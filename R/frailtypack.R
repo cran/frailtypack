@@ -1,6 +1,6 @@
 
 "frailtyPenal" <-
-function (formula, data, Frailty = TRUE, n.knots , kappa1 ,
+function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
            kappa2, maxit=350)
  {
 
@@ -28,7 +28,7 @@ function (formula, data, Frailty = TRUE, n.knots , kappa1 ,
 
     call <- match.call()
     m <- match.call(expand = FALSE)
-    m$Frailty <- m$n.knots <- m$kappa1 <- m$kappa2 <-  m$... <- NULL
+    m$Frailty <- m$n.knots <- m$recurrentAG <- m$kappa1 <- m$kappa2 <-  m$... <- NULL
     special <- c("strata", "cluster")
     Terms <- if (missing(data)) 
         terms(formula, special)
@@ -161,6 +161,7 @@ function (formula, data, Frailty = TRUE, n.knots , kappa1 ,
     if (min(cens)==0) cens.data<-1
     if (min(cens)==1 && max(cens)==1) cens.data<-0
 
+    AG<-ifelse(recurrentAG,1,0)
 
     ans <- .Fortran("frailpenal",
                 as.integer(n),
@@ -178,6 +179,7 @@ function (formula, data, Frailty = TRUE, n.knots , kappa1 ,
                 as.integer(nvar),
                 as.double(strats),
                 as.double(var),
+                as.integer(AG),
                 as.integer(noVar), 
                 as.integer(maxit),
                 as.integer(0),
@@ -198,16 +200,16 @@ function (formula, data, Frailty = TRUE, n.knots , kappa1 ,
     
     if (noVar==1) nvar<-0
 
-    np <- ans[[18]]
+    np <- ans[[19]]
     fit <- NULL
     fit$na.action <- attr(m, "na.action")
     fit$call <- call
     fit$n <- n
     fit$groups <- length(uni.cluster)
-    fit$n.events <- ans[[30]]
-    fit$logVerComPenal <- ans[[22]]
+    fit$n.events <- ans[[31]]
+    fit$logVerComPenal <- ans[[23]]
     if (Frailty) {
-        fit$theta <- (ans[[19]][np - nvar])^2
+        fit$theta <- (ans[[20]][np - nvar])^2
     }
     if (!Frailty) {
         fit$theta <- NULL
@@ -217,28 +219,28 @@ function (formula, data, Frailty = TRUE, n.knots , kappa1 ,
     } 
     else
      {
-       fit$coef <- ans[[19]][(np - nvar + 1):np]
+       fit$coef <- ans[[20]][(np - nvar + 1):np]
        names(fit$coef) <- colnames(X)
      }
     
 
-    temp1 <- matrix(ans[[20]], nrow = 50, ncol = 50)[1:np, 1:np]
-    temp2 <- matrix(ans[[21]], nrow = 50, ncol = 50)[1:np, 1:np]
+    temp1 <- matrix(ans[[21]], nrow = 50, ncol = 50)[1:np, 1:np]
+    temp2 <- matrix(ans[[22]], nrow = 50, ncol = 50)[1:np, 1:np]
     fit$varH <- temp1[(np - nvar):np, (np - nvar):np]
     fit$varHIH <- temp2[(np - nvar):np, (np - nvar):np]
     fit$formula <- formula(Terms)
-    fit$x1 <- ans[[23]]
-    fit$lam <- matrix(ans[[24]], nrow = 99, ncol = 3)
-    fit$surv <- matrix(ans[[25]], nrow = 99, ncol = 3)
-    fit$x2 <- ans[[26]]
-    fit$lam2 <- matrix(ans[[27]], nrow = 99, ncol = 3)
-    fit$surv2 <- matrix(ans[[28]], nrow = 99, ncol = 3)
+    fit$x1 <- ans[[24]]
+    fit$lam <- matrix(ans[[25]], nrow = 99, ncol = 3)
+    fit$surv <- matrix(ans[[26]], nrow = 99, ncol = 3)
+    fit$x2 <- ans[[27]]
+    fit$lam2 <- matrix(ans[[28]], nrow = 99, ncol = 3)
+    fit$surv2 <- matrix(ans[[29]], nrow = 99, ncol = 3)
     fit$type <- type
     fit$n.strat <- uni.strat
     fit$n.knots<-n.knots 
-    fit$n.iter <- ans[[29]]
+    fit$n.iter <- ans[[30]]
     
-    if(ans[[31]]==-1)
+    if(ans[[32]]==-1)
         warning("matrix non-positive definite")
 
     if(fit$n.iter>maxit)

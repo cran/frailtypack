@@ -1,3 +1,11 @@
+c programme modifié le 21 mars 2005 
+c on a la possibilité de choisir deux formaulations pour la vraisemblance :
+c soit la vraisemblance avec troncature a gauche : cf LIDA2003
+c soit l'ancienne version de la troncature, adaptée aux données récurrentes de type 
+c andersen gill (calendar time????? --> counting process formulation), qui permet aussi 
+c de traiter des variables explicatievs dépendantes du temps .
+
+
 c********************************************************************
 c********  version F77 pour le passer sous R ************************
 c********************************************************************
@@ -70,7 +78,7 @@ c                        avec fraitly avec loi Gamma
 
       subroutine frailpenal(nsujetAux,ngAux,icenAux,nstAux,effetAux,
      &             nzAux,ax1,ax2,tt0Aux,tt1Aux,icAux,groupeAux,
-     &             nvaAux,strAux,vaxAux,noVar,maxit,
+     &             nvaAux,strAux,vaxAux,AGAux,noVar,maxit,
      &             np,b,H_hessOut,HIHOut,resOut,x1Out,lamOut,suOut,
      &             x2Out,lam2Out,su2Out,ni,cpt,ier)
 
@@ -140,7 +148,7 @@ c******************************************   Add JRG January 05
          double precision  x1Out(99),lamOut(99,3),suOut(99,3),
      &                     x2Out(99),lam2Out(99,3),su2Out(99,3)
 
-         integer maxit,noVar
+         integer maxit,noVar,AGAux
 
 
 
@@ -184,6 +192,11 @@ c*****mem1
       double precision mm3(ndatemax),mm2(ndatemax)
       double precision mm1(ndatemax),mm(ndatemax)
       common /mem1/mm3,mm2,mm1,mm
+c %%%%%%%%%%%%% ANDERSEN-GILL %%%%%%%%%%%%%%%%%%%%%%%%% 
+      integer AG
+      common /andersengill/AG
+
+
 
 c************ FIN COMMON ***********************************
      
@@ -297,6 +310,7 @@ c
         end do
       end do
       
+	AG=AGAux
 
       istop=0
 c      ier=0     
@@ -1012,6 +1026,9 @@ c*****groupe
       integer g(nsujetmax) 
       integer nig(ngmax) 
       common /gpe/g,nig
+c %%%%%%%%%%%%% ANDERSEN-GILL %%%%%%%%%%%%%%%%%%%%%%%%% 
+      integer AG
+      common /andersengill/AG
 c************************************************************        
 
 
@@ -1252,10 +1269,17 @@ c     gam1 = gamma(dnb + inv)
  16                continue
                 endif
                 if(theta.gt.(1.d-5)) then
-                   res = res-(inv+dnb)*dlog(theta*res1(k)+1.d0) 
-     &                  +(inv)*dlog(theta*res3(k)+1.d0) 
+ccccc ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
+                   if(AG.EQ.1)then
+                   res= res-(inv+dnb)*dlog(theta*(res1(k)-res3(k))+1.d0) 
      &                  + res2(k) + sum  
-                    
+ccccc nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
+                   else
+                   res= res-(inv+dnb)*dlog(theta*(res1(k))+1.d0) 
+     &                  +(inv)*dlog(theta*res3(k)+1.d0) 
+     &                  + res2(k) + sum 
+                   endif
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c                   write(*,*)'res',res
 c                   write(*,*)'vet',vet
 c                   write(*,*)'inv+dnb',inv+dnb
@@ -1269,12 +1293,23 @@ c                   write(*,*)'sum',sum
 c                   stop
                 else              
 c     developpement de taylor d ordre 3
+ccccc ancienne vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
+                     if(AG.EQ.1)then
+                   res = res-dnb*dlog(theta*(res1(k)-res3(k))+1.d0)
+     &             -(res1(k)-res3(k))*(1.d0-theta*(res1(k)-res3(k))/2.d0
+     &            +theta*theta*(res1(k)-res3(k))*(res1(k)-res3(k))/3.d0)
+     &                  +res2(k)+sum
+
+ccccc nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
+                     else
                    res = res-dnb*dlog(theta*res1(k)+1.d0)
      &                  -res1(k)*(1.d0-theta*res1(k)/2.d0
      &                            +theta*theta*res1(k)*res1(k)/3.d0)
      &                  +res2(k)+sum
      &                  +res3(k)*(1.d0-theta*res3(k)/2.d0
      &                            +theta*theta*res3(k)*res3(k)/3.d0)
+                     endif
+ccccccccccccccccccccccccccccccccccccccccccccccc
                    endif
              endif 
  15       continue
@@ -2727,4 +2762,4 @@ c     remarque :  jcolA=IrowB
  1    continue
       return
       end
-c====================================================================
+c===================================================================
