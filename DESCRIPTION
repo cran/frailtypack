@@ -1,0 +1,13 @@
+Package: frailtypack
+Version: 0.8-1
+Date: 2005-02-15
+Title: Frailty models using maximum penalized likelihood estimation 
+Author: Modified Fortran routines, R code and packaged by Juan R González <jrgonzalez@ico.scs.es>. 
+        Original Fortran routines by Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr> 
+Maintainer: Juan R González <jrgonzalez@ico.scs.es>
+Depends: R (>= 2.0.0), survival
+Description: Fit a shared gamma frailty model and Cox proportional hazards model using a Penalized Likelihood 
+             on the hazard function. Left truncated, censored data and strata (max=2) are allowed.             
+License: GPL version 2 or newer
+URL: http://www.r-project.org
+Packaged: Tue Feb 22 10:40:03 2005; hornik
