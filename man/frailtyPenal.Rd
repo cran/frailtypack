@@ -8,7 +8,7 @@ This approach is different from the partial penalized likelihood approach of The
  
 }
 \usage{
-frailtyPenal(formula, data, Frailty = TRUE, n.knots, 
+frailtyPenal(formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, 
                kappa1, kappa2, maxit=350)
 }
 
@@ -21,6 +21,9 @@ frailtyPenal(formula, data, Frailty = TRUE, n.knots,
   \item{Frailty}{Logical value. Is model with frailties fitted? If so variance of frailty parameter is estimated. 
                  If not, Cox proportional hazards model is estimated using Penalized Likelihood on the hazard
                  function}
+  \item{recurrentAG}{Logical value. Is Andersen-Gill model fitted? If so indicates that recurrent event times with the 
+                 counting process approach of Andersen and Gill is used. This formulation can be used for dealing with
+                 time-dependent covariates. The default is FALSE.}
   \item{n.knots}{ integer giving the number of knots to use. Value required.
   It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions. 
   Number of knots must be between 4 and 20.}
@@ -109,8 +112,9 @@ data(readmission)
 frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id)+strata(sex),
              n.knots=10,kappa1=10000,kappa2=10000,data=readmission)
 
-
-
+#Andersen-Gill counting-process approach with time-dependent covariate
+frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+as.factor(charlson)+
+           cluster(id),data=readmission, Frail=TRUE,n.knots=6,kappa1=100000,recurrentAG=TRUE)
 }
 
 \keyword{ survival }
