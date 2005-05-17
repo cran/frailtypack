@@ -1,7 +1,7 @@
 
 "frailtyPenal" <-
-function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
-           kappa2, maxit=350)
+function (formula, data, Frailty = TRUE, recurrentAG=FALSE, cross.validation=FALSE,
+           n.knots, kappa1 , kappa2, maxit=350)
  {
 
    
@@ -25,10 +25,12 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
     if (missing(kappa1))
          stop("smoothing parameter (kappa1) is required")       
 
+    if (!missing(kappa2) & cross.validation)
+        stop("The cross validation is not implemented for two strata")
 
     call <- match.call()
     m <- match.call(expand = FALSE)
-    m$Frailty <- m$n.knots <- m$recurrentAG <- m$kappa1 <- m$kappa2 <-  m$... <- NULL
+    m$Frailty <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <-  m$... <- NULL
     special <- c("strata", "cluster")
     Terms <- if (missing(data)) 
         terms(formula, special)
@@ -76,9 +78,9 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
       stop("grouping variable must have more than 1 level")   
      }
  
-    if(length(uni.cluster)>1000) 
+    if(length(uni.cluster)>5000) 
      {
-      stop("grouping variable must have less than 1000 groups
+      stop("grouping variable must have less than 5000 groups
              \n please contact to the mantainer")   
      }
     
@@ -93,7 +95,7 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
         uni.strat<-length(unique(strats))
       
         if (missing(kappa1))
-         stop("smoothing parameter (kappa2) is required") 
+         stop("smoothing parameter (kappa1) is required") 
     
         if (uni.strat!=2) 
           {
@@ -111,7 +113,11 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
     type <- attr(Y, "type")
     if (type != "right" && type != "counting") 
         stop(paste("Cox model doesn't support \"", type, "\" survival data", 
-            sep = ""))    
+            sep = ""))
+
+    if (type != "counting" && recurrentAG)
+       stop("recurrentAG needs counting process formulation")
+    
 
     if (length(dropx)) 
         newTerms <- Terms[-dropx]
@@ -139,9 +145,9 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
     var<-matrix(c(X),nrow=nrow(X),ncol=nvar)
 
     n<-nrow(X)    
-    if(n>15000) 
+    if(n>60000) 
      {
-      stop("number of observations must be less than 15000 
+      stop("number of observations must be less than 60000 
              \n please contact to the mantainer")   
      }
 
@@ -162,6 +168,7 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
     if (min(cens)==1 && max(cens)==1) cens.data<-0
 
     AG<-ifelse(recurrentAG,1,0)
+    crossVal<-ifelse(cross.validation,0,1)
 
     ans <- .Fortran("frailpenal",
                 as.integer(n),
@@ -182,6 +189,7 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
                 as.integer(AG),
                 as.integer(noVar), 
                 as.integer(maxit),
+                as.integer(crossVal),
                 as.integer(0),
                 as.double(rep(0,50)),
                 as.double(matrix(0,nrow=50,ncol=50)),
@@ -195,21 +203,23 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
                 as.double(matrix(0,nrow=99,ncol=3)),
                 as.integer(0),
                 as.integer(0),
-                as.integer(0), PACKAGE = "frailtypack"
+                as.integer(0),
+                as.double(c(0,0)), 
+                as.double(0),  PACKAGE = "frailtypack"
      )    
     
     if (noVar==1) nvar<-0
 
-    np <- ans[[19]]
+    np <- ans[[20]]
     fit <- NULL
     fit$na.action <- attr(m, "na.action")
     fit$call <- call
     fit$n <- n
     fit$groups <- length(uni.cluster)
-    fit$n.events <- ans[[31]]
-    fit$logVerComPenal <- ans[[23]]
+    fit$n.events <- ans[[32]]
+    fit$logVerComPenal <- ans[[24]]
     if (Frailty) {
-        fit$theta <- (ans[[20]][np - nvar])^2
+        fit$theta <- (ans[[21]][np - nvar])^2
     }
     if (!Frailty) {
         fit$theta <- NULL
@@ -219,32 +229,39 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, kappa1 ,
     } 
     else
      {
-       fit$coef <- ans[[20]][(np - nvar + 1):np]
+       fit$coef <- ans[[21]][(np - nvar + 1):np]
        names(fit$coef) <- colnames(X)
      }
     
 
-    temp1 <- matrix(ans[[21]], nrow = 50, ncol = 50)[1:np, 1:np]
-    temp2 <- matrix(ans[[22]], nrow = 50, ncol = 50)[1:np, 1:np]
+    temp1 <- matrix(ans[[22]], nrow = 50, ncol = 50)[1:np, 1:np]
+    temp2 <- matrix(ans[[23]], nrow = 50, ncol = 50)[1:np, 1:np]
     fit$varH <- temp1[(np - nvar):np, (np - nvar):np]
     fit$varHIH <- temp2[(np - nvar):np, (np - nvar):np]
     fit$formula <- formula(Terms)
-    fit$x1 <- ans[[24]]
-    fit$lam <- matrix(ans[[25]], nrow = 99, ncol = 3)
-    fit$surv <- matrix(ans[[26]], nrow = 99, ncol = 3)
-    fit$x2 <- ans[[27]]
-    fit$lam2 <- matrix(ans[[28]], nrow = 99, ncol = 3)
-    fit$surv2 <- matrix(ans[[29]], nrow = 99, ncol = 3)
+    fit$x1 <- ans[[25]]
+    fit$lam <- matrix(ans[[26]], nrow = 99, ncol = 3)
+    fit$surv <- matrix(ans[[27]], nrow = 99, ncol = 3)
+    fit$x2 <- ans[[28]]
+    fit$lam2 <- matrix(ans[[29]], nrow = 99, ncol = 3)
+    fit$surv2 <- matrix(ans[[30]], nrow = 99, ncol = 3)
     fit$type <- type
     fit$n.strat <- uni.strat
     fit$n.knots<-n.knots 
-    fit$n.iter <- ans[[30]]
-    
-    if(ans[[32]]==-1)
+    fit$n.iter <- ans[[31]]
+    fit$kappa <- ans[[34]]
+    fit$DoF <- ans[[35]]
+    fit$cross.Val<-cross.validation
+
+    if(ans[[33]]==-1)
         warning("matrix non-positive definite")
 
     if(fit$n.iter>maxit)
         warning("model did not converge. Change the 'maxit' parameter") 
+
+    if(ans[[33]]==2000)
+        stop("The cross validation procedure cannot be finished. Try to change 
+          either the number of knots or the seed for kappa parameter")
 
     class(fit) <- "frailtyPenal"
     fit
@@ -323,11 +340,34 @@ function (x, digits = max(options()$digits - 4, 3), ...)
     if (length(x$na.action)) 
         cat("  (", length(x$na.action), " observation deleted due to missing) \n")
     else cat("\n")
-    cat("    n events=", x$n.event, "\n")
-    cat("    n groups=", x$groups, "\n")
+    cat("    n events=", x$n.event, " n groups=", x$groups)
+    cat( "\n")
     cat("    number of iterations: ", x$n.iter)
     cat("\n")
-    cat("    Exact number of knots used: ", x$n.knots)
+    cat("    Exact number of knots used: ", x$n.knots, "\n")
+
+    if (!x$cross.Val)
+      {
+       cat("    Value of the smoothing parameter: ", x$kappa[1])
+       if (x$n.strat==2)
+        cat(" ", x$kappa[2])
+      }
+
+    if (x$cross.Val)
+      {
+       if (is.null(x$theta))
+         cat("    Smoothing parameter estimated by Cross validation: ", x$kappa[1])  
+       else 
+         {
+           cat("    Best smoothing parameter estimated by")
+           cat("\n")
+           cat("       an approximated Cross validation: ", x$kappa[1])
+         } 
+      }
+    
+    cat(", DoF: ", formatC(-x$DoF, format="f",dig=2))
+
+
     cat("\n")
     invisible()
 }
