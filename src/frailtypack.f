@@ -1,3 +1,6 @@
+c avec crossvalidation
+
+
 c programme modifié le 21 mars 2005 
 c on a la possibilité de choisir deux formaulations pour la vraisemblance :
 c soit la vraisemblance avec troncature a gauche : cf LIDA2003
@@ -78,16 +81,15 @@ c                        avec fraitly avec loi Gamma
 
       subroutine frailpenal(nsujetAux,ngAux,icenAux,nstAux,effetAux,
      &             nzAux,ax1,ax2,tt0Aux,tt1Aux,icAux,groupeAux,
-     &             nvaAux,strAux,vaxAux,AGAux,noVar,maxit,
+     &             nvaAux,strAux,vaxAux,AGAux,noVar,maxitAux,irep1,
      &             np,b,H_hessOut,HIHOut,resOut,x1Out,lamOut,suOut,
-     &             x2Out,lam2Out,su2Out,ni,cpt,ier)
-
+     &             x2Out,lam2Out,su2Out,ni,cpt,ier,k0,ddl)
 
 c
 c  Obs: noVar=0 indicates no variables but I need to pass all 0's in vaxAux
 c
-       parameter(npmax=50,NSUJETMAX=15000,nvarmax=15,ngmax=1000)
-       parameter(nboumax=1000,NSIMAX=5000,ndatemax=30000)
+       parameter(npmax=50,NSUJETMAX=30000,nvarmax=15,ngmax=5000)
+       parameter(nboumax=1000,NSIMAX=5000,ndatemax=60000)
 
 
        integer  groupe,ij,kk,j,k,nz,n,np,cpt,ii,iii,ver
@@ -100,7 +102,8 @@ c
        integer  cpt1(nboumax) 
        integer  cpt2(nboumax) 
        integer  cpt3(nboumax) 
-       integer  ind(nboumax) 
+       integer  ind(nboumax)
+       integer irep1,nvat 
 
        real vax(nvarmax)
        double precision tt0
@@ -113,7 +116,7 @@ c
        double precision moyvar,moyse,moyse_cor,str
        double precision varxij,eca,varsmarg,smoy,smoyxij
        double precision pe1,pe2,moy_peh0,moy_peh1,lrs
-       double precision BIAIS_moy
+
 
        double precision aux(2*nsujetmax)
        double precision res_tab(ngmax) 
@@ -148,7 +151,18 @@ c******************************************   Add JRG January 05
          double precision  x1Out(99),lamOut(99,3),suOut(99,3),
      &                     x2Out(99),lam2Out(99,3),su2Out(99,3)
 
-         integer maxit,noVar,AGAux
+         integer noVar,AGAux,maxitAux
+
+
+
+
+c*******************************************  Add JRG May 05 (Cross-validation)
+
+       double precision auxi,ax,bx,cx,tol,ddl
+       double precision fa,fb,fc,golden,estimv
+       double precision y(npmax,npmax)  
+       double precision xmin1,xmin2
+
 
 
 
@@ -162,8 +176,9 @@ c*****dace2
       double precision  ncsrl
       integer c(nsujetmax)
       integer nt0(nsujetmax),nt1(nsujetmax)
-      integer  nsujet,nsim,nva,ndate,nst
-      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,nst
+      integer  nsujet,nsim,nva,ndate,nst,maxit
+      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,
+     &              nst,maxit
 c*****dace4
       integer  stra(nsujetmax)
       common /dace4/stra
@@ -172,8 +187,8 @@ c*****ve1
       common /ve1/ve
 c*****dace3
       double precision  pe
-      integer  effet,nz1,nz2
-      common /dace3/pe,effet,nz1,nz2
+      integer  effet,nz1,nz2,effetcross
+      common /dace3/pe,effet,nz1,nz2,effetcross
 c*****dace7
       double precision I_hess(npmax,npmax),H_hess(npmax,npmax)
       double precision Hspl_hess(npmax,npmax)
@@ -310,7 +325,8 @@ c
         end do
       end do
       
-	AG=AGAux
+      AG=AGAux
+      maxit=maxitAux 
 
       istop=0
 c      ier=0     
@@ -553,26 +569,196 @@ c------- initialisation des parametres
  75                continue
 
 
-
+          
 C deux parametres de lissage :
 
-         k0(1) = ax1
-         if(nst.eq.2)then
-            k0(2) = ax2
-         else
-            k0(2) = 0.d0 
-         endif
+c         k0(1) = ax1
+c         if(nst.eq.2)then
+c            k0(2) = ax2
+c         else
+c            k0(2) = 0.d0 
+c         endif
           
+
+
+c    Esto se cambia ya que ahora xmin1 es kappa1
+ 
+      
+         xmin1=ax1 
+         if(nst.eq.2)then
+            xmin2 = ax2
+         else
+            xmin2 = 0.d0 
+         endif
+
+         nvat=nva !para buscar el parametro de lissage
+
+
+c***********************************************************
+c************** NEW : cross validation  ***********************
+c***********************************************************
+
+         nva=0
+
+         if(irep1.eq.1)then   !recherche du parametre de lissage
+
+            xmin1 = dsqrt(xmin1)
+
+            auxi = estimv(xmin1,n,b,y,ddl,ni,res)
+
+            if (ni.ge.maxit) then
+c              write(*,*) ' '
+c              write(*,*) 'no convergence 
+c     &             with the chosen smoothing parameter'
+
+              do 175 i=1,nz+2
+                 b(i)=1.d-1
+ 175           continue     
+              xmin1 = sqrt(10.d0)*xmin1
+              auxi = estimv(xmin1,n,b,y,ddl,ni,res)
+              if (ni.lt.maxit) then
+c                 write(*,*)' '
+c            write(*,*)'Value of the smoothing parameter :'
+c     &       ,real(xmin1*xmin1), '  DoF :',-ddl
+c                 write(*,*)' '
+c                 write(*,*)'Log-vraisemblance :',res
+c                 stop
+              else
+                 do 176 i=1,nz+2
+                    b(i)=1.d-1
+ 176             continue     
+                 xmin1 = sqrt(10.d0)*xmin1
+                 auxi = estimv(xmin1,n,b,y,ddl,ni,res)
+                 if (ni.lt.maxit) then
+c                    write(*,*)' '
+c            write(*,*)'Value of the smoothing parameter :'
+c     &       ,real(xmin1*xmin1), '  DoF :',-ddl
+c                    write(*,*)' '
+c                    write(*,*)'Log-vraisemblance :',res
+                 endif   
+               endif
+            else
+c               write(*,*)' '
+c            write(*,*)'Value of the smoothing parameter :'
+c     &       ,real(xmin1*xmin1), '  DoF :',-ddl
+c               write(4,*)' '
+c            write(4,*)'Value of the smoothing parameter :'
+c     &       ,real(xmin1*xmin1), '  DoF :',-ddl
+c               write(*,*)' '
+c               write(*,*)'Log-vraisemblance :',res
+            endif
+
+            
+c----------------------------------------------------
+         else                   !recherche du parametre de lissage
+            
+c            write(*,*)' b ',b
+c            stop
+            if(xmin1.le.0.d0)then
+               xmin1 = 1.d0
+            endif  
+c            write(*,*)' '
+c            write(*,*)'                Searching smoothing parameter'
+c            write(*,*)' '
+            xmin1 = dsqrt(xmin1)
+            auxi = estimv(xmin1,n,b,y,ddl,ni,res)
+c            write(*,*)'estimv1',ddl
+c               stop
+            if(ddl.gt.-2.5d0)then
+c            write(*,*)'OK non'
+c               stop
+               xmin1 = dsqrt(xmin1)
+c               stop
+               auxi = estimv(xmin1,n,b,y,ddl,ni,res)
+c               write(*,*)'estimv2'
+c               stop !pb
+               if(ddl.gt.-2.5d0)then
+                  xmin1 = dsqrt(xmin1)
+                  auxi = estimv(xmin1,n,b,y,ddl,ni,res)
+c                  write(*,*)'estimv3'
+                  if(ddl.gt.-2.5d0)then
+                     xmin1 = dsqrt(xmin1)
+                     auxi = estimv(xmin1,n,b,y,ddl,ni,res)
+c                     write(*,*)'estimv4'
+                     if(ddl.gt.-2.5d0)then
+                        xmin1 = dsqrt(xmin1)
+                        auxi = estimv(xmin1,n,b,y,ddl,ni,res)
+c                        write(*,*)'estimv5'
+                        if(ddl.gt.-2.5d0)then
+                           xmin1 = dsqrt(xmin1)
+                        endif   
+                     endif   
+                  endif   
+               endif
+            endif 
+c            write(*,*)'estimv1 bis',ddl
+            if (ni.ge.maxit) then
+              do 275 i=1,nz+2
+                 b(i)=1.d-1
+ 275          continue     
+              xmin1 = sqrt(10.d0)*xmin1
+              auxi = estimv(xmin1,n,b,y,ddl,ni,res)
+c              write(*,*)'estimv5'
+              if (ni.ge.maxit) then
+                 do 276 i=1,nz+2
+                    b(i)=1.d-1
+ 276             continue     
+                 xmin1 = sqrt(10.d0)*xmin1
+              endif
+            endif 
+            ax = xmin1
+            bx = xmin1*dsqrt(1.5d0)  
+c            write(*,*)'avant mnbrak' ,ax ,bx,cx,fa,fb,fc,n
+            
+            call mnbrak(ax,bx,cx,fa,fb,fc,b,n)
+c            write(*,*)'OK 2' 
+c            stop   
+            
+            tol = 0.001d0
+c            write(*,*)'avant golden',ax,bx,cx,tol,xmin1,n,b,ddl
+c            stop
+            res = golden(ax,bx,cx,tol,xmin1,n,b,y,ddl)
+c            write(*,*)'apres golden'
+c            stop
+
+c            write(4,*)'******************************************* '
+c            write(4,*)'Best smoothing parameter',real(xmin1*xmin1)
+c     &                , '  DoF :',-ddl
+c            write(4,*)'******************************************* '
+c            write(*,*)'Best smoothing parameter',real(xmin1*xmin1)
+c     &                , '  DoF :',-ddl
+            effetcross=0
+c            stop
+            call marq98((xmin1*xmin1),b,n,ni,v,res,ier,istop,
+     &           effetcross)
+
+            if (ni.ge.maxit) then
+c               write(*,*)' '
+c              write(*,*) 'non convergence'
+            else
+c               write(*,*)' '
+c               write(*,*)'Log-vraisemblance :',res
+            endif
+         endif   
+         nva=nvat ! pour la recherche des parametres de regression
+c        stop
+ccccc********************************************************************
+
+
+         k0(1) = xmin1*xmin1
+         if(nst.eq.2)then
+            k0(2) = xmin2
+         endif
 
 
 
 
 C-------------  indicateur d'effet aleatoire ou non dans le modele
       
-                
+          
 
 
-          call marq98(k0,b,np,ni,v,res,ier,istop,effet,maxit)
+          call marq98(k0,b,np,ni,v,res,ier,istop,effet)
   
 
            j=(np-nva)*(np-nva+1)/2       
@@ -696,6 +882,10 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
+
+
+
+
 CCCCCCCCCCCCC**********SUBROUTINES******  CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
 
@@ -707,8 +897,8 @@ c========================== VECSPLI ==============================
       double precision  ht,htm,h2t,ht2,ht3,hht,h,hh,h2
       double precision  h3,h4,h3m,h2n,hn,hh3,hh2
          
-      parameter(ndatemax=30000,npmax=50,nvarmax=15,nsujetmax=15000)
-
+      parameter(ndatemax=60000,npmax=50,nsujetmax=30000)
+      parameter(nvarmax=15)
 
 c*****ve1
       double precision ve(nsujetmax,nvarmax)
@@ -729,15 +919,6 @@ c*****mem2
 c----------  calcul de u(ti) ---------------------------
 c    attention the(1)  sont en nz=1
 c        donc en ti on a the(i)
-
-
-         j=0
-         do i=1,ndatemax
-          im3(i)=0.d0
-          im2(i)=0.d0
-          im1(i)=0.d0
-          im(i)=0.d0
-         enddo 
 
          do 8 i=1,ndate-1
             do 6 k = 2,n-2
@@ -776,17 +957,11 @@ c        donc en ti on a the(i)
 
 
  8       continue
-         
-      return 
-
-      end subroutine
-
-
-
+         end
 c========================== VECPEN ==============================
       subroutine vecpen(n) 
 
-      parameter(ndatemax=30000,npmax=50)
+      parameter(ndatemax=60000,npmax=50)
 
       integer   n,i
       double precision  h,hh,h2,h3,h4,h3m,h2n,hn,hh3,hh2
@@ -805,24 +980,7 @@ c*****pen2
       double precision m2m(npmax),m1m(npmax)
       common /pen2/m3m1,m3m,m2m1,m2m,m1m
 c*********************************************************************
-       
-
-         do i=1,npmax
-           m3m3(i)=0.d0
-           m2m2(i)=0.d0
-           m1m1(i)=0.d0
-           mmm(i)=0.d0
-           m3m2(i)=0.d0
-
-           m3m1(i)=0.d0
-           m3m(i)=0.d0
-           m2m1(i)=0.d0
-           m2m(i)=0.d0
-           m1m(i)=0.d0
-         end do
-
-
-  
+         
          do 20 i=1,n-3
             h = zi(i+1)-zi(i)
             hh= zi(i+1)-zi(i-1)
@@ -952,9 +1110,8 @@ c*********************************************************************
      &      +2.d0*zi(i)*zi(i)))/(c1*a0)) )
  20       continue
 
-      return       
+          end
 
-      end subroutine
 
 
 
@@ -963,12 +1120,13 @@ c========================          FUNCPA          ====================
 
 c *** NOUVELLLE DECLARATION F90 :
 
-      parameter(npmax=50,NSUJETMAX=15000,nvarmax=15)
-      parameter(ngmax=1000,nssgmax=1000,nptsmax=50)
-      parameter(ndatemax=30000,NSIMAX=5000)
+      parameter(npmax=50,NSUJETMAX=30000,nvarmax=15)
+      parameter(ngmax=5000,nssgmax=1000)
+      parameter(ndatemax=60000,NSIMAX=5000)
 
       integer  nb,n,np,id,jd,i,j,k,vj,cptg,l
       integer cpt(ngmax)
+c      integer nan
 
       double precision  thi,thj,pe1,pe2,dnb,sum
       double precision  theta,inv
@@ -1004,11 +1162,12 @@ c*****dace1
       common /dace1/date,zi
 c*****dace2
       double precision t0(nsujetmax),t1(nsujetmax)
-      double precision ncsrl
+      double precision  ncsrl
       integer c(nsujetmax)
       integer nt0(nsujetmax),nt1(nsujetmax)
-      integer  nsujet,nsim,nva,ndate,nst
-      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,nst
+      integer  nsujet,nsim,nva,ndate,nst,maxit
+      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,
+     &              nst,maxit
 c*****dace4
       integer stra(nsujetmax)
       common /dace4/stra
@@ -1017,8 +1176,8 @@ c*****ve1
       common /ve1/ve
 c*****dace3
       double precision  pe
-      integer  effet,nz1,nz2
-      common /dace3/pe,effet,nz1,nz2
+      integer  effet,nz1,nz2,effetcross
+      common /dace3/pe,effet,nz1,nz2,effetcross
 c*****contrib
       integer ng          !nb de gpes
       common /contrib/ng    
@@ -1030,12 +1189,15 @@ c %%%%%%%%%%%%% ANDERSEN-GILL %%%%%%%%%%%%%%%%%%%%%%%%%
       integer AG
       common /andersengill/AG
 c************************************************************        
+c     write(*,*)'%%%%%%%%%% ENTREE DANS FUNCPA %%%%%%%%%%'
 
-
-         j=0 
-         theta=0.d0
-         
-                    
+c      write(*,*)'* funcm3*',m3m(1),m2m1(1),m2m(1),m1m(1)
+c      write(*,*)'* m3m3* ',m3m3(1),m2m2(1),m1m1(1),mmm(1),m3m2(1)
+        
+c      write(*,*)'* mm3* ',mm3(1),mm2(1),mm1(1),mm(1)
+c      write(*,*)'* im3* ',im3(4)
+c      stop
+c      write(*,*)'nig',nig
          do 3 i=1,np
             bh(i)=b(i)
 c             write(*,*)'funcpa bh(i)',bh(i),i,np
@@ -1045,8 +1207,6 @@ c         stop
          if (jd.ne.0) bh(jd)=bh(jd)+thj    
          
          n = (np-nva-effet)/nst
-
-       
           
 c         write(*,*)'funcpa nombre total de paramètres',np
 c         write(*,*)'funcpa nb noeuds+2',nz1,nz2
@@ -1106,9 +1266,9 @@ c            write(4,*)date(i),dut1(i),ut1(i)
      &       +(the2(j-1)*im1(i))+(the2(j)*im(i))
             dut2(i) = (the2(j-3)*mm3(i))+(the2(j-2)*mm2(i))
      &       +(the2(j-1)*mm1(i))+(the2(j)*mm(i)) 
-d            if(i.eq.157.or.i.eq.158)then
+c            if(i.eq.157.or.i.eq.158)then
 c               write(*,*)'** dut2',dut2(i),mm2(i),mm1(i),mm(i)
-d            endif
+c            endif
             endif
             
  8       continue
@@ -1274,12 +1434,12 @@ ccccc ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
                    res= res-(inv+dnb)*dlog(theta*(res1(k)-res3(k))+1.d0) 
      &                  + res2(k) + sum  
 ccccc nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
-                   else
-                   res= res-(inv+dnb)*dlog(theta*(res1(k))+1.d0) 
+                else
+                   res = res-(inv+dnb)*dlog(theta*res1(k)+1.d0) 
      &                  +(inv)*dlog(theta*res3(k)+1.d0) 
-     &                  + res2(k) + sum 
+     &                  + res2(k) + sum  
                    endif
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc              
 c                   write(*,*)'res',res
 c                   write(*,*)'vet',vet
 c                   write(*,*)'inv+dnb',inv+dnb
@@ -1293,6 +1453,7 @@ c                   write(*,*)'sum',sum
 c                   stop
                 else              
 c     developpement de taylor d ordre 3
+c                   write(*,*)'************** TAYLOR *************'
 ccccc ancienne vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
                      if(AG.EQ.1)then
                    res = res-dnb*dlog(theta*(res1(k)-res3(k))+1.d0)
@@ -1308,11 +1469,10 @@ ccccc nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
      &                  +res2(k)+sum
      &                  +res3(k)*(1.d0-theta*res3(k)/2.d0
      &                            +theta*theta*res3(k)*res3(k)/3.d0)
-                     endif
-ccccccccccccccccccccccccccccccccccccccccccccccc
-                   endif
+                endif
              endif 
- 15       continue
+          endif 
+ 15    continue
 
        endif !fin boucle effet=0
 
@@ -1336,32 +1496,49 @@ c---------- calcul de la penalisation -------------------
      &    m2m1(i))+(2.d0*the2(i-2)*the2(i)*m2m(i))+(2.d0*the2(i-1)
      &    *the2(i)*m1m(i))
  20       continue
+    
+
+c    Changed JRG 25 May 05
+          if (nst.eq.1) then
+            pe2=0.d0
+          end if
+          
           pe = k0(1)*pe1 + k0(2)*pe2 
+              
+
 c          write(*,*)'avant  penalisation ',res,pe,pe1,pe2
           res = res - pe
 c           write(*,*)'vraisemblance penalisee',res,pe,pe1,pe2
 c           write(*,*)'vraisemblance penalisee',k0(1),k0(2)
           funcpa = res 
+
+c          if(funcpa.eq.nan)then 
+c             write(*,*)'%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ù'
+c             write(*,*)'%%%%%%%%%%%% PB FUNCPA :NAN %%%%%%%%%ù'
+c             write(*,*)'%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ù'
+c             stop
+c          endif
         
 c      write(*,*)'%%%%%%%%%% SORTIE DANS FUNCPA %%%%%%%%%%' ,res
 c      stop
-       
+          return
+          end
 
-      
-      end function
+
+
+
 
 
 
 c================================  DCHOLE  ===========================
       subroutine dchole(a,k,nq,idpos)
 
-       parameter(npmax=50)
-      
+      parameter(npmax=50)      
       integer  k,nq,i,ii,i1,i2,i3,m,is,j,k2,jmk
       integer  ijm,irm,jji,jjj,l,jj,iil,jjl,il,idpos
-      double precision a(npmax*(npmax+3)/2) 
+      double precision a((npmax*(npmax+3)/2)) 
       double precision  term,xn,diag,p
-      dimension is(200)
+      dimension is(500)
       equivalence (term,xn)
 c
 c      ss programme de resolution d'un systeme lineaire symetrique
@@ -1372,15 +1549,12 @@ c
 c       en sortie les seconds membres sont remplaces par les solutions
 c       correspondantes
 c
-      ii=0
-      i2=0 
-
       idpos=0
       k2=k+nq
 c     calcul des elements de la matrice
       do 13 i=1,k
       ii=i*(i+1)/2
-c       elements diagonaux
+c     elements diagonaux
       diag=a(ii)
       i1=ii-i
       if(i-1) 1,4,1
@@ -1473,10 +1647,6 @@ C
 C
 C   INITIALIZE DIAGONAL-LOOP
 C
-
-      DPIV=0 
-
-
       KPIV=0
       DO 11 K=1,N
       KPIV=KPIV+K
@@ -1658,9 +1828,12 @@ c
       END
 
 
+
+
+
 c===============================    MARQ98  HJ =========================
 
-   	 subroutine marq98(k0,b,m,ni,v,rl,ier,istop,effet,maxit)
+   	 subroutine marq98(k0,b,m,ni,v,rl,ier,istop,effet)
 c
 c
 c  fu = matrice des derivees secondes et premieres
@@ -1671,47 +1844,50 @@ c  2: nb max d'iterations atteints
 c  3: 1 mais echec inversion matrice d'info (ier=1)
 C  4: non amelioration vraisblce apres searpas
 c      
-         parameter(npmax=50,NSUJETMAX=15000,nvarmax=15)
+         parameter(npmax=50,NSUJETMAX=30000,nvarmax=15)
          parameter(NSIMAX=5000)
-      
-         integer  m,ni,nql,i,ii,nfmax,idpos,ier,istop,igrad,j
-         integer  ncount,id,jd,i0
-         integer effet
 
-         double precision  da,dm,ga,tr
+         integer  m,ni,nq,i,ii,nfmax,idpos,ier,istop,igrad,j
+         integer  ncount,id,jd,i0,kkk
+         integer effet  
+
+         double precision  da,dm,tr,g0
          double precision  ca,cb,epsa,epsb,rl
          double precision  funcpa,det, step,eps,epsd
          double precision  vw,fi,maxt,z
          double precision  rl1,th,ep,dd
 
-         double precision V(npmax*(npmax+3)/2)
-         double precision V1(npmax*(npmax+3)/2)
-         double precision vnonpen(npmax*(npmax+3)/2)
+         double precision v((npmax*(npmax+3)/2))
+         double precision v1((npmax*(npmax+3)/2))
+         double precision vnonpen((npmax*(npmax+3)/2))
          double precision b(npmax),delta(npmax)
-         double precision fu(npmax*(npmax+3)/2)
+         double precision fu((npmax*(npmax+3)/2))
          double precision k0(2)
          double precision bh(npmax),b1(npmax)
          double precision zero(2)
 
-         integer maxit
-
+         double precision ga
 c*****dace2
       double precision t0(nsujetmax),t1(nsujetmax)
       double precision  ncsrl
       integer c(nsujetmax)
       integer nt0(nsujetmax),nt1(nsujetmax)
-      integer  nsujet,nsim,nva,ndate,nst
-      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,nst
-      
+      integer  nsujet,nsim,nva,ndate,nst,maxit
+      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,
+     &              nst,maxit
 c*****dace7
       double precision I_hess(npmax,npmax),H_hess(npmax,npmax)
       double precision Hspl_hess(npmax,npmax)
-      double precision PEN_deri(npmax,1)
-      double precision hess(npmax,npmax) 
+      double precision PEN_deri(npmax,1) 
+      double precision hess(npmax,npmax)
       common /dace7/PEN_deri,I_hess,H_hess,Hspl_hess,hess
 c***********************************************
      
-
+c      ga=0.d0
+c
+c      write(*,*)'Marq'
+c      write(*,*)'ga 1=',ga
+c      stop
       zero(1)=0.d0
       zero(2)=0.d0
       id=0
@@ -1730,60 +1906,38 @@ c***********************************************
       istop=0
       da=0.01d0
       dm=5.d0
-c     nql=nbre de seconds membres pour chole
-      nql=1
-
-   
-
-      do i=1,npmax
-           bh(i)=0.d0
-           b1(i)=0.d0
-           delta(i)=0.d0
-      end do       
-
-      do i=1,npmax*(npmax+3)/2
-           fu(i)=0.d0
-           v1(i)=0.d0
-      end do  
-
-      ii=0
-      ga=670474812.d260 
-      idpos=0
-      dd=0.d0
-
- 
-  10   continue
-
+c     nq=nbre de seconds membres pour chole
+      nq=1
+ 10   continue
+c     
+c      write(6,*)
+c      write(*,*)'** Iteration :', ni 
+c      if (ni.eq.6) stop
+c      write(*,*)'** Parametres:'
+c      write(*,*)(b(i),i=1,m)
+c      write(*,*)'da',da,' ga=',ga
       
-c      write(7,*)'** Iteration :', ni 
-
-c      if (ni.eq.5) stop
-
-c      write(7,*)'** Parametres:'
-c      write(7,*)(b(i),i=1,m)
-c      write(7,*)'da',da,' ga=',ga
-
-
-
       z=0.d0
       i0=0 
 
-
-
+      
       rl=funcpa(b,m,i0,z,i0,z,k0)
       rl1=rl 
 
-c      write(7,*)'log Vrais rl1,nsujet',rl1,nsujet
+c      write(*,*)'log Vrais rl1,nsujet',rl1,nsujet
+c      stop
 
-
+c      if(ni.eq.0) write(8,*)'vrais init=',rl1
+     
+      if (RL1.gt.0)stop
+     
       call deriva(b,m,v,rl,k0)
        
 c          if (ni.eq.1) stop
-           dd = 0.d0
-           do 13 i=m*(m+1)/2+1,m*(m+3)/2
-
-
-           dd = dd + v(i)*v(i)
+          dd = 0.d0
+          do 13 i=m*(m+1)/2+1,m*(m+3)/2
+c             write(*,*)'d',v(i)
+             dd = dd + v(i)*v(i)
  13       continue 
           dd=dd/dabs(RL)
 
@@ -1814,7 +1968,7 @@ c             write(*,*)'fu',fu(i),i
              fu(ii)=da*ga*tr
              endif
  500      continue
-          call dchole(fu,m,nql,idpos)
+          call dchole(fu,m,nq,idpos)
 c
           if (idpos.ne.0) then  
 c             write(6,*) 'echec inversion choleski'
@@ -1829,23 +1983,15 @@ c             da=dm*da
              endif
              goto 400
           else
-
-
-c           write(7,*) 'matrice reguliere, idpos=',idpos
-c           write(7,*)'ncount=',ncount, 'da=',da, 'ga=',ga
-
-
+c              write(6,*) 'matrice reguliere, idpos=',idpos
+c              write(*,*)'ncount=',ncount, 'da=',da, 'ga=',ga
               do 2 i=1,m
                  delta(i)=fu(nfmax+i)
                  b1(i)=b(i)+delta(i)
 2             continue
 c              write(6,*) '** ** avant func.....',b1,delta(1)
               rl=funcpa(b1,m,id,z,jd,z,k0)
-
-
-c           write(7,*) 'rl1 =',rl1,' rl =',rl
-
-
+c              write(6,*) 'rl1 =',rl1,' rl =',rl
               igrad=1
               if (rl1.lt.rl) then
                  if(da.lt.eps) then
@@ -1893,13 +2039,12 @@ c              goto 110
            do 5 i=1,m
               ca=ca+delta(i)*delta(i)
  5         continue
-
-c        write(7,*)'rl1=',rl1,'rl=',rl,'(rl1-rl)',(rl1-rl)
-c        write(7,*) 'ca =',ca,' cb =',cb,' dd =',dd
+c           write(6,*)'rl1=',rl1,'rl=',rl,'(rl1-rl)',(rl1-rl)
+c           write(6,*) 'ca =',ca,' cb =',cb,' dd =',dd
     
            do 6 i=1,m
               b(i)=b(i)+delta(i)
-c             write(*,*)'delta',delta(i),i
+c              write(*,*)'delta',delta(i),i
  6         continue
 
            ni=ni+1
@@ -1909,10 +2054,6 @@ c              write(6,*) 'nombre iteration max atteinte'
               goto 110
            end if
            goto 10
-
- 
-
-
 c********************
 c     inversion matrice d'information
 c********************
@@ -1986,7 +2127,7 @@ c           write(8,*)'ca,cb,dd final',ca,cb,dd
            call dsinv(v,m,ep,ier)
            if (ier.eq.-1) then
 c             write(6,103)          
-c 103         format(1x,'echec inversion matrice information')
+103          format(1x,'echec inversion matrice information')
              istop=3
 c             call dsinv(v1,npl,ep,ier)
 c               if (ier.eq.-1) then
@@ -2046,12 +2187,9 @@ c       write(*,*) 'H_hess(16,16) fin marq',H_hess(16,16),m,((j-1)*j/2+i)
  108       continue
 
  110       continue
-         
-        return
 
-        end subroutine
-
-c======== fin 
+           return
+       end
 
 
 
@@ -2072,6 +2210,7 @@ C
        VLW2=VLW1+STEP
        CALL VALFPA(VLW1,FI1,B,BH,M,DELTA,k0)
        CALL VALFPA(VLW2,FI2,B,BH,M,DELTA,k0)
+
 C
        IF(FI2.GE.FI1) THEN
           VLW3=VLW2
@@ -2100,6 +2239,7 @@ C
           FI2=FI1
 C
           VLW1=VLW2+STEP
+
           CALL VALFPA(VLW1,FI1,B,BH,M,DELTA,k0)
           IF(FI1.GT.FI2) GO TO 50
 c          IF (dabs(FI1-FI2).LT.EPSV) THEN
@@ -2117,12 +2257,19 @@ C
 C  CALCUL MINIMUM QUADRIQUE
 C
          VM=VLW2-STEP*(FI1-FI3)/(2.d0*(FI1-2.d0*FI2+FI3))
-         CALL VALFPA(VM,FIM,B,BH,M, DELTA,k0)
+
+
+
+         CALL VALFPA(VM,FIM,B,BH,M,DELTA,k0)
          IF (FIM.LE.FI2) GO TO 100
          VM=VLW2
          FIM=FI2
 100   CONTINUE
+
+      
+  
       VW=DEXP(VM)
+       
       RETURN
 
       END
@@ -2153,35 +2300,34 @@ c=================================    DERIVA pjoly =======================
 
       subroutine deriva(b,m,v,rl,k0)
 
+      parameter(npmax=50)
+       
       integer i0,iun,m,m1,ll,i,k,j
-      double precision  funcpa,thn,th,z,rl,vl
+      double precision  funcpa
+      double precision thn,th
+      double precision z
+      double precision rl
+      double precision vl
+      double precision vaux
       double precision  th2
       double precision k0(2)
-      double precision fcith(70)
+      double precision fcith(m)
       double precision b(m)
-      double precision v(1000)
+      double precision v((npmax*(npmax+3)/2))
+c      double precision v(1000)
 
 c
 c     v:matrice d'information+score
 c     calcul de la derivee premiere
 c
 c      print*,'entree deriva'
- 
       th=1.d-5
       thn=-th
       th2=th*th
       z=0.d0
       i0=0
       iun =1
-
-      do i=1,70
-        fcith(i)=0.d0
-      end do    
-
       rl=funcpa(b,m,iun,z,iun,z,k0)
-
-c      write(*,*) rl
-
       do 2 i=1,m
 	    fcith(i)=funcpa(b,m,i,th,i0,z,k0)
 c            print*,'fcith',fcith(i),i
@@ -2192,12 +2338,20 @@ c            print*,'fcith',fcith(i),i
       ll=m1
       do 1 i=1,m
       ll=ll+1
-      vl=(fcith(i)-funcpa(b,m,i,thn,i0,z,k0))/(2.d0*th)
+      vaux=funcpa(b,m,i,thn,i0,z,k0)
+c      write(*,*)'vaux ok',vaux
+      vl=(fcith(i)-vaux)/(2.d0*th)
+c      write(*,*)'vl / deriva',vl,ll,i
+c      write(*,*)'detail',fcith(i),vaux,(fcith(i)-vaux)
+c      write(*,*)'vl',(fcith(i)-vaux)/(2.d0*th)
+c      vl=(fcith(i)-funcpa(b,m,i,thn,i0,z,k0))/(2.d0*th)
       v(ll)=vl
       do 1 j=1,i
       k=k+1
       v(k)=-(funcpa(b,m,i,th,j,th,k0)-fcith(j)-fcith(i)+rl)/th2
 1     continue
+      
+c      stop
       return
       end
 
@@ -2210,7 +2364,7 @@ c==========================  DISTANCE   =================================
 
 
 
-         parameter(ndatemax=30000,npmax=50,NSUJETMAX=15000)
+         parameter(ndatemax=60000,npmax=50,NSUJETMAX=30000)
 
          integer  nz1,nz2,nz3,i,j,n,np,k,l,effet
          integer indx(71) 
@@ -2237,8 +2391,9 @@ c*****dace2
       double precision  ncsrl
       integer c(nsujetmax)
       integer nt0(nsujetmax),nt1(nsujetmax)
-      integer  nsujet,nsim,nva,ndate,nst
-      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,nst
+      integer  nsujet,nsim,nva,ndate,nst,maxit
+      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,
+     &              nst,maxit
 c*****dace7
          double precision I_hess(npmax,npmax),H_hess(npmax,npmax)
          double precision Hspl_hess(npmax,npmax)
@@ -2348,13 +2503,9 @@ c
 
 
 
-
-
-
-
 c==========================  SUSP  ====================================
       subroutine susp(x,the,n,su,lam,zi)
-      parameter(ndatemax=30000,npmax=50)
+      parameter(ndatemax=60000,npmax=50)
 
       integer  j,k,n,i
       double precision  x,ht,ht2,h2,som,lam,su
@@ -2362,11 +2513,13 @@ c==========================  SUSP  ====================================
       double precision  ht3,hht,h4,h3m,hh3,hh2,mm,im3,mm2
       double precision  h,gl,hh
       double precision zi(-2:npmax),the(-2:npmax)
-         
-         
-         gl=0.d0
-          
+
+
          som = 0.d0
+         gl = 0.d0
+          
+
+
          do 58 k = 2,n+1
             if ((x.ge.zi(k-1)).and.(x.lt.zi(k)))then
                j = k-1
@@ -2425,7 +2578,7 @@ c calcul les points pour les fonctions
 c et leur bandes de confiance
 
       subroutine cosp(x,the,n,y,zi,date,binf,su,bsup,lbinf,lam,lbsup)
-      parameter(ndatemax=30000,npmax=50)
+      parameter(ndatemax=60000,npmax=50)
       integer  j,k,n,i
       double precision  x,ht,ht2,h2,som,lam,su
       double precision  binf,bsup,lbinf,lbsup,pm
@@ -2436,13 +2589,13 @@ c et leur bandes de confiance
       double precision y(npmax,npmax)
       double precision date(ndatemax)
 
-c         do 4 i=1,n
-c            the(i-3)=(b(i))*(b(i))
-c 4       continue
-
-         gl=0.d0
+c      do 4 i=1,n
+c         the(i-3)=(b(i))*(b(i))
+c 4    continue
 
          som = 0.d0
+         gl = 0.d0 
+ 
          do 58 k = 2,n-1
             if ((x.ge.zi(k-1)).and.(x.lt.zi(k)))then
                j = k-1
@@ -2502,6 +2655,7 @@ c 4       continue
          call conf1(x,j,n,y,pm,zi,date)
          lbinf = lam - 1.96d0*pm
          lbsup = lam + 1.96d0*pm
+c         write(*,*)'lbinf apres conf1',lbinf,lam,pm
 
          return
 
@@ -2509,7 +2663,7 @@ c 4       continue
 c=====================  CONF1  =============================
       subroutine  conf1(x,ni,n,y,pm,zi,date) 
        parameter(npmax=50)
-       parameter(ndatemax=30000)
+       parameter(ndatemax=60000)
 
       integer  ni,i,n,j
 
@@ -2519,49 +2673,46 @@ c=====================  CONF1  =============================
       double precision zi(-2:npmax)
       double precision  vecti(npmax),aux(npmax)
       double precision y(npmax,npmax) 
-      
-           
+                 
             do 10 i=1,n
                vecti(i) = mmsp(x,ni,i,zi,date)
- 10         continue   
-
+c               write(*,*)' vecti(i)' ,vecti(i),i / ok idem
+ 10         continue
+          
             do 20 i=1,n
                aux(i) = 0.d0
                do 15 j=1,n
                   aux(i) = aux(i) - y(i,j)*vecti(j)
+c                  write(*,*)'aux(i)', y(i,j),i,j !/non y
  15            continue
- 20         continue   
+ 20         continue 
+c            stop
 
             res = 0.d0
             do 30 i=1,n
                res = res + aux(i)*vecti(i)
+c            write(*,*)'conf1 : res ',aux(i),vecti(i),i
  30         continue
-c            write(4,*)'conf1 : res ',res
-            if (res.lt.0)then 
+c            write(*,*)'conf1 : res ',res
+c            stop
+c            if (res.lt.0)then 
                res=-res
-            endif 
-c               pm = dsqrt(2.d0*res)
+c            endif 
                pm = dsqrt(res)
              
-c            write(4,*)'conf1 pm',pm 
-
-      return  
-
-      end subroutine
-
-
-
+c            write(*,*)'conf1 pm',pm 
+         end
 c=====================  CONF  =============================
       subroutine  conf(x,ni,n,y,pm,zi,date)
        parameter(npmax=50)
-       parameter(ndatemax=30000)
+       parameter(ndatemax=60000)
        
        integer  ni,i,n,j
        double precision isp,x,pm
        double precision res
        double precision zi(-2:npmax)
        double precision date(ndatemax)
-       double precision vecti(52),aux(52)
+       double precision vecti(npmax),aux(npmax)
        double precision y(npmax,npmax)
 
             do 10 i=1,n
@@ -2572,6 +2723,7 @@ c=====================  CONF  =============================
                aux(i) = 0.d0
                do 15 j=1,n
                   aux(i) = aux(i) - y(i,j)*vecti(j)
+c                 write(*,*)'aux(i) conf1', y(i,j),i,j
  15            continue
  20         continue   
 
@@ -2580,23 +2732,21 @@ c=====================  CONF  =============================
                res = res + aux(i)*vecti(i)
  30         continue
 
-c            write(4,*)'conf : res ',res
-            if (res.lt.0)then 
+c            write(*,*)'conf : res ',res
+c            if (res.lt.0)then 
                res=-res
-            endif 
+c            endif 
 c               pm = dsqrt(2.d0*res)
                pm = dsqrt(res)
               
 c            write(4,*)'conf : pm ',pm
                
-      return       
- 
-      end subroutine
+         end
 
 
 c==========================   ISP   ==================================
           double precision function isp(x,ni,ns,zi,date)
-          parameter(ndatemax=30000,npmax=50)
+          parameter(ndatemax=60000,npmax=50)
           integer  ni,ns
           double precision  val,mmsp,x
           double precision zi(-2:npmax)
@@ -2658,7 +2808,7 @@ c==========================   ISP   ==================================
              end
 c==========================  MMSP   ==================================
       double precision function mmsp(x,ni,ns,zi,date)
-      parameter(ndatemax=30000,npmax=50)
+      parameter(ndatemax=60000,npmax=50)
       integer  ni,ns
       double precision  val,x
       double precision zi(-2:npmax)
@@ -2762,4 +2912,839 @@ c     remarque :  jcolA=IrowB
  1    continue
       return
       end
-c===================================================================
+c====================================================================
+
+c========================          MNBRAK         ===================
+      subroutine mnbrak(ax,bx,cx,fa,fb,fc,b,n)
+      parameter(npmax=50)
+         double precision ax,bx,cx,fa,fb,fc,aux,res
+         double precision b(npmax),y(npmax,npmax)
+         double precision estimv,gold,glimit,tiny
+         parameter (gold=1.618034d0,glimit=100.d0,tiny=1.d-20)
+         double precision dum,fu,q,r,u,ulim
+         integer n,ni
+
+c     write(*,*)' DEBUT mnbrak',fa,fb
+         fa = estimv(ax,n,b,y,aux,ni,res)
+ccc   write(*,*)'fa mnbrak',fa
+c     stop
+         fb = estimv(bx,n,b,y,aux,ni,res)
+c         write(*,*)'mnbrak',fa,fb
+c         stop
+
+         if(fb.gt.fa)then
+            dum = ax
+            ax = bx
+            bx = dum
+            dum = fb
+            fb = fa
+            fa = dum
+         endif
+         cx = bx + gold*(bx-ax)
+c         write(*,*)'ok yes mnbrak'
+c         stop
+         fc = estimv(cx,n,b,y,aux,ni,res)
+c         write(*,*)'ok mnbrak'
+c         stop
+ 1       if(fb.ge.fc)then
+            r = (bx-ax)*(fb-fc)
+            q = (bx-cx)*(fb-fa)
+            u = bx-((bx-cx)*q-(bx-ax)*r)/
+     &       (2.d0*sign(max(abs(q-r),tiny),q-r))
+            ulim = bx + glimit*(cx-bx)
+            if((bx-u)*(u-cx).gt.0.d0)then
+               fu = estimv(u,n,b,y,aux,ni,res)
+               if(fu.lt.fc)then
+                  ax = bx
+                  fa = fb
+                  bx = u
+                  fb = fu
+                  return
+               else
+                  if(fu.gt.fb)then
+                     cx = u
+                     fc = fu
+                     return
+                  endif   
+               endif
+               u = cx + gold*(cx-bx)
+               fu = estimv(u,n,b,y,aux,ni,res)
+            else
+               if((cx-u)*(u-ulim).gt.0.d0)then
+                  fu = estimv(u,n,b,y,aux,ni,res)
+                  if(fu.lt.fc)then
+                     bx = cx
+                     cx = u
+                     u = cx + gold*(cx-bx)
+                     fb = fc
+                     fc = fu
+                     fu = estimv(u,n,b,y,aux,ni,res)
+                  endif  
+               else
+                  if((u-ulim)*(ulim-cx).ge.0.d0)then
+                     u = ulim
+                     fu = estimv(u,n,b,y,aux,ni,res)
+                  else
+                     u = cx + gold*(cx-bx)
+                     fu = estimv(u,n,b,y,aux,ni,res)
+                  endif
+               endif   
+            endif
+            ax = bx
+            bx = cx
+            cx = u
+            fa = fb
+            fb = fc
+            fc = fu
+            goto 1
+         endif
+c         write(*,*)'fin'
+c         stop
+         return 
+         end
+
+c========================      GOLDEN   =========================
+      double precision function golden(ax,bx,cx,tol,xmin,n,b,y,aux)
+
+      parameter(ndatemax=60000,npmax=50)
+      
+      double precision y(npmax,npmax)
+      double precision ax,bx,cx,tol,xmin,b(npmax)
+      double precision r,c,aux,res
+      parameter (r=0.61803399d0,c=1.d0-r)
+      double precision f1,f2,x0,x1,x2,x3,estimv
+      integer n,ni
+      
+         x0 = ax
+         x3 = cx
+         if(abs(cx-bx).gt.abs(bx-ax))then
+            x1 = bx
+            x2 = bx + c*(cx-bx)
+         else
+            x2 = bx
+            x1 = bx - c*(bx-ax)
+         endif
+c         write(*,*)'DANS golden',x2,x1,n,aux,ni,res
+         f1 = estimv(x1,n,b,y,aux,ni,res)
+         f2 = estimv(x2,n,b,y,aux,ni,res)
+         
+c         write(*,*)'f2 f1',f2,f1
+c         write(*,*)'abs',(x3-x0),tol*(abs(x1)+abs(x2))
+c         stop
+ 1       if(abs(x3-x0).gt.tol*(abs(x1)+abs(x2)))then
+            if(f2.lt.f1)then
+               x0 = x1
+               x1 = x2
+               x2 = r*x1 + c*x3
+               f1 = f2
+c         write(*,*)'f2',f1
+c         stop
+               f2 = estimv(x2,n,b,y,aux,ni,res)
+               
+c         write(*,*)'f2 DANS golden',f2,f1
+c         stop
+            else
+               x3 = x2
+               x2 = x1
+               x1 = r*x2+c*x0
+               f2 = f1
+c         write(*,*)'f2 else',f1
+               f1 = estimv(x1,n,b,y,aux,ni,res)
+c         write(*,*)'f1 else',f1
+c         stop
+            endif
+            go to 1
+          endif
+          if(f1.lt.f2)then
+             golden = f1
+             xmin = x1
+          else
+             golden = f2
+             xmin = x2
+          endif
+          return
+          end
+
+
+c========================          ESTIMV         ===================
+
+      double precision function estimv(k00,n,b,y,aux,ni,res)
+
+      parameter(ndatemax=60000,npmax=50,NSUJETMAX=30000)
+
+      double precision v((npmax*(npmax+3)/2)),y(npmax,npmax)
+      double precision res,k0(2),k00,ut(ndatemax),bh(npmax),som,h1
+      double precision b(npmax),the(-2:npmax),aux,dut(ndatemax)
+      integer n,ij,i,k,j,vj
+      integer ier,istop,ni
+
+
+c*****dace2
+      double precision t0(nsujetmax),t1(nsujetmax)
+      double precision ncsrl
+      integer c(nsujetmax)
+      integer nt0(nsujetmax),nt1(nsujetmax)
+      integer  nsujet,nsim,nva,ndate,nst,maxit
+      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,
+     &              nst,maxit
+c*****dace1 
+      double precision date(ndatemax)
+      double precision zi(-2:npmax)
+      common /dace1/date,zi
+      
+c*****dace3
+      double precision  pe
+      integer  effet,nz1,nz2,effetcross
+      common /dace3/pe,effet,nz1,nz2,effetcross
+c*****mem1
+      double precision mm3(ndatemax),mm2(ndatemax)
+      double precision mm1(ndatemax),mm(ndatemax)
+      common /mem1/mm3,mm2,mm1,mm
+      
+c*****mem2
+      double precision im3(ndatemax),im2(ndatemax)
+      double precision im1(ndatemax),im(ndatemax)
+      common /mem2/im3,im2,im1,im
+      
+c************
+      
+      k0(1) = k00*k00
+      k0(2) = 0.d0
+ 
+c      write(*,*)'DEBUT ESTIMV',effetcross ,k0
+c      stop
+      call marq98(k0,b,n,ni,v,res,ier,istop,effetcross)
+      
+      
+      if(k0(1).gt.0.d0)then
+         do 4 ij=1,n
+            the(ij-3)=(b(ij))*(b(ij))
+            bh(ij) = (b(ij))*(b(ij))
+ 4       continue
+         
+         vj = 0
+         som = 0.d0
+         dut(1) = (the(-2)*4.d0/(zi(2)-zi(1)))
+         ut(1) = the(-2)*dut(1)*0.25d0*(zi(1)-zi(-2))
+         do 8 i=2,ndate-1
+            do 6 k = 2,n-2
+               if ((date(i).ge.zi(k-1)).and.(date(i).lt.zi(k)))then
+                  j = k-1
+                  if ((j.gt.1).and.(j.gt.vj))then
+                     som = som+the(j-4)
+                     vj  = j
+                  endif   
+               endif
+ 6          continue 
+            ut(i) = som +(the(j-3)*im3(i))+(the(j-2)*im2(i))
+     &           +(the(j-1)*im1(i))+(the(j)*im(i))
+            dut(i) = (the(j-3)*mm3(i))+(the(j-2)*mm2(i))
+     &           +(the(j-1)*mm1(i))+(the(j)*mm(i))
+ 8       continue
+         i = n-2
+         h1 = (zi(i)-zi(i-1))
+         ut(ndate) = som+ the(i-4) + the(i-3)+the(i-2)+the(i-1)
+         dut(ndate) = (4.d0*the(i-1)/h1)
+         
+         call test(bh,ut,dut,k0,n,aux,v,y)
+         estimv = - ((res-pe)) - aux
+c         write(*,*)'estimv',k0,-aux,ni,estimv
+      else
+         aux = -n
+c     write(*,*)'estimv2',k0,-aux,ni
+      endif
+      
+      return
+      end
+      
+c=================calcul de la hessienne  et de omega  ==============
+      subroutine test(b,ut,dut,k0,n,res,v,y)
+      parameter(ndatemax=60000,npmax=50,NSUJETMAX=30000)
+
+      double precision hessh(npmax,npmax),hess(npmax,npmax)
+      double precision omeg(npmax,npmax),y(npmax,npmax)
+      integer n,i,j,np,indx(npmax)
+      double precision b(npmax),k0(2),d,dut(ndatemax),ut(ndatemax)
+      double precision res,tra ,v((npmax*(npmax+3)/2))
+
+c*****dace1 
+      double precision date(ndatemax)
+      double precision zi(-2:npmax)
+      common /dace1/date,zi
+c*****dace2
+      double precision t0(nsujetmax),t1(nsujetmax)
+      double precision ncsrl
+      integer c(nsujetmax)
+      integer nt0(nsujetmax),nt1(nsujetmax)
+      integer  nsujet,nsim,nva,ndate,nst,maxit
+      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,
+     &              nst,maxit
+c*****
+         do 10 i = 1,n
+            do 5 j = 1,n
+               hess(i,j) = 0.d0 
+ 5         continue
+ 10      continue
+   
+ 
+         do 20 i = 1,n
+            do 15 j = i,n
+               call mat(hess(i,j),ut,dut,i,j,n)
+c               write(*,*)'hess test',hess(i,j),i,j
+ 15         continue
+ 20      continue
+        do 40 i = 2,n
+            do 35 j = 1,i-1
+               hess(i,j)=hess(j,i)
+ 35         continue
+ 40      continue
+
+
+         call calcomeg(n,omeg)
+
+         do 100 i = 1,n
+            do 90 j = 1,n
+               hessh(i,j)=-hess(i,j)
+               hess(i,j) = hess(i,j) - (2.d0*k0(1)*omeg(i,j)) 
+ 90         continue   
+ 100     continue
+
+         np = n
+         do 112 i=1,n
+            do 111 j=1,n
+               y(i,j)=0.d0
+ 111        continue
+            y(i,i)=1.d0
+ 112     continue
+         call ludcmp(hess,n,np,indx,d)
+
+         do 113 j=1,n
+            call lubksb(hess,n,np,indx,y(1,j))
+ 113     continue
+
+c         write(*,*)'hess test',y(1,1)
+
+         tra = 0.d0
+         do 150 i=1,n
+            do 140 j=1,n
+               tra = tra + y(i,j)*hessh(j,i)
+c         write(*,*)'test tra',tra,y(i,j),hessh(j,i),i,j
+ 140        continue
+ 150     continue
+   
+c         write(*,*)'test',k0,-tra
+         res = (tra)
+
+         end
+
+c======================  LUBKSB  ======================================
+      subroutine lubksb(a,n,np,indx,b)
+      parameter(ndatemax=60000,npmax=50)
+         integer n,np,indx(npmax)
+         double precision a(npmax,npmax),b(npmax)
+         integer i,ii,j,ll
+         double precision sum
+
+         ii = 0
+         do 12 i=1,n
+            ll = indx(i)
+            sum = b(ll)
+            b(ll) = b(i)
+            if(ii.ne.0)then
+               do 11 j=ii,i-1
+                  sum = sum -a(i,j)*b(j)
+ 11            continue
+            else
+               if(sum.ne.0.d0)then
+                  ii=i
+               endif
+            endif
+            b(i)=sum
+ 12      continue
+         do 14 i=n,1,-1
+            sum = b(i)
+            do 13 j = i+1,n
+               sum = sum-a(i,j)*b(j)
+ 13         continue
+            b(i)=sum/a(i,i)
+ 14      continue
+         return
+
+         end
+c==================
+c======================  LUDCMP  ======================================
+       subroutine ludcmp(a,n,np,indx,d)
+      parameter(ndatemax=60000,npmax=50)
+
+         integer n,np,indx(n),nmax
+         double precision d,a(npmax,npmax),tiny
+         parameter (nmax=500,tiny=1.d-20)
+         integer i,imax,j,k
+         double precision aamax,dum,sum,vv(nmax)
+
+         d = 1.d0
+         do 12 i=1,n
+            aamax=0.d0
+            do 11 j=1,n
+               if (dabs(a(i,j)).gt.aamax)then
+                  aamax=dabs(a(i,j))
+               endif
+ 11         continue
+            if (aamax.eq.0.d0) pause 'matrice singuliere'
+            vv(i) = 1.d0/aamax
+ 12      continue
+         do 19 j = 1,n
+            do 14 i=1,j-1
+               sum = a(i,j)
+               do 13 k=1,i-1
+                  sum = sum - a(i,k)*a(k,j)
+ 13            continue
+               a(i,j) = sum
+ 14         continue
+            aamax = 0.d0
+            do 16 i = j,n
+               sum = a(i,j)
+               do 15 k=1,j-1
+                  sum = sum -a(i,k)*a(k,j)
+ 15            continue
+               a(i,j) = sum
+               dum = vv(i)*dabs(sum)
+               if (dum.ge.aamax) then
+                  imax = i
+                  aamax = dum
+               endif
+ 16         continue
+            if(j.ne.imax)then
+               do 17 k=1,n
+                  dum = a(imax,k)
+                  a(imax,k)=a(j,k)
+                  a(j,k) = dum
+ 17            continue
+               d = -d
+               vv(imax)=vv(j)
+            endif
+            indx(j)=imax
+            if(a(j,j).eq.0.d0)then
+               a(j,j)=tiny
+            endif
+            if(j.ne.n)then
+               dum = 1.d0/a(j,j)
+               do 18 i = j+1,n
+                  a(i,j) = a(i,j)*dum
+ 18            continue
+            endif
+ 19      continue
+         return
+         end
+c=======================  CALOMEG  ===========================
+      subroutine calcomeg(n,omeg)
+c        remplissage de la matrice omega n*n
+c          elle a 7 diagonales
+      parameter(ndatemax=60000,npmax=50)
+
+      double precision omeg(npmax,npmax)
+      integer n
+      double precision calc00,calc01,calc02
+      integer i,j
+c*****dace1 
+      double precision date(ndatemax)
+      double precision zi(-2:npmax)
+      common /dace1/date,zi
+c*****pen1
+      double precision  m3m3(npmax),m2m2(npmax),m1m1(npmax)
+      double precision  mmm(npmax),m3m2(npmax)
+      common /pen1/m3m3,m2m2,m1m1,mmm,m3m2
+c*****pen2
+      double precision m3m1(npmax),m3m(npmax),m2m1(npmax)
+      double precision m2m(npmax),m1m(npmax)
+      common /pen2/m3m1,m3m,m2m1,m2m,m1m
+c**************************
+      do 5 i=1,n
+         do 3 j=1,n
+            omeg(i,j)=0.d0
+ 3       continue
+ 5    continue
+   
+      omeg(1,1)=calc00(1,n)
+      omeg(1,2)=calc01(1,n)
+      omeg(1,3)=calc02(1,n)
+      omeg(1,4)=m3m(1)
+      omeg(2,1)=omeg(1,2)
+      omeg(2,2)=calc00(2,n)
+      omeg(2,3)=calc01(2,n)
+      omeg(2,4)=calc02(2,n)
+      omeg(2,5)=m3m(2)
+      omeg(3,1)=omeg(1,3)
+      omeg(3,2)=omeg(2,3)
+      omeg(3,3)=calc00(3,n)
+      omeg(3,4)=calc01(3,n)
+      omeg(3,5)=calc02(3,n)
+      omeg(3,6)=m3m(3)
+      do 10 i=4,n-3
+         omeg(i,i-3)=omeg(i-3,i)
+         omeg(i,i-2)=omeg(i-2,i)
+         omeg(i,i-1)=omeg(i-1,i)
+         omeg(i,i)=calc00(i,n)
+         omeg(i,i+1)=calc01(i,n)
+         omeg(i,i+2)=calc02(i,n)
+         omeg(i,i+3)=m3m(i)
+ 10   continue   
+      omeg(n-2,n-5)=omeg(n-5,n-2)
+      omeg(n-2,n-4)=omeg(n-4,n-2)
+      omeg(n-2,n-3)=omeg(n-3,n-2)
+      omeg(n-2,n-2)=calc00(n-2,n)
+      omeg(n-2,n-1)=calc01(n-2,n)
+      omeg(n-2,n)=calc02(n-2,n)
+      omeg(n-1,n-4)=omeg(n-4,n-1)
+      omeg(n-1,n-3)=omeg(n-3,n-1)
+      omeg(n-1,n-2)=omeg(n-2,n-1)
+      omeg(n-1,n-1)=calc00(n-1,n)
+      omeg(n-1,n)=calc01(n-1,n)
+      omeg(n,n-3)=omeg(n-3,n)
+      omeg(n,n-2)=omeg(n-2,n)
+      omeg(n,n-1)=omeg(n-1,n)
+      omeg(n,n)=calc00(n,n)
+
+      end
+
+
+c====================  MAT  ==================================
+      subroutine mat(res,ut,dut,k,l,n)
+      parameter(ndatemax=60000,npmax=50,NSUJETMAX=30000)
+
+      double precision res,dut(ndatemax),ut(ndatemax)
+      integer k,l,j,ni,n,ni1
+      double precision res1,msp,aux2,sp
+      double precision u2
+      integer i
+
+c*****dace1 
+      double precision date(ndatemax)
+      double precision zi(-2:npmax)
+      common /dace1/date,zi
+c*****dace2
+      double precision t0(nsujetmax),t1(nsujetmax)
+      double precision  ncsrl
+      integer c(nsujetmax)
+      integer nt0(nsujetmax),nt1(nsujetmax)
+      integer  nsujet,nsim,nva,ndate,nst,maxit
+      common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,
+     &              nst,maxit
+c**
+
+             
+c---------- calcul de la hessienne ij ------------------
+          res = 0.d0
+          res1 = 0.d0
+          do 10 i=1,nsujet
+             if(c(i).eq.1)then  !event
+                u2 = dut(nt1(i)) 
+c                write(*,*)'mat u2',u2,nt1(i),i
+                do 6 j = 2,n-2
+                   if((date(nt1(i)).ge.zi(j-1)).and.
+     &                  (date(nt1(i)).lt.zi(j)))then
+                      ni = j-1
+c                     write(*,*)'mat ni',ni
+                   endif
+ 6              continue 
+                if(date(nt1(i)).eq.zi(n-2))then
+                   ni = n-2
+                endif   
+c-------attention numero spline 
+                aux2 = msp(nt1(i),ni,k)*msp(nt1(i),ni,l)
+c                write(*,*)'mat aux2',aux2,nt1(i),ni,k
+                if (u2.le.0.d0)then
+                   res1 = 0.d0
+                else   
+                   res1 = - aux2/(u2*u2)
+                endif  
+c                write(*,*)'mat',res1
+c                stop
+             else !censure  
+                res1 = 0.d0
+             endif 
+          res = res + res1
+ 10    continue   
+       
+       end
+
+c==========================  MSP   ==================================
+          double precision function msp(i,ni,ns)
+          parameter(ndatemax=60000,npmax=50)
+             integer ni,ns,i
+             double precision val
+c*****dace1 
+      double precision date(ndatemax)
+      double precision zi(-2:npmax)
+      common /dace1/date,zi
+c************************************
+
+          if(ni.lt.ns-3)then
+             val = 0.d0
+          else
+             if(ns-3.eq.ni)then
+                if(date(i).eq.zi(ni))then
+                   val = 0.d0
+                else  
+                   val = (4.d0*(date(i)-zi(ni))*(date(i)-zi(ni))
+     &             *(date(i)-zi(ni)))/((zi(ni+4)-zi(ni))*(zi(ni+3)
+     &             -zi(ni))*(zi(ni+2)-zi(ni))*(zi(ni+1)-zi(ni)))
+                endif
+             else 
+                if(ns-2.eq.ni)then
+                   if(date(i).eq.zi(ni))then
+                      val = (4.d0*(zi(ni)-zi(ni-1))*(zi(ni)-zi(ni-1)))
+     &              /((zi(ni+3)-zi(ni-1))*(zi(ni+2)-zi(ni-1))
+     &              *(zi(ni+1)-zi(ni-1)))
+                   else  
+                      val = (4.d0*(date(i)-zi(ni-1))*(date(i)-zi(ni-1))
+     &              *(zi(ni+1)-date(i)))/((zi(ni+3)-zi(ni-1))*(zi(ni+2)
+     &              -zi(ni-1))*(zi(ni+1)-zi(ni-1))*(zi(ni+1)-zi(ni)))
+     &              +   (4.d0*(date(i)-zi(ni-1))*(date(i)-zi(ni))
+     &              *(zi(ni+2)-date(i)))/((zi(ni+3)-zi(ni-1))*(zi(ni+2)
+     &              -zi(ni))*(zi(ni+1)-zi(ni))*(zi(ni+2)-zi(ni-1))) 
+     &              +   (4.d0*(date(i)-zi(ni))*(date(i)-zi(ni))
+     &              *(zi(ni+3)-date(i)))/((zi(ni+3)-zi(ni-1))*(zi(ni+3)
+     &              -zi(ni))*(zi(ni+2)-zi(ni))*(zi(ni+1)-zi(ni)))
+                   endif
+                else   
+                   if (ns-1.eq.ni)then
+                      if(date(i).eq.zi(ni))then
+                         val = (4.d0*((zi(ni)-zi(ni-2))*(zi(ni+1)
+     &                  -zi(ni)))/((zi(ni+2)-zi(ni-2))*(zi(ni+1)
+     &                  -zi(ni-1))*(zi(ni+1)-zi(ni-2))))
+     &                 +((4.d0*((zi(ni)-zi(ni-1))*(zi(ni+2)-zi(ni))) 
+     &                 /((zi(ni+2)-zi(ni-2))*(zi(ni+2)-zi(ni-1))
+     &                 *(zi(ni+1)-zi(ni-1)))))
+                      else
+                        val = (4.d0*((date(i)-zi(ni-2))*(zi(ni+1)
+     &                  -date(i))*(zi(ni+1)-date(i)))/((zi(ni+2)
+     &                  -zi(ni-2))*(zi(ni+1)-zi(ni-1))*(zi(ni+1)-
+     &                   zi(ni))*(zi(ni+1)-zi(ni-2))))
+     &                 +((4.d0*((date(i)-zi(ni-1))*(zi(ni+2)-date(i)) 
+     &                 *(zi(ni+1)-date(i)))/((zi(ni+2)-zi(ni-2))
+     &                 *(zi(ni+2)-zi(ni-1))*(zi(ni+1)-zi(ni-1))*
+     &                 (zi(ni+1)-zi(ni)))))
+     &                 +((4.d0*((zi(ni+2)-date(i))*(zi(ni+2)-date(i)) 
+     &                 *(date(i)-zi(ni)))/((zi(ni+2)-zi(ni-2))
+     &                 *(zi(ni+2)-zi(ni))*(zi(ni+2)-zi(ni-1))*
+     &                 (zi(ni+1)-zi(ni)))))
+                      endif 
+                   else
+                      if(ni.eq.ns)then
+                         if(date(i).eq.zi(ni))then
+                            val =(4.d0*(date(i)-zi(ni+1))*(date(i)
+     &                    -zi(ni+1))/((zi(ni+1)-zi(ni-1))*(zi(ni+1)
+     &                    -zi(ni-2))*(zi(ni+1)-zi(ni-3))))
+                         else   
+                           val =(4.d0*(date(i)-zi(ni+1))*(date(i)
+     &                      -zi(ni+1))*(zi(ni+1)-date(i))/((zi(ni+1)
+     &                      -zi(ni-1))*(zi(ni+1)-zi(ni-2))*(zi(ni+1)
+     &                      -zi(ni))*(zi(ni+1)-zi(ni-3))))
+                         endif
+                      else
+                         val = 0.d0
+                      endif
+                   endif
+                endif
+             endif
+          endif
+
+             msp = val
+             return
+             end
+c==========================   SP   ==================================
+          double precision function sp(i,ni,ns)
+          parameter(ndatemax=60000,npmax=50)
+          
+             integer ni,ns,i
+             double precision val,msp
+c*****dace1 
+      double precision date(ndatemax)
+      double precision zi(-2:npmax)
+      common /dace1/date,zi
+c-----------
+
+          if(date(i).eq.zi(ni))then
+             if(ni.le.ns-3)then
+                val = 0.d0
+             else
+                if(ni.le.ns-2)then
+                   val = ((zi(ni)-zi(ni-1))*msp(i,ni,ns))*0.25d0
+                else
+                   if (ni.eq.ns-1)then
+                      val = ((zi(ni)-zi(ni-2))*msp(i,ni,ns)+
+     &                (zi(ni+3)-zi(ni-1))*msp(i,ni,ns+1))*0.25d0
+                   else
+                      if(ni.eq.ns)then
+                         val = ((zi(ni)-zi(ni-3))*msp(i,ni,ns)+
+     &                       (zi(ni+2)-zi(ni-2))*msp(i,ni,ns+1)
+     &              +(zi(ni+3)-zi(ni-1))*msp(i,ni,ns+2))*0.25d0
+                      else
+                         val = 1.d0
+                      endif
+                   endif
+                endif   
+             endif
+          else   
+          if(ni.lt.ns-3)then
+             val = 0.d0
+          else
+             if(ni.eq.ns-3)then
+                   val = (date(i)-zi(ni))*msp(i,ni,ns)*0.25d0
+             else  
+             if(ni.eq.ns-2)then
+                   val = ((date(i)-zi(ni-1))*msp(i,ni,ns)+
+     &             (zi(ni+4)-zi(ni))*msp(i,ni,ns+1))*0.25d0
+             else   
+                if (ni.eq.ns-1)then
+                   val =((date(i)-zi(ni-2))*msp(i,ni,ns)+
+     &             (zi(ni+3)-zi(ni-1))*msp(i,ni,ns+1)
+     &             +(zi(ni+4)-zi(ni))*msp(i,ni,ns+2))*0.25d0
+                else
+                   if(ni.eq.ns)then
+                      val =((date(i)-zi(ni-3))*msp(i,ni,ns)+
+     &             (zi(ni+2)-zi(ni-2))*msp(i,ni,ns+1)
+     &             +(zi(ni+3)-zi(ni-1))*msp(i,ni,ns+2)
+     &             +(zi(ni+4)-zi(ni))*msp(i,ni,ns+3))*0.25d0
+                   else
+                      val = 1.d0
+                   endif
+                endif
+             endif
+             endif
+          endif 
+          endif
+             sp = val
+             return
+             end
+c================
+
+c=========================  CALC00  =========================
+          double precision function calc00(j,n) 
+          parameter(npmax=50)
+          double precision part
+          integer j,n
+c*****pen1
+          double precision  m3m3(npmax),m2m2(npmax),m1m1(npmax)
+          double precision  mmm(npmax),m3m2(npmax)
+          common /pen1/m3m3,m2m2,m1m1,mmm,m3m2
+c*****pen2
+          double precision m3m1(npmax),m3m(npmax),m2m1(npmax)
+          double precision m2m(npmax),m1m(npmax)
+          common /pen2/m3m1,m3m,m2m1,m2m,m1m
+c----------------------------
+c        entre i et i+1 ---> m*m et       i = j-3
+
+c       entre i+1 et i+2 ---> m1*m1 et      i = j-2
+
+c       entre i+2 et i+3 ---> m2*m2 et    i = j-1
+
+c       entre i+3 et i+4 ---> m3*m3  et    i = j
+
+             if(j.eq.1)then
+                part = m3m3(j)
+             else
+                if(j.eq.2)then
+                   part = m3m3(j) + m2m2(j-1)
+                else
+                   if(j.eq.3)then
+                      part = m3m3(j) + m2m2(j-1) + m1m1(j-2)
+                   else
+                      if(j.eq.n-2)then
+                         part = m2m2(j-1) + m1m1(j-2) + mmm(j-3)
+                      else   
+                         if(j.eq.n-1)then
+                            part = mmm(j-3) + m1m1(j-2)
+                         else
+                            if(j.eq.n)then
+                               part = mmm(j-3)
+                            else   
+                            part=mmm(j-3)+m1m1(j-2)+m2m2(j-1)+m3m3(j)
+                            endif
+                         endif
+                      endif   
+                  endif   
+                endif   
+             endif 
+
+             calc00 = part
+             return
+             end
+c=========================  CALC01  =========================
+      double precision function calc01(j,n)
+      parameter(npmax=50)
+      double precision part
+      integer j,n
+
+c*****pen1
+          double precision  m3m3(npmax),m2m2(npmax),m1m1(npmax)
+          double precision  mmm(npmax),m3m2(npmax)
+          common /pen1/m3m3,m2m2,m1m1,mmm,m3m2
+c*****pen2
+          double precision m3m1(npmax),m3m(npmax),m2m1(npmax)
+          double precision m2m(npmax),m1m(npmax)
+          common /pen2/m3m1,m3m,m2m1,m2m,m1m
+c----------------------------
+c        entre j+1 et j+2 ---> m1*m et       i = j-2
+
+c        entre j+2 et j+3 ---> m2*m1 et    i = j -1
+
+c        entre j+3 et j+4 ---> m3*m2 et     i = j 
+
+
+             if(j.eq.1)then
+                part = m3m2(j)
+             else   
+                if(j.eq.2)then
+                   part = m3m2(j) + m2m1(j-1) 
+                else
+                   if(j.eq.n-2)then
+                      part = m1m(j-2) + m2m1(j-1) 
+                   else
+                      if(j.ne.n-1)then
+                         part = m3m2(j) + m2m1(j-1) + m1m(j-2)
+                      else
+                         part = m1m(j-2)
+                      endif
+                   endif   
+                endif
+             endif   
+
+             calc01 = part
+             return
+             end
+c=========================  CALC02  =========================
+          double precision function calc02(j,n)
+          parameter(npmax=50)
+
+          double precision part
+          integer j,n
+
+c*****pen1
+          double precision  m3m3(npmax),m2m2(npmax),m1m1(npmax)
+          double precision  mmm(npmax),m3m2(npmax)
+          common /pen1/m3m3,m2m2,m1m1,mmm,m3m2
+c*****pen2
+          double precision m3m1(npmax),m3m(npmax),m2m1(npmax)
+          double precision m2m(npmax),m1m(npmax)
+          common /pen2/m3m1,m3m,m2m1,m2m,m1m
+c====================
+c        entre j+3 et j+4 ---> m2*m et     i = j-1
+ 
+c        entre j+2 et j+3 ---> m3*m1 et       i = j
+
+
+             if(j.eq.1)then
+                part = m3m1(j)
+             else   
+                if(j.ne.n-2)then
+                   part = m3m1(j) + m2m(j-1) 
+                else
+                   part = m2m(j-1)
+                endif
+             endif   
+
+             calc02 = part
+             return
+             end

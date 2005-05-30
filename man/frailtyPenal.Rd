@@ -8,8 +8,8 @@ This approach is different from the partial penalized likelihood approach of The
  
 }
 \usage{
-frailtyPenal(formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots, 
-               kappa1, kappa2, maxit=350)
+frailtyPenal(formula, data, Frailty = TRUE, recurrentAG=FALSE, 
+             cross.validation=FALSE, n.knots, kappa1, kappa2, maxit=350)
 }
 
 \arguments{
@@ -24,6 +24,10 @@ frailtyPenal(formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots,
   \item{recurrentAG}{Logical value. Is Andersen-Gill model fitted? If so indicates that recurrent event times with the 
                  counting process approach of Andersen and Gill is used. This formulation can be used for dealing with
                  time-dependent covariates. The default is FALSE.}
+  \item{cross.validation}{Logical value. Is cross validation procedure used for estimating smoothing parameter?
+                 If so a search of the smoothing parameter using cross validation is done, with kappa1 as the seed.
+                 The cross validation is not implemented for two strata. The cross validation has been implemented 
+                 for a Cox proportional hazard model, with no covariates. The default is FALSE.}
   \item{n.knots}{ integer giving the number of knots to use. Value required.
   It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions. 
   Number of knots must be between 4 and 20.}
@@ -40,8 +44,26 @@ frailtyPenal(formula, data, Frailty = TRUE, recurrentAG=FALSE, n.knots,
   between a Newton-Raphson algorithm and a steepest descent algorithm. When frailty parameter is small, numerical
   problems may arise. To solve this problem, an alternative formula of the penalized log-likelihood is used (see 
   Rondeau, 2003 for further details). 
-Cubic M-splines of order 4 are used for the hazard function, and I-splines (integrated M-splines) are used for the cumulative hazard function.
+  Cubic M-splines of order 4 are used for the hazard function, and I-splines (integrated M-splines) are used for the cumulative hazard function.
+
+
+\bold{PARAMETERS}
+
+As frailtypack is written in Fortran 77 some parameters had to be hard coded in. The default
+values of these parameters are
+
+maximum number of observations: 60000\cr
+maximum number of groups: 5000\cr
+maximum number of subjects: 30000\cr
+
+If these parameters are not large enough (an error message will let you know this), you need to reset
+them in frailtypack.f and recompile. In particular, the statements defining these parameters are
+\code{PARAMETER (ndatemax = 60000)}\cr
+\code{PARAMETER (ngmax = 5000)}\cr
+\code{PARAMETER (nsujetmax = 30000)}\cr
+
 }
+
 \value{
   an object of class '"frailtyPenal"'. Methods defined for 'frailtyPenal' objects are
      provided for print and plot. The following components are included in a 'frailtyPenal'object.
@@ -113,8 +135,15 @@ frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id)+strata(sex),
              n.knots=10,kappa1=10000,kappa2=10000,data=readmission)
 
 #Andersen-Gill counting-process approach with time-dependent covariate
-frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+as.factor(charlson)+
-           cluster(id),data=readmission, Frail=TRUE,n.knots=6,kappa1=100000,recurrentAG=TRUE)
+frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+
+             as.factor(charlson)+cluster(id),data=readmission, Frail=TRUE,
+             n.knots=6,kappa1=100000,recurrentAG=TRUE)
+
+# with the use of the cross validation approach, to find the smoothing parameter 
+frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+
+             as.factor(charlson)+cluster(id),data=readmission, Frail=TRUE,
+             n.knots=6,kappa1=5000,recurrentAG=TRUE,cross.validation=TRUE)
+
 }
 
 \keyword{ survival }
