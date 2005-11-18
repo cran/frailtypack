@@ -1280,8 +1280,8 @@ c            endif
          dut2(ndate) = (4.d0*the2(i-1)/h1)
 
 c         write(*,*)'** ut2',(ut2(i),i=0,ndate)
-d         write(*,*)'** dut2',(dut2(i),i,i=0,ndate)
-d         stop
+c         write(*,*)'** dut2',(dut2(i),i,i=0,ndate)
+c         stop
 c         write(*,*)'dut1(ndate)',dut1(ndate),dut1(1)
 c         write(*,*)'dut2(ndate)',dut2(ndate),dut2(1)
 c_-------------------------------------------------------
