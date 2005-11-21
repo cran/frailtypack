@@ -1,5 +1,5 @@
 Package: frailtypack
-Version: 2.0-1
+Version: 2.0-2
 Date: 2005-Nov-18
 Title: Frailty models using maximum penalized likelihood estimation 
 Author: Juan R González, and Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr> 
@@ -13,4 +13,4 @@ Description: Fit a shared gamma frailty model and Cox proportional hazards model
 License: GPL version 2 or newer
 URL: http://www.r-project.org
 Encoding: latin1
-Packaged: Fri Nov 18 13:30:19 2005; jrgonzalez
+Packaged: Mon Nov 21 14:56:01 2005; jrgonzalez

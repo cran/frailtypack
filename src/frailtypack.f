@@ -3290,7 +3290,8 @@ c======================  LUDCMP  ======================================
                   aamax=dabs(a(i,j))
                endif
  11         continue
-            if (aamax.eq.0.d0) pause 'matrice singuliere'
+c          if (aamax.eq.0.d0) 
+c               pause 'matrice singuliere'
             vv(i) = 1.d0/aamax
  12      continue
          do 19 j = 1,n
