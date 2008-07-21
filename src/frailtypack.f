@@ -88,7 +88,8 @@ c                        avec fraitly avec loi Gamma
 c
 c  Obs: noVar=0 indicates no variables but I need to pass all 0's in vaxAux
 c
-       parameter(npmax=50,NSUJETMAX=30000,nvarmax=15,ngmax=5000)
+
+       parameter(npmax=50,NSUJETMAX=30000,nvarmax=50,ngmax=5000)
        parameter(nboumax=1000,NSIMAX=5000,ndatemax=60000)
 
 
@@ -898,7 +899,7 @@ c========================== VECSPLI ==============================
       double precision  h3,h4,h3m,h2n,hn,hh3,hh2
          
       parameter(ndatemax=60000,npmax=50,nsujetmax=30000)
-      parameter(nvarmax=15)
+      parameter(nvarmax=50)
 
 c*****ve1
       double precision ve(nsujetmax,nvarmax)
@@ -1120,7 +1121,7 @@ c========================          FUNCPA          ====================
 
 c *** NOUVELLLE DECLARATION F90 :
 
-      parameter(npmax=50,NSUJETMAX=30000,nvarmax=15)
+      parameter(npmax=50,NSUJETMAX=30000,nvarmax=50)
       parameter(ngmax=5000,nssgmax=1000)
       parameter(ndatemax=60000,NSIMAX=5000)
 
@@ -1844,7 +1845,7 @@ c  2: nb max d'iterations atteints
 c  3: 1 mais echec inversion matrice d'info (ier=1)
 C  4: non amelioration vraisblce apres searpas
 c      
-         parameter(npmax=50,NSUJETMAX=30000,nvarmax=15)
+         parameter(npmax=50,NSUJETMAX=30000,nvarmax=50)
          parameter(NSIMAX=5000)
 
          integer  m,ni,nq,i,ii,nfmax,idpos,ier,istop,igrad,j
