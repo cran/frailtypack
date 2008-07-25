@@ -138,8 +138,8 @@ function (formula, data, Frailty = TRUE, recurrentAG=FALSE, cross.validation=FAL
 
     nvar<-ncol(X) 
 
-    if(nvar>50)
-       stop("maximum number of variables allowed are 50. 
+    if(nvar>15)
+       stop("maximum number of variables allowed are 15. 
              \n please contact to the mantainer")
 
     var<-matrix(c(X),nrow=nrow(X),ncol=nvar)

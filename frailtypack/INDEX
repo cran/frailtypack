@@ -1,0 +1,7 @@
+frailtyPenal		Fit a shared gamma frailty model
+plot.frailtyPenal	Plots estimated baseline survival and hazard functions
+print.frailtyPenal	Print a Short Summary of frailtyPenal
+summary.frailtyPenal	Confidence intervals of frailtyPenal
+
+
+
