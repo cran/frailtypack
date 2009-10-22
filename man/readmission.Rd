@@ -1,6 +1,8 @@
+
 \name{readmission}
+\docType{data}
 \alias{readmission}
-\non_function{}
+
 \title{Rehospitalization colorectal cancer}
 \usage{data(readmission)}
 \description{
@@ -19,7 +21,8 @@
     \item{chemo}{Did patient receive chemotherapy? 1: No; 2:Yes}
     \item{sex}{gender: 1:Males 2:Females}
     \item{dukes}{Dukes' tumoral stage: 1:A-B; 2:C 3:D}
-    \item{charlson}{Comorbidity Charlson's index. Time-dependent covariate. 0: Index 0; 1: Index 1-2; 3: Index >=3 }
+    \item{charlson}{Comorbidity Charlson's index. Time-dependent covariate.
+ 0: Index 0; 1: Index 1-2; 3: Index >=3 }
   }
  
 }
