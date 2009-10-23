@@ -1,0 +1,64 @@
+
+\name{plot.frailtyPenal}
+\Rdversion{1.1}
+\alias{plot.frailtyPenal}
+\alias{lines.frailtyPenal}
+
+
+\title{Plot Method for a Shared frailty model.}
+
+\description{
+  Plots estimated baseline survival and hazard functions from an object of class 'frailtyPenal'. Confidence bands are allowed. 
+}
+
+\usage{
+
+\method{plot}{frailtyPenal}(x, type.plot = "hazard", conf.bands=TRUE, ...)
+
+}
+
+\arguments{
+  \item{x}{ A shared frailty model, more generally a \code{frailtyPenal} class object (output from calling \code{frailtyPenal}
+    function).}
+  \item{type.plot}{ a character string specifying the type of curve. Possible
+                   value are "hazard", or "survival". The default
+                   is "hazard". Only the first words are required, e.g "haz", "su"}
+  \item{conf.bands}{ Logical value. Determines whether confidence bands will be plotted.  The
+                   default is to do so.}
+  \item{\dots}{ Other graphical parameters}
+}
+
+\value{
+     Print a plot of a shared frailty model.
+}
+
+\seealso{
+\code{\link{print.frailtyPenal}},
+\code{\link{summary.frailtyPenal}},
+\code{\link{frailtyPenal for Shared frailty models}}
+}
+
+
+\examples{
+
+data(readmission)
+
+# /*** Shared frailty model ***/
+
+modSha<-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
+             n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE)
+
+plot(modSha,type="surv",conf=FALSE)
+
+# /*** Cox proportional hazard model using Penalized likelihood ***/
+
+modCox<-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
+             n.knots=10,kappa1=10000,data=readmission,Frailty=FALSE)
+plot(modCox)
+
+# no confidence bands
+plot(modSha,conf.bands=FALSE)
+plot(modCox,conf.bands=FALSE)
+}
+
+\keyword{ file }

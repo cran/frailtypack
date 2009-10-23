@@ -87,10 +87,9 @@ c                        avec fraitly avec loi Gamma
 
 c
 c  Obs: noVar=0 indicates no variables but I need to pass all 0's in vaxAux
-c
 
-       parameter(npmax=50,NSUJETMAX=30000,nvarmax=50,ngmax=5000)
-       parameter(nboumax=1000,NSIMAX=5000,ndatemax=60000)
+       parameter(npmax=50,nsujetmax=15000,nvarmax=50,ngmax=1000)
+       parameter(nboumax=1000,ndatemax=30000)
 
 
        integer  groupe,ij,kk,j,k,nz,n,np,cpt,ii,iii,ver
@@ -104,7 +103,9 @@ c
        integer  cpt2(nboumax) 
        integer  cpt3(nboumax) 
        integer  ind(nboumax)
-       integer irep1,nvat 
+       
+       integer  stracross(nsujetmax)
+       integer irep1,nvacross,nstcross,effetcross
 
        real vax(nvarmax)
        double precision tt0
@@ -119,6 +120,7 @@ c
        double precision pe1,pe2,moy_peh0,moy_peh1,lrs
 
 
+       double precision auxkappa(2)
        double precision aux(2*nsujetmax)
        double precision res_tab(ngmax) 
        double precision v((npmax*(npmax+3)/2))
@@ -154,9 +156,6 @@ c******************************************   Add JRG January 05
 
          integer noVar,AGAux,maxitAux
 
-
-
-
 c*******************************************  Add JRG May 05 (Cross-validation)
 
        double precision auxi,ax,bx,cx,tol,ddl
@@ -188,8 +187,8 @@ c*****ve1
       common /ve1/ve
 c*****dace3
       double precision  pe
-      integer  effet,nz1,nz2,effetcross
-      common /dace3/pe,effet,nz1,nz2,effetcross
+      integer  effet,nz1,nz2
+      common /dace3/pe,effet,nz1,nz2
 c*****dace7
       double precision I_hess(npmax,npmax),H_hess(npmax,npmax)
       double precision Hspl_hess(npmax,npmax)
@@ -483,8 +482,8 @@ c--------------- zi- ----------------------------------
 
 c      construire vecteur zi (des noeuds)
 
-c         min = 1.d-10
-          min = 0.d0
+         min = 1.d-10
+c          min = 0.d0
           
  
          max = maxt
@@ -551,6 +550,9 @@ c---------- affectation nt0,nt1----------------------------
  45            continue
  50          continue 
 
+c         write(*,*)'nt0',(nt0(i),i=1,nsujet)
+c         write(*,*)'nt1',(nt1(i),i=1,nsujet)  
+c         stop
 
 c---------- affectation des vecteurs de splines -----------------
            
@@ -562,6 +564,9 @@ c---------- affectation des vecteurs de splines -----------------
              
              np = nst*n + nva + effet
 
+
+c          write(*,*)'nombre total de paramètres',np,nst,n,nva,effet,nz
+               
                
 c------- initialisation des parametres
                    
@@ -592,18 +597,34 @@ c    Esto se cambia ya que ahora xmin1 es kappa1
             xmin2 = 0.d0 
          endif
 
-         nvat=nva !para buscar el parametro de lissage
-
 
 c***********************************************************
 c************** NEW : cross validation  ***********************
+ccccc sur une seule strate, sans var expli , sans frailties ****
 c***********************************************************
-
+         
+         nvacross=nva !pour la recherche du parametre de lissage sans var expli
          nva=0
+         effetcross=effet
+         effet=0
+         nstcross=nst
+         nst=1
 
-         if(irep1.eq.1)then   !recherche du parametre de lissage
+         do 751 l=1,nsujet  
+            stracross(l)=stra(l)
+ 751     continue
+         do 752 l=1,nsujet  
+            stra(l)=1
+ 752     continue
+        
+
+         if(irep1.eq.1)then   !pas recherche du parametre de lissage
 
             xmin1 = dsqrt(xmin1)
+c            write(*,*) 'auxi',n,nst,effet,effetcross,np,K0,xmin1
+c            write(*,*)'==avant premier estimv',n,k0,xmin1,effet,
+c     & effetcross,nst,nvacross
+c            stop
 
             auxi = estimv(xmin1,n,b,y,ddl,ni,res)
 
@@ -728,10 +749,13 @@ c     &                , '  DoF :',-ddl
 c            write(4,*)'******************************************* '
 c            write(*,*)'Best smoothing parameter',real(xmin1*xmin1)
 c     &                , '  DoF :',-ddl
-            effetcross=0
+           
 c            stop
-            call marq98((xmin1*xmin1),b,n,ni,v,res,ier,istop,
-     &           effetcross)
+
+            auxkappa(1)=xmin1*xmin1
+            auxkappa(2)=0.d0
+
+            call marq98(auxkappa,b,n,ni,v,res,ier,istop)
 
             if (ni.ge.maxit) then
 c               write(*,*)' '
@@ -741,8 +765,17 @@ c               write(*,*)' '
 c               write(*,*)'Log-vraisemblance :',res
             endif
          endif   
-         nva=nvat ! pour la recherche des parametres de regression
+        
+
+ccccccccc
+         nva=nvacross ! pour la recherche des parametres de regression
+         nst=nstcross ! avec stratification si nécessaire
+         effet=effetcross ! avec effet initial
+         do 753 l=1,nsujet  
+            stra(l)=stracross(l) !rétablissement stratification
+ 753     continue
 c        stop
+
 ccccc********************************************************************
 
 
@@ -751,16 +784,15 @@ ccccc********************************************************************
             k0(2) = xmin2
          endif
 
-
+         
 
 
 C-------------  indicateur d'effet aleatoire ou non dans le modele
       
-          
-
-
-          call marq98(k0,b,np,ni,v,res,ier,istop,effet)
+c          write(*,*) k0          
+          call marq98(k0,b,np,ni,v,res,ier,istop)
   
+
 
            j=(np-nva)*(np-nva+1)/2       
 
@@ -898,7 +930,7 @@ c========================== VECSPLI ==============================
       double precision  ht,htm,h2t,ht2,ht3,hht,h,hh,h2
       double precision  h3,h4,h3m,h2n,hn,hh3,hh2
          
-      parameter(ndatemax=60000,npmax=50,nsujetmax=30000)
+      parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
       parameter(nvarmax=50)
 
 c*****ve1
@@ -962,7 +994,7 @@ c        donc en ti on a the(i)
 c========================== VECPEN ==============================
       subroutine vecpen(n) 
 
-      parameter(ndatemax=60000,npmax=50)
+      parameter(ndatemax=30000,npmax=50)
 
       integer   n,i
       double precision  h,hh,h2,h3,h4,h3m,h2n,hn,hh3,hh2
@@ -1121,9 +1153,9 @@ c========================          FUNCPA          ====================
 
 c *** NOUVELLLE DECLARATION F90 :
 
-      parameter(npmax=50,NSUJETMAX=30000,nvarmax=50)
-      parameter(ngmax=5000,nssgmax=1000)
-      parameter(ndatemax=60000,NSIMAX=5000)
+      parameter(npmax=50,nsujetmax=15000,nvarmax=50)
+      parameter(ngmax=1000,nssgmax=1000)
+      parameter(ndatemax=30000)
 
       integer  nb,n,np,id,jd,i,j,k,vj,cptg,l
       integer cpt(ngmax)
@@ -1177,8 +1209,8 @@ c*****ve1
       common /ve1/ve
 c*****dace3
       double precision  pe
-      integer  effet,nz1,nz2,effetcross
-      common /dace3/pe,effet,nz1,nz2,effetcross
+      integer  effet,nz1,nz2
+      common /dace3/pe,effet,nz1,nz2
 c*****contrib
       integer ng          !nb de gpes
       common /contrib/ng    
@@ -1527,314 +1559,107 @@ c      stop
 
 
 
+c================================  SEARPAS joly    ==============================
 
-
-
-
-c================================  DCHOLE  ===========================
-      subroutine dchole(a,k,nq,idpos)
-
-      parameter(npmax=50)      
-      integer  k,nq,i,ii,i1,i2,i3,m,is,j,k2,jmk
-      integer  ijm,irm,jji,jjj,l,jj,iil,jjl,il,idpos
-      double precision a((npmax*(npmax+3)/2)) 
-      double precision  term,xn,diag,p
-      dimension is(500)
-      equivalence (term,xn)
-c
-c      ss programme de resolution d'un systeme lineaire symetrique
-c
-c       k ordre du systeme /
-c       nq nombre de seconds membres
-c
-c       en sortie les seconds membres sont remplaces par les solutions
-c       correspondantes
-c
-      idpos=0
-      k2=k+nq
-c     calcul des elements de la matrice
-      do 13 i=1,k
-      ii=i*(i+1)/2
-c     elements diagonaux
-      diag=a(ii)
-      i1=ii-i
-      if(i-1) 1,4,1
-1     i2=i-1
-      do 3 l=1,i2
-      m=i1+l
-      p=a(m)
-      p=p*p
-      if(is(l)) 2,3,3
-2     p=-p
-3     diag=diag-p
-4     if(diag) 5,50,6
-5     is(i)=-1
-      idpos=idpos+1
-      diag=-dsqrt(-diag)
-      a(ii)=-diag
-      go to 7
-6     is(i)=1
-      diag=dsqrt(diag)
-      a(ii)=diag
-c       elements non diagonaux
-7     i3=i+1
-      do 13 j=i3,k2
-      jj=j*(j-1)/2+i
-      jmk=j-k-1
-      if(jmk) 9,9,8
-8     jj=jj-jmk*(jmk+1)/2
-9     term=a(jj)
-      if(i-1) 10,13,10
-10    do 12 l=1,i2
-      iil=ii-l
-      jjl=jj-l
-      p=a(iil)*a(jjl)
-      il=i-l
-      if(is(il)) 11,12,12
-11    p=-p
-12    term=term-p
-13    a(jj)=term/diag
-c       calcul des solutions
-      jj=ii-k+1
-      do 45 l=1,nq
-      jj=jj+k
-      i=k-1
-14    jji=jj+i
-      xn=a(jji)
-      if(i-k+1) 20,22,22
-20    j=k-1
-21    jjj=jj+j
-      ijm=i+1+j*(j+1)/2
-      xn=xn-a(jjj)*a(ijm)
-      if(j-i-1) 22,22,30
-30    j=j-1
-      go to 21
-22    irm=(i+1)*(i+2)/2
-      a(jji)=xn/a(irm)
-      if(i) 45,45,40
-40    i=i-1
-      go to 14
-45    continue
-50    continue
-      return 
-      end
-c=================================  DMFSD  ===================================
-
-      SUBROUTINE DMFSD(A,N,EPS,IER)
+      SUBROUTINE SEARPAS(VW,STEP,B,BH,M,DELTA,FIM,EPSV,k0)
 C
-C   FACTORISATION DE CHOLESKY D'UNE MATRICE SDP
-C   MATRICE = TRANSPOSEE(T)*T
-C   ENTREE : TABLEAU A CONTENANT LA PARTIE SUPERIEURE STOCKEE COLONNE
-C            PAR COLONNE DE LA METRICE A FACTORISER
-C   SORTIE : A CONTIENT LA PARTIE SUPPERIEURE DE LA MATRICE SYMETRIQUE T
-C 
-C   SUBROUTINE APPELE PAR DSINV
-C  
-C   N : DIM. MATRICE 
-C   EPS : SEUIL DE TOLERANCE
-C   IER = 0 PAS D'ERREUR
-C   IER = -1 ERREUR
-C   IER = K COMPRIS ENTRE 1 ET N, WARNING, LE CALCUL CONTINUE
+C  MINIMISATION UNIDIMENSIONNELLE
 C
-      DOUBLE PRECISION A(N*(N+1)/2)
-      DOUBLE PRECISION DPIV,DSUM
-      DOUBLE PRECISION EPS,TOL
-      INTEGER I,K,L,N,IER,KPIV,IND,LEND,LANF,LIND
+       INTEGER  I,M
+       DOUBLE PRECISION  VLW,VLW1,VLW2,VLW3,VW,VM
+       DOUBLE PRECISION  FI1,FI2,FI3,FIM,EPSV
+       DOUBLE PRECISION  STEP
+       DOUBLE PRECISION k0(2)
+       DOUBLE PRECISION B(M),BH(M),DELTA(M)
 C
-C   TEST ON WRONG INPUT PARAMETER N
+       VLW1=DLOG(VW)
+       VLW2=VLW1+STEP
+       CALL VALFPA(VLW1,FI1,B,BH,M,DELTA,k0)
+       CALL VALFPA(VLW2,FI2,B,BH,M,DELTA,k0)
 C
-      IF(N-1) 12,1,1
-1     IER=0
+       IF(FI2.GE.FI1) THEN
+          VLW3=VLW2
+          VLW2=VLW1
+          FI3=FI2
+          FI2=FI1
 C
-C   INITIALIZE DIAGONAL-LOOP
+          STEP=-STEP
 C
-      KPIV=0
-      DO 11 K=1,N
-      KPIV=KPIV+K
-      IND=KPIV
-      LEND=K-1
+          VLW1=VLW2+STEP
+          CALL VALFPA(VLW1,FI1,B,BH,M,DELTA,k0)   
+          IF (FI1.GT.FI2) GOTO 50
+       ELSE
+          VLW=VLW1
+          VLW1=VLW2
+          VLW2=VLW
+          FIM = FI1
+          FI1 = FI2
+          FI2 = FIM
+       ENDIF
 C
-C   CALCULATE TOLERANCE
+       DO 20 I=1,40
+          VLW3=VLW2
+          VLW2=VLW1
+          FI3=FI2
+          FI2=FI1
 C
-      TOL=DABS(EPS*SNGL(A(KPIV)))
+          VLW1=VLW2+STEP
+          CALL VALFPA(VLW1,FI1,B,BH,M,DELTA,k0)
+          IF(FI1.GT.FI2) GO TO 50
+c          IF (dabs(FI1-FI2).LT.EPSV) THEN
+          IF (FI1.eq.FI2) THEN
+             FIM=FI2
+             VM=VLW2
+             GO TO 100
+          ENDIF
+ 20    CONTINUE
 C
-C   START FACTORIZATION-LOOP OVER K-TH ROW
+C  PHASE 2 APPROXIMATION PAR QUADRIQUE
 C
-      DO 11 I=K,N
-      DSUM=0.D0
-      IF(LEND) 2,4,2
+50     CONTINUE
 C
-C   START INNER LOOP
+C  CALCUL MINIMUM QUADRIQUE
 C
-2     DO 3 L=1,LEND
-      LANF=KPIV-L
-      LIND=IND-L
-3     DSUM=DSUM+A(LANF)*A(LIND)
-C
-C   END OF INNEF LOOP
-C
-C   TRANSFORM ELEMENT A(IND)
-C
-4     DSUM=A(IND)-DSUM
-      IF(I-K)10,5,10
-C
-C   TEST FOR NEGATIVE PIVOT ELEMENT AND FOR LOSS OF SIGNIFICANCE
-C
-5     IF(SNGL(DSUM)-TOL)6,6,9
-6     IF(DSUM)12,12,7
-7     IF(IER)8,8,9
-8     IER=K-1
-C
-C   COMPUTE PIVOT ELEMENT
-C
-9     DPIV=DSQRT(DSUM)
-      A(KPIV)=DPIV
-      DPIV=1.D0/DPIV
-      GO TO 11
-C
-C   CALCULATE TERMS IN ROW
-C
-10    A(IND)=DSUM*DPIV
-11    IND=IND+I
-C
-C   END OF DIAGONAL-LOOP
-C
+         VM=VLW2-STEP*(FI1-FI3)/(2.d0*(FI1-2.d0*FI2+FI3))
+         CALL VALFPA(VM,FIM,B,BH,M, DELTA,k0)
+         IF (FIM.LE.FI2) GO TO 100
+         VM=VLW2
+         FIM=FI2
+100   CONTINUE
+      VW=DEXP(VM)
       RETURN
-12    IER=-1
-      RETURN
- 
+
       END
 
-c==============================   DSINV  ======================================
 
-      SUBROUTINE DSINV(A,N,EPS,IER)
-C
-C     INVERSION D'UNE MATRICE SYMETRIQUE DEFINIE POSITIVE :
-C
-C     MATRICE = TRANSPOSEE(T)*T
-C     INERSE(MATRICE) = INVERSE(T)*INVERSE(TRANSPOSEE(T))
-C
-C     A : TABLEAU CONTENANT LA PARTIE SUPERIEURE DE LA MATRICE A INVERSER
-C         STOCKEE COLONNE PAR COLONNE
-C     DIM. MATRICE A INVERSER = N 
-C     DIM. TABLEAU A = N*(N+1)/2
-C
-C     EPS : SEUIL DE TOLERANCE AU-DESSOUS DUQUEL UN PIVOT EST CONSIDERE
-C           COMME NUL
-C
-C     IER : CODE D'ERREUR
-C         IER=0 PAS D'ERREUR
-C         IER=-1 ERREUR SUR LA DIM.N OU MATRICE PAS DEFINIE POSITIVE
-C         IER=1 PERTE DE SIGNIFICANCE, LE CALCUL CONTINUE
-C
-      DOUBLE PRECISION A(N*(N+1)/2)
-      DOUBLE PRECISION DIN,WORK
-      DOUBLE PRECISION EPS
-      INTEGER N,IER,IND,IPIV,I,J,K,L,MIN,KEND
-      INTEGER LHOR,LVER,LANF
-C
-C     FACTORIZE GIVEN MATRIX BY MEANS OF SUBROUTINE DMFSD
-C     A=TRANSPOSE(T) * T
-C
-      CALL DMFSD(A,N,EPS,IER)
-      IF(IER) 9,1,1
-C
-C     INVERT UPPER TRIANGULAR MATRIX T
-C     PREPARE INVERSION-LOOP
-C
-1     IPIV=N*(N+1)/2
-      IND=IPIV
-C
-C     INITIALIZE INVERSION-LOOP
-C
-      DO 6 I=1,N
-      DIN=1.D0/A(IPIV)
-      A(IPIV)=DIN
-      MIN=N
-      KEND=I-1
-      LANF=N-KEND
-      IF(KEND) 5,5,2
-2     J=IND
-C
-C     INITIALIZE ROW-LOOP
-C
-      DO 4 K=1,KEND
-      WORK=0.D0
-      MIN=MIN-1
-      LHOR=IPIV
-      LVER=J
-C
-C     START INNER LOOP
-C
-      DO 3 L=LANF,MIN
-      LVER=LVER+1
-      LHOR=LHOR+L
-3     WORK=WORK+A(LVER)*A(LHOR)
-C
-C     END OF INNER LOOP
-C
-      A(J)=-WORK*DIN
-4     J=J-MIN
-C
-C     END OF ROW-LOOP
-C
-5     IPIV=IPIV-MIN
-6     IND=IND-1
-C
-C     END OF INVERSION-LOOP
-C
-C     CALCULATE INVERSE(A) BY MEANS OF INVERSE(T)
-C     INVERSE(A) = INVERSE(T) * TRANSPOSE(INVERSE(T))
-C     INITIALIZE MULTIPLICATION-LOOP
-C
-      DO 8 I=1,N
-      IPIV=IPIV+I
-      J=IPIV
-C
-C     INITIALIZE ROW-LOOP
-C
-      DO 8 K=I,N
-      WORK=0.D0
-      LHOR=J
-C
-C     START INNER LOOP
-C
-      DO 7 L=K,N
-      LVER=LHOR+K-I
-      WORK=WORK+A(LHOR)*A(LVER)
-7     LHOR=LHOR+L
-C
-C     END OF INNER LOOP
-C
-      A(J)=WORK
-8     J=J+K
-C
-C     END OF ROW-AND MULTIPLICATION-LOOP
-C
-9     RETURN
- 
-      END
 
-c===============================    MAXT    =============================
 
-      DOUBLE PRECISION FUNCTION MAXT(DELTA,M)
-      DOUBLE PRECISION DELTA(m)
-      INTEGER  I,M
+c===================================   VALFPA joly   ==============================
+
+        subroutine valfpa(vw,fi,b,bk,m,delta,k0)
+        integer  m,i
+        double precision  vw,fi
+        double precision  funcpa,z        
+        double precision k0(2)
+        double precision b(M),bk(M),delta(M)
+
+
+         z=0.d0
+         do 1 i=1,m
+            bk(i)=b(i)+dexp(vw)*delta(i)
+1        continue
 c
-      MAXT=DELTA(1)
-      DO 2 I=2,M
-      IF(DELTA(I).GT.MAXT) MAXT=DELTA(I)
-2     CONTINUE
-      RETURN
-      END
-
+         fi=-funcpa(bk,m,1,z,1,z,k0)
+c
+         return
+         end   
 
 
 
 
 c===============================    MARQ98  HJ =========================
 
-   	 subroutine marq98(k0,b,m,ni,v,rl,ier,istop,effet)
+   	 subroutine marq98(k0,b,m,ni,v,rl,ier,istop)
 c
 c
 c  fu = matrice des derivees secondes et premieres
@@ -1845,12 +1670,11 @@ c  2: nb max d'iterations atteints
 c  3: 1 mais echec inversion matrice d'info (ier=1)
 C  4: non amelioration vraisblce apres searpas
 c      
-         parameter(npmax=50,NSUJETMAX=30000,nvarmax=50)
-         parameter(NSIMAX=5000)
+         parameter(npmax=50,nsujetmax=15000,nvarmax=50)
 
          integer  m,ni,nq,i,ii,nfmax,idpos,ier,istop,igrad,j
          integer  ncount,id,jd,i0,kkk
-         integer effet  
+
 
          double precision  da,dm,tr,g0
          double precision  ca,cb,epsa,epsb,rl
@@ -1876,6 +1700,10 @@ c*****dace2
       integer  nsujet,nsim,nva,ndate,nst,maxit
       common /dace2/t0,t1,ncsrl,c,nt0,nt1,nsujet,nsim,nva,ndate,
      &              nst,maxit
+c*****dace3
+      double precision  pe
+      integer  effet,nz1,nz2
+      common /dace3/pe,effet,nz1,nz2  
 c*****dace7
       double precision I_hess(npmax,npmax),H_hess(npmax,npmax)
       double precision Hspl_hess(npmax,npmax)
@@ -1928,7 +1756,7 @@ c      write(*,*)'da',da,' ga=',ga
 c      write(*,*)'log Vrais rl1,nsujet',rl1,nsujet
 c      stop
 
-c      if(ni.eq.0) write(8,*)'vrais init=',rl1
+      if(ni.eq.0) write(8,*)'vrais init=',rl1
      
       if (RL1.gt.0)stop
      
@@ -2192,110 +2020,6 @@ c       write(*,*) 'H_hess(16,16) fin marq',H_hess(16,16),m,((j-1)*j/2+i)
            return
        end
 
-
-
-c================================  SEARPAS joly    ==============================
-
-      SUBROUTINE SEARPAS(VW,STEP,B,BH,M,DELTA,FIM,EPSV,k0)
-C
-C  MINIMISATION UNIDIMENSIONNELLE
-C
-       INTEGER  I,M
-       DOUBLE PRECISION  VLW,VLW1,VLW2,VLW3,VW,VM
-       DOUBLE PRECISION  FI1,FI2,FI3,FIM,EPSV
-       DOUBLE PRECISION  STEP
-       DOUBLE PRECISION k0(2)
-       DOUBLE PRECISION B(M),BH(M),DELTA(M)
-C
-       VLW1=DLOG(VW)
-       VLW2=VLW1+STEP
-       CALL VALFPA(VLW1,FI1,B,BH,M,DELTA,k0)
-       CALL VALFPA(VLW2,FI2,B,BH,M,DELTA,k0)
-
-C
-       IF(FI2.GE.FI1) THEN
-          VLW3=VLW2
-          VLW2=VLW1
-          FI3=FI2
-          FI2=FI1
-C
-          STEP=-STEP
-C
-          VLW1=VLW2+STEP
-          CALL VALFPA(VLW1,FI1,B,BH,M,DELTA,k0)   
-          IF (FI1.GT.FI2) GOTO 50
-       ELSE
-          VLW=VLW1
-          VLW1=VLW2
-          VLW2=VLW
-          FIM = FI1
-          FI1 = FI2
-          FI2 = FIM
-       ENDIF
-C
-       DO 20 I=1,40
-          VLW3=VLW2
-          VLW2=VLW1
-          FI3=FI2
-          FI2=FI1
-C
-          VLW1=VLW2+STEP
-
-          CALL VALFPA(VLW1,FI1,B,BH,M,DELTA,k0)
-          IF(FI1.GT.FI2) GO TO 50
-c          IF (dabs(FI1-FI2).LT.EPSV) THEN
-          IF (FI1.eq.FI2) THEN
-             FIM=FI2
-             VM=VLW2
-             GO TO 100
-          ENDIF
- 20    CONTINUE
-C
-C  PHASE 2 APPROXIMATION PAR QUADRIQUE
-C
-50     CONTINUE
-C
-C  CALCUL MINIMUM QUADRIQUE
-C
-         VM=VLW2-STEP*(FI1-FI3)/(2.d0*(FI1-2.d0*FI2+FI3))
-
-
-
-         CALL VALFPA(VM,FIM,B,BH,M,DELTA,k0)
-         IF (FIM.LE.FI2) GO TO 100
-         VM=VLW2
-         FIM=FI2
-100   CONTINUE
-
-      
-  
-      VW=DEXP(VM)
-       
-      RETURN
-
-      END
-
-
-   
-c===================================   VALFPA joly   ==============================
-
-        subroutine valfpa(vw,fi,b,bk,m,delta,k0)
-        integer  m,i
-        double precision  vw,fi
-        double precision  funcpa,z        
-        double precision k0(2)
-        double precision b(M),bk(M),delta(M)
-
-
-         z=0.d0
-         do 1 i=1,m
-            bk(i)=b(i)+dexp(vw)*delta(i)
-1        continue
-c
-         fi=-funcpa(bk,m,1,z,1,z,k0)
-c
-         return
-         end   
        
 c=================================    DERIVA pjoly =======================
 
@@ -2365,7 +2089,7 @@ c==========================  DISTANCE   =================================
 
 
 
-         parameter(ndatemax=60000,npmax=50,NSUJETMAX=30000)
+         parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
 
          integer  nz1,nz2,nz3,i,j,n,np,k,l,effet
          integer indx(71) 
@@ -2506,7 +2230,7 @@ c
 
 c==========================  SUSP  ====================================
       subroutine susp(x,the,n,su,lam,zi)
-      parameter(ndatemax=60000,npmax=50)
+      parameter(ndatemax=30000,npmax=50)
 
       integer  j,k,n,i
       double precision  x,ht,ht2,h2,som,lam,su
@@ -2579,7 +2303,7 @@ c calcul les points pour les fonctions
 c et leur bandes de confiance
 
       subroutine cosp(x,the,n,y,zi,date,binf,su,bsup,lbinf,lam,lbsup)
-      parameter(ndatemax=60000,npmax=50)
+      parameter(ndatemax=30000,npmax=50)
       integer  j,k,n,i
       double precision  x,ht,ht2,h2,som,lam,su
       double precision  binf,bsup,lbinf,lbsup,pm
@@ -2664,7 +2388,7 @@ c         write(*,*)'lbinf apres conf1',lbinf,lam,pm
 c=====================  CONF1  =============================
       subroutine  conf1(x,ni,n,y,pm,zi,date) 
        parameter(npmax=50)
-       parameter(ndatemax=60000)
+       parameter(ndatemax=30000)
 
       integer  ni,i,n,j
 
@@ -2706,7 +2430,7 @@ c            write(*,*)'conf1 pm',pm
 c=====================  CONF  =============================
       subroutine  conf(x,ni,n,y,pm,zi,date)
        parameter(npmax=50)
-       parameter(ndatemax=60000)
+       parameter(ndatemax=30000)
        
        integer  ni,i,n,j
        double precision isp,x,pm
@@ -2747,7 +2471,7 @@ c            write(4,*)'conf : pm ',pm
 
 c==========================   ISP   ==================================
           double precision function isp(x,ni,ns,zi,date)
-          parameter(ndatemax=60000,npmax=50)
+          parameter(ndatemax=30000,npmax=50)
           integer  ni,ns
           double precision  val,mmsp,x
           double precision zi(-2:npmax)
@@ -2809,7 +2533,7 @@ c==========================   ISP   ==================================
              end
 c==========================  MMSP   ==================================
       double precision function mmsp(x,ni,ns,zi,date)
-      parameter(ndatemax=60000,npmax=50)
+      parameter(ndatemax=30000,npmax=50)
       integer  ni,ns
       double precision  val,x
       double precision zi(-2:npmax)
@@ -2890,30 +2614,7 @@ c==========================  MMSP   ==================================
              return
              end
 
-c================== multiplication de matrice  ==================
 
-c multiplie A par B avec le resultat dans C
-
-      subroutine multi(A,B,IrowA,JcolA,JcolB,C)
-c     remarque :  jcolA=IrowB
-      parameter(npmax=50)
-      
-      integer IrowA,JcolA,JcolB,i,j,k
-      double precision sum
-      double precision A(npmax,npmax) ,B(npmax,npmax) ,C(npmax,npmax) 
-      
-      do 1 I=1,IrowA
-         do 2 J=1,JcolB
-            sum=0
-            do 3 K=1,JcolA
-               sum=sum+A(I,K)*B(K,J)
- 3          continue
-            C(I,J)=sum
- 2       continue
- 1    continue
-      return
-      end
-c====================================================================
 
 c========================          MNBRAK         ===================
       subroutine mnbrak(ax,bx,cx,fa,fb,fc,b,n)
@@ -3007,7 +2708,7 @@ c         stop
 c========================      GOLDEN   =========================
       double precision function golden(ax,bx,cx,tol,xmin,n,b,y,aux)
 
-      parameter(ndatemax=60000,npmax=50)
+      parameter(ndatemax=30000,npmax=50)
       
       double precision y(npmax,npmax)
       double precision ax,bx,cx,tol,xmin,b(npmax)
@@ -3071,7 +2772,7 @@ c========================          ESTIMV         ===================
 
       double precision function estimv(k00,n,b,y,aux,ni,res)
 
-      parameter(ndatemax=60000,npmax=50,NSUJETMAX=30000)
+      parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
 
       double precision v((npmax*(npmax+3)/2)),y(npmax,npmax)
       double precision res,k0(2),k00,ut(ndatemax),bh(npmax),som,h1
@@ -3095,8 +2796,8 @@ c*****dace1
       
 c*****dace3
       double precision  pe
-      integer  effet,nz1,nz2,effetcross
-      common /dace3/pe,effet,nz1,nz2,effetcross
+      integer  effet,nz1,nz2
+      common /dace3/pe,effet,nz1,nz2
 c*****mem1
       double precision mm3(ndatemax),mm2(ndatemax)
       double precision mm1(ndatemax),mm(ndatemax)
@@ -3114,7 +2815,7 @@ c************
  
 c      write(*,*)'DEBUT ESTIMV',effetcross ,k0
 c      stop
-      call marq98(k0,b,n,ni,v,res,ier,istop,effetcross)
+      call marq98(k0,b,n,ni,v,res,ier,istop)
       
       
       if(k0(1).gt.0.d0)then
@@ -3160,7 +2861,7 @@ c     write(*,*)'estimv2',k0,-aux,ni
       
 c=================calcul de la hessienne  et de omega  ==============
       subroutine test(b,ut,dut,k0,n,res,v,y)
-      parameter(ndatemax=60000,npmax=50,NSUJETMAX=30000)
+      parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
 
       double precision hessh(npmax,npmax),hess(npmax,npmax)
       double precision omeg(npmax,npmax),y(npmax,npmax)
@@ -3238,111 +2939,12 @@ c         write(*,*)'test',k0,-tra
 
          end
 
-c======================  LUBKSB  ======================================
-      subroutine lubksb(a,n,np,indx,b)
-      parameter(ndatemax=60000,npmax=50)
-         integer n,np,indx(npmax)
-         double precision a(npmax,npmax),b(npmax)
-         integer i,ii,j,ll
-         double precision sum
 
-         ii = 0
-         do 12 i=1,n
-            ll = indx(i)
-            sum = b(ll)
-            b(ll) = b(i)
-            if(ii.ne.0)then
-               do 11 j=ii,i-1
-                  sum = sum -a(i,j)*b(j)
- 11            continue
-            else
-               if(sum.ne.0.d0)then
-                  ii=i
-               endif
-            endif
-            b(i)=sum
- 12      continue
-         do 14 i=n,1,-1
-            sum = b(i)
-            do 13 j = i+1,n
-               sum = sum-a(i,j)*b(j)
- 13         continue
-            b(i)=sum/a(i,i)
- 14      continue
-         return
-
-         end
-c==================
-c======================  LUDCMP  ======================================
-       subroutine ludcmp(a,n,np,indx,d)
-      parameter(ndatemax=60000,npmax=50)
-
-         integer n,np,indx(n),nmax
-         double precision d,a(npmax,npmax),tiny
-         parameter (nmax=500,tiny=1.d-20)
-         integer i,imax,j,k
-         double precision aamax,dum,sum,vv(nmax)
-
-         d = 1.d0
-         do 12 i=1,n
-            aamax=0.d0
-            do 11 j=1,n
-               if (dabs(a(i,j)).gt.aamax)then
-                  aamax=dabs(a(i,j))
-               endif
- 11         continue
-c          if (aamax.eq.0.d0) 
-c               pause 'matrice singuliere'
-            vv(i) = 1.d0/aamax
- 12      continue
-         do 19 j = 1,n
-            do 14 i=1,j-1
-               sum = a(i,j)
-               do 13 k=1,i-1
-                  sum = sum - a(i,k)*a(k,j)
- 13            continue
-               a(i,j) = sum
- 14         continue
-            aamax = 0.d0
-            do 16 i = j,n
-               sum = a(i,j)
-               do 15 k=1,j-1
-                  sum = sum -a(i,k)*a(k,j)
- 15            continue
-               a(i,j) = sum
-               dum = vv(i)*dabs(sum)
-               if (dum.ge.aamax) then
-                  imax = i
-                  aamax = dum
-               endif
- 16         continue
-            if(j.ne.imax)then
-               do 17 k=1,n
-                  dum = a(imax,k)
-                  a(imax,k)=a(j,k)
-                  a(j,k) = dum
- 17            continue
-               d = -d
-               vv(imax)=vv(j)
-            endif
-            indx(j)=imax
-            if(a(j,j).eq.0.d0)then
-               a(j,j)=tiny
-            endif
-            if(j.ne.n)then
-               dum = 1.d0/a(j,j)
-               do 18 i = j+1,n
-                  a(i,j) = a(i,j)*dum
- 18            continue
-            endif
- 19      continue
-         return
-         end
 c=======================  CALOMEG  ===========================
       subroutine calcomeg(n,omeg)
 c        remplissage de la matrice omega n*n
 c          elle a 7 diagonales
-      parameter(ndatemax=60000,npmax=50)
+      parameter(ndatemax=30000,npmax=50)
 
       double precision omeg(npmax,npmax)
       integer n
@@ -3412,7 +3014,7 @@ c**************************
 
 c====================  MAT  ==================================
       subroutine mat(res,ut,dut,k,l,n)
-      parameter(ndatemax=60000,npmax=50,NSUJETMAX=30000)
+      parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
 
       double precision res,dut(ndatemax),ut(ndatemax)
       integer k,l,j,ni,n,ni1
@@ -3472,7 +3074,7 @@ c                stop
 
 c==========================  MSP   ==================================
           double precision function msp(i,ni,ns)
-          parameter(ndatemax=60000,npmax=50)
+          parameter(ndatemax=30000,npmax=50)
              integer ni,ns,i
              double precision val
 c*****dace1 
@@ -3557,7 +3159,7 @@ c************************************
              end
 c==========================   SP   ==================================
           double precision function sp(i,ni,ns)
-          parameter(ndatemax=60000,npmax=50)
+          parameter(ndatemax=30000,npmax=50)
           
              integer ni,ns,i
              double precision val,msp
