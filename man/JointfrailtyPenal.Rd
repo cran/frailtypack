@@ -64,11 +64,13 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
   Number of knots must be between 4 and 20.(See Note)}
 
   \item{kappa1}{ positive smoothing parameter. The coefficient kappa of the integral of the squared
-          second derivative of hazard function in the fit (penalized log likelihood). We advise the user 
-          to identify several possible tuning parameters, note their defaults and look at the sensitivity 
+          second derivative of hazard function in the fit (penalized log likelihood). To obtain a good
+value for \code{kappa1}, a solution is to fit the corresponding shared frailty model using cross validation (See cross.validation) with the event indicator as the event of interest. 
+We advise the user to identify several possible tuning parameters, note their defaults and look at the sensitivity 
           of the results to varying them. Value required.(See Note)}
 
-  \item{kappa2}{ positive smoothing parameter for the terminal event rate. See kappa1. Stratification is not allowed here. }
+  \item{kappa2}{ positive smoothing parameter for the terminal event rate. To obtain a good
+value for \code{kappa2}, a solution is to fit the corresponding Cox model using cross-validation (See cross.validation) with the death indicator as the event of interest. See kappa1. Stratification is not allowed here. }
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
 
@@ -85,7 +87,7 @@ The inverse of the hessian matrix is the variance estimator and to deal with the
 
 \bold{INITIAL VALUES}
 
-When a joint frailty model is fitted, at first, the splines coefficients and the regression coefficients are initialized at 0.5, and the variance of the frailty term \eqn{\theta} and the coefficient \eqn{\alpha} associated in the death hazard function are initialized at 1. Thus, the next step is the maximisation of the penalized log-likelihood. 
+The splines and the regression coefficients are initialized to 0.5. The program fits an adjusted Cox model to have new initial values for the regression and the splines coefficients. The variance of the frailty term \eqn{\theta} and the coefficient \eqn{\alpha} associated in the death hazard function are initialized to 1. Then, it fits a joint frailty model.
 
 
 \bold{PARAMETERS LIMIT VALUES}
@@ -161,7 +163,7 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
  \code{\link{summary.jointPenal}},
  \code{\link{print.jointPenal}},
  \code{\link{plot.jointPenal}}, 
- \code{\link{dataJoint}},
+ \code{\link{readmission}},
  \code{\link{terminal}},
  \code{\link{cluster}}
 
@@ -176,23 +178,33 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 
 \dontrun{
 
-  data(dataJoint)
+  data(readmission)
 
-  modJoint<-frailtyPenal(Surv(time.entry,time.end,status)~cluster(id)+var1+var2
-                         +terminal(status.terminal),
-                         formula.terminalEvent=~var1,
-                         data=dataJoint,n.knots=7,
-                         kappa1=1, kappa2=1, Frailty = TRUE, joint=TRUE, 
-			 recurrentAG=TRUE)
+## Gap-time ##
+modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)
+		+as.factor(charlson)+terminal(death),
+		formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
+		data=readmission,n.knots=14,kappa1=9550000000,
+		kappa2=1410000000000,Frailty=TRUE,joint=TRUE,recurrentAG=FALSE)
+
+## Calendar time ##
+modJoint_calendar<-frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
+		+as.factor(dukes)+as.factor(charlson)+terminal(death),
+		formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
+		data=readmission,n.knots=10,kappa1=9550000000,
+		kappa2=1410000000000,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE)
     
-  print(modJoint)
-  summary(modJoint)
-  plot(modJoint)
-
+  print(modJoint_gap)
+  summary(modJoint_gap)
+  plot(modJoint_gap)
+  
+  print(modJoint_calendar)
+  summary(modJoint_calendar)
+  plot(modJoint_calendar)
 
 }
 
-# It takes around 1 minute to converge #
+# A model takes around 1 minute to converge #
 
 
 }

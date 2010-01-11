@@ -55,11 +55,12 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
   Number of knots must be between 4 and 20.(See Note)}
 
   \item{kappa1}{ positive smoothing parameter. The coefficient kappa of the integral of the squared
-          second derivative of hazard function in the fit (penalized log likelihood). We advise the user 
+          second derivative of hazard function in the fit (penalized log likelihood). To obtain an initial 
+value for \code{kappa1} (or \code{kappa2}), a solution is to fit the corresponding shared frailty model using cross validation (See cross.validation). We advise the user 
           to identify several possible tuning parameters, note their defaults and look at the sensitivity 
           of the results to varying them. Value required.(See Note)}
 
-  \item{kappa2}{ positive smoothing parameter for the second stratum, when data are stratified. See kappa1. }
+  \item{kappa2}{positive smoothing parameter for the second stratum, when data are stratified. See kappa1. }
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
 
@@ -85,7 +86,7 @@ The integrations in the full log likelihood werre evaluated using Gaussian quadr
 
 \bold{INITIAL VALUES}
 
-When a nested frailty model is fitted, at first, a Cox proportional hazards model with covariates (without random effects) is fitted and it provides initial values for the regression coefficients. Then, a model with covariates and only subgroup frailties is fitted, so it gives new initial values for the regression coefficients and for the subgroup frailty terms variance.  Then, a model with covariates and only group frailty terms is fitted, so it gives new initial values for the regression coefficients and for the group frailties variance. The last step is the maximisation of the penalized log-likelihood for all parameters.
+The splines and the regression coefficients are initialized to 0.1. The program fits an adjusted Cox model to provide new initial values for the regression and the splines coefficients. The variances of the frailties are initialized to 0.1. Then, a shared frailty model with covariates with only subgroup frailty is fitted to give a  new initial value for the variance of the subgroup frailty term. Then, a shared frailty model with covariates and only group frailty terms is fitted to give a  new initial value for the variance of the group frailties. In a last step, a nested frailty model is fitted.
 
 
 

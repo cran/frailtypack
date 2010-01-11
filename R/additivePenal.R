@@ -156,9 +156,9 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
 
 
     n<-nrow(X)    
-    if(n>60000) 
+    if(n>20000) 
      {
-      stop("number of observations must be less than 60000 
+      stop("number of observations must be less than 20000 
              \n please contact to the mantainer")   
      }
 

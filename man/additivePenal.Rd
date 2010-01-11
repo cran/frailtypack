@@ -64,7 +64,7 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
   \item{kappa1}{ positive smoothing parameter. The coefficient kappa of the
  integral of the squared
           second derivative of hazard function in the fit (penalized log
- likelihood). We advise the user 
+ likelihood). To obtain an initial value for \code{kappa1} (or \code{kappa2}), a solution is to fit the corresponding shared frailty model using cross validation (See cross.validation).We advise the user 
           to identify several possible tuning parameters, note their
  defaults and look at the sensitivity 
           of the results to varying them. Value required.(See Note)}
@@ -99,7 +99,7 @@ The marginal log-likelihood depends on integrations that are approximated
 
 \bold{INITIAL VALUES}
 
-When an additive model is fitted, at first, a Cox proportional hazards model (without random effects) is fitted with covariates, it provides initial values for the splines coefficients and the regression coefficients. Then, the variance of the random intercept \bold{\eqn{\sigma^{2}}}  is set at 0.25, the variance of the random slope \eqn{\bold{\tau^{2}}} is set at 0.025 and the covariance of these two random terms \eqn{(\bold{cov}(u_i,v_i))} is set at \eqn{3.75*10^{-3}}. The last step is then the maximisation of the penalized log-likelihood on all parameters. 
+The splines and the regression coefficients are initialized to 0.1. An adjusted Cox model is fitted, it provides new initial values for the splines coefficients and the regression coefficients. The variances of the frailties are initialized to 0.1. Then an additive frailty model with independent frailties is fitted. At last, an additive frailty model with correlated frailties is fitted.
 
 
 \bold{PARAMETERS LIMIT VALUES}
@@ -108,7 +108,7 @@ As frailtypack is written in Fortran 77 some parameters had to be hard coded in.
 
 maximum number of observations (ndatemax): 30000\cr
 maximum number of groups (ngmax): 1000\cr
-maximum number of subjects (nsujetmax): 15000\cr
+maximum number of subjects (nsujetmax): 20000\cr
 maximum number of parameters (npmax) :50\cr
 maximum number of covariates (nvarmax):50\cr
 maximum number of subgroups (nssgmax):5000\cr
