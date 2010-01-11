@@ -58,11 +58,12 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
   Number of knots must be between 4 and 20.(See Note)}
 
   \item{kappa1}{ positive smoothing parameter. The coefficient kappa of the integral of the squared
-          second derivative of hazard function in the fit (penalized log likelihood). We advise the user 
-          to identify several possible tuning parameters, note their defaults and look at the sensitivity 
+          second derivative of hazard function in the fit (penalized log likelihood). To obtain an initial 
+value for \code{kappa1} (or \code{kappa2}), a solution is to fit the corresponding shared frailty model using cross validation (See cross.validation). 
+We advise the user to identify several possible tuning parameters, note their defaults and look at the sensitivity 
           of the results to varying them. Value required.(See Note)}
 
-  \item{kappa2}{ positive smoothing parameter for the second stratum, when data are stratified. See kappa1. }
+  \item{kappa2}{positive smoothing parameter for the second stratum, when data are stratified. See kappa1. }
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
 
@@ -77,7 +78,7 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
 
 \bold{INITIAL VALUES}
 
-When a shared frailty model is fitted, at first, the program fit a model with frailty or covariates, it gives initial values for the splines coefficient. Then, the initial value 0.1 is given to the variance of the frailty term (theta) and to the regression coefficients. Thus, the nest step after the parameter initialisation is the maximisation of the penalized log-likelihood.
+The splines and the regression coefficients are initialized to 0.1. The program fits, firstly, an adjusted Cox model to give new initial values for the splines and the regression coefficients. The variance of the frailty term \eqn{\theta} is initialized to 0.1. Then, a shared frailty model is fitted.
 
 
 \bold{PARAMETERS LIMIT VALUES}
@@ -86,7 +87,7 @@ As frailtypack is written in Fortran 77 some parameters had to be hard coded in.
 
 maximum number of observations (ndatemax): 30000\cr
 maximum number of groups (ngmax): 5000\cr
-maximum number of subjects (nsujetmax): 15000\cr
+maximum number of subjects (nsujetmax): 20000\cr
 maximum number of parameters (npmax) :50\cr
 maximum number of covariates (nvarmax):50\cr
 

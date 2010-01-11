@@ -117,7 +117,7 @@ c     avec fraitly avec loi Gamma
 
      
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -1512,7 +1512,7 @@ c========================== VECSPLI =====================
       double precision :: h3,h4,h3m,h2n,hn,hh3,hh2
          
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -1574,7 +1574,7 @@ c        donc en ti on a the(i)
 c========================== VECPEN ==============================
       subroutine vecpen3(n) 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -1731,7 +1731,7 @@ c================================  DCHOLE  ===========================
       subroutine dchole3(a,k,nq,idpos)
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -1839,7 +1839,7 @@ C   IER = -1 ERREUR
 C   IER = K COMPRIS ENTRE 1 ET N, WARNING, LE CALCUL CONTINUE
 C
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -1937,7 +1937,7 @@ C         IER=-1 ERREUR SUR LA DIM.N OU mat3(RICE PAS DEFINIE POSITIVE
 C         IER=1 PERTE DE SIGNIFICANCE, LE CALCUL CONTINUE
 C
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -2038,7 +2038,7 @@ c===============================    MAXT    =============================
 c************** definition commune des parameter ***********************
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -2203,7 +2203,7 @@ c==========================  DISTANCE   =================================
 
 
 c*************** SAME **********************************************
-      integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+      integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
       integer , parameter ::ngmax=1000,nboumax=1000
       integer , parameter ::ndatemax=30000
       integer , parameter ::nptsmax=1000
@@ -2347,7 +2347,7 @@ c==========================  SUSP  ====================================
       subroutine SUPS3(x,the,n,su,lam,zi)
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -2419,7 +2419,7 @@ c et leur bandes de confiance
 
       subroutine cosp3(x,the,n,y,zi,date,binf,su,bsup,lbinf,lam,lbsup)
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -2507,7 +2507,7 @@ c=====================  CONF1  =============================
       subroutine  conf13(x,ni,n,y,pm,zi,date)
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -2551,7 +2551,7 @@ c            write(4,*)'conf1 pm',pm
 c=====================  CONF  =============================
       subroutine  conf3(x,ni,n,y,pm,zi,date)
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -2597,7 +2597,7 @@ c            write(4,*)'conf : pm ',pm
 c==========================   ISP   ==================================
           double precision function isp3(x,ni,ns,zi,date)
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -2663,7 +2663,7 @@ c******************************************************************
 c==========================  MMSP   ==================================
           double precision function mmsp3(x,ni,ns,zi,date)
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -2812,7 +2812,7 @@ c multiplie A par B avec le resultat dans C
 	subroutine multi3(A,B,IrowA,JcolA,JcolB,C)
 c remarque :  jcolA=IrowB
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -2849,7 +2849,7 @@ C  4: non amelioration vraisblce apres searpas
 
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -3220,7 +3220,7 @@ c  3: 1 mais echec inversion mat3(rice d'info (ier=1)
 C  4: non amelioration vraisblce apres searpas
  
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -3579,7 +3579,7 @@ c========================          FUNCPA       ====================
 c      USE nr, ONLY : gammln
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -5847,7 +5847,7 @@ c=====================cross validation
 c========================          MNBRAK         ===================
       subroutine mnbrak3(ax,bx,cx,fa,fb,fc,b,n)
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -5943,7 +5943,7 @@ c========================      GOLDEN   =========================
       double precision function golden3(ax,bx,cx,tol,xmin,n,b,y,aux)
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6012,7 +6012,7 @@ c========================          ESTIMV         ===================
       double precision function estimv3(k00,n,b,y,aux,ni,res)
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6105,7 +6105,7 @@ c      stop
 c=================calcul de la hessienne  et de omega  ==============
       subroutine test3(b,ut,dut,k0,n,res,v,y)
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6191,7 +6191,7 @@ c======================  LUBKSB  ======================================
 
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6233,7 +6233,7 @@ c======================  LUDCMP  ======================================
        subroutine ludcmp3(a,n,np,indx,d)
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6313,7 +6313,7 @@ c=======================  CALOMEG  ===========================
 c        remplissage de la mat3(rice omega n*n
 c          elle a 7 diagonales
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6390,7 +6390,7 @@ c====================  mat3(  ==================================
       subroutine mat3(res,ut,dut,k,l,n)
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6456,7 +6456,7 @@ c==========================  MSP   ==================================
           double precision function msp3(i,ni,ns)
  
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6548,7 +6548,7 @@ c==========================   SP   ==================================
           double precision function sp3(i,ni,ns)
  
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6621,7 +6621,7 @@ c=========================  CALC00  =========================
           double precision function calc003(j,n) 
   
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6678,7 +6678,7 @@ c=========================  CALC01  =========================
       double precision function calc013(j,n)
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6725,7 +6725,7 @@ c        entre j+3 et j+4 ---> m3*m2 et     i = j
 c=========================  CALC02  =========================
           double precision function calc023(j,n)
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -6776,7 +6776,7 @@ c  3: 1 mais echec inversion mat3(rice d'info (ier=1)
 C  4: non amelioration vraisblce apres searpas
 c   
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -7208,7 +7208,7 @@ c================================  DCHOLE  ===========================
       subroutine dcholeaux(a,k,nq,idpos)
 
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -7303,7 +7303,7 @@ c========================    DEBUT FUNCPAAUX       ====================
       double precision function funcpaAUX(b,np,id,thi,jd,thj,k0)
  
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000
@@ -7455,7 +7455,7 @@ c=================================    DERIVATH  =======================
       subroutine derivaTH(b,m,v,rl,k0)
           
 c*************** SAME **********************************************
-         integer , parameter ::npmax=50,NSUJETMAX=15000,nvarmax=50
+         integer , parameter ::npmax=50,NSUJETMAX=20000,nvarmax=50
          integer , parameter ::ngmax=1000,nboumax=1000
          integer , parameter ::ndatemax=30000
          integer , parameter ::nptsmax=1000

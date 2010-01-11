@@ -190,9 +190,9 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
     var<-matrix(c(X),nrow=nrow(X),ncol=nvar)
 
     n<-nrow(X)    
-    if(n>15000) 
+    if(n>20000) 
      {
-      stop("number of observations must be less than 15000 
+      stop("number of observations must be less than 20000 
              \n please contact to the mantainer")   
      }
 
@@ -321,9 +321,17 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 
 if (joint & !length(subcluster)) # joint model
  {
-    tt1.death<-aggregate(tt1,by=list(cluster),FUN=sum)[,2]
-    tt0.death<-rep(0,length(tt1.death))
- 
+    if (!recurrentAG)
+     {
+      tt1.death<-aggregate(tt1,by=list(cluster),FUN=sum)[,2]
+      tt0.death<-rep(0,length(tt1.death))
+     }
+    else
+     {
+     tt1.death<-aggregate(tt1,by=list(cluster),FUN=function(x) x[length(x)])[,2]
+     tt0.death<-rep(0,length(tt1.death))
+     }
+    
 
     Terms2 <- if (missing(data)) 
         terms(formula.terminalEvent, special)
@@ -353,11 +361,31 @@ if (joint & !length(subcluster)) # joint model
    match.noNA<-dimnames(m2)[[1]]%in%dimnames(m)[[1]]
    m2<-m2[match.noNA,]
 
-   if(is.null(nrow(m2)))
-     vardc.temp<-m2
-   else
-     vardc.temp <- m2[, attr(Terms2, "term.labels")]
 
+
+##### New after Vigninie's comment and paper (for dealing with factors)
+
+    newTerms2<-Terms2
+    X2 <- model.matrix(newTerms2, m2)
+    assign <- lapply(attrassign(X2, newTerms2)[-1], function(x) x - 1)
+    if (ncol(X2) == 1) 
+      {
+         X2<-X2-1
+      }
+    else
+      {
+         X2 <- X2[, -1, drop = FALSE]
+      } 
+
+    nvar2<-ncol(X2) 
+
+    if(nvar2>15)
+       stop("maximum number of variables allowed for death are 15. 
+             \n please contact to the mantainer")
+
+    vardc.temp<-matrix(c(X2),nrow=nrow(X2),ncol=nvar2)
+    
+#####
 
    if(is.null(nrow(m2)))
         {
@@ -393,10 +421,10 @@ if (joint & !length(subcluster)) # joint model
 # 1a version no, y tomaba nvar<-2*nvar
      
     nvarRec<-nvar
-    if(is.null(nrow(m2)))
+    if(is.null(nrow(vardc)))
      nvarEnd<-1
     else
-     nvarEnd<-ncol(m2)
+     nvarEnd<-ncol(vardc)
 
     nvar<-nvarRec+nvarEnd
 
@@ -467,7 +495,7 @@ if (joint & !length(subcluster)) # joint model
        fit$coef <- ans$b[(np - nvar + 1):np]
 
 
-       names(fit$coef) <- c(colnames(X), attr(Terms2, "term.labels"))
+       names(fit$coef) <- c(colnames(X), colnames(X2))
      }
     
 

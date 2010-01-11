@@ -1,0 +1,18 @@
+v2.2-12
+2010-01-11
+- changed: Rd files "JointfrailtyPenal" and "summaryJointPenal" (recurrentAG = FALSE instead of recurrentAG=TRUE)
+- removed: "dataJoint" data example (also dataJoint.Rd file)
+
+v2.2-11
+2010-01-07
+- fixed: as.factor did not work for Joint models
+- fixed: gap timescale works for joint models now
+- changed: in the examples for joint model (now we use readmission2) and initializations
+- changed: readmission data set, enclosed, please addit)
+- bugs: in the .Rd files "frailtyPenal" and "JointfrailtyPenal" (latex-related)
+
+v2.2-10
+2009-12-25
+- NEW VERSION OF FRAILTYPACK including Additive, Nested and Joint Frailty models
+- Paper submitted to J Stat Sofware 
+

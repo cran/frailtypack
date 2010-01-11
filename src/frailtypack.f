@@ -88,7 +88,7 @@ c                        avec fraitly avec loi Gamma
 c
 c  Obs: noVar=0 indicates no variables but I need to pass all 0's in vaxAux
 
-       parameter(npmax=50,nsujetmax=15000,nvarmax=50,ngmax=1000)
+       parameter(npmax=50,NSUJETMAX=20000,nvarmax=50,ngmax=1000)
        parameter(nboumax=1000,ndatemax=30000)
 
 
@@ -930,7 +930,7 @@ c========================== VECSPLI ==============================
       double precision  ht,htm,h2t,ht2,ht3,hht,h,hh,h2
       double precision  h3,h4,h3m,h2n,hn,hh3,hh2
          
-      parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
+      parameter(ndatemax=30000,npmax=50,NSUJETMAX=20000)
       parameter(nvarmax=50)
 
 c*****ve1
@@ -1153,7 +1153,7 @@ c========================          FUNCPA          ====================
 
 c *** NOUVELLLE DECLARATION F90 :
 
-      parameter(npmax=50,nsujetmax=15000,nvarmax=50)
+      parameter(npmax=50,NSUJETMAX=20000,nvarmax=50)
       parameter(ngmax=1000,nssgmax=1000)
       parameter(ndatemax=30000)
 
@@ -1670,7 +1670,7 @@ c  2: nb max d'iterations atteints
 c  3: 1 mais echec inversion matrice d'info (ier=1)
 C  4: non amelioration vraisblce apres searpas
 c      
-         parameter(npmax=50,nsujetmax=15000,nvarmax=50)
+         parameter(npmax=50,NSUJETMAX=20000,nvarmax=50)
 
          integer  m,ni,nq,i,ii,nfmax,idpos,ier,istop,igrad,j
          integer  ncount,id,jd,i0,kkk
@@ -2089,7 +2089,7 @@ c==========================  DISTANCE   =================================
 
 
 
-         parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
+         parameter(ndatemax=30000,npmax=50,NSUJETMAX=20000)
 
          integer  nz1,nz2,nz3,i,j,n,np,k,l,effet
          integer indx(71) 
@@ -2772,7 +2772,7 @@ c========================          ESTIMV         ===================
 
       double precision function estimv(k00,n,b,y,aux,ni,res)
 
-      parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
+      parameter(ndatemax=30000,npmax=50,NSUJETMAX=20000)
 
       double precision v((npmax*(npmax+3)/2)),y(npmax,npmax)
       double precision res,k0(2),k00,ut(ndatemax),bh(npmax),som,h1
@@ -2861,7 +2861,7 @@ c     write(*,*)'estimv2',k0,-aux,ni
       
 c=================calcul de la hessienne  et de omega  ==============
       subroutine test(b,ut,dut,k0,n,res,v,y)
-      parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
+      parameter(ndatemax=30000,npmax=50,NSUJETMAX=20000)
 
       double precision hessh(npmax,npmax),hess(npmax,npmax)
       double precision omeg(npmax,npmax),y(npmax,npmax)
@@ -3014,7 +3014,7 @@ c**************************
 
 c====================  MAT  ==================================
       subroutine mat(res,ut,dut,k,l,n)
-      parameter(ndatemax=30000,npmax=50,nsujetmax=15000)
+      parameter(ndatemax=30000,npmax=50,NSUJETMAX=20000)
 
       double precision res,dut(ndatemax),ut(ndatemax)
       integer k,l,j,ni,n,ni1

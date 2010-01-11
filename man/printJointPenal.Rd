@@ -49,17 +49,19 @@ Print, separately for each type of event (recurrent and terminal), the parameter
 
 \dontrun{
 
-  data(dataJoint)
+  data(readmission)
 
-  modJoint<-frailtyPenal(Surv(time.entry,time.end,status)~cluster(id)+var1+var2
-                         +terminal(status.terminal),
-                         formula.terminalEvent=~var1,
-                         data=dataJoint,n.knots=7, Frailty=TRUE,
-                         kappa1=1, kappa2=1, joint=TRUE, recurrentAG=TRUE)
+## Gap-time ##
+modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)
+		+as.factor(charlson)+terminal(death),
+		formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
+		data=readmission,n.knots=14,kappa1=9550000000,
+		kappa2=1410000000000,Frailty=TRUE,joint=TRUE,recurrentAG=FALSE)
+
     
  # It takes around 1 minute to converge.#
 
-  print(modJoint)
+  print(modJoint_gap)
 
 }
 
