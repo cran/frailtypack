@@ -186,7 +186,8 @@ V. Rondeau, S. Michiels, B.Liquet, and J.P. Pignon (2008).
  \code{\link{summary.additivePenal}},
  \code{\link{cluster}},
 \code{\link{slope}},
-\code{\link{strata}}
+\code{\link{strata}},
+\code{\link[survival]{Surv}}
  }
 
 

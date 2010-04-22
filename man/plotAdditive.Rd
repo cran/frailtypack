@@ -13,19 +13,14 @@
 
 \usage{
 
-\method{plot}{additivePenal}(x, type.plot = "hazard", conf.bands=TRUE, ...)
+\method{plot}{additivePenal}(x, ...)
 
 }
 
 \arguments{
-  \item{x}{ An fitted additive frailty model (output from calling \code{additivePenal}
-    function).}
-  \item{type.plot}{ a character string specifying the type of curve. Possible
-                   value are "hazard", or "survival". The default
-                   is "hazard". Only the first words are required, e.g "haz", "su"}
-  \item{conf.bands}{ logical value. Determines whether confidence bands will be plotted.  The
-                   default is to do so.}
-  \item{\dots}{ Other graphical parameters}
+  \item{x}{ An fitted additive frailty model (output from calling \code{additivePenal}}
+  \item{\dots}{ Other graphical parameters like those in \code{\link{plot.frailtyPenal}}}
+
 }
 
 \value{

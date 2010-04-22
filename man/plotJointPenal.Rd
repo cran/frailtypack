@@ -15,7 +15,7 @@
 \usage{
 
 \method{plot}{jointPenal}(x, event = "both", type.plot = "hazard", conf.bands
-                 = FALSE, ...)
+                 = FALSE, pos.legend="topright", cex.legend=0.7, ylim, main, ...)
 
 
 }
@@ -30,6 +30,12 @@
                    value are "hazard", or "survival". The default
                    is "hazard". Only the first words are required, e.g "haz", "su"}
   \item{conf.bands}{ logical value. Determines whether confidence bands will be plotted. The default is to do so.}
+ \item{pos.legend}{The location of the legend can be specified by setting this argument to a single keyword from the list '"bottomright"', '"bottom"', '"bottomleft"', '"left"', '"topleft"', '"top"', '"topright"', '"right"' and
+     '"center"'. The default is '"topright"'}
+  \item{cex.legend}{character expansion factor *relative* to current
+          'par("cex")'. Default is 0.7}
+  \item{ylim}{y-axis limits}
+  \item{main}{plot title}
   \item{\dots}{ Other graphical parameters}
 }
 
