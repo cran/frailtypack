@@ -96,7 +96,6 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
          stop("joint model is not implemented for nested model")        
 
 
-# fixed after Virginie's comment
         if (missing(kappa2))
          kappa2<-kappa1 
 
@@ -220,7 +219,11 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
  cat("Be patient. The program is computing ... \n")
 
 
- if (!joint & !length(subcluster))  # shared model
+#
+# Begin SHARED MODEL
+#
+
+ if (!joint & !length(subcluster))  
   {
     ans <- .Fortran("frailpenal",
                 as.integer(n),
@@ -317,10 +320,21 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
     attr(fit,"joint")<-joint
     attr(fit,"subcluster")<-FALSE
     class(fit) <- "frailtyPenal"
- }
 
-if (joint & !length(subcluster)) # joint model
+ }  # End SHARED MODEL
+
+
+
+
+#
+# Begin JOINT MODEL
+#
+
+if (joint & !length(subcluster)) 
  {
+
+# Preparing data ...
+
     if (!recurrentAG)
      {
       tt1.death<-aggregate(tt1,by=list(cluster),FUN=sum)[,2]
@@ -343,7 +357,7 @@ if (joint & !length(subcluster)) # joint model
 
     terminalEvent<-aggregate(terminal,by=list(cluster),FUN=function(x) x[length(x)])[,2]
 
-# Control sobre terminalEvent que debe ser 0-1 
+# terminalEvent might be 0-1 
     if (!all(terminalEvent%in%c(1,0))) 
         stop("terminal must contain a variable coded 0-1 and a non-factor variable")
 
@@ -356,14 +370,8 @@ if (joint & !length(subcluster)) # joint model
     m2[[1]] <- as.name("model.frame")
     m2 <- eval(m2, sys.parent())
 
-
-# Control sobre missing de recurrent para que cuadre el terminal
-   match.noNA<-dimnames(m2)[[1]]%in%dimnames(m)[[1]]
-   m2<-m2[match.noNA,]
-
-
-
-##### New after Vigninie's comment and paper (for dealing with factors)
+    match.noNA<-dimnames(m2)[[1]]%in%dimnames(m)[[1]]
+    m2<-m2[match.noNA,]
 
     newTerms2<-Terms2
     X2 <- model.matrix(newTerms2, m2)
@@ -385,8 +393,6 @@ if (joint & !length(subcluster)) # joint model
 
     vardc.temp<-matrix(c(X2),nrow=nrow(X2),ncol=nvar2)
     
-#####
-
    if(is.null(nrow(m2)))
         {
          if (length(m2) != nrow(m))
@@ -416,10 +422,7 @@ if (joint & !length(subcluster)) # joint model
       vardc<-aggregate(vardc.temp,by=list(cluster), FUN=function(x) x[length(x)])[,2]  
      }
 
-
-# ojo, consideramos que puede que no sean las mismas variables para recurrent y para terminal event
-# 1a version no, y tomaba nvar<-2*nvar
-     
+ 
     nvarRec<-nvar
     if(is.null(nrow(vardc)))
      nvarEnd<-1
@@ -427,6 +430,8 @@ if (joint & !length(subcluster)) # joint model
      nvarEnd<-ncol(vardc)
 
     nvar<-nvarRec+nvarEnd
+
+# ... end preparing data 
 
     ans <- .Fortran("frailpenalJoint",
                 as.integer(n),
@@ -480,9 +485,7 @@ if (joint & !length(subcluster)) # joint model
     fit$n.deaths <- ans$cpt.dc
     fit$logVerComPenal <- ans$loglik
 
-
-
-   
+ 
     fit$theta <- ans$b[np - nvar-1]^2
     fit$alpha <- ans$b[np - nvar]
 
@@ -527,10 +530,14 @@ if (joint & !length(subcluster)) # joint model
     attr(fit,"subcluster")<-FALSE
     class(fit) <- "jointPenal"
 
- }
+ }  # End JOINT MODEL
 
 
-if (length(subcluster))  # nested model
+#
+# Begin NESTED MODEL
+#
+
+if (length(subcluster))  
  {
 
     ans <- .Fortran("nested",
@@ -601,7 +608,6 @@ if (length(subcluster))  # nested model
     temp2 <- matrix(ans$HIH, nrow = 50, ncol = 50)[1:np, 1:np]
     fit$varH <- temp1[(np - nvar - 1):np, (np - nvar - 1):np]
     fit$varHIH <- temp2[(np - nvar - 1):np, (np - nvar - 1):np]
-#    fit$varHIH <- fit$varH
     fit$formula <- formula(Terms)
     fit$x1 <- ans$x1
     fit$lam <- matrix(ans$lam, nrow = 99, ncol = 3)
@@ -630,7 +636,8 @@ if (length(subcluster))  # nested model
     attr(fit,"joint")<-joint
     attr(fit,"subcluster")<-TRUE
     class(fit) <- "nestedPenal"
- }
+
+ } # End NESTED MODEL
 
  cost<-proc.time()-ptm
  cat("The program took", round(cost[3],2), "seconds \n")

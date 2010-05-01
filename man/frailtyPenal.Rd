@@ -160,7 +160,8 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 \code{\link{summary.frailtyPenal}},
 \code{\link{plot.frailtyPenal}},
 \code{\link{cluster}},
-\code{\link{strata}}
+\code{\link{strata}},
+\code{\link[survival]{Surv}}
 }
 
 

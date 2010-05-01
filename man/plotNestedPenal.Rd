@@ -13,19 +13,14 @@
 
 \usage{
 
-\method{plot}{nestedPenal}(x, type.plot = "hazard", conf.bands=TRUE, ...)
+\method{plot}{nestedPenal}(x, ...)
 
 }
 
 \arguments{
   \item{x}{ A nested model, more generaly an object of class \code{frailtyPenal for Nested frailty models} (output from calling \code{frailtyPenal}
     function).}
-  \item{type.plot}{ a character string specifying the type of curve. Possible
-                   value are "hazard", or "survival". The default
-                   is "hazard". Only the first words are required, e.g "haz", "su"}
-  \item{conf.bands}{ logical value. Determines whether confidence bands will be plotted.  The
-                   default is to do so.}
-  \item{\dots}{ Other graphical parameters}
+  \item{\dots}{ Other graphical parameters like those in \code{\link{plot.frailtyPenal}}}
 }
 
 \value{
