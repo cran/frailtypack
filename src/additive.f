@@ -377,7 +377,8 @@ c Juan  Added August'07
 
         nsujet=nsujetAux
         ng=ngexactAux
-        nssgbyg=nssgbygAux
+c removed CRAN
+c        nssgbyg=nssgbygAux
         icen=icenAux
         nst=nstAux
 
