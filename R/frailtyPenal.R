@@ -371,7 +371,7 @@ if (joint & !length(subcluster))
     m2 <- eval(m2, sys.parent())
 
     match.noNA<-dimnames(m2)[[1]]%in%dimnames(m)[[1]]
-    m2<-m2[match.noNA,]
+    m2<-m2[match.noNA, , drop=FALSE]
 
     newTerms2<-Terms2
     X2 <- model.matrix(newTerms2, m2)
@@ -411,10 +411,13 @@ if (joint & !length(subcluster))
     if (!is.null(ncol(vardc.temp)))
      {
       vardc<-aggregate(vardc.temp[,1],by=list(cluster), FUN=function(x) x[length(x)])[,2] 
-      for (i in 2:ncol(vardc.temp)) 
+      if (ncol(vardc.temp)>1)
        {
-        vardc.i<-aggregate(vardc.temp[,i],by=list(cluster), FUN=function(x) x[length(x)])[,2] 
-        vardc<-cbind(vardc,vardc.i)
+        for (i in 2:ncol(vardc.temp)) 
+         {
+          vardc.i<-aggregate(vardc.temp[,i],by=list(cluster), FUN=function(x) x[length(x)])[,2] 
+          vardc<-cbind(vardc,vardc.i)
+         } 
        }
      } 
     else
