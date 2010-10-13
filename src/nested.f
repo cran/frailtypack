@@ -90,8 +90,8 @@ c***************SAME **********************************************
       integer npmax,nsujetmax,nvarmax,ngmax,nssgmax,
      &   nboumax,ndatemax,nptsmax 
       parameter(npmax=50,nsujetmax=20000,nvarmax=50)
-      parameter(ngmax=1000,nssgmax=5000,nboumax=1000)
-      parameter(ndatemax=30000,nptsmax=1000)
+      parameter(ngmax=2500,nssgmax=5000,nboumax=2000)
+      parameter(ndatemax=30000,nptsmax=1500)
 c******************************************************************
 
      
@@ -1305,9 +1305,9 @@ c========================== VECSPLI =====================
       
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       integer ::  n,ndate,i,j,k
@@ -1373,9 +1373,9 @@ c========================== VECPEN ==============================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       integer ::  n,i
@@ -1625,9 +1625,9 @@ c=================================    DERIVA pjoly =======================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       integer ::i0,iun,m,m1,ll,i,k,j
@@ -1686,8 +1686,8 @@ c***************SAME **********************************************
       integer npmax,nsujetmax,nvarmax,ngmax,nssgmax,
      &   nboumax,ndatemax,nptsmax 
       parameter(npmax=50,nsujetmax=20000,nvarmax=50)
-      parameter(ngmax=1000,nssgmax=5000,nboumax=1000)
-      parameter(ndatemax=30000,nptsmax=1000)
+      parameter(ngmax=2500,nssgmax=5000,nboumax=2000)
+      parameter(ndatemax=30000,nptsmax=1500)
 c******************************************************************
 
          integer :: nz1,nz2,i,j,n,np,k,l,effet
@@ -1832,9 +1832,9 @@ c==========================  SUSP  ====================================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       integer :: j,k,n,i
@@ -1906,9 +1906,9 @@ c et leur bandes de confiance
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       integer :: j,k,n,i
@@ -1994,9 +1994,9 @@ c=====================  CONF1  =============================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       integer :: ni,i,n,j
@@ -2037,9 +2037,9 @@ c=====================  CONF  =============================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
        
        integer :: ni,i,n,j
@@ -2084,9 +2084,9 @@ c==========================   ISP   ==================================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
   
           integer :: ni,ns
@@ -2152,9 +2152,9 @@ c==========================  MMSP   ==================================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       integer :: ni,ns
@@ -2247,9 +2247,9 @@ c========================          MNBRAK         ===================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
          double precision ax,bx,cx,fa,fb,fc,aux,res
@@ -2343,9 +2343,9 @@ c========================      GOLDEN   =========================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
      
       double precision y(npmax,npmax)
@@ -2412,9 +2412,9 @@ c========================          ESTIMV         ===================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       double precision v((npmax*(npmax+3)/2)),y(npmax,npmax)
@@ -2505,9 +2505,9 @@ c=================calcul de la hessienne  et de omega  ==============
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
 
@@ -2597,9 +2597,9 @@ c          elle a 7 diagonales
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
 
@@ -2674,9 +2674,9 @@ c====================  MAT  ==================================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       double precision res,dut(ndatemax),ut(ndatemax)
@@ -2739,9 +2739,9 @@ c==========================  MSP   ==================================
  
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       integer ni,ns,i
@@ -2831,9 +2831,9 @@ c==========================   SP   ==================================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
          
              integer ni,ns,i
@@ -2904,9 +2904,9 @@ c=========================  calc00  =========================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
       
       double precision part
@@ -2962,9 +2962,9 @@ c=========================  CALC01  =========================
   
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
  
       double precision part
@@ -3013,9 +3013,9 @@ c=========================  CALC02  =========================
  
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
 
@@ -3064,9 +3064,9 @@ C  4: non amelioration vraisblce apres searpas
  
 c*************** SAME **********************************************
          integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-         integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+         integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
          integer , parameter ::ndatemax=30000
-         integer , parameter ::nptsmax=1000
+         integer , parameter ::nptsmax=1500
 c******************************************************************
 
          integer :: m,ni,nql,i,ii,nfmax,idpos,ier,istop,igrad,j
@@ -3434,9 +3434,9 @@ c      USE nr, ONLY : gammln
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
 
@@ -4061,9 +4061,9 @@ c==================================================================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
 
@@ -4136,9 +4136,9 @@ c==================================================================
 
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
       double precision :: a,b,ss,i
@@ -4206,9 +4206,9 @@ c================================================
  
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
 
@@ -4332,9 +4332,9 @@ c================================================
  
 c*************** SAME **********************************************
       integer , parameter ::npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter ::ngmax=1000,nssgmax=5000,nboumax=1000
+      integer , parameter ::ngmax=2500,nssgmax=5000,nboumax=2000
       integer , parameter ::ndatemax=30000
-      integer , parameter ::nptsmax=1000
+      integer , parameter ::nptsmax=1500
 c******************************************************************
 
 

@@ -76,12 +76,18 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
       stop("grouping variable must have more than 1 level")   
      }
  
-    if(length(uni.cluster)>5000) 
+    if(length(uni.cluster)>1500 & missing(formula.terminalEvent)) 
      {
-      stop("grouping variable must have less than 5000 groups
+      stop("grouping variable must have less than 1500 groups
              \n please contact to the mantainer")   
      }
     
+    if(length(uni.cluster)>15000 & !missing(formula.terminalEvent)) 
+     {
+      stop("grouping variable must have less than 15000 groups
+             \n please contact to the mantainer")   
+     }
+
 
     if (length(subcluster)) {
        tempsub <- untangle.specials(Terms, "subcluster", 1:10)
