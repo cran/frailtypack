@@ -1,3 +1,7 @@
+v2.2-16
+2010-10-13
+- changed: nested model to allow 1500 groups 
+
 v2.2-14
 2010-05-17
 - changed: model.matrix for newTerm2 to consider only 1 covariate (after Gillian's problem)

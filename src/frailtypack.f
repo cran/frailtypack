@@ -88,8 +88,8 @@ c                        avec fraitly avec loi Gamma
 c
 c  Obs: noVar=0 indicates no variables but I need to pass all 0's in vaxAux
 
-       parameter(npmax=50,NSUJETMAX=20000,nvarmax=50,ngmax=1000)
-       parameter(nboumax=1000,ndatemax=30000)
+       parameter(npmax=50,NSUJETMAX=20000,nvarmax=50,ngmax=2000)
+       parameter(nboumax=2000,ndatemax=30000)
 
 
        integer  groupe,ij,kk,j,k,nz,n,np,cpt,ii,iii,ver
@@ -1154,7 +1154,7 @@ c========================          FUNCPA          ====================
 c *** NOUVELLLE DECLARATION F90 :
 
       parameter(npmax=50,NSUJETMAX=20000,nvarmax=50)
-      parameter(ngmax=1000,nssgmax=1000)
+      parameter(ngmax=2000,nssgmax=1000)
       parameter(ndatemax=30000)
 
       integer  nb,n,np,id,jd,i,j,k,vj,cptg,l

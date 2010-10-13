@@ -80,8 +80,8 @@ c********************************************************************
 
       
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************
 
@@ -1030,8 +1030,8 @@ c========================== VECSPLI ==============================
       double precision  h3,h4,h3m,h2n,hn,hh3,hh2
          
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************
 
@@ -1094,8 +1094,8 @@ c========================== VECPEN ==============================
       subroutine vecpen1(n) 
       
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************
 
@@ -1351,8 +1351,8 @@ c========================          FUNCPA NEW         ====================
 c *** NOUVELLLE DECLARATION F90 :
 
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************
 
@@ -1713,8 +1713,8 @@ c================================  DCHOLE  ===========================
       subroutine dchole1(a,k,nq,idpos)
 
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************  
       integer  k,nq,i,ii,i1,i2,i3,m,is,j,k2,jmk
@@ -1816,8 +1816,8 @@ c  3: 1 mais echec inversion matrice d'info (ier=1)
 C  4: non amelioration vraisblce apres searpas
 c      
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************  
       
@@ -2172,8 +2172,8 @@ c=================================    DERIVA pjoly =======================
       subroutine deriva1(b,m,v,rl,k0)
 
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************  
        
@@ -2239,8 +2239,8 @@ c==========================  DISTANCE   =================================
      &	       x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************  
 
@@ -2390,8 +2390,8 @@ c
 c==========================  SUSP  ====================================
       subroutine susp1(x,the,n,su,lam,zi)
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************  
 
@@ -2463,8 +2463,8 @@ c et leur bandes de confiance
 
       subroutine cosp1(x,the,n,y,zi,date,binf,su,bsup,lbinf,lam,lbsup)
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************  
       integer  j,k,n,i
@@ -2549,8 +2549,8 @@ c         write(*,*)'lbinf apres conf1',lbinf,lam,pm
 c=====================  CONF1  =============================
       subroutine  conf11(x,ni,n,y,pm,zi,date)
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************  
 
@@ -2595,8 +2595,8 @@ c            write(*,*)'conf1 pm',pm
 c=====================  CONF  =============================
       subroutine  conf01(x,ni,n,y,pm,zi,date)
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************  
        
@@ -2640,8 +2640,8 @@ c            write(4,*)'conf : pm ',pm
 c==========================   ISP   ==================================
           double precision function isp1(x,ni,ns,zi,date)
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************  
           integer  ni,ns
@@ -2706,8 +2706,8 @@ c************************************************************************
 c==========================  MMSP   ==================================
       double precision function mmsp1(x,ni,ns,zi,date)
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************ 
       integer  ni,ns
@@ -2821,8 +2821,8 @@ c 20 points / sur (0,+infty)
       SUBROUTINE gaulag1(ss,choix) 
 
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************
 
@@ -2896,8 +2896,8 @@ c================================================
 ! calcul de l integrant, pour un effet aleatoire donné frail et un groupe donne auxig (cf funcpa)      
       
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************
 
@@ -2947,8 +2947,8 @@ c================================================
 ! calcul de l integrant, pour un effet aleatoire donné frail et un groupe donne auxig (cf funcpa)      
       
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************
 
@@ -2985,8 +2985,8 @@ c==================================================================
 ! calcul de l integrant, pour un effet aleatoire donné frail et un groupe donne auxig (cf funcpa)      
       
 c************** definition commune des parameter ***********************
-      integer , parameter :: npmax=50,nsujetmax=20000,nvarmax=50
-      integer , parameter :: ngmax=1000
+      integer , parameter :: npmax=50,nsujetmax=30000,nvarmax=50
+      integer , parameter :: ngmax=15000
       integer , parameter :: ndatemax=30000
 c************************************************************************ 
 
