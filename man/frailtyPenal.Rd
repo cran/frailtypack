@@ -80,23 +80,6 @@ We advise the user to identify several possible tuning parameters, note their de
 
 The splines and the regression coefficients are initialized to 0.1. The program fits, firstly, an adjusted Cox model to give new initial values for the splines and the regression coefficients. The variance of the frailty term \eqn{\theta} is initialized to 0.1. Then, a shared frailty model is fitted.
 
-
-\bold{PARAMETERS LIMIT VALUES}
-
-As frailtypack is written in Fortran 77 some parameters had to be hard coded in. The default values of these parameters are, with the corresponding variable name in the fortran code between brackets.
-
-maximum number of observations (ndatemax): 30000\cr
-maximum number of groups (ngmax): 5000\cr
-maximum number of subjects (nsujetmax): 20000\cr
-maximum number of parameters (npmax) :50\cr
-maximum number of covariates (nvarmax):50\cr
-
-
-
-If these parameters are not large enough (an error message will let you know this), you need to reset
-them in frailtypack.f and recompile. In particular, the statements defining these parameters are
-
-
 }
 
 \value{
@@ -122,12 +105,16 @@ The following components are included in a 'frailtyPenal' object for shared frai
 \item{surv}{matrix of baseline survival estimates at x1 times and confidence bands. }
 \item{surv2}{the same value as surv for the second stratum}
 \item{theta}{variance of frailty parameter}
-\item{type}{charater string specifying the type of censoring. Possible values are "right", "left", "counting", "interval", "interval2". The default is "right" or "counting" depending on whether the 'time2' argument is absent or present, respectively.}
- \item{varH}{the variance matrix of all parameters (theta, the regression coefficients and the spline coefficients).}
+%\item{type}{charater string specifying the type of censoring. Possible values are "right", "left", %"counting", "interval", "interval2". The default is "right" or "counting" depending on whether the %'time2' argument is absent or present, respectively.}
+ \item{varH}{the variance matrix of all parameters before positivity constraint transformation (theta, the regression coefficients and the spline coefficients). Thenafter, the delta method is needed to obtain the estimated variance parameters.}
  \item{varHIH}{the robust estimation of the variance matrix of all parameters (theta, the regression coefficients and the spline coefficients).}
 \item{x1}{vector of times where both survival and hazard function are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
 \item{x2}{see x1 value for the second stratum}
-
+\item{npar}{number of parameters.}
+\item{nvar}{number of vairables.}
+\item{noVar1}{indicator of explanatory variable.}
+\item{LCV}{the approximate likelihood cross-validation criterion in the semi parametric case}
+\item{n.knots.temp}{initial value of n.knots.}
 }
 
 \note{

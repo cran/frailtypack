@@ -24,7 +24,22 @@ function (x, digits = max(options()$digits - 4, 3), ...)
         x$varH<-matrix(x$varH) 
         x$varHIH<-matrix(x$varHIH)
       }
+ #AD:     
+ 	 
+    if (x$n.knots.temp < 4){
+    	cat("\n")
+         cat("  The minimum number of knots is 4","\n")	
+    }
+    if (x$n.knots.temp > 20){
+    	cat("\n")
+         cat("  The maximum number of knots is 20","\n")	
+    }  
     
+    if ((x$indic.Kappa2 == 0) & (x$nst == 1)){
+        cat(" Kappa2 is not used  \n")
+    }
+  
+#AD    
     if (!is.null(coef)) 
       { 
         seH <- sqrt(diag(x$varH))[-c(1,2)]
@@ -70,8 +85,13 @@ function (x, digits = max(options()$digits - 4, 3), ...)
 
 
 
-    cat(paste("    penalized marginal log-likelihood =", round(x$logVerComPenal, 
+    cat(paste("    penalized marginal log-likelihood =", round(x$logLikPenal, 
         2)))
+#AD:
+    cat("\n")
+    cat("    LCV = the approximate likelihood cross-validation criterion\n")
+    cat("    in the semi parametric case     =",x$LCV,"\n")
+#AD:
     cat("\n")
     cat("    n=", x$n)
     if (length(x$na.action)) 
@@ -82,8 +102,13 @@ function (x, digits = max(options()$digits - 4, 3), ...)
     cat("    number of iterations: ", x$n.iter)
     cat("\n")
     cat("    Exact number of knots used: ", x$n.knots, "\n")
-
-    cat("    Value of the smoothing parameter: ", x$kappa[1])
+    if (x$nst == 1){
+        cat("    Value of the smoothing parameter: ", x$kappa[1])
+    }else{
+        cat("    Value of the smoothing parameter: ", x$kappa[1], " and kappa2=", x$kappa[2], sep="")
+    }
+    
+    cat(", DoF: ", formatC(-x$DoF, format="f",dig=2))
     
     cat("\n")
     invisible()

@@ -44,9 +44,7 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
  'formula' and 'formula.terminalEvent'.}
 
 
-  \item{Frailty}{Logical value. Is model with frailties fitted? If so, variance of frailty parameter is estimated. 
-                 If not, Cox proportional hazards model is estimated using Penalized Likelihood on the hazard
-                 function. The default is FALSE}
+  \item{Frailty}{Logical value. Is model with frailties fitted? If so, variance of frailty parameter is estimated. The default is FALSE}
  
   \item{joint}{Logical value. Is joint model fitted? If so, 'formula.terminalEvent' is required. The default is FALSE}
 
@@ -89,20 +87,6 @@ The inverse of the hessian matrix is the variance estimator and to deal with the
 
 The splines and the regression coefficients are initialized to 0.5. The program fits an adjusted Cox model to have new initial values for the regression and the splines coefficients. The variance of the frailty term \eqn{\theta} and the coefficient \eqn{\alpha} associated in the death hazard function are initialized to 1. Then, it fits a joint frailty model.
 
-
-\bold{PARAMETERS LIMIT VALUES}
-
-As frailtypack is written in Fortran 77 some parameters had to be hard coded in.The default values of these parameters are, with the corresponding variable namein the fortran code between brackets.
-
-
-maximum number of observations(ndatemax): 30000\cr
-maximum number of groups(ngmax): 1000\cr
-maximum number of subjects(nsujetmax): 15000\cr
-maximum number of parameters (npmax) :50\cr
-maximum number of covariates (nvarmax):50\cr
-
-If these parameters are not large enough (an error message will
- let you know this), you need to reset them in joint.f and recompile. 
 }
 
 \value{
@@ -121,7 +105,7 @@ provided for print,  plot and summary. The following components are included in 
 \item{kappa}{ A vector with the smoothing parameters corresponding to each baseline function as components}
 \item{lam}{matrix of hazard estimates at x1 times and confidence bands. }
 \item{lam2}{the same value as lam for  the second stratum}
-
+\item{LCV}{the approximation likelihood cross-validation criterion in the semi-parametric/parametric case}
 \item{n}{the number of observations used in the fit.}
 \item{n.events}{the number of events observed in the fit}
 \item{n.iter}{number of iterations needed to converge}
@@ -129,12 +113,19 @@ provided for print,  plot and summary. The following components are included in 
 \item{surv}{matrix of baseline survival estimates at x1 times and confidence bands. }
 \item{surv2}{the same value as surv for the  the second stratum}
 \item{theta}{variance of the frailty parameter \eqn{(\bold{Var}(\omega_i))}}
-\item{type}{character string specifying the type of censoring. Possible values are "right", "left", "counting", "interval", "interval2". The default is "right" or "counting" depending on whether the 'time2' argument is absent (not interval-censored data) or present (interval-censored data), respectively.}
- \item{varH}{the variance matrix of all parameters (theta, the regression coefficients and the spline coefficients).}
+%\item{type}{character string specifying the type of censoring. Possible values are "right", "left", "counting", %"interval", "interval2". The default is "right" or "counting" depending on whether the 'time2' argument is absent (not %interval-censored data) or present (interval-censored data), respectively.}
+ \item{varH}{the variance matrix of all parameters before positivity constraint transformation (theta, the regression coefficients and the spline coefficients). Thenafter, the delta method is needed to obtain the estimated variance parameters.}
  \item{varHIH}{the robust estimation of the variance matrix of all parameters (theta, the regression coefficients and the spline coefficients).}
 \item{x1}{vector of times where both survival and hazard function for the recurrent events are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
 \item{x2}{see x1 value for the terminal events survival and hazard function}
 
+\item{npar}{number of parameters.}
+\item{nvarRec}{number of recurrent vairables.}
+\item{nvarEnd}{number of death variable.}
+\item{noVar1}{indicator of recurrent variable.}
+\item{noVar2}{indicator of death variable.}
+\item{LCV}{the approximate likelihood cross-validation criterion in the semi parametric case.}
+\item{n.knots.temp}{initial value of n.knots.}
 }
 
 \note{

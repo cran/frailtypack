@@ -21,7 +21,18 @@ function (x, digits = max(options()$digits - 4, 3), ...)
         x$varH<-matrix(x$varH) 
         x$varHIH<-matrix(x$varHIH)
       }
-    
+ #AD:     
+ 	 
+    if (x$n.knots.temp < 4){
+    	cat("\n")
+        cat("  The minimum number of knots is 4","\n")	
+	cat("\n")
+    }  
+    if (x$n.knots.temp > 20){
+    	cat("\n")
+         cat("  The maximum number of knots is 20","\n")	
+    }        
+#AD    
     if (!is.null(coef)) 
       { 
 
@@ -48,7 +59,7 @@ function (x, digits = max(options()$digits - 4, 3), ...)
 
         if (x$n.strat>1)  
         cat("  (Stratification structure used)", "\n")         
-
+	
         dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
         "SE coef (H)", "SE coef (HIH)", "z", "p"))
         cat("\n")
@@ -59,6 +70,14 @@ function (x, digits = max(options()$digits - 4, 3), ...)
     if (x$correlation)
     cat("    Covariance (between the two frailty terms, \n                the intercept and the slope):", x$cov, "(SE:",x$varcov^0.5, ")", "\n")
 
+#AD:
+	if (x$noVar == 1){
+		cat("\n")
+		cat("    Additive gaussian frailty model: No covariates \n")
+		cat("    ------------------------------- \n")
+		cat("\n")
+	}
+#AD:
     if (x$rho!=-1)      
     cat("    Corresponding correlation between the two frailty terms :", x$rho, "\n")
 
@@ -71,6 +90,11 @@ function (x, digits = max(options()$digits - 4, 3), ...)
     cat(" \n")
     cat(paste("    penalized marginal log-likelihood =", round(x$logLikPenal, 
         2)))
+#AD:
+    cat("\n")
+    cat("    LCV = the approximate likelihood cross-validation criterion\n")
+    cat("    in the semi parametric case     =",x$LCV,"\n")
+#AD:
     cat("\n")
     cat("    n=", x$n)
     if (length(x$na.action)) 
@@ -101,7 +125,7 @@ function (x, digits = max(options()$digits - 4, 3), ...)
          } 
       }
     
-#    cat(", DoF: ", formatC(-x$DoF, format="f",dig=2))
+    cat(", DoF: ", formatC(-x$DoF, format="f",dig=2))
 
 
     cat("\n")

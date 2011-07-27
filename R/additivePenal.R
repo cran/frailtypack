@@ -1,11 +1,18 @@
-
 "additivePenal" <-
 function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350)
  {
 
+#AD:
+	if (missing(formula))stop("The argument formula must be specified in any model")
+	if(class(formula)!="formula")stop("The argument formula must be a formula")
+#AD:  
+ 
     if (missing(n.knots))
          stop("number of knots are required")       
-
+#AD:	 
+    n.knots.temp <- n.knots	
+ 
+#AD
     if (n.knots<4) n.knots<-4
     if (n.knots>20) n.knots<-20
 
@@ -150,18 +157,12 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
 
     var<-matrix(c(X),nrow=nrow(X),ncol=nvar)
 
-
-
-
-
-
     n<-nrow(X)    
     if(n>20000) 
      {
       stop("number of observations must be less than 20000 
              \n please contact to the mantainer")   
      }
-
     if (type=="right")
       {
         tt0 <- rep(0,n)
@@ -181,19 +182,16 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
     AG<-ifelse(recurrentAG,1,0)
     crossVal<-ifelse(cross.validation,0,1)
 
-#    np<-uni.strat*n.knots+nvar+as.integer(correlation)+2*as.integer(frailty)+2
-    np<-uni.strat*n.knots+nvar+as.integer(correlation)+2*1+2
-
+    np <- as.integer(uni.strat) * (as.integer(n.knots) + 2) + as.integer(nvar) + as.integer(correlation) + 2 * 1
 
     ptm<-proc.time()
+    cat("\n")
     cat("Be patient. The program is computing ... \n")
 
     ans <- .Fortran("additive",
                 as.integer(n),
                 as.integer(length(uni.cluster)),
-                as.integer(cens.data),
                 as.integer(uni.strat),
-#                as.integer(frailty),
                 as.integer(n.knots),
                 as.double(kappa1),
                 as.double(kappa2),
@@ -210,7 +208,8 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
                 as.integer(maxit),
                 as.integer(crossVal),  
                 as.integer(correlation),
-                b=as.double(rep(0,150)),
+		as.integer(np),
+                b=as.double(rep(0,np)),#150
                 coef=as.double(rep(0,nvar)),   
                 varcoef=as.double(rep(0,nvar)),
                 varcoef2=as.double(rep(0,nvar)),
@@ -221,6 +220,7 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
                 varTau2=as.double(c(0,0)),
                 ni=as.integer(0),
                 loglikpen=as.double(0),
+		trace=as.double(0),
                 k0=as.double(c(0,0)),  
                 x1=as.double(rep(0,99)),
                 lam1=as.double(matrix(0,nrow=99,ncol=3)),
@@ -229,9 +229,9 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
                 lam2=as.double(matrix(0,nrow=99,ncol=3)),
                 surv2=as.double(matrix(0,nrow=99,ncol=3)),
                 ier=as.integer(0),
-                ddl=as.double(0),
-                PACKAGE = "frailtypack")   
-
+                ddl=as.double(0),   
+                PACKAGE = "frailtypack") 
+    
     flush.console()
     cost<-proc.time()-ptm
     cat("The program took", round(cost[3],2), "seconds \n")
@@ -245,6 +245,9 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
     fit$groups <- length(uni.cluster)
     fit$n.events <- sum(cens)  #coded 0: censure 1:event
     fit$logLikPenal <- ans$loglikpen
+#AD:
+    fit$LCV <- ans$trace
+#AD:     
     fit$type <- type
 
     fit$b <- ans$b 
@@ -288,11 +291,19 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
     fit$x2 <- ans$x2
     fit$lam2 <- matrix(ans$lam2, nrow = 99, ncol = 3)
     fit$surv2 <- matrix(ans$surv2, nrow = 99, ncol = 3)
+    fit$npar <- np
 
+#AD:
+    fit$noVar <- noVar
+    fit$nvar <- nvar
+#AD:
 
    
     fit$DoF <- ans$ddl
+#AD:
+     fit$n.knots.temp <- n.knots.temp
 
+#AD
     if(ans$ier==-1)
         warning("matrix non-positive definite")
 
