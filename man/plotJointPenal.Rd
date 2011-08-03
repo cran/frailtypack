@@ -14,8 +14,8 @@
 
 \usage{
 
-\method{plot}{jointPenal}(x, event = "both", type.plot = "hazard", conf.bands
-                 = FALSE, pos.legend="topright", cex.legend=0.7, ylim, main, ...)
+\method{plot}{jointPenal}(x, event = "both", type.plot = "hazard", conf.bands = FALSE,
+ pos.legend="topright", cex.legend=0.7, ylim, main, ...)
 
 
 }

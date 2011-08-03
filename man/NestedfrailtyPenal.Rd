@@ -89,20 +89,6 @@ The integrations in the full log likelihood werre evaluated using Gaussian quadr
 The splines and the regression coefficients are initialized to 0.1. The program fits an adjusted Cox model to provide new initial values for the regression and the splines coefficients. The variances of the frailties are initialized to 0.1. Then, a shared frailty model with covariates with only subgroup frailty is fitted to give a  new initial value for the variance of the subgroup frailty term. Then, a shared frailty model with covariates and only group frailty terms is fitted to give a  new initial value for the variance of the group frailties. In a last step, a nested frailty model is fitted.
 
 
-
-\bold{PARAMETERS LIMIT VALUES}
-
-As frailtypack is written in Fortran 77 some parameters had to be hard coded in. The default values of these parameters are, with the corresponding variable name in the fortran code between brackets.
-
-maximum number of observations (ndatemax): 30000\cr
-maximum number of groups (ngmax): 1000\cr
-maximum number of subjects (nsujetmax): 15000\cr
-maximum number of parameters (npmax) :50\cr
-maximum number of covariates (nvarmax):50\cr
-maximum number of subgroups (nssgmax):5000\cr
-
-
-If these parameters are not large enough (an error message will let you know this), you need to reset them in nested.f and recompile. 
 }
 
 \value{
@@ -129,17 +115,19 @@ If these parameters are not large enough (an error message will let you know thi
 \item{nvar}{A vector with the number of covariates of each type of hazard function as components}
 \item{surv}{matrix of baseline survival estimates at x1 times and confidence bands. }
 \item{surv2}{the same value as surv for the second stratum}
-\item{type}{a character string specifying the type of censoring. Possible values are "right", "left", "counting", "interval", "interval2". The default is "right" or "counting" depending on whether the 'time2' argument is absent (not interval-censored data) or present (interval-censored data), respectively.}
-\item{varH}{the variance matrix of all parameters (alpha, eta, the regression coefficients and the spline coefficients).}
+%\item{type}{a character string specifying the type of censoring. Possible values are "right", "left", "counting", %"interval", "interval2". The default is "right" or "counting" depending on whether the 'time2' argument is absent (not %interval-censored data) or present (interval-censored data), respectively.}
+\item{varH}{the variance matrix of all parameters before positivity constraint transformation (alpha, eta, the regression coefficients and the spline coefficients). Thenafter, the delta method is needed to obtain the estimated variance parameters.}
 \item{varHIH}{the robust estimation of the variance matrix of all parameters (alpha, eta, the regression coefficients and the spline coefficients).}
 \item{x1}{vector of times where both survival and hazard function are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
 \item{x2}{the same value as x1 for the second stratum}
 
-
-
-
-
-
+\item{npar}{number of parameters.}
+\item{nvar}{number of vairables.}
+\item{noVar1}{indicator of explanatory variable.}
+\item{LCV}{the approximate likelihood cross-validation criterion in the semi parametric case.}
+\item{indic.Kappa2}{indicator of second stratum.}
+\item{nst}{number of strat.}
+\item{n.knots.temp}{initial value of n.knots.}
 
  }
 
@@ -191,7 +179,7 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 
   data(dataNested)
   modClu<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+subcluster(subgroup)+
-                  cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000)
+  cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000)
 
 
 # It takes around 24 minutes to converge (depends on the processor)#
@@ -201,8 +189,8 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
   plot(modClu)
   
   modClu.str<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+subcluster(subgroup)+
-		  cov1+strata(cov2)
-                  ,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=20000,kappa2=20000)
+  cov1+strata(cov2),Frailty=TRUE,data=dataNested,n.knots=8,kappa1=20000
+  ,kappa2=20000)
   
  # It takes around 8 minutes to converge (depends on the processor)#
  

@@ -13,7 +13,8 @@
 
 \usage{
 
-\method{plot}{frailtyPenal}(x, type.plot = "hazard", conf.bands=TRUE, pos.legend="topright", cex.legend=0.7, main, ...)
+\method{plot}{frailtyPenal}(x, type.plot = "hazard", conf.bands=TRUE, pos.legend="topright",
+ cex.legend=0.7, main, ...)
 
 }
 

@@ -24,7 +24,18 @@ function (x, digits = max(options()$digits - 4, 3), ...)
         x$varH<-matrix(x$varH) 
         x$varHIH<-matrix(x$varHIH)
       }
-    
+#AD:     
+ 	 
+    if (x$n.knots.temp < 4){
+    	cat("\n")
+        cat("  The minimum number of knots is 4","\n")	
+	cat("\n")
+    } 
+    if (x$n.knots.temp > 20){
+    	cat("\n")
+         cat("  The maximum number of knots is 20","\n")	
+    }     
+#AD     
     if (!is.null(coef)) 
       { 
         seH <- sqrt(diag(x$varH))[-1]
@@ -49,6 +60,8 @@ function (x, digits = max(options()$digits - 4, 3), ...)
         if (x$n.strat>1)  
           cat("  (Stratification structure used)", "\n")         
           }
+	  
+	
         dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
         "SE coef (H)", "SE coef (HIH)", "z", "p"))
         cat("\n")
@@ -61,26 +74,39 @@ function (x, digits = max(options()$digits - 4, 3), ...)
           seH <- sqrt(((2 * (tetha^0.5))^2) * temp)
           temp <- diag(x$varHIH)[1]
           seHIH <- sqrt(((2 * (tetha^0.5))^2) * temp)
+#AD:
+	if (x$noVar1 == 1){
+		cat("\n")
+		cat("    Shared Gamma Frailty model: No covariates \n")
+		cat("    -------------------------- \n")
+		cat("\n")
+	}
+#AD:		  
          cat("    Frailty parameter, Theta:", tetha, "(SE (H):", 
             seH, ")", "(SE (HIH):", seHIH, ")", "\n")
         }
     cat(" \n")
-    cat(paste("    penalized marginal log-likelihood =", round(x$logVerComPenal, 
+    cat(paste("      penalized marginal log-likelihood =", round(x$logLikPenal, 
         2)))
+#AD:
     cat("\n")
-    cat("    n=", x$n)
+    cat("      LCV = the approximate likelihood cross-validation criterion\n")
+    cat("      in the semi parametric case     =",x$LCV,"\n")
+#AD:
+    cat("\n")
+    cat("      n=", x$n)
     if (length(x$na.action)) 
         cat("  (", length(x$na.action), " observation deleted due to missing) \n")
     else cat("\n")
-    cat("    n events=", x$n.event, " n groups=", x$groups)
+    cat("      n events=", x$n.event, " n groups=", x$groups)
     cat( "\n")
-    cat("    number of iterations: ", x$n.iter)
+    cat("      number of iterations: ", x$n.iter)
     cat("\n")
-    cat("    Exact number of knots used: ", x$n.knots, "\n")
+    cat("      Exact number of knots used: ", x$n.knots, "\n")
 
     if (!x$cross.Val)
       {
-       cat("    Value of the smoothing parameter: ", x$kappa[1])
+       cat("      Value of the smoothing parameter: ", x$kappa[1])
        if (x$n.strat==2)
         cat(" ", x$kappa[2])
       }
@@ -88,12 +114,12 @@ function (x, digits = max(options()$digits - 4, 3), ...)
     if (x$cross.Val)
       {
        if (is.null(x$theta))
-         cat("    Smoothing parameter estimated by Cross validation: ", x$kappa[1])  
+         cat("      Smoothing parameter estimated by Cross validation: ", x$kappa[1])  
        else 
          {
-           cat("    Best smoothing parameter estimated by")
+           cat("      Best smoothing parameter estimated by")
            cat("\n")
-           cat("       an approximated Cross validation: ", x$kappa[1])
+           cat("      an approximated Cross validation: ", x$kappa[1])
          } 
       }
     
