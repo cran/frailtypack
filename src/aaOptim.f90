@@ -246,7 +246,7 @@
 	double precision::fct_names
 !---------- ajout
 	integer::kkk
-!	logical::isnan
+
      
 	
 	zero=0.d0     
@@ -271,10 +271,10 @@
         call derivaj(b,m,v,rl,k0,fct_names)   
 	           
         rl1=rl
-!	if (isnan(rl).or.(abs(rl) .gt. 1.d30)) then
-!		istop=4
-!		goto 110
-!	end if  
+	if ((rl .ne. rl).or.(abs(rl) .gt. 1.d30)) then
+		istop=4
+		goto 110
+	end if  
 !	write(*,*)'iteration***',ni,'vrais',rl  
 	   
         dd = 0.d0    

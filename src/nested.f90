@@ -525,6 +525,9 @@
 		auxkappa(1)=xmin1*xmin1
 		auxkappa(2)=0.d0
 		call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan)
+		if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+			goto 1400
+		end if
 	endif 
  
 	nva=nvacross ! pour la recherche des parametres de regression
@@ -551,7 +554,9 @@
 	np = nst*n + nva
 
 	call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan)        
-         
+	if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+		goto 1400
+	end if        
 !	write(*,*),'================================================'
 !	write(*,*),'== avec var explicatives + effet groupe ========='
 !	write(*,*),'================================================'
@@ -562,6 +567,9 @@
 	b(np-nva+1)=0.1d0
 	np = nst*n + nva +effet
 	call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan)
+	if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+		goto 1400
+	end if  	
 !	write(*,*),'================================================'
 !	write(*,*),'== avec var explicatives + effet sub group ====='
 !	write(*,*),'================================================'
@@ -583,6 +591,9 @@
 	b(np-nva)=0.5d0
 	np = nst*n + nva +effet      
 	call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan)
+	if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+		goto 1400
+	end if  	
 	bssgpe=b(np-nva)
          
 !         write(*,*),'=========================================='
@@ -600,7 +611,9 @@
 	b(np-nva)=bssgpe!1.0d0!0.15d0   !initialisation eta(sous groupe)
 
 	call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan)
-
+	if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+		goto 1400
+	end if  
 	j=(np-nva)*(np-nva+1)/2
 	
 	trace=0
@@ -672,7 +685,7 @@
 	traceLCV = (traceLCV - resnonpen) / nsujet
 !AD:end	
 
-
+1400    continue
 	deallocate(date,mm3,mm2,mm1,mm,im3,im2,im1,im,aux,gaux,gnew,filtre)
 	deallocate(t0,t1,c,nt0,nt1,stra,stracross,g,ssg,nig,mid,ve,vax)    
 

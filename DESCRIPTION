@@ -1,6 +1,6 @@
 Package: frailtypack
-Version: 2.2-17
-Date: 2011-07-27
+Version: 2.2-18
+Date: 2011-08-31
 Title: Frailty models using maximum penalized likelihood estimation
 Author: Juan R Gonzalez, Virginie Rondeau
         <Virginie.Rondeau@isped.u-bordeaux2.fr>,Yassin Mazroui
@@ -28,5 +28,5 @@ License: GPL (>= 2)
 URL: http://www.r-project.org
 Encoding: latin1
 Repository: CRAN
-Date/Publication: 2011-08-03 08:47:32
-Packaged: 2011-08-03 08:44:28 UTC; ad6
+Date/Publication: 2011-09-01 18:34:56
+Packaged: 2011-09-01 13:36:51 UTC; ad6

@@ -521,7 +521,9 @@
 		auxkappa(2)=0.d0
 
 		call marq98J(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaadd)
-	
+		if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+			goto 1000
+		end if	
 
 	endif  
 
@@ -562,6 +564,9 @@
 
 !	write(*,*)'===avant marq98==========',n,np,nva,nst,effet
 	call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaadd)
+	if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+		goto 1000
+	end if		
 !AD:	
 !	if (istop.eq.4) goto 1000
 !AD:		
@@ -587,6 +592,9 @@
 	b(np-nva)=0.15d0!0.5477d0  !0.13d0!  !   0.15d0!   initialisation pente
 	
 	call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaadd)
+	if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+		goto 1000
+	end if		
 !AD:	
 !	if (istop.eq.4) goto 1000
 !AD:		
@@ -719,7 +727,7 @@
 	
 	traceLCV = (traceLCV - resnonpen) / nsujet
 !AD:end     
-!1000    continue
+1000    continue
 	deallocate(invd)
 	deallocate(t0,t1,c,nt0,nt1,stra,g,stracross,aux)
 	deallocate(date,mm3,mm2,mm1,mm,im3,im2,im1,im,dut1,dut2,ut1,ut2)
