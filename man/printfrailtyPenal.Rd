@@ -8,7 +8,7 @@
   Prints a short summary of parameter estimates of a 'frailtyPenal' object 
 }
 \usage{
-\method{print}{frailtyPenal}(x, digits = max(options()$digits - 4, 3), ...)
+\method{print}{frailtyPenal}(x, digits = max(options()$digits - 4, 6), ...)
 }
 \arguments{
   \item{x}{the result of a call to the frailtyPenal function}
@@ -47,14 +47,16 @@ data(readmission)
 # /*** Shared frailty model ***/
 
 modSha<-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
-             n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE)
+             n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,
+	     hazard="Splines")
 
 print(modSha,type="surv",conf=FALSE)
 
 # /*** Cox proportional hazard model using Penalized likelihood ***/
 
 modCox<-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
-             n.knots=10,kappa1=10000,data=readmission,Frailty=FALSE)
+             n.knots=10,kappa1=10000,data=readmission,Frailty=FALSE,
+	     hazard="Splines")
 print(modCox)
 
 

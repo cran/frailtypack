@@ -10,7 +10,7 @@
 }
 \usage{
 
-\method{print}{jointPenal}(x, digits = max(options()$digits - 4, 3), ...)
+\method{print}{jointPenal}(x, digits = max(options()$digits - 4, 6), ...)
 
 }
 \arguments{
@@ -53,10 +53,10 @@ Print, separately for each type of event (recurrent and terminal), the parameter
 
 ## Gap-time ##
 modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)
-		+as.factor(charlson)+terminal(death),
-		formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
-		data=readmission,n.knots=14,kappa1=9550000000,
-		kappa2=1410000000000,Frailty=TRUE,joint=TRUE,recurrentAG=FALSE)
+	      +as.factor(charlson)+terminal(death),
+	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
+	      data=readmission,n.knots=14,kappa1=9550000000,kappa2=1410000000000,
+	      Frailty=TRUE,joint=TRUE,recurrentAG=FALSE,hazard="Splines")
 
     
  # It takes around 1 minute to converge.#

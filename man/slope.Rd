@@ -41,8 +41,8 @@ data(dataAdditive)
 
 # Additive with one covariate #
 
-modAdd1cov<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+
-slope(var1),data=dataAdditive,n.knots=8,kappa1=10000)
+modAdd1cov<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1)
+            ,data=dataAdditive,n.knots=8,kappa1=10000,hazard="Splines")
 
 
 # Additive with two covariates #
@@ -51,7 +51,7 @@ set.seed(1234)
 dataAdditive$var2<-rbinom(nrow(dataAdditive),1,0.5)
 
 modAdd2cov<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+var2+
-slope(var1),data=dataAdditive,n.knots=8,kappa1=10000)
+    slope(var1),data=dataAdditive,n.knots=8,kappa1=10000,hazard="Splines")
 
 
 # Additive with 2 covariates and stratification #
@@ -59,7 +59,8 @@ slope(var1),data=dataAdditive,n.knots=8,kappa1=10000)
 dataAdditive$var2<-rbinom(nrow(dataAdditive),1,0.5)
 
 modAddstrat<-additivePenal(Surv(t1,t2,event)~cluster(group)+strata(var2)+var1+
-slope(var1),data=dataAdditive,n.knots=8,kappa1=10000,kappa2=10000)
+      slope(var1),data=dataAdditive,n.knots=8,kappa1=10000,kappa2=10000,
+      hazard="Splines")
 
 }
 

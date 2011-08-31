@@ -1,30 +1,91 @@
 "additivePenal" <-
-function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350)
+function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1)
  {
+##### hazard specification ######
+haztemp <- hazard
+hazard <- strsplit(hazard,split="-")
+hazard <- unlist(hazard)  
+if(!(length(hazard) %in% c(1,2))){stop("Please check and revise the hazard argument according to the format specified in the help.")}
 
+### longueur hazard = 1
+if((all.equal(length(hazard),1)==T)==T){
+   if(!(hazard %in% c("Weibull","Piecewise","Splines"))){
+	stop("Only 'Weibull', 'Splines' or 'Piecewise' hazard can be specified in hazard argument.")
+   }else{
+	typeof <- switch(hazard,"Splines"=0,"Piecewise"=1,"Weibull"=2)	
+	if(typeof %in% c(0,2)){
+### Splines
+		if (!(missing(nb.int1))){
+			stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int1' and 'nb.int2' arguments must be deleted.")
+		}
+		if (typeof == 0){
+			size1 <- 100
+			size2 <- 100
+			equidistant <- 2	
+			nbintervR <- 0
+		}
+### Weibull
+		if (typeof == 2){
+			equidistant <- 2
+			nbintervR <- 0
+			size1 <- 100
+		}
+	}else{
+		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")		
+	}
+   } 
+}else{
+### Picewise
+      typeof <- 1
+#### longueur hazard > 1
+      if(!("Piecewise" %in% hazard)){
+	stop("Only 'Piecewise' hazard can be specified in hazard argument in this case")
+      }
+      if(!(all(hazard %in% c("Piecewise","per","equi")))){
+		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
+      }else{
+		if (!(haztemp %in% c("Piecewise-per","Piecewise-equi"))){
+			stop ("The hazard argument is incorrectly specified. Please refer to the help file of frailtypack.")
+		}
+		equidistant <- switch(haztemp,"Piecewise-per"=0,"Piecewise-equi"=1)
+      }
+ }
+
+ 
+ 
+ 
+ 
+ 
 #AD:
 	if (missing(formula))stop("The argument formula must be specified in any model")
 	if(class(formula)!="formula")stop("The argument formula must be a formula")
 #AD:  
- 
-    if (missing(n.knots))
-         stop("number of knots are required")       
+	if(typeof == 0){ 
+		if (missing(n.knots)) stop("number of knots are required")       
 #AD:	 
-    n.knots.temp <- n.knots	
- 
+		n.knots.temp <- n.knots	
 #AD
-    if (n.knots<4) n.knots<-4
-    if (n.knots>20) n.knots<-20
-
-    if (missing(kappa1))
-         stop("smoothing parameter (kappa1) is required")       
-
-    if (!missing(kappa2) & cross.validation)
-        stop("The cross validation is not implemented for two strata")
-
+		if (n.knots<4) n.knots<-4
+		if (n.knots>20) n.knots<-20
+		
+		if (missing(kappa1))stop("smoothing parameter (kappa1) is required")       
+		
+		if (!missing(kappa2) & cross.validation)stop("The cross validation is not implemented for two strata")
+	}else{
+		if (!(missing(n.knots)) || !(missing(kappa1)) || !(missing(kappa2)) || !(missing(cross.validation))){
+			stop("When parametric hazard function is specified, 'Kappa1', 'n.knots' and 'cross.validations' arguments must be deleted.")	
+		}
+		n.knots <- 0
+		kappa1 <- 0
+		kappa2 <- 0
+		crossVal <- 0
+	}	
+    
+    
+    
     call <- match.call()
     m <- match.call(expand = FALSE)
-    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <-  m$... <- NULL
+    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-  m$... <- NULL
     special <- c("strata", "cluster", "slope")
     Terms <- if (missing(data)) 
         terms(formula, special)
@@ -50,9 +111,7 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
     strats <- attr(Terms, "specials")$strata
     cluster <- attr(Terms, "specials")$cluster
     slope <- attr(Terms, "specials")$slope
-
-
-
+    
     dropx <- NULL
 
     if (length(cluster)) {
@@ -172,79 +231,112 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
     if (min(cens)==1 && max(cens)==1) cens.data<-0
 
     AG<-ifelse(recurrentAG,1,0)
-    crossVal<-ifelse(cross.validation,0,1)
+    if (typeof == 0){ 
+ 	crossVal<-ifelse(cross.validation,0,1)
+    }
 
-    np <- as.integer(uni.strat) * (as.integer(n.knots) + 2) + as.integer(nvar) + as.integer(correlation) + 2 * 1
+        if(equidistant %in% c(0,1)){
+		if (missing(nb.int1)) stop("Time interval 'nb.int1' is required")
+		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")	
+		if (nb.int1 < 1) stop("Number of Time 'nb.int2' interval must be between 1 and 20")
+		if (nb.int1 > 20){
+			 nb.int1 <-20
+			indic.nb.int1 <- 1 # equals 1 for nb.int1 > 20	 
+		}else{
+			indic.nb.int1 <- 0 # equals 1 for nb.int1 < 20
+		}
+		nbintervR <- nb.int1
+		size1 <- 3*nbintervR
+	}
+	if ((typeof == 0) | (typeof == 2)) indic.nb.int1 <- 0
+	np <- switch(as.character(typeof),
+		"0"=(as.integer(uni.strat) * (as.integer(n.knots) + 2) + as.integer(nvar) + as.integer(correlation) + 2 * 1),
+		"1"=(as.integer(uni.strat) * nbintervR + as.integer(nvar) + as.integer(correlation) + 2 * 1),
+		"2"=(as.integer(uni.strat) * 2 + nvar + as.integer(correlation) + 2 * 1))	
+ 
 
-    ptm<-proc.time()
-    cat("\n")
-    cat("Be patient. The program is computing ... \n")
+		xSu1 <- rep(0,100)
+		xSu2 <- rep(0,100)
+		if (typeof==0){
+			mt1 <- size1	
+		}else{
+			mt1 <- 100
+		}
+		size2 <- mt1
+		
+			ptm<-proc.time()
+			cat("\n")
+			cat("Be patient. The program is computing ... \n")
 
-    ans <- .Fortran("additive",
-                as.integer(n),
-                as.integer(length(uni.cluster)),
-                as.integer(uni.strat),
-                as.integer(n.knots),
-                as.double(kappa1),
-                as.double(kappa2),
-                as.double(tt0),
-                as.double(tt1),
-                as.integer(cens),
-                as.integer(cluster),
-                as.integer(nvar),
-                as.integer(strats),
-                as.double(var),
-                as.integer(varInt), 
-                as.integer(AG),
-                as.integer(noVar), 
-                as.integer(maxit),
-                as.integer(crossVal),  
-                as.integer(correlation),
-		as.integer(np),
-                b=as.double(rep(0,np)),#150
-                coef=as.double(rep(0,nvar)),   
-                varcoef=as.double(rep(0,nvar)),
-                varcoef2=as.double(rep(0,nvar)),
-                rho=as.double(0),
-                cov=as.double(0),
-                varcov=as.double(0),
-                varSigma2=as.double(c(0,0)),
-                varTau2=as.double(c(0,0)),
-                ni=as.integer(0),
-                loglikpen=as.double(0),
-		trace=as.double(0),
-                k0=as.double(c(0,0)),  
-                x1=as.double(rep(0,99)),
-                lam1=as.double(matrix(0,nrow=99,ncol=3)),
-                surv1=as.double(matrix(0,nrow=99,ncol=3)),
-                x2=as.double(rep(0,99)),
-                lam2=as.double(matrix(0,nrow=99,ncol=3)),
-                surv2=as.double(matrix(0,nrow=99,ncol=3)),
-                ier=as.integer(0),
-                ddl=as.double(0),   
-                PACKAGE = "frailtypack") 
-#AD:
-  if(ans$ier==4 || ans$loglikpen==-1e9){
-	cat("Problem in the loglikehood computation. The program stopped abnormally.\n")
-	ans$coef <- rep(NA,nvar)
-	ans$varcoef <- rep(NA,nvar)
-	ans$varcoef2 <- rep(NA,nvar)
-	varSigma2 <- c(NA,NA)
-	varTau2 <- c(NA,NA)
-	ans$cov <- NA
-	ans$varcov <- NA
-	ans$rho <- NA
-	ans$trace <- NA
-	ans$ddl <- NA
-	ans$x1 <- rep(NA,99)
-	ans$x2 <- rep(NA,99)	
-	ans$lam1 <- matrix(NA,nr=99,nc=3)
-	ans$lam2 <- matrix(NA,nr=99,nc=3)	
-	ans$surv1 <- matrix(NA,nr=99,nc=3) 
-	ans$surv2 <- matrix(NA,nr=99,nc=3) 
-	ans$ni <- 0
-  }
-#AD:
+			ans <- .Fortran("additive",
+				as.integer(n),
+				as.integer(length(uni.cluster)),
+				as.integer(uni.strat),
+				as.integer(n.knots),
+				as.double(kappa1),
+				as.double(kappa2),
+				as.double(tt0),
+				as.double(tt1),
+				as.integer(cens),
+				as.integer(cluster),
+				as.integer(nvar),
+				as.integer(strats),
+				as.double(var),
+				as.integer(varInt), 
+				as.integer(AG),
+				as.integer(noVar), 
+				as.integer(maxit),
+				as.integer(crossVal),  
+				as.integer(correlation),
+				as.integer(np),
+				b=as.double(rep(0,np)),
+				coef=as.double(rep(0,nvar)),   
+				varcoef=as.double(rep(0,nvar)),
+				varcoef2=as.double(rep(0,nvar)),
+				rho=as.double(0),
+				cov=as.double(0),
+				varcov=as.double(0),
+				varSigma2=as.double(c(0,0)),
+				varTau2=as.double(c(0,0)),
+				ni=as.integer(0),
+				loglikpen=as.double(0),
+				LCV=as.double(rep(0,2)),
+				k0=as.double(c(0,0)),  
+				x1=as.double(rep(0,size1)),
+				lam1=as.double(matrix(0,nrow=size1,ncol=3)),
+                                xSu1=as.double(xSu1),
+				surv1=as.double(matrix(0,nrow=size2,ncol=3)),
+				x2=as.double(rep(0,size1)),
+				lam2=as.double(matrix(0,nrow=size1,ncol=3)),
+                                xSu2=as.double(xSu2),
+				surv2=as.double(matrix(0,nrow=size2,ncol=3)),
+				as.integer(typeof),
+				as.integer(equidistant),
+				as.integer(nbintervR),
+				as.integer(size1),
+				ier=as.integer(0),
+				ddl=as.double(0),  
+				istop=as.integer(0),
+				shape.weib=as.double(rep(0,2)),
+				scale.weib=as.double(rep(0,2)),
+				as.integer(mt1),
+				trunc=as.integer(0),
+				PACKAGE = "frailtypack") 
+		
+
+    if (ans$trunc == 1){
+    	stop("'addivePenal' can not deal with left truncation.")
+    }
+    if (ans$istop == 4){
+	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")    
+     }
+    
+    if (ans$istop == 2){
+         warning("Model did not converge. Change the 'maxit' parameter")
+    }
+    if (ans$istop == 3){
+         warning("Matrix non-positive definite.")
+    }
     
     flush.console()
     cost<-proc.time()-ptm
@@ -260,7 +352,8 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
     fit$n.events <- sum(cens)  #coded 0: censure 1:event
     fit$logLikPenal <- ans$loglikpen
 #AD:
-    fit$LCV <- ans$trace
+    fit$LCV <- ans$LCV[1]
+    fit$AIC <- ans$LCV[2]   
 #AD:     
     fit$type <- type
 
@@ -300,30 +393,32 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
     fit$correlation<-correlation
 
     fit$x1 <- ans$x1
-    fit$lam <- matrix(ans$lam1, nrow = 99, ncol = 3) 
-    fit$surv <- matrix(ans$surv1, nrow = 99, ncol = 3)
+    fit$lam <- matrix(ans$lam1, nrow = size1, ncol = 3) 
     fit$x2 <- ans$x2
-    fit$lam2 <- matrix(ans$lam2, nrow = 99, ncol = 3)
-    fit$surv2 <- matrix(ans$surv2, nrow = 99, ncol = 3)
+    fit$lam2 <- matrix(ans$lam2, nrow = size1, ncol = 3)
+
+
+    fit$surv <- matrix(ans$surv1, nrow = size2, ncol = 3)
+    fit$surv2 <- matrix(ans$surv2, nrow = size2, ncol = 3)
+
+    fit$xSu1 <- ans$xSu1
+    fit$xSu2 <- ans$xSu2
     fit$npar <- np
 
 #AD:
     fit$noVar <- noVar
     fit$nvar <- nvar
 #AD:
-
-   
-    fit$DoF <- ans$ddl
-#AD:
-     fit$n.knots.temp <- n.knots.temp
-
+    fit$typeof <- typeof
+    fit$istop <- ans$istop  
+    if (typeof == 0){    
+    	fit$DoF <- ans$ddl
+    	fit$n.knots.temp <- n.knots.temp
+    }
+    fit$indic.nb.int1 <- indic.nb.int1
+    fit$shape.weib <- ans$shape.weib
+    fit$scale.weib <- ans$scale.weib   
 #AD
-    if(ans$ier==-1)
-        warning("matrix non-positive definite")
-
-    if(fit$n.iter>maxit)
-        warning("model did not converge. Change the 'maxit' parameter") 
-
     if(ans$ier==2000)
         stop("The cross validation procedure cannot be finished. Try to change 
           either the number of knots or the seed for kappa parameter")

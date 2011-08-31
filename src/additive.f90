@@ -1,8 +1,7 @@
 	
 
 	
-	module propred	
-		integer,dimension(:),allocatable,save::filtre,filtre2      
+	module propred	     
 		integer,dimension(:),allocatable,save::stracross!pour crossvalidation   
 		double precision,dimension(:),allocatable,save::aux
 		double precision,dimension(:,:),allocatable,save::y
@@ -18,13 +17,10 @@
 !#########################################################################################################
 !
 !
-	subroutine additive(ns0,ng0,nst0, &
-	nz0,xmin10,xmin20,tt00,tt10,ic0,groupe0,nva0, &
-	str0,vax0,interaction,ag0,noVar,maxiter0,irep10, &
-	correl0,np,b,&
-	coef,varcoef,varcoef2,rhoEnd,covEnd,varcovEnd, &
-	varSigma2,varTau2, &
-	ni,res,traceLCV,k0,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out,ier,ddl)
+	subroutine additive(ns0,ng0,nst0,nz0,xmin10,xmin20,tt00,tt10,ic0,groupe0,nva0, &
+	str0,vax0,interaction,ag0,noVar,maxiter0,irep10,correl0,np,b,coef,varcoef,varcoef2, &
+	rhoEnd,covEnd,varcovEnd,varSigma2,varTau2,ni,res,LCV,k0,x1Out,lamOut,xSu1,suOut,x2Out, &
+	lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt,ier,ddl,istop,shape_weib,scale_weib,mt1,trunc)
 
 	use parameters		
 	use tailles
@@ -35,7 +31,7 @@
 	
 	implicit none	
      
-	integer::noVar,interaction
+	integer::noVar,interaction,mt,mt1,trunc
 	integer::groupe,j,k,nz,n,np,cpt,ii,iii,iiii,ver, &
 	cptstr1,cptstr2,i,ic,ni,ier,istop,l,str, &
         nb_echec,nb_echecor,auxng, &
@@ -48,7 +44,8 @@
 	double precision::xmin10,xmin20
 	double precision,dimension(np)::b
 !------------------
-	double precision::tt0,tt1
+	real::tt0,tt1
+	integer,dimension(nva0)::filtre,filtre2
 	double precision::h,xmin1,xmin2,res,min,max,maxt, &
 	lrs,trace,trace1,trace2,auxi,ax,bx,cx,tol,ddl, &
 	fa,fb,fc,goldenadd,estimvadd,f1,f2,f3,varcov    
@@ -57,21 +54,38 @@
 	double precision::rhoEnd,covEnd,varcovEnd
 	double precision,dimension(nva0)::coef,varcoef,varcoef2	
 	double precision,dimension(2)::varSigma2,varTau2
-	double precision,dimension(99)::x1Out,x2Out
-	double precision,dimension(99,3)::lamOut,suOut,lam2Out,su2Out
+	double precision,dimension(mt)::x1Out,x2Out
+	double precision,dimension(mt,3)::lamOut,lam2Out
+	double precision,dimension(mt1,3)::suOut,su2Out
+	double precision,dimension(mt1)::xSu1,xSu2
 !AD: add traceLCV	
-	double precision,intent(out)::traceLCV
+	double precision,dimension(2),intent(out)::LCV,shape_weib,scale_weib
 !AD: add for new marq
-	double precision::ca,cb,dd,funcpaadd
-	external::funcpaadd
+	double precision::ca,cb,dd,funcpaa_splines,funcpaa_cpm,funcpaa_weib
+	external::funcpaa_splines,funcpaa_cpm,funcpaa_weib
+
+!Cpm
+	integer::typeof0,nbintervR0,equidistant,ent,indd
+	double precision::temp
+!cpm
 	ca=0.d0
 	cb=0.d0
-	dd=0.d0	
+	dd=0.d0
+	filtre=0
+	filtre2=0
 !AD:end	
 	epsa=1.d-4
 	epsb=1.d-4
 	epsd=1.d-3
+	typeof = typeof0
+
 	model=2
+!------------------------
+	if (typeof .ne. 0) then
+		nbintervR = nbintervR0
+	end if	
+	shape_weib = 0.d0
+	scale_weib = 0.d0
 	auxng=0
 	maxiter=maxiter0
 !----------------
@@ -97,35 +111,31 @@
 	stra(nsujetmax),g(nsujetmax),stracross(nsujetmax),aux(2*nsujetmax))
 
 	ndatemax=2*nsujet
-	allocate(date(ndatemax),mm3(ndatemax),mm2(ndatemax),mm1(ndatemax),mm(ndatemax), &
-	im3(ndatemax),im2(ndatemax),im1(ndatemax),im(ndatemax),dut1(ndatemax),dut2(ndatemax), &
-	ut1(0:ndatemax),ut2(0:ndatemax))
+	allocate(date(ndatemax))
+	if (typeof == 0) then
+		allocate(mm3(ndatemax),mm2(ndatemax),mm1(ndatemax),mm(ndatemax), &
+		im3(ndatemax),im2(ndatemax),im1(ndatemax),im(ndatemax),dut1(ndatemax),dut2(ndatemax), &
+		ut1(0:ndatemax),ut2(0:ndatemax))
+	end if
 !-----------------------------------------------------------------------------------------
 	ng=ng0
 	ngmax=ng
 	allocate(nig(ngmax),mid(ngmax))	
 !-----------------------------------------------------------------------------------------
 	nst=nst0
-	correl=correl0
-	  
+	correl=correl0  
 	correlini=correl
 !-----------------------------------------------------------------------------------------
 	ver=nva0
 	nvarmax=ver
 	allocate(ve(nsujetmax,nvarmax),ve2(nsujetmax,nvarmax),betaaux(nvarmax))
 	allocate(vax(nvarmax))
-	
-	allocate(filtre(nva0),filtre2(nva0))
+
 	if (noVar.eq.1) then 
-		do i=1,nva0
-			filtre(i)=0
-		enddo  
+		filtre=0
 		nva=0  
 	else
-		do i=1,nva0
-			filtre(i)=1
-			filtre2(i)=0
-		enddo  
+		filtre=1
 		filtre2(interaction)=1
 		nva=nva0  
 	end if  
@@ -138,11 +148,8 @@
 	
 	effet = 1
 	nig = 0
-	g=0
-
-    
+	g=0  
 !------------  lecture fichier -----------------------
-
 	maxt = 0.d0
 	cpt = 0
 	k = 0
@@ -275,21 +282,29 @@
 			maxt = t1(k)
 		endif
 	end do 
-	
-	nz1=nz
-	nz2=nz
-	if(nz.gt.20)then
-		nz = 20
-	endif
-	if(nz.lt.4)then
-		nz = 4
-	endif
+!AD:
+	if (typeof .ne. 0) then 
+		cens = maxt
+	end if
+!Ad	
+		
+	if (typeof == 0) then	
+		nz1=nz
+		nz2=nz
+		if(nz.gt.20)then
+			nz = 20
+		endif
+		if(nz.lt.4)then
+			nz = 4
+		endif
+	end if
 
 !***************************************************
 !--------------- zi- ----------------------------------
 
 !      construire vecteur zi (des noeuds)
 
+	
 	min = 1.d-10
 	max = maxt
 
@@ -320,59 +335,76 @@
 		endif 
 	end do 
 	
-	nzmax=nz+3
-	allocate(zi(-2:nzmax))
+	if(typeof == 0) then
+		nzmax=nz+3
+		allocate(zi(-2:nzmax))
 	
-	ndate = k
+		ndate = k
 
-	zi(-2) = date(1)
-	zi(-1) = date(1)
-	zi(0) = date(1)
-	zi(1) = date(1)
-	h = (date(ndate)-date(1))/dble(nz-1)
-	do i=2,nz-1
-		zi(i) =zi(i-1) + h   
-	end do
+		zi(-2) = date(1)
+		zi(-1) = date(1)
+		zi(0) = date(1)
+		zi(1) = date(1)
+		h = (date(ndate)-date(1))/dble(nz-1)
+		do i=2,nz-1
+			zi(i) =zi(i-1) + h   
+		end do
 
-	zi(nz) = date(ndate)
-	zi(nz+1)=zi(nz)
-	zi(nz+2)=zi(nz)
-	zi(nz+3)=zi(nz)
-
+		zi(nz) = date(ndate)
+		zi(nz+1)=zi(nz)
+		zi(nz+2)=zi(nz)
+		zi(nz+3)=zi(nz)
+	end if
 !---------- affectation nt0,nt1----------------------------
 
 	indictronq=0
 	do i=1,nsujet 
-		if(t0(i).eq.0.d0)then
-			nt0(i) = 0
-		endif
+		if (typeof == 0) then
+			if(t0(i).eq.0.d0)then
+				nt0(i) = 0
+			endif
+		end if
+
 		if(t0(i).ne.0.d0)then
 			indictronq=1
 		endif
-		do j=1,ndate
-			if(date(j).eq.t0(i))then
-				nt0(i)=j
-			endif
-			if(date(j).eq.t1(i))then
-				nt1(i)=j
-			endif
-		end do
+
+		if (typeof == 0) then
+			do j=1,ndate
+				if(date(j).eq.t0(i))then
+					nt0(i)=j
+				endif
+				if(date(j).eq.t1(i))then
+					nt1(i)=j
+				endif
+			end do
+		end if
+
 	end do  
 
 !---------- affectation des vecteurs de splines -----------------
-	n  = nz+2
+	if (typeof == 0) then
+		n  = nz+2
 	
-	call vecspliadd(n,ndate)
+		call vecspliadd(n,ndate)
 	
 	
-	allocate(m3m3(nzmax),m2m2(nzmax),m1m1(nzmax),mmm(nzmax),m3m2(nzmax), &
-	m3m1(nzmax),m3m(nzmax),m2m1(nzmax),m2m(nzmax),m1m(nzmax))
+		allocate(m3m3(nzmax),m2m2(nzmax),m1m1(nzmax),mmm(nzmax),m3m2(nzmax), &
+		m3m1(nzmax),m3m(nzmax),m2m1(nzmax),m2m(nzmax),m1m(nzmax))
 		
-	call vecpenadd(n)  
-	    
-	np = nst*n + nva + correl + 2*effet 
-
+		call vecpenadd(n)  
+		    
+		np = nst*n + nva + correl + 2*effet 
+	end if 
 !-----------------------
+!	if(typeof == 1) then 
+!		np = nst*nbintervR + nva + correl + 2*effet 
+!	end if
+!	
+!	if(typeof == 2) then
+!		np = nst*2 + nva + correl + 2*effet 
+!	end if
+	
 	npmax=np
 
 	allocate(I_hess(npmax,npmax),H_hess(npmax,npmax),Hspl_hess(npmax,npmax) &
@@ -386,100 +418,158 @@
             
 !------- initialisation des parametres                  
 	do i=1,np
-		b(i)= 1.d-1!5.d-1!
+		b(i)= 1.d-1
 	end do
 ! traitement, intercept et pente initialis�s plus loin
+	if (typeof == 1) then
+!------- RECHERCHE DES NOEUDS
+!----------> Enlever les zeros dans le vecteur de temps
+		i=0
+		j=0
 
+!----------> taille - nb de recu
+		do i=1,nsujet
+			if(t1(i).ne.(0.d0).and.c(i).eq.1) then
+				j=j+1
+			endif
+		end do
+		nbrecu=j
+
+	!	n = nbintervR
+!----------> allocation des vecteur temps
+		allocate(t2(nbrecu))
+		
+!----------> remplissage du vecteur de temps
+		j=0
+		do i=1,nsujet
+			if (t1(i).ne.(0.d0).and.c(i).eq.1) then
+				j=j+1
+				t2(j)=t1(i)
+			endif
+		end do
+		
+!----------> tri du vecteur de temps
+		indd=1
+		do while (indd.eq.1)
+			indd=0
+			do i=1,nbrecu-1
+				if (t2(i).gt.t2(i+1)) then
+					temp=t2(i)
+					t2(i)=t2(i+1)
+					t2(i+1)=temp
+					indd=1        
+				end if
+			end do
+		end do	
+		
+		ent=int(nbrecu/(nbintervR))
+		
+		allocate(ttt(0:nbintervR))
+		
+		ttt(0)=0.d0
+		
+		ttt(nbintervR)=cens
+		
+		j=0
+		do j=1,nbintervR-1
+			if (equidistant.eq.0) then
+				ttt(j)=(t2(ent*j)+t2(ent*j+1))/(2.d0)
+			else
+				ttt(j)=(cens/(nbintervR))*j
+			endif
+		end do
+		
+		deallocate(t2)
+!------- FIN RECHERCHE DES NOEUDS	
+	end if	
 
 !***********************************************************
 !************** NEW : cross validation  ***********************
 !!!!! sur une seule strate, sans var expli , sans frailties ****
 !*****************************************************************
-	nvacross=nva !pour la recherche du parametre de lissage sans var expli
-	nva=0
-	effetcross=effet
-	effet=0
-	nstcross=nst
-	nst=1
-	correl=0
+	if (typeof == 0) then
+		nvacross=nva !pour la recherche du parametre de lissage sans var expli
+		nva=0
+		effetcross=effet
+		effet=0
+		nstcross=nst
+		nst=1
+		correl=0
 
-	do l=1,nsujet  
-		stracross(l)=stra(l)
-	end do
-	do l=1,nsujet  
-		stra(l)=1
-	end do
+		do l=1,nsujet  
+			stracross(l)=stra(l)
+		end do
+		do l=1,nsujet  
+			stra(l)=1
+		end do
 
 	
-	irep1=irep10
+		irep1=irep10
 
-	if(irep1.eq.0.and.nst.ge.2)then
+		if(irep1.eq.0.and.nst.ge.2)then
 ! ne se produit jamais maintenant (1 seule strate pour CV): changement de juin 2009
-		stop
-	endif
+			stop
+		endif
 	
-	xmin1=xmin10
+		xmin1=xmin10
 		
-	if(xmin1.le.0.d0)then
-		xmin1 = 0.d0
-	endif  
+		if(xmin1.le.0.d0)then
+			xmin1 = 0.d0
+		endif  
 
 	
 !*************************************************
 !	nvat=nva
-	nva=0
+		nva=0
+	end if
 
 
 !on  travaille d'abord sur une seule strate
+	if(typeof == 0) then
+		if(irep1.eq.1)then   !pas recherche du parametre de lissage
+			xmin1 = dsqrt(xmin1)
 
-	if(irep1.eq.1)then   !pas recherche du parametre de lissage
-		xmin1 = dsqrt(xmin1)
-
-		auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
-
-		if (ni.ge.250) then
-
-			do i=1,nz+2
-				b(i)=1.d-1
-			end do     
-			xmin1 = sqrt(10.d0)*xmin1
 			auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
 
-			if (ni.lt.250) then
+			if (ni.ge.250) then
 
-			else
 				do i=1,nz+2
 					b(i)=1.d-1
 				end do     
 				xmin1 = sqrt(10.d0)*xmin1
 				auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
- 
+
+				if (ni.lt.250) then
+
+				else
+					do i=1,nz+2
+						b(i)=1.d-1
+					end do     
+					xmin1 = sqrt(10.d0)*xmin1
+					auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
+	 
+				endif
+			else
+
 			endif
-		else
+	!----------------------------------------------------
+		else                   !recherche du parametre de lissage
 
-		endif
-!----------------------------------------------------
-	else                   !recherche du parametre de lissage
+			if(xmin1.le.0.d0)then
+				xmin1 = 1.d0
+			endif  
 
-		if(xmin1.le.0.d0)then
-			xmin1 = 1.d0
-		endif  
-
-		xmin1 = dsqrt(xmin1)
-		auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
-
-		if(ddl.gt.-2.5d0)then
 			xmin1 = dsqrt(xmin1)
 			auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
-	
+
 			if(ddl.gt.-2.5d0)then
 				xmin1 = dsqrt(xmin1)
 				auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
-
-
+	
 				if(ddl.gt.-2.5d0)then
 					xmin1 = dsqrt(xmin1)
 					auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
+
 
 					if(ddl.gt.-2.5d0)then
 						xmin1 = dsqrt(xmin1)
@@ -487,67 +577,73 @@
 
 						if(ddl.gt.-2.5d0)then
 							xmin1 = dsqrt(xmin1)
+							auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
+
+							if(ddl.gt.-2.5d0)then
+								xmin1 = dsqrt(xmin1)
+							endif   
 						endif   
 					endif   
-				endif   
-			endif
-		endif 
-
-		if (ni.ge.250) then
-			do i=1,nz+2
-				b(i)=1.d-1
-			end do     
-			xmin1 = sqrt(10.d0)*xmin1
-			auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
+				endif
+			endif 
 
 			if (ni.ge.250) then
 				do i=1,nz+2
 					b(i)=1.d-1
 				end do     
 				xmin1 = sqrt(10.d0)*xmin1
-			endif
-		endif 
-		ax = xmin1
-		bx = xmin1*dsqrt(1.5d0)  
+				auxi = estimvadd(xmin1,n,b,y,ddl,ni,res)
 
-		call mnbrakadd(ax,bx,cx,fa,fb,fc,b,n)            
-		tol = 0.001d0
-		res = goldenadd(ax,bx,cx,tol,xmin1,n,b,y,ddl)
+				if (ni.ge.250) then
+					do i=1,nz+2
+						b(i)=1.d-1
+					end do     
+					xmin1 = sqrt(10.d0)*xmin1
+				endif
+			endif 
+			ax = xmin1
+			bx = xmin1*dsqrt(1.5d0)  
 
-		effet=0
-		correl=0
+			call mnbrakadd(ax,bx,cx,fa,fb,fc,b,n)            
+			tol = 0.001d0
+			res = goldenadd(ax,bx,cx,tol,xmin1,n,b,y,ddl)
 
-		auxkappa(1)=xmin1*xmin1
-		auxkappa(2)=0.d0
+			effet=0
+			correl=0
 
-		call marq98J(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaadd)
-		if ((istop .eq. 4).or.(res .eq. -1.d9)) then
-			goto 1000
-		end if	
+			auxkappa(1)=xmin1*xmin1
+			auxkappa(2)=0.d0
+			call marq98J(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)
+			if (istop .ne. 1) then
+				goto 1000
+			end if	
+		end if
+	end if
 
-	endif  
-
-	
-	nva=nvacross ! pour la recherche des parametres de regression
-	nst=nstcross ! avec stratification si n�cessaire
-	effet=effetcross ! avec effet initial
-	do l=1,nsujet  
-		stra(l)=stracross(l) !r�tablissement stratification
-	end do
+	if(typeof == 0) then
+		nva=nvacross ! pour la recherche des parametres de regression
+		nst=nstcross ! avec stratification si n�cessaire
+		effet=effetcross ! avec effet initial
+		do l=1,nsujet  
+			stra(l)=stracross(l) !r�tablissement stratification
+		end do
 	
 !********************************************************************
-	if(nst.eq.2)then
-		xmin2=xmin20
-	endif
-
-
-	k0(1) = xmin1*xmin1
-	k0(2) = 0.d0
+		if(nst.eq.2)then
+			xmin2=xmin20
+		endif
 	
-	if(nst.eq.2)then
-		k0(2) = xmin2
-	endif
+		k0(1) = xmin1*xmin1
+		k0(2) = 0.d0
+		
+		if(nst.eq.2)then
+			k0(2) = xmin2
+		endif
+	end if
 
+	if (typeof .ne. 0) then
+		allocate(vvv((npmax*(npmax+1)/2)),kkapa(2))	
+	end if
 !=============================- fin cross validation
 	
 !===== initialisation des parametres de regression/pas effets aleatopires
@@ -557,19 +653,29 @@
 	
 	effet=0
 
-	np = nst*n + nva
-
-	b(nst*n+1)=-0.15d0           !initialisation traitementc
-
-
 !	write(*,*)'===avant marq98==========',n,np,nva,nst,effet
-	call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaadd)
-	if ((istop .eq. 4).or.(res .eq. -1.d9)) then
-		goto 1000
-	end if		
-!AD:	
-!	if (istop.eq.4) goto 1000
-!AD:		
+
+!	write(*,*)' ============> marq 1 typeof :',typeof
+	select case(typeof)
+		case(0)
+			np = nst*n + nva
+			b(nst*n+1)=-0.15d0 !initialisation traitementc
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)
+		case(1)
+			np = nst*nbintervR + nva
+			b(nst*nbintervR+1)=-0.15d0
+			allocate(betacoef(nst*nbintervR))
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_cpm)
+			
+		case(2)
+			np = nst*2 + nva
+			b(nst*2+1)=-0.15d0
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_weib)
+			if (istop .ne. 1) then
+				goto 1000
+			end if	
+	end select
+		
 !===== recherche de l'ensemble des parametres
 	
 !	write(*,*)'====================================='
@@ -588,63 +694,124 @@
 		b(np-nva-2)=0.1d0!-0.69d0!-1.61d0!-0.64d0!initialisation cov avec contrainte 
 	endif
 	
+
 	b(np-nva-1)=0.5d0!0.5477d0      !      initialisation intercept
 	b(np-nva)=0.15d0!0.5477d0  !0.13d0!  !   0.15d0!   initialisation pente
 	
-	call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaadd)
-	if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+	
+!	write(*,*)' ============> marq2 typeof :',typeof
+	select case(typeof)
+		case(0)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)
+		case(1)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_cpm)
+		case(2)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_weib)
+	end select
+
+	if (istop .ne. 1) then
 		goto 1000
-	end if		
-!AD:	
-!	if (istop.eq.4) goto 1000
-!AD:		
+	end if	
+	
 	j=(np-nva)*(np-nva+1)/2
 	
 	trace=0
 	trace1=0
 	trace2=0
-	
-	if(indic_sousv.eq.0)then 
+
+	select case(typeof)
+		case(0)	
 ! que lorsque la matrice totale est inversible, ie sans echec inversion
 ! strate1 : 
-		do i=1,nz1+2
-			do j=1,nz1+2
-				H1_hess(i,j)=H_hess(i,j)
-				I1_hess(i,j)=I_hess(i,j)
+			do i=1,nz1+2
+				do j=1,nz1+2
+					H1_hess(i,j)=H_hess(i,j)
+					I1_hess(i,j)=I_hess(i,j)
+				end do
+			end do 
+			call multiJ(H1_hess,I1_hess,nz1+2,nz1+2,nz1+2,HI1)
+			do i =1,nz1+2
+				trace1=trace1+HI1(i,i)
 			end do
-		end do 
-		call multiJ(H1_hess,I1_hess,nz1+2,nz1+2,nz1+2,HI1)
-		do i =1,nz1+2
-			trace1=trace1+HI1(i,i)
-		end do
 
 ! strate2 :
-		if(nst.eq.2)then
-			do i=1,nz2+2
-				k=nz1+2+i
-				do j=1,nz2+2
-					l=nz1+2+j                   
-					H2_hess(i,j)=H_hess(k,l)
-					I2_hess(i,j)=I_hess(k,l)
+			if(nst.eq.2)then
+				do i=1,nz2+2
+					k=nz1+2+i
+					do j=1,nz2+2
+						l=nz1+2+j                   
+						H2_hess(i,j)=H_hess(k,l)
+						I2_hess(i,j)=I_hess(k,l)
+					end do
 				end do
+				call multiJ(H2_hess,I2_hess,nz2+2,nz2+2,nz2+2,HI2)
+				do i =1,nz2+2
+					trace2=trace2+HI2(i,i)
+				end do
+			endif ! pour la deuxieme strate
+			
+		case(1)
+			
+			do i=1,nbintervR
+				do j=1,nbintervR
+					H1_hess(i,j)=H_hess(i,j)
+					I1_hess(i,j)=I_hess(i,j)
+				end do
+			end do 
+			call multiJ(H1_hess,I1_hess,nbintervR,nbintervR,nbintervR,HI1)
+			do i =1,nbintervR
+				trace1=trace1+HI1(i,i)
 			end do
-			call multiJ(H2_hess,I2_hess,nz2+2,nz2+2,nz2+2,HI2)
-			do i =1,nz2+2
-				trace2=trace2+HI2(i,i)
+
+! strate2 :
+			if(nst.eq.2)then
+				do i=1,nbintervR
+					k=nbintervR+i
+					do j=1,nbintervR
+						l=nbintervR+j                   
+						H2_hess(i,j)=H_hess(k,l)
+						I2_hess(i,j)=I_hess(k,l)
+					end do
+				end do
+				call multiJ(H2_hess,I2_hess,nbintervR,nbintervR,nbintervR,HI2)
+				do i =1,nbintervR
+					trace2=trace2+HI2(i,i)
+				end do
+			endif ! pour la deuxieme strate
+			
+		case(2)
+		
+			do i=1,2
+				do j=1,2
+					H1_hess(i,j)=H_hess(i,j)
+					I1_hess(i,j)=I_hess(i,j)
+				end do
+			end do 
+			call multiJ(H1_hess,I1_hess,2,2,2,HI1)
+			do i =1,2
+				trace1=trace1+HI1(i,i)
 			end do
-		endif ! pour la deuxieme strate
-	endif
-! fin calcul trace
-	
-	if(indic_sousv.eq.0)then
-		call multiJ(I_hess,H_hess,np,np,np,IH)
-		call multiJ(H_hess,IH,np,np,np,HIH)
-	endif
-	if(indic_sousv.eq.1)then
-		call multiJ(I_hess,H_hess,sousm,sousm,sousm,IH)
-		call multiJ(H_hess,IH,sousm,sousm,sousm,HIH)
-	endif
-	
+
+! strate2 :
+			if(nst.eq.2)then
+				do i=1,2
+					k=2+i
+					do j=1,2
+						l=2+j                   
+						H2_hess(i,j)=H_hess(k,l)
+						I2_hess(i,j)=I_hess(k,l)
+					end do
+				end do
+				call multiJ(H2_hess,I2_hess,2,2,2,HI2)
+				do i =1,2
+					trace2=trace2+HI2(i,i)
+				end do
+			endif ! pour la deuxieme strate
+	end select
+
+
+	call multiJ(I_hess,H_hess,np,np,np,IH)
+	call multiJ(H_hess,IH,np,np,np,HIH)
 ! Salida Juan Aug'07
 	
 	f1 = (b(np-nva))*(2.d0* dexp(b(np-nva-2))/(1.d0+dexp(b(np-nva-2)))-1.d0)
@@ -669,38 +836,20 @@
 	varcovEnd=varcov
 
 
-	if(indic_sousv.eq.0)then
-		varSigma2(1)=((2.d0*b(np-nva-1))**2)*H_hess(np-nva-1,np-nva-1)
-		varSigma2(2)=((2.d0*b(np-nva-1))**2)*HIH(np-nva-1,np-nva-1)
-		
-		varTau2(1)=((2.d0*b(np-nva))**2)*H_hess(np-nva,np-nva)
-		varTau2(2)=((2.d0*b(np-nva))**2)*HIH(np-nva,np-nva)
-	end if
+
+	varSigma2(1)=((2.d0*b(np-nva-1))**2)*H_hess(np-nva-1,np-nva-1)
+	varSigma2(2)=((2.d0*b(np-nva-1))**2)*HIH(np-nva-1,np-nva-1)
 	
-	if(indic_sousv.eq.1)then
-		varSigma2(1)=((2.d0*b(np-nva-1))**2)*H_hess(sousm-nva-1,sousm-nva-1)
-		varSigma2(2)=((2.d0*b(np-nva-1))**2)*HIH(sousm-nva-1,sousm-nva-1)
-		
-		varTau2(1)=((2.d0*b(np-nva))**2)*H_hess(sousm-nva,sousm-nva)
-		varTau2(2)=((2.d0*b(np-nva))**2)*HIH(sousm-nva,sousm-nva)
-	end if  
+	varTau2(1)=((2.d0*b(np-nva))**2)*H_hess(np-nva,np-nva)
+	varTau2(2)=((2.d0*b(np-nva))**2)*HIH(np-nva,np-nva)
+
 
 ! Covariates
 
 	do i=1,nva
-	
 		coef(i)=b(np-nva+i)
-		
-		if(indic_sousv.eq.0)then
-			varcoef(i)=H_hess(np-nva+i,np-nva+i) 
-			varcoef2(i)=HIH(np-nva+i,np-nva+i)
-		end if     
-			
-		if(indic_sousv.eq.1)then
-			varcoef(i)=H_hess(sousm-nva+i,sousm-nva+i)
-			varcoef2(i)=HIH(sousm-nva+i,sousm-nva+i)
-		end if 
-		
+		varcoef(i)=H_hess(np-nva+i,np-nva+i) 
+		varcoef2(i)=HIH(np-nva+i,np-nva+i)
 	end do
 
 	
@@ -712,33 +861,74 @@
 	
 ! --------------  Lambda and survival and cumulative hazard estimates 
 	
-!	call distance(nz1,nz2,b,fich3,fich4,fich3b,fich4b,fich3c,fich4c,effet)
-
-	call distanceadd(nz1,nz2,b,effet,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
-	
+!	write(*,*)'===========> avant distance <==========='
+	select case(typeof)
+		case(0)
+			call distancea_splines(nz1,nz2,b,effet,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
+		case(1)
+			Call distance_cpm(b,nst*nbintervR,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+		case(2)
+			if (nst == 1) then
+				typeof2 = 1
+			else
+				typeof2 = 2
+			end if
+			Call distance_weib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+	end select
+!	write(*,*)'===========> apres distance <==========='
+	if (nst == 1) then
+		shape_weib(1) = betaR
+		scale_weib(1) = etaR
+		shape_weib(2) = 0.d0
+		scale_weib(2) = 0.d0
+	else
+		shape_weib(1) = betaR
+		scale_weib(1) = etaR
+		shape_weib(2) = betaD
+		scale_weib(2) =	etaD	
+	end if	
 !AD:add LCV
 !     calcul de la trace, pour le LCV (likelihood cross validation)
-	traceLCV=0.d0
-	call multiJ(H_hess,I_hess,np,np,np,HI)
-	
-	do i =1,np
-		traceLCV = traceLCV + HI(i,i)
-	end do 
-	
-	traceLCV = (traceLCV - resnonpen) / nsujet
+	LCV=0.d0
+	if (typeof == 0) then	
+!		write(*,*)'The approximate like cross-validation Criterion in the non parametric case'
+		call multiJ(H_hess,I_hess,np,np,np,HI)
+		do i =1,np
+			LCV(1) = LCV(1) + HI(i,i)
+		end do 
+		LCV(1) = (LCV(1) - resnonpen) / nsujet
+	else		
+!		write(*,*)'=========> Akaike information Criterion <========='
+!		LCV(2) = 2.d0 * np - 2.d0 * res
+		LCV(2) = (1.d0 / nsujet) * (np - res)
+!		write(*,*)'======== AIC :',LCV(2)
+	end if
 !AD:end     
 1000    continue
-	deallocate(invd)
-	deallocate(t0,t1,c,nt0,nt1,stra,g,stracross,aux)
-	deallocate(date,mm3,mm2,mm1,mm,im3,im2,im1,im,dut1,dut2,ut1,ut2)
+	trunc = indic_tronc
+
+	deallocate(t0,t1,c,nt0,nt1,stra,g,stracross,aux,invd)
+	if (typeof == 0) then
+		deallocate(mm3,mm2,mm1,mm,im3,im2,im1,im,dut1,dut2,ut1,ut2)
+	end if
+	
 	deallocate(nig,mid)	
-	deallocate(ve,ve2,betaaux)
-	deallocate(vax)
-	deallocate(filtre,filtre2)		
-	deallocate(zi)	
-	deallocate(m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m)
+	deallocate(date,ve,ve2,betaaux,vax)	
+	
+	if (typeof == 0) then
+		deallocate(zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m)
+	end if
+	
 	deallocate(I_hess,H_hess,Hspl_hess,hess,PEN_deri)
-	deallocate(y,v,I1_hess,H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI)	
+	deallocate(y,v,I1_hess,H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI)
+	
+	if (typeof == 1) then
+		deallocate(ttt,betacoef)	
+	end if
+	
+	if (typeof .ne. 0) then
+		deallocate(vvv,kkapa)
+	end if	
 	
 	end subroutine additive
 
@@ -939,128 +1129,6 @@
 	end do
 	
 	end subroutine vecpenadd
-
-
-!==========================  DISTANCE   =================================
-	
-!	subroutine distance(nz1,nz2,b,fic1,fic2,fic1b,fic2b,fic1c,fic2c,effet)
-
-	subroutine distanceadd(nz1,nz2,b,effet,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)	
-	 	
-	use tailles
-	use comon,only:zi,date,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst, &
-	PEN_deri,I_hess,H_hess,Hspl_hess,hess	
-
-	
-	implicit none
-	
-	
-	integer::nz1,nz2,i,j,n,np,k,l,effet
-	double precision::x1,x2,su,bsup,binf,lam,lbinf, &
-	h,lbsup
-	double precision,dimension(npmax,npmax)::hes1,hes2
-	double precision,dimension(-2:npmax):: the1,the2
-	double precision,dimension(npmax):: b
-	double precision,dimension(99)::x1Out,x2Out
-	double precision,dimension(99,3)::lamOut,suOut,lam2Out,su2Out
-	
-	n  = nz1+2
-	
-	if(nst.eq.2)then      
-		np  = nz1+2+nz2+2+effet+nva
-	else
-		np  = nz1+2+effet+nva
-	endif
-	
-	do i=1,nz1+2
-		do j=1,nz1+2
-			hes1(i,j)=h_Hess(i,j)
-		end do
-	end do 
-	
-	if(nst.eq.2)then  
-		k = 0
-		do i=nz1+3,nz1+2+nz2+2
-			k = k + 1 
-			l = 0
-			do j=nz1+3,nz1+2+nz2+2
-				l = l + 1
-				hes2(k,l)=H_hess(i,j)
-			end do
-		end do   
-	endif
-	
-	do i=1,nz1+2
-		the1(i-3)=(b(i))*(b(i))
-	end do
-	
-	if(nst.eq.2)then  
-		do i=1,nz2+2
-			j = nz1+2+i
-			the2(i-3)=(b(j))*(b(j))
-		end do
-	endif
-	
-	h = (zi(n)-zi(1))*0.01d0
-	x1 = zi(1)
-	x2 = zi(1)     
-		
-		
-	do i=1,99 
-		if(i .ne.1)then
-			x1 = x1 + h 
-		end if
-		call cospadd(x1,the1,nz1+2,hes1,zi,binf,su,bsup,lbinf,lam,lbsup)
-	
-		if(bsup.lt.0.d0)then
-			bsup = 0.d0
-		endif
-		if(binf.gt.1.d0)then
-			binf = 1.d0 
-		endif
-		if(lbinf.lt.0.d0)then
-			lbinf = 0.d0
-		endif 
-!!
-!!
-!!	
-		x1Out(i)=x1
-		lamOut(i,1)=lam
-		lamOut(i,2)=lbinf
-		lamOut(i,3)=lbsup 
-		suOut(i,1)=su
-		suOut(i,2)=binf
-		suOut(i,3)=bsup  	
-		
-		if(nst.eq.2)then
-			if(i.ne.1)then
-				x2 = x2 + h 
-			endif 
-			call cospadd(x2,the2,nz2+2,hes2,zi,binf,su,bsup,lbinf,lam,lbsup)
-			if(binf.lt.0.d0)then
-				binf = 0.d0
-			endif
-			if(bsup.gt.1.d0)then
-				bsup = 1.d0
-			endif
-			if(lbinf.lt.0.d0)then
-				lbinf = 0.d0
-			endif
-	
-			x2Out(i)=x2
-			lam2Out(i,1)=lam
-			lam2Out(i,2)=lbinf
-			lam2Out(i,3)=lbsup 
-			su2Out(i,1)=su
-			su2Out(i,2)=binf
-			su2Out(i,3)=bsup  
-	
-		endif
-	end do
-		
-	return
-	
-	end subroutine distanceadd
 
 !==========================  SUSP  ====================================
 	subroutine suspadd(x,the,n,su,lam,zi)
@@ -1445,527 +1513,6 @@
 
 
 	
-!===================================================================
-!========================          FUNCPA       ====================
-	double precision function funcpaadd(b,np,id,thi,jd,thj,k0)
-	
-	use tailles
-	use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-	mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,pe,effet,nz1,nz2,stra, &
-	t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,auxig,ng,ve,g,nig,indictronq,resnonpen
-	use additiv,only: &
-	dut1,dut2,ut1,ut2,correl,ngexact,ve2,sigma2,tau2,rho,cov,mid,betaaux,invD
-	
-	implicit none
-	
-	integer::n,np,id,jd,i,j,k,vj,cptg,ig,ip
-	integer,dimension(ngmax)::cpt
-	double precision::thi,thj,pe1,pe2,som1,som2, &
-	res,vet,h1
-	double precision,dimension(-2:npmax)::the1,the2
-	double precision,dimension(np)::b,bh
-	double precision,dimension(ngmax)::integrale1,funcaux
-	double precision,dimension(2)::k0
-	
-	real,parameter::pi = 3.1415926535
-        integer::restar,nf
-!****** pour la maximisation avec marq98aux
-	integer :: npaux,niaux,ieraux,istopaux
-	DOUBLE PRECISION::resaux
-	double precision,dimension((npmax*(npmax+3)/2))::vaux
-	double precision,dimension(npmax)::baux
-!****** derivanal
-	double precision , dimension(ngmax)::res1,res2,res3,res4
-	double precision , dimension(ngmax)::res5,res6
-!      common /derivanal/res1,res2,res3,res4,res5,res6,res8
-
-!****** u_tilde
-	double precision  :: u_tilde,v_tilde
-!      common /utilde/u_tilde,v_tilde
-!******************
-
-
-	j=0
-	res=0.d0
-	resnonpen=0.d0
-	som2=0.d0
-	pe=0.d0
-	restar = 0
-	nf = 1   
-	
-	do i=1,np
-		bh(i)=b(i)
-	end do 
-	
-	if (id.ne.0) bh(id)=bh(id)+thi 
-	if (jd.ne.0) bh(jd)=bh(jd)+thj    
-	
-	if(nst.eq.2)then
-		n = (nz1+2 +nz2+2)/nst
-	else
-		n = nz1+2
-	endif
-	
-	do i=1,n
-		the1(i-3)=(bh(i))*(bh(i))
-		j = n+i 
-		if (nst.eq.2) then
-			the2(i-3)=(bh(j))*(bh(j))
-		endif
-	end do
-	
-	if(effet.eq.1) then
-!terme de correlation entre 2 frailties/avec contraintes
-		sigma2 = (bh(np-nva-1)*bh(np-nva-1)) ! variance intercept
-		tau2 = (bh(np-nva)*bh(np-nva))  ! variance traitement * groupe
-		cov=dsqrt(sigma2*tau2)*(2.d0 * dexp(bh(np-nva-2))/(1.d0+dexp(bh(np-nva-2)))-1.d0)
-	endif
-	
-	vj = 0
-	som1 = 0.d0
-	dut1(1) = (the1(-2)*4.d0/(zi(2)-zi(1)))
-	ut1(0) = 0.d0
-	ut1(1) = the1(-2)*dut1(1)*0.25d0*(zi(1)-zi(-2))
-
-	if (nst.eq.2) then
-		som2 = 0.d0
-		dut2(1) = (the2(-2)*4.d0/(zi(2)-zi(1)))
-		ut2(1) = the2(-2)*dut2(1)*0.25d0*(zi(1)-zi(-2))
-		ut2(0) = 0.d0
-	endif
-	
-	do i=2,ndate-1
-		do k = 2,n-2
-			if (((date(i)).ge.(zi(k-1))).and.(date(i).lt.zi(k)))then
-				j = k-1
-				if ((j.gt.1).and.(j.gt.vj))then
-					som1 = som1+the1(j-4)
-					som2 = som2+the2(j-4)
-					vj  = j
-				endif   
-			endif
-		end do 
-		
-		ut1(i) = som1 +(the1(j-3)*im3(i))+(the1(j-2)*im2(i)) &
-		+(the1(j-1)*im1(i))+(the1(j)*im(i))
-		dut1(i) = (the1(j-3)*mm3(i))+(the1(j-2)*mm2(i)) &
-		+(the1(j-1)*mm1(i))+(the1(j)*mm(i))
-
-		if(nst.eq.2)then
-			ut2(i) = som2 +(the2(j-3)*im3(i))+(the2(j-2)*im2(i)) &
-			+(the2(j-1)*im1(i))+(the2(j)*im(i))
-			dut2(i) = (the2(j-3)*mm3(i))+(the2(j-2)*mm2(i)) &
-			+(the2(j-1)*mm1(i))+(the2(j)*mm(i))
-		endif         
-	end do
-	
-	
-	i = n-2
-	h1 = (zi(i)-zi(i-1))
-	ut1(ndate)=som1+the1(i-4)+the1(i-3)+the1(i-2)+the1(i-1)
-	dut1(ndate) = (4.d0*the1(i-1)/h1)   
-!AD:the1(i-4) en th2(i-4)
-	if(nst.eq.2)then
-		ut2(ndate)=som2+the2(i-4)+the2(i-3)+the2(i-2)+the2(i-1)
-		dut2(ndate) = (4.d0*the2(i-1)/h1) 
-	endif
-!AD:
-!--------------------------------------------------------
-!----------calcul de la vraisemblance ------------------
-!---------------------------------------------------------
-
-!---- avec ou sans variable explicative  ------cc
-	
-	do ig=1,ngexact!ng!
-		res1(ig) = 0.d0
-		res2(ig) = 0.d0
-	end do
-	cpt=0
-!*******************************************     
-!----- sans effet aleatoire dans le modele
-!*******************************************     
-
-	if (effet.eq.0) then
-		
-		do i=1,nsujet
-	
-			cpt(g(i))=cpt(g(i))+1
-	
-			if(nva.gt.0)then
-			
-				vet = 0.d0  
-				 
-				do j=1,nva
-					vet =vet + bh(np-nva+j)*ve(i,j)
-				end do
-				
-				vet = dexp(vet)
-			else
-				vet=1.d0
-			endif
-	
-	
-			if((c(i).eq.1).and.(stra(i).eq.1))then
-				res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet)
-			endif  
-
-			if((c(i).eq.1).and.(stra(i).eq.2))then
-				res2(g(i)) = res2(g(i))+dlog(dut2(nt1(i))*vet)
-			endif
-
-			if(stra(i).eq.1)then
-				res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet-ut1(nt0(i))*vet 
-			endif
-	
-			if(stra(i).eq.2)then
-				res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet-ut2(nt0(i))*vet 
-			endif
-	
-		end do       
-
-		res = 0.d0
-
-		cptg = 0
-	
-! k indice les groupes
-		do k=1,ngexact 
-			if(cpt(k).gt.0)then !nb de sujets dans un gpe=nig()               
-				res = res-res1(k)+ res2(k) 
-				cptg = cptg + 1 
-			endif 
-		end do
-	
-	else 
-!*******************************************         
-!-----avec deux effets aleatoires dans le modele et correl=0
-!*********************************************
-		if(effet.eq.1.and.correl.eq.0)then
-		
-			mid=0
-			integrale1=0.d0
-			
-			do k=1,nsujet
-				if(c(k).eq.1)then
-					mid(g(k))=mid(g(k))+1
-				endif
-			end do 
-	
-			do k=1,nsujet
-			
-				if(nva.gt.0)then
-					vet = 0.d0 
-					do ip=1,nva
-						vet =vet + bh(np-nva+ip)*ve(k,ip)
-					end do
-					vet = dexp(vet)
-				else
-					vet=1.d0
-				endif
-	
-				if((c(k).eq.1).and.(stra(k).eq.1))then
-					res2(g(k)) = res2(g(k))+dlog(dut1(nt1(k))*vet)
-				endif  
-				
-				if((c(k).eq.1).and.(stra(k).eq.2))then
-					res2(g(k)) = res2(g(k))+dlog(dut2(nt1(k))*vet)
-				endif 
-	
-			end do 
-
-!=========================================================================
-!==== calcul des int�grales par transformation de LAPLACE pour chq gpe ===
-!=========================================================================
-	
-			do ig=1,ng!ngexact
-			
-				res3(ig)=0.d0
-				res4(ig)=0.d0
-				res5(ig)=0.d0
-				res6(ig)=0.d0
-				auxig=ig
-				baux(1)=0.05d0      !initialisation de u_tilde
-				baux(2)=0.05d0      !initialisation de v_tilde
-
-!======================================================================
-! maximisation pour deux parametres, les 2 effets aleatoires : u et v 
-!======================================================================
-				npaux=2
-				niaux=0
-				ieraux=0
-				istopaux=0
-				vaux=0.d0!vecteur derivees 2nd et 1ERES
-				funcaux=0.d0!vraisemblance
-				resaux=0.d0!vraisemblance
-				
-				do ip=1,nva
-					betaaux(ip)= bh(np-nva+ip)
-				end do
-
-
-
-	call marq98o(baux,npaux,niaux,vaux,resaux,ieraux,istopaux)
-
-				u_tilde = baux(1)!u_tilde
-				v_tilde = baux(2)!v_tilde
-
-				if(effet.eq.1) then
-				end if
-				
-				do k=1,nsujet
-				
-					if(nva.gt.0.and.g(k).eq.ig)then
-						vet = 0.d0 
-						do ip=1,nva
-							vet =vet + bh(np-nva+ip)*ve(k,ip)
-						end do
-						vet = dexp(vet)
-					else
-						vet=1.d0
-					endif
-	
-	
-					if(g(k).eq.ig)then
-					
-						if(c(k).eq.1)then
-							res3(ig) = res3(ig)+u_tilde+v_tilde*ve2(k,1)
-						endif
-	
-						if(stra(k).eq.1)then
-							res4(ig) = res4(ig) &
-							+ut1(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))
-							res5(ig) = res5(ig) &
-							+ut1(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
-							res6(ig) = res6(ig) &
-							+ut1(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
-						endif
-						
-						if(stra(k).eq.2)then
-							res4(ig) = res4(ig) &
-							+ut2(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))
-							res5(ig) = res5(ig) &
-							+ut2(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
-							res6(ig) = res6(ig) &
-							+ut2(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
-						endif
-	
-					endif 
-				end do 
-
-!=====fin maximisation aux
-	
-				integrale1(ig)= -0.5d0*dlog(sigma2*tau2) &
-				-0.5d0* &
-				dlog(res4(ig)*res6(ig)+res4(ig)/tau2+res6(ig)/sigma2 &
-				+1.d0/(sigma2*tau2)-res5(ig)*res5(ig)) & !det(K"(b)) 
-				+res2(ig)+res3(ig)-res4(ig) &
-				-0.5d0*((u_tilde**2)/sigma2+(v_tilde**2)/tau2)!-k(b)
-			end do
-	!======= fin calcul de log integrale
-!======================================================================
-	
-	
-			res = 0.d0
-			do k=1,ng!ngexact  
-				if(nig(k).gt.0)then
-				
-					if(indictronq.eq.0)then
-						res = res+integrale1(k)!integrale1 donne le log de I directement
-					else !troncature
-				!		write(*,*)'***TRAITER TRONCATURE**'
-						stop
-					endif
-				endif
-			end do
-		endif                !fin boucle effet= 1 and correl = 0
-
-!=======================================================================
-
-!*******************************************         
-!-----avec deux effets aleatoires dans le modele et correl=1
-!*********************************************
-	
-		if(effet.eq.1.and.correl.eq.1)then
-	
-			mid=0
-			integrale1=0.d0
-	
-			do k=1,nsujet
-				if(c(k).eq.1)then
-					mid(g(k))=mid(g(k))+1
-				endif
-			end do 
-	
-			do k=1,nsujet
-				if(nva.gt.0)then
-					vet = 0.d0 
-					do ip=1,nva
-						vet =vet + bh(np-nva+ip)*ve(k,ip)
-					end do
-					vet = dexp(vet) 
-				else
-					vet=1.d0
-				endif
-	
-				if((c(k).eq.1).and.(stra(k).eq.1))then
-					res2(g(k)) = res2(g(k))+dlog(dut1(nt1(k))*vet)
-				endif  
-				if((c(k).eq.1).and.(stra(k).eq.2))then
-					res2(g(k)) = res2(g(k))+dlog(dut2(nt1(k))*vet)
-				endif 
-	
-			end do 
-
-!=========================================================================
-!==== calcul des int�grales par transformation de LAPLACE pour chq gpe ===
-!=========================================================================
-	
-			do ig=1,ngexact!ng!
-				res3(ig)=0.d0
-				res4(ig)=0.d0
-				res5(ig)=0.d0
-				res6(ig)=0.d0
-				auxig=ig
-				baux(1)=0.05d0   !initialisation de u_tilde
-				baux(2)=0.05d0   !initialisation de v_tilde
-
-!======================================================================
-! maximisation pour deux parametres, les 2 effets aleatoires : u et v 
-!======================================================================
-				npaux=2
-				niaux=0
-				vaux=0.d0!vecteur derivees 2nd et 1ERES
-				funcaux=0.d0!vraisemblance
-				resaux=0.d0!vraisemblance
-				do ip=1,nva
-					betaaux(ip)= bh(np-nva+ip)
-				end do
-	call marq98o(baux,npaux,niaux,vaux,resaux,ieraux,istopaux)
-		
-				u_tilde = baux(1)!u_tilde(ig)
-				v_tilde = baux(2)!v_tilde
-	
-				if(effet.eq.1) then
-				end if
-				do k=1,nsujet
-					if(nva.gt.0.and.g(k).eq.ig)then
-						vet = 0.d0 
-						do ip=1,nva
-							vet =vet + bh(np-nva+ip)*ve(k,ip)
-						end do
-						vet = dexp(vet)
-					else
-						vet=1.d0
-					endif
-	
-					if(g(k).eq.ig)then
-						if(c(k).eq.1)then
-							res3(ig) = res3(ig) &
-							+u_tilde+v_tilde*ve2(k,1)
-						endif
-	
-						if(stra(k).eq.1)then
-							res4(ig) = res4(ig) &
-							+ut1(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))
-							res5(ig) = res5(ig) &
-							+ut1(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
-							res6(ig) = res6(ig) &
-							+ut1(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
-	
-						endif
-						if(stra(k).eq.2)then
-							res4(ig) = res4(ig) &
-							+ut2(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))
-							res5(ig) = res5(ig) &
-							+ut2(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
-							res6(ig) = res6(ig) &
-							+ut2(nt1(k))*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
-	
-						endif
-	
-					endif 
-				end do 
-	
-!=====fin maximisation aux
-	
-				cov=dsqrt(sigma2*tau2)* & !avec contrainte
-				(2.d0 * dexp(bh(np-nva-2))/(1.d0+dexp(bh(np-nva-2)))-1.d0)
-	
-				integrale1(ig)= -0.5d0*dlog(sigma2*tau2-cov*cov) &!-0.5logdet(D)
-				-0.5d0* &
-				dlog((res4(ig)+tau2/(tau2*sigma2-cov**2)) &
-				*(res6(ig)+sigma2/(tau2*sigma2-cov**2)) &
-				-(res5(ig)-cov/(tau2*sigma2-cov**2))**2) &!-0.5*log(det(ka2)
-				+res2(ig)+res3(ig)-res4(ig) &
-				-0.5d0*((u_tilde**2)/sigma2+(v_tilde**2)/tau2 &
-				-2.d0*u_tilde*v_tilde*cov/(sigma2*tau2)) &
-				/(1.d0-(cov**2)/(sigma2*tau2))         !-ka
-	
-			end do
-!======= fin calcul de log integrale
-!======================================================================
-
-
-!======= fin calcul de integrale
-!         print*,'** integrale1 **',(integrale1(ig),ig,ig=1,ngexact)
-!          stop
-!======================================================================
-	
-	
-			res = 0.d0
-			do k=1,ngexact  !ng!
-				if(nig(k).gt.0)then
-					if(indictronq.eq.0)then
-						res = res &
-						+integrale1(k)!integrale1 donne le log de I directement
-					else !troncature
-						write(*,*)'***TRAITER TRONCATURE**'
-						stop
-					endif
-				endif
-			end do
-	
-		endif                     !fin boucle effet= 1 and correl = 1
-	endif                     !fin boucle globale effet=0 
-
-!----------calcul de la penalisation -------------------
-	pe=0.d0
-	pe1 = 0.d0
-	pe2 = 0.d0
-	do i=1,n-3
-		pe1 = pe1+(the1(i-3)*the1(i-3)*m3m3(i))+(the1(i-2) &
-		*the1(i-2)*m2m2(i))+(the1(i-1)*the1(i-1)*m1m1(i))+( &
-		the1(i)*the1(i)*mmm(i))+(2.d0*the1(i-3)*the1(i-2)* &
-		m3m2(i))+(2.d0*the1(i-3)*the1(i-1)*m3m1(i))+(2.d0* &
-		the1(i-3)*the1(i)*m3m(i))+(2.d0*the1(i-2)*the1(i-1)* &
-		m2m1(i))+(2.d0*the1(i-2)*the1(i)*m2m(i))+(2.d0*the1(i-1) &
-		*the1(i)*m1m(i))
-	
-		if (nst.eq.2) then
-			pe2 = pe2+(the2(i-3)*the2(i-3)*m3m3(i))+(the2(i-2) &
-			*the2(i-2)*m2m2(i))+(the2(i-1)*the2(i-1)*m1m1(i))+( &
-			the2(i)*the2(i)*mmm(i))+(2.d0*the2(i-3)*the2(i-2)* &
-			m3m2(i))+(2.d0*the2(i-3)*the2(i-1)*m3m1(i))+(2.d0* &
-			the2(i-3)*the2(i)*m3m(i))+(2.d0*the2(i-2)*the2(i-1)* &
-			m2m1(i))+(2.d0*the2(i-2)*the2(i)*m2m(i))+(2.d0*the2(i-1) &
-			*the2(i)*m1m(i))
-		endif
-	end do
-	
-	if (nst.eq.2) then
-		pe = k0(1)*pe1 + k0(2)*pe2 
-	else
-		pe = k0(1)*pe1
-	endif 
-	resnonpen = res
-	res = res - pe
-	
-	funcpaadd= res 
-		
-	return
-	
-	end function funcpaadd
-	
-
 
 
 
@@ -2135,8 +1682,8 @@
 	double precision::res,k00,som,h1,aux
 	double precision,dimension(2)::k0
 	integer n,ij,i,k,j,vj,ier,istop,ni
-	double precision::ca,cb,dd,funcpaadd
-	external::funcpaadd
+	double precision::ca,cb,dd,funcpaa_splines
+	external::funcpaa_splines
 	
 	ca=0.d0
 	cb=0.d0
@@ -2146,8 +1693,10 @@
 	k0(1) = k00*k00
 	k0(2)=0.d0
 	
-	call marq98J(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaadd)	
-	
+	call marq98J(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)	
+!AD:	
+	if (istop.eq.4) goto 50
+!AD:		
 	if(k0(1).gt.0.d0)then
 		do ij=1,n
 			the(ij-3)=(b(ij))*(b(ij))
@@ -2184,7 +1733,9 @@
 	else
 		aux = -n
 	endif
-
+!AD:
+50	continue      
+!AD:
 	return
 	end function estimvadd
       
@@ -2750,446 +2301,4 @@
 !
 
  	
-	subroutine marq98o(b,m,ni,v,rl,ier,istop)
-	
-	use tailles
-	use optim
-	use parameters,only:maxiter
-	use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,auxig
-	
-	Implicit none
-	
-	integer::m,ni,nql,i,ii,nfmax,idpos,ier,istop,igrad,ncount,id,jd,i0
-	double precision::da,dm,ga,tr,ca,cb,epsa,epsb,rl &
-	,funcpao,step,eps,epsd,vw,fi,z,rl1,th,ep,dd,auxmax     
-	double precision,dimension(m*(m+3)/2)::V,fu
-	double precision,dimension(m)::b,delta,bh,b1
-	double precision,dimension(2)::zero
-	double precision::maxtadd
-	
-	zero(1)=0.d0
-	zero(2)=0.d0
-	id=0
-	jd=0
-	z=0.d0
-	th=1.d-5
-	eps=1.d-7
-	epsa=1.d-6
-	epsb=1.d-6
-	epsd=1.d-6
-	
-	nfmax=m*(m+1)/2
-	ca=epsa+1.d0
-	cb=epsb+1.d0
-	rl1=-1.d+10
-	ni=0
-	istop=0
-	da=0.01d0
-	dm=5.d0
-	
-	nql=1
-	
-10   continue
 
-		
-	z=0.d0
-	i0=0 	
-	rl=funcpao(b,m,i0,z,i0,z)
-!	write(*,*)'iter',ni,'vrais',rl1
-	rl1=rl 
-	
-	call derivao(b,m,v,rl)
-	
-	dd = 0.d0
-	do i=m*(m+1)/2+1,m*(m+3)/2
-		dd = dd + v(i)*v(i)
-	end do
-	
-	dd=dd/dabs(RL)
-
-	if (ca.lt.epsa.and.cb.lt.epsb.and.dd.lt.epsd) goto 100
-	
-		tr=0.d0
-		
-		do i=1,m
-			ii=i*(i+1)/2
-			tr=tr+dabs(v(ii))
-		end do 
-		
-		tr=tr/dble(m)
-		ncount=0
-		ga=0.01d0
-		
-400      	do i=1,nfmax+m
-			fu(i)=v(i)
-		end do
-		
-		do i=1,m
-			ii=i*(i+1)/2
-			if (v(ii).ne.0) then
-				fu(ii)=v(ii)+da*((1.d0-ga)*dabs(v(ii))+ga*tr)
-			else
-				fu(ii)=da*ga*tr
-			end if
-		end do
-		
-		call dcholej(fu,m,nql,idpos)
-	
-		if (idpos.ne.0) then  
-	
-			if(b(1).lt.-1.d0.or.b(1).gt.1.d0.or.b(2).lt.-1.d0.or.b(2).gt.1.d0) then
-				b(1)=0.5d0
-				b(2)=0.5d0
-				goto 110
-			endif
-				
-			ncount=ncount+1
-			
-			if (ncount.le.3.or.ga.ge.1.d0) then
-				da=da*dm
-			else
-				ga=ga*dm
-				if (ga.gt.1.d0) ga=1.d0
-			end if
-			
-			if (ncount > 10) then
-				fu=0.d0
-				do i=1,m
-					ii=i*(i+1)/2
-					fu(ii)=1
-				end do
-				return
-			end if
-			
-			goto 400
-			
-		else
-			do i=1,m
-				delta(i)=fu(nfmax+i)
-				b1(i)=b(i)+delta(i)
-			end do
-	
-			rl=funcpao(b1,m,id,z,jd,z)
-			
-			igrad=1
-			
-			if (rl1.lt.rl) then
-				if(da.lt.eps) then
-					da=eps
-				else
-					da=da/(dm+2.d0)
-				end if
-				goto 800
-			end if
-		end if
-		
-		call dmaxt(maxtadd,delta,m)
-		auxmax=maxtadd
-		
-		if(auxmax.eq.0.d0) then
-			vw=1.D-5
-		else
-		!	call dmaxt(maxtadd,delta,m)
-			vw=th/auxmax
-		end if
-
-		step=dlog(1.5d0)
-		
-		call searpaso(vw,step,b,bh,m,delta,fi) 
-		
-		rl=-fi
-		
-		IF(rl1.gt.rl) then
-		end if
-		
-		do i=1,m
-			delta(i)=vw*delta(i)
-		end do
-		
-		da=(dm-3.d0)*da  
-	
-800       cb=dabs(rl1-rl)
-
-		ca=0.d0
-		
-		do i=1,m
-			ca=ca+delta(i)*delta(i)
-		end do
-
-		do i=1,m
-			b(i)=b(i)+delta(i)
-		end do
-
-		ni=ni+1
-		
-		if (ni.gt.maxiter) then
-			istop=2	
-			goto 110
-		end if
-		goto 10
-	
-100     continue
-
-	istop=1
-	
-	ep=10.d-10
-	
-	call dsinvj(v,m,ep,ier)	
-	if (ier.eq.-1) then
-	write(6,103)          
-103       format(1x,'echec inversion mat information ds marq98aux')	
-		istop=3
-	end if	
-
-
-110       continue
-
-	return
-	
-	end subroutine marq98o
-	     
-!=================================DERIVAAUX =======================
-	
-	subroutine derivao(b,m,v,rl)
-		
-	integer ::i0,iun,m,m1,ll,i,k,j
-	double precision :: funcpao,thn,th,z,rl,vl
-	double precision :: th2
-	double precision ,dimension(m):: fcith
-	double precision ,dimension(m):: b
-	double precision , dimension(m*(m+3)/2)::V
-	
-	
-	th=1.d-5
-	thn=-th
-	th2=th*th
-	z=0.d0
-	i0=0
-	iun =1
-	
-	rl=funcpao(b,m,iun,z,iun,z)
-	
-	do i=1,m
-		fcith(i)=funcpao(b,m,i,th,i0,z)
-	end do
-	
-	k=0
-	m1=m*(m+1)/2
-	ll=m1
-	
-	do i=1,m
-		ll=ll+1
-		vl=(fcith(i)-funcpao(b,m,i,thn,i0,z))/(2.d0*th)
-		v(ll)=vl
-		do  j=1,i
-			k=k+1
-			v(k)=-(funcpao(b,m,i,th,j,th)-fcith(j)-fcith(i)+rl)/th2 
-		end do
-	end do
-	
-	return
-		
-	end subroutine derivao
-
-
-
-
-!================================  SEARPAS joly    ==============================
-
-	subroutine searpaso(vw,step,b,bh,m,delta,fim)
-	
-	implicit none
-	
-	integer::m,i      
-	double precision,dimension(m)::b
-	double precision::vw
-	double precision,dimension(m)::bh,delta    
-	double precision::fim,step   
-	double precision::vlw,vlw1,vlw2,vlw3,vm,fi1,fi2,fi3    
-
-
-	
-	vlw1=dlog(vw)
-	vlw2=vlw1+step
-	call valfpao(vlw1,fi1,b,bh,m,delta)
-	call valfpao(vlw2,fi2,b,bh,m,delta)       
-	
-	if(fi2.ge.fi1) then
-		vlw3=vlw2
-		vlw2=vlw1
-		fi3=fi2
-		fi2=fi1
-		step=-step
-	
-		vlw1=vlw2+step
-		call valfpao(vlw1,fi1,b,bh,m,delta)   
-		if(fi1.gt.fi2) goto 50
-	else 
-		vlw=vlw1
-		vlw1=vlw2
-		vlw2=vlw
-		fim=fi1
-		fi1=fi2
-		fi2=fim
-	end if
-	
-	do i=1,40
-		vlw3=vlw2
-		vlw2=vlw1
-		fi3=fi2
-		fi2=fi1
-	
-		vlw1=vlw2+step
-		call valfpao(vlw1,fi1,b,bh,m,delta)
-		if(fi1.gt.fi2) goto 50
-		if(fi1.eq.fi2) then
-		fim=fi2
-		vm=vlw2 
-		goto 100
-		end if
-	end do
-	
-50     continue
-	
-	vm=vlw2-step*(fi1-fi3)/(2.d0*(fi1-2.d0*fi2+fi3))   
-	call valfpao(vm,fim,b,bh,m,delta)	
-	if(fim.le.fi2) goto 100
-	vm=vlw2
-	fim=fi2
-100   continue
-	vw=dexp(vm)
-	
-	return
-	
-	end subroutine searpaso
-
-   
-!========================   VALFPAAUX   ============================== 
-       
-	subroutine valfpao(vw,fi,b,bk,m,delta)
-	
-	implicit none
-	
-	integer::m  
-	double precision,dimension(m)::b,delta  
-	double precision,dimension(m)::bk 
-	double precision::fi 
-	double precision::vw,funcpao,z	
-	integer::i0,i
-	
-	z=0.d0
-	i0=1
-	do i=1,m
-	bk(i)=b(i)+dexp(vw)*delta(i)
-	end do
-	fi=-funcpao(bk,m,i0,z,i0,z)
-	
-	return
-		
-	end subroutine valfpao
-
-!========================    DEBUT FUNCPAAUX       ====================
-	double precision function funcpao(b,np,id,thi,jd,thj)
-	
-	use tailles
-	use comon,only:g,nig,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst, &
-	stra,ve,auxig
-	use additiv,only:dut1,dut2,ut1,ut2,betaaux,ve2,sigma2,tau2,rho,cov
-	implicit none
-	
-	integer::np,id,jd,i,k,ip
-	double precision,dimension(np)::bhaux,b
-	double precision::thi,thj,res,vet
-!****** u_tilde
-	double precision  :: u_tilde,v_tilde
-!****** derivanal
-	double precision , dimension(ngmax)::res3,res4
-	double precision , dimension(ngmax)::res5,res6,res8
-
-!==============================================
-!================POUR UN GROUPE AUXIG donn� !
-!==============================================
-	
-	res3=0.d0
-	res4=0.d0
-	res5=0.d0
-	res6=0.d0
-	res8=0.d0
-	
-	do i=1,np
-		bhaux(i)=b(i)
-	end do 
-	
-	
-	if (id.ne.0) bhaux(id)=bhaux(id)+thi 
-	if (jd.ne.0) bhaux(jd)=bhaux(jd)+thj    
-		
-	u_tilde=bhaux(1)
-	v_tilde=bhaux(2)
-!--------------------------------------------------------
-!----------calcul de la vraisemblance ------------------
-!---------------------------------------------------------
-	
-	do k=1,nsujet
-		if(nva.gt.0.and.g(k).eq.auxig)then
-			vet = 0.d0 
-			do ip=1,nva
-				vet =vet + betaaux(ip)*ve(k,ip)
-			end do
-			vet = dexp(vet)
-		else
-			vet=1.d0
-		endif
-		
-		if(g(k).eq.auxig)then
-		
-			if(c(k).eq.1)then
-				res3(auxig) = res3(auxig)+u_tilde+v_tilde*ve(k,1)
-				res8(auxig) = res8(auxig)+ve(k,1)
-			endif
-			if(stra(k).eq.1)then
-				res4(auxig) =res4(auxig)+ut1(nt1(k))*vet*dexp(u_tilde+v_tilde*ve(k,1))
-				
-				res5(auxig) = res5(auxig)+ut1(nt1(k))*vet* &
-				dexp(u_tilde+v_tilde*ve(k,1))*ve(k,1)
-				
-				res6(auxig) = res6(auxig)+ut1(nt1(k))*vet* &
-				dexp(u_tilde+v_tilde*ve(k,1))*(ve(k,1))**2
-			endif
-			if(stra(k).eq.2)then
-				res4(auxig) = res4(auxig) &
-				+ut2(nt1(k))*vet*dexp(u_tilde+v_tilde*ve(k,1))
-				
-				res5(auxig) = res5(auxig)+ut2(nt1(k))*vet* &
-				dexp(u_tilde+v_tilde*ve(k,1))*ve(k,1)
-				
-				res6(auxig) = res6(auxig)+ut2(nt1(k))*vet* &
-				dexp(u_tilde+v_tilde*ve(k,1))*(ve(k,1))**2
-			endif
-		
-		endif 
-	end do 
-		
-	res=-res3(auxig) + res4(auxig)+0.5d0*(((u_tilde)**2)/sigma2+((v_tilde)**2)/tau2 &
-	-2.d0*u_tilde*v_tilde*cov/(sigma2*tau2))/(1.d0-(cov**2)/(sigma2*tau2))         !-ka
-	
-	funcpao= -res
-	
-	return
-	
-	end function funcpao
-
-
-	logical function isnann(x)
-
-	implicit none
-	
-	double precision,intent(in)::x
-	
-	if (x .ne. x) then
-		isnann=.true.
-	else
-		isnann=.false.
-	end if
-
-	end function isnann

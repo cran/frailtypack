@@ -19,6 +19,7 @@ This contains simulated samples of 100 clusters with 100 subjects in each cluste
     \item{t2}{end of interval (death or censoring time)}
     \item{event}{censoring status (0:alive, 1:death, as acensoring indicator}
     \item{var1}{dichotomous covariate (=0 or 1,as a treatment variable)}
+    \item{var2}{dichotomous covariate (=0 or 1)}
   }
  
 }
