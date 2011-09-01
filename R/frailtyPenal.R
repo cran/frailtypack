@@ -95,18 +95,7 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 		stop("grouping variable must have more than 1 level")   
 	}
 
-	if(length(uni.cluster)>1500 & missing(formula.terminalEvent)){ 
-		stop("grouping variable must have less than 1500 groups
-	\n please contact to the mantainer")   
-	}
-
-	if(length(uni.cluster)>15000 & !missing(formula.terminalEvent)) 
-	{
-		stop("grouping variable must have less than 15000 groups
-	\n please contact to the mantainer")   
-	}
-
-		
+	
 	if (length(subcluster)){
 		tempsub <- untangle.specials(Terms, "subcluster", 1:10)
 		ordsub <- attr(Terms, "order")[tempsub$terms]		
@@ -120,11 +109,6 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 	
 		if(length(uni.subcluster)==1){        
 			stop("subcluster variable must have more than 1 level")   
-		}
-
-		if(length(uni.subcluster)>5000){
-			stop("sub-grouping variable must have less than 5000 groups
-			\n please contact to the mantainer")   
 		}
 
 	}	
@@ -205,32 +189,15 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 		noVar1 <- 0
 	} 	
 # on enleve ensuite la premiere colonne correspondant a id
-	
-	
-	
-	
+		
 	nvar<-ncol(X) #nvar==1 correspond a 2 situaions: 
 # au cas ou on a aucune var explicative dans la partie rec, mais X=0
 # cas ou on a 1seul var explicative, ici X est en general different de 0
-
-
-	if(nvar>15){
-		stop("maximum number of variables allowed are 15. 
-			\n please contact to the mantainer")
-	}
-	
 	
 	var<-matrix(c(X),nrow=nrow(X),ncol=nvar) #matrix sans id et sans partie ex terminal(death)
 	
 	n<-nrow(X)    
-	if(n>20000){     
-		stop("number of observations must be less than 20000 
-		\n please contact to the mantainer")   
-	}
-	
 
-
-		#car Y est de class surv
 	if (type=="right"){
 		tt0 <- rep(0,n)
 		tt1 <- Y[,1]
@@ -304,7 +271,24 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
                 as.double(c(0,0)), 
                 as.double(0),  PACKAGE = "frailtypack"
      )    
-     
+#AD:
+  if(ans[[34]]==4 || ans[[24]]==-1e9){
+	cat("Problem in the loglikehood computation. The program stopped abnormally.\n")
+	ans[[21]] <- rep(NA,np)
+	ans[[22]] <- matrix(NA,nc=np,nr=np)
+	ans[[23]] <- matrix(NA,nc=np,nr=np)	
+	ans[[25]] <- NA
+	ans[[26]] <- rep(NA,99)
+	ans[[27]] <- matrix(NA,nr=99,nc=3)
+	ans[[28]] <- matrix(NA,nr=99,nc=3)  
+	ans[[29]] <- rep(NA,99)
+	ans[[30]] <- matrix(NA,nr=99,nc=3)
+	ans[[31]] <- matrix(NA,nr=99,nc=3) 		
+	ans[[32]] <- 0	
+	ans[[33]] <- 0   
+	ans[[36]] <- NA
+  }
+#AD:     
     if (noVar1 == 1) nvar<-0
 
     np <- ans[[20]]
@@ -467,11 +451,6 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 
 			nvar2<-ncol(X2) 
 		
-			if(nvar2>15){
-				stop("maximum number of variables allowed for death are 15. 
-				\n please contact to the mantainer")
-			}
-
 			vardc.temp<-matrix(c(X2),nrow=nrow(X2),ncol=nvar2)
 
 
@@ -722,7 +701,7 @@ if (length(subcluster))
                 ddl=as.double(0),  PACKAGE = "frailtypack")    
 
 #AD:
-  if(ans$ier==4){
+  if(ans$ier==4 || ans$loglik==-1e9){
 	cat("Problem in the loglikehood computation. The program stopped abnormally.\n")
 	ans$H <- matrix(NA,nc=np,nr=np)
 	ans$HIH <- matrix(NA,nc=np,nr=np)	
@@ -733,6 +712,7 @@ if (length(subcluster))
 	ans$x2<- rep(NA,99)	
 	ans$lam2 <- matrix(NA,nr=99,nc=3)  
 	ans$surv2 <- matrix(NA,nr=99,nc=3)  
+	ans$ni <- 0
 	ans$cpt <- 0
 	ans$cpt.dc <- 0
   }

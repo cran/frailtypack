@@ -151,18 +151,10 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
 
     nvar<-ncol(X) 
 
-    if(nvar>15)
-       stop("maximum number of variables allowed are 15. 
-             \n please contact to the mantainer")
-
     var<-matrix(c(X),nrow=nrow(X),ncol=nvar)
 
     n<-nrow(X)    
-    if(n>20000) 
-     {
-      stop("number of observations must be less than 20000 
-             \n please contact to the mantainer")   
-     }
+
     if (type=="right")
       {
         tt0 <- rep(0,n)
@@ -231,6 +223,28 @@ function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=
                 ier=as.integer(0),
                 ddl=as.double(0),   
                 PACKAGE = "frailtypack") 
+#AD:
+  if(ans$ier==4 || ans$loglikpen==-1e9){
+	cat("Problem in the loglikehood computation. The program stopped abnormally.\n")
+	ans$coef <- rep(NA,nvar)
+	ans$varcoef <- rep(NA,nvar)
+	ans$varcoef2 <- rep(NA,nvar)
+	varSigma2 <- c(NA,NA)
+	varTau2 <- c(NA,NA)
+	ans$cov <- NA
+	ans$varcov <- NA
+	ans$rho <- NA
+	ans$trace <- NA
+	ans$ddl <- NA
+	ans$x1 <- rep(NA,99)
+	ans$x2 <- rep(NA,99)	
+	ans$lam1 <- matrix(NA,nr=99,nc=3)
+	ans$lam2 <- matrix(NA,nr=99,nc=3)	
+	ans$surv1 <- matrix(NA,nr=99,nc=3) 
+	ans$surv2 <- matrix(NA,nr=99,nc=3) 
+	ans$ni <- 0
+  }
+#AD:
     
     flush.console()
     cost<-proc.time()-ptm

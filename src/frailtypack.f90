@@ -492,7 +492,9 @@
 		auxkappa(2)=0.d0
 	
 		call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas)
-		
+		if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+			goto 1000
+		end if		
 !AD:	
 !	if (istop.eq.4) goto 1000
 !AD:	
@@ -516,7 +518,9 @@
 
 
 	call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas)
-
+	if ((istop .eq. 4).or.(res .eq. -1.d9)) then
+		goto 1000
+	end if	
 !	deallocate(mm3,mm2,mm1,mm,im3,im2,im1,im,m3m3,m2m2,m1m1,mmm,m3m2,m3m1, &
 !	m3m,m2m1,m2m,m1m,stra,ve,g,nig)
 !AD:	
@@ -571,7 +575,7 @@
 !
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !AD:
-!1000    continue
+1000    continue
 !	if(istop.eq.4)then
 !		ier=12
 !	end if
