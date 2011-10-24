@@ -8,7 +8,7 @@
   Prints a short summary of  parameter estimates of a nested frailty model  
 }
 \usage{
-\method{print}{nestedPenal}(x, digits = max(options()$digits - 4, 3), ...)
+\method{print}{nestedPenal}(x, digits = max(options()$digits - 4, 6), ...)
 }
 \arguments{
   \item{x}{the result of a call to the frailtyPenal function for nested frailty models}
@@ -50,7 +50,8 @@
  data(dataNested)
  
  modNested<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+subcluster(subgroup)+
- cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000,kappa2=50000)
+            cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000,
+	    kappa2=50000,hazard="Splines")
 
 # It takes around 24 minutes to converge (depends on the processor) #
 

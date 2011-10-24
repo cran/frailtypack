@@ -39,12 +39,14 @@ data(kidney)
 # /*** Shared frailty model ***/
 
 modSha<-frailtyPenal(Surv(time,status)~age+sex+cluster(id),
-             Frailty=TRUE,n.knots=8,kappa1=10000,data=kidney)
+           Frailty=TRUE,n.knots=8,kappa1=10000,data=kidney,
+	   hazard="Splines")
 
 # /*** Cox proportional hazard model using Penalized likelihood ***/
 
 modCox<-frailtyPenal(Surv(time,status)~age+sex+cluster(id),
-             n.knots=8,kappa1=10000,data=kidney,Frailty=FALSE)
+          n.knots=8,kappa1=10000,data=kidney,Frailty=FALSE,
+	  hazard="Splines")
 
 
 # /*** confidence interval at 95% level (default) ***/

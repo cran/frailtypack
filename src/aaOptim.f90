@@ -10,7 +10,8 @@
 		integer,save::maxiter
 	end module parameters
 	
-	
+
+		
 	module comon
 	implicit none
 !*****************************************************************
@@ -20,7 +21,7 @@
 
 !*****dace2
 	double precision,dimension(:),allocatable,save::t0dc,t1dc
-	double precision,dimension(:),allocatable,save::t0,t1
+	double precision,dimension(:),allocatable,save::t0,t1,t2,t3
 	integer,dimension(:),allocatable,save:: c, cdc
 	integer,dimension(:),allocatable,save:: nt0,nt1
 	integer,dimension(:),allocatable,save:: nt0dc,nt1dc
@@ -69,12 +70,28 @@
 !*****auxig
 	integer,save :: auxig
 !******  aux1 aux2
-	double precision,dimension(:),allocatable,save::res1,res3
+	double precision,dimension(:),allocatable,save::res1,res3,aux1,aux2
 	double precision,save::resnonpen
+	double precision,dimension(:),allocatable::kkapa
 !****** Type du modele
-	integer,save::model   
+	integer,save::model  
+	double precision,dimension(:),allocatable::vvv 
+!cpm
+	double precision ::cens
+	integer,save:: nbrecu,nbdeces,nbintervR,nbintervDC
+	integer,save::indic_eta
+!	double precision,save::eta !en exposant pour la frailty deces 
+	double precision,dimension(:),allocatable,save::res4
+	integer,save::typeof,typeof2
+        double precision,dimension(:),allocatable,save::ttt,tttdc
+        double precision,dimension(:),allocatable,save::betacoef
+!Weib
+	double precision,save::etaR,etaD,betaR,betaD
+	integer,save::indic_tronc
 	
 	end module comon
+	
+
 !===============================    MARQ98  HJ =================================
 !                                  Version optim
 !===============================================================================
@@ -221,7 +238,8 @@
 	use parameters
 	use comon,only:t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc, &
 	nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,model, &
-	PEN_deri,I_hess,H_hess,Hspl_hess,hess,indic_ALPHA	
+	PEN_deri,I_hess,H_hess,Hspl_hess,hess,indic_ALPHA,typeof,indic_eta,vvv!add vvv	
+!	use vec
 !add additive
 	use additiv,only:correl
       
@@ -233,8 +251,8 @@
 	double precision,intent(out)::rl
 	double precision,dimension(m),intent(inout)::b
 	double precision,intent(out)::ca,cb,dd
-	double precision,dimension(2)::k0,zero
-      
+	double precision,dimension(2)::k0
+        double precision,dimension(2)::zero
 !   variables locales            
 	integer::nql,ii,nfmax,idpos,ncount,id,jd,m1,j,i,ij,k
 	double precision,dimension(m*(m+3)/2)::fu,v1,vnonpen
@@ -247,8 +265,6 @@
 !---------- ajout
 	integer::kkk
 
-     
-	
 	zero=0.d0     
 	id=0
 	jd=0
@@ -266,15 +282,16 @@
 	nql=1
 	m1=m*(m+1)/2
 	ep=1.d-20
-	
-	Main:Do          
+	Main:Do 
+
         call derivaj(b,m,v,rl,k0,fct_names)   
-	           
+
         rl1=rl
-	if ((rl .ne. rl).or.(abs(rl) .gt. 1.d30)) then
+	if(rl.eq.-1.D9) then
 		istop=4
 		goto 110
-	end if  
+	end if
+ 
 !	write(*,*)'iteration***',ni,'vrais',rl  
 	   
         dd = 0.d0    
@@ -352,7 +369,10 @@
 			end do
 			
 			rl=fct_names(b1,m,id,z,jd,z,k0)
-			
+			if(rl.eq.-1.D9) then
+				istop=4
+				goto 110
+			end if
 			if (rl1.lt.rl) then
 				if(da.lt.eps) then
 					da=eps
@@ -413,6 +433,10 @@
 !================ pour les bandes de confiance
 !==== on ne retient que les para des splines
 	call derivaJ(b,m,v,rl,k0,fct_names)
+	if(rl.eq.-1.D9) then
+		istop=4
+		goto 110
+	end if
 	do i=1,(m*(m+3)/2)
 		v1(i)=0.d0
 	end do
@@ -515,7 +539,13 @@
 		end do
 	end do      
 
-    
+ !AD:
+	if (typeof .ne. 0) then
+		do i=1,m*(m+1)/2
+			vvv(i)=v(i)
+		end do
+	end if
+	   
  110   continue
        return    
        end subroutine marq98j
@@ -537,12 +567,10 @@
 	integer ::i0,m1,ll,i,k,j,iun
 	double precision::fct_names,thn,th,z,vl,th2,vaux  
 	external::fct_names
-!	logical::isnan
-
-
+      	
 	select case(model)
 	case(1)
-		th=1.d-5	
+		th=1.d-3	
 	case(2)
 		th=5.d-3
 	case(3)
@@ -556,13 +584,18 @@
 	z=0.d0
 	i0=0
 	iun =1
+
 	rl=fct_names(b,m,iun,z,iun,z,k0)
-	
+        if(rl.eq.-1.d9) then
+            rl=-1.d9
+            goto 123
+        end if	
 	do i=1,m
 		fcith(i)=fct_names(b,m,i,th,i0,z,k0)
-!		if(isnan(fcith(i)).or.(abs(fcith(i)).gt.1.d30)) then
-!			goto 100
-!		end if
+                if(fcith(i).eq.-1.d9) then
+                    rl=-1.d9
+                    goto 123
+                end if
 	end do
 
 	k=0
@@ -571,10 +604,11 @@
 	
 	do i=1,m
 		ll=ll+1
-		vaux=fct_names(b,m,i,thn,i0,z,k0)	
-!		if(isnan(vaux).or.(abs(vaux).gt.1.d30)) then
-!			goto 100
-!		end if		
+		vaux=fct_names(b,m,i,thn,i0,z,k0)
+                if(vaux.eq.-1.d9) then
+                    rl=-1.d9
+                    goto 123
+                end if	
 		vl=(fcith(i)-vaux)/(2.d0*th)
 		v(ll)=vl
 		do j=1,i
@@ -583,7 +617,7 @@
 		end do
 	end do
       
-!100	continue	
+123   continue	
 	return
 	
 	end subroutine derivaj
@@ -1047,7 +1081,10 @@
 	bk(i)=b(i)+dexp(vw)*delta(i)
 	end do
 	fi=-fct_names(bk,m,i0,z,i0,z,k0)
-
+	if(fi.eq.-1.D9) then
+		goto 1
+	end if
+1       continue
 	return
 	
 	end subroutine valfpaj

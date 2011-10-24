@@ -1,44 +1,108 @@
 
 "frailtyPenal" <-
 function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, recurrentAG=FALSE, 
-             cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350)
+             cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1,nb.int2)
 {
+##### hazard specification ######
+haztemp <- hazard
+hazard <- strsplit(hazard,split="-")
+hazard <- unlist(hazard)  
+if(!(length(hazard) %in% c(1,2))){stop("Please check and revise the hazard argument according to the format specified in the help.")}
+
+### longueur hazard = 1
+if((all.equal(length(hazard),1)==T)==T){
+   if(!(hazard %in% c("Weibull","Piecewise","Splines"))){
+	stop("Only 'Weibull', 'Splines' or 'Piecewise' hazard can be specified in hazard argument.")
+   }else{
+	typeof <- switch(hazard,"Splines"=0,"Piecewise"=1,"Weibull"=2)	
+	if(typeof %in% c(0,2)){
+### Splines
+		if (!(missing(nb.int1)) || !(missing(nb.int2))){
+			stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int1' and 'nb.int2' arguments must be deleted.")
+		}
+		if (typeof == 0){
+			size1 <- 100
+			size2 <- 100
+			equidistant <- 2	
+			nbintervR <- 0
+			nbintervDC <- 0
+		}
+### Weibull
+		if (typeof == 2){
+			equidistant <- 2
+			nbintervR <- 0
+			nbintervDC <- 0
+			size1 <- 100
+			size2 <- 100
+		}
+	}else{
+		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")		
+	}
+   } 
+}else{
+### Picewise
+      typeof <- 1
+#### longueur hazard > 1
+      if(!("Piecewise" %in% hazard)){
+	stop("Only 'Piecewise' hazard can be specified in hazard argument in this case")
+      }
+      if(!(all(hazard %in% c("Piecewise","per","equi")))){
+		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
+      }else{
+		if (!(haztemp %in% c("Piecewise-per","Piecewise-equi"))){
+			stop ("The hazard argument is incorrectly specified. Please refer to the help file of frailtypack.")
+		}
+		equidistant <- switch(haztemp,"Piecewise-per"=0,"Piecewise-equi"=1)
+      }
+ }
 
 #AD:
 	if (missing(formula))stop("The argument formula must be specified in any model")
 	if(class(formula)!="formula")stop("The argument formula must be a formula")
+	
+	if(typeof == 0){
 #AD:   
-	if (missing(n.knots))stop("number of knots are required")   
+		if (missing(n.knots))stop("number of knots are required")   
 #AD:	 
-	n.knots.temp <- n.knots	 
+		n.knots.temp <- n.knots	 
 #AD
-	if (n.knots<4) n.knots<-4
-	if (n.knots>20) n.knots<-20
+		if (n.knots<4) n.knots<-4
+		if (n.knots>20) n.knots<-20
 
-	if (missing(kappa1))stop("smoothing parameter (kappa1) is required")     
+		if (missing(kappa1))stop("smoothing parameter (kappa1) is required")     
 #AD:
-	if (!missing(kappa2)) indic.Kappa2 <- 0
-	if (missing(kappa2)) indic.Kappa2 <- 1
+		if (!missing(kappa2)) indic.Kappa2 <- 0
+		if (missing(kappa2)) indic.Kappa2 <- 1
 #AD:  
 
-	if (!missing(kappa2) & cross.validation){
-		stop("The cross validation is not implemented for two strata")
-	}
+		if (!missing(kappa2) & cross.validation){
+			stop("The cross validation is not implemented for two strata")
+		}
 	
-	if (missing(kappa2) & joint){
-		stop("smoothing parameter (kappa2) is required for the joint model")
+		if (missing(kappa2) & joint){
+			stop("smoothing parameter (kappa2) is required for the joint model")
+		}
+
+
+		if (joint & cross.validation){
+			stop("The cross validation is not implemented for the joint model")  
+		}  
+	}else{
+		if (!(missing(n.knots)) || !(missing(kappa1)) || !(missing(kappa2)) || !(missing(cross.validation))){
+			stop("When parametric hazard function is specified, 'Kappa1', 'n.knots' and 'cross.validations' arguments must be deleted.")
+		}
+		n.knots <- 0
+		kappa1 <- 0
+		kappa2 <- 0
+		crossVal <- 0
+		
 	}
-
-
-	if (joint & cross.validation){
-		stop("The cross validation is not implemented for the joint model")  
-	}  
-
 	call <- match.call()
 	
 	m <- match.call(expand = FALSE)
-    m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <-  m$... <- NULL
-  
+    m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <-  m$... <- NULL
+    
+
     special <- c("strata", "cluster", "subcluster", "terminal")
 		
 	Terms <- if (missing(data)){ 
@@ -212,92 +276,129 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 	if (min(cens)==1 && max(cens)==1) cens.data<-0
 
 	AG<-ifelse(recurrentAG,1,0)
-	crossVal<-ifelse(cross.validation,0,1)
+	if (typeof == 0){
+		crossVal<-ifelse(cross.validation,0,1)
+	}	
+	
 	
 	flush.console()
 	ptm<-proc.time()
 	cat("\n")
 	cat("Be patient. The program is computing ... \n")
-
 	
-	
-		
 #
 # Begin SHARED MODEL
 #
 
-	
-
-
  if (!joint & !length(subcluster))  
   {
-   if (sum(as.double(var))==0) nvar <- 0
-   np <- as.integer(uni.strat) * (as.integer(n.knots) + 2) + as.integer(nvar) + as.integer(Frailty)
-    ans <- .Fortran("frailpenal",
-                as.integer(n),
-                as.integer(length(uni.cluster)),
-                as.integer(cens.data),
-                as.integer(uni.strat),
-                as.integer(Frailty),
-                as.integer(n.knots),
-                as.double(kappa1),
-                as.double(kappa2),
-                as.double(tt0),
-                as.double(tt1),
-                as.integer(cens),
-                as.integer(cluster),
-                as.integer(nvar),
-                as.double(strats),
-                as.double(var),
-                as.integer(AG),
-                as.integer(noVar1), 
-                as.integer(maxit),
-                as.integer(crossVal),
-                np=as.integer(np),
-                as.double(rep(0,50)),
-                as.double(matrix(0,nrow=np,ncol=np)),
-                as.double(matrix(0,nrow=np,ncol=np)),
-                as.double(0),
-		as.double(0),
-                as.double(rep(0,99)),
-                as.double(matrix(0,nrow=99,ncol=3)),
-                as.double(matrix(0,nrow=99,ncol=3)),
-                as.double(rep(0,99)),
-                as.double(matrix(0,nrow=99,ncol=3)),
-                as.double(matrix(0,nrow=99,ncol=3)),
-                as.integer(0),
-                as.integer(0),
-                as.integer(0),
-                as.double(c(0,0)), 
-                as.double(0),  PACKAGE = "frailtypack"
-     )    
-#AD:
-  if(ans[[34]]==4 || ans[[24]]==-1e9){
-	cat("Problem in the loglikehood computation. The program stopped abnormally.\n")
-	ans[[21]] <- rep(NA,np)
-	ans[[22]] <- matrix(NA,nc=np,nr=np)
-	ans[[23]] <- matrix(NA,nc=np,nr=np)	
-	ans[[25]] <- NA
-	ans[[26]] <- rep(NA,99)
-	ans[[27]] <- matrix(NA,nr=99,nc=3)
-	ans[[28]] <- matrix(NA,nr=99,nc=3)  
-	ans[[29]] <- rep(NA,99)
-	ans[[30]] <- matrix(NA,nr=99,nc=3)
-	ans[[31]] <- matrix(NA,nr=99,nc=3) 		
-	ans[[32]] <- 0	
-	ans[[33]] <- 0   
-	ans[[36]] <- NA
-  }
-#AD:     
-    if (noVar1 == 1) nvar<-0
+   
+        if(equidistant %in% c(0,1)){
+		if (missing(nb.int1)) stop("Time interval 'nb.int1' is required")
+		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")	
+		if ((nb.int1 < 1)) stop("Number of Time 'nb.int1' interval must be between 1 and 20")
+		if (nb.int1 > 20){
+			 nb.int1 <-20
+			indic.nb.int1 <- 1 # equals 1 for nb.int1 > 20	 
+		}else{
+			indic.nb.int1 <- 0 # equals 1 for nb.int1 < 20
+		}
+		nbintervR <- nb.int1
+		size1 <- 3*nbintervR
+	}
+	if ((typeof == 0) | (typeof == 2)) indic.nb.int1 <- 0 
 
+
+	if (sum(as.double(var))==0) nvar <- 0
+
+	np <- switch(as.character(typeof),
+		"0"=(as.integer(uni.strat) * (as.integer(n.knots) + 2) + as.integer(nvar) + as.integer(Frailty)),
+		"1"=(as.integer(uni.strat) * nbintervR + nvar + as.integer(Frailty)),
+		"2"=(as.integer(uni.strat) * 2 + nvar + as.integer(Frailty)))
+
+		xSu1 <- rep(0,100)
+		xSu2 <- rep(0,100)
+		if (typeof==0){
+			mt1 <- size1	
+		}else{
+			mt1 <- 100
+		}
+		size2 <- mt1
+
+		ans <- .Fortran("frailpenal",
+		
+				as.integer(n),
+				as.integer(length(uni.cluster)),
+				as.integer(cens.data),
+				as.integer(uni.strat),
+				as.integer(Frailty),
+				as.integer(n.knots),
+				as.double(kappa1),
+				as.double(kappa2),
+				as.double(tt0),
+				as.double(tt1),
+				as.integer(cens),
+				as.integer(cluster),
+				as.integer(nvar),
+				as.double(strats),
+				as.double(var),
+				as.integer(AG),
+				as.integer(noVar1), 
+				as.integer(maxit),
+				as.integer(crossVal),
+				np=as.integer(np),
+				b=as.double(rep(0,np)),
+				as.double(matrix(0,nrow=np,ncol=np)),
+				as.double(matrix(0,nrow=np,ncol=np)),
+				as.double(0),
+				LCV=as.double(rep(0,2)),
+				as.double(rep(0,size1)),
+				as.double(matrix(0,nrow=size1,ncol=3)),
+				xSu1=as.double(xSu1),
+				as.double(matrix(0,nrow=size2,ncol=3)),
+				as.double(rep(0,size1)),
+				as.double(matrix(0,nrow=size1,ncol=3)),
+				xSu2=as.double(xSu2),
+				as.double(matrix(0,nrow=size2,ncol=3)),
+				as.integer(typeof),
+				as.integer(equidistant),
+				as.integer(nbintervR),
+				as.integer(size1),
+				as.integer(0),
+				as.integer(0),
+				as.integer(0),
+				as.double(c(0,0)), 
+				as.double(0),
+				istop=as.integer(0),
+			shape.weib=as.double(rep(0,2)),
+			scale.weib=as.double(rep(0,2)),
+				as.integer(mt1),
+				PACKAGE = "frailtypack")    
+#AD:
+
+    if (ans$istop == 4){
+	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")    
+     }
+    
+    if (ans$istop == 2){
+         warning("Model did not converge. Change the 'maxit' parameter")
+    }
+    if (ans$istop == 3){
+         warning("Matrix non-positive definite.")
+    }
+    
+#AD:  
+
+    if (noVar1 == 1) nvar<-0
+    
     np <- ans[[20]]
     fit <- NULL
+    fit$b <- ans$b
     fit$na.action <- attr(m, "na.action")
     fit$call <- call
     fit$n <- n
     fit$groups <- length(uni.cluster)
-    fit$n.events <- ans[[33]]
+    fit$n.events <- ans[[39]]
     fit$logLikPenal <- ans[[24]]
     if (Frailty) {
         fit$theta <- (ans[[21]][np - nvar])^2
@@ -313,43 +414,61 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
        fit$coef <- ans[[21]][(np - nvar + 1):np]
        names(fit$coef) <- colnames(X)
      }
+ 
 #AD:modification des dimensions des tableaux
     temp1 <- matrix(ans[[22]], nrow = np, ncol = np)
     temp2 <- matrix(ans[[23]], nrow = np, ncol = np)
     fit$varH <- temp1[(np - nvar):np, (np - nvar):np]
     fit$varHIH <- temp2[(np - nvar):np, (np - nvar):np]
     fit$formula <- formula(Terms)
+
     fit$x1 <- ans[[26]]
-    fit$lam <- matrix(ans[[27]], nrow = 99, ncol = 3)
-    fit$surv <- matrix(ans[[28]], nrow = 99, ncol = 3)
-    fit$x2 <- ans[[29]]
-    fit$lam2 <- matrix(ans[[30]], nrow = 99, ncol = 3)
-    fit$surv2 <- matrix(ans[[31]], nrow = 99, ncol = 3)
+    fit$lam <- matrix(ans[[27]], nrow = size1, ncol = 3)
+    fit$x2 <- ans[[30]]
+    fit$lam2 <- matrix(ans[[31]], nrow = size1, ncol = 3)
+    
+    fit$surv <- matrix(ans[[29]], nrow = size2, ncol = 3)
+    fit$surv2 <- matrix(ans[[33]], nrow = size2, ncol = 3)
+
+    fit$xSu1 <- ans$xSu1
+    fit$xSu2 <- ans$xSu2
+
     fit$type <- type
     fit$n.strat <- uni.strat
-    fit$n.knots<-n.knots 
-    fit$n.iter <- ans[[32]]
-    fit$kappa <- ans[[35]]
-    fit$DoF <- ans[[36]]
-    fit$cross.Val<-cross.validation
+    
+     
+    fit$n.iter <- ans[[38]]
+
+    if (typeof == 0){
+    	fit$n.knots<-n.knots
+	fit$kappa <- ans[[41]]    
+	fit$DoF <- ans[[42]]
+	fit$cross.Val<-cross.validation
+	fit$n.knots.temp <- n.knots.temp
+    }
 #AD:
-    fit$LCV <- ans[[25]]
+    
+    fit$LCV <- ans$LCV[1]
+    fit$AIC <- ans$LCV[2]
     fit$npar <- np
     fit$nvar <- nvar
     fit$noVar1 <- noVar1
+    fit$indic.nb.int1 <- indic.nb.int1
 #AD:
-    if(ans[[34]]==-1)
-        warning("matrix non-positive definite")
-
-    if(fit$n.iter>maxit)
-        warning("model did not converge. Change the 'maxit' parameter") 
-
-    if(ans[[34]]==2000)
+ 
+    if(ans[[40]]==2000)
         stop("The cross validation procedure cannot be finished. Try to change 
           either the number of knots or the seed for kappa parameter")
- #AD:
-	fit$n.knots.temp <- n.knots.temp
-#AD   
+
+    fit$typeof <- typeof
+    fit$equidistant <- equidistant
+    fit$nbintervR <- nbintervR
+    fit$istop <- ans$istop
+    
+    fit$shape.weib <- ans$shape.weib
+    fit$scale.weib <- ans$scale.weib
+    
+#
     attr(fit,"joint")<-joint
     attr(fit,"subcluster")<-FALSE
     class(fit) <- "frailtyPenal"
@@ -363,7 +482,7 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 	
 	if (joint & !length(subcluster)) 
 	{
-
+	
 # Preparing data ...
 #AD:
 		if(Frailty =="FALSE"){
@@ -416,9 +535,9 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 
 ## AD: modified 20 06 2011, for no covariates on terminal event part
 		if (missing(formula.terminalEvent)){
-			m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <-  m2$... <- NULL			
+			m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <-  m2$... <- NULL			
 		}else{
-			m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <-  m2$... <- NULL
+			m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <-  m2$... <- NULL
 		}
 
 		
@@ -503,16 +622,64 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 
 # ... end preparing data 
 #AD:
-    effet <- 1
-    indic_alpha <- 1
-    nst=2
-    np <- nst*(n.knots + 2) + nvarRec+nvarEnd +effet+indic_alpha
+	effet <- 1
+	indic_alpha <- 1
+	nst=2
+	
+        if(equidistant %in% c(0,1)){
+		if (missing(nb.int1)) stop("Recurrent Time interval 'nb.int1' is required")
+		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")
+		if (nb.int1 < 1) stop("Number of Time interval 'nb.int1' must be between 1 and 20")
+		if (missing(nb.int2)) stop("Death Time intervale 'nb.int2' is required")
+		if (class(nb.int2) != "numeric") stop("The argument 'nb.int2' must be a numeric")
+		if (nb.int2 < 1) stop("Number of Time interval 'nb.int2' must be between 1 and 20")
+		
+		if (nb.int1 > 20){
+			 nb.int1 <-20
+			indic.nb.int1 <- 1 # equals 1 for nb.int1 > 20	 
+		}else{
+			indic.nb.int1 <- 0 # equals 1 for nb.int1 < 20
+		}
+		
+		if (nb.int2 > 20){
+			 nb.int2 <-20
+			indic.nb.int2 <- 1 # equals 1 for nb.int1 > 20	 
+		}else{
+			indic.nb.int2 <- 0 # equals 1 for nb.int1 < 20
+		}
+		
+		nbintervR <- nb.int1
+		size1 <- 3*nbintervR	
+		nbintervDC <- nb.int2
+		size2 <- 3*nbintervDC		
+	}
+	if ((typeof == 0) | (typeof == 2)){
+		indic.nb.int1 <- 0
+		indic.nb.int2 <- 0
+	}	
+	np <- switch(as.character(typeof),
+		"0"=(nst * (n.knots + 2) + nvarRec + nvarEnd + effet + indic_alpha),
+
+		"1"=(nbintervR + nbintervDC + nvarRec + nvarEnd + effet + indic_alpha),
+
+		"2"=(2*nst + nvar + effet + indic_alpha))
+
 
 	if (all(all.equal(as.numeric(cens),terminal)==T)){	
 		stop("'Recurrent event' variable and 'Terminal event' variable need to be different")    
 	}
 
-    
+	xSu1 <- rep(0,100)
+	xSu2 <- rep(0,100)
+	if (typeof==0){
+		mt11 <- size1	
+		mt12 <- size2
+	}else{
+		mt11 <- 100
+		mt12 <- 100
+	}
+   
+
     ans <- .Fortran("joint",
                 as.integer(n),
                 as.integer(length(uni.cluster)), 
@@ -540,41 +707,54 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
                 H=as.double(matrix(0,nrow=np,ncol=np)),
                 HIH=as.double(matrix(0,nrow=np,ncol=np)),
                 loglik=as.double(0),
-		trace=as.double(0),
-                x1=as.double(rep(0,99)),
-                lam=as.double(matrix(0,nrow=99,ncol=3)),
-                surv=as.double(matrix(0,nrow=99,ncol=3)),
-
-                x2=as.double(rep(0,99)),
-                lam2=as.double(matrix(0,nrow=99,ncol=3)),
-                surv2=as.double(matrix(0,nrow=99,ncol=3)),
+		LCV=as.double(rep(0,2)),
+                x1=as.double(rep(0,size1)),
+                lam=as.double(matrix(0,nrow=size1,ncol=3)),
+                xSu1=as.double(xSu1),
+                surv=as.double(matrix(0,nrow=mt11,ncol=3)),
+                x2=as.double(rep(0,size2)),
+                lam2=as.double(matrix(0,nrow=size2,ncol=3)),
+		xSu2=as.double(xSu2),
+                surv2=as.double(matrix(0,nrow=mt12,ncol=3)),
+#
+		as.integer(typeof),
+		as.integer(equidistant),
+		as.integer(nbintervR),
+		as.integer(nbintervDC),
+		as.integer(size1),
+		as.integer(size2),
+#
                 ni=as.integer(0),
                 cpt=as.integer(0),
                 cpt.dc=as.integer(0),
                 ier=as.integer(0),
+		istop=as.integer(0),
+		shape.weib=as.double(rep(0,2)),
+		scale.weib=as.double(rep(0,2)),
+		as.integer(mt11),
+		as.integer(mt12),
                 PACKAGE = "frailtypack")  	
-#AD:
-  if(ans$ier==4 || ans$loglik==-1e9){
-	cat("Problem in the loglikehood computation. The program stopped abnormally.\n")
-	ans$H <- matrix(NA,nc=np,nr=np)
-	ans$HIH <- matrix(NA,nc=np,nr=np)	
-	ans$trace <- NA
-	ans$x1 <- rep(NA,99)
-	ans$lam <- matrix(NA,nr=99,nc=3)
-	ans$surv <- matrix(NA,nr=99,nc=3)  
-	ans$x2<- rep(NA,99)	
-	ans$lam2 <- matrix(NA,nr=99,nc=3)  
-	ans$surv2 <- matrix(NA,nr=99,nc=3)  
-	ans$ni <- 0
-	ans$cpt <- 0
-	ans$cpt.dc <- 0
-  }
-#AD:	
+		
+
+
+    if (ans$istop == 4){
+	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")    
+     }
+    
+    if (ans$istop == 2){
+         warning("Model did not converge. Change the 'maxit' parameter")
+    }
+    if (ans$istop == 3){
+         warning("Matrix non-positive definite.")
+    }
+
 #AD:    
     if (noVar1==1 & noVar2==1) nvar<-0
 #AD:
+    
     np <- ans$np
     fit <- NULL
+    fit$b <- ans$b
     fit$na.action <- attr(m, "na.action")
     fit$call <- call
     fit$n <- n
@@ -583,7 +763,8 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
     fit$n.deaths <- ans$cpt.dc
     fit$logLikPenal <- ans$loglik
 #AD:
-    fit$LCV <- ans$trace
+    fit$LCV <- ans$LCV[1]
+    fit$AIC <- ans$LCV[2]
 #AD: 
     fit$theta <- ans$b[np - nvar-1]^2
     fit$alpha <- ans$b[np - nvar]
@@ -612,37 +793,42 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
     fit$varHIH <- temp2[(np - (nvar) - 1):np, (np - (nvar) - 1):np]
     fit$formula <- formula(Terms)
     fit$x1 <- ans$x1
-    fit$lam <- matrix(ans$lam, nrow = 99, ncol = 3)
-    fit$surv <- matrix(ans$surv, nrow = 99, ncol = 3)
+    fit$lam <- matrix(ans$lam, nrow = size1, ncol = 3)
+    fit$surv <- matrix(ans$surv, nrow = mt11, ncol = 3)
     if (missing(formula.terminalEvent)){
     	fit$x2 <- NA
     }else{
         fit$x2 <- ans$x2
     }
-    fit$lam2 <- matrix(ans$lam2, nrow = 99, ncol = 3)
-    fit$surv2 <- matrix(ans$surv2, nrow = 99, ncol = 3)
+    fit$lam2 <- matrix(ans$lam2, nrow = size2, ncol = 3)
+    fit$surv2 <- matrix(ans$surv2, nrow = mt12, ncol = 3)
+
+    fit$xSu1 <- ans$xSu1
+    fit$xSu2 <- ans$xSu2
+
     fit$type <- type
-    fit$n.knots<-n.knots 
     fit$n.iter <- ans$ni
-    fit$kappa <- ans$k0
-    fit$cross.Val<-cross.validation
+    fit$typeof <- typeof
+    if (typeof == 0){  
+	fit$n.knots<-n.knots      
+	fit$kappa <- ans$k0
+	fit$cross.Val<-cross.validation
+	fit$n.knots.temp <- n.knots.temp	
+    }	
 #AD:
     fit$noVar1 <- noVar1
     fit$noVar2 <- noVar2
+    fit$nbintervR <- nbintervR
+    fit$nbintervDC <- nbintervDC
     fit$nvarRec <- nvarRec
     fit$nvarEnd <- nvarEnd
+    fit$istop <- ans$istop
+    fit$indic.nb.int1 <- indic.nb.int1
+    fit$indic.nb.int2 <- indic.nb.int2
+    fit$shape.weib <- ans$shape.weib
+    fit$scale.weib <- ans$scale.weib
 #AD:
 
-    if(ans$ier==-1)
-        warning("matrix non-positive definite")
-
-    if(fit$n.iter>maxit){
-        warning("model did not converge. Change the 'maxit' parameter") 
-    }
-#AD:
-     fit$n.knots.temp <- n.knots.temp
-
-#AD
     attr(fit,"joint")<-joint
     attr(fit,"subcluster")<-FALSE
     class(fit) <- "jointPenal"
@@ -654,14 +840,41 @@ function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, re
 #
 
 effet <- 1
-
-
-
-
 if (length(subcluster))  
  {
-    if (sum(as.double(var))==0) nvar <- 0
-    np <- as.integer(uni.strat) * (as.integer(n.knots)+2) + as.integer(nvar) + 2*effet
+         if(equidistant %in% c(0,1)){
+		if (missing(nb.int1)) stop("Time interval 'nb.int1' is required")
+		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")	
+		if (nb.int1 < 1) stop("Number of Time 'nb.int2' interval must be between 1 and 20")
+		if (nb.int1 > 20){
+			 nb.int1 <-20
+			indic.nb.int1 <- 1 # equals 1 for nb.int1 > 20	 
+		}else{
+			indic.nb.int1 <- 0 # equals 1 for nb.int1 < 20
+		}
+		nbintervR <- nb.int1
+		size1 <- 3*nbintervR
+	}
+	 if ((typeof == 0) | (typeof == 2)) indic.nb.int1 <- 0
+	if (sum(as.double(var))==0) nvar <- 0
+   
+	np <- switch(as.character(typeof),
+		"0"=(as.integer(uni.strat) * (as.integer(n.knots) + 2) + as.integer(nvar) + 2 * as.integer(Frailty)),
+
+		"1"=(as.integer(uni.strat) * nbintervR + nvar + 2 * as.integer(Frailty)),
+
+		"2"=(as.integer(uni.strat) * 2 + nvar + 2 * as.integer(Frailty)))   
+    
+		xSu1 <- rep(0,100)
+		xSu2 <- rep(0,100)
+		if (typeof==0){
+			mt1 <- size1	
+		}else{
+			mt1 <- 100
+		}
+		size2 <- mt1
+
+		
     ans <- .Fortran("nested",
                 as.integer(n),
                 as.integer(length(uni.cluster)),
@@ -675,54 +888,62 @@ if (length(subcluster))
                 as.integer(cens),
                 as.integer(cluster),
                 as.integer(subcluster),
-                nvar=as.integer(nvar),
+                as.integer(nvar),
                 as.double(strats),
                 as.double(var),
                 as.integer(AG),
                 as.integer(noVar1), 
                 as.integer(maxit),
                 as.integer(crossVal),  
-                np=as.integer(np),
+                as.integer(np),
                 b=as.double(rep(0,np)),
                 H=as.double(matrix(0,nrow=np,ncol=np)),
                 HIH=as.double(matrix(0,nrow=np,ncol=np)),
                 loglik=as.double(0),
-		trace=as.double(0),
-                x1=as.double(rep(0,99)),
-                lam=as.double(matrix(0,nrow=99,ncol=3)),
-                surv=as.double(matrix(0,nrow=99,ncol=3)),
-                x2=as.double(rep(0,99)),
-                lam2=as.double(matrix(0,nrow=99,ncol=3)),
-                surv2=as.double(matrix(0,nrow=99,ncol=3)),
+		LCV=as.double(rep(0,2)),
+                x1=as.double(rep(0,size1)),
+                lam=as.double(matrix(0,nrow=size1,ncol=3)),
+		xSu1=as.double(xSu1),
+                surv=as.double(matrix(0,nrow=size2,ncol=3)),
+                x2=as.double(rep(0,size1)),
+                lam2=as.double(matrix(0,nrow=size1,ncol=3)),
+		xSu2=as.double(xSu2),
+                surv2=as.double(matrix(0,nrow=size2,ncol=3)),
+		
+		as.integer(typeof),
+		as.integer(equidistant),
+		as.integer(nbintervR),
+		as.integer(size1),
+			
                 ni=as.integer(0),
                 cpt=as.integer(0),
                 ier=as.integer(0),
                 k0=as.double(c(0,0)), 
-                ddl=as.double(0),  PACKAGE = "frailtypack")    
+                ddl=as.double(0),
+		istop=as.integer(0),
+		shape.weib=as.double(rep(0,2)),
+		scale.weib=as.double(rep(0,2)),
+		as.integer(mt1),
+		PACKAGE = "frailtypack")    
 
-#AD:
-  if(ans$ier==4 || ans$loglik==-1e9){
-	cat("Problem in the loglikehood computation. The program stopped abnormally.\n")
-	ans$H <- matrix(NA,nc=np,nr=np)
-	ans$HIH <- matrix(NA,nc=np,nr=np)	
-	ans$trace <- NA
-	ans$x1 <- rep(NA,99)
-	ans$lam <- matrix(NA,nr=99,nc=3)
-	ans$surv <- matrix(NA,nr=99,nc=3)  
-	ans$x2<- rep(NA,99)	
-	ans$lam2 <- matrix(NA,nr=99,nc=3)  
-	ans$surv2 <- matrix(NA,nr=99,nc=3)  
-	ans$ni <- 0
-	ans$cpt <- 0
-	ans$cpt.dc <- 0
-  }
-#AD:	
+    if (ans$istop == 4){
+	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")    
+     }
+    
+    if (ans$istop == 2){
+         warning("Model did not converge. Change the 'maxit' parameter")
+    }
+    if (ans$istop == 3){
+         warning("Matrix non-positive definite.")
+    }
+
     nst <- as.integer(uni.strat)		
 		
     if (noVar1 == 1) nvar<-0
-
-    np <- ans$np
+   
+    np <- np
     fit <- NULL
+    fit$b <- ans$b
     fit$na.action <- attr(m, "na.action")
     fit$call <- call
     fit$n <- n
@@ -746,45 +967,55 @@ if (length(subcluster))
 
     temp1 <- matrix(ans$H, nrow = np, ncol = np)
     temp2 <- matrix(ans$HIH, nrow = np, ncol = np)
+
     fit$varH <- temp1[(np - nvar - 1):np, (np - nvar - 1):np]
     fit$varHIH <- temp2[(np - nvar - 1):np, (np - nvar - 1):np]
+
       
     fit$formula <- formula(Terms)
     fit$x1 <- ans$x1
-    fit$lam <- matrix(ans$lam, nrow = 99, ncol = 3)
-    fit$surv <- matrix(ans$surv, nrow = 99, ncol = 3)
     fit$x2 <- ans$x2
-    fit$lam2 <- matrix(ans$lam2, nrow = 99, ncol = 3)
-    fit$surv2 <- matrix(ans$surv2, nrow = 99, ncol = 3)
+    fit$lam <- matrix(ans$lam, nrow = size1, ncol = 3)
+    fit$lam2 <- matrix(ans$lam2, nrow = size1, ncol = 3)
+
+    fit$surv <- matrix(ans$surv, nrow = size2, ncol = 3) 
+    fit$surv2 <- matrix(ans$surv2, nrow = size2, ncol = 3)
+
+    fit$xSu1 <- ans$xSu1
+    fit$xSu2 <- ans$xSu2
+
     fit$type <- type
     fit$n.strat <- uni.strat
-    fit$n.knots<-n.knots 
     fit$n.iter <- ans$ni
-    fit$kappa <- ans$k0
-    fit$DoF <- ans$ddl
-    fit$cross.Val<-cross.validation
+    fit$typeof <- typeof
+    fit$noVar1 <- noVar1
+    
+    if (typeof == 0){
+    	fit$n.knots<-n.knots
+    	fit$kappa <- ans$k0
+    	fit$DoF <- ans$ddl
+    	fit$cross.Val<-cross.validation
+    }
 #AD:
+    fit$nbintervR <- nbintervR
     fit$nvar <- nvar
-    fit$LCV <- ans$trace
+    fit$LCV <- ans$LCV[1]
+    fit$AIC <- ans$LCV[2]    
     fit$npar <- np
     fit$nst <- nst
-    fit$indic.Kappa2 <- indic.Kappa2 
-
-#AD:
-
-    if(ans$ier==-1)
-        warning("matrix non-positive definite")
-
-    if(fit$n.iter>maxit)
-        warning("model did not converge. Change the 'maxit' parameter") 
-
+    if (typeof == 0){
+    	fit$indic.Kappa2 <- indic.Kappa2 
+	fit$n.knots.temp <- n.knots.temp
+    }
+    fit$indic.nb.int1 <- indic.nb.int1
+    fit$istop <- ans$istop
+    fit$shape.weib <- ans$shape.weib
+    fit$scale.weib <- ans$scale.weib
+    
     if(ans$ier==2000)
         stop("The cross validation procedure cannot be finished. Try to change 
           either the number of knots or the seed for kappa parameter")
-#AD:
-     fit$n.knots.temp <- n.knots.temp
 
-#AD
     attr(fit,"joint")<-joint
     attr(fit,"subcluster")<-TRUE
     class(fit) <- "nestedPenal"

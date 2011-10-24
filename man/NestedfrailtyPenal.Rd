@@ -3,16 +3,21 @@
 \name{frailtyPenal for Nested frailty models}
 \alias{frailtyPenal for Nested frailty models}
 
-\title{Fit Nested Frailty model using penalized likelihood estimation }
+\title{Fit a Nested Frailty model using a semi-parametrical penalized likelihood estimation or a parametrical estimation }
 
-\description{Fit a nested frailty model using a Penalized Likelihood on the hazard function. Nested frailty models allow survival studies for hierarchically clustered data by including two iid gamma random effects.
+\description{Fit a nested frailty model using a Penalized Likelihood on the hazard function or using a parametrical estimation. Nested frailty models allow survival studies for hierarchically clustered data by including two iid gamma random effects.
 Left truncated and censored data are allowed. Stratification analysis is allowed(maximum of strata=2).
 
 The hazard function conditional on the two frailties \eqn{v_i} and \eqn{w_{ij}} for the \eqn{k^{th}} individual of the \eqn{j^{th}} subgroup of the \eqn{i^{th}} group is :
 
-\deqn{\lambda_{ijk}(t|v_i,w_{ij})=v_iw_{ij}\lambda_0(t)exp(\bold{\beta^{'}X_{ijk}})}
-
-\deqn{\small{ v_i\sim\Gamma\left(\frac{1}{\alpha},\frac{1}{\alpha}\right) \hspace{0.05cm}i.i.d. \hspace{0.2cm} \bold{E}(v_i)=1 \hspace{0.2cm}\bold{Var}(v_i)=\alpha \hspace{0.5cm}  w_{ij}\sim\Gamma\left(\frac{1}{\eta},\frac{1}{\eta}\right)\hspace{0.05cm}i.i.d. \hspace{0.2cm} \bold{E}(w_{ij})=1 \hspace{0.2cm}\bold{Var}(w_{ij})=\eta}}
+\deqn{\left\{
+\begin{array}{ll}
+\lambda_{ijk}(t|v_i,w_{ij})=v_iw_{ij}\lambda_0(t)exp(\bold{\beta^{'}X_{ijk}}) \\
+v_i\sim\Gamma\left(\frac{1}{\alpha},\frac{1}{\alpha}\right) \hspace{0.05cm}i.i.d. \hspace{0.2cm} \bold{E}(v_i)=1 \hspace{0.2cm}\bold{Var}(v_i)=\alpha \\
+ w_{ij}\sim\Gamma\left(\frac{1}{\eta},\frac{1}{\eta}\right)\hspace{0.05cm}i.i.d. \hspace{0.2cm} \bold{E}(w_{ij})=1 \hspace{0.2cm} \bold{Var}(w_{ij})=\eta
+ \end{array}
+ \right.
+}
 
 where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{X_{ijk}}
  denotes the covariate vector and \eqn{\beta} the corresponding vector of regression parameters.
@@ -23,8 +28,8 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{X_{ijk}}
 \synopsis{
 
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
-                 joint = FALSE, recurrentAG = FALSE, cross.validation =
-                 FALSE, n.knots, kappa1, kappa2, maxit = 350)
+             joint = FALSE, recurrentAG = FALSE, cross.validation =
+             FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard,nb.int1,nb.int2)
 }
 
 \arguments{
@@ -45,14 +50,15 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
                  counting process approach of Andersen and Gill is used. This formulation can be used for dealing with
                  time-dependent covariates. The default is FALSE.}
 
-  \item{cross.validation}{Logical value. Is cross validation procedure used for estimating smoothing parameter?
+  \item{cross.validation}{Logical value. Is cross validation procedure used for estimating smoothing parameter in 
+                 the penalized likelihood estimation?
                  If so a search of the smoothing parameter using cross validation is done, with kappa1 as the seed.
                  The cross validation is not implemented for two strata. The cross validation has been implemented 
                  for a Cox proportional hazard model, with no covariates. The default is FALSE.}
 
-  \item{n.knots}{ integer giving the number of knots to use. Value required.
+  \item{n.knots}{ integer giving the number of knots to use. Value required in the penalized likelihood estimation.
   It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions. 
-  Number of knots must be between 4 and 20.(See Note)}
+  Number of knots must be between 4 and 20. (See Note)}
 
   \item{kappa1}{ positive smoothing parameter. The coefficient kappa of the integral of the squared
           second derivative of hazard function in the fit (penalized log likelihood). To obtain an initial 
@@ -60,9 +66,12 @@ value for \code{kappa1} (or \code{kappa2}), a solution is to fit the correspondi
           to identify several possible tuning parameters, note their defaults and look at the sensitivity 
           of the results to varying them. Value required.(See Note)}
 
-  \item{kappa2}{positive smoothing parameter for the second stratum, when data are stratified. See kappa1. }
+  \item{kappa2}{positive smoothing parameter in the penalized likelihood estimation for the second stratum, when data are stratified. See kappa1. }
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
+  \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard function with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametrical weibull functions. Default is "Splines".}
+  
+ \item{nb.int1}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi")}
 
 }
 
@@ -76,7 +85,7 @@ The smoothing parameter can be fixed a priori or chosen by maximizing a likeliho
  The iterations are stopped when the difference between two
  consecutive loglikelhoods was small \eqn{(<10^{-4})}, the estimated coefficients
  were stable (consecutive values \eqn{(<10^{-4})}, and the gradient small
- enough \eqn{(<10^{-6})}.
+ enough \eqn{(<10^{-3})}.
 To be sure of having a positive function at all stages of
  the algorithm, the spline coefficients were reparametrizes to be positive
  at each stage. The variance space of the two random effects is reduced,
@@ -92,8 +101,10 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 }
 
 \value{
-  a Nested frailty model or more generally an object of class 'frailtyPenal'. Methods defined for 'frailtyPenal' objects are provided for print, plot and summary. The following components are included in a 'frailtyPenal' object for nested frailty models.
 
+  a Nested frailty model or more generally an object of class 'frailtyPenal'. Methods defined for 'frailtyPenal' objects are provided for print, plot and summary. The following components are included in a 'frailtyPenal' object for nested frailty models.
+  
+\item{b}{sequence of the corresponding estimation of the splines coefficients, the random effects variances and the regression coefficients.}
 \item{alpha}{variance of the cluster effect \eqn{(\bold{Var}(v_{i}))}}
 \item{call}{The code used for fitting the model}
 \item{coef}{the coefficients of the linear predictor, which
@@ -107,28 +118,33 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 \item{kappa}{ A vector with the smoothing parameters corresponding to each baseline function as components}
 \item{lam}{matrix of hazard estimates at x1 times and confidence bands. }
 \item{lam2}{the same value as lam for  the second stratum}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametrical case or the marginal log-likelihood in the parametrical case.}
 \item{n}{the number of observations used in the fit.}
 \item{n.events}{the number of events observed in the fit}
 \item{n.iter}{number of iterations needed to converge}
-\item{n.knots}{number of knots}
+\item{n.knots}{number of knots for estimating the baseline functions}
 \item{n.strat}{A vector with the number of covariates of each type of hazard function as components}
-\item{nvar}{A vector with the number of covariates of each type of hazard function as components}
+
 \item{surv}{matrix of baseline survival estimates at x1 times and confidence bands. }
-\item{surv2}{the same value as surv for the second stratum}
+\item{surv2}{the same value as surv for the second stratum.}
 %\item{type}{a character string specifying the type of censoring. Possible values are "right", "left", "counting", %"interval", "interval2". The default is "right" or "counting" depending on whether the 'time2' argument is absent (not %interval-censored data) or present (interval-censored data), respectively.}
 \item{varH}{the variance matrix of all parameters before positivity constraint transformation (alpha, eta, the regression coefficients and the spline coefficients). Thenafter, the delta method is needed to obtain the estimated variance parameters.}
 \item{varHIH}{the robust estimation of the variance matrix of all parameters (alpha, eta, the regression coefficients and the spline coefficients).}
-\item{x1}{vector of times where both survival and hazard function are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
-\item{x2}{the same value as x1 for the second stratum}
+\item{x1}{vector of times where both survival and hazard functions are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
+\item{x2}{the same value as x1 for the second stratum.}
+\item{type.of.hazard}{Type of hazard functions (0:"Splines", "1:Piecewise", "2:Weibull").}
+\item{type.of.Piecewise}{Type of Piecewise hazard functions (1:"per", 0:"equi").}
+\item{nbintervR}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+\item{size}{Number of points to plot the hazard functions in the parametrical and semi-parametrical cases.}
 
 \item{npar}{number of parameters.}
-\item{nvar}{number of vairables.}
-\item{noVar1}{indicator of explanatory variable.}
-\item{LCV}{the approximate likelihood cross-validation criterion in the semi parametric case.}
-\item{indic.Kappa2}{indicator of second stratum.}
-\item{nst}{number of strat.}
-\item{n.knots.temp}{initial value of n.knots.}
-
+\item{nvar}{number of explanatory variables.}
+\item{noVar}{indicator of explanatory variables.}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametrical case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
+\item{AIC}{the Akaike information Criterion for the parametrical case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
+\item{n.knots.temp}{initial value for the number of knots.}
+\item{shape.weib}{shape parameters for the weibull hazard function.}
+\item{scale.weib}{scale parameters for the weibull hazard function.}
  }
 
 \note{
@@ -141,6 +157,8 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 
 
 \references{
+V. Rondeau, Y. Mazroui and J. R. Gonzalez. Frailtypack: An r package for the analysis of correleted survival data with frailty models using penalized likelihood estimation.
+\emph{Journal of Statistical Software, In press, 2011}
 
 V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum penalized likelihood estimation.
 \emph{Statistics in Medecine}, \bold{25}, 4036-4052.
@@ -170,17 +188,14 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 
 \examples{
 
-
-
- ### Nested model (or hierarchical model) with 2 covariates ###
-
+### Nested model (or hierarchical model) with 2 covariates ###
 
 \dontrun{
 
   data(dataNested)
-  modClu<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+subcluster(subgroup)+
-  cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000)
-
+  modClu<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+
+  subcluster(subgroup)+cov1+cov2,Frailty=TRUE,data=dataNested,
+  n.knots=8,kappa1=50000)
 
 # It takes around 24 minutes to converge (depends on the processor)#
 
@@ -188,9 +203,9 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
   summary(modClu)
   plot(modClu)
   
-  modClu.str<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+subcluster(subgroup)+
-  cov1+strata(cov2),Frailty=TRUE,data=dataNested,n.knots=8,kappa1=20000
-  ,kappa2=20000)
+  modClu.str<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+
+  subcluster(subgroup)+cov1+strata(cov2),Frailty=TRUE,data=dataNested,
+  n.knots=8,kappa1=20000,kappa2=20000)
   
  # It takes around 8 minutes to converge (depends on the processor)#
  
@@ -198,10 +213,7 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
   summary(modClu.str)
   plot(modClu.str)
   
-  
 }
-
-
 }
 
 \keyword{models}

@@ -37,8 +37,9 @@ the variable subgroup}
 \dontrun{
 
   data(dataNested)
-  modClu<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+subcluster(subgroup)+
-            cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000,kappa2=50000)
+  modClu<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+
+          subcluster(subgroup)+cov1+cov2,Frailty=TRUE,data=dataNested,
+	  n.knots=8,kappa1=50000,kappa2=50000,hazard="Splines")
 
   print(modClu)
 

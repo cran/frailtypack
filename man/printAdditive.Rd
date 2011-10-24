@@ -9,7 +9,7 @@
   Prints a short summary of the parameter estimates of an additive frailty model or more generally of an 'additivePenal' object 
 }
 \usage{
-\method{print}{additivePenal}(x, digits = max(options()$digits - 4, 3), ...)
+\method{print}{additivePenal}(x, digits = max(options()$digits - 4, 6), ...)
 }
 \arguments{
   \item{x}{the result of a call to the additivePenal function}
@@ -48,7 +48,8 @@
 
   data(dataAdditive) 
   modAdd<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
-                 correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862)
+                  correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862,
+		  hazard="Splines")
 
 
 # It takes around 4 minutes to converge. 'var1' is boolean as a treatment variable. #

@@ -51,14 +51,16 @@ data(readmission)
 # /*** Shared frailty model ***/
 
 modSha<-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
-             n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE)
+             n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,
+	     hazard="Splines")
 
 plot(modSha,type="surv",conf=FALSE)
 
 # /*** Cox proportional hazard model using Penalized likelihood ***/
 
 modCox<-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
-             n.knots=10,kappa1=10000,data=readmission,Frailty=FALSE)
+             n.knots=10,kappa1=10000,data=readmission,Frailty=FALSE,
+	     hazard="Splines")
 plot(modCox)
 
 # no confidence bands

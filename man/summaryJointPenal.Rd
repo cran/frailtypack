@@ -41,20 +41,19 @@
 
 ## Gap-time ##
 modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)
-		+as.factor(charlson)+terminal(death),
-		formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
-		data=readmission,n.knots=14,kappa1=9550000000,
-		kappa2=1410000000000,Frailty=TRUE,joint=TRUE,recurrentAG=FALSE)
+	      +as.factor(charlson)+terminal(death),
+	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
+	      data=readmission,n.knots=14,kappa1=9550000000,kappa2=1410000000000,
+	      Frailty=TRUE,joint=TRUE,recurrentAG=FALSE,hazard="Splines")
 
 ## Calendar time ##
 modJoint_calendar<-frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
-		+as.factor(dukes)+as.factor(charlson)+terminal(death),
-		formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
-		data=readmission,n.knots=10,kappa1=9550000000,
-		kappa2=1410000000000,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE)
-
-						 
-						 
+	      +as.factor(dukes)+as.factor(charlson)+terminal(death),
+	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
+	      data=readmission,n.knots=10,kappa1=9550000000,
+	      kappa2=1410000000000,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE
+	      ,hazard="Splines")
+	 
 # It takes around 1 minute to converge  
 
   summary(modJoint_gap)
