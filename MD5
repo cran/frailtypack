@@ -1,4 +1,4 @@
-582624845d0e25b5895d7336100cc053 *DESCRIPTION
+e871d119348fed3af7d74f9acf0c843f *DESCRIPTION
 48c97e5ae86ff440d62c2d52b093e4be *NAMESPACE
 67fd67b5e9e978b76e2c468c003c5147 *R/additivePenal.R
 6e7a6599db627ea14af1658360286134 *R/firstlib.R
@@ -51,9 +51,9 @@ b4814eaa54068756f34d272d56fc0348 *man/summaryFrailtyPenal.Rd
 98ffd05f8a8bf8fe55f6c95dc19088ef *src/aaOptim.f90
 4fdca243fae8017ab046b384a38c015f *src/aaUseFunction.f90
 ef3b643081f6961b72e9f655d055e390 *src/aamarq98o.f90
-cf56e096ab8959d21e3007c8cea32664 *src/additive.f90
-0c24e5acbbd861b2ea778702b4ef9119 *src/distance.f90
-9daac76cc93944b5cc02a24c4e1d7865 *src/frailtypack.f90
+8293fae6d0f208c06dfcf774268857ee *src/additive.f90
+a961277b306f9e4de0e2e99daf434680 *src/distance.f90
+faa3e8108c99265b3dcc510158d37a16 *src/frailtypack.f90
 8ec76e3eadc5dff754c7631ef97c5d3b *src/funcpaa_cpm.f90
 c5315ccb0cd8e6770e2c627da87d2ad8 *src/funcpaa_splines.f90
 2f74f8b9aea88adb31b9748014d68488 *src/funcpaa_weib.f90
@@ -66,5 +66,5 @@ b069ae128d848ec2836023e50bf8faa3 *src/funcpan_weib.f90
 b3e2c4fb9a3941c5c45c069903331e54 *src/funcpas_cpm.f90
 94271ec3591d5f785ca03f91248e643c *src/funcpas_splines.f90
 377acf6dcd6e688b2c752a2e0b4a5035 *src/funcpas_weib.f90
-15537ea612c0a8ac2ae62e337aec05d8 *src/joint.f90
-9d149b8d88c071be887561ad2d65cd11 *src/nested.f90
+458572f1dfd5546d23a449b8895b16cf *src/joint.f90
+f63471e373849ad30e0bdea8ac85b16f *src/nested.f90

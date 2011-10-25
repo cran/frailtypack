@@ -929,18 +929,16 @@
 	end select
 
 	if (nst == 1) then
-		shape_weib(1) = betaR
-		scale_weib(1) = etaR
-		shape_weib(2) = 0.d0
+		scale_weib(1) = betaR
+		shape_weib(1) = etaR
 		scale_weib(2) = 0.d0
+		shape_weib(2) = 0.d0
 	else
-		shape_weib(1) = betaR
-		scale_weib(1) = etaR
-		shape_weib(2) = betaD
-		scale_weib(2) =	etaD	
+		scale_weib(1) = betaR
+		shape_weib(1) = etaR
+		scale_weib(2) = betaD
+		shape_weib(2) = etaD
 	end if	
-
-	
 
 !AD:add LCV
 !     calcul de la trace, pour le LCV (likelihood cross validation)
