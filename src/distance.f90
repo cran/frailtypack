@@ -141,7 +141,7 @@
 !!!! SURV 1
 	
 	bgen=0.d0
-	x=0.d0
+	x=date(1)
 	do t=1,100
 		if(t .ne.1) then
 			x=x+ttt(nbintervR)/100
@@ -335,7 +335,7 @@
 
 		bgen=0.d0
 
-		x=0.d0
+		x=date(1)
 		do t=1,100
 			if(t .ne. 1) then
 				x=x+ttt(nbintervR)/100
@@ -511,7 +511,7 @@
 !     Pour chaque temps de 0 à la censure du décès par pas cens/100
 	
  !     commencer à 0 dans la boucle
-	x=0.d0
+	x=date(1)
 !       shape et scale
 
 	betaR = b(1)**2
@@ -598,8 +598,8 @@
 		
 	end do
 	
-!	x=date(1)
-	x=0.d0
+	x=date(1)
+
 	do t=1,100
 		
 		glR=0.d0
@@ -941,7 +941,7 @@
 !--------------- Fontion de survie recurrent ----------------
 	bgen=0.d0
 	
-	x=0.d0
+	x=date(1)
 
 	do t=1,100
 
@@ -1054,7 +1054,7 @@
 !--------------- Fontion de survie ----------------
 	bgen=0.d0
 
-	x=0.d0
+	x=date(1)
 	do t=1,100
 
 !         n=n+1 ! compteur sur nième temps
@@ -1250,7 +1250,7 @@
 !     Pour chaque temps de 0 à la censure du décès par pas cens/100
 !	x=-cens/100 !permet de commencer à 0 dans la boucle
 
-	x=-cens/100
+	x=date(1)
 	do t=1,100
 
 		glR=0.d0
