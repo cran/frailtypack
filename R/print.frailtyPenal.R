@@ -43,12 +43,19 @@
 #AD     
 	if (x$istop == 1){
 		if (!is.null(coef)){ 
-			seH <- sqrt(diag(x$varH))[-1]
-			seHIH <- sqrt(diag(x$varHIH))[-1]
+			if(x$nvar != 1){
+				seH <- sqrt(diag(x$varH))
+				seHIH <- sqrt(diag(x$varHIH))
+			}else{
+				seH <- sqrt(x$varH)
+				seHIH <- sqrt(x$varHIH)
+			}
 			if (x$typeof == 0){
 				tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
+				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)	
 			}else{
 				tmp <- cbind(coef, exp(coef), seH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
+				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)
 			}
 		
 			cat("\n")
@@ -73,26 +80,42 @@
 				
 				if (x$n.strat>1) cat("  (Stratification structure used)", "\n")         
 			}
-
+			
 			if (x$typeof == 0){
+				if(x$global_chisq.test==1){
+					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
+					
+				}
+
 				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
 				"SE coef (H)", "SE coef (HIH)", "z", "p"))
+
 			}else{
+				if(x$global_chisq.test==1){
+					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
+					
+				}
 				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
 				"SE coef (H)", "z", "p"))
+
 			}
 			cat("\n")
 			prmatrix(tmp)
-
+			if(x$global_chisq.test==1){
+				cat("\n")
+				prmatrix(tmpwald)
+			}
 			cat("\n")
 		} 
 	
 		if (!is.null(x$theta)) {
 			tetha <- x$theta
-			temp <- diag(x$varH)[1]
+			temp <- x$varTheta[1]
 			seH <- sqrt(((2 * (tetha^0.5))^2) * temp)
-			temp <- diag(x$varHIH)[1]
+			temp <- x$varTheta[2]
 			seHIH <- sqrt(((2 * (tetha^0.5))^2) * temp)
+			
+			
 #AD:
 			if (x$noVar1 == 1){
 				cat("\n")
@@ -118,10 +141,8 @@
 			cat("      LCV = the approximate likelihood cross-validation criterion\n")
 			cat("            in the semi parametrical case     =",x$LCV,"\n")
 		}else{
-			cat(paste("      marginal log-likelihood =", round(x$logLikPenal,2)))
+			cat(paste("      marginal log-likelihood =", round(x$logLik,2)))
 			cat("\n")
-#			cat("      LCV = the approximate likelihood cross-validation criterion\n")
-#			cat("            in the parametrical case     =",x$LCV,"\n")	
 			cat("      AIC = Aikaike information Criterion     =",x$AIC,"\n")
 			cat("\n")
 			cat("The expression of the Aikaike Criterion is:","\n")
@@ -137,7 +158,7 @@
 				}
 					cat("\n")
 					cat("The expression of the Weibull hazard function is:","\n")
-					cat("        'lambda(t) = shape(t^(shape-1)/(scale^shape)'","\n")
+					cat("        'lambda(t) = (shape.(t^(shape-1)))/(scale^shape)'","\n")
 					cat("The expression of the Weibull survival function is:","\n")
 					cat("        'S(t) = exp[- (t/scale)^shape]'")
 					cat("\n")
@@ -179,7 +200,7 @@
 					cat("      an approximated Cross validation: ", x$kappa[1])
 				}
 			}
-			cat(", DoF: ", formatC(-x$DoF, format="f",dig=2))
+			cat(", DoF: ", formatC(-x$DoF, format="f",digits=2))
 		}
 	}else{
 		if (!is.null(x$theta)){

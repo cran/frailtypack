@@ -5,7 +5,8 @@
 	nzAux,ax1,ax2,tt0Aux,tt1Aux,icAux,groupeAux,nvaAux,strAux,vaxAux, &
 	AGAux,noVar,maxitAux,irep1,np,b,H_hessOut,HIHOut,resOut,LCV, &
 	x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt, &	
-	ni,cpt,ier,k0,ddl,istop,shape_weib,scale_weib,mt1)
+	ni,cpt,ier,k0,ddl,istop,shape_weib,scale_weib,mt1,ziOut,Res_martingale,martingaleCox,&
+	frailtypred,frailtyvar,frailtysd,linearpred,time)
 
 
 !
@@ -14,6 +15,7 @@
 	use tailles
 	use comon
 	use optim
+	use residusM
 	
 	implicit none
 
@@ -33,6 +35,7 @@
 	!******************************************   Add JRG January 05
 	integer::ss,sss,noVar,AGAux,maxitAux,nsujetAux,ngAux,icenAux,nstAux,effetAux, &
 	nzAux,nvaAux
+	double precision,dimension(nzAux+6),intent(out)::ziOut
 	double precision::resOut
 	double precision,dimension(nsujetAux)::tt0Aux,tt1Aux
 	integer,dimension(nsujetAux)::icAux,groupeAux
@@ -55,7 +58,17 @@
 !Cpm
 	integer::typeof0,nbintervR0,equidistant,ent,indd
 	double precision::temp
+!predictor
+	double precision,dimension(ngAux),intent(out)::Res_martingale,frailtypred,frailtysd,frailtyvar
+	double precision,external::funcpas_res
+	double precision,dimension(nsujetAux),intent(out)::linearpred,martingaleCox
+	double precision,dimension(1,nvaAux)::coefBeta
+	double precision,dimension(1,nsujetAux)::XBeta
+	double precision,dimension(nbintervR0+1)::time
+	integer,dimension(2)::istopp
 !cpm
+	istopp=0
+	time = 0.d0
 	lamOut=0.d0
 	lam2Out=0.d0
 	suOut=0.d0
@@ -79,6 +92,7 @@
 	NSUJETMAX=nsujetAux
 	allocate(t0(nsujetmax),t1(nsujetmax),c(nsujetmax),stra(nsujetmax),g(nsujetmax))
 
+	allocate(RisqCumul(nsujetmax))
 	if (typeof == 0) then
 		allocate(nt0(nsujetmax),nt1(nsujetmax))
 		nt0=0
@@ -102,9 +116,10 @@
 	mm3=0.d0
 		
 	ngmax=ngAux
+	
 	allocate(nig(ngmax))
 	nig=0
-	
+	allocate(Residus(ngmax),cumulhaz(ngmax),vuu(1))	
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	j=0
 	nbou2=0
@@ -281,7 +296,9 @@
 ! %%%%%%%%%%%%% SANS EFFET ALEATOIRE %%%%%%%%%%%%%%%%%%%%%%%%% 
 
 	nsujet = k
+	
 
+	
 	if (typeof == 0) then	
 		nz1=nz
 		nz2=nz
@@ -349,18 +366,18 @@
 		zi(nz+1)=zi(nz)
 		zi(nz+2)=zi(nz)
 		zi(nz+3)=zi(nz)
-
+		ziOut = zi
  
 !--------- affectation nt0,nt1----------------------------
-		indictronq=0
+	!	indictronq=0
 		do i=1,nsujet 
 			
 			if(t0(i).eq.0.d0)then
 				nt0(i) = 0
 			endif
-			if(t0(i).ne.0.d0)then
-				indictronq=1
-			endif	
+		!	if(t0(i).ne.0.d0)then
+		!		indictronq=1
+		!	endif	
 			do j=1,ndate
 				if(date(j).eq.t0(i))then
 					nt0(i)=j
@@ -395,9 +412,7 @@
 !------ initialisation des parametres
               
 	b=1.d-1
-!	do i=1,npmax
-!		b(i)=5.d-1
-!	end do
+
 	if (typeof == 1) then
 		if (nst == 2) then
 			b(nbintervR+1:2*nbintervR)=0.2d0
@@ -471,7 +486,7 @@
 				ttt(j)=(cens/nbintervR)*j
 			endif
 		end do
-		
+		time = ttt
 		deallocate(t2)
 !------- FIN RECHERCHE DES NOEUDS	
 	end if	
@@ -619,6 +634,7 @@
 			call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_splines)
 	
 			if (istop.ne.1) then
+				istopp(1)=1
 				goto 1000
 			end if	
 			if (ni.ge.maxiter) then
@@ -644,11 +660,12 @@
 		allocate(vvv((npmax*(npmax+1)/2)))	
 	end if
 	
-	k0(1) = xmin1*xmin1
-	if(nst.eq.2)then
-		k0(2) = xmin2
-	endif
-
+	if (typeof == 0) then 	
+		k0(1) = xmin1*xmin1
+		if(nst.eq.2)then
+			k0(2) = xmin2
+		endif
+	end if
 !------------  indicateur d'effet aleatoire ou non dans le modele
 	!write(*,*)'np',np	
 	ca=0.d0
@@ -657,7 +674,7 @@
 	if (typeof .ne. 0) then
 		allocate(kkapa(2))
 	end if
-
+	
 	select case(typeof)
 		case(0)
 			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_splines)
@@ -675,6 +692,7 @@
 
 
 	if (istop .ne.1) then
+		istopp(2)=1
 		goto 1000
 	end if	
 	
@@ -772,8 +790,87 @@
 !AD:
 1000    continue
 
-	deallocate(t0,t1,c,stra,g,nig,ve,I_hess,H_hess,Hspl_hess,hess, &
-	mm3,mm2,mm1,mm,im3,im2,im1,im,date)
+
+!---------------------Calcul residus de martingal
+!	write(*,*)'----- Calcul residus de martingal -----'
+	
+	coefBeta(1,:)=b((np-nva+effet):np)
+
+	Xbeta = matmul(coefBeta,transpose(ve))
+	
+	if(typeof==0) then
+
+		if((istopp(1) == 0).and.(istopp(2) == 0)) then	
+			deallocate(I_hess,H_hess)
+			
+			allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1),post_esp(ng),post_SD(ng))	
+			effetres = effet
+
+			if (effet == 1) then
+				Call Residus_Martingale(b,np,funcpas_res,Res_martingale,frailtypred,frailtyvar,frailtysd)
+			else
+				Res_martingale=0.d0
+				frailtypred=0.d0
+				frailtyvar=0.d0
+				frailtysd=0.d0
+			end if
+	
+			do i=1,nsujet
+				if (effet == 1) then
+					linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
+				else
+					linearpred(i)=Xbeta(1,i)
+					martingaleCox(i) = c(i) - RisqCumul(i)
+				end if
+			end do
+	
+			deallocate(I_hess,H_hess,vres,vecuiRes,post_esp,post_SD)
+		else
+			deallocate(I_hess,H_hess)
+			Res_martingale=0.d0
+			frailtypred=0.d0
+			linearpred=0.d0
+			martingaleCox=0.d0
+		end if	
+	
+	else	
+		if((istopp(2) == 0)) then
+	
+			deallocate(I_hess,H_hess)
+			
+			allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1),post_esp(ng),post_SD(ng))	
+			effetres = effet	
+	
+			if (effet == 1) then
+				Call Residus_Martingale(b,np,funcpas_res,Res_martingale,frailtypred,frailtyvar,frailtysd)
+			else
+				Res_martingale=0.d0
+				frailtypred=0.d0
+				frailtyvar=0.d0
+				frailtysd=0.d0
+			end if	
+	
+			do i=1,nsujet
+				if (effet == 1) then
+					linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
+				else
+					linearpred(i)=Xbeta(1,i)
+					martingaleCox(i) = c(i) - RisqCumul(i)
+				end if
+			end do
+	
+			deallocate(I_hess,H_hess,vres,vecuiRes,post_esp,post_SD)
+		else
+			deallocate(I_hess,H_hess)
+			Res_martingale=0.d0
+			frailtypred=0.d0
+			linearpred=0.d0
+			martingaleCox=0.d0
+		end if
+	end if
+
+	deallocate(t0,t1,c,stra,g,nig,ve,Hspl_hess,hess, &
+	mm3,mm2,mm1,mm,im3,im2,im1,im,date,cumulhaz,Residus,vuu,RisqCumul)
 	
 	if (typeof == 0) then
 		deallocate(nt0,nt1,zi)
@@ -2010,7 +2107,6 @@
 	
 	end subroutine multis
 			     
-	
 
 !======================  LUBKSB  ======================================
 	subroutine lubksbs(a,n,indx,b)

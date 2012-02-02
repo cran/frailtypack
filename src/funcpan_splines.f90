@@ -11,18 +11,18 @@
 	,stra,pe,effet,nz1,nz2,ve &
 	,g,nig,indictronq,AG,auxig,alpha,eta,resnonpen
 	use commun,only:ngexact,nssgexact,mij,mid,ssg,aux1,aux2
+        use residusM
 	
 	Implicit none
 
 	
 	integer::nb,n,np,id,jd,i,j,k,vj,cptg,l,ig,ip,issg,choix
-	integer,dimension(ngmax)::cpt
-	real::gammlnN
+	integer,dimension(ngexact)::cpt
 	double precision::thi,thj,pe1,pe2,dnb,sum,theta,inv &
-	,som1,som2,res,vet,h1,int
+	,som1,som2,res,vet,h1,int,gammlnN
 	double precision,dimension(-2:np)::the1,the2
 	double precision,dimension(np)::b,bh
-	double precision,dimension(ngmax)::res1,res2,res3 &
+	double precision,dimension(ngexact)::res1,res2,res3 &
 	,integrale1,integrale2,integrale3,sum1      
 	double precision,dimension(2)::k0
 	double precision,dimension(ndatemax)::dut1,dut2
@@ -119,13 +119,13 @@
 			cpt(g(i))=cpt(g(i))+1
 			
 			if(nva.gt.0)then
-			vet = 0.d0   
-			do j=1,nva
-				vet =vet + bh(np-nva+j)*ve(i,j)
-			end do
-			vet = dexp(vet)
+				vet = 0.d0   
+				do j=1,nva
+					vet =vet + bh(np-nva+j)*ve(i,j)
+				end do
+				vet = dexp(vet)
 			else
-			vet=1.d0
+				vet=1.d0
 			endif
 			
 			if((c(i).eq.1).and.(stra(i).eq.1))then
@@ -157,7 +157,7 @@
 		res = 0.d0          
 		cptg = 0         
 ! k indice les groupes
-		do k=1,ngmax
+		do k=1,ngexact
 			if(cpt(k).gt.0)then !nb de sujets dans un gpe=nig()                             
 				res = res-res1(k)+ res2(k) 
 				cptg = cptg + 1 
@@ -175,10 +175,10 @@
 !*********************************************
        
 	if (effet.eq.1) then
-!      write(*,*)'AVEC 1 EFFET ALEATOIRE'
+!    write(*,*)'AVEC 1 EFFET ALEATOIRE'
 		
 		inv = 1.d0/theta
-		cpt=0!0.d0!!!!
+		cpt=0
 		res1=0.d0
 		res2=0.d0
 		res3=0.d0
@@ -240,7 +240,7 @@
 
 		res = 0.d0
 		cptg = 0
-		mid =0.d0
+		mid = 0
 !     gam2 = gamma(inv)
 ! k indice les groupes
 
@@ -248,9 +248,11 @@
 			if(c(k).eq.1)then
 				mid(g(k))=mid(g(k))+1
 			endif
-		end do 
-
-		do k=1,ngmax 
+		end do
+		
+		
+		
+		do k=1,ngexact!exact 
 			sum=0.d0
 			if(cpt(k).gt.0)then
 				nb = mid(k)!nb de deces par groupe
@@ -301,7 +303,16 @@
 					goto 123
 				end if
 			endif 
+			
 		end do
+		
+		if (indic_cumul==1) then
+			do i= 1,ngmax
+				do j=1,n_ssgbygrp(i)
+					cumulhaz1(i,j) = res1((i-1)*n_ssgbygrp(i)+j)
+				end do
+			end do
+		end if
 	endif !fin boucle effet=1
 
 !*******************************************
@@ -321,15 +332,18 @@
 
 !     === MODIFICATION DE LA VRAISEMBLANCE POUR LE NESTED FRAILTY MODEL
           
-		do k=1,nsujetmax
+
+
+
+		do k=1,nsujet
 			if(c(k).eq.1)then
 				mid(g(k))=mid(g(k))+1
 				mij(g(k),ssg(k,g(k)))=mij(g(k),ssg(k,g(k)))+1 
 !nb de dc ds ss gpe ssg(k)                
-             		endif
+            		endif
           	end do 
         
-		do k=1,nsujetmax
+		do k=1,nsujet
 			if(nva.gt.0)then
 				vet = 0.d0 
 				do ip=1,nva
@@ -379,6 +393,7 @@
 			choix=1
 			call gaulagN(int,choix)
 			integrale1(auxig)=int
+!			write(*,*)'ig',ig,'integrale1',integrale1(auxig)
 !     integrale sur la troncature: 
 			if(indictronq.eq.1)then
 				if(AG.eq.1)then !andersen gill
@@ -395,11 +410,9 @@
 
 !======================================================================
 
-
-
 		do ig=1,ngexact  
 			sum1(ig)=0.d0
-			do issg=1,nssgbyg !!! NON ICI NSSGBYG
+			do issg=1,n_ssgbygrp(ig)!nssgbyg !!! NON ICI NSSGBYG
 				if(mij(ig,issg).gt.1) then
 					do l=1,mij(ig,issg)
 				sum1(ig)=sum1(ig)+dlog(1.d0+eta*dble(mij(ig,issg)-l)) 
@@ -414,7 +427,8 @@
 			if(nig(k).gt.0)then
 				if(indictronq.eq.0)then
 					res = res+res2(k)+sum1(k) &
-					-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
+					-dlog(alpha)/(alpha)-gammlnN(1.d0/alpha) &
+				!	-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
 					+dlog(integrale1(k))
 
 				endif
@@ -422,7 +436,8 @@
 					if(AG.eq.1)then
 !cccc ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
 						res = res+res2(k)+sum1(k) &
-						-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
+						-dlog(alpha)/(alpha)-gammlnN(1.d0/alpha) &
+					!	-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
 						+dlog(integrale3(k))
 					else
 ! vraisemblance pr donnees censur�es dte et tronqu�es a gauche
@@ -431,16 +446,20 @@
 					endif
 				endif
 				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-					funcpan_splines=-1.d9
+					funcpan_splines=-1.d9	
+			!	write(*,*)' ok 11',k,integrale1(k),gammlnN(1.d0/alpha),alpha
 					goto 123
 				end if
 			endif
 		end do
+		
+
 	endif !fin boucle effet=2
 !----------calcul de la penalisation -------------------
              
 	pe1 = 0.d0
 	pe2 = 0.d0
+	
 	do i=1,n-3
 		pe1 = pe1+(the1(i-3)*the1(i-3)*m3m3(i))+(the1(i-2) &
 		*the1(i-2)*m2m2(i))+(the1(i-1)*the1(i-1)*m1m1(i))+( &
@@ -475,11 +494,16 @@
 	    
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 		funcpan_splines=-1.d9
+!				write(*,*)' ok 12'
 		goto 123
 	end if	 
 	
 	funcpan_splines = res 
+
+
+
 123     continue
+
 	return
 	
 	end function funcpan_splines

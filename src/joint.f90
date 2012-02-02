@@ -84,7 +84,8 @@
 	,tt0dc0,tt1dc0,icdc0,nva10,vax0,nva20,vaxdc0,noVar1,noVar2,maxit0   &
 	,np,b,H_hessOut,HIHOut,resOut,LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out &
 	,typeof0,equidistant,nbintervR0,nbintervDC0,mt1,mt2 &
-	,ni,cpt,cpt_dc,ier,istop,shape_weib,scale_weib,mt11,mt12)
+	,ni,cpt,cpt_dc,ier,istop,shape_weib,scale_weib,mt11,mt12 &
+	,Res_martingale,Res_martingaledc,frailtypred,frailtyvar,linearpred,linearpreddc,ziOut,time,timedc)
 !AD: add for new marq    
 	use parameters	
 !AD:end
@@ -94,11 +95,13 @@
 	use optim
 !AD:pour fortran	
 	use sortie
+	use residusM
 !AD:
-	IMPLICIT NONE  
+	implicit none  
 	
 	integer::maxit0,mt11,mt12
 	integer,intent(in)::nsujet0,ng0,nz0,nva10,nva20,mt1,mt2
+	double precision,dimension(nz0+6),intent(out)::ziOut
 	integer::np,equidistant
 	integer,dimension(nsujet0)::groupe0,ic0
 	integer,dimension(ng0),intent(in)::icdc0
@@ -135,7 +138,19 @@
 	integer::indd,ent,entdc,typeof0
 	double precision::temp	
 	integer::nbintervR0,nbintervDC0	
-
+!predictor
+	double precision,dimension(ng0),intent(out)::Res_martingale,Res_martingaledc,frailtypred,frailtyvar
+	double precision,external::funcpajres
+	double precision,dimension(nsujet0),intent(out)::linearpred
+	double precision,dimension(ng0),intent(out)::linearpreddc
+	double precision,dimension(1,nva10)::coefBeta
+	double precision,dimension(1,nva20)::coefBetadc	
+	double precision,dimension(1,nsujet0)::XBeta
+	double precision,dimension(1,ng0)::XBetadc
+	double precision,dimension(:,:),allocatable::ve1,ve2
+	double precision,dimension(nbintervR0+1)::time
+	double precision,dimension(nbintervDC0+1)::timedc
+	
 	typeof = typeof0
 	model = 1
 	
@@ -145,7 +160,6 @@
 		nbintervR = nbintervR0
 		nbintervDC = nbintervDC0
 	end if
-	
 	
 	maxiter = maxit0
 !AD:add for new marq
@@ -165,6 +179,8 @@
 		
 	ngmax=ng0
 	ng=ng0
+	allocate(ResidusRec(ngmax),Residusdc(ngmax),Rrec(ngmax),Nrec(ngmax),Rdc(ngmax),Ndc(ngmax),vuu(1))
+		
 	allocate(nig(ngmax),cdc(ngmax),t0dc(ngmax),t1dc(ngmax),aux1(ngmax),aux2(ngmax) &
 	,res1(ngmax),res4(ngmax),res3(ngmax),mi(ngmax))
 	
@@ -215,6 +231,7 @@
 	nvarmax=nva
 	
 	allocate(ve(nsujetmax,nvarmax),vedc(ngmax,nvarmax))
+	allocate(ve1(nsujetmax,nva1),ve2(ngmax,nva2))
 	allocate(filtre(nva10),filtre2(nva20))
 	
 	nig=0
@@ -374,7 +391,7 @@
 			maxt = t1(i)
 		endif
 	end do 
-         	
+
 	nsujet=i-1
 
 	if (typeof == 0) then	
@@ -491,7 +508,7 @@
 		zi(nz+1)=zi(nz)
 		zi(nz+2)=zi(nz)
 		zi(nz+3)=zi(nz)
-
+		ziOut = zi
 	end if
 !---------- affectation nt0dc,nt1dc DECES ----------------------------
 	indictronqdc=0
@@ -561,7 +578,7 @@
 	end if
 	
 	npmax=np
-	
+
 	allocate(I_hess(npmax,npmax),H_hess(npmax,npmax),Hspl_hess(npmax,npmax) &
 	,PEN_deri(npmax,1),hess(npmax,npmax),v((npmax*(npmax+3)/2)),I1_hess(npmax,npmax) &
 	,H1_hess(npmax,npmax),I2_hess(npmax,npmax),H2_hess(npmax,npmax),HI2(npmax,npmax) & 
@@ -643,7 +660,7 @@
 		
 		ttt(0)=0.d0
 		ttt(nbintervR)=cens
-		
+	
 		j=0
 		do j=1,nbintervR-1
 			if (equidistant.eq.0) then
@@ -652,7 +669,7 @@
 				ttt(j)=(cens/nbintervR)*j
 			endif
 		end do
-		
+		time = ttt
 !----------> taille - nb de deces
 		j=0
 		do i=1,ngmax
@@ -699,7 +716,7 @@
 				tttdc(j)=(cens/nbintervDC)*j
 			endif
 		end do	 
-
+		timedc = tttdc
 		deallocate(t2,t3)
 !------- FIN RECHERCHE DES NOEUDS	
 	end if		
@@ -710,7 +727,7 @@
 	if (typeof .ne. 0) then
 		allocate(kkapa(2))
 	end if	
-	
+
 	select case(typeof)
 		case(0)
 			call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaj_splines)
@@ -793,9 +810,61 @@
 
 1000 continue	
 !AD:end
+
+!	write(*,*)'======== Calcul des residus de matrtingale ========'
+	coefBeta(1,:) = b((np-nva+effet):(np-nva+effet+nva1))
+	coefBetadc(1,:) =b((np-nva+effet+nva1+1):np)
+
+	do i=1,nsujet
+		do j=1,nva1
+			ve1(i,j)=ve(i,j)
+		end do
+	end do
+	do i=1,ng
+		do j=1,nva2
+			ve2(i,j)=vedc(i,j)
+		end do
+	end do
+		
+	Xbeta = matmul(coefBeta,transpose(ve1))
+	Xbetadc = matmul(coefBetadc,transpose(ve2))
+
+	if((istop == 1) .and. (effet == 1)) then
+
+		deallocate(I_hess,H_hess)
+		
+		allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1))	
+		effetres = effet	
+
+		Call Residus_Martingalej(b,np,funcpajres,Res_martingale,Res_martingaledc,frailtypred,frailtyvar)
+
+		do i=1,nsujet
+			linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
+		end do
+		
+		do i=1,ng
+			linearpreddc(i)=Xbetadc(1,i)+alpha*dlog(frailtypred(i))
+		end do
+
+		deallocate(I_hess,H_hess,vres,vecuiRes)
+	else
+		deallocate(I_hess,H_hess)
+		Res_martingale=0.d0
+		Res_martingaledc=0.d0
+		frailtypred=0.d0
+		linearpred=0.d0
+		linearpreddc=0.d0
+	end if
+
+
+
+
+
+
 	deallocate(nig,cdc,t0dc,t1dc,aux1,aux2,res1,res4,res3,mi,t0,t1,c,stra,g, &
-	aux,vax,vaxdc,ve,vedc,filtre,filtre2,I_hess,H_hess,Hspl_hess,PEN_deri, &
+	aux,vax,vaxdc,ve,vedc,filtre,filtre2,Hspl_hess,PEN_deri, &
 	hess,v,I1_hess,H1_hess,I2_hess,H2_hess,HI2,HIH,IH,HI,BIAIS,date,datedc)
+	deallocate(ResidusRec,Residusdc,Rrec,Nrec,Rdc,Ndc,vuu,ve1,ve2)
 		
 	if (typeof == 0) then
 		deallocate(nt0dc,nt1dc,nt0,nt1,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc, &

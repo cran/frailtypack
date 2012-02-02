@@ -1,13 +1,16 @@
 "additivePenal" <-
 function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1)
- {
+{
+
 ##### hazard specification ######
+
 haztemp <- hazard
 hazard <- strsplit(hazard,split="-")
 hazard <- unlist(hazard)  
 if(!(length(hazard) %in% c(1,2))){stop("Please check and revise the hazard argument according to the format specified in the help.")}
 
 ### longueur hazard = 1
+
 if((all.equal(length(hazard),1)==T)==T){
    if(!(hazard %in% c("Weibull","Piecewise","Splines"))){
 	stop("Only 'Weibull', 'Splines' or 'Piecewise' hazard can be specified in hazard argument.")
@@ -51,11 +54,7 @@ if((all.equal(length(hazard),1)==T)==T){
       }
  }
 
- 
- 
- 
- 
- 
+
 #AD:
 	if (missing(formula))stop("The argument formula must be specified in any model")
 	if(class(formula)!="formula")stop("The argument formula must be a formula")
@@ -84,7 +83,7 @@ if((all.equal(length(hazard),1)==T)==T){
     
     
     call <- match.call()
-    m <- match.call(expand = FALSE)
+    m <- match.call(expand.dots = FALSE)
     m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-  m$... <- NULL
     special <- c("strata", "cluster", "slope")
     Terms <- if (missing(data)) 
@@ -104,14 +103,56 @@ if((all.equal(length(hazard),1)==T)==T){
     if (!inherits(Y, "Surv")) 
         stop("Response must be a survival object")
     ll <- attr(Terms, "term.labels")
+
     mt <- attr(m, "terms")
     X <- if (!is.empty.model(mt)) 
         model.matrix(mt, m, contrasts)
-    
+
+
     strats <- attr(Terms, "specials")$strata
     cluster <- attr(Terms, "specials")$cluster
     slope <- attr(Terms, "specials")$slope
-    
+
+	if (length(cluster)){
+		ll <- ll[-grep("cluster",ll)]
+	}
+	if (length(slope)){
+		ll <- ll[-grep("slope",ll)]
+	}
+	if (length(strats)){
+		ll <- ll[-grep("strata",ll)]
+	}
+#=========================================================>
+	ind.place <- grep("factor",ll)
+	vecteur <- NULL
+	vecteur <- c(vecteur,ll[ind.place])
+	mat.factor <- matrix(vecteur,ncol=1,nrow=length(vecteur))
+
+ # Fonction servant a prendre les termes entre "as.factor"
+	vec.factor <-apply(mat.factor,MARGIN=1,FUN=function(x){
+	pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+	pos2 <- length(unlist(strsplit(x,split="")))-1
+	return(substr(x,start=pos1,stop=pos2))})	
+#=========================================================>
+#=========================================================>
+# On determine le nombre de categorie pour chaque var categorielle
+	if(length(vec.factor) > 0){
+		vect.fact <- attr(X,"dimnames")[[2]]
+
+		vect.fact <- vect.fact[grep("factor",vect.fact)]
+		vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
+		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+		pos2 <- length(unlist(strsplit(x,split="")))-2
+		return(substr(x,start=pos1,stop=pos2))})		
+		occur <- rep(0,length(vec.factor))
+	
+
+		for(i in 1:length(vec.factor)){
+			occur[i] = sum(vec.factor[i] == vect.fact)
+		}
+	}
+#=========================================================>    
+
     dropx <- NULL
 
     if (length(cluster)) {
@@ -135,7 +176,7 @@ if((all.equal(length(hazard),1)==T)==T){
  
  
 
-    if (length(strats)) {
+    if (length(strats)){
         temp <- untangle.specials(Terms, "strata", 1)
         dropx <- c(dropx, temp$terms)
         if (length(temp$vars) == 1) 
@@ -190,8 +231,12 @@ if((all.equal(length(hazard),1)==T)==T){
         newTerms <- Terms[-dropx]
     else newTerms <- Terms
     X <- model.matrix(newTerms, m)
-    assign <- lapply(attrassign(X, newTerms)[-1], function(x) x - 
-        1)
+    assign <- lapply(attrassign(X, newTerms)[-1], function(x) x - 1)
+	if(length(vec.factor) > 0){
+#========================================>
+		position <- unlist(assign,use.names=F)
+	}
+#========================================>
     if (ncol(X) == 1) 
       {
          X<-X-1
@@ -205,6 +250,11 @@ if((all.equal(length(hazard),1)==T)==T){
 
 
     nn<-dimnames(X)[[2]]
+#AD
+    if(!(nnOK %in% ll)) stop("covariate between 'slope()' missing in the terms formula.")
+
+
+
     varInt<-c(1:length(nn))[nn==nnOK]
 
 
@@ -235,6 +285,19 @@ if((all.equal(length(hazard),1)==T)==T){
  	crossVal<-ifelse(cross.validation,0,1)
     }
 
+#=======================================>
+#======= Construction du vecteur des indicatrice
+	if(length(vec.factor) > 0){
+		if(length(vec.factor) > 0){
+			k <- 0
+			for(i in 1:length(vec.factor)){
+				ind.place[i] <- ind.place[i]+k
+					k <- k + occur[i]-1
+			}
+		}
+	}
+#==================================
+
         if(equidistant %in% c(0,1)){
 		if (missing(nb.int1)) stop("Time interval 'nb.int1' is required")
 		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")	
@@ -263,7 +326,7 @@ if((all.equal(length(hazard),1)==T)==T){
 			mt1 <- 100
 		}
 		size2 <- mt1
-		
+			
 			ptm<-proc.time()
 			cat("\n")
 			cat("Be patient. The program is computing ... \n")
@@ -321,6 +384,17 @@ if((all.equal(length(hazard),1)==T)==T){
 				scale.weib=as.double(rep(0,2)),
 				as.integer(mt1),
 				trunc=as.integer(0),
+				zi=as.double(rep(0,(n.knots+6))),
+				time=as.double(rep(0,(nbintervR+1))),
+				
+				martingale.res=as.double(rep(0,as.integer(length(uni.cluster)))),
+				frailty.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
+				frailty.pred2=as.double(rep(0,as.integer(length(uni.cluster)))),
+				frailty.var=as.double(rep(0,as.integer(length(uni.cluster)))),
+				frailty.var2=as.double(rep(0,as.integer(length(uni.cluster)))),
+				frailty.cov=as.double(rep(0,as.integer(length(uni.cluster)))),
+				linear.pred=as.double(rep(0,n)),
+
 				PACKAGE = "frailtypack") 
 		
 
@@ -350,7 +424,12 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$n <- n
     fit$groups <- length(uni.cluster)
     fit$n.events <- sum(cens)  #coded 0: censure 1:event
-    fit$logLikPenal <- ans$loglikpen
+
+    if(as.character(typeof)=="0"){    
+        fit$logLikPenal <- ans$loglikpen
+    }else{
+        fit$logLik <- ans$loglikpen
+    }  
 #AD:
     fit$LCV <- ans$LCV[1]
     fit$AIC <- ans$LCV[2]   
@@ -414,14 +493,55 @@ if((all.equal(length(hazard),1)==T)==T){
     if (typeof == 0){    
     	fit$DoF <- ans$ddl
     	fit$n.knots.temp <- n.knots.temp
+	fit$zi <- ans$zi
+    }
+    if(typeof == 1){
+	fit$time <- ans$time
+	fit$nbintervR <- nbintervR
     }
     fit$indic.nb.int1 <- indic.nb.int1
     fit$shape.weib <- ans$shape.weib
-    fit$scale.weib <- ans$scale.weib   
+    fit$scale.weib <- ans$scale.weib  
+##
+	fit$martingale.res <- ans$martingale.res
+	fit$frailty.pred <- ans$frailty.pred
+	fit$frailty.pred2 <- ans$frailty.pred2
+# 	fit$frailty.var <- ans$frailty.var
+# 	fit$frailty.var2 <- ans$frailty.var2	
+# 	fit$frailty.cov <- ans$frailty.cov
+	fit$linear.pred <- ans$linear.pred  
+##    
+     
 #AD
     if(ans$ier==2000)
         stop("The cross validation procedure cannot be finished. Try to change 
           either the number of knots or the seed for kappa parameter")
+
+#========================= Test de Wald pour shared
+	
+	if(length(vec.factor) > 0){
+		Beta <- ans$coef
+		VarBeta <- diag(ans$varcoef)
+		nfactor <- length(vec.factor)
+		p.wald <- rep(0,nfactor)
+
+		fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+		fit$dof_chisq <- occur
+		fit$global_chisq.test <- 1
+# Calcul de pvalue globale
+		for(i in 1:length(vec.factor)){
+			p.wald[i] <- signif(1 - pchisq(fit$global_chisq[i], occur[i]), 3)
+		}
+		fit$p.global_chisq <- p.wald
+		fit$names.factor <- vec.factor 
+
+		
+	}else{
+		fit$global_chisq.test <- 0
+	}
+	
+#===============================================	
+
 
 
     class(fit) <- "additivePenal"

@@ -5,16 +5,15 @@
 	use tailles
 	use comon,only:t0,t1,c,nsujet,nva, &
 	nst,stra,ve,effet,ng,g,nig,AG,nbintervR, &
-        ttt,alpha,betacoef,kkapa
-
-	
+        ttt,alpha,betacoef,kkapa,theta
+        use residusM
 	implicit none
 	
 ! *** NOUVELLLE DECLARATION F90 :
-	
+
 	integer::nb,np,id,jd,i,j,k,cptg,l
 	integer,dimension(ngmax)::cpt
-	double precision::thi,thj,dnb,sum,theta,inv,som1,som2,res,vet,somm1,somm2
+	double precision::thi,thj,dnb,sum,inv,som1,som2,res,vet,somm1,somm2
 	double precision,dimension(np)::b,bh
 	double precision,dimension(ngmax)::res1,res2,res3
 	double precision,dimension(2)::k0 
@@ -51,12 +50,12 @@
 
 !--- avec ou sans variable explicative  ------cc
 
-	do k=1,ng
-		res1(k) = 0.d0
-		res2(k) = 0.d0
-		res3(k) = 0.d0
-		cpt(k) = 0
-	end do
+
+	res1= 0.d0
+	res2= 0.d0
+	res3= 0.d0
+	cpt= 0
+
 
 !*******************************************     
 !---- sans effet aleatoire dans le modele
@@ -113,6 +112,7 @@
 						endif!!
 
 						res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
+						RisqCumul(i) = (som1+som2)*vet
 					end if!!
 
 					if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
@@ -148,6 +148,7 @@
 						endif!!
 
 						res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
+						RisqCumul(i) = (som1+som2)*vet
 					end if!!
 
 					if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
@@ -189,10 +190,11 @@
 !      write(*,*)'AVEC EFFET ALEATOIRE'
 		inv = 1.d0/theta
 !     i indice les sujets
+
 		do i=1,nsujet 
 			
 			cpt(g(i))=cpt(g(i))+1 
-		
+
 			if(nva.gt.0)then
 				vet = 0.d0   
 				do j=1,nva
@@ -218,10 +220,11 @@
 					end if!!
 				end do !!
 			endif  
-	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpas_cpm=-1.d9
-                          goto 123
-                       end if
+			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
+				funcpas_cpm=-1.d9
+				goto 123
+			end if
+			
 			if(stra(i).eq.1)then
 				som1=0.d0
 				som2=0.d0				
@@ -305,10 +308,13 @@
                        end if		
 		end do 
 
-		res = 0.	
+		res = 0.d0	
 		cptg = 0
 !     gam2 = gamma(inv)
 ! k indice les groupes
+	!	write(*,*)' ng :',ng
+	!	stop
+
 		do k=1,ng  
 			sum=0.d0
 			if(cpt(k).gt.0)then
@@ -358,12 +364,19 @@
        	endif !fin boucle effet=0
 
 !--------- calcul de la penalisation -------------------
-       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-          funcpas_cpm=-1.d9
-          goto 123
-       end if
+	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+		funcpas_cpm=-1.d9
+		goto 123
+	end if
+
 	funcpas_cpm = res 
+
+	do k=1,ng
+		cumulhaz(k)=res1(k)
+	end do
+
 123     continue
+
 	return
 
 	end function funcpas_cpm

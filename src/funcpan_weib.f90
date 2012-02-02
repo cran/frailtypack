@@ -7,17 +7,17 @@
 	use tailles
 	use comon,only:t0,t1,c,nsujet,nva,ndate,nst,stra,effet,ve &
 	,g,nig,AG,auxig,alpha,eta,kkapa,etaR,etaD,betaR,betaD,indictronq
-	use commun,only:ngexact,nssgexact,mij,mid,ssg,aux1,aux2
-	
+	use commun,only:ngexact,mij,mid,ssg,aux1,aux2
+        use residusM
+		
 	Implicit none
 
 	
 	integer::nb,np,id,jd,i,j,k,cptg,l,ig,ip,issg,choix
-	integer,dimension(ngmax)::cpt
-	real::gammlnN
-	double precision::thi,thj,dnb,sum,theta,inv,res,vet,int
+	integer,dimension(ngexact)::cpt
+	double precision::thi,thj,dnb,sum,theta,inv,res,vet,int,gammlnN
 	double precision,dimension(np)::b,bh
-	double precision,dimension(ngmax)::res1,res2,res3 &
+	double precision,dimension(ngexact)::res1,res2,res3 &
 	,integrale1,integrale2,integrale3,sum1      
 	double precision,dimension(2)::k0
 
@@ -62,7 +62,7 @@
 	res2 = 0.d0
 	cpt = 0!!!!!!!!!!!!!!!!!!!!!
     
-    
+  
 !*******************************************     
 !----- sans effet aleatoire dans le modele
 !*******************************************  
@@ -72,13 +72,13 @@
 			cpt(g(i))=cpt(g(i))+1
 			
 			if(nva.gt.0)then
-			vet = 0.d0   
-			do j=1,nva
-				vet =vet + bh(np-nva+j)*ve(i,j)
-			end do
-			vet = dexp(vet)
+				vet = 0.d0   
+				do j=1,nva
+					vet =vet + bh(np-nva+j)*ve(i,j)
+				end do
+				vet = dexp(vet)
 			else
-			vet=1.d0
+				vet=1.d0
 			endif
 			
 			if((c(i).eq.1).and.(stra(i).eq.1))then
@@ -110,7 +110,7 @@
 		res = 0.d0          
 		cptg = 0         
 ! k indice les groupes
-		do k=1,ngmax
+		do k=1,ngexact
 			if(cpt(k).gt.0)then !nb de sujets dans un gpe=nig()                             
 				res = res-res1(k)+ res2(k) 
 				cptg = cptg + 1
@@ -131,7 +131,7 @@
 !      write(*,*)'AVEC 1 EFFET ALEATOIRE'
 		
 		inv = 1.d0/theta
-		cpt=0!0.d0!!!!
+		cpt=0
 		res1=0.d0
 		res2=0.d0
 		res3=0.d0
@@ -192,7 +192,7 @@
 
 		res = 0.d0
 		cptg = 0
-		mid =0.d0
+		mid = 0
 !     gam2 = gamma(inv)
 ! k indice les groupes
 
@@ -202,9 +202,10 @@
 			endif
 		end do 
 
-		do k=1,ngmax 
+		do k=1,ngexact 
 			sum=0.d0
 			if(cpt(k).gt.0)then
+
 				nb = mid(k)!nb de deces par groupe
 				dnb = dble(nb)
             
@@ -221,13 +222,12 @@
 !cccc nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
 					else
 						res= res-(inv+dnb)*dlog(theta*(res1(k))+1.d0) &
-						+(inv)*dlog(theta*res3(k)+1.d0) &
+						+inv*dlog(theta*res3(k)+1.d0) &
 						+ res2(k) + sum  
 					endif
 
 				else              
 !     developpement de taylor d ordre 3
-!                   write(*,*)'************** TAYLOR *************'
 !cccc ancienne vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
 					if(AG.EQ.1)then
 						res = res-dnb*dlog(theta*(res1(k)-res3(k))+1.d0) &
@@ -250,6 +250,13 @@
 				end if
 			endif 
 		end do
+		if (indic_cumul==1) then
+			do i= 1,ngmax
+				do j=1,n_ssgbygrp(i)
+					cumulhaz1(i,j) = res1((i-1)*n_ssgbygrp(i)+j)
+				end do
+			end do
+		end if
 	endif !fin boucle effet=1
 
 !*******************************************
@@ -347,7 +354,7 @@
 
 		do ig=1,ngexact  
 			sum1(ig)=0.d0
-			do issg=1,nssgbyg !!! NON ICI NSSGBYG
+			do issg=1,n_ssgbygrp(ig)!nssgbyg !!! NON ICI NSSGBYG
 				if(mij(ig,issg).gt.1) then
 					do l=1,mij(ig,issg)
 				sum1(ig)=sum1(ig)+dlog(1.d0+eta*dble(mij(ig,issg)-l)) 
@@ -362,14 +369,16 @@
 			if(nig(k).gt.0)then
 				if(indictronq.eq.0)then
 					res = res+res2(k)+sum1(k) &
-					-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
+				!	-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
+					-dlog(alpha)/(alpha)-gammlnN(1.d0/alpha) &
 					+dlog(integrale1(k))
 				endif
 				if(indictronq.eq.1)then
 					if(AG.eq.1)then
 !cccc ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
 						res = res+res2(k)+sum1(k) &
-						-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
+						!-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
+						-dlog(alpha)/(alpha)-gammlnN(1.d0/alpha) &
 						+dlog(integrale3(k))
 					else
 ! vraisemblance pr donnees censur�es dte et tronqu�es a gauche
@@ -383,7 +392,9 @@
 				end if
 			endif
 		end do
+
 	endif !fin boucle effet=2
+
 !----------calcul de la penalisation -------------------
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 		funcpan_weib=-1.d9
@@ -391,6 +402,7 @@
 	end if 
 	            	 
 	funcpan_weib = res 
+
 123     continue
 
 	return

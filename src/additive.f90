@@ -20,7 +20,8 @@
 	subroutine additive(ns0,ng0,nst0,nz0,xmin10,xmin20,tt00,tt10,ic0,groupe0,nva0, &
 	str0,vax0,interaction,ag0,noVar,maxiter0,irep10,correl0,np,b,coef,varcoef,varcoef2, &
 	rhoEnd,covEnd,varcovEnd,varSigma2,varTau2,ni,res,LCV,k0,x1Out,lamOut,xSu1,suOut,x2Out, &
-	lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt,ier,ddl,istop,shape_weib,scale_weib,mt1,trunc)
+	lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt,ier,ddl,istop,shape_weib,scale_weib,mt1,trunc,ziOut,time,&
+	Res_martingale,frailtypred,frailtypred2,frailtyvar,frailtyvar2,frailtycov,linearpred)
 
 	use parameters		
 	use tailles
@@ -28,6 +29,7 @@
 	use comon
 	use additiv
 	use optim
+	use residusM
 	
 	implicit none	
      
@@ -38,6 +40,7 @@
 	irep1,nvacross,nstcross,effetcross
 !----------------- ajout      
 	integer::ns0,ng0,nst0,correl0,maxiter0,nva0,ag0,nz0,irep10
+	double precision,dimension(nz0+6),intent(out)::ziOut
 	double precision,dimension(ns0)::tt00,tt10
 	integer,dimension(ns0)::groupe0,ic0,str0
 	double precision, dimension(ns0,nva0)::vax0
@@ -67,7 +70,21 @@
 !Cpm
 	integer::typeof0,nbintervR0,equidistant,ent,indd
 	double precision::temp
+	double precision,dimension(nbintervR0+1)::time
+	integer,dimension(3)::istopp
+	double precision,dimension(ng0)::frailtysd,frailtysd2
+!predictor
+	double precision,dimension(ng0),intent(out)::Res_martingale,frailtypred,frailtypred2,frailtyvar,&
+	frailtyvar2,frailtycov
+	double precision,external::funcpaares
+	double precision,dimension(ns0),intent(out)::linearpred
+	double precision,dimension(1,ns0)::XBeta1
+	double precision,dimension(1,nva0)::Xcoef
+	double precision,dimension(2,2)::Hess0,sigma
+
+	
 !cpm
+	istopp=0
 	ca=0.d0
 	cb=0.d0
 	dd=0.d0
@@ -121,6 +138,10 @@
 	ng=ng0
 	ngmax=ng
 	allocate(nig(ngmax),mid(ngmax))	
+
+	allocate(cumulhaz(ngmax))
+	allocate(cumulhaz1(ngmax,2))
+
 !-----------------------------------------------------------------------------------------
 	nst=nst0
 	correl=correl0  
@@ -129,6 +150,7 @@
 	ver=nva0
 	nvarmax=ver
 	allocate(ve(nsujetmax,nvarmax),ve2(nsujetmax,nvarmax),betaaux(nvarmax))
+	allocate(som_Xbeta(ngmax))
 	allocate(vax(nvarmax))
 
 	if (noVar.eq.1) then 
@@ -354,6 +376,7 @@
 		zi(nz+1)=zi(nz)
 		zi(nz+2)=zi(nz)
 		zi(nz+3)=zi(nz)
+		ziOut = zi
 	end if
 !---------- affectation nt0,nt1----------------------------
 
@@ -407,6 +430,7 @@
 	
 	npmax=np
 
+	allocate(b_temp(np))
 	allocate(I_hess(npmax,npmax),H_hess(npmax,npmax),Hspl_hess(npmax,npmax) &
 	,hess(npmax,npmax),PEN_deri(npmax,1))
 	allocate(y(npmax,npmax),v((npmax*(npmax+3)/2)),&
@@ -478,7 +502,7 @@
 				ttt(j)=(cens/(nbintervR))*j
 			endif
 		end do
-		
+		time = ttt
 		deallocate(t2)
 !------- FIN RECHERCHE DES NOEUDS	
 	end if	
@@ -615,6 +639,7 @@
 			auxkappa(2)=0.d0
 			call marq98J(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)
 			if (istop .ne. 1) then
+				istopp(1)=1
 				goto 1000
 			end if	
 		end if
@@ -671,11 +696,11 @@
 			np = nst*2 + nva
 			b(nst*2+1)=-0.15d0
 			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_weib)
-			if (istop .ne. 1) then
-				goto 1000
-			end if	
 	end select
-		
+	if (istop .ne. 1) then
+		istopp(2)=1
+		goto 1000
+	end if			
 !===== recherche de l'ensemble des parametres
 	
 !	write(*,*)'====================================='
@@ -700,6 +725,7 @@
 	
 	
 !	write(*,*)' ============> marq2 typeof :',typeof
+!	write(*,*)'effet ',effet,' correl ',correl
 	select case(typeof)
 		case(0)
 			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)
@@ -709,7 +735,9 @@
 			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_weib)
 	end select
 
+!	write(*,*)'fin marquardt'
 	if (istop .ne. 1) then
+		istopp(3)=1
 		goto 1000
 	end if	
 	
@@ -858,6 +886,7 @@
 	endif
 		
 	j=(np-nva)*(np-nva+1)/2
+	b_temp = b
 	
 ! --------------  Lambda and survival and cumulative hazard estimates 
 	
@@ -907,28 +936,98 @@
 1000    continue
 	trunc = indic_tronc
 
-	deallocate(t0,t1,c,nt0,nt1,stra,g,stracross,aux,invd)
-	if (typeof == 0) then
+	allocate(Xbeta(1,ns0),invsigma(2,2))
+	sigma(1,1)=b(np-nva-1)**2!varSigma2(1)
+	sigma(2,2)=b(np-nva)**2!varTau2(1)	
+	if (correl == 1) then
+		sigma(1,2)=dsqrt(sigma(1,1))*dsqrt(sigma(2,2))*rhoEnd
+	else
+		sigma(1,2)=0.d0
+	end if
+	sigma(2,1)=sigma(1,2)
+
+!	write(*,*)'matrice  a inverser: sigma'
+!	do i= 1,2
+!		write(*,*)(sigma(i,j),j=1,2)
+!	end do
+	
+	detsigma=sigma(1,1)*sigma(2,2)-sigma(1,2)**2
+	invsigma(1,1)=sigma(2,2)
+	invsigma(2,2)=sigma(1,1)
+	invsigma(1,2)=-sigma(1,2)
+	invsigma(2,1)=-sigma(2,1)
+		
+!	write(*,*)'matrice inverse sigma'
+	do i= 1,2
+		do j=1,2
+			invsigma(i,j)= 1.d0/detsigma*invsigma(i,j)
+		end do
+!		write(*,*)(invsigma(i,j),j=1,2)
+	end do
+	
+!	write(*,*)'test ====> 1'
+	if(typeof==0) then
+
+		if((istopp(1)==0).and.(istopp(2)==0).and.(istopp(3)==0)) then
+!calcul residus martingale 
+			allocate(vuu(2))
+
+			Xcoef(1,:) = coef
+			Xbeta1 = matmul(Xcoef,transpose(ve))		
+
+			Hess0=H_hess((np-nva-effet+1):(np-nva),(np-nva-effet+1):(np-nva))
+			deallocate(I_hess,H_hess)
+			allocate(vres((2*(2+3)/2)),I_hess(2,2),H_hess(2,2))	
+			
+!			write(*,*)'=========== Residu Martingale ==========='
+			Call Residus_Martingalea(b,np,funcpaares,Res_martingale,frailtypred,frailtyvar,frailtysd,&
+			frailtypred2,frailtyvar2,frailtysd2,frailtycov)
+!			write(*,*)'=========== Fin Residu Martingale ==========='
+			do i=1,nsujet
+				linearpred(i)=Xbeta1(1,i) + frailtypred(g(i)) + frailtypred2(g(i)) * ve2(i,1)
+			end do
+		
+			deallocate(vres,vuu)
+		endif
+
 		deallocate(mm3,mm2,mm1,mm,im3,im2,im1,im,dut1,dut2,ut1,ut2)
-	end if
-	
-	deallocate(nig,mid)	
-	deallocate(date,ve,ve2,betaaux,vax)	
-	
-	if (typeof == 0) then
 		deallocate(zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m)
-	end if
-	
-	deallocate(I_hess,H_hess,Hspl_hess,hess,PEN_deri)
-	deallocate(y,v,I1_hess,H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI)
-	
-	if (typeof == 1) then
-		deallocate(ttt,betacoef)	
-	end if
-	
-	if (typeof .ne. 0) then
+	else
+!calcul residus martingale
+		if((istopp(2)==0).and.(istopp(3)==0)) then
+		!calcul residus martingale 
+			allocate(vuu(2))
+
+			Xcoef(1,:) = coef
+			Xbeta1 = matmul(Xcoef,transpose(ve))	
+
+			Hess0=H_hess((np-nva-effet+1):(np-nva),(np-nva-effet+1):(np-nva))
+			deallocate(I_hess,H_hess)
+			allocate(vres((2*(2+3)/2)),I_hess(2,2),H_hess(2,2))	
+			
+			Call Residus_Martingalea(b,np,funcpaares,Res_martingale,frailtypred,frailtyvar,frailtysd,&
+			frailtypred2,frailtyvar2,frailtysd2,frailtycov)
+			
+			do i=1,nsujet
+				linearpred(i)=Xbeta1(1,i) + frailtypred(g(i)) + frailtypred2(g(i)) * ve2(i,1)
+			end do
+			deallocate(vres,vuu)
+		endif	
+		
+		if (typeof == 1) then
+			deallocate(ttt,betacoef)	
+		end if	
+
 		deallocate(vvv,kkapa)
-	end if	
+	end if
+!	write(*,*)'<======== Fin ========> 1'
+	deallocate(cumulhaz,cumulhaz1,som_Xbeta)
+
+	deallocate(XBeta,invsigma,b_temp)
+
+	deallocate(t0,t1,c,nt0,nt1,stra,g,stracross,aux,invd,nig,mid,date,ve,ve2,betaaux,vax)	
+	deallocate(I_hess,H_hess,Hspl_hess,hess,PEN_deri,y,v,I1_hess,H1_hess,I2_hess,H2_hess, &
+	HI1,HI2,HIH,IH,HI)
 	
 	end subroutine additive
 

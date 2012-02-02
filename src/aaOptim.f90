@@ -117,6 +117,8 @@
 !*****invD
 		double precision,dimension(:,:),allocatable,save::invD	
 		double precision,dimension(:),allocatable,save::aux1,aux2
+		double precision,dimension(:,:),allocatable,save::Xbeta
+		
 	end module additiv	
 
 !
@@ -198,7 +200,24 @@
                               
       end module type
 
-  
+	module residusM
+		double precision,dimension(:),allocatable,save::Residus &
+		,varResidus,cumulhaz,vecuiRes,post_esp,post_SD,som_Xbeta
+		double precision,dimension(:),allocatable,save::ResidusRec,&
+		Residusdc,Rrec,Nrec,Rdc,Ndc,vecviRes,RisqCumul
+		double precision,save::cares,cbres,ddres
+		double precision,dimension(:),allocatable,save:: vres
+		integer , save :: ierres,nires,istopres,effetres,indg
+		double precision,save::rlres,varuiR,moyuiR,varviR,moyviR,corruiviR
+		double precision,dimension(:),allocatable::vuu,b_temp
+		integer,save::indic_cumul
+		integer,dimension(:),allocatable::n_ssgbygrp
+		double precision,dimension(:,:),allocatable,save::cumulhaz1,invsigma
+		double precision,save::detSigma
+		
+		
+	end module residusM 
+	
 !-----------------------------------------------------------
 ! Derniere mis a jour : 09/02/2011
 !-----------------------------------------------------------
@@ -234,12 +253,12 @@
 !  1: critere d'arret satisfait (prm=ca, vraisblce=cb, derivee=dd)
 !  2: nb max d'iterations atteints
 !  4: Erreur
-
+	use residusM,only:indg
 	use parameters
 	use comon,only:t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc, &
 	nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,model, &
-	PEN_deri,I_hess,H_hess,Hspl_hess,hess,indic_ALPHA,typeof,indic_eta,vvv!add vvv	
-!	use vec
+	PEN_deri,I_hess,H_hess,Hspl_hess,hess,indic_ALPHA,typeof,indic_eta,vvv
+
 !add additive
 	use additiv,only:correl
       
@@ -430,27 +449,30 @@
 	v(1:m*(m+1)/2)=fu(1:m*(m+1)/2)
 	
 	istop=1
+	
 !================ pour les bandes de confiance
 !==== on ne retient que les para des splines
+
 	call derivaJ(b,m,v,rl,k0,fct_names)
 	if(rl.eq.-1.D9) then
 		istop=4
 		goto 110
 	end if
+
 	do i=1,(m*(m+3)/2)
 		v1(i)=0.d0
 	end do
 !---- Choix du model
 
-        select case(model) 
+	select case(model) 
 		case(1)  
-			m1=m-nva-effet-indic_alpha
+			m1=m-nva-effet-indic_alpha !joint
 		case(2)
-			m1=m-nva-effet*2	
+			m1=m-nva-effet*2 !additive	
 		case(3)
-			m1=m-nva-effet
+			m1=m-nva-effet !nested
 		case(4)	
-			m1=m-nva-effet
+			m1=m-nva-effet !shared
 	end select
 
 	kkk=m1*(m1+1)/2
@@ -547,6 +569,7 @@
 	end if
 	   
  110   continue
+
        return    
        end subroutine marq98j
 
@@ -570,13 +593,13 @@
       	
 	select case(model)
 	case(1)
-		th=1.d-3	
+		th=1.d-3 !joint	
 	case(2)
-		th=5.d-3
+		th=5.d-3 !additive
 	case(3)
-		th=1.d-5
+		th=1.d-5 !nested		
 	case(4)
-		th=1.d-5
+		th=1.d-5 !shared
 	end select
 	
 	thn=-th

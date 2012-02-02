@@ -1,6 +1,6 @@
 Package: frailtypack
-Version: 2.2-20
-Date: 2011-10-25
+Version: 2.2-21
+Date: 2012-02-02
 Title: General Frailty models using a semi_parametrical penalized
         likelihood estimation or a parametrical estimation
 Author: Juan R. Gonzalez, Virginie Rondeau
@@ -8,7 +8,7 @@ Author: Juan R. Gonzalez, Virginie Rondeau
         <Yassin.Mazroui@isped.u-bordeaux2.fr> and Amadou Diakite
         <Amadou.Diakite@isped.u-bordeaux2.fr>
 Maintainer: Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr>
-Depends: R (>= 2.0.0), survival
+Depends: survival
 LazyLoad: yes
 Description: Frailtypack now fits several classes of frailty models
         using a penalized likelihood estimation on the hazard function
@@ -25,9 +25,9 @@ Description: Frailtypack now fits several classes of frailty models
         data (with 2 levels of clustering) by including two iid gamma
         random effects. 4) Joint frailty models in the context of joint
         modelling of recurrent events with terminal event.
-License: GPL (>= 2)
+License: GPL (>= 2.0.0)
 URL: http://www.r-project.org
 Encoding: latin1
 Repository: CRAN
-Date/Publication: 2011-10-26 17:59:52
-Packaged: 2011-10-25 14:01:57 UTC; ad6
+Date/Publication: 2012-02-06 12:18:56
+Packaged: 2012-02-06 13:30:43 UTC; ad6

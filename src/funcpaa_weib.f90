@@ -6,13 +6,13 @@
 	use comon,only:effet,stra,t0,t1,c,nsujet,nva,nst,auxig,ng,ve,g,nig,indictronq, &
 	etaR,etaD,betaR,betaD,kkapa,indic_tronc
 	use additiv,only:correl,ngexact,ve2,sigma2,tau2,rho,cov,mid,betaaux,invD
+	use residusM,only:som_Xbeta
 	
 	implicit none
 	
 	integer::np,id,jd,i,j,k,cptg,ig,ip
 	integer,dimension(ngmax)::cpt
-	double precision::thi,thj,som2, &
-	res,vet
+	double precision::thi,thj,som2,res,vet
 	double precision,dimension(np)::b,bh
 	double precision,dimension(ngmax)::integrale1,funcaux
 	double precision,dimension(2)::k0
@@ -34,12 +34,12 @@
 	double precision,external::funcpao_weib
 !      common /utilde/u_tilde,v_tilde
 !******************
-	indic_tronc=0
 
 	kkapa=k0
 	
 	j=0
 	res=0.d0
+	vet=0.d0
 	som2=0.d0
 	restar = 0
 	nf = 1   
@@ -271,6 +271,7 @@
 	
 					endif 
 				end do 
+				som_Xbeta(ig) = vet
 
 !=====fin maximisation aux
 	
@@ -421,7 +422,7 @@
 				end do 
 	
 !=====fin maximisation aux
-	
+				som_Xbeta(ig) = vet
 				cov=dsqrt(sigma2*tau2)* & !avec contrainte
 				(2.d0 * dexp(bh(np-nva-2))/(1.d0+dexp(bh(np-nva-2)))-1.d0)
 	

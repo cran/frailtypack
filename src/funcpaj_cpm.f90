@@ -6,7 +6,7 @@
 	use comon,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
 	effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
 	auxig,aux1,aux2,res1,res3,res4,ttt,tttdc,betacoef,kkapa
-     
+        use residusM     
       
 	implicit none
 	
@@ -258,11 +258,24 @@
 
 !!!	
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		funcpaj_cpm=-1.d9
+		funcpaj_cpm =-1.d9
+		Rrec = 0.d0
+		Nrec = 0.d0
+		Rdc = 0.d0
+		Ndc = 0.d0
 		goto 123
-	end if 
-	funcpaj_cpm = res 
 
+	else
+		funcpaj_cpm = res 
+		
+		do k=1,ng
+			Rrec(k)=res1(k)
+			Nrec(k)=nig(k)
+			Rdc(k)=aux1(k)
+			Ndc(k)=cdc(k)
+		end do
+	end if
+	
 123     continue
 
 	return

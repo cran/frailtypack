@@ -5,8 +5,9 @@
 	
 	use tailles
 	use comon
-	
-	IMPLICIT NONE
+        use residusM
+		
+	implicit none
 
 ! *** NOUVELLLE DECLARATION F90 :
 	
@@ -182,11 +183,26 @@
 	end do
                
 !---------- calcul de la penalisation -------------------
+	
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		funcpaj_weib=-1.d9
+		funcpaj_weib =-1.d9
+		Rrec = 0.d0
+		Nrec = 0.d0
+		Rdc = 0.d0
+		Ndc = 0.d0
 		goto 123
-	end if		
-	funcpaj_weib = res 
+
+	else
+		funcpaj_weib = res 
+		
+		do k=1,ng
+			Rrec(k)=res1(k)
+			Nrec(k)=nig(k)
+			Rdc(k)=aux1(k)
+			Ndc(k)=cdc(k)
+		end do
+	end if
+
 !Ad:
 123     continue
 

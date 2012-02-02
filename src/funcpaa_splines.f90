@@ -8,13 +8,13 @@
 	t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,auxig,ng,ve,g,nig,indictronq,resnonpen,indic_tronc
 	use additiv,only: &
 	dut1,dut2,ut1,ut2,correl,ngexact,ve2,sigma2,tau2,rho,cov,mid,betaaux,invD
+	use residusM,only:som_Xbeta
 	
 	implicit none
 	
 	integer::n,np,id,jd,i,j,k,vj,cptg,ig,ip
 	integer,dimension(ngmax)::cpt
-	double precision::thi,thj,pe1,pe2,som1,som2, &
-	res,vet,h1
+	double precision::thi,thj,pe1,pe2,som1,som2,res,vet,h1
 	double precision,dimension(-2:npmax)::the1,the2
 	double precision,dimension(np)::b,bh
 	double precision,dimension(ngmax)::integrale1,funcaux
@@ -38,12 +38,16 @@
 
 !******************
 
-
 	j=0
+	h1=0.d0
 	res=0.d0
+	vet=0.d0
 	resnonpen=0.d0
+	som1=0.d0
 	som2=0.d0
 	pe=0.d0
+	pe1=0.d0
+	pe2=0.d0
 	restar = 0
 	nf = 1
 	
@@ -176,7 +180,7 @@
 			if(stra(i).eq.1)then
 				res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet-ut1(nt0(i))*vet 
 			endif
-	
+
 			if(stra(i).eq.2)then
 				res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet-ut2(nt0(i))*vet 
 			endif
@@ -199,6 +203,7 @@
 		end do
 	
 	else 
+
 !*******************************************         
 !-----avec deux effets aleatoires dans le modele et correl=0
 !*********************************************
@@ -236,6 +241,7 @@
 		                  funcpaa_splines=-1.d9
 		                  goto 123
 		               end if	
+
 			end do 
 
 !=========================================================================
@@ -283,7 +289,6 @@
 						vet = 0.d0 
 						do ip=1,nva
 							vet =vet + bh(np-nva+ip)*ve(k,ip)
-
 						end do
 						vet = dexp(vet)
 					else
@@ -317,6 +322,8 @@
 	
 					endif 
 				end do 
+				
+				som_Xbeta(ig) = vet
 
 !=====fin maximisation aux
 	
@@ -360,7 +367,7 @@
 !*********************************************
 	
 		if(effet.eq.1.and.correl.eq.1)then
-	
+		
 			mid=0
 			integrale1=0.d0
 	
@@ -391,6 +398,7 @@
 			          funcpaa_splines=-1.d9
 			          goto 123
 			       end if
+			        
 			end do 
 
 !=========================================================================
@@ -465,6 +473,8 @@
 	
 					endif 
 				end do 
+				
+				som_Xbeta(ig) = vet
 	
 !=====fin maximisation aux
 	
@@ -515,6 +525,7 @@
 		endif                     !fin boucle effet= 1 and correl = 1
 
 	endif                     !fin boucle globale effet=0 
+
 
 !----------calcul de la penalisation -------------------
 	pe=0.d0
