@@ -45,9 +45,13 @@
 			if (x$typeof == 0){
 				tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, signif(1 - 
 				pchisq((coef/seH)^2, 1), digits - 1))
+				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)
+				if(x$global_chisq.test_d==1) tmpwalddc <- cbind(x$global_chisq_d,x$dof_chisq_d,x$p.global_chisq_d)
 			}else{
 				tmp <- cbind(coef, exp(coef), seH, coef/seH, signif(1 - 
 				pchisq((coef/seH)^2, 1), digits - 1))
+				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)
+				if(x$global_chisq.test_d==1) tmpwalddc <- cbind(x$global_chisq_d,x$dof_chisq_d,x$p.global_chisq_d)
 			}
 			cat("\n")
 			cat("  Joint gamma frailty model for recurrent and a terminal event processes","\n")
@@ -57,9 +61,25 @@
 				cat("  using a Parametrical approach for the hazard function","\n")
 			}
 			if (x$typeof == 0){
+				if(x$global_chisq.test==1){
+					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
+					
+				}
+				if(x$global_chisq.test_d==1){
+					dimnames(tmpwalddc) <- list(x$names.factordc,c("chisq", "df", "global p"))
+					
+				}
 				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
 				"SE coef (H)", "SE coef (HIH)", "z", "p"))
 			}else{
+				if(x$global_chisq.test==1){
+					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
+					
+				}
+				if(x$global_chisq.test_d==1){
+					dimnames(tmpwalddc) <- list(x$names.factordc,c("chisq", "df", "global p"))
+					
+				}
 				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
 				"SE coef (H)", "z", "p"))
 			}
@@ -70,6 +90,10 @@
 				cat("Recurrences:\n")
 				cat("------------- \n")
 				prmatrix(tmp[1:x$nvar[1], ,drop=FALSE])
+				if(x$global_chisq.test==1){
+					cat("\n")
+					prmatrix(tmpwald)
+				}
 			}
 			cat("\n")
 		
@@ -77,6 +101,10 @@
 				cat("Terminal event:\n")
 				cat("---------------- \n")
 				prmatrix(tmp[-c(1:x$nvar[1]), ,drop=FALSE])
+				if(x$global_chisq.test_d==1){
+					cat("\n")
+					prmatrix(tmpwalddc)
+				}
 				cat("\n")
 			}
 		}
@@ -119,7 +147,7 @@
 			cat("   LCV = the approximate likelihood cross-validation criterion\n")
 			cat("         in the semi parametric case     =",x$LCV,"\n")
 		}else{
-			cat(paste("   marginal log-likelihood =", round(x$logLikPenal,2)))
+			cat(paste("   marginal log-likelihood =", round(x$logLik,2)))
 			cat("\n")
 #			cat("   LCV = the approximate likelihood cross-validation criterion\n")
 #			cat("         in the parametric case     =",x$LCV,"\n")	
@@ -133,7 +161,7 @@
 				cat("      Shape for the weibull hazard function is :",round(x$shape.weib[1],2),round(x$shape.weib[2],2),"\n")
 				cat("\n")
 				cat("The expression of the Weibull hazard function is:","\n")
-				cat("        'lambda(t) = shape(t^(shape-1)/(scale^shape)'","\n")
+				cat("        'lambda(t) = (shape.(t^(shape-1)))/(scale^shape)'","\n")
 				cat("The expression of the Weibull survival function is:","\n")
 				cat("        'S(t) = exp[- (t/scale)^shape]'")
 				cat("\n")

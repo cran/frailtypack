@@ -46,8 +46,10 @@
 			seHIH <- sqrt(diag(x$varHIH))[-c(1,2)]
 			if (x$typeof == 0){
 				tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
+				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)
 			}else{
 				tmp <- cbind(coef, exp(coef), seH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
+				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)
 			}	
 			cat("\n")
 			cat(" Nested Frailty model parameter estimates using ", "\n")
@@ -60,14 +62,26 @@
 			if (x$n.strat>1) cat(" (Stratification structure used)", "\n") 
 			
 			if (x$typeof == 0){	
+				if(x$global_chisq.test==1){
+					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
+					
+				}
 				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
 				"SE coef (H)", "SE coef (HIH)", "z", "p"))
 			}else{
+				if(x$global_chisq.test==1){
+					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
+					
+				}
 				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
 				"SE coef (H)", "z", "p"))
 			}
 			cat("\n")
 			prmatrix(tmp)
+			if(x$global_chisq.test==1){
+				cat("\n")
+				prmatrix(tmpwald)
+			}
 			cat("\n")
 		} 
 
@@ -115,7 +129,7 @@
 			cat("    LCV = the approximate likelihood cross-validation criterion\n")
 			cat("          in the semi parametrical case     =",x$LCV,"\n")
 		}else{
-			cat(paste("    marginal log-likelihood =", round(x$logLikPenal,2)))
+			cat(paste("    marginal log-likelihood =", round(x$logLik,2)))
 			cat("\n")
 #			cat("    LCV = the approximate likelihood cross-validation criterion\n")
 #			cat("          in the parametrical case     =",x$LCV,"\n")	
@@ -134,7 +148,7 @@
 				}
 					cat("\n")
 					cat("The expression of the Weibull hazard function is:","\n")
-					cat("        'lambda(t) = shape(t^(shape-1)/(scale^shape)'","\n")
+					cat("        'lambda(t) = (shape.(t^(shape-1)))/(scale^shape)'","\n")
 					cat("The expression of the Weibull survival function is:","\n")
 					cat("        'S(t) = exp[- (t/scale)^shape]'")
 					cat("\n")
@@ -163,7 +177,7 @@
 			}else{
 				cat("    Value of the smoothing parameter: ", x$kappa[1], " and kappa2=", x$kappa[2], sep="")
 			}
-			cat(", DoF: ", formatC(-x$DoF, format="f",dig=2))
+			cat(", DoF: ", formatC(-x$DoF, format="f",digits=2))
 		}
 	}else{
 		cat("\n")

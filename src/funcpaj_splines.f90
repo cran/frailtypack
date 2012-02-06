@@ -6,7 +6,8 @@
 	
 	use tailles
 	use comon
-	
+        use residusM
+		
 	IMPLICIT NONE
 
 ! *** NOUVELLLE DECLARATION F90 :
@@ -281,34 +282,51 @@
 
 	pe1 = 0.d0
 	pe2 = 0.d0
+	
 	do i=1,n-3
-	pe1 = pe1+(the1(i-3)*the1(i-3)*m3m3(i))+(the1(i-2) &
-	*the1(i-2)*m2m2(i))+(the1(i-1)*the1(i-1)*m1m1(i))+( &
-	the1(i)*the1(i)*mmm(i))+(2.d0*the1(i-3)*the1(i-2)* &
-	m3m2(i))+(2.d0*the1(i-3)*the1(i-1)*m3m1(i))+(2.d0* &
-	the1(i-3)*the1(i)*m3m(i))+(2.d0*the1(i-2)*the1(i-1)* &
-	m2m1(i))+(2.d0*the1(i-2)*the1(i)*m2m(i))+(2.d0*the1(i-1) &
-	*the1(i)*m1m(i))
-	if(nst.eq.1)then
-	pe2=0.d0
-	else
-	pe2 = pe2+(the2(i-3)*the2(i-3)*m3m3(i))+(the2(i-2) &
-	*the2(i-2)*m2m2(i))+(the2(i-1)*the2(i-1)*m1m1(i))+( &
-	the2(i)*the2(i)*mmm(i))+(2.d0*the2(i-3)*the2(i-2)* &
-	m3m2(i))+(2.d0*the2(i-3)*the2(i-1)*m3m1(i))+(2.d0* &
-	the2(i-3)*the2(i)*m3m(i))+(2.d0*the2(i-2)*the2(i-1)* &
-	m2m1(i))+(2.d0*the2(i-2)*the2(i)*m2m(i))+(2.d0*the2(i-1) &
-	*the2(i)*m1m(i))
-	endif
+		pe1 = pe1+(the1(i-3)*the1(i-3)*m3m3(i))+(the1(i-2) &
+		*the1(i-2)*m2m2(i))+(the1(i-1)*the1(i-1)*m1m1(i))+( &
+		the1(i)*the1(i)*mmm(i))+(2.d0*the1(i-3)*the1(i-2)* &
+		m3m2(i))+(2.d0*the1(i-3)*the1(i-1)*m3m1(i))+(2.d0* &
+		the1(i-3)*the1(i)*m3m(i))+(2.d0*the1(i-2)*the1(i-1)* &
+		m2m1(i))+(2.d0*the1(i-2)*the1(i)*m2m(i))+(2.d0*the1(i-1) &
+		*the1(i)*m1m(i))
+		if(nst.eq.1)then
+			pe2=0.d0
+		else
+			pe2 = pe2+(the2(i-3)*the2(i-3)*m3m3(i))+(the2(i-2) &
+			*the2(i-2)*m2m2(i))+(the2(i-1)*the2(i-1)*m1m1(i))+( &
+			the2(i)*the2(i)*mmm(i))+(2.d0*the2(i-3)*the2(i-2)* &
+			m3m2(i))+(2.d0*the2(i-3)*the2(i-1)*m3m1(i))+(2.d0* &
+			the2(i-3)*the2(i)*m3m(i))+(2.d0*the2(i-2)*the2(i-1)* &
+			m2m1(i))+(2.d0*the2(i-2)*the2(i)*m2m(i))+(2.d0*the2(i-1) &
+			*the2(i)*m1m(i))
+		endif
 	end do
+	
 	pe = k0(1)*pe1 + k0(2)*pe2 
+	
 	resnonpen = res
+	
 	res = res - pe
+	
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 		funcpaj_splines=-1.d9
+		Rrec = 0.d0
+		Nrec = 0.d0
+		Rdc = 0.d0
+		Ndc = 0.d0
 		goto 123
-	end if		
-	funcpaj_splines = res 
+
+	else
+		funcpaj_splines = res 
+		do k=1,ng
+			Rrec(k)=res1(k)
+			Nrec(k)=nig(k)
+			Rdc(k)=aux1(k)
+			Ndc(k)=cdc(k)
+		end do
+	end if
 !Ad:
 123     continue
 

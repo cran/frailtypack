@@ -1,7 +1,6 @@
 ############ First.lib ###############
 
 .onLoad <- function(lib, pkg){
-   require(survival)
    library.dynam("frailtypack", pkg, lib)
 }
 

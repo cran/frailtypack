@@ -1,0 +1,42 @@
+\name{survival}
+\alias{survival}
+
+\title{
+Survival function
+}
+\description{
+Let t be a continuous variable, we determine the value of the survival function to t after run fit.
+}
+\usage{
+survival(t, ObjFrailty)
+}
+
+\arguments{
+  \item{t}{
+time for survival function.
+}
+  \item{ObjFrailty}{
+an object from the frailtypack fit.
+}
+}
+
+\value{
+return the value of survival function in t.
+}
+
+\author{
+V. Rondeau
+}
+
+\examples{
+
+###  a fit Shared
+data(readmission)
+fit.shared <- frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id)+strata(sex),
+             n.knots=10,kappa1=10000,kappa2=10000,data=readmission,
+	     Frailty=TRUE)
+
+### calling survival
+survival(20,fit.shared) 
+}
+

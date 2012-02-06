@@ -99,7 +99,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	}
 	call <- match.call()
 	
-	m <- match.call(expand = FALSE)
+	m <- match.call(expand.dots = FALSE)
     m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <-  m$... <- NULL
     
 
@@ -132,14 +132,65 @@ if((all.equal(length(hazard),1)==T)==T){
 		
 	ll <- attr(Terms, "term.labels")#liste des variables explicatives
 #cluster(id) as.factor(dukes) as.factor(charlson) sex chemo terminal(death) 
-	
+
+
+#=========================================================>
+
+
 	mt <- attr(m, "terms") #m devient de class "formula" et "terms"
 			
 	X <- if (!is.empty.model(mt))model.matrix(mt, m, contrasts) #idem que mt sauf que ici les factor sont divise en plusieurs variables
 			
+#=========================================================>
+# On determine le nombre de categorie pour chaque var categorielle
 	strats <- attr(Terms, "specials")$strata #nbre de var qui sont en fonction de strata()
 	cluster <- attr(Terms, "specials")$cluster #nbre de var qui sont en fonction de cluster()
 	subcluster <- attr(Terms, "specials")$subcluster #nbre de var qui sont en fonction de subcluster()
+
+	if (length(subcluster)){
+		ll <- ll[-grep("subcluster",ll)]
+	}
+	if (length(cluster)){
+		ll <- ll[-grep("cluster",ll)]
+	}
+	if (length(strats)){
+		ll <- ll[-grep("strata",ll)]
+	}
+
+	ind.place <- grep("factor",ll)
+
+	vecteur <- NULL
+	vecteur <- c(vecteur,ll[ind.place])
+
+	mat.factor <- matrix(vecteur,ncol=1,nrow=length(vecteur))
+
+ # Fonction servant a prendre les termes entre "as.factor"
+	vec.factor <-apply(mat.factor,MARGIN=1,FUN=function(x){
+	pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+	pos2 <- length(unlist(strsplit(x,split="")))-1
+	return(substr(x,start=pos1,stop=pos2))})
+
+	if(length(vec.factor) > 0){
+		vect.fact <- attr(X,"dimnames")[[2]]
+
+		vect.fact <- vect.fact[grep("factor",vect.fact)]
+		vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
+		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+		pos2 <- length(unlist(strsplit(x,split="")))-2
+		return(substr(x,start=pos1,stop=pos2))})		
+		occur <- rep(0,length(vec.factor))
+	
+
+		for(i in 1:length(vec.factor)){
+			occur[i] = sum(vec.factor[i] == vect.fact)
+		}
+	}
+
+#=========================================================>	
+	
+	
+	
+
 	terminalEvent <- attr(Terms, "specials")$terminal #nbre de var qui sont en fonction de terminal()
 	
 	dropx <- NULL
@@ -243,7 +294,12 @@ if((all.equal(length(hazard),1)==T)==T){
 	assign <- lapply(attrassign(X, newTerms)[-1], function(x) x - 1)
 # assigne donne la position pour chaque variables
 #ncol(X) : nombre de variable sans sans les fonction speciaux comme terminal()...+id
+	if(length(vec.factor) > 0){
+#========================================>
+		position <- unlist(assign,use.names=F)
+	}
 	
+#========================================>
 
 	if (ncol(X) == 1){ 
 		X<-X-1
@@ -286,7 +342,18 @@ if((all.equal(length(hazard),1)==T)==T){
 	cat("\n")
 	cat("Be patient. The program is computing ... \n")
 	
-#
+#=======================================>
+#======= Construction du vecteur des indicatrice
+	if(length(vec.factor) > 0){
+#		ind.place <- ind.place -1
+		k <- 0
+		for(i in 1:length(vec.factor)){
+			ind.place[i] <- ind.place[i]+k
+				k <- k + occur[i]-1
+		}
+	}
+
+#==================================
 # Begin SHARED MODEL
 #
 
@@ -370,9 +437,17 @@ if((all.equal(length(hazard),1)==T)==T){
 				as.double(c(0,0)), 
 				as.double(0),
 				istop=as.integer(0),
-			shape.weib=as.double(rep(0,2)),
-			scale.weib=as.double(rep(0,2)),
+				shape.weib=as.double(rep(0,2)),
+				scale.weib=as.double(rep(0,2)),
 				as.integer(mt1),
+				zi=as.double(rep(0,(n.knots+6))),
+				martingale.res=as.double(rep(0,as.integer(length(uni.cluster)))),
+				martingaleCox=as.double(rep(0,n)),
+				frailty.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
+				frailty.var=as.double(rep(0,as.integer(length(uni.cluster)))),
+				frailty.sd=as.double(rep(0,as.integer(length(uni.cluster)))),
+				linear.pred=as.double(rep(0,n)),
+				time=as.double(rep(0,(nbintervR+1))),
 				PACKAGE = "frailtypack")    
 #AD:
 
@@ -399,9 +474,14 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$n <- n
     fit$groups <- length(uni.cluster)
     fit$n.events <- ans[[39]]
-    fit$logLikPenal <- ans[[24]]
+    if(as.character(typeof)=="0"){    
+        fit$logLikPenal <- ans[[24]]
+    }else{
+        fit$logLik <- ans[[24]]
+    }
+    
     if (Frailty) {
-        fit$theta <- (ans[[21]][np - nvar])^2
+        fit$theta <- (ans[[21]][np - nvar])^2 
     }
     if (!Frailty) {
         fit$theta <- NULL
@@ -418,8 +498,12 @@ if((all.equal(length(hazard),1)==T)==T){
 #AD:modification des dimensions des tableaux
     temp1 <- matrix(ans[[22]], nrow = np, ncol = np)
     temp2 <- matrix(ans[[23]], nrow = np, ncol = np)
-    fit$varH <- temp1[(np - nvar):np, (np - nvar):np]
-    fit$varHIH <- temp2[(np - nvar):np, (np - nvar):np]
+
+    fit$varH <- temp1[(np - nvar + 1):np, (np - nvar + 1):np]
+    fit$varHIH <- temp2[(np - nvar + 1):np, (np - nvar + 1):np]
+    if (Frailty) fit$varTheta <- c(temp1[(np - nvar),(np - nvar)],temp2[(np - nvar),(np - nvar)])
+   
+
     fit$formula <- formula(Terms)
 
     fit$x1 <- ans[[26]]
@@ -445,7 +529,9 @@ if((all.equal(length(hazard),1)==T)==T){
 	fit$DoF <- ans[[42]]
 	fit$cross.Val<-cross.validation
 	fit$n.knots.temp <- n.knots.temp
+	fit$zi <- ans$zi
     }
+	if(typeof == 1) fit$time <- ans$time
 #AD:
     
     fit$LCV <- ans$LCV[1]
@@ -468,7 +554,45 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$shape.weib <- ans$shape.weib
     fit$scale.weib <- ans$scale.weib
     
+    if(Frailty){  
+	fit$martingale.res <- ans$martingale.res
+	fit$frailty.pred <- ans$frailty.pred
+	fit$frailty.var <- ans$frailty.var	
+	fit$frailty.sd <- ans$frailty.sd
+	
+    }else{
+
+	fit$martingaleCox <- ans$martingaleCox
+    }
+	fit$linear.pred <- ans$linear.pred 
 #
+#========================= Test de Wald pour shared
+
+	
+	if(length(vec.factor) > 0){
+		Beta <- ans[[21]][(np - nvar + 1):np]
+		VarBeta <- fit$varH#[2:(nvar+1),2:(nvar+1)] 
+		nfactor <- length(vec.factor)
+		p.wald <- rep(0,nfactor)
+		
+		fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+		fit$dof_chisq <- occur
+		fit$global_chisq.test <- 1
+# Calcul de pvalue globale
+		for(i in 1:length(vec.factor)){
+			p.wald[i] <- signif(1 - pchisq(fit$global_chisq[i], occur[i]), 3)
+		}
+		fit$p.global_chisq <- p.wald
+		fit$names.factor <- vec.factor 
+
+		
+	}else{
+		fit$global_chisq.test <- 0
+	}
+	
+#===============================================	
+
+
     attr(fit,"joint")<-joint
     attr(fit,"subcluster")<-FALSE
     class(fit) <- "frailtyPenal"
@@ -531,7 +655,7 @@ if((all.equal(length(hazard),1)==T)==T){
 			stop("terminal must contain a variable coded 0-1 and a non-factor variable")
 		}
 	
-		m2 <- match.call(expand = FALSE)
+		m2 <- match.call(expand.dots = FALSE)
 
 ## AD: modified 20 06 2011, for no covariates on terminal event part
 		if (missing(formula.terminalEvent)){
@@ -553,11 +677,39 @@ if((all.equal(length(hazard),1)==T)==T){
 		
 		if (!missing(formula.terminalEvent))newTerms2<-Terms2
 
+#=========================================================>
+                lldc <- attr(newTerms2,"term.labels")
+		ind.placedc <- grep("factor",lldc)
+		vecteur <- NULL
+		vecteur <- c(vecteur,lldc[ind.placedc])
+		mat.factor <- matrix(vecteur,ncol=1,nrow=length(vecteur))
 
+ # Fonction servant a prendre les termes entre "as.factor"
+		vec.factordc <-apply(mat.factor,MARGIN=1,FUN=function(x){
+		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+		pos2 <- length(unlist(strsplit(x,split="")))-1
+		return(substr(x,start=pos1,stop=pos2))})	
+	       
+#=========================================================>
 		if (!missing(formula.terminalEvent)){
 			X2 <- model.matrix(newTerms2, m2)
+#=========================================================>
+# On determine le nombre de categorie pour chaque var categorielle
+			if(length(vec.factordc) > 0){
+				vect.fact <- attr(X2,"dimnames")[[2]]
+				occurdc <- rep(0,length(vec.factordc))
+	
+				for(i in 1:length(vec.factordc)){
+					occurdc[i] = length(grep(vec.factordc[i],vect.fact))
+				}
+			}
+#=========================================================>
 			assign <- lapply(attrassign(X2, newTerms2)[-1], function(x) x - 1)
-			
+#========================================>
+			if(length(vec.factordc) > 0){
+				positiondc <- unlist(assign,use.names=F)
+			}
+#========================================>
 			if (ncol(X2) == 1) 
 			{
 				X2<-X2-1
@@ -607,6 +759,18 @@ if((all.equal(length(hazard),1)==T)==T){
 	nvarRec<-nvar
 
 	if (!missing(formula.terminalEvent)){	
+#=======================================>
+#======= Construction du vecteur des indicatrice
+
+		if(length(vec.factordc) > 0){
+			k <- 0
+			for(i in 1:length(vec.factordc)){
+				ind.placedc[i] <- ind.placedc[i]+k
+					k <- k + occurdc[i]-1
+			}
+		}
+
+#==================================
 		if(is.null(nrow(vardc))){
 			nvarEnd<-1
 		}else{
@@ -733,6 +897,16 @@ if((all.equal(length(hazard),1)==T)==T){
 		scale.weib=as.double(rep(0,2)),
 		as.integer(mt11),
 		as.integer(mt12),
+		
+		martingale.res=as.double(rep(0,as.integer(length(uni.cluster)))),
+		martingaledc.res=as.double(rep(0,as.integer(length(uni.cluster)))),
+		frailty.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
+		frailty.var=as.double(rep(0,as.integer(length(uni.cluster)))),
+		linear.pred=as.double(rep(0,n)),
+		lineardc.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
+		zi=as.double(rep(0,(n.knots+6))),
+		time=as.double(rep(0,(nbintervR+1))),
+		timedc=as.double(rep(0,(nbintervDC+1))),
                 PACKAGE = "frailtypack")  	
 		
 
@@ -761,7 +935,12 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$groups <- length(uni.cluster)
     fit$n.events <- ans$cpt
     fit$n.deaths <- ans$cpt.dc
-    fit$logLikPenal <- ans$loglik
+
+    if(as.character(typeof)=="0"){    
+        fit$logLikPenal <- ans$loglik
+    }else{
+        fit$logLik <- ans$loglik
+    }    
 #AD:
     fit$LCV <- ans$LCV[1]
     fit$AIC <- ans$LCV[2]
@@ -814,7 +993,12 @@ if((all.equal(length(hazard),1)==T)==T){
 	fit$kappa <- ans$k0
 	fit$cross.Val<-cross.validation
 	fit$n.knots.temp <- n.knots.temp	
+	fit$zi <- ans$zi
     }	
+    if(typeof == 1){
+	fit$time <- ans$time
+	fit$timedc <- ans$timedc
+    }
 #AD:
     fit$noVar1 <- noVar1
     fit$noVar2 <- noVar2
@@ -829,9 +1013,72 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$scale.weib <- ans$scale.weib
 #AD:
 
-    attr(fit,"joint")<-joint
-    attr(fit,"subcluster")<-FALSE
-    class(fit) <- "jointPenal"
+    if (Frailty){    
+		
+	fit$martingale.res <- ans$martingale.res
+	fit$martingaledeath.res <- ans$martingaledc.res
+	
+	fit$frailty.pred <- ans$frailty.pred
+	fit$frailty.var <- ans$frailty.var
+	
+	fit$linear.pred <- ans$linear.pred  
+	fit$lineardeath.pred <- ans$lineardc.pred
+    }    
+ 
+
+
+#================================> For the reccurrent
+#========================= Test de Wald pour shared
+	
+
+	if(length(vec.factor) > 0){
+		Beta <- ans$b[(np - nvar + 1):np]
+		VarBeta <- diag(diag(fit$varH)[-c(1,2)])
+		nfactor <- length(vec.factor)
+		p.wald <- rep(0,nfactor)
+		ntot <- nvarEnd + nvarRec
+		fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)
+		fit$dof_chisq <- occur
+		fit$global_chisq.test <- 1
+# Calcul de pvalue globale
+		for(i in 1:length(vec.factor)){
+			p.wald[i] <- signif(1 - pchisq(fit$global_chisq[i], occur[i]), 3)
+		}
+		fit$p.global_chisq <- p.wald
+		fit$names.factor <- vec.factor 
+
+		
+	}else{
+		fit$global_chisq.test <- 0
+	}
+
+#================================> For the death
+#========================= Test de Wald pour shared
+
+	if(length(vec.factordc) > 0){
+		Beta <- ans$b[(np - nvar + 1):np]
+		VarBeta <- diag(diag(fit$varH)[-c(1,2)]) 
+		nfactor <- length(vec.factordc)
+		p.walddc <- rep(0,nfactor)
+		ntot <- nvarEnd + nvarRec
+		fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
+		fit$dof_chisq_d <- occurdc
+		fit$global_chisq.test_d <- 1
+# Calcul de pvalue globale
+		for(i in 1:length(vec.factordc)){
+			p.walddc[i] <- signif(1 - pchisq(fit$global_chisq_d[i], occurdc[i]), 3)
+		}
+		fit$p.global_chisq_d <- p.walddc
+		fit$names.factordc <- vec.factordc 
+
+		
+	}else{
+		fit$global_chisq.test_d <- 0
+	}	
+  
+	attr(fit,"joint")<-joint
+	attr(fit,"subcluster")<-FALSE
+	class(fit) <- "jointPenal"
  }  # End JOINT MODEL
 
 
@@ -873,8 +1120,50 @@ if (length(subcluster))
 			mt1 <- 100
 		}
 		size2 <- mt1
+	
 
-		
+
+
+########### group and subgroup
+	grpe <- function(g){
+
+		grp <- unique(g)
+
+		res <- rep(0,length(grp))	
+
+		for(i in 1:length(res)){
+			res[i] = sum(grp[i]==g)
+		}
+		return(res)
+	}
+
+	grp <- grpe(as.integer(cluster))
+
+	subgrpe <- function(g,sg){
+
+		j <- 0
+		k <- 0
+		res <- rep(0,length(g))
+
+		for(i in 1:length(g)){
+			k <- k + g[i]
+			j <- j + 1
+			temp <- sg[j:k]
+			res[i] <- length(grpe(temp))
+			j <- k
+		}
+		return(res)
+	}
+
+	subgbyg <- subgrpe(grp,as.integer(subcluster))
+	maxng <- max(subgbyg)
+	ngg <- length(uni.cluster)
+#	cat("nombre de sujet par groupe\n")
+#	print(grp)
+#	cat("nombre de sous-groupe par groupe\n")
+#	print(subgbyg)	
+#### group and subgroup
+
     ans <- .Fortran("nested",
                 as.integer(n),
                 as.integer(length(uni.cluster)),
@@ -896,6 +1185,7 @@ if (length(subcluster))
                 as.integer(maxit),
                 as.integer(crossVal),  
                 as.integer(np),
+                as.integer(maxng),
                 b=as.double(rep(0,np)),
                 H=as.double(matrix(0,nrow=np,ncol=np)),
                 HIH=as.double(matrix(0,nrow=np,ncol=np)),
@@ -924,6 +1214,17 @@ if (length(subcluster))
 		shape.weib=as.double(rep(0,2)),
 		scale.weib=as.double(rep(0,2)),
 		as.integer(mt1),
+		zi=as.double(rep(0,(n.knots+6))),
+		time=as.double(rep(0,(nbintervR+1))),
+
+		martingale.res=as.double(rep(0,as.integer(length(uni.cluster)))),
+		frailty.pred.group=as.double(rep(0,as.integer(length(uni.cluster)))),
+		frailty.pred.subgroup=as.double(matrix(0,nrow=ngg,ncol=maxng)),
+		frailty.var.group=as.double(rep(0,as.integer(length(uni.cluster)))),
+		frailty.var.subgroup=as.double(matrix(0,nrow=ngg,ncol=maxng)),
+		frailty.sd.group=as.double(rep(0,as.integer(length(uni.cluster)))),
+		frailty.sd.subgroup=as.double(matrix(0,nrow=ngg,ncol=maxng)),
+		linear.pred=as.double(rep(0,n)),
 		PACKAGE = "frailtypack")    
 
     if (ans$istop == 4){
@@ -949,9 +1250,13 @@ if (length(subcluster))
     fit$n <- n
     fit$groups <- length(uni.cluster)
     fit$subgroups <- length(uni.subcluster)
-    fit$n.events <- ans$cpt
-    fit$logLikPenal <- ans$loglik
-    
+    fit$n.events <- ans$cpt 
+    if(as.character(typeof)=="0"){    
+        fit$logLikPenal <- ans$loglik
+    }else{
+        fit$logLik <- ans$loglik
+    }     
+     
     fit$alpha<-ans$b[np-nvar-1]^2
     fit$eta<-ans$b[np-nvar]^2
 
@@ -995,7 +1300,9 @@ if (length(subcluster))
     	fit$kappa <- ans$k0
     	fit$DoF <- ans$ddl
     	fit$cross.Val<-cross.validation
+	fit$zi <- ans$zi
     }
+    if(typeof == 1)fit$time <- ans$time
 #AD:
     fit$nbintervR <- nbintervR
     fit$nvar <- nvar
@@ -1011,10 +1318,78 @@ if (length(subcluster))
     fit$istop <- ans$istop
     fit$shape.weib <- ans$shape.weib
     fit$scale.weib <- ans$scale.weib
-    
+ 
+ #   if (Frailty){    
+	fit$martingale.res <- ans$martingale.res
+	fit$frailty.pred.group <- ans$frailty.pred.group
+
+	nom1 <- paste("g_",c(1:ngg),sep="")
+	nom2 <- paste("sub_g",c(1:maxng))
+
+	frailty.pred.subgroup <- as.data.frame(matrix(round(ans$frailty.pred.subgroup,6),ncol=maxng))
+	rownames(frailty.pred.subgroup) <- nom1
+	colnames(frailty.pred.subgroup) <- nom2
+	if(sum(which(subgbyg < max(subgbyg)))>0)frailty.pred.subgroup[which(subgbyg < max(subgbyg)),(subgbyg[which(subgbyg < max(subgbyg))]+1):max(subgbyg)] <- "."
+	fit$frailty.pred.subgroup <- frailty.pred.subgroup
+
+#	fit$frailty.var.group <- ans$frailty.var.group
+	
+# 	frailty.var.subgroup <- as.data.frame(matrix(round(ans$frailty.var.subgroup,6),nc=maxng))
+# 	rownames(frailty.var.subgroup) <- nom1
+# 	colnames(frailty.var.subgroup) <- nom2
+# 
+# 	if(sum(which(subgbyg < max(subgbyg)))>0)frailty.var.subgroup[which(subgbyg < max(subgbyg)),(subgbyg[which(subgbyg < max(subgbyg))]+1):max(subgbyg)] <- "."
+	
+#	fit$frailty.var.subgroup <- frailty.var.subgroup
+	
+#	fit$frailty.sd.group <- ans$frailty.sd.group
+	
+#	frailty.sd.subgroup <- as.data.frame(matrix(round(ans$frailty.sd.subgroup,6),nc=maxng))
+#	rownames(frailty.sd.subgroup) <- nom1
+#	colnames(frailty.sd.subgroup) <- nom2
+#	if(sum(which(subgbyg < max(subgbyg)))>0)frailty.sd.subgroup[which(subgbyg < max(subgbyg)),(subgbyg[which(subgbyg < max(subgbyg))]+1):max(subgbyg)] <- "."
+	
+#	fit$frailty.sd.subgroup <- frailty.sd.subgroup
+
+
+	fit$linear.pred <- ans$linear.pred  
+	fit$subgbyg <- subgbyg
+ #   }      
     if(ans$ier==2000)
         stop("The cross validation procedure cannot be finished. Try to change 
           either the number of knots or the seed for kappa parameter")
+
+
+
+
+#================================> For the reccurrent
+
+#========================= Test de Wald pour shared
+
+
+
+	if(length(vec.factor) > 0){
+		Beta <- ans$b[(np - nvar + 1):np]
+		VarBeta <- fit$varH[2:(nvar+1),2:(nvar+1)] 
+
+		nfactor <- length(vec.factor)
+		p.wald <- rep(0,nfactor)
+		
+		fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+		fit$dof_chisq <- occur
+		fit$global_chisq.test <- 1
+# Calcul de pvalue globale
+		for(i in 1:length(vec.factor)){
+			p.wald[i] <- signif(1 - pchisq(fit$global_chisq[i], occur[i]), 3)
+		}
+		fit$p.global_chisq <- p.wald
+		fit$names.factor <- vec.factor 
+
+		
+	}else{
+		fit$global_chisq.test <- 0
+	}
+
 
     attr(fit,"joint")<-joint
     attr(fit,"subcluster")<-TRUE

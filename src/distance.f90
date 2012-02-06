@@ -2,7 +2,7 @@
 	subroutine distance_cpm(b,m,mt,xR1,moyLamR1,xSu1,moysuR1,xR2,moyLamR2,xSu2,moysuR2)
 	
 	use tailles
-	use comon,only:cens,vvv,t0,t1,c,nsujet,nva,nva1,nva2,nst,nbrecu,nbintervR,ttt,vvv,date
+	use comon,only:cens,vvv,t0,t1,c,nsujet,nva,nva1,nva2,nst,nbrecu,nbintervR,ttt,date
 	use optim
 	
 	implicit none

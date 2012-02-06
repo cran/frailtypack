@@ -8,7 +8,7 @@
 	double precision,dimension(:),allocatable,save::aux
 	integer,dimension(:),allocatable,save::gaux,gnew
 	integer,dimension(:),allocatable,save::stracross,filtre       
-	real,dimension(:),allocatable,save::vax
+	double precision,dimension(:),allocatable,save::vax
 	double precision,dimension(:,:),allocatable,save:: I1_hess &
 	,H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI      
 	double precision,dimension(:),allocatable,save::v
@@ -17,10 +17,11 @@
 	
 	
 	subroutine nested(ns0,ng0,nssgbyg0,nst0,nz0,ax1,ax2,tt00,tt10,ic0,groupe0, &
-	ssgroupe0,nva0,str0,vax0,AG0,noVar,maxiter0,irep1,np,b,H_hessOut,HIHOut,resOut, &
+	ssgroupe0,nva0,str0,vax0,AG0,noVar,maxiter0,irep1,np,maxngg,b,H_hessOut,HIHOut,resOut, &
 	LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt,ni, &
-	cpt,ier,k0,ddl,istop,shape_weib,scale_weib,mt1)
-      	
+	cpt,ier,k0,ddl,istop,shape_weib,scale_weib,mt1,ziOut,time, &
+	Res_martingale,frailtypred,frailtypredg,frailtyvar,frailtyvarg,frailtysd,frailtysdg,linearpred)
+
 	use tailles
 	use parameters
 	use optim
@@ -30,11 +31,13 @@
 	m3m1,m3m,m2m1,m2m,m1m,auxig,alpha,eta,resnonpen,nsujet,nva,ndate,nst,model,hess,typeof, &
 	ttt,betacoef,typeof2,t2,vvv,nbintervR,cens,kkapa,nbrecu,etaR,etaD,betaR,betaD
 	use perso
+	use residusM
  	
 	Implicit none
 
 	
-	integer::ns0,ng0,nssgbyg0,nst0,np,nz0,nva0,AG0,noVar,maxiter0,mt,mt1 
+	integer::ns0,ng0,nssgbyg0,nst0,np,nz0,nva0,AG0,noVar,maxiter0,mt,mt1,maxngg 
+	double precision,dimension(nz0+6),intent(out)::ziOut
 	double precision,intent(in)::ax1,ax2
 	double precision,dimension(ns0)::tt00,tt10
 	integer,dimension(ns0)::ic0,groupe0,ssgroupe0
@@ -56,12 +59,14 @@
 	,ss,sss,ngaux,istop
 	integer::i,cptstr1,cptstr2,groupe,ssgroupe,ver
 	double precision::str,ddl
-	real::tt0,tt1
+!	real::tt0,tt1
+	double precision::tt0,tt1	
 	integer::auxng,auxssng
 	double precision::auxi,ax,bx,cx,tol,fa,fb,fc,res,goldenN,estimvN
 	double precision:: bgpe,bssgpe
 	double precision ::trace,trace1,trace2
 	double precision,dimension(2)::auxkappa
+	double precision,dimension(2,2)::H_hess0
 !AD:add
 	double precision,dimension(2),intent(out)::LCV,shape_weib,scale_weib
 	double precision::ca,cb,dd,funcpan_splines,funcpan_cpm,funcpan_weib
@@ -69,10 +74,28 @@
 !Cpm
 	integer::typeof0,nbintervR0,equidistant,ent,indd
 	double precision::temp
+	double precision,dimension(nbintervR0+1)::time
 !cpm	
+!predictor
+	double precision,dimension(ng0),intent(out)::Res_martingale,frailtypred,frailtysd,frailtyvar
+	double precision,external::funcpanres
+	double precision,dimension(ns0),intent(out)::linearpred
+	double precision,dimension(1,nva0)::coefBeta
+	double precision,dimension(1,ns0)::XBeta
+	integer,dimension(5)::istopp
+	double precision,dimension(ng0,maxngg),intent(out)::frailtypredg,frailtysdg,frailtyvarg
 	
+
+	istopp = 0
+	indic_cumul=0
+	Res_martingale=0.d0
+	frailtypred=0.d0
+	frailtyvar=0.d0
+	frailtysd=0.d0
+	linearpred=0.d0
 !AD:end
 
+	time = 0.d0
 	lamOut=0.d0
 	lam2Out=0.d0
 	suOut=0.d0
@@ -100,8 +123,10 @@
 	nsujetmax=ns0 
 	nsujet=ns0  
 	
-	ngmax=ng0	
+	ngmax=ng0
+	
 	nssgbyg=nssgbyg0
+	ngexact=nssgbyg0 
 	
 	xmin1=ax1
 	xmin2=ax2
@@ -109,6 +134,7 @@
 	nvarmax=nva0
 
 	ndatemax=2*ns0
+
 	allocate(filtre(ver),date(ndatemax),aux(2*ns0))
 
 	if (noVar.eq.1) then 
@@ -131,12 +157,12 @@
 	end if
 	
 
-	allocate(t0(ns0),t1(ns0),c(ns0),stra(ns0),stracross(ns0),g(ns0),gaux(ns0),gnew(ns0))
-	allocate(ssg(ns0,ngmax),nig(ngmax),mid(ngmax))    
+	allocate(t0(ns0),t1(ns0),c(ns0),stra(ns0),stracross(ns0),g(ns0),gaux(ns0),gnew(ns0))   
 	allocate(ve(ns0,nvarmax))
-	
+
+	allocate(ssg(ns0,ngexact),nig(ngexact),mid(ngexact),n_ssgbygrp(ngexact))
 	AG=AG0
-	
+
 	nz=nz0       	
 	cptni=0
 	cptni1=0
@@ -155,8 +181,8 @@
 	k = 0
 	cptstr1 = 0
 	cptstr2 = 0
-	
-	allocate(vax(nva))!
+
+	allocate(vax(nva))
 	nst=nst0
 	do i = 1,ns0    
 		if(nst.eq.2)then
@@ -208,8 +234,8 @@
 				stra(k) = 1
 				cptstr1 = cptstr1 + 1
 			endif
-			t0(k) = dble(tt0)   
-			t1(k) = dble(tt1)                  
+			t0(k) = tt0!dble(tt0)   
+			t1(k) = tt1!dble(tt1)                  
 			if(auxng.ne.groupe)then !chgt de groupes
 				ngexact=ngexact+1
 				auxng=groupe
@@ -251,7 +277,7 @@
 			do ii = 1,nva
 				if(filtre(ii).eq.1)then
 					iii = iii + 1
-					ve(i,iii) = dble(vax(ii))
+					ve(i,iii) = vax(ii)!dble(vax(ii))
 				endif
 			end do   
 		else 
@@ -274,12 +300,12 @@
 				do ii = 1,nva
 					if(filtre(ii).eq.1)then
 						iii = iii + 1
-						ve(i,iii) = dble(vax(ii))
+						ve(i,iii) = vax(ii)!dble(vax(ii))
 
 					endif
 				end do 
-				t0(k) =  dble(tt0)
-				t1(k) = dble(tt1)
+				t0(k) =  tt0!dble(tt0)
+				t1(k) = tt1!dble(tt1)
 
 				if(auxng.ne.groupe)then !chgt de groupes
 					ngexact=ngexact+1
@@ -317,8 +343,8 @@
 						goto 101             
 					endif
 				endif
- 101           continue
-				nig(g(k)) = nig(g(k))+1
+101     continue
+ 				nig(g(k)) = nig(g(k))+1
 			endif
 		endif
 		if (maxtt.lt.t1(k))then
@@ -332,11 +358,11 @@
 		cens = maxtt
 	end if
 !Ad	
-
-	nssgmax=nssgexact
+	nsujet = k
+	nssgbyg=nssgexact
 
 !--------------------------- fin lecture du fichier
-	allocate(mij(ngmax,nssgmax),aux1(ngmax,nssgmax),aux2(ngmax,nssgmax))
+
 
 	if (typeof == 0) then	
 	
@@ -407,11 +433,11 @@
 		zi(nz+1)=zi(nz)
 		zi(nz+2)=zi(nz)
 		zi(nz+3)=zi(nz)
-
+		ziOut = zi
 
 !---------- affectation nt0,nt1----------------------------
 	end if
-	
+
 	indictronq=0
 	do i=1,ns0 
 		if (typeof == 0) then
@@ -436,8 +462,6 @@
 	end do   
 
 	if (typeof == 0) then
-! test sans troncature
-!             indictronq=0
 
 !---------- affectation des vecteurs de splines -----------------
 		n = nz+2
@@ -450,9 +474,7 @@
 				
 		call vecpenN(n) 
 	end if
-!Ad:	                   
-!      np = nst*n + nva + 2*effet
-!AD
+
 	nbpara =np
 	npmax=np
 
@@ -466,6 +488,7 @@
 !***********************************************************
 !************** NEW : cross validation  ***********************
 !***********************************************************
+
 	nvacross=nva  
 	nva=0
 	effetcross=effet
@@ -541,12 +564,11 @@
 				ttt(j)=(cens/nbintervR)*j
 			endif
 		end do
-		
+		time = ttt
 		deallocate(t2)
 !------- FIN RECHERCHE DES NOEUDS	
 	end if		
-	
-	
+		
 	
 	if(typeof == 0) then	
 		if(irep1.eq.1)then   !pas recherche du parametre de lissage
@@ -554,7 +576,7 @@
 			auxi = estimvN(xmin1,n,b,y,ddl,ni,res)
 			if (ni.ge.250) then
 				do i=1,nz+2
-					b(i)=3.d-1 !
+					b(i)=1.d-1 !3.d-1
 				end do     
 				xmin1 = sqrt(10.d0)*xmin1
 				auxi = estimvN(xmin1,n,b,y,ddl,ni,res)
@@ -562,7 +584,7 @@
 	
 				else
 					do i=1,nz+2
-						b(i)=3.d-1 !
+						b(i)=1.d-1 !
 					end do     
 					xmin1 = sqrt(10.d0)*xmin1
 					auxi = estimvN(xmin1,n,b,y,ddl,ni,res)
@@ -626,15 +648,16 @@
 			auxkappa(2)=0.d0
 			call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines)
 			if (istop .ne. 1) then
+				istopp(1)=1
 				goto 1000
 			end if
 		endif 
 	end if 
-		
-	
+			
 	nva=nvacross ! pour la recherche des parametres de regression
 	nst=nstcross ! avec stratification si n�cessaire
 	effet=effetcross ! avec effet initial
+	
 	do l=1,ns0  
 		stra(l)=stracross(l) !r�tablissement stratification
 	end do
@@ -654,14 +677,14 @@
 !=============================- fin cross validation           
 !===== initialisation des parametres de regression/pas effets aleatopires
 
-
 !	write(*,*),'====================================='
 !	write(*,*),'== avec var explicatives !t ============='
 !	write(*,*),'====================================='
+	
 	ca=0.d0
 	cb=0.d0
 	dd=0.d0
-	effet=0
+	
 
 	select case(typeof)
 		case(1)
@@ -669,71 +692,69 @@
 		case(2)
 			b(1:nst*2) = 0.8d0
 	end select 
-
-	select case(typeof)
-		case(0)
-			np = nst*n + nva
-		case(1)
-			np = nst*nbintervR + nva
-		case(2)
-			np = nst*2 + nva
-	end select
-		
+	
 	if (typeof .ne. 0) then
 		allocate(kkapa(2))
 		allocate(betacoef(nst*nbintervR))
 	end if
-	
+
+	effet=0	
+
 	select case(typeof)
 		case(0)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
+			np = nst*n + nva
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
 		case(1)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
+			np = nst*nbintervR + nva
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
 		case(2)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
+			np = nst*2 + nva
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
 	end select
-
+!	write(*,*)'istop ==========>',istop,' np ',np	
 	if (istop .ne. 1) then
+		istopp(2)=1
 		goto 1000
 	end if
+
+!=================================   debut effet = 1 groupe =======================================	
 !	write(*,*),'================================================'
 !	write(*,*),'== avec var explicatives + effet groupe ========='
 !	write(*,*),'================================================'
-	effet=1
 	do i=1,nva
 		b(np-i+2)=b(np-i+1)
 	end do
-	b(np-nva+1)=0.1d0
+!	b(np-nva)=0.1d0
+	b(np-nva)=0.5d0
+	effet=1
 
 	select case(typeof)
 		case(0)
-			np = nst*n + nva +effet
+			np = nst*n + nva + effet
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
 		case(1)
 			np = nst*nbintervR + nva + effet
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
 		case(2)
 			np = nst*2 + nva + effet
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
 	end select
-
-	select case(typeof)
-		case(0)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
-		case(1)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
-		case(2)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
-	end select
-		
+!	write(*,*)'istop ==========>',istop,' np ',np
 	if (istop .ne. 1) then
+		istopp(3)=1
 		goto 1000
 	end if  
+	bgpe=b(np-nva)
 
+!=================================   Fin effet = 1 groupe =======================================	
+
+!=================================   debut effet = 1 sub groupe =======================================	
 !	write(*,*),'================================================'
 !	write(*,*),'== avec var explicatives + effet sub group ====='
 !	write(*,*),'================================================'
-	bgpe=b(np-nva)
+	
 	gaux=g !numero de groupe stokes
 	gnew=0
-
 	do i=1,ngexact
 		do j=1,nsujet
 			if(g(j).eq.i)then
@@ -742,50 +763,73 @@
 		end do
 	end do   
 	g=gnew
+	
+	g=ssgroupe0
+
+	n_ssgbygrp=0
+	nssgmax=0
+	do i=1,ng0
+		do k=1,nsujet
+			if(gaux(k) == i) then
+				if(k==1)then
+					n_ssgbygrp(i) =  n_ssgbygrp(i)+1
+				else
+					if(g(k) .ne. g(k-1))n_ssgbygrp(i) =  n_ssgbygrp(i)+1
+				end if
+			end if
+		end do
+		if(nssgmax <= n_ssgbygrp(i)) then
+			nssgmax = n_ssgbygrp(i)
+		end if	
+	end do
+	
+	indic_cumul=1
+	allocate(mij(ng0,nssgmax),aux1(ngexact,nssgmax),aux2(ngexact,nssgmax),cumulhaz1(ngmax,nssgmax))
+	
 
 	effet=1
 	ngaux=ngexact
 	ngexact=nssgexact
 	b(np-nva)=0.5d0
-
 	select case(typeof)
 		case(0)
-			np = nst*n + nva +effet
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
 		case(1)
-			np = nst*nbintervR + nva +effet
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
 		case(2)
-			np = nst*2 + nva + effet
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
 	end select
 
-	select case(typeof)
-		case(0)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
-		case(1)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
-		case(2)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
-	end select
-		     
+!	write(*,*)'istop ==========>',istop,' np ',np 
 	if (istop .ne. 1) then
+		istopp(4)=1
 		goto 1000
-	end if  	
+	end if  
+		
 	bssgpe=b(np-nva)
-         
-!         write(*,*),'=========================================='
-!         write(*,*),'== ensemble des parametres ============='!,k0(1)
-!         write(*,*),'====================================='
+
+!=================================   Fin effet = 1 sub groupe =======================================	
+
+        indic_cumul=0 
+!=================================   debut  ensemble de parametres  =================================	
+!	write(*,*),'=========================================='
+!	write(*,*),'== ensemble des parametres ============='!,k0(1)
+!	write(*,*),'====================================='
+	 
 	effet=2
-	ngexact = ngaux
+	ngexact = ngaux	
 	g=gaux
 	do i=1,nva
 		b(np-i+2)=b(np-i+1)
 	end do
 
 	np=nbpara 
-	b(np-nva-1)=bgpe!0.1d0!0.15d0  !initialisation alpha(groupe)
+
+	b(np-nva-1)=bgpe!0.1d0! !initialisation alpha(groupe)
 	b(np-nva)=bssgpe!1.0d0!0.15d0   !initialisation eta(sous groupe)
 
-	
+!	write(*,*)'np ',np
+!	write(*,*)'b ',b
 	select case(typeof)
 		case(0)
 			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
@@ -794,10 +838,16 @@
 		case(2)
 			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
 	end select
-		
+
+!	write(*,*)'istop ==========>',istop,' np ',np
+	
 	if (istop .ne. 1) then
+		istopp(5)=1
 		goto 1000
 	end if  
+
+!=================================   fin  ensemble de parametres  =================================	
+	
 	j=(np-nva)*(np-nva+1)/2
 	
 	trace=0
@@ -958,10 +1008,54 @@
 	end if
 !AD:end	
 
-1000    continue
+
 	
-	deallocate(date,t0,t1,c,stra,stracross,g,ssg,nig,mid,mij,aux1,aux2,ve,vax,filtre,v,I1_hess, & 
-	H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI,y,I_hess,H_hess,Hspl_hess,hess,gaux,gnew,aux) 
+!---------------------Calcul residus de martingal
+!	write(*,*)'----- Calcul residus de martingal -----'
+	
+	allocate(vuu(2))
+	
+	do i=1,2
+		coefBeta(1,i)=b(np-nva-effet+i)
+	end do
+
+	Xbeta = matmul(coefBeta,transpose(ve))	
+	
+	vuu = b((np-nva-effet+1):(np-nva))
+	
+	H_hess0=0.d0
+	H_hess0(1,1)=H_hess(np-nva-1,np-nva-1)
+	H_hess0(2,2)=H_hess(np-nva,np-nva)	
+	deallocate(I_hess,H_hess)
+	
+
+	Call Residus_Martingalen(funcpanres,Res_martingale,frailtypred,maxngg,frailtypredg,&
+	frailtyvar,frailtyvarg,frailtysd,frailtysdg)
+	
+	do i=1,nsujet
+!		linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
+		linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i))*frailtypredg(g(i),ssg(i,g(i))))	
+	end do
+
+	deallocate(vuu)
+
+	
+1000    continue
+
+!	write(*,*) '====== apres residud Martingale ========'
+
+		
+	if((istopp(4) == 1).or.(istopp(5) == 1)) then
+		Res_martingale=0.d0
+		frailtypred=0.d0
+		linearpred=0.d0	
+	end if
+	if((istopp(2)== 0).and.(istopp(3)== 0)) then
+		deallocate(mij,aux1,aux2,cumulhaz1)
+	end if
+
+	deallocate(H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI,y,Hspl_hess,hess,gaux,gnew,aux) 
+	deallocate(date,t0,t1,c,stra,stracross,g,ssg,nig,mid,ve,vax,filtre,v,I1_hess,n_ssgbygrp)	
 
 	if (typeof == 0) then	
 		deallocate(zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
@@ -979,7 +1073,7 @@
 	if (typeof .ne. 0) then
 		deallocate(kkapa)
 	end if
-
+!	write(*,*) '====Fin nested  === '
 
 	end subroutine nested!FIN prog principal
       
@@ -2217,9 +2311,9 @@
 
 !===================================================================
 
-	FUNCTION gammlnN(xx)
+	double precision function gammlnN(xx)
 	
-	REAL gammlnN,xx
+	double precision::xx
 !     Returns the value ln[gamma(xx)] for xx > 0.
 	INTEGER j
 	DOUBLE PRECISION ser,stp,tmp,x,y,cof(6)
@@ -2231,18 +2325,59 @@
 	x=xx
 	y=x
 	tmp=x+5.5d0
-	tmp=(x+0.5d0)*log(tmp)-tmp
+	tmp=(x+0.5d0)*dlog(tmp)-tmp
 	ser=1.000000000190015d0
 	do j=1,6
 		y=y+1.d0
 		ser=ser+cof(j)/y
 	end do
-	gammlnN=tmp+log(stp*ser/x)
+	
+	gammlnN = tmp + dlog(stp*ser/x)
+	
 	return
       
 	END FUNCTION gammlnN
 
 !==================================================================
+
+!==================================================================
+
+	SUBROUTINE qgauss1N(a,b,ss) ! sans troncature
+	
+	use tailles
+	use comon,only:auxig
+	use commun,only:mij,mid,ngexact,nssgexact
+	Implicit none
+	
+	double precision :: a,b,ss
+	double precision ::auxfunc1a,auxfunc1b
+!      external :: func1N
+!      Returns as ss the integral of the function func1 between a and b, by ten-point Gauss-Legendre integration: the function is evaluated exactly ten times at interior points in the range of integration.
+! func1 est l int�grant, ss le r�sultat de l integrale
+      
+	integer::j
+	double precision::func1N
+	double precision,dimension(5)::w,x
+	double precision::dx,xm,xr  !The abscissas and weights.
+	SAVE  w,x
+	DATA w/.2955242247,.2692667193,.2190863625,.1494513491,.0666713443/
+	DATA x/.1488743389,.4333953941,.6794095682,.8650633666,.9739065285/ 
+	
+	xm=5.d-1*(b+a)
+	xr=5.d-1*(b-a)
+	ss=0.d0 ! Will be twice the average value of the function,since the ten
+	do j=1,5  !weights (five numbers above each used twice) sum to 2.
+		dx=xr*x(j)
+		auxfunc1a=func1N(xm+dx)
+		auxfunc1b=func1N(xm-dx)
+		ss = ss+w(j)*( auxfunc1a+ auxfunc1b)
+	end do
+	ss=xr*ss            !  Scale the answer to the range of integration.
+	return
+	
+	END SUBROUTINE qgauss1N
+  
+!================================================
 !==================================================================
 	
 	SUBROUTINE gaulagN(ss,choix) 
@@ -2292,49 +2427,11 @@
 		endif
 	end do
 	
-      return
-      
-      END SUBROUTINE gaulagN
-  
-
-!==================================================================
-
-	SUBROUTINE qgauss1N(a,b,ss) ! sans troncature
-	
-	use tailles
-	use comon,only:auxig
-	use commun,only:mij,mid,ngexact,nssgexact
-	Implicit none
-	
-	double precision :: a,b,ss
-	double precision ::auxfunc1a,auxfunc1b
-!      external :: func1N
-!      Returns as ss the integral of the function func1 between a and b, by ten-point Gauss-Legendre integration: the function is evaluated exactly ten times at interior points in the range of integration.
-! func1 est l int�grant, ss le r�sultat de l integrale
-      
-	integer::j
-	double precision::func1N
-	double precision,dimension(5)::w,x
-	double precision::dx,xm,xr  !The abscissas and weights.
-	SAVE  w,x
-	DATA w/.2955242247,.2692667193,.2190863625,.1494513491,.0666713443/
-	DATA x/.1488743389,.4333953941,.6794095682,.8650633666,.9739065285/ 
-	
-	xm=5.d-1*(b+a)
-	xr=5.d-1*(b-a)
-	ss=0.d0 ! Will be twice the average value of the function,since the ten
-	do j=1,5  !weights (five numbers above each used twice) sum to 2.
-		dx=xr*x(j)
-		auxfunc1a=func1N(xm+dx)
-		auxfunc1b=func1N(xm-dx)
-		ss = ss+w(j)*( auxfunc1a+ auxfunc1b)
-	end do
-	ss=xr*ss            !  Scale the answer to the range of integration.
 	return
 	
-	END SUBROUTINE qgauss1N
+	END SUBROUTINE gaulagN
   
-!================================================
+
 !================================================
 
 	double precision function func1N(frail) 
@@ -2344,32 +2441,41 @@
 	use comon,only:auxig,g,nig,stra &
 	,indictronq,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,alpha,eta 
 	use commun,only:ngexact,nssgexact,aux1,aux2,ssg,mij,mid
-	
+	use residusM,only:n_ssgbygrp	
 	Implicit none
 
 
 	double precision::frail
 	integer::ig,issg,k
-	double precision,dimension(ngmax)::prod1
+	double precision,dimension(ngexact)::prod1 !
 	
 	ig=auxig
 !     initialisation de prod1 et prod2 par le numerateur de l integrant
      
-	prod1(ig)=(dexp(dble(-frail/alpha)))&
-	*(dble(frail)**(1.d0/alpha-1.d0+mid(ig)))
-
-	do issg=1,nssgbyg !!! attention sous gpe pour un gpe donn�
+	prod1(ig)=(dexp(-frail/alpha))&
+	*(frail**(1.d0/alpha-1.d0+mid(ig)))
+!	write(*,*)'groupe',ig,'mid',mid(ig),'n_ssgbygrp(ig)',n_ssgbygrp(ig)
+!	write(*,*)'eta',eta,'alpha',alpha,'frail',frail
+	
+	do issg=1,n_ssgbygrp(ig) !!! attention sous gpe pour un gpe donn�
 		do k=1,nsujet
 			if((g(k).eq.ig).and.(ssg(k,g(k)).eq.issg))then  
 				prod1(ig)=prod1(ig) &
-				*(1.d0+eta*dble(frail)*aux1(g(k),ssg(k,g(k)))) &
-				**(-(1.d0/eta)-dble(mij(g(k),ssg(k,g(k))))) 
+				*(1.d0+eta*frail*aux1(g(k),ssg(k,g(k)))) &
+				**(-(1.d0/eta)-mij(g(k),ssg(k,g(k))))
+			!	write(*,*)'groupe',ig,'eta',eta,'alpha',alpha,'frail',frail
+				
+!				write(*,*)'mij(g(k),ssg(k,g(k)))',mij(g(k),ssg(k,g(k)))
+!				write(*,*)'(1.d0+eta*frail*aux1(g(k),ssg(k,g(k))))',(1.d0+eta*frail*aux1(g(k),ssg(k,g(k))))
+!				write(*,*)'(-(1.d0/eta)-mij(g(k),ssg(k,g(k))))',(-(1.d0/eta)-mij(g(k),ssg(k,g(k))))
+			!	write(*,*)'** prod1 **',prod1(ig),'**value',(1.d0+eta*frail*aux1(g(k),ssg(k,g(k)))) &
+			!	**(-(1.d0/eta)-mij(g(k),ssg(k,g(k))))
 				exit
 			endif
 		end do
 	end do
-	
-	func1N=prod1(ig)   
+!	write(*,*)'** prod1 **',prod1(ig),frail,eta,alpha,ig
+	func1N = prod1(ig)   
 	
 	return
 	
@@ -2417,25 +2523,29 @@
 	,stra,alpha,eta,indictronq &
 	,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst
 	use commun,only:ssg,ngexact,nssgexact,aux1,aux2,mij,mid
+	use residusM,only:n_ssgbygrp
 	
 	Implicit none
 
 	
 	integer::ig,issg,k
 	double precision::frail
-	double precision,dimension(ngmax)::prod2
+	double precision,dimension(ngexact)::prod2 !ngmax
 
 	ig=auxig
 
-	PROD2(IG)=(DEXP(DBLE(-frail/ALPHA))) &
-	*(DBLE(frail)**(1.d0/alpha-1.d0))
+!	PROD2(IG)=(DEXP(DBLE(-frail/ALPHA))) &
+!	*(DBLE(frail)**(1.d0/alpha-1.d0))
 	
-	do issg=1,nssgbyg
+	PROD2(IG)=(DEXP(-frail/ALPHA)) &
+	*(frail**(1.d0/alpha-1.d0))	
+	do issg=1,n_ssgbygrp(ig)
 		do k=1,nsujet
 		if((g(k).eq.ig).and.(ssg(k,g(k)).eq.issg))then
 			if(indictronq.eq.1)then
 			prod2(ig)=prod2(ig)*((1.d0 &
-		+(eta*dble(frail)*aux2(g(k),ssg(k,g(k)))))**(-1.d0/eta)) 
+		+(eta*frail*aux2(g(k),ssg(k,g(k)))))**(-1.d0/eta)) 
+	!	+(eta*dble(frail)*aux2(g(k),ssg(k,g(k)))))**(-1.d0/eta)) 
 			endif
 			exit
 		endif

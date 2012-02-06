@@ -59,8 +59,8 @@
 	}
 	
 \references{
-V. Rondeau, Y. Mazroui and J. R. Gonzalez. Frailtypack: An r package for the analysis of correlated survival data with frailty models using penalized likelihood estimation.
-\emph{Journal of Statistical Software,In press}, 2011.
+V. Rondeau, Y. Mazroui and J. R. Gonzalez. Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation.
+\emph{Journal of Statistical Software, In press}, 2012.
 
 V. Rondeau and J. R. Gonzalez. Frailtypack: A computer program for the analysis of correlated failure time data using penalized likelihood estimation.
 \emph{Computer Methods and Programs in Biomedicine, 80(2)}: \bold{154-164}, 2005.
@@ -130,7 +130,7 @@ V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum pena
  data(readmission)
  frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+
           as.factor(charlson)+cluster(id),data=readmission, Frailty=TRUE,
-	  hazard="Piecewise-per",nb.int=6)
+	  hazard="Piecewise-per",nb.int1=6)
 }
 }
 

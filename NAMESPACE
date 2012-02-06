@@ -1,13 +1,13 @@
 export(
-additivePenal,
 frailtyPenal,
+additivePenal,
+hazard,
+survival,
 slope,
 subcluster,
 terminal
 )
-
 import("survival")
-
 S3method(plot,frailtyPenal)
 S3method(lines,frailtyPenal)
 S3method(plot,jointPenal)      

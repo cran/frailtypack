@@ -27,7 +27,8 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\bold{\beta}} the
 
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
             joint = FALSE, recurrentAG = FALSE, cross.validation =
-            FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard,nb.int1,nb.int2)
+            FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard,
+	    nb.int1,nb.int2)
 }
 
 \arguments{
@@ -90,36 +91,33 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 \value{
 
 The following components are included in a 'frailtyPenal' object for shared frailty models.
-\item{b}{sequence of the corresponding estimation of the splines coefficients, the random effects variances and the regression coefficients.}
-\item{call}{The code used for the model}
-\item{coef}{the coefficients of the linear predictor, which
-          multiply the columns of the model matrix. }
+\item{b}{sequence of the corresponding estimation of the coefficients for the hazard functions (parametrical or semi-parametrical), the random effects variances and the regression coefficients.}
+\item{call}{The code used for the model.}
+\item{coef}{the regression coefficients.}
 \item{cross.Val }{Logical value. Is cross validation procedure used for estimating the smoothing parameters in the penalized likelihood estimation?  }
-\item{DoF}{Degrees of freedom associated with the "kappa"}
-\item{formula }{the formula part of the code used for the model  }
-\item{groups}{the maximum number of groups used in the fit}
-\item{kappa}{ A vector with the smoothing parameters  in the penalized likelihood estimation corresponding to each baseline function as components }
-\item{lam}{matrix of hazard estimates at x1 times and confidence bands. }
-\item{lam2}{the same value as lam for the second stratum}
-\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametrical case or the marginal log-likelihood in the parametrical case.}
+\item{DoF}{Degrees of freedom associated with the "kappa".}
+\item{formula }{the formula part of the code used for the model.}
+\item{groups}{the maximum number of groups used in the fit.}
+\item{kappa}{ A vector with the smoothing parameters  in the penalized likelihood estimation corresponding to each baseline function as components.}
+\item{lam}{matrix of hazard estimates and confidence bands.}
+\item{lam2}{the same value as lam for the second stratum.}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametrical case.}
+\item{loglik}{the marginal log-likelihood in the parametrical case.}
 \item{n}{the number of observations used in the fit.}
-\item{n.events}{the number of events observed in the fit}
-\item{n.iter}{number of iterations needed to converge  }
-\item{n.knots}{number of knots for estimating the baseline functions in the penalized likelihood estimation }
-\item{n.strat}{ number of stratum }
-\item{surv}{matrix of baseline survival estimates at x1 times and confidence bands. }
-\item{surv2}{the same value as surv for the second stratum}
-\item{theta}{variance of frailty parameter}
-%\item{type}{charater string specifying the type of censoring. Possible values are "right", "left", %"counting", "interval", "interval2". The default is "right" or "counting" depending on whether the %'time2' argument is absent or present, respectively.}
+\item{n.events}{the number of events observed in the fit.}
+\item{n.iter}{number of iterations needed to converge.}
+\item{n.knots}{number of knots for estimating the baseline functions in the penalized likelihood estimation.}
+\item{n.strat}{ number of stratum.}
+\item{surv}{matrix of baseline survival estimates and confidence bands.}
+\item{surv2}{the same value as surv for the second stratum.}
+\item{theta}{variance of frailty parameter.}
  \item{varH}{the variance matrix of all parameters before positivity constraint transformation (theta, the regression coefficients and the spline coefficients). Thenafter, the delta method is needed to obtain the estimated variance parameters.}
  \item{varHIH}{the robust estimation of the variance matrix of all parameters (theta, the regression coefficients and the spline coefficients).}
 \item{x1}{vector of times where both survival and hazard function are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
-\item{x2}{see x1 value for the second stratum}
+\item{x2}{vector of times for the second stratum (see x1 value).}
 \item{type.of.hazard}{Type of hazard functions (0:"Splines", "1:Piecewise", "2:Weibull").}
-\item{type.of.Piecewise}{Type of Piecewise hazard functions (1:"per", 0:"equi").}
+\item{type.of.Piecewise}{Type of Piecewise hazard functions (1:"percentile", 0:"equidistant").}
 \item{nbintervR}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
-\item{size}{Number of points to plot the hazard functions in the parametrical and semi-parametrical cases.}
-
 \item{npar}{number of parameters.}
 \item{nvar}{number of explanatory variables.}
 \item{noVar}{indicator of explanatory variables.}
@@ -128,6 +126,18 @@ The following components are included in a 'frailtyPenal' object for shared frai
 \item{n.knots.temp}{initial value for the number of knots.}
 \item{shape.weib}{shape parameter for the weibull hazard function.}
 \item{scale.weib}{scale parameter for the weibull hazard function.}
+\item{martingale.res}{martingale residuals for each cluster.}
+\item{martingaleCox}{martingale residuals for observation in the Cox model.}
+\item{frailty.pred}{empirical Bayes prediction of the frailty term (ie, using conditional posterior distributions).}
+\item{frailty.var}{variance of the empirical Bayes prediction of the frailty term.}
+\item{frailty.sd}{standard error of the frailty empirical Bayes prediction.}
+\item{linear.pred}{linear predictor: uses simply "Beta'X" in the cox proportional hazard model or "Beta'X + log z_i" in the shared Frailty models.}
+
+\item{global_chisq}{a vector with the values of each multivariate Wald test.}
+\item{dof_chisq}{a vector with the degree of freedom for each multivariate Wald test.}
+\item{global_chisq.test}{a binary variable equals to 0 when no multivariate Wald is given, 1 otherwise.}
+\item{p.global_chisq}{a vector with the p_values for each global multivariate Wald test.}
+\item{names.factor}{Names of the "as.factor" variables.}
 }
 
 \note{
@@ -141,6 +151,8 @@ The following components are included in a 'frailtyPenal' object for shared frai
 
 
 \references{
+V. Rondeau, Y. Mazroui and J. R. Gonzalez. Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation.
+\emph{Journal of Statistical Software, In press}, 2012.
 
 V. Rondeau, D Commenges, and P. Joly (2003). Maximum penalized likelihood estimation in a gamma-frailty model.
 \emph{Lifetime Data Analysis} \bold{9}, 139-153.

@@ -5,8 +5,9 @@
 	use tailles
 	use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
 	mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-	nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen
-
+	nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta
+        use residusM
+	
 	
 	implicit none
 	
@@ -14,7 +15,7 @@
 	
 	integer::nb,n,np,id,jd,i,j,k,vj,cptg,l
 	integer,dimension(ngmax)::cpt
-	double precision::thi,thj,pe1,pe2,dnb,sum,theta,inv,som1,som2,res,vet,h1
+	double precision::thi,thj,pe1,pe2,dnb,sum,inv,som1,som2,res,vet,h1
 	double precision,dimension(-2:npmax)::the1,the2
 	double precision,dimension(np)::b,bh
 	double precision,dimension(ngmax)::res1,res2,res3
@@ -26,7 +27,6 @@
 	theta=0.d0
 	do i=1,np
 		bh(i)=b(i)
-	
 	end do 
 
 	if (id.ne.0) bh(id)=bh(id)+thi
@@ -138,10 +138,12 @@
                        end if	
 			if(stra(i).eq.1)then
 				res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet-ut1(nt0(i))*vet 
+				RisqCumul(i) = ut1(nt1(i))*vet
 			endif
 	
 			if(stra(i).eq.2)then
 				res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet-ut2(nt0(i))*vet 
+				RisqCumul(i) = ut2(nt1(i))*vet
 			endif
 	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                           funcpas_splines=-1.d9
@@ -226,6 +228,7 @@
 		cptg = 0
 !     gam2 = gamma(inv)
 ! k indice les groupes
+
 		do k=1,ng  
 			sum=0.d0
 			if(cpt(k).gt.0)then
@@ -313,12 +316,20 @@
 	resnonpen = res
 
 	res = res - pe
-       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-          funcpas_splines=-1.d9
-          goto 123
-       end if
+
+	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+		funcpas_splines=-1.d9
+		goto 123
+	end if
+
 	funcpas_splines = res 
+
+	do k=1,ng
+		cumulhaz(k)=res1(k)
+	end do
+
 123     continue
+
 	return
 
 	end function funcpas_splines

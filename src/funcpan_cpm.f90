@@ -1,13 +1,3 @@
-	
-	module commun
-	implicit none
-	integer,save::ngexact,nssgexact
-	integer,dimension(:,:),allocatable,save::ssg
-	integer,dimension(:),allocatable,save:: mid 
-	integer,dimension(:,:),allocatable,save::mij 
-	integer,save::nbpara
-	double precision,dimension(:,:),allocatable,save::aux1,aux2
-	end module commun 
 
 !========================          FUNCPA  NESTED_CPM       ====================
 
@@ -18,17 +8,18 @@
 	use comon,only:t0,t1,c,nsujet,nva,nst,indictronq &
 	,stra,effet,ve,g,nig,AG,auxig,alpha,eta,betacoef,kkapa,nbintervR,ttt
 	use commun,only:ngexact,nssgexact,mij,mid,ssg,aux1,aux2
+        use residusM	
 	
 	Implicit none
 
 	
 	integer::nb,np,id,jd,i,j,k,cptg,l,ig,ip,issg,choix
-	integer,dimension(ngmax)::cpt
-	real::gammlnN
+	integer,dimension(ngexact)::cpt
+	double precision::gammlnN
 	double precision::thi,thj,dnb,sum,theta,inv &
 	,som1,som2,res,vet,int,somm1,somm2
 	double precision,dimension(np)::b,bh
-	double precision,dimension(ngmax)::res1,res2,res3 &
+	double precision,dimension(ngexact)::res1,res2,res3 &
 	,integrale1,integrale2,integrale3,sum1
 	double precision,dimension(2)::k0
 	integer::gg,jj
@@ -70,14 +61,14 @@
 !*******************************************  
   
 	if (effet.eq.0) then
-		do i=1,nsujetmax
+		do i=1,nsujet
 			cpt(g(i))=cpt(g(i))+1
 			
 			if(nva.gt.0)then
-			vet = 0.d0   
-			do j=1,nva
-				vet =vet + bh(np-nva+j)*ve(i,j)
-			end do
+				vet = 0.d0   
+				do j=1,nva
+					vet =vet + bh(np-nva+j)*ve(i,j)
+				end do
 				vet = dexp(vet)
 			else
 				vet=1.d0
@@ -168,13 +159,14 @@
 				goto 123
 			end if	
 		
-		end do     
+		end do 
+		    
 		res = 0.d0          
 		cptg = 0         
 ! k indice les groupes
-		do k=1,ngmax
+		do k=1,ngexact
 			if(cpt(k).gt.0)then !nb de sujets dans un gpe=nig()                             
-				res = res-res1(k)+ res2(k) 
+				res = res-res1(k) + res2(k) 
 				cptg = cptg + 1 
 				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 					funcpan_cpm=-1.d9
@@ -189,19 +181,20 @@
 !-----avec un seul  effet aleatoire dans le modele
 !*********************************************
        
+
 	if (effet.eq.1) then
-!      write(*,*)'AVEC 1 EFFET ALEATOIRE'
-		
+!	write(*,*)'AVEC 1 EFFET ALEATOIRE'	
 		inv = 1.d0/theta
+		
 		cpt=0!0.d0!!!!
 		res1=0.d0
 		res2=0.d0
 		res3=0.d0
 
-		do i=1,nsujetmax 
-             
-			cpt(g(i))=cpt(g(i))+1 
+		do i=1,nsujet
 		
+			cpt(g(i))=cpt(g(i))+1 
+			
 			if(nva.gt.0)then
 				vet = 0.d0   
 				do j=1,nva
@@ -211,14 +204,15 @@
 			else
 				vet=1.d0
 			endif
-
+			
 			if((c(i).eq.1).and.(stra(i).eq.1))then
 				do gg=1,nbintervR !!
 					if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
 						 res2(g(i)) = res2(g(i))+dlog(betacoef(gg)*vet)
 					end if!!
 				end do !!
-			endif  
+			endif 
+
 			if((c(i).eq.1).and.(stra(i).eq.2))then
 				do gg=1,nbintervR !!
 					if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
@@ -226,7 +220,7 @@
 					end if!!
 				end do !!
 			endif  
-			
+
 			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
 				funcpan_cpm=-1.d9
 				goto 123
@@ -248,7 +242,7 @@
 					end if!!
 				end do	
 			endif
-			
+
 			if(stra(i).eq.2)then
 ! nouvelle version
 				som1=0.d0
@@ -265,12 +259,12 @@
 					end if!!
 				end do	
 			endif
-			
+
 			if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
 				funcpan_cpm=-1.d9
 				goto 123
 			end if	
-			
+
 ! modification pour nouvelle vraisemblance / troncature:
 			if(stra(i).eq.1)then
 				som1=0.d0
@@ -287,7 +281,7 @@
 					end if!!
 				end do	
 			endif
-			
+
 			if(stra(i).eq.2)then
 				som1=0.d0
 				som2=0.d0
@@ -303,15 +297,17 @@
 					end if!!
 				end do	
 			endif
+
 			if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
 				funcpan_cpm=-1.d9
 				goto 123
 			end if	
+
 		end do 
 
 		res = 0.d0
 		cptg = 0
-		mid =0.d0
+		mid = 0
 !     gam2 = gamma(inv)
 ! k indice les groupes
 
@@ -320,8 +316,8 @@
 				mid(g(k))=mid(g(k))+1
 			endif
 		end do 
-
-		do k=1,ngmax 
+			
+		do k=1,ngexact
 			sum=0.d0
 			if(cpt(k).gt.0)then
 				nb = mid(k)!nb de deces par groupe
@@ -372,6 +368,14 @@
 				end if	
 			endif 
 		end do
+		
+		if (indic_cumul==1) then
+			do i= 1,ngmax
+				do j=1,n_ssgbygrp(i)
+					cumulhaz1(i,j) = res1((i-1)*n_ssgbygrp(i)+j)
+				end do
+			end do
+		end if
 	endif !fin boucle effet=1
 
 !*******************************************
@@ -391,7 +395,7 @@
 
 !     === MODIFICATION DE LA VRAISEMBLANCE POUR LE NESTED FRAILTY MODEL
           
-		do k=1,nsujetmax
+		do k=1,nsujet
 			if(c(k).eq.1)then
 				mid(g(k))=mid(g(k))+1
 				mij(g(k),ssg(k,g(k)))=mij(g(k),ssg(k,g(k)))+1 
@@ -399,7 +403,7 @@
              		endif
           	end do 
         
-		do k=1,nsujetmax
+		do k=1,nsujet
 			if(nva.gt.0)then
 				vet = 0.d0 
 				do ip=1,nva
@@ -411,18 +415,18 @@
 			endif
 
 			if((c(k).eq.1).and.(stra(k).eq.1))then
-				do gg=1,nbintervR !!
+				do gg=1,nbintervR 
 					if((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg))))then
 						 res2(g(k)) = res2(g(k))+dlog(betacoef(gg)*vet)
-					end if!!
-				end do !!
+					end if
+				end do 
 			endif  
 			if((c(k).eq.1).and.(stra(k).eq.2))then
-				do gg=1,nbintervR !!
+				do gg=1,nbintervR 
 					if((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg))))then
 						 res2(g(k)) = res2(g(k))+dlog(betacoef(nbintervR+gg)*vet)
-					end if!!
-				end do !!
+					end if
+				end do 
 			endif 
 
 			if ((res2(g(k)).ne.res2(g(k))).or.(abs(res2(g(k))).ge. 1.d30)) then
@@ -519,11 +523,9 @@
 
 !======================================================================
 
-
-
-		do ig=1,ngexact  
+		do ig=1,ngexact
 			sum1(ig)=0.d0
-			do issg=1,nssgbyg !!! NON ICI NSSGBYG
+			do issg=1,n_ssgbygrp(ig)!,nssgbyg !!! NON ICI NSSGBYG
 				if(mij(ig,issg).gt.1) then
 					do l=1,mij(ig,issg)
 				sum1(ig)=sum1(ig)+dlog(1.d0+eta*dble(mij(ig,issg)-l)) 
@@ -538,7 +540,7 @@
 			if(nig(k).gt.0)then
 				if(indictronq.eq.0)then
 					res = res+res2(k)+sum1(k) &
-					-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
+					-dlog(alpha)/(alpha)-gammlnN(1.d0/alpha) &
 					+dlog(integrale1(k))
 					if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 						funcpan_cpm=-1.d9
@@ -549,7 +551,7 @@
 					if(AG.eq.1)then
 !cccc ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
 						res = res+res2(k)+sum1(k) &
-						-dlog(alpha)/(alpha)-dble(gammlnN(real(1./alpha))) &
+						-dlog(alpha)/(alpha)-gammlnN(1.d0/alpha) &
 						+dlog(integrale3(k))
 					else
 ! vraisemblance pr donnees censur�es dte et tronqu�es a gauche
@@ -568,9 +570,12 @@
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 		funcpan_cpm=-1.d9
 		goto 123
-	end if		 
+	end if
+		 
 	funcpan_cpm = res 
+
 123     continue
+
 	return
 	
 	end function funcpan_cpm

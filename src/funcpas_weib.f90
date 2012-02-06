@@ -4,15 +4,16 @@
 	double precision function funcpas_weib(b,np,id,thi,jd,thj,k0)
 	use tailles
 	use comon,only:t0,t1,c,nsujet,nva, &
-	nst,stra,ve,effet,ng,g,nig,AG,etaR,etaD,betaR,betaD,kkapa
-	
+	nst,stra,ve,effet,ng,g,nig,AG,etaR,etaD,betaR,betaD,kkapa,theta
+        use residusM
+
 	implicit none
 	
 ! *** NOUVELLLE DECLARATION F90 :
 	
 	integer::nb,np,id,jd,i,j,k,cptg,l
 	integer,dimension(ngmax)::cpt
-	double precision::thi,thj,dnb,sum,theta,inv,res,vet
+	double precision::thi,thj,dnb,sum,inv,res,vet
 	double precision,dimension(np)::b,bh
 	double precision,dimension(ngmax)::res1,res2,res3
 	double precision,dimension(2)::k0 
@@ -87,10 +88,12 @@
                        end if	
 			if(stra(i).eq.1)then
 				res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet - ((t0(i)/etaR)**betaR)*vet  
+				RisqCumul(i) = ((t1(i)/etaR)**betaR)*vet
 			endif
 	
 			if(stra(i).eq.2)then
 				res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet - ((t0(i)/etaD)**betaD)*vet 
+				RisqCumul(i) = ((t1(i)/etaD)**betaD)*vet
 			endif
 	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                           funcpas_weib=-1.d9
@@ -226,12 +229,19 @@
 !--------- calcul de la penalisation -------------------
 
 !    Changed JRG 25 May 05
-       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-          funcpas_weib=-1.d9
-          goto 123
-       end if	
+	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+		funcpas_weib=-1.d9
+		goto 123
+	end if	
+
 	funcpas_weib = res 
+
+	do k=1,ng
+		cumulhaz(k)=res1(k)
+	end do
+
 123     continue
+
 	return
 
 	end function funcpas_weib
