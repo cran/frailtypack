@@ -1,9 +1,9 @@
 Package: frailtypack
-Version: 2.2-22
+Version: 2.2-23
 Date: 2012-03-09
 Title: General Frailty models using a semi_parametrical penalized
         likelihood estimation or a parametrical estimation
-Author: Juan R. Gonzalez, Virginie Rondeau, Yassin Mazroui, Audrey
+Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
         Mauguen and Amadou Diakite
 Maintainer: Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr>
 Depends: survival, boot
@@ -30,5 +30,5 @@ License: GPL (>= 2.0)
 URL: http://www.r-project.org
 Encoding: latin1
 Repository: CRAN
-Date/Publication: 2012-03-13 14:57:18
-Packaged: 2012-03-13 17:33:55 UTC; ad6
+Date/Publication: 2012-04-05 14:52:47
+Packaged: 2012-04-05 14:06:00 UTC; ad6

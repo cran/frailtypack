@@ -1,86 +1,86 @@
 
-      module type	
+      module typeres	
        
-      interface verif   
-      subroutine marq98res(b,m,ni,v,rl,ier,istop,ca,cb,dd,namefunc)
-         integer,intent(in) :: m
-         integer,intent(inout)::ni,ier,istop
-         double precision,dimension(m*(m+3)/2),intent(out)::v
-         double precision,intent(out)::rl
-         double precision,dimension(m),intent(inout)::b	
-	 double precision,intent(inout)::ca,cb,dd 
-         double precision,external::namefunc
-      end subroutine marq98res    
-        
-      subroutine deriva(b,m,v,rl,namefunc)
-        integer,intent(in)::m
-        double precision,intent(inout)::rl
-        double precision,dimension(m),intent(in)::b
-        double precision,dimension((m*(m+3)/2)),intent(out)::v    
-        double precision,external::namefunc   
-      end subroutine deriva
-      
-      subroutine searpas(vw,step,b,bh,m,delta,fim,namefunc)
-        integer,intent(in)::m      
-        double precision,dimension(m),intent(in)::b
-        double precision,dimension(m),intent(inout)::bh,delta
-        double precision,intent(inout)::vw,fim,step  
-        double precision,external::namefunc
-      end subroutine searpas
-      
-      subroutine dmfsd(a,n,eps,ier)
-        integer,intent(in)::n
-        integer,intent(inout)::ier
-        double precision,intent(inout)::eps 
-        double precision,dimension(n*(n+1)/2),intent(inout)::A      
-      end subroutine dmfsd
-   
-      subroutine valfpa(vw,fi,b,bk,m,delta,namefunc)
-        integer,intent(in)::m  
-	double precision,intent(in)::vw
-        double precision,dimension(m),intent(in)::b,delta  
-        double precision,dimension(m),intent(out)::bk 
-        double precision,intent(out)::fi
-        double precision,external::namefunc  
-      end subroutine valfpa
-      
-     subroutine dmaxtres(maxt,delta,m)
-       integer,intent(in)::m
-       double precision,dimension(m),intent(in)::delta 
-       double precision,intent(out)::maxt
-     end subroutine dmaxtres              	                 
-      end interface verif  
+      interface verifres
+		subroutine marq98res(b,m,ni,v,rl,ier,istop,ca,cb,dd,namefunc)
+		integer,intent(in) :: m
+		integer,intent(inout)::ni,ier,istop
+		double precision,dimension(m*(m+3)/2),intent(out)::v
+		double precision,intent(out)::rl
+		double precision,dimension(m),intent(inout)::b	
+		double precision,intent(inout)::ca,cb,dd 
+		double precision,external::namefunc
+		end subroutine marq98res    
+		
+		subroutine deriva(b,m,v,rl,namefunc)
+		integer,intent(in)::m
+		double precision,intent(inout)::rl
+		double precision,dimension(m),intent(in)::b
+		double precision,dimension((m*(m+3)/2)),intent(out)::v    
+		double precision,external::namefunc   
+		end subroutine deriva
+		
+		subroutine searpas(vw,step,b,bh,m,delta,fim,namefunc)
+		integer,intent(in)::m      
+		double precision,dimension(m),intent(in)::b
+		double precision,dimension(m),intent(inout)::bh,delta
+		double precision,intent(inout)::vw,fim,step  
+		double precision,external::namefunc
+		end subroutine searpas
+		
+		subroutine dmfsd(a,n,eps,ier)
+		integer,intent(in)::n
+		integer,intent(inout)::ier
+		double precision,intent(inout)::eps 
+		double precision,dimension(n*(n+1)/2),intent(inout)::A      
+		end subroutine dmfsd
+		
+		subroutine valfpa(vw,fi,b,bk,m,delta,namefunc)
+		integer,intent(in)::m  
+		double precision,intent(in)::vw
+		double precision,dimension(m),intent(in)::b,delta  
+		double precision,dimension(m),intent(out)::bk 
+		double precision,intent(out)::fi
+		double precision,external::namefunc  
+		end subroutine valfpa
 
-      interface veriff
-      subroutine dsinv(A,N,EPS,IER,DET)
-        integer,intent(in)::n
-        integer,intent(inout)::ier
-        double precision,intent(inout)::eps      
-        double precision,intent(inout),optional::det     
-        double precision,dimension(n*(n+1)/2),intent(inout)::A  
-      end subroutine dsinv 
-      
-      subroutine dchole(a,k,nq,idpos)
-      integer,intent(in)::k,nq
-      integer,intent(inout)::idpos
-      double precision,dimension(k*(k+3)/2),intent(inout)::a      
-      end subroutine dchole    
-      end interface veriff
-                              
-      end module type
+		subroutine dmaxtres(maxt,delta,m)
+		integer,intent(in)::m
+		double precision,dimension(m),intent(in)::delta 
+		double precision,intent(out)::maxt
+		end subroutine dmaxtres
+      end interface verifres  
+
+      interface veriffres
+		subroutine dsinv(A,N,EPS,IER,DET)
+		integer,intent(in)::n
+		integer,intent(inout)::ier
+		double precision,intent(inout)::eps      
+		double precision,intent(inout),optional::det     
+		double precision,dimension(n*(n+1)/2),intent(inout)::A  
+		end subroutine dsinv 
+		
+		subroutine dchole(a,k,nq,idpos)
+		integer,intent(in)::k,nq
+		integer,intent(inout)::idpos
+		double precision,dimension(k*(k+3)/2),intent(inout)::a      
+		end subroutine dchole    
+      end interface veriffres
+
+      end module typeres
 
 
       module optimres
 
       implicit none
 ! -Interface permettant la verification des type des arguments      
-      interface verif   
+      interface verifres 
         module procedure marq98res,deriva,searpas,dmfsd,valfpa
-      end interface verif
+      end interface verifres
       
-      interface veriff
+      interface veriffres
         module procedure dsinv,dchole,dmaxtres
-      end interface veriff
+      end interface veriffres
 
       CONTAINS
 !-------------------------------------------------------------

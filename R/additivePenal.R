@@ -232,6 +232,9 @@ if((all.equal(length(hazard),1)==T)==T){
     else newTerms <- Terms
     X <- model.matrix(newTerms, m)
     assign <- lapply(attrassign(X, newTerms)[-1], function(x) x - 1)
+    Xlevels <- .getXlevels(newTerms, m)
+    contr.save <- attr(X, 'contrasts')
+
 	if(length(vec.factor) > 0){
 #========================================>
 		position <- unlist(assign,use.names=F)
@@ -510,8 +513,8 @@ if((all.equal(length(hazard),1)==T)==T){
 # 	fit$frailty.var2 <- ans$frailty.var2	
 # 	fit$frailty.cov <- ans$frailty.cov
 	fit$linear.pred <- ans$linear.pred  
-##    
-     
+##
+
 #AD
     if(ans$ier==2000)
         stop("The cross validation procedure cannot be finished. Try to change 
@@ -543,6 +546,8 @@ if((all.equal(length(hazard),1)==T)==T){
 #===============================================	
 
 
+if (length(Xlevels) >0)fit$Xlevels <- Xlevels
+    fit$contrasts <- contr.save
 
     class(fit) <- "additivePenal"
     fit

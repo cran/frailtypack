@@ -74,7 +74,7 @@
       double precision,dimension(k*(k+3)/2),intent(inout)::a      
       end subroutine dcholej     
       end interface verif2
-                              
+
       end module type
 !-----------------------------------------------------------
 ! Derniere mis a jour : 09/02/2011

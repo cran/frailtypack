@@ -96,19 +96,16 @@
 	dut1(ndate) = (4.d0*the1(i-1)/h1)
 	dut2(ndate) = (4.d0*the2(i-1)/h1)
 
-
+	
 !-------------------------------------------------------
 !--------- calcul de la vraisemblance ------------------
 !--------------------------------------------------------
 
 !--- avec ou sans variable explicative  ------cc
-
-	do k=1,ng
-		res1(k) = 0.d0
-		res2(k) = 0.d0
-		res3(k) = 0.d0
-		cpt(k) = 0
-	end do
+	res1= 0.d0
+	res2= 0.d0
+	res3= 0.d0
+	cpt = 0
 
 !*******************************************     
 !---- sans effet aleatoire dans le modele
@@ -119,7 +116,7 @@
 			cpt(g(i))=cpt(g(i))+1
 			
 			if(nva.gt.0)then
-				vet = 0.d0   
+				vet = 0.d0
 				do j=1,nva
 					vet =vet + bh(np-nva+j)*dble(ve(i,j))
 				end do

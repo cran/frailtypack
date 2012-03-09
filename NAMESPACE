@@ -6,7 +6,6 @@ survival,
 slope,
 subcluster,
 terminal,
-event2,
 Cmeasures
 )
 import("survival","boot")

@@ -167,6 +167,8 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 \item{global_chisq.test}{a binary variable equals to 0 when no multivariate Wald is given, 1 otherwise.}
 \item{p.global_chisq}{a vector with the p_values for each global multivariate Wald test.}
 \item{names.factor}{Names of the "as.factor" variables.}
+\item{Xlevels}{vector of the values that factor might have taken.}
+\item{contrasts}{type of contrast for factor variable.}
 }
 
 \note{
@@ -180,8 +182,8 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 
 
 \references{ 
-V. Rondeau, Y. Mazroui and J. R. Gonzalez. Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation.
-\emph{Journal of Statistical Software, In press}, 2012.
+V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametrical estimation.
+\emph{Journal of Statistical Software} \bold{47}, 1-28.
 
 V. Rondeau, S. Michiels, B. Liquet, and J. P. Pignon (2008).
 
