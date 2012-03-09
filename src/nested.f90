@@ -19,8 +19,8 @@
 	subroutine nested(ns0,ng0,nssgbyg0,nst0,nz0,ax1,ax2,tt00,tt10,ic0,groupe0, &
 	ssgroupe0,nva0,str0,vax0,AG0,noVar,maxiter0,irep1,np,maxngg,b,H_hessOut,HIHOut,resOut, &
 	LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt,ni, &
-	cpt,ier,k0,ddl,istop,shape_weib,scale_weib,mt1,ziOut,time, &
-	Res_martingale,frailtypred,frailtypredg,frailtyvar,frailtyvarg,frailtysd,frailtysdg,linearpred)
+	cpt,ier,k0,ddl,istop,shapeweib,scaleweib,mt1,ziOut,time, &
+	Resmartingale,frailtypred,frailtypredg,frailtyvar,frailtyvarg,frailtysd,frailtysdg,linearpred)
 
 	use tailles
 	use parameters
@@ -66,18 +66,17 @@
 	double precision:: bgpe,bssgpe
 	double precision ::trace,trace1,trace2
 	double precision,dimension(2)::auxkappa
-	double precision,dimension(2,2)::H_hess0
 !AD:add
-	double precision,dimension(2),intent(out)::LCV,shape_weib,scale_weib
-	double precision::ca,cb,dd,funcpan_splines,funcpan_cpm,funcpan_weib
-	external::funcpan_splines,funcpan_cpm,funcpan_weib
+	double precision,dimension(2),intent(out)::LCV,shapeweib,scaleweib
+	double precision::ca,cb,dd,funcpansplines,funcpancpm,funcpanweib
+	external::funcpansplines,funcpancpm,funcpanweib
 !Cpm
 	integer::typeof0,nbintervR0,equidistant,ent,indd
 	double precision::temp
 	double precision,dimension(nbintervR0+1)::time
 !cpm	
 !predictor
-	double precision,dimension(ng0),intent(out)::Res_martingale,frailtypred,frailtysd,frailtyvar
+	double precision,dimension(ng0),intent(out)::Resmartingale,frailtypred,frailtysd,frailtyvar
 	double precision,external::funcpanres
 	double precision,dimension(ns0),intent(out)::linearpred
 	double precision,dimension(1,nva0)::coefBeta
@@ -88,7 +87,7 @@
 
 	istopp = 0
 	indic_cumul=0
-	Res_martingale=0.d0
+	Resmartingale=0.d0
 	frailtypred=0.d0
 	frailtyvar=0.d0
 	frailtysd=0.d0
@@ -106,7 +105,7 @@
 	maxiter=maxiter0
 	epsa=1.d-3
 	epsb=1.d-3
-	epsd=1.d-3
+	epsd=1.d-2
 	ca=0.d0
 	cb=0.d0
 	dd=0.d0	
@@ -117,8 +116,8 @@
 	if (typeof == 1) then
 		nbintervR = nbintervR0
 	end if	
-	shape_weib = 0.d0
-	scale_weib = 0.d0
+	shapeweib = 0.d0
+	scaleweib = 0.d0
 	
 	nsujetmax=ns0 
 	nsujet=ns0  
@@ -479,10 +478,12 @@
 	npmax=np
 
 !===== Allocation
-	allocate(v(np*(np+3)/2),I1_hess(np,np),H1_hess(np,np),I2_hess(np,np) &
+	allocate(I1_hess(np,np),H1_hess(np,np),I2_hess(np,np) &
 	,H2_hess(np,np),HI1(np,np),HI2(np,np),HIH(np,np),IH(np,np),HI(np,np) &
-	,y(np,np),I_hess(np,np),H_hess(np,np),Hspl_hess(np,np),hess(np,np)) 
+	,y(np,np),Hspl_hess(np,np)) 
 
+
+	
 	b=3.d-1
 
 !***********************************************************
@@ -568,9 +569,10 @@
 		deallocate(t2)
 !------- FIN RECHERCHE DES NOEUDS	
 	end if		
-		
+	
 	
 	if(typeof == 0) then	
+		allocate(hess(n,n),I_hess(n,n),H_hess(n,n),v(n*(n+3)/2))
 		if(irep1.eq.1)then   !pas recherche du parametre de lissage
 			xmin1 = dsqrt(xmin1)
 			auxi = estimvN(xmin1,n,b,y,ddl,ni,res)
@@ -646,14 +648,16 @@
 			effet=0
 			auxkappa(1)=xmin1*xmin1
 			auxkappa(2)=0.d0
-			call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines)
+			call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpansplines)
+			
 			if (istop .ne. 1) then
 				istopp(1)=1
 				goto 1000
 			end if
 		endif 
+		
 	end if 
-			
+
 	nva=nvacross ! pour la recherche des parametres de regression
 	nst=nstcross ! avec stratification si n�cessaire
 	effet=effetcross ! avec effet initial
@@ -662,9 +666,9 @@
 		stra(l)=stracross(l) !r�tablissement stratification
 	end do
 
-	if (typeof .ne. 0) then
-		allocate(vvv((npmax*(npmax+1)/2)))	
-	end if
+! 	if (typeof .ne. 0) then
+! 		allocate(vvv((npmax*(npmax+1)/2)))	
+! 	end if
 	
 	if (typeof == 0) then 
 		k0(1) = xmin1*xmin1
@@ -702,15 +706,21 @@
 
 	select case(typeof)
 		case(0)
+			deallocate(hess,I_hess,H_hess,v)
 			np = nst*n + nva
-			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
+			allocate(hess(np,np),I_hess(np,np),H_hess(np,np),v(np*(np+3)/2))
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpansplines) 
 		case(1)
 			np = nst*nbintervR + nva
-			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
+			allocate(hess(np,np),I_hess(np,np),H_hess(np,np),v(np*(np+3)/2),vvv(np*(np+1)/2))
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpancpm) 
 		case(2)
 			np = nst*2 + nva
-			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
+			allocate(hess(np,np),I_hess(np,np),H_hess(np,np),v(np*(np+3)/2),vvv(np*(np+1)/2))
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpanweib) 
+			
 	end select
+
 !	write(*,*)'istop ==========>',istop,' np ',np	
 	if (istop .ne. 1) then
 		istopp(2)=1
@@ -727,18 +737,24 @@
 !	b(np-nva)=0.1d0
 	b(np-nva)=0.5d0
 	effet=1
-
+	deallocate(hess,I_hess,H_hess,v)
 	select case(typeof)
 		case(0)
 			np = nst*n + nva + effet
-			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
+			allocate(hess(np,np),I_hess(np,np),H_hess(np,np),v(np*(np+3)/2))
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpansplines) 
 		case(1)
 			np = nst*nbintervR + nva + effet
-			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
+			deallocate(vvv)
+			allocate(hess(np,np),I_hess(np,np),H_hess(np,np),v(np*(np+3)/2),vvv(np*(np+1)/2))
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpancpm) 
 		case(2)
 			np = nst*2 + nva + effet
-			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
+			deallocate(vvv)
+			allocate(hess(np,np),I_hess(np,np),H_hess(np,np),v(np*(np+3)/2),vvv(np*(np+1)/2))
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpanweib) 
 	end select
+
 !	write(*,*)'istop ==========>',istop,' np ',np
 	if (istop .ne. 1) then
 		istopp(3)=1
@@ -785,7 +801,6 @@
 	
 	indic_cumul=1
 	allocate(mij(ng0,nssgmax),aux1(ngexact,nssgmax),aux2(ngexact,nssgmax),cumulhaz1(ngmax,nssgmax))
-	
 
 	effet=1
 	ngaux=ngexact
@@ -793,11 +808,11 @@
 	b(np-nva)=0.5d0
 	select case(typeof)
 		case(0)
-			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpansplines) 
 		case(1)
-			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpancpm) 
 		case(2)
-			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
+			call marq98j(k0,b(1:np),np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpanweib) 
 	end select
 
 !	write(*,*)'istop ==========>',istop,' np ',np 
@@ -830,13 +845,19 @@
 
 !	write(*,*)'np ',np
 !	write(*,*)'b ',b
+	deallocate(hess,I_hess,H_hess,v)
+	allocate(hess(np,np),I_hess(np,np),H_hess(np,np),v(np*(np+3)/2))
 	select case(typeof)
 		case(0)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines) 
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpansplines) 
 		case(1)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_cpm) 
+			deallocate(vvv)
+			allocate(vvv(np*(np+1)/2))
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpancpm) 
 		case(2)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_weib) 
+			deallocate(vvv)
+			allocate(vvv(np*(np+1)/2))
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpanweib) 
 	end select
 
 !	write(*,*)'istop ==========>',istop,' np ',np
@@ -966,28 +987,28 @@
 
 	select case(typeof)
 		case(0)
-			call distancen_splines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
+			call distancensplines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 		case(1)
-			call distance_cpm(b,nbintervR*nst,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+			call distancecpm(b,nbintervR*nst,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
 		case(2)
 			if (nst == 1) then
 				typeof2 = 1
 			else
 				typeof2 = 2
 			end if
-			call distance_weib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)		
+			call distanceweib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)		
 	end select
 
 	if (nst == 1) then
-		scale_weib(1) = betaR
-		shape_weib(1) = etaR
-		scale_weib(2) = 0.d0
-		shape_weib(2) = 0.d0
+		scaleweib(1) = betaR
+		shapeweib(1) = etaR
+		scaleweib(2) = 0.d0
+		shapeweib(2) = 0.d0
 	else
-		scale_weib(1) = betaR
-		shape_weib(1) = etaR
-		scale_weib(2) = betaD
-		shape_weib(2) = etaD
+		scaleweib(1) = betaR
+		shapeweib(1) = etaR
+		scaleweib(2) = betaD
+		shapeweib(2) = etaD
 	end if	
 
 !AD:add LCV
@@ -1009,52 +1030,46 @@
 !AD:end	
 
 
-	
-!---------------------Calcul residus de martingal
-!	write(*,*)'----- Calcul residus de martingal -----'
-	
-	allocate(vuu(2))
-	
-	do i=1,2
-		coefBeta(1,i)=b(np-nva-effet+i)
-	end do
-
-	Xbeta = matmul(coefBeta,transpose(ve))	
-	
-	vuu = b((np-nva-effet+1):(np-nva))
-	
-	H_hess0=0.d0
-	H_hess0(1,1)=H_hess(np-nva-1,np-nva-1)
-	H_hess0(2,2)=H_hess(np-nva,np-nva)	
-	deallocate(I_hess,H_hess)
-	
-
-	Call Residus_Martingalen(funcpanres,Res_martingale,frailtypred,maxngg,frailtypredg,&
-	frailtyvar,frailtyvarg,frailtysd,frailtysdg)
-	
-	do i=1,nsujet
-!		linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
-		linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i))*frailtypredg(g(i),ssg(i,g(i))))	
-	end do
-
-	deallocate(vuu)
 
 	
 1000    continue
 
-!	write(*,*) '====== apres residud Martingale ========'
+	
 
-		
-	if((istopp(4) == 1).or.(istopp(5) == 1)) then
-		Res_martingale=0.d0
-		frailtypred=0.d0
-		linearpred=0.d0	
+
+	linearpred=0.d0
+	Resmartingale=0.d0
+	frailtypred=0.d0
+	frailtypredg=0.d0
+	frailtyvar=0.d0
+	frailtyvarg=0.d0
+	frailtysd=0.d0
+	frailtysdg=0.d0	
+!---------------------Calcul residus de martingal
+!	write(*,*),'=========================================='
+!	write(*,*),'=============== Martingale =============',nva
+!	write(*,*),'====================================='
+
+	if(nva .gt. 0) then
+		do i=1,2
+			coefBeta(1,i)=b(np-nva-effet+i)
+		end do
+	
+		Xbeta = matmul(coefBeta,transpose(ve))	
+
+		Call ResidusMartingalen(funcpanres,Resmartingale,frailtypred,maxngg,frailtypredg,&
+		frailtyvar,frailtyvarg,frailtysd,frailtysdg)
+	
+		do i=1,nsujet
+			linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i))*frailtypredg(g(i),ssg(i,g(i))))	
+		end do
 	end if
+
 	if((istopp(2)== 0).and.(istopp(3)== 0)) then
 		deallocate(mij,aux1,aux2,cumulhaz1)
 	end if
 
-	deallocate(H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI,y,Hspl_hess,hess,gaux,gnew,aux) 
+	deallocate(H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI,y,Hspl_hess,hess,gaux,gnew,aux,H_hess,I_hess) 
 	deallocate(date,t0,t1,c,stra,stracross,g,ssg,nig,mid,ve,vax,filtre,v,I1_hess,n_ssgbygrp)	
 
 	if (typeof == 0) then	
@@ -1766,8 +1781,8 @@
 	double precision,dimension(2)::k0
 	double precision,dimension(-2:npmax)::the
 	integer::n,ij,i,k,j,vj,ier,istop,ni
-	double precision::ca,cb,dd,funcpan_splines
-	external::funcpan_splines
+	double precision::ca,cb,dd,funcpansplines
+	external::funcpansplines
 	ca=0.d0
 	cb=0.d0
 	dd=0.d0      
@@ -1776,7 +1791,7 @@
 	k0(1) = k00*k00
 	k0(2)=0.d0
 	
-	call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpan_splines)
+	call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpansplines)
 !AD:	
 	if (istop.eq.4) goto 50
 !AD:	

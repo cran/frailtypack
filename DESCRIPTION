@@ -1,20 +1,18 @@
 Package: frailtypack
-Version: 2.2-21
-Date: 2012-02-02
+Version: 2.2-22
+Date: 2012-03-09
 Title: General Frailty models using a semi_parametrical penalized
         likelihood estimation or a parametrical estimation
-Author: Juan R. Gonzalez, Virginie Rondeau
-        <Virginie.Rondeau@isped.u-bordeaux2.fr>,Yassin Mazroui
-        <Yassin.Mazroui@isped.u-bordeaux2.fr> and Amadou Diakite
-        <Amadou.Diakite@isped.u-bordeaux2.fr>
+Author: Juan R. Gonzalez, Virginie Rondeau, Yassin Mazroui, Audrey
+        Mauguen and Amadou Diakite
 Maintainer: Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr>
-Depends: survival
+Depends: survival, boot
 LazyLoad: yes
 Description: Frailtypack now fits several classes of frailty models
         using a penalized likelihood estimation on the hazard function
         but also a parametrical estimation. 1) A shared gamma frailty
         model and Cox proportional hazard model. Left truncated,
-        censored data and strata (max=2) are allowed.  Clustered and
+        censored data and strata (max=2) are allowed. Clustered and
         recurrent survival times can be studied (the
         Andersen-Gill(1982) approach has been implemented for recurrent
         events). An automatic choice of the smoothing parameter is
@@ -24,10 +22,13 @@ Description: Frailtypack now fits several classes of frailty models
         slope). 3) Nested frailty models for hierarchically clustered
         data (with 2 levels of clustering) by including two iid gamma
         random effects. 4) Joint frailty models in the context of joint
-        modelling of recurrent events with terminal event.
-License: GPL (>= 2.0.0)
+        modelling of recurrent events with terminal event. Prediction
+        values are available. The package includes concordance measures
+        for Cox proportional hazards models and for shared frailty
+        models.
+License: GPL (>= 2.0)
 URL: http://www.r-project.org
 Encoding: latin1
 Repository: CRAN
-Date/Publication: 2012-02-06 12:18:56
-Packaged: 2012-02-06 13:30:43 UTC; ad6
+Date/Publication: 2012-03-13 14:57:18
+Packaged: 2012-03-13 17:33:55 UTC; ad6

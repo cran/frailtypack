@@ -1,7 +1,7 @@
 !=============================================================================
 !                       CALCUL DES RESIDUS de MARTINGALES Shared
 !=============================================================================
-	subroutine Residus_Martingale(b,np,names_func_res,Res_martingale,frailtypred,frailtyvar,frailtysd)
+	subroutine ResidusMartingale(b,np,namesfuncres,Resmartingale,frailtypred,frailtyvar,frailtysd)
 
 	use residusM
 	use optim
@@ -10,9 +10,9 @@
 	implicit none
 	
 	integer::np
-	double precision,external::names_func_res
+	double precision,external::namesfuncres
 	double precision,dimension(np),intent(in)::b	
-	double precision,dimension(ng),intent(out)::Res_martingale
+	double precision,dimension(ng),intent(out)::Resmartingale
 	double precision,dimension(ng),intent(out)::frailtypred,frailtysd,frailtyvar
 
 	
@@ -29,7 +29,7 @@
 		
 		post_SD(indg)=dsqrt((nig(indg)+1/(b(np-nva)*b(np-nva)))/((cumulhaz(indg)+1/(b(np-nva)*b(np-nva)))**2))
 		
-		Res_martingale(indg)=nig(indg)-(post_esp(indg))*cumulhaz(indg)
+		Resmartingale(indg)=nig(indg)-(post_esp(indg))*cumulhaz(indg)
 		
 		frailtypred(indg) = post_esp(indg)
 		
@@ -39,27 +39,27 @@
 	end do
 
 	
-	end subroutine Residus_Martingale
+	end subroutine ResidusMartingale
 	
 
 !=============================================================================
 !                       CALCUL DES RESIDUS de MARTINGALES Joint
 !=============================================================================
 		
-	subroutine Residus_Martingalej(b,np,names_func_res,Res_martingale,Res_martingaledc,&
+	subroutine ResidusMartingalej(b,np,namesfuncres,Resmartingale,Resmartingaledc,&
 	frailtypred,frailtyvar)
 
 	use residusM
-	use optim2
+	use optimres
 	use comon
 
 	implicit none
 	
 	integer::np
-	double precision,external::names_func_res
+	double precision,external::namesfuncres
 	double precision,dimension(np),intent(in)::b
 	double precision,dimension(np)::bint
-	double precision,dimension(ng),intent(out)::Res_martingale,Res_martingaledc
+	double precision,dimension(ng),intent(out)::Resmartingale,Resmartingaledc
 	double precision,dimension(ng),intent(out)::frailtypred,frailtyvar	
 	
 	bint=b
@@ -71,13 +71,13 @@
 	do indg=1,ng
 
 		vuu=0.9d0
-		call marq98(vuu,1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,names_func_res)
+		call marq98res(vuu,1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
 		ResidusRec(indg)=Nrec(indg)-((vuu(1)*vuu(1)))*Rrec(indg)
 		Residusdc(indg)=Ndc(indg)-((vuu(1)*vuu(1))**alpha)*Rdc(indg)
 		vecuiRes(indg) = vuu(1)*vuu(1)
 		
-		Res_martingale(indg) = ResidusRec(indg)
-		Res_martingaledc(indg) = Residusdc(indg)
+		Resmartingale(indg) = ResidusRec(indg)
+		Resmartingaledc(indg) = Residusdc(indg)
 
 		frailtypred(indg) = vecuiRes(indg)
 
@@ -85,25 +85,25 @@
 		
 	end do	
 	
-	end subroutine Residus_Martingalej	
+	end subroutine ResidusMartingalej	
 
 !=============================================================================
 !                       CALCUL DES RESIDUS de MARTINGALES Nested
 !=============================================================================
 	
-	subroutine Residus_Martingalen(names_func_res,Res_martingale,frailtypred,maxng,frailtypredg,&
+	subroutine ResidusMartingalen(namesfuncres,Resmartingale,frailtypred,maxng,frailtypredg,&
 	frailtyvar,frailtyvarg,frailtysd,frailtysdg)
 
 	use residusM
-	use optim2
-	use comon,only:alpha,eta,H_hess,I_hess
+	use optimres
+	use comon,only:alpha,eta
 	use commun
 
 	implicit none
 	
 	integer::i,j,maxng
-	double precision,external::names_func_res	
-	double precision,dimension(ngexact),intent(out)::Res_martingale
+	double precision,external::namesfuncres	
+	double precision,dimension(ngexact),intent(out)::Resmartingale
 	double precision,dimension(ngexact),intent(out)::frailtypred,frailtysd,frailtyvar
 	double precision,dimension(ngexact,maxng),intent(out)::frailtypredg,frailtysdg,frailtyvarg
 	double precision,dimension(:),allocatable::vuuu
@@ -112,18 +112,16 @@
 	cares=0.d0
 	cbres=0.d0
 	ddres=0.d0
-	
-	Res_martingale = mid 
+	Resmartingale = mid 
 
 	do indg=1,ngexact 
 		allocate(H_hess0(n_ssgbygrp(indg)+1,n_ssgbygrp(indg)+1))
 		
-		allocate(vuuu(n_ssgbygrp(indg)+1),vres((n_ssgbygrp(indg)+1)*((n_ssgbygrp(indg)+1)+3)/2),&
-		I_hess((n_ssgbygrp(indg)+1),(n_ssgbygrp(indg)+1)),H_hess((n_ssgbygrp(indg)+1),(n_ssgbygrp(indg)+1)))
-		
+		allocate(vuuu(n_ssgbygrp(indg)+1),vres((n_ssgbygrp(indg)+1)*((n_ssgbygrp(indg)+1)+3)/2))
+
 		vuuu=0.9d0
 		
-		call marq98(vuuu,(n_ssgbygrp(indg)+1),nires,vres,rlres,ierres,istopres,cares,cbres,ddres,names_func_res)
+		call marq98res(vuuu,(n_ssgbygrp(indg)+1),nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
 
  		do i=1,n_ssgbygrp(indg)+1
  			do j=i,n_ssgbygrp(indg)+1
@@ -137,7 +135,7 @@
 		end do
 		
 		do i=1,n_ssgbygrp(indg)
-			Res_martingale(indg) = Res_martingale(indg) - ((vuuu(1)*vuuu(1+i))**2)*cumulhaz1(indg,i)
+			Resmartingale(indg) = Resmartingale(indg) - ((vuuu(1)*vuuu(1+i))**2)*cumulhaz1(indg,i)
 			frailtypredg(indg,i) = vuuu(1+i)**2
 		end do
 	
@@ -158,10 +156,10 @@
 			frailtysd(indg) = 0.d0
 			frailtyvar(indg) = 0.d0 
 		end if
-		deallocate(vuuu,vres,I_hess,H_hess,H_hess0)
+		deallocate(vuuu,vres,H_hess0)!,I_hess,H_hess)
 	end do
 	
-	end subroutine Residus_Martingalen
+	end subroutine ResidusMartingalen
 	
 
 
@@ -169,45 +167,42 @@
 !                       CALCUL DES RESIDUS de MARTINGALES Additive
 !=============================================================================
 	
-	subroutine Residus_Martingalea(b,np,names_func_res,Res_martingale,frailtypred,frailtyvar,frailtysd,&
+	subroutine ResidusMartingalea(b,np,namesfuncres,Resmartingale,frailtypred,frailtyvar,frailtysd,&
 	frailtypred2,frailtyvar2,frailtysd2,frailtycov)
 
 	use parameters
-	use residusM
-	use optim2
-	use optim
-	use comon,only:alpha,eta,nst,nig,nsujet,g,stra,nt1,nva,ve,H_hess
+	use residusM,only:indg,cumulhaz
+	use optimres
+	use comon,only:alpha,eta,nst,nig,nsujet,g,stra,nt1,nva,ve,typeof!,H_hess
 	use additiv,only:ve2,ngexact,ut1,ut2,mid
 
 	implicit none
 	
-	integer::np,k,ip,i,j
-	double precision::vet
+	integer::np,k,ip,i,j,ier,istop,ni
+	double precision::vet,ca,cb,dd,rl
 	double precision,dimension(np),intent(in)::b
-	double precision,external::names_func_res	
-	double precision,dimension(ngexact),intent(out)::Res_martingale
+	double precision,external::namesfuncres	
+	double precision,dimension(ngexact),intent(out)::Resmartingale
 	double precision,dimension(ngexact),intent(out)::frailtypred,frailtysd,frailtyvar,frailtycov
 	double precision,dimension(ngexact),intent(out)::frailtypred2,frailtysd2,frailtyvar2
 	double precision,dimension(2,2)::H_hess0
-	
-	cares=0.d0
-	cbres=0.d0
-	ddres=0.d0
+	double precision,dimension(2)::vu
+	double precision,dimension(2*(2+3)/2)::v
+
 	vet=0.d0
 	H_hess0=0.d0
 	
-	Res_martingale = mid
-
+	Resmartingale = mid
 
 	do indg = 1,ngexact
 
-		vuu=0.9d0
-		vres=0.d0
-		effetres=0
-		call marq98(vuu,2,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,names_func_res)
+		vu=0.0d0
+		v=0.d0
+		call marq98res(vu,2,ni,v,rl,ier,istop,ca,cb,dd,namesfuncres)
+
  		do i=1,2
  			do j=i,2
- 				H_hess0(i,j)=vres((j-1)*j/2+i)
+ 				H_hess0(i,j)=v((j-1)*j/2+i)
  			end do
  		end do
  		H_hess0(2,1) = H_hess0(1,2)
@@ -225,20 +220,29 @@
 			else
 				vet=1.d0
 			endif
-			if(g(k) == indg)then	
-				if(stra(k).eq.1)then
-					Res_martingale(indg) = Res_martingale(indg) - ut1(nt1(k)) * dexp(vuu(1) + vuu(2) * ve2(k,1) + dlog(vet))
+			if(typeof==0) then
+				if(g(k) == indg)then	
+					if(stra(k).eq.1)then
+						Resmartingale(indg) = Resmartingale(indg) - ut1(nt1(k)) * &
+							dexp(vu(1) + vu(2) * ve2(k,1) + dlog(vet))
+					end if
+					if(stra(k).eq.2)then
+						Resmartingale(indg) = Resmartingale(indg) - ut2(nt1(k)) * dexp(vu(1) &
+						+ vu(2) * ve2(k,1) + dlog(vet))
+					end if
 				end if
-				if(stra(k).eq.2)then
-					Res_martingale(indg) = Res_martingale(indg) - ut2(nt1(k)) * dexp(vuu(1) + vuu(2) * ve2(k,1) + dlog(vet))
+			else
+				if(g(k) == indg)then	
+					Resmartingale(indg) = Resmartingale(indg) - cumulhaz(g(k)) * &
+					dexp(vu(1) + vu(2) * ve2(k,1) + dlog(vet))
 				end if
 			end if
 		end do
 	
-		frailtypred(indg) = vuu(1)
-		frailtypred2(indg) = vuu(2)
+		frailtypred(indg) = vu(1)
+		frailtypred2(indg) = vu(2)
 
-		if(istopres==1) then
+		if(istop==1) then
 			frailtyvar(indg) = H_hess0(1,1)
 			frailtysd(indg) = dsqrt(H_hess0(1,1))
 			
@@ -255,6 +259,6 @@
 			frailtycov(indg) = 0.d0
 		end if
 	end do
-	
-	end subroutine Residus_Martingalea
+
+	end subroutine ResidusMartingalea
 	

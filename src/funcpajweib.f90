@@ -1,7 +1,7 @@
 
 !!!!_____________________________________________________
 !========================          FUNCPA NEW         ====================
-	double precision function funcpaj_weib(b,np,id,thi,jd,thj,k0)
+	double precision function funcpajweib(b,np,id,thi,jd,thj,k0)
 	
 	use tailles
 	use comon
@@ -97,23 +97,26 @@
 			
 			res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet) 
 			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-				funcpaj_weib=-1.d9
+				funcpajweib=-1.d9
+			!	print*,'ok 1'
 				goto 123
 			end if	
 		endif  
 !     nouvelle version
 		res1(g(i)) = res1(g(i))+((t1(i)/etaR)**betaR)*vet 
  		if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-			funcpaj_weib=-1.d9
+			funcpajweib=-1.d9
+			!print*,'ok 2'
 			goto 123
 		end if	         
 !     modification pour nouvelle vraisemblance / troncature:
 		res3(g(i)) = res3(g(i))+((t0(i)/etaR)**betaR)*vet
 		if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-			funcpaj_weib=-1.d9
+			funcpajweib=-1.d9
+			!print*,'ok 3'
 			goto 123
 		end if	
-	!	write(*,*)'***res2',res3(g(i)),vet,i,g(i) 
+	!	write(*,*)'***res3',res3(g(i)),vet,i,g(i) 
 	end do
 	 
 !           stop
@@ -134,7 +137,8 @@
 		if(cdc(k).eq.1)then
 			res2dc(k) = (betaD-1.d0)*dlog(t1dc(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet2) 
 			if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
-				funcpaj_weib=-1.d9
+				funcpajweib=-1.d9
+			!	print*,'ok 4'
 				goto 123
 			end if	
 		endif 
@@ -142,7 +146,8 @@
 ! pour le calcul des integrales / pour la survie, pas les donn�es recurrentes:
 		aux1(k)=((t1dc(k)/etaD)**betaD)*vet2
 		if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
-			funcpaj_weib=-1.d9
+			funcpajweib=-1.d9
+			!print*,'ok 5'
 			goto 123
 		end if		
 	end do
@@ -176,7 +181,8 @@
 				+ dlog(integrale3(k)) 
 			endif
 			if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-				funcpaj_weib=-1.d9
+				funcpajweib=-1.d9
+			!	print*,k,'ok 6',gammaJ(1./theta),theta,dlog(integrale3(k))
 				goto 123
 			end if	
 		endif 
@@ -185,15 +191,16 @@
 !---------- calcul de la penalisation -------------------
 	
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		funcpaj_weib =-1.d9
+		funcpajweib =-1.d9
 		Rrec = 0.d0
 		Nrec = 0.d0
 		Rdc = 0.d0
 		Ndc = 0.d0
+		!print*,'ok 7'
 		goto 123
 
 	else
-		funcpaj_weib = res 
+		funcpajweib = res 
 		
 		do k=1,ng
 			Rrec(k)=res1(k)
@@ -208,6 +215,6 @@
 
 	return
 		
-	end function funcpaj_weib
+	end function funcpajweib
 	
 !=================================================================================================

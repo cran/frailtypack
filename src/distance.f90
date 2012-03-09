@@ -1,5 +1,5 @@
 
-	subroutine distance_cpm(b,m,mt,xR1,moyLamR1,xSu1,moysuR1,xR2,moyLamR2,xSu2,moysuR2)
+	subroutine distancecpm(b,m,mt,xR1,moyLamR1,xSu1,moysuR1,xR2,moyLamR2,xSu2,moysuR2)
 	
 	use tailles
 	use comon,only:cens,vvv,t0,t1,c,nsujet,nva,nva1,nva2,nst,nbrecu,nbintervR,ttt,date
@@ -430,14 +430,14 @@
 		end do
 	end if
 
-	end subroutine distance_cpm
+	end subroutine distancecpm
 
 !=========================================================================================================
 !=========================================================================================================	
 !=========================================================================================================
 !=========================================================================================================
 
-	subroutine distance_weib(b,m,mt,xR1,moyLamR1,xSu1,moysuR1,xR2,moyLamR2,xSu2,moysuR2)
+	subroutine distanceweib(b,m,mt,xR1,moyLamR1,xSu1,moysuR1,xR2,moyLamR2,xSu2,moysuR2)
 	
 	use tailles
 	use comon,only:cens,vvv,t0,t1,c,nsujet &
@@ -717,11 +717,11 @@
 	end do
 		
 
-	end subroutine distance_weib
+	end subroutine distanceweib
 
 
 !====================================================================
-	subroutine distancej_cpm(b,m,mt1,mt2,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC)
+	subroutine distancejcpm(b,m,mt1,mt2,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC)
 	
 	use tailles
 	use comon,only:cens,vvv,t0,t1,t0dc,t1dc,c,cdc,nsujet, &
@@ -1172,10 +1172,10 @@
 
 	end do
 
-	end subroutine distancej_cpm
+	end subroutine distancejcpm
 
 
-	subroutine distanceJ_weib(b,m,mt1,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC)
+	subroutine distanceJweib(b,m,mt1,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC)
 	
 	use tailles
 	use comon,only:cens,vvv,t0,t1,t0dc,t1dc,c,cdc,nsujet &
@@ -1349,6 +1349,6 @@
 		moyLamDC = 0.d0
 		moysuDC = 0.d0
 	end if
-	end subroutine distanceJ_weib
+	end subroutine distanceJweib
 	
 

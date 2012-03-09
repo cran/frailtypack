@@ -21,11 +21,11 @@
 	coef <- x$coef
 	nvar <- length(x$coef)
  
-	if (is.null(coef))
-	{
-		x$varH<-matrix(x$varH) 
-		x$varHIH<-matrix(x$varHIH)
-	}
+#	if (is.null(coef))
+#	{
+#		x$varH<-matrix(x$varH) 
+#		x$varHIH<-matrix(x$varHIH)
+#	}
 #AD:     
 	if (x$typeof == 0){	 
 		if (x$n.knots.temp < 4){

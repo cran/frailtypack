@@ -84,8 +84,8 @@
 	,tt0dc0,tt1dc0,icdc0,nva10,vax0,nva20,vaxdc0,noVar1,noVar2,maxit0   &
 	,np,b,H_hessOut,HIHOut,resOut,LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out &
 	,typeof0,equidistant,nbintervR0,nbintervDC0,mt1,mt2 &
-	,ni,cpt,cpt_dc,ier,istop,shape_weib,scale_weib,mt11,mt12 &
-	,Res_martingale,Res_martingaledc,frailtypred,frailtyvar,linearpred,linearpreddc,ziOut,time,timedc)
+	,ni,cpt,cpt_dc,ier,istop,shapeweib,scaleweib,mt11,mt12 &
+	,Resmartingale,Resmartingaledc,frailtypred,frailtyvar,linearpred,linearpreddc,ziOut,time,timedc)
 !AD: add for new marq    
 	use parameters	
 !AD:end
@@ -120,7 +120,7 @@
 	double precision,dimension(mt12,3)::su2Out
 	integer::ss,sss
 	double precision,dimension(np):: b
-	double precision,dimension(2),intent(out)::LCV,shape_weib,scale_weib
+	double precision,dimension(2),intent(out)::LCV,shapeweib,scaleweib
 	
 	integer,intent(in)::noVar1,noVar2
 	integer,intent(out)::cpt,cpt_dc,ier,ni
@@ -132,14 +132,14 @@
 	double precision,dimension(2)::res01
 !AD: add for new marq
 	double precision::ca,cb,dd
-	double precision,external::funcpaj_splines,funcpaj_cpm,funcpaj_weib
+	double precision,external::funcpajsplines,funcpajcpm,funcpajweib
 	double precision,dimension(100)::xSu1,xSu2
 !cpm
 	integer::indd,ent,entdc,typeof0
 	double precision::temp	
 	integer::nbintervR0,nbintervDC0	
 !predictor
-	double precision,dimension(ng0),intent(out)::Res_martingale,Res_martingaledc,frailtypred,frailtyvar
+	double precision,dimension(ng0),intent(out)::Resmartingale,Resmartingaledc,frailtypred,frailtyvar
 	double precision,external::funcpajres
 	double precision,dimension(nsujet0),intent(out)::linearpred
 	double precision,dimension(ng0),intent(out)::linearpreddc
@@ -184,8 +184,8 @@
 	allocate(nig(ngmax),cdc(ngmax),t0dc(ngmax),t1dc(ngmax),aux1(ngmax),aux2(ngmax) &
 	,res1(ngmax),res4(ngmax),res3(ngmax),mi(ngmax))
 	
-	shape_weib = 0.d0
-	scale_weib = 0.d0	
+	shapeweib = 0.d0
+	scaleweib = 0.d0	
 	nsujetmax=nsujet0
 	nsujet=nsujet0	    
 	allocate(t0(nsujetmax),t1(nsujetmax),c(nsujetmax),stra(nsujetmax),g(nsujetmax),aux(2*nsujetmax))
@@ -730,12 +730,12 @@
 
 	select case(typeof)
 		case(0)
-			call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaj_splines)
+			call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines)
 		case(1)
 			allocate(betacoef(nbintervR+nbintervDC))
-			call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaj_cpm)
+			call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajcpm)
 		case(2)
-			call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaj_weib)
+			call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajweib)
 	end select
 	
 	if (typeof .ne. 0) then
@@ -763,23 +763,23 @@
 
 	select case(typeof)
 		case(0)
-			call distanceJ_splines(nz1,nz2,b,mt1,mt2,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
+			call distanceJsplines(nz1,nz2,b,mt1,mt2,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 		case(1)
-			Call distanceJ_cpm(b,nbintervR+nbintervDC,mt1,mt2,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+			Call distanceJcpm(b,nbintervR+nbintervDC,mt1,mt2,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
 		case(2)
-			Call distanceJ_weib(b,np,mt1,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+			Call distanceJweib(b,np,mt1,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
 	end select
 	
 	if (nst == 1) then
-		scale_weib(1) = betaR
-		shape_weib(1) = etaR
-		scale_weib(2) = 0.d0
-		shape_weib(2) = 0.d0
+		scaleweib(1) = betaR
+		shapeweib(1) = etaR
+		scaleweib(2) = 0.d0
+		shapeweib(2) = 0.d0
 	else
-		scale_weib(1) = betaR
-		shape_weib(1) = etaR
-		scale_weib(2) = betaD
-		shape_weib(2) = etaD
+		scaleweib(1) = betaR
+		shapeweib(1) = etaR
+		scaleweib(2) = betaD
+		shapeweib(2) = etaD
 	end if
 		
 	do ss=1,npmax
@@ -836,7 +836,7 @@
 		allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1))	
 		effetres = effet	
 
-		Call Residus_Martingalej(b,np,funcpajres,Res_martingale,Res_martingaledc,frailtypred,frailtyvar)
+		Call ResidusMartingalej(b,np,funcpajres,Resmartingale,Resmartingaledc,frailtypred,frailtyvar)
 
 		do i=1,nsujet
 			linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
@@ -849,8 +849,8 @@
 		deallocate(I_hess,H_hess,vres,vecuiRes)
 	else
 		deallocate(I_hess,H_hess)
-		Res_martingale=0.d0
-		Res_martingaledc=0.d0
+		Resmartingale=0.d0
+		Resmartingaledc=0.d0
 		frailtypred=0.d0
 		linearpred=0.d0
 		linearpreddc=0.d0
@@ -1668,7 +1668,11 @@
 	func3J = (nig(auxig)+ alpha*cdc(auxig)+ 1./theta-1.)*dlog(frail) &
 		- frail*(res1(auxig)-res3(auxig)) &!res3=0 si AG=0
 		- (frail**alpha)*(aux1(auxig))- frail/theta
-
+	
+! 	if(auxig==1) then
+! 		 print*,nig(auxig),alpha,cdc(auxig),+ theta,frail,res1(auxig),res3(auxig),aux1(auxig)
+! 		 print*,'func3J',func3J
+! 	end if
 	
 	func3J = exp(func3J)
 	

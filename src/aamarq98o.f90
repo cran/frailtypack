@@ -4,7 +4,7 @@
 !
 
  	
-	subroutine marq98o(b,m,ni,v,rl,ier,istop,fct_names)
+	subroutine marq98o(b,m,ni,v,rl,ier,istop,fctnames)
 	
 	use tailles
 	use optim
@@ -20,7 +20,7 @@
 	double precision,dimension(m)::b,delta,bh,b1
 	double precision,dimension(2)::zero
 	double precision::maxtadd
-	double precision,external::fct_names
+	double precision,external::fctnames
 	
 	zero(1)=0.d0
 	zero(2)=0.d0
@@ -49,11 +49,11 @@
 		
 	z=0.d0
 	i0=0 	
-	rl=fct_names(b,m,i0,z,i0,z)
+	rl=fctnames(b,m,i0,z,i0,z)
 !	write(*,*)'iter',ni,'vrais',rl1
 	rl1=rl 
 	
-	call derivao(b,m,v,rl,fct_names)
+	call derivao(b,m,v,rl,fctnames)
 	
 	dd = 0.d0
 	do i=m*(m+1)/2+1,m*(m+3)/2
@@ -124,7 +124,7 @@
 				b1(i)=b(i)+delta(i)
 			end do
 	
-			rl=fct_names(b1,m,id,z,jd,z)
+			rl=fctnames(b1,m,id,z,jd,z)
 			
 			igrad=1
 			
@@ -150,7 +150,7 @@
 
 		step=dlog(1.5d0)
 		
-		call searpaso(vw,step,b,bh,m,delta,fi,fct_names) 
+		call searpaso(vw,step,b,bh,m,delta,fi,fctnames) 
 		
 		rl=-fi
 		
@@ -201,51 +201,9 @@
 	
 	end subroutine marq98o
 	     
-!=================================DERIVAAUX =======================
-	
-!	subroutine derivao(b,m,v,rl,fct_names)
-		
-!	integer ::i0,iun,m,m1,ll,i,k,j
-!	double precision :: thn,th,z,rl,vl
-!	double precision :: th2
-!	double precision ,dimension(m):: fcith
-!	double precision ,dimension(m):: b
-!	double precision , dimension(m*(m+3)/2)::V
-!	double precision,external::fct_names
-!	
-!	th=1.d-5
-!	thn=-th
-!	th2=th*th
-!	z=0.d0
-!	i0=0
-!	iun =1
-!	
-!	rl=fct_names(b,m,iun,z,iun,z)
-!	
-!	do i=1,m
-!		fcith(i)=fct_names(b,m,i,th,i0,z)
-!	end do
-!	
-!	k=0
-!	m1=m*(m+1)/2
-!	ll=m1
-!	
-!	do i=1,m
-!		ll=ll+1
-!	vl=(fcith(i)-fct_names(b,m,i,thn,i0,z))/(2.d0*th)
-!		v(ll)=vl
-!		do  j=1,i
-!			k=k+1
-!			v(k)=-(fct_names(b,m,i,th,j,th)-fcith(j)-fcith(i)+rl)/th2 
-!		end do
-!	end do
-!	
-!	return
-!		
-!	end subroutine derivao
 
 
-	subroutine derivao(b,m,v,rl,fct_names)
+	subroutine derivao(b,m,v,rl,fctnames)
 
 	implicit none
 	
@@ -255,8 +213,8 @@
 	double precision,dimension((m*(m+3)/2)),intent(out)::v     
 	double precision,dimension(m)::fcith
 	integer ::i0,m1,ll,i,k,j,iun
-	double precision::fct_names,thn,th,z,vl,th2,vaux  
-	external::fct_names
+	double precision::fctnames,thn,th,z,vl,th2,vaux  
+	external::fctnames
 
 	th=5.d-3
 	
@@ -266,13 +224,13 @@
 	i0=0
 	iun =1
 
-	rl=fct_names(b,m,iun,z,iun,z)
+	rl=fctnames(b,m,iun,z,iun,z)
         if(rl.eq.-1.d9) then
             rl=-1.d9
             goto 123
         end if	
 	do i=1,m
-		fcith(i)=fct_names(b,m,i,th,i0,z)
+		fcith(i)=fctnames(b,m,i,th,i0,z)
                 if(fcith(i).eq.-1.d9) then
                     rl=-1.d9
                     goto 123
@@ -285,7 +243,7 @@
 !	
 	do i=1,m
 		ll=ll+1
-		vaux=fct_names(b,m,i,thn,i0,z)
+		vaux=fctnames(b,m,i,thn,i0,z)
                 if(vaux.eq.-1.d9) then
                     rl=-1.d9
                     goto 123
@@ -294,7 +252,7 @@
 		v(ll)=vl
 		do j=1,i
 			k=k+1
-			v(k)=-(fct_names(b,m,i,th,j,th)-fcith(j)-fcith(i)+rl)/th2
+			v(k)=-(fctnames(b,m,i,th,j,th)-fcith(j)-fcith(i)+rl)/th2
 		end do
 	end do
       
@@ -305,7 +263,7 @@
 
 !================================  SEARPAS joly    ==============================
 
-	subroutine searpaso(vw,step,b,bh,m,delta,fim,fct_names)
+	subroutine searpaso(vw,step,b,bh,m,delta,fim,fctnames)
 	
 	implicit none
 	
@@ -315,13 +273,13 @@
 	double precision,dimension(m)::bh,delta    
 	double precision::fim,step   
 	double precision::vlw,vlw1,vlw2,vlw3,vm,fi1,fi2,fi3    
-	double precision,external::fct_names
+	double precision,external::fctnames
 
 	
 	vlw1=dlog(vw)
 	vlw2=vlw1+step
-	call valfpao(vlw1,fi1,b,bh,m,delta,fct_names)
-	call valfpao(vlw2,fi2,b,bh,m,delta,fct_names)       
+	call valfpao(vlw1,fi1,b,bh,m,delta,fctnames)
+	call valfpao(vlw2,fi2,b,bh,m,delta,fctnames)       
 	
 	if(fi2.ge.fi1) then
 		vlw3=vlw2
@@ -331,7 +289,7 @@
 		step=-step
 	
 		vlw1=vlw2+step
-		call valfpao(vlw1,fi1,b,bh,m,delta,fct_names)   
+		call valfpao(vlw1,fi1,b,bh,m,delta,fctnames)   
 		if(fi1.gt.fi2) goto 50
 	else 
 		vlw=vlw1
@@ -349,7 +307,7 @@
 		fi2=fi1
 	
 		vlw1=vlw2+step
-		call valfpao(vlw1,fi1,b,bh,m,delta,fct_names)
+		call valfpao(vlw1,fi1,b,bh,m,delta,fctnames)
 		if(fi1.gt.fi2) goto 50
 		if(fi1.eq.fi2) then
 		fim=fi2
@@ -361,7 +319,7 @@
 50     continue
 	
 	vm=vlw2-step*(fi1-fi3)/(2.d0*(fi1-2.d0*fi2+fi3))   
-	call valfpao(vm,fim,b,bh,m,delta,fct_names)	
+	call valfpao(vm,fim,b,bh,m,delta,fctnames)	
 	if(fim.le.fi2) goto 100
 	vm=vlw2
 	fim=fi2
@@ -375,7 +333,7 @@
    
 !========================   VALFPAAUX   ============================== 
        
-	subroutine valfpao(vw,fi,b,bk,m,delta,fct_names)
+	subroutine valfpao(vw,fi,b,bk,m,delta,fctnames)
 	
 	implicit none
 	
@@ -385,14 +343,14 @@
 	double precision::fi 
 	double precision::vw,z	
 	integer::i0,i
-	double precision,external::fct_names
+	double precision,external::fctnames
 	
 	z=0.d0
 	i0=1
 	do i=1,m
 	bk(i)=b(i)+dexp(vw)*delta(i)
 	end do
-	fi=-fct_names(bk,m,i0,z,i0,z)
+	fi=-fctnames(bk,m,i0,z,i0,z)
 	
 	return
 		

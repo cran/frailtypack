@@ -11,9 +11,9 @@
 \method{print}{frailtyPenal}(x, digits = max(options()$digits - 4, 6), ...)
 }
 \arguments{
-  \item{x}{the result of a call to the frailtyPenal function}
-  \item{digits}{number of digits to print}
-  \item{\dots}{ other unusued arguments }
+  \item{x}{the result of a call to the frailtyPenal function.}
+  \item{digits}{number of digits to print.}
+  \item{\dots}{other unusued arguments.}
 }
 \value{
  

@@ -20,8 +20,8 @@
 	subroutine additive(ns0,ng0,nst0,nz0,xmin10,xmin20,tt00,tt10,ic0,groupe0,nva0, &
 	str0,vax0,interaction,ag0,noVar,maxiter0,irep10,correl0,np,b,coef,varcoef,varcoef2, &
 	rhoEnd,covEnd,varcovEnd,varSigma2,varTau2,ni,res,LCV,k0,x1Out,lamOut,xSu1,suOut,x2Out, &
-	lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt,ier,ddl,istop,shape_weib,scale_weib,mt1,trunc,ziOut,time,&
-	Res_martingale,frailtypred,frailtypred2,frailtyvar,frailtyvar2,frailtycov,linearpred)
+	lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt,ier,ddl,istop,shapeweib,scaleweib,mt1,trunc,ziOut,time,&
+	Resmartingale,frailtypred,frailtypred2,frailtyvar,frailtyvar2,frailtycov,linearpred)
 
 	use parameters		
 	use tailles
@@ -62,10 +62,10 @@
 	double precision,dimension(mt1,3)::suOut,su2Out
 	double precision,dimension(mt1)::xSu1,xSu2
 !AD: add traceLCV	
-	double precision,dimension(2),intent(out)::LCV,shape_weib,scale_weib
+	double precision,dimension(2),intent(out)::LCV,shapeweib,scaleweib
 !AD: add for new marq
-	double precision::ca,cb,dd,funcpaa_splines,funcpaa_cpm,funcpaa_weib
-	external::funcpaa_splines,funcpaa_cpm,funcpaa_weib
+	double precision::ca,cb,dd,funcpaasplines,funcpaacpm,funcpaaweib
+	external::funcpaasplines,funcpaacpm,funcpaaweib
 
 !Cpm
 	integer::typeof0,nbintervR0,equidistant,ent,indd
@@ -74,16 +74,17 @@
 	integer,dimension(3)::istopp
 	double precision,dimension(ng0)::frailtysd,frailtysd2
 !predictor
-	double precision,dimension(ng0),intent(out)::Res_martingale,frailtypred,frailtypred2,frailtyvar,&
+	double precision,dimension(ng0),intent(out)::Resmartingale,frailtypred,frailtypred2,frailtyvar,&
 	frailtyvar2,frailtycov
 	double precision,external::funcpaares
 	double precision,dimension(ns0),intent(out)::linearpred
 	double precision,dimension(1,ns0)::XBeta1
 	double precision,dimension(1,nva0)::Xcoef
-	double precision,dimension(2,2)::Hess0,sigma
+	double precision,dimension(2,2)::sigma
 
 	
 !cpm
+	indic_cumul=0
 	istopp=0
 	ca=0.d0
 	cb=0.d0
@@ -101,8 +102,8 @@
 	if (typeof .ne. 0) then
 		nbintervR = nbintervR0
 	end if	
-	shape_weib = 0.d0
-	scale_weib = 0.d0
+	shapeweib = 0.d0
+	scaleweib = 0.d0
 	auxng=0
 	maxiter=maxiter0
 !----------------
@@ -139,7 +140,7 @@
 	ngmax=ng
 	allocate(nig(ngmax),mid(ngmax))	
 
-	allocate(cumulhaz(ngmax))
+
 	allocate(cumulhaz1(ngmax,2))
 
 !-----------------------------------------------------------------------------------------
@@ -637,7 +638,7 @@
 
 			auxkappa(1)=xmin1*xmin1
 			auxkappa(2)=0.d0
-			call marq98J(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)
+			call marq98J(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaasplines)
 			if (istop .ne. 1) then
 				istopp(1)=1
 				goto 1000
@@ -679,23 +680,24 @@
 	effet=0
 
 !	write(*,*)'===avant marq98==========',n,np,nva,nst,effet
+	indic_cumul=1
+	allocate(cumulhaz(ngmax))
 
-!	write(*,*)' ============> marq 1 typeof :',typeof
 	select case(typeof)
 		case(0)
 			np = nst*n + nva
 			b(nst*n+1)=-0.15d0 !initialisation traitementc
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaasplines)
 		case(1)
 			np = nst*nbintervR + nva
 			b(nst*nbintervR+1)=-0.15d0
 			allocate(betacoef(nst*nbintervR))
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_cpm)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaacpm)
 			
 		case(2)
 			np = nst*2 + nva
 			b(nst*2+1)=-0.15d0
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_weib)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaaweib)
 	end select
 	if (istop .ne. 1) then
 		istopp(2)=1
@@ -726,13 +728,14 @@
 	
 !	write(*,*)' ============> marq2 typeof :',typeof
 !	write(*,*)'effet ',effet,' correl ',correl
+	indic_cumul=0
 	select case(typeof)
 		case(0)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaasplines)
 		case(1)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_cpm)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaacpm)
 		case(2)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_weib)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaaweib)
 	end select
 
 !	write(*,*)'fin marquardt'
@@ -893,28 +896,28 @@
 !	write(*,*)'===========> avant distance <==========='
 	select case(typeof)
 		case(0)
-			call distancea_splines(nz1,nz2,b,effet,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
+			call distanceasplines(nz1,nz2,b,effet,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 		case(1)
-			Call distance_cpm(b,nst*nbintervR,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+			Call distancecpm(b,nst*nbintervR,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
 		case(2)
 			if (nst == 1) then
 				typeof2 = 1
 			else
 				typeof2 = 2
 			end if
-			Call distance_weib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+			Call distanceweib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
 	end select
 !	write(*,*)'===========> apres distance <==========='
 	if (nst == 1) then
-		scale_weib(1) = betaR
-		shape_weib(1) = etaR
-		scale_weib(2) = 0.d0
-		shape_weib(2) = 0.d0
+		scaleweib(1) = betaR
+		shapeweib(1) = etaR
+		scaleweib(2) = 0.d0
+		shapeweib(2) = 0.d0
 	else
-		scale_weib(1) = betaR
-		shape_weib(1) = etaR
-		scale_weib(2) = betaD
-		shape_weib(2) = etaD
+		scaleweib(1) = betaR
+		shapeweib(1) = etaR
+		scaleweib(2) = betaD
+		shapeweib(2) = etaD
 	end if	
 !AD:add LCV
 !     calcul de la trace, pour le LCV (likelihood cross validation)
@@ -936,96 +939,67 @@
 1000    continue
 	trunc = indic_tronc
 
-	allocate(Xbeta(1,ns0),invsigma(2,2))
-	sigma(1,1)=b(np-nva-1)**2!varSigma2(1)
-	sigma(2,2)=b(np-nva)**2!varTau2(1)	
-	if (correl == 1) then
-		sigma(1,2)=dsqrt(sigma(1,1))*dsqrt(sigma(2,2))*rhoEnd
-	else
-		sigma(1,2)=0.d0
-	end if
-	sigma(2,1)=sigma(1,2)
+	Resmartingale=0.d0
+	frailtypred=0.d0
+	frailtyvar=0.d0
+	frailtysd=0.d0
+	frailtypred2=0.d0
+	frailtyvar2=0.d0
+	frailtysd2=0.d0
+	frailtycov=0.d0	
 
-!	write(*,*)'matrice  a inverser: sigma'
-!	do i= 1,2
-!		write(*,*)(sigma(i,j),j=1,2)
-!	end do
-	
-	detsigma=sigma(1,1)*sigma(2,2)-sigma(1,2)**2
-	invsigma(1,1)=sigma(2,2)
-	invsigma(2,2)=sigma(1,1)
-	invsigma(1,2)=-sigma(1,2)
-	invsigma(2,1)=-sigma(2,1)
-		
-!	write(*,*)'matrice inverse sigma'
-	do i= 1,2
-		do j=1,2
-			invsigma(i,j)= 1.d0/detsigma*invsigma(i,j)
-		end do
-!		write(*,*)(invsigma(i,j),j=1,2)
-	end do
-	
-!	write(*,*)'test ====> 1'
-	if(typeof==0) then
+	if(nva .gt. 0) then
+!		write(*,*)'========= Call martingale =========='
+		allocate(Xbeta(1,ns0),invsigma(2,2))
+		sigma(1,1)=b(np-nva-1)**2
+		sigma(2,2)=b(np-nva)**2	
 
-		if((istopp(1)==0).and.(istopp(2)==0).and.(istopp(3)==0)) then
-!calcul residus martingale 
-			allocate(vuu(2))
+		if (correl == 1) then
+			sigma(1,2)=dsqrt(sigma(1,1))*dsqrt(sigma(2,2))*rhoEnd
+		else
+			sigma(1,2)=0.d0
+		end if
+		sigma(2,1)=sigma(1,2)
 
-			Xcoef(1,:) = coef
-			Xbeta1 = matmul(Xcoef,transpose(ve))		
+		detsigma=sigma(1,1)*sigma(2,2)-sigma(1,2)**2
+		invsigma(1,1)=sigma(2,2)
+		invsigma(2,2)=sigma(1,1)
+		invsigma(1,2)=-sigma(1,2)
+		invsigma(2,1)=-sigma(2,1)
 
-			Hess0=H_hess((np-nva-effet+1):(np-nva),(np-nva-effet+1):(np-nva))
-			deallocate(I_hess,H_hess)
-			allocate(vres((2*(2+3)/2)),I_hess(2,2),H_hess(2,2))	
-			
-!			write(*,*)'=========== Residu Martingale ==========='
-			Call Residus_Martingalea(b,np,funcpaares,Res_martingale,frailtypred,frailtyvar,frailtysd,&
-			frailtypred2,frailtyvar2,frailtysd2,frailtycov)
-!			write(*,*)'=========== Fin Residu Martingale ==========='
-			do i=1,nsujet
-				linearpred(i)=Xbeta1(1,i) + frailtypred(g(i)) + frailtypred2(g(i)) * ve2(i,1)
+		do i= 1,2
+			do j=1,2
+				invsigma(i,j)= 1.d0/detsigma*invsigma(i,j)
 			end do
+		end do
 		
-			deallocate(vres,vuu)
-		endif
+		Xcoef(1,:) = coef
+		Xbeta1 = matmul(Xcoef,transpose(ve))		
 
+		Call ResidusMartingalea(b,np,funcpaares,Resmartingale,frailtypred,frailtyvar,frailtysd,&
+		frailtypred2,frailtyvar2,frailtysd2,frailtycov)
+
+		do i=1,nsujet
+			linearpred(i)=Xbeta1(1,i) + frailtypred(g(i)) + frailtypred2(g(i)) * ve2(i,1)
+		end do
+	end if
+
+!	write(*,*)'<======== Fin ========> 1'
+	if(typeof==0) then
 		deallocate(mm3,mm2,mm1,mm,im3,im2,im1,im,dut1,dut2,ut1,ut2)
 		deallocate(zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m)
 	else
-!calcul residus martingale
-		if((istopp(2)==0).and.(istopp(3)==0)) then
-		!calcul residus martingale 
-			allocate(vuu(2))
-
-			Xcoef(1,:) = coef
-			Xbeta1 = matmul(Xcoef,transpose(ve))	
-
-			Hess0=H_hess((np-nva-effet+1):(np-nva),(np-nva-effet+1):(np-nva))
-			deallocate(I_hess,H_hess)
-			allocate(vres((2*(2+3)/2)),I_hess(2,2),H_hess(2,2))	
-			
-			Call Residus_Martingalea(b,np,funcpaares,Res_martingale,frailtypred,frailtyvar,frailtysd,&
-			frailtypred2,frailtyvar2,frailtysd2,frailtycov)
-			
-			do i=1,nsujet
-				linearpred(i)=Xbeta1(1,i) + frailtypred(g(i)) + frailtypred2(g(i)) * ve2(i,1)
-			end do
-			deallocate(vres,vuu)
-		endif	
-		
-		if (typeof == 1) then
-			deallocate(ttt,betacoef)	
-		end if	
-
 		deallocate(vvv,kkapa)
+		if (typeof == 1) then
+			deallocate(ttt,betacoef)
+		end if
 	end if
-!	write(*,*)'<======== Fin ========> 1'
-	deallocate(cumulhaz,cumulhaz1,som_Xbeta)
+
+	deallocate(cumulhaz1,som_Xbeta)
 
 	deallocate(XBeta,invsigma,b_temp)
 
-	deallocate(t0,t1,c,nt0,nt1,stra,g,stracross,aux,invd,nig,mid,date,ve,ve2,betaaux,vax)	
+	deallocate(t0,t1,c,nt0,nt1,stra,g,stracross,aux,invd,nig,mid,date,ve,ve2,betaaux,vax,cumulhaz)	
 	deallocate(I_hess,H_hess,Hspl_hess,hess,PEN_deri,y,v,I1_hess,H1_hess,I2_hess,H2_hess, &
 	HI1,HI2,HIH,IH,HI)
 	
@@ -1781,8 +1755,8 @@
 	double precision::res,k00,som,h1,aux
 	double precision,dimension(2)::k0
 	integer n,ij,i,k,j,vj,ier,istop,ni
-	double precision::ca,cb,dd,funcpaa_splines
-	external::funcpaa_splines
+	double precision::ca,cb,dd,funcpaasplines
+	external::funcpaasplines
 	
 	ca=0.d0
 	cb=0.d0
@@ -1792,7 +1766,7 @@
 	k0(1) = k00*k00
 	k0(2)=0.d0
 	
-	call marq98J(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaa_splines)	
+	call marq98J(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaasplines)	
 !AD:	
 	if (istop.eq.4) goto 50
 !AD:		
