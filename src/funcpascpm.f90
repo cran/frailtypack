@@ -1,12 +1,14 @@
 
 
 !========================          FUNCPA_CPM          ====================
-	double precision function funcpas_cpm(b,np,id,thi,jd,thj,k0)
+	double precision function funcpascpm(b,np,id,thi,jd,thj,k0)
+	
 	use tailles
 	use comon,only:t0,t1,c,nsujet,nva, &
 	nst,stra,ve,effet,ng,g,nig,AG,nbintervR, &
         ttt,alpha,betacoef,kkapa,theta
         use residusM
+	
 	implicit none
 	
 ! *** NOUVELLLE DECLARATION F90 :
@@ -24,12 +26,9 @@
 	j=0
 	theta=0.d0
 
-	do i=1,np
-		bh(i)=b(i)
-	end do 
+	bh=b
 
 	if (id.ne.0) bh(id)=bh(id)+thi
-	
 	if (jd.ne.0) bh(jd)=bh(jd)+thj    
 	
 	betacoef = 0.d0
@@ -91,7 +90,7 @@
 				end do !!
 			endif
 	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpas_cpm=-1.d9
+                          funcpascpm=-1.d9
                           goto 123
                        end if
 !!cccccccccccccccccccccc
@@ -126,7 +125,7 @@
 					end if
 				end do!!
 			       if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-		                  funcpas_cpm=-1.d9
+		                  funcpascpm=-1.d9
 		                  goto 123
 		               end if
 			endif
@@ -163,7 +162,7 @@
 					end if
 				end do
 			       if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-		                  funcpas_cpm=-1.d9
+		                  funcpascpm=-1.d9
 		                  goto 123
 		               end if	
 			endif
@@ -221,7 +220,7 @@
 				end do !!
 			endif  
 			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-				funcpas_cpm=-1.d9
+				funcpascpm=-1.d9
 				goto 123
 			end if
 			
@@ -261,7 +260,7 @@
 				end do
 			endif
 	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpas_cpm=-1.d9
+                          funcpascpm=-1.d9
                           goto 123
                        end if
 ! modification pour nouvelle vraisemblance / troncature:
@@ -303,7 +302,7 @@
 	
 			endif
 	               if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-                          funcpas_cpm=-1.d9
+                          funcpascpm=-1.d9
                           goto 123
                        end if		
 		end do 
@@ -355,7 +354,7 @@
 					endif
 				endif 
 			       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		                  funcpas_cpm=-1.d9
+		                  funcpascpm=-1.d9
 		                  goto 123
 		               end if
 			endif 
@@ -365,11 +364,11 @@
 
 !--------- calcul de la penalisation -------------------
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		funcpas_cpm=-1.d9
+		funcpascpm=-1.d9
 		goto 123
 	end if
 
-	funcpas_cpm = res 
+	funcpascpm = res 
 
 	do k=1,ng
 		cumulhaz(k)=res1(k)
@@ -379,7 +378,7 @@
 
 	return
 
-	end function funcpas_cpm
+	end function funcpascpm
 
 
 !====================================================================

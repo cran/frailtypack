@@ -93,7 +93,7 @@
 		
 		if (x$noVar1 == 1){
 			cat("\n")
-			cat("    Shared Gamma Frailty model: No covariates \n")
+			cat("    Nested Frailty model: No covariates \n")
 			cat("    -------------------------- \n")
 			cat("\n")
 		}

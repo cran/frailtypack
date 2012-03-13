@@ -5,7 +5,7 @@
 	nzAux,ax1,ax2,tt0Aux,tt1Aux,icAux,groupeAux,nvaAux,strAux,vaxAux, &
 	AGAux,noVar,maxitAux,irep1,np,b,H_hessOut,HIHOut,resOut,LCV, &
 	x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt, &	
-	ni,cpt,ier,k0,ddl,istop,shape_weib,scale_weib,mt1,ziOut,Res_martingale,martingaleCox,&
+	ni,cpt,ier,k0,ddl,istop,shapeweib,scaleweib,mt1,ziOut,Resmartingale,martingaleCox,&
 	frailtypred,frailtyvar,frailtysd,linearpred,time)
 
 
@@ -51,16 +51,16 @@
 	xmin1,xmin2
 	double precision,dimension(np,np)::y  
 !AD:add
-	double precision,dimension(2),intent(out)::LCV,shape_weib,scale_weib
-	double precision::ca,cb,dd,funcpas_splines,funcpas_cpm,funcpas_weib
-	external::funcpas_splines,funcpas_cpm,funcpas_weib
+	double precision,dimension(2),intent(out)::LCV,shapeweib,scaleweib
+	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib
+	external::funcpassplines,funcpascpm,funcpasweib
 !AD:	
 !Cpm
 	integer::typeof0,nbintervR0,equidistant,ent,indd
 	double precision::temp
 !predictor
-	double precision,dimension(ngAux),intent(out)::Res_martingale,frailtypred,frailtysd,frailtyvar
-	double precision,external::funcpas_res
+	double precision,dimension(ngAux),intent(out)::Resmartingale,frailtypred,frailtysd,frailtyvar
+	double precision,external::funcpasres
 	double precision,dimension(nsujetAux),intent(out)::linearpred,martingaleCox
 	double precision,dimension(1,nvaAux)::coefBeta
 	double precision,dimension(1,nsujetAux)::XBeta
@@ -86,8 +86,8 @@
 	if (typeof .ne. 0) then
 		nbintervR = nbintervR0
 	end if	
-	shape_weib = 0.d0
-	scale_weib = 0.d0
+	shapeweib = 0.d0
+	scaleweib = 0.d0
 
 	NSUJETMAX=nsujetAux
 	allocate(t0(nsujetmax),t1(nsujetmax),c(nsujetmax),stra(nsujetmax),g(nsujetmax))
@@ -167,7 +167,6 @@
 		nva=nvaAux  
 	end if  
 
-	
 	ver=nvaAux
 	nvarmax=ver
 	allocate(ve(nsujetmax,nvarmax))
@@ -631,7 +630,7 @@
 			auxkappa(2)=0.d0
 	
 
-			call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_splines)
+			call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
 	
 			if (istop.ne.1) then
 				istopp(1)=1
@@ -674,16 +673,16 @@
 	if (typeof .ne. 0) then
 		allocate(kkapa(2))
 	end if
-	
+
 	select case(typeof)
 		case(0)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_splines)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
 		case(1)
 			allocate(betacoef(nst*nbintervR))
 			
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_cpm)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm)
 		case(2)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_weib)
+			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib)
 	end select
 
 	if (typeof .ne. 0) then
@@ -730,26 +729,26 @@
 
 	select case(typeof)
 		case(0)
-			call distances_splines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
+			call distancessplines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 		case(1)
-			Call distance_cpm(b,nbintervR*nst,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+			Call distancecpm(b,nbintervR*nst,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
 		case(2)
 			typeof2 = 1
-			Call distance_weib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)		
+			Call distanceweib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)		
 	end select
 
 	resOut=res
 	
 	if (nst == 1) then
-		scale_weib(1) = betaR
-		shape_weib(1) = etaR
-		scale_weib(2) = 0.d0
-		shape_weib(2) = 0.d0
+		scaleweib(1) = betaR
+		shapeweib(1) = etaR
+		scaleweib(2) = 0.d0
+		shapeweib(2) = 0.d0
 	else
-		scale_weib(1) = betaR
-		shape_weib(1) = etaR
-		scale_weib(2) = betaD
-		shape_weib(2) = etaD
+		scaleweib(1) = betaR
+		shapeweib(1) = etaR
+		scaleweib(2) = betaD
+		shapeweib(2) = etaD
 	end if
 
 !AD:add LCV
@@ -792,9 +791,8 @@
 
 
 !---------------------Calcul residus de martingal
-!	write(*,*)'----- Calcul residus de martingal -----'
-	
-	coefBeta(1,:)=b((np-nva+effet):np)
+
+	coefBeta(1,:)=b((np-nva+1):np)
 
 	Xbeta = matmul(coefBeta,transpose(ve))
 	
@@ -807,9 +805,9 @@
 			effetres = effet
 
 			if (effet == 1) then
-				Call Residus_Martingale(b,np,funcpas_res,Res_martingale,frailtypred,frailtyvar,frailtysd)
+				Call ResidusMartingale(b,np,funcpasres,Resmartingale,frailtypred,frailtyvar,frailtysd)
 			else
-				Res_martingale=0.d0
+				Resmartingale=0.d0
 				frailtypred=0.d0
 				frailtyvar=0.d0
 				frailtysd=0.d0
@@ -827,7 +825,7 @@
 			deallocate(I_hess,H_hess,vres,vecuiRes,post_esp,post_SD)
 		else
 			deallocate(I_hess,H_hess)
-			Res_martingale=0.d0
+			Resmartingale=0.d0
 			frailtypred=0.d0
 			linearpred=0.d0
 			martingaleCox=0.d0
@@ -842,9 +840,9 @@
 			effetres = effet	
 	
 			if (effet == 1) then
-				Call Residus_Martingale(b,np,funcpas_res,Res_martingale,frailtypred,frailtyvar,frailtysd)
+				Call ResidusMartingale(b,np,funcpasres,Resmartingale,frailtypred,frailtyvar,frailtysd)
 			else
-				Res_martingale=0.d0
+				Resmartingale=0.d0
 				frailtypred=0.d0
 				frailtyvar=0.d0
 				frailtysd=0.d0
@@ -862,7 +860,7 @@
 			deallocate(I_hess,H_hess,vres,vecuiRes,post_esp,post_SD)
 		else
 			deallocate(I_hess,H_hess)
-			Res_martingale=0.d0
+			Resmartingale=0.d0
 			frailtypred=0.d0
 			linearpred=0.d0
 			martingaleCox=0.d0
@@ -1647,8 +1645,8 @@
 	double precision::res,k00,som,h1
 	double precision::aux
 	integer::n,ij,i,k,j,vj,ier,istop,ni
-	double precision::ca,cb,dd,funcpas_splines,funcpas_cpm,funcpas_weib
-	external::funcpas_splines,funcpas_cpm,funcpas_weib
+	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib
+	external::funcpassplines,funcpascpm,funcpasweib
       
 	j=0
 	estimvs=0.d0
@@ -1657,7 +1655,7 @@
 	k0(2) = 0.d0
 !	write(*,*)'dans estimvs',n
 
-	call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_splines)
+	call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
 !AD:	
 	if (istop.eq.4) goto 50
 !AD:	
@@ -2225,26 +2223,4 @@
 	return
 	
 	end subroutine ludcmps
-!==================================================================
-!AD: IS NAN
-
-!	logical function isnan(x)
-!
-!	implicit none
-!	
-!	double precision,intent(in)::x
-!	
-!	if (x .ne. x) then
-!		isnan=.true.
-!	else
-!		isnan=.false.
-!	end if
-!
-!	end function isnan
-
-
-!AD:end
-!====================================================================
-	
-	
 

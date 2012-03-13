@@ -1,7 +1,7 @@
 
 
 !========================          FUNCPA_SPLINES          ====================
-	double precision function funcpas_splines(b,np,id,thi,jd,thj,k0)
+	double precision function funcpassplines(b,np,id,thi,jd,thj,k0)
 	use tailles
 	use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
 	mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
@@ -28,7 +28,10 @@
 	do i=1,np
 		bh(i)=b(i)
 	end do 
-
+	dut1=0.d0
+	dut2=0.d0
+	ut1=0.d0
+	ut2=0.d0
 	if (id.ne.0) bh(id)=bh(id)+thi
 	if (jd.ne.0) bh(jd)=bh(jd)+thj    
 	
@@ -133,7 +136,7 @@
 				res2(g(i)) = res2(g(i))+dlog(dut2(nt1(i))*vet)
 			endif
 	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpas_splines=-1.d9
+                          funcpassplines=-1.d9
                           goto 123
                        end if	
 			if(stra(i).eq.1)then
@@ -146,7 +149,7 @@
 				RisqCumul(i) = ut2(nt1(i))*vet
 			endif
 	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpas_splines=-1.d9
+                          funcpassplines=-1.d9
                           goto 123
                        end if		
 		end do       
@@ -161,7 +164,7 @@
 				res = res-res1(k)+res2(k) 
 				cptg = cptg + 1 
 			       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		                  funcpas_splines=-1.d9
+		                  funcpassplines=-1.d9
 		                  goto 123
 		               end if
 			endif 
@@ -196,7 +199,7 @@
 				res2(g(i)) = res2(g(i))+dlog(dut2(nt1(i))*vet)
 			endif  
 	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpas_splines=-1.d9
+                          funcpassplines=-1.d9
                           goto 123
                        end if
 			if(stra(i).eq.1)then
@@ -207,7 +210,7 @@
 				res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet
 			endif
 	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpas_splines=-1.d9
+                          funcpassplines=-1.d9
                           goto 123
                        end if
 ! modification pour nouvelle vraisemblance / troncature:
@@ -219,7 +222,7 @@
 				res3(g(i)) = res3(g(i)) + ut2(nt0(i))*vet
 			endif
 	               if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-                          funcpas_splines=-1.d9
+                          funcpassplines=-1.d9
                           goto 123
                        end if		
 		end do 
@@ -251,7 +254,7 @@
 						+(inv)*dlog(theta*res3(k)+1.d0)+ res2(k) + sum  
 					endif
 				       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-				          funcpas_splines=-1.d9
+				          funcpassplines=-1.d9
 				          goto 123
 				       end if
 				else              
@@ -272,7 +275,7 @@
 							+theta*theta*res3(k)*res3(k)/3.d0)
 					endif
 				       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-				          funcpas_splines=-1.d9
+				          funcpassplines=-1.d9
 				          goto 123
 				       end if
 				endif 
@@ -318,11 +321,11 @@
 	res = res - pe
 
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		funcpas_splines=-1.d9
+		funcpassplines=-1.d9
 		goto 123
 	end if
 
-	funcpas_splines = res 
+	funcpassplines = res 
 
 	do k=1,ng
 		cumulhaz(k)=res1(k)
@@ -332,13 +335,13 @@
 
 	return
 
-	end function funcpas_splines
+	end function funcpassplines
 
 
 !==========================  DISTANCE   =================================
     
    
-	subroutine distances_splines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
+	subroutine distancessplines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 
 	use tailles,only:ndatemax,npmax,NSUJETMAX
 	use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
@@ -452,5 +455,5 @@
               
 	return
 	    
-	end subroutine distances_splines
+	end subroutine distancessplines
 

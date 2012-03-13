@@ -2,7 +2,7 @@
 !========================          FUNCPA  NESTED_CPM       ====================
 
 
-	double precision function funcpan_cpm(b,np,id,thi,jd,thj,k0)
+	double precision function funcpancpm(b,np,id,thi,jd,thj,k0)
 	
 	use tailles
 	use comon,only:t0,t1,c,nsujet,nva,nst,indictronq &
@@ -91,7 +91,7 @@
 			endif
 			
 			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-				funcpan_cpm=-1.d9
+				funcpancpm=-1.d9
 				goto 123
 			end if	
 				
@@ -155,7 +155,7 @@
 				end do
 			endif
 			if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-				funcpan_cpm=-1.d9
+				funcpancpm=-1.d9
 				goto 123
 			end if	
 		
@@ -169,7 +169,7 @@
 				res = res-res1(k) + res2(k) 
 				cptg = cptg + 1 
 				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-					funcpan_cpm=-1.d9
+					funcpancpm=-1.d9
 					goto 123
 				end if	
 			endif 
@@ -222,7 +222,7 @@
 			endif  
 
 			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-				funcpan_cpm=-1.d9
+				funcpancpm=-1.d9
 				goto 123
 			end if	
 			
@@ -261,7 +261,7 @@
 			endif
 
 			if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-				funcpan_cpm=-1.d9
+				funcpancpm=-1.d9
 				goto 123
 			end if	
 
@@ -299,7 +299,7 @@
 			endif
 
 			if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-				funcpan_cpm=-1.d9
+				funcpancpm=-1.d9
 				goto 123
 			end if	
 
@@ -340,7 +340,7 @@
 						+ res2(k) + sum  
 					endif
 					if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-						funcpan_cpm=-1.d9
+						funcpancpm=-1.d9
 						goto 123
 					end if	
 				else              
@@ -363,7 +363,7 @@
 					endif
 				endif
 				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-					funcpan_cpm=-1.d9
+					funcpancpm=-1.d9
 					goto 123
 				end if	
 			endif 
@@ -430,7 +430,7 @@
 			endif 
 
 			if ((res2(g(k)).ne.res2(g(k))).or.(abs(res2(g(k))).ge. 1.d30)) then
-				funcpan_cpm=-1.d9
+				funcpancpm=-1.d9
 				goto 123
 			end if	
 			
@@ -543,7 +543,7 @@
 					-dlog(alpha)/(alpha)-gammlnN(1.d0/alpha) &
 					+dlog(integrale1(k))
 					if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-						funcpan_cpm=-1.d9
+						funcpancpm=-1.d9
 						goto 123
 					end if	
 				endif
@@ -559,7 +559,7 @@
 						-dlog(integrale2(k)) 
 					endif
 					if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-						funcpan_cpm=-1.d9
+						funcpancpm=-1.d9
 						goto 123
 					end if	
 				endif
@@ -568,17 +568,17 @@
 	endif !fin boucle effet=2
 !----------calcul de la penalisation -------------------      
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		funcpan_cpm=-1.d9
+		funcpancpm=-1.d9
 		goto 123
 	end if
 		 
-	funcpan_cpm = res 
+	funcpancpm = res 
 
 123     continue
 
 	return
 	
-	end function funcpan_cpm
+	end function funcpancpm
 
 
 	

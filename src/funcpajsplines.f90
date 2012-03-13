@@ -2,7 +2,7 @@
 
 
 !========================          FUNCPAJ_SPLINES         ====================
-	double precision function funcpaj_splines(b,np,id,thi,jd,thj,k0)
+	double precision function funcpajsplines(b,np,id,thi,jd,thj,k0)
 	
 	use tailles
 	use comon
@@ -33,12 +33,17 @@
 	double precision,dimension(0:ndatemaxdc)::ut2
 	double precision::int,gammaJ
 
+!	print*,'debut funcpa'
 	choix=0
 	ig=0
 	k=0
 	vj=0
 	n=0
 	j=0
+	ut1=0.d0
+	ut2=0.d0
+	dut2=0.d0
+	dut1=0.d0		
 	do i=1,np
 	bh(i)=b(i)
 	end do 
@@ -136,6 +141,10 @@
 	ut2(ndatedc)=som2+the2(i-4)+the2(i-3)+the2(i-2)+the2(i-1)!am the1(i-4)
 	dut2(ndatedc) = (4.d0*the2(i-1)/h1)
          
+!	print*,ndatemaxdc
+!	print*,'ut2',ut2
+	
+	
 !//// fin NEW AMADOU-vvv
 !AD:end
 !-------------------------------------------------------
@@ -187,23 +196,23 @@
 			res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet) 
 		endif  
 		if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-			funcpaj_splines=-1.d9
+			funcpajsplines=-1.d9
 			goto 123
 		end if	
 !     nouvelle version
 		res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet  
 		if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-			funcpaj_splines=-1.d9
+			funcpajsplines=-1.d9
 			goto 123
 		end if	          
 !     modification pour nouvelle vraisemblance / troncature:
 		res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet 
 		if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-			funcpaj_splines=-1.d9
+			funcpajsplines=-1.d9
 			goto 123
 		end if	
 	end do
-	 
+!	print*,'ok 1',res1(1)
 !           stop
 !ccccccccccccccccccccccccccccccccccccccccc
 ! pour le deces 
@@ -222,7 +231,8 @@
 		if(cdc(k).eq.1)then
 			res2dc(k) = dlog(dut2(nt1dc(k))*vet2)  
 			if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
-				funcpaj_splines=-1.d9
+				funcpajsplines=-1.d9
+!				print*,'gt 1'
 				goto 123
 			end if	
 		endif 
@@ -230,16 +240,20 @@
 ! pour le calcul des integrales / pour la survie, pas les donn�es recurrentes:
 		aux1(k)=ut2(nt1dc(k))*vet2
 		aux2(k)=aux2(k)+ut2(nt0(k))*vet2 !vraie troncature
+		
 		if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
-			funcpaj_splines=-1.d9
+			funcpajsplines=-1.d9
+!			print*,'gt 2'
 			goto 123
 		end if	
 		if ((aux2(k).ne.aux2(k)).or.(abs(aux2(k)).ge. 1.d30)) then
-			funcpaj_splines=-1.d9
+			funcpajsplines=-1.d9
+!			print*,'gt 3'
+!			print*,k,'(aux2(k)',aux2(k),'nt0(k)',nt0(k),'vet2',vet2,'ut2(nt0(k))',ut2(nt0(k))
 			goto 123
 		end if	
 	end do
-
+!	print*,'ok 2',res1(1)
 !**************INTEGRALES ****************************
 	do ig=1,ng 
 		auxig=ig 
@@ -272,12 +286,14 @@
 				+ dlog(integrale3(k)) 
 			endif
 			if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-				funcpaj_splines=-1.d9
+				funcpajsplines=-1.d9
 				goto 123
 			end if	
-		endif 
+		endif
+!		print*,'k',k
+!		print*,'res',res,'dlog(integrale3(k))', dlog(integrale3(k))     
 	end do
-               
+         
 !---------- calcul de la penalisation -------------------
 
 	pe1 = 0.d0
@@ -311,7 +327,7 @@
 	res = res - pe
 	
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		funcpaj_splines=-1.d9
+		funcpajsplines=-1.d9
 		Rrec = 0.d0
 		Nrec = 0.d0
 		Rdc = 0.d0
@@ -319,7 +335,7 @@
 		goto 123
 
 	else
-		funcpaj_splines = res 
+		funcpajsplines = res 
 		do k=1,ng
 			Rrec(k)=res1(k)
 			Nrec(k)=nig(k)
@@ -332,13 +348,13 @@
 
 	return
 	
-	end function funcpaj_splines
+	end function funcpajsplines
 
 
 
 !==========================  DISTANCE   =================================
          
-	subroutine distanceJ_splines(nz1,nz2,b,mt1,mt2,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
+	subroutine distanceJsplines(nz1,nz2,b,mt1,mt2,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 	
 	use tailles
 	use comon,only:date,datedc,zi,t0,t1,t0dc,t1dc,c,cdc &
@@ -448,5 +464,5 @@
 	          
 	return
 		
-	end subroutine distanceJ_splines
+	end subroutine distanceJsplines
 

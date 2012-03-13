@@ -3,6 +3,12 @@
 function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, recurrentAG=FALSE, 
              cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1,nb.int2)
 {
+
+#ad 15/02/12 :add Audrey
+m2 <- match.call()
+m2$formula <- m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$recurrentAG <- m2$cross.validation <- m2$n.knots <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <-m2$nb.int2 <-NULL
+Names.data <- m2$data
+#
 ##### hazard specification ######
 haztemp <- hazard
 hazard <- strsplit(hazard,split="-")
@@ -117,12 +123,17 @@ if((all.equal(length(hazard),1)==T)==T){
 #si pas vide tous si il ya au moins un qui vaut 1 on arrête
 	
 	m$formula <- Terms
+	
+	
+	
+	
 	m[[1]] <- as.name("model.frame") ##m[[1]]=frailtypenal, il le remplace par model.frame en fait
 		
 #model.frame(formula = Surv(time, event) ~ cluster(id) + as.factor(dukes) + 
 #as.factor(charlson) + sex + chemo + terminal(death), data = readmission)
 		
 	m <- eval(m, sys.parent()) #ici la classe de m est un data.frame donc il recupere ce qu'on lui donne en argument
+
 		
 	if (NROW(m) == 0)stop("No (non-missing) observations") #nombre ligne different de 0
 		
@@ -132,7 +143,6 @@ if((all.equal(length(hazard),1)==T)==T){
 		
 	ll <- attr(Terms, "term.labels")#liste des variables explicatives
 #cluster(id) as.factor(dukes) as.factor(charlson) sex chemo terminal(death) 
-
 
 #=========================================================>
 
@@ -145,13 +155,19 @@ if((all.equal(length(hazard),1)==T)==T){
 # On determine le nombre de categorie pour chaque var categorielle
 	strats <- attr(Terms, "specials")$strata #nbre de var qui sont en fonction de strata()
 	cluster <- attr(Terms, "specials")$cluster #nbre de var qui sont en fonction de cluster()
+	
 	subcluster <- attr(Terms, "specials")$subcluster #nbre de var qui sont en fonction de subcluster()
 
 	if (length(subcluster)){
 		ll <- ll[-grep("subcluster",ll)]
 	}
 	if (length(cluster)){
+		ll_tmp <- ll[grep("cluster",ll)]
 		ll <- ll[-grep("cluster",ll)]
+
+		pos1 <- grep("r",unlist(strsplit(ll_tmp,split="")))[1]+2
+		pos2 <- length(unlist(strsplit(ll_tmp,split="")))-1
+		Names.cluster <- substr(ll_tmp,start=pos1,stop=pos2)
 	}
 	if (length(strats)){
 		ll <- ll[-grep("strata",ll)]
@@ -199,6 +215,8 @@ if((all.equal(length(hazard),1)==T)==T){
 		tempc <- untangle.specials(Terms, "cluster", 1:10)
 		ord <- attr(Terms, "order")[tempc$terms]
 		if (any(ord > 1))stop("Cluster can not be used in an interaction")
+		
+		
 		cluster <- strata(m[, tempc$vars], shortlabel = TRUE)
 		dropx <- tempc$terms
 		uni.cluster<-unique(cluster)
@@ -338,9 +356,11 @@ if((all.equal(length(hazard),1)==T)==T){
 	
 	
 	flush.console()
+	
 	ptm<-proc.time()
 	cat("\n")
 	cat("Be patient. The program is computing ... \n")
+
 	
 #=======================================>
 #======= Construction du vecteur des indicatrice
@@ -461,7 +481,7 @@ if((all.equal(length(hazard),1)==T)==T){
     if (ans$istop == 3){
          warning("Matrix non-positive definite.")
     }
-    
+
 #AD:  
 
     if (noVar1 == 1) nvar<-0
@@ -491,19 +511,20 @@ if((all.equal(length(hazard),1)==T)==T){
     } 
     else
      {
-       fit$coef <- ans[[21]][(np - nvar + 1):np]
-       names(fit$coef) <- colnames(X)
+	fit$coef <- ans[[21]][(np - nvar + 1):np]
+       names(fit$coef) <- factor.names(colnames(X))
      }
- 
+
 #AD:modification des dimensions des tableaux
-    temp1 <- matrix(ans[[22]], nrow = np, ncol = np)
-    temp2 <- matrix(ans[[23]], nrow = np, ncol = np)
+    if(nvar > 0){
+         temp1 <- matrix(ans[[22]], nrow = np, ncol = np)
+         temp2 <- matrix(ans[[23]], nrow = np, ncol = np)
 
-    fit$varH <- temp1[(np - nvar + 1):np, (np - nvar + 1):np]
-    fit$varHIH <- temp2[(np - nvar + 1):np, (np - nvar + 1):np]
-    if (Frailty) fit$varTheta <- c(temp1[(np - nvar),(np - nvar)],temp2[(np - nvar),(np - nvar)])
-   
-
+         fit$varH <- temp1[(np - nvar + 1):np, (np - nvar + 1):np]
+         fit$varHIH <- temp2[(np - nvar + 1):np, (np - nvar + 1):np]
+	 if (Frailty) fit$varTheta <- c(temp1[(np - nvar),(np - nvar)],temp2[(np - nvar),(np - nvar)])
+    }
+    
     fit$formula <- formula(Terms)
 
     fit$x1 <- ans[[26]]
@@ -519,8 +540,6 @@ if((all.equal(length(hazard),1)==T)==T){
 
     fit$type <- type
     fit$n.strat <- uni.strat
-    
-     
     fit$n.iter <- ans[[38]]
 
     if (typeof == 0){
@@ -553,7 +572,9 @@ if((all.equal(length(hazard),1)==T)==T){
     
     fit$shape.weib <- ans$shape.weib
     fit$scale.weib <- ans$scale.weib
-    
+    fit$Names.data <- Names.data
+    fit$Names.cluster <- Names.cluster
+    fit$Frailty <- Frailty
     if(Frailty){  
 	fit$martingale.res <- ans$martingale.res
 	fit$frailty.pred <- ans$frailty.pred
@@ -568,7 +589,7 @@ if((all.equal(length(hazard),1)==T)==T){
 #
 #========================= Test de Wald pour shared
 
-	
+    if(ans$istop==1){	
 	if(length(vec.factor) > 0){
 		Beta <- ans[[21]][(np - nvar + 1):np]
 		VarBeta <- fit$varH#[2:(nvar+1),2:(nvar+1)] 
@@ -589,7 +610,8 @@ if((all.equal(length(hazard),1)==T)==T){
 	}else{
 		fit$global_chisq.test <- 0
 	}
-	
+	}
+
 #===============================================	
 
 
@@ -678,17 +700,19 @@ if((all.equal(length(hazard),1)==T)==T){
 		if (!missing(formula.terminalEvent))newTerms2<-Terms2
 
 #=========================================================>
-                lldc <- attr(newTerms2,"term.labels")
-		ind.placedc <- grep("factor",lldc)
-		vecteur <- NULL
-		vecteur <- c(vecteur,lldc[ind.placedc])
-		mat.factor <- matrix(vecteur,ncol=1,nrow=length(vecteur))
+		if (!missing(formula.terminalEvent)){
+			lldc <- attr(newTerms2,"term.labels")
+			ind.placedc <- grep("factor",lldc)
+			vecteur <- NULL
+			vecteur <- c(vecteur,lldc[ind.placedc])
+			mat.factor <- matrix(vecteur,ncol=1,nrow=length(vecteur))
 
  # Fonction servant a prendre les termes entre "as.factor"
-		vec.factordc <-apply(mat.factor,MARGIN=1,FUN=function(x){
-		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-		pos2 <- length(unlist(strsplit(x,split="")))-1
-		return(substr(x,start=pos1,stop=pos2))})	
+			vec.factordc <-apply(mat.factor,MARGIN=1,FUN=function(x){
+			pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+			pos2 <- length(unlist(strsplit(x,split="")))-1
+			return(substr(x,start=pos1,stop=pos2))})
+		}	
 	       
 #=========================================================>
 		if (!missing(formula.terminalEvent)){
@@ -958,9 +982,9 @@ if((all.equal(length(hazard),1)==T)==T){
        fit$coef <- ans$b[(np - nvar + 1):np]
 
 	if (missing(formula.terminalEvent)){
-	   names(fit$coef) <- c(colnames(X)) 
+	   names(fit$coef) <- c(factor.names(colnames(X))) 
 	}else{
-           names(fit$coef) <- c(colnames(X), colnames(X2))
+           names(fit$coef) <- c(factor.names(colnames(X)), factor.names(colnames(X2)))
         }
      }
     
@@ -1054,24 +1078,25 @@ if((all.equal(length(hazard),1)==T)==T){
 
 #================================> For the death
 #========================= Test de Wald pour shared
-
-	if(length(vec.factordc) > 0){
-		Beta <- ans$b[(np - nvar + 1):np]
-		VarBeta <- diag(diag(fit$varH)[-c(1,2)]) 
-		nfactor <- length(vec.factordc)
-		p.walddc <- rep(0,nfactor)
-		ntot <- nvarEnd + nvarRec
-		fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
-		fit$dof_chisq_d <- occurdc
-		fit$global_chisq.test_d <- 1
-# Calcul de pvalue globale
-		for(i in 1:length(vec.factordc)){
-			p.walddc[i] <- signif(1 - pchisq(fit$global_chisq_d[i], occurdc[i]), 3)
+	if (!missing(formula.terminalEvent)){
+		if(length(vec.factordc) > 0){
+			Beta <- ans$b[(np - nvar + 1):np]
+			VarBeta <- diag(diag(fit$varH)[-c(1,2)]) 
+			nfactor <- length(vec.factordc)
+			p.walddc <- rep(0,nfactor)
+			ntot <- nvarEnd + nvarRec
+			fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
+			fit$dof_chisq_d <- occurdc
+			fit$global_chisq.test_d <- 1
+	# Calcul de pvalue globale
+			for(i in 1:length(vec.factordc)){
+				p.walddc[i] <- signif(1 - pchisq(fit$global_chisq_d[i], occurdc[i]), 3)
+			}
+			fit$p.global_chisq_d <- p.walddc
+			fit$names.factordc <- vec.factordc 	
+		}else{
+			fit$global_chisq.test_d <- 0
 		}
-		fit$p.global_chisq_d <- p.walddc
-		fit$names.factordc <- vec.factordc 
-
-		
 	}else{
 		fit$global_chisq.test_d <- 0
 	}	
@@ -1266,7 +1291,7 @@ if (length(subcluster))
     else
      {
        fit$coef <- ans$b[(np - nvar + 1):np]
-       names(fit$coef) <- colnames(X)
+       names(fit$coef) <- factor.names(colnames(X))
      }
     
 
@@ -1397,8 +1422,9 @@ if (length(subcluster))
 
  } # End NESTED MODEL
 
- cost<-proc.time()-ptm
- cat("The program took", round(cost[3],2), "seconds \n")
+cost<-proc.time()-ptm
+cat("The program took", round(cost[3],2), "seconds \n")
+
  fit
 
 }

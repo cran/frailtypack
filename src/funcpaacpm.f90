@@ -1,18 +1,18 @@
 !===================================================================
 !========================          FUNCPA       ====================
-	double precision function funcpaa_weib(b,np,id,thi,jd,thj,k0)
+	double precision function funcpaacpm(b,np,id,thi,jd,thj,k0)
 	
 	use tailles
-	use comon,only:effet,stra,t0,t1,c,nsujet,nva,nst,auxig,ng,ve,g,nig,indictronq, &
-	etaR,etaD,betaR,betaD,kkapa,indic_tronc
+	use comon,only:im,effet,stra,t0,t1,c,nsujet,nva,nst,auxig,ng,ve,g,nig,indictronq,&
+	nbintervR,ttt,alpha,betacoef,kkapa,indic_tronc
 	use additiv,only:correl,ngexact,ve2,sigma2,tau2,rho,cov,mid,betaaux,invD
-	use residusM,only:som_Xbeta
+	use residusM,only:som_Xbeta,indic_cumul,cumulhaz
 	
 	implicit none
 	
 	integer::np,id,jd,i,j,k,cptg,ig,ip
 	integer,dimension(ngmax)::cpt
-	double precision::thi,thj,som2,res,vet
+	double precision::thi,thj,som1,som2,res,vet,somm1,somm2
 	double precision,dimension(np)::b,bh
 	double precision,dimension(ngmax)::integrale1,funcaux
 	double precision,dimension(2)::k0
@@ -27,48 +27,47 @@
 !****** derivanal
 	double precision , dimension(ngmax)::res1,res2,res3,res4
 	double precision , dimension(ngmax)::res5,res6
-!      common /derivanal/res1,res2,res3,res4,res5,res6,res8
-
 !****** u_tilde
 	double precision  :: u_tilde,v_tilde
-	double precision,external::funcpao_weib
-!      common /utilde/u_tilde,v_tilde
+	integer::gg,jj
+	double precision,external::funcpaocpm
 !******************
 
 	kkapa=k0
-	
+	somm1=0.d0
+	somm2=0.d0
+	vet=0.d0
 	j=0
 	res=0.d0
-	vet=0.d0
 	som2=0.d0
 	restar = 0
-	nf = 1   
-		
-	bh=b
-		
-	if (id.ne.0) bh(id)=bh(id)+thi 
-	if (jd.ne.0) bh(jd)=bh(jd)+thj    
-	
-	if (nst == 1) then
-		betaR= bh(1)**2
-		etaR= bh(2)**2	
-		betaD= 0.d0
-		etaD= 0.d0
-	else
-		betaR= bh(1)**2
-		etaR= bh(2)**2	
-		betaD= bh(3)**2
-		etaD= bh(4)**2
-	end if	
+	nf = 1
 
+	bh=b
+
+	if (id.ne.0) bh(id)=bh(id)+thi 
+	if (jd.ne.0) bh(jd)=bh(jd)+thj  
+	  
+	betacoef = 0.d0
 	
+	do i=1,nst*nbintervR
+		betacoef(i)=bh(i)**2
+	end do 	
+
+!	write(*,*)' effet',effet,'correl',correl,' n '
+
 	if(effet.eq.1) then
 !terme de correlation entre 2 frailties/avec contraintes
 		sigma2 = (bh(np-nva-1)*bh(np-nva-1)) ! variance intercept
 		tau2 = (bh(np-nva)*bh(np-nva))  ! variance traitement * groupe
 		cov=dsqrt(sigma2*tau2)*(2.d0 * dexp(bh(np-nva-2))/(1.d0+dexp(bh(np-nva-2)))-1.d0)
 	endif
-	
+
+
+!--------------------------------------------------------
+!----------calcul de la vraisemblance ------------------
+!---------------------------------------------------------
+
 !---- avec ou sans variable explicative  ------cc
 	
 	do ig=1,ngexact!ng!
@@ -81,7 +80,7 @@
 !*******************************************     
 
 	if (effet.eq.0) then
-
+		
 		do i=1,nsujet
 	
 			cpt(g(i))=cpt(g(i))+1
@@ -101,29 +100,93 @@
 	
 	
 			if((c(i).eq.1).and.(stra(i).eq.1))then
-			!	res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet)
-				res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
+				do gg=1,nbintervR !!
+					if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
+						 res2(g(i)) = res2(g(i))+dlog(betacoef(gg)*vet)
+					end if!!
+				end do !!
 			endif  
 
 			if((c(i).eq.1).and.(stra(i).eq.2))then
-			!	res2(g(i)) = res2(g(i))+dlog(dut2(nt1(i))*vet)
-				res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
+				do gg=1,nbintervR !!
+					if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
+						  res2(g(i)) = res2(g(i))+dlog(betacoef(nbintervR+gg)*vet)
+					end if!!
+				end do !!
 			endif
 	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpaa_weib=-1.d9
+                          funcpaacpm=-1.d9
                           goto 123
                        end if
 			if(stra(i).eq.1)then
-			!	res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet-ut1(nt0(i))*vet 
-				res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet - ((t0(i)/etaR)**betaR)*vet
+				som1=0.d0
+				som2=0.d0
+				somm1=0.d0
+				somm2=0.d0				
+				do gg=1,nbintervR
+					if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
+						som1=betacoef(gg)*(t1(i)-ttt(gg-1))
+						if (gg.ge.2)then
+							do jj=1,gg-1
+								som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
+							end do!!
+						endif!!
+
+						res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
+
+						if (indic_cumul==1) then
+							cumulhaz(g(i)) = (som1+som2)
+						end if
+					end if!!
+
+					if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
+						somm1=betacoef(gg)*(t0(i)-ttt(gg-1))
+						if (gg.ge.2)then
+							do jj=1,gg-1
+								somm2=somm2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
+							end do!!
+						endif!!
+						res1(g(i)) = res1(g(i)) - (somm1+somm2)*vet
+					end if
+				end do!!
+				if (indic_cumul==1) then
+					cumulhaz(g(i)) = (som1+som2)
+				end if	
 			endif
 	
 			if(stra(i).eq.2)then
-			!	res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet-ut2(nt0(i))*vet 
-				res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet - ((t0(i)/etaD)**betaD)*vet
+				som1=0.d0
+				som2=0.d0
+				somm1=0.d0
+				somm2=0.d0
+				
+				do gg=1,nbintervR
+					if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
+						som1=betacoef(nbintervR+gg)*(t1(i)-ttt(gg-1))
+						if (gg.ge.2)then
+							do jj=1,gg-1
+								som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
+							end do!!
+						endif!!
+						res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
+					end if!!
+
+					if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
+						somm1=betacoef(nbintervR+gg)*(t0(i)-ttt(gg-1))	
+						if (gg.ge.2)then
+							do jj=1,gg-1
+								somm2=somm2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
+							end do!!
+						endif!!
+						res1(g(i)) = res1(g(i)) - (somm1+somm2)*vet
+					end if
+				end do
+				if (indic_cumul==1) then
+					cumulhaz(g(i)) = (som1+som2)
+				end if	
 			endif
 	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpaa_weib=-1.d9
+                          funcpaacpm=-1.d9
                           goto 123
                        end if
 		end do       
@@ -138,19 +201,18 @@
 				res = res-res1(k)+ res2(k) 
 				cptg = cptg + 1 
 				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-					funcpaa_weib=-1.d9
+					funcpaacpm=-1.d9
 					goto 123
 				end if
 			endif 
 		end do
 	
 	else 
-
 !*******************************************         
 !-----avec deux effets aleatoires dans le modele et correl=0
 !*********************************************
 		if(effet.eq.1.and.correl.eq.0)then
-
+		
 			mid=0
 			integrale1=0.d0
 			
@@ -173,16 +235,22 @@
 				endif
 	
 				if((c(k).eq.1).and.(stra(k).eq.1))then
-				!	res2(g(k)) = res2(g(k))+dlog(dut1(nt1(k))*vet)
-					res2(g(k)) = res2(g(k))+(betaR-1.d0)*dlog(t1(k))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
+					do gg=1,nbintervR 
+						if((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg))))then
+							res2(g(k)) = res2(g(k))+dlog(betacoef(gg)*vet)
+						end if
+					end do 
 				endif  
 				
 				if((c(k).eq.1).and.(stra(k).eq.2))then
-				!	res2(g(k)) = res2(g(k))+dlog(dut2(nt1(k))*vet)
-					res2(g(k)) = res2(g(k))+(betaD-1.d0)*dlog(t1(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
+					do gg=1,nbintervR 
+						if((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg))))then
+							res2(g(k)) = res2(g(k))+dlog(betacoef(nbintervR+gg)*vet)
+						end if
+					end do 
 				endif 
 				if ((res2(g(k)).ne.res2(g(k))).or.(abs(res2(g(k))).ge. 1.d30)) then
-					funcpaa_weib=-1.d9
+					funcpaacpm=-1.d9
 					goto 123
 				end if
 			end do 
@@ -190,9 +258,8 @@
 !=========================================================================
 !==== calcul des int�grales par transformation de LAPLACE pour chq gpe ===
 !=========================================================================
-
-			do ig=1,ng!ngexact
-			
+	
+			do ig=1,ng
 				res3(ig)=0.d0
 				res4(ig)=0.d0
 				res5(ig)=0.d0
@@ -200,7 +267,6 @@
 				auxig=ig
 				baux(1)=0.05d0      !initialisation de u_tilde
 				baux(2)=0.05d0      !initialisation de v_tilde
-
 !======================================================================
 ! maximisation pour deux parametres, les 2 effets aleatoires : u et v 
 !======================================================================
@@ -211,24 +277,18 @@
 				vaux=0.d0!vecteur derivees 2nd et 1ERES
 				funcaux=0.d0!vraisemblance
 				resaux=0.d0!vraisemblance
-				
 				do ip=1,nva
 					betaaux(ip)= bh(np-nva+ip)
 				end do
 
-
-
-	call marq98o(baux,npaux,niaux,vaux,resaux,ieraux,istopaux,funcpao_weib)
+	call marq98o(baux,npaux,niaux,vaux,resaux,ieraux,istopaux,funcpaocpm)
        if (ieraux .eq.-1) then
-          funcpaa_weib=-1.d9
+          funcpaacpm=-1.d9
           goto 123
        end if
 				u_tilde = baux(1)!u_tilde
 				v_tilde = baux(2)!v_tilde
 
-				if(effet.eq.1) then
-				end if
-				
 				do k=1,nsujet
 				
 					if(nva.gt.0.and.g(k).eq.ig)then
@@ -241,40 +301,59 @@
 						vet=1.d0
 					endif
 	
-	
 					if(g(k).eq.ig)then
 					
 						if(c(k).eq.1)then
 							res3(ig) = res3(ig)+u_tilde+v_tilde*ve2(k,1)
 						endif
-	
+
 						if(stra(k).eq.1)then
-							res4(ig) = res4(ig)+((t1(k)/etaR)**betaR)*vet* &
-							dexp(u_tilde+v_tilde*ve2(k,1))
-						
-							res5(ig) = res5(ig)+((t1(k)/etaR)**betaR)*vet* &
-							dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
-							
-							res6(ig) = res6(ig)+((t1(k)/etaR)**betaR)*vet* &
-							dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
-							
+							somm1=0.d0
+							som1=0.d0
+							som2=0.d0
+							do gg=1,nbintervR
+								if ((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg)))) then
+									som1=betacoef(gg)*(t1(k)-ttt(gg-1))
+									if (gg.ge.2)then
+										do jj=1,gg-1
+										som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
+										end do!!
+									endif!!
+						res4(ig) = res4(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1)) 
+						res5(ig) = res5(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
+						res6(ig) = res6(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
+								end if!!
+							end do
+
 						endif
-						
+
 						if(stra(k).eq.2)then
-							res4(ig) = res4(ig)+((t1(k)/etaD)**betaD)*vet* &
-							dexp(u_tilde+v_tilde*ve2(k,1))
-							res5(ig) = res5(ig)+((t1(k)/etaD)**betaD)*vet* &
-							dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
-							res6(ig) = res6(ig)+((t1(k)/etaD)**betaD)*vet* &
-							dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
+							som1=0.d0
+							som2=0.d0
+							somm2=0.d0
+							do gg=1,nbintervR
+								if ((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg)))) then
+									som1=betacoef(nbintervR+gg)*(t1(k)-ttt(gg-1))
+									if (gg.ge.2)then
+									do jj=1,gg-1
+									som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
+									end do!!
+									endif!!
+					res4(ig) = res4(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1)) 
+					res5(ig) = res5(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
+					res6(ig) = res6(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
+								end if!!
+							end do
+							
 						endif
-	
+
 					endif 
 				end do 
+				
 				som_Xbeta(ig) = vet
 
 !=====fin maximisation aux
-	
+
 				integrale1(ig)= -0.5d0*dlog(sigma2*tau2) &
 				-0.5d0* &
 				dlog(res4(ig)*res6(ig)+res4(ig)/tau2+res6(ig)/sigma2 &
@@ -282,8 +361,10 @@
 				+res2(ig)+res3(ig)-res4(ig) &
 				-0.5d0*((u_tilde**2)/sigma2+(v_tilde**2)/tau2)!-k(b)
 			end do
+
 	!======= fin calcul de log integrale
 !======================================================================
+	
 	
 			res = 0.d0
 			do k=1,ng!ngexact  
@@ -292,15 +373,13 @@
 					if(indictronq.eq.0)then
 						res = res+integrale1(k)!integrale1 donne le log de I directement
 						if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-							funcpaa_weib=-1.d9
+							funcpaacpm=-1.d9
 							goto 123
 						end if
 					else !troncature
 						indic_tronc = 1
-						funcpaa_weib=-1.d9
+						funcpaacpm=-1.d9
 						goto 123
-				!		write(*,*)'***TRAITER TRONCATURE**'
-			!			stop
 					endif
 				endif
 			end do
@@ -311,9 +390,9 @@
 !*******************************************         
 !-----avec deux effets aleatoires dans le modele et correl=1
 !*********************************************
-
+	
 		if(effet.eq.1.and.correl.eq.1)then
-
+	
 			mid=0
 			integrale1=0.d0
 	
@@ -335,15 +414,21 @@
 				endif
 	
 				if((c(k).eq.1).and.(stra(k).eq.1))then
-				!	res2(g(k)) = res2(g(k))+dlog(dut1(nt1(k))*vet)
-					res2(g(k)) = res2(g(k))+(betaR-1.d0)*dlog(t1(k))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
+					do gg=1,nbintervR !!
+						if((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg))))then
+							res2(g(k)) = res2(g(k))+dlog(betacoef(gg)*vet)
+						end if!!
+					end do !!
 				endif  
 				if((c(k).eq.1).and.(stra(k).eq.2))then
-				!	res2(g(k)) = res2(g(k))+dlog(dut2(nt1(k))*vet)
-					res2(g(k)) = res2(g(k))+(betaD-1.d0)*dlog(t1(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
+					do gg=1,nbintervR !!
+						if((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg))))then
+							res2(g(k)) = res2(g(k))+dlog(betacoef(nbintervR+gg)*vet)
+						end if!!
+					end do !!
 				endif 
 				if ((res2(g(k)).ne.res2(g(k))).or.(abs(res2(g(k))).ge. 1.d30)) then
-					funcpaa_weib=-1.d9
+					funcpaacpm=-1.d9
 					goto 123
 				end if
 			end do 
@@ -372,9 +457,9 @@
 				do ip=1,nva
 					betaaux(ip)= bh(np-nva+ip)
 				end do
-	call marq98o(baux,npaux,niaux,vaux,resaux,ieraux,istopaux,funcpao_weib)
+	call marq98o(baux,npaux,niaux,vaux,resaux,ieraux,istopaux,funcpaocpm)
        if (ieraux .eq.-1) then
-          funcpaa_weib=-1.d9
+          funcpaacpm=-1.d9
           goto 123
        end if	
 				u_tilde = baux(1)!u_tilde(ig)
@@ -395,27 +480,47 @@
 	
 					if(g(k).eq.ig)then
 						if(c(k).eq.1)then
-							res3(ig) = res3(ig) &
-							+u_tilde+v_tilde*ve2(k,1)
+							res3(ig) = res3(ig)+u_tilde+v_tilde*ve2(k,1)
 						endif
 	
 						if(stra(k).eq.1)then
-							res4(ig) = res4(ig) &
-							+((t1(k)/etaR)**betaR)*vet*dexp(u_tilde+v_tilde*ve2(k,1))
-							res5(ig) = res5(ig) &
-							+((t1(k)/etaR)**betaR)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
-							res6(ig) = res6(ig) &
-							+((t1(k)/etaR)**betaR)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
-	
+							som1=0.d0
+							som2=0.d0
+
+							do gg=1,nbintervR
+								if ((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg)))) then
+									som1=betacoef(gg)*(t1(k)-ttt(gg-1))
+									if (gg.ge.2)then
+										do jj=1,gg-1
+										som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
+										end do!!
+									endif!!
+
+					res4(ig) = res4(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1)) 
+					res5(ig) = res5(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
+					res6(ig) = res6(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
+								end if!!
+							end do
+
 						endif
 						if(stra(k).eq.2)then
-							res4(ig) = res4(ig) &
-							+((t1(k)/etaD)**betaD)*vet*dexp(u_tilde+v_tilde*ve2(k,1))
-							res5(ig) = res5(ig) &
-							+((t1(k)/etaD)**betaD)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
-							res6(ig) = res6(ig) &
-							+((t1(k)/etaD)**betaD)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
-	
+							som1=0.d0
+							som2=0.d0
+							do gg=1,nbintervR
+								if ((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg)))) then
+									som1=betacoef(nbintervR+gg)*(t1(k)-ttt(gg-1))
+									if (gg.ge.2)then
+									do jj=1,gg-1
+									som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
+									end do!!
+									endif!!
+
+					res4(ig) = res4(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1)) 
+					res5(ig) = res5(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*ve2(k,1)
+					res6(ig) = res6(ig) + (som1+som2)*vet*dexp(u_tilde+v_tilde*ve2(k,1))*(ve2(k,1))**2
+								end if!!
+							end do
+
 						endif
 	
 					endif 
@@ -423,6 +528,7 @@
 	
 !=====fin maximisation aux
 				som_Xbeta(ig) = vet
+	
 				cov=dsqrt(sigma2*tau2)* & !avec contrainte
 				(2.d0 * dexp(bh(np-nva-2))/(1.d0+dexp(bh(np-nva-2)))-1.d0)
 	
@@ -437,61 +543,65 @@
 				/(1.d0-(cov**2)/(sigma2*tau2))         !-ka
 	
 			end do
-
 !======= fin calcul de log integrale
+!======================================================================
+
+
+!======= fin calcul de integrale
+!         print*,'** integrale1 **',(integrale1(ig),ig,ig=1,ngexact)
+!          stop
+!======================================================================
+	
 	
 			res = 0.d0
 			do k=1,ngexact  !ng!
 				if(nig(k).gt.0)then
 					if(indictronq.eq.0)then
-						res = res+integrale1(k)!integrale1 donne le log de I directement
+						res = res + integrale1(k)!integrale1 donne le log de I directement
 						if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-							funcpaa_weib=-1.d9
+							funcpaacpm=-1.d9
 							goto 123
 						end if
 					else !troncature
 						indic_tronc = 1
-						funcpaa_weib=-1.d9
+						funcpaacpm=-1.d9
 						goto 123
-						
 					endif
 				endif
 			end do
-
+	
 		endif                     !fin boucle effet= 1 and correl = 1
 	endif                     !fin boucle globale effet=0 
 
-!----------calcul de la penalisation -------------------
-
-	funcpaa_weib = res 
-	if ((funcpaa_weib.ne.funcpaa_weib).or.(abs(funcpaa_weib).ge. 1.d30)) then
-		funcpaa_weib=-1.d9
+	funcpaacpm = res 
+	if ((funcpaacpm.ne.funcpaacpm).or.(abs(funcpaacpm).ge. 1.d30)) then
+		funcpaacpm=-1.d9
 		goto 123
-	end if
+	end if		
 123     continue	
 	return
 	
-	end function funcpaa_weib
+	end function funcpaacpm	
 
 
 !========================    DEBUT FUNCPAO_cpm       ====================
-	double precision function funcpao_weib(b,np,id,thi,jd,thj)
+	double precision function funcpaocpm(b,np,id,thi,jd,thj)
 	
 	use tailles
-	use comon,only:g,nig,t0,t1,c,nsujet,nva,ndate,nst, &
-	stra,ve,auxig,etaR,etaD,betaR,betaD
+	use comon,only:g,nig,t0,t1,c,nsujet,nva,nst, &
+	stra,ve,auxig,nbintervR,ttt,alpha,betacoef
 	use additiv,only:betaaux,ve2,sigma2,tau2,rho,cov
 	
 	implicit none
 	
-	integer::np,id,jd,i,k,ip
+	integer::np,id,jd,k,i,gg,jj
 	double precision,dimension(np)::bhaux,b
 	double precision::thi,thj,res,vet
 !****** u_tilde
-	double precision  :: u_tilde,v_tilde
+	double precision::u_tilde,v_tilde,som1,som2
 !****** derivanal
-	double precision , dimension(ngmax)::res3,res4
-	double precision , dimension(ngmax)::res5,res6,res8
+	double precision,dimension(ngmax)::res3,res4
+	double precision,dimension(ngmax)::res5,res6,res8
 
 !==============================================
 !================POUR UN GROUPE AUXIG donn� !
@@ -503,11 +613,8 @@
 	res6=0.d0
 	res8=0.d0
 	
-	do i=1,np
-		bhaux(i)=b(i)
-	end do 
-	
-	
+	bhaux=b
+
 	if (id.ne.0) bhaux(id)=bhaux(id)+thi 
 	if (jd.ne.0) bhaux(jd)=bhaux(jd)+thj    
 		
@@ -520,48 +627,73 @@
 	do k=1,nsujet
 		if(nva.gt.0.and.g(k).eq.auxig)then
 			vet = 0.d0 
-			do ip=1,nva
-				vet =vet + betaaux(ip)*ve(k,ip)
+			do i=1,nva
+				vet =vet + betaaux(i)*ve(k,i)
 			end do
 			vet = dexp(vet)
 		else
 			vet=1.d0
 		endif
 		
-		if(g(k).eq.auxig)then
-		
+		if(g(k).eq.auxig)then		
 			if(c(k).eq.1)then
 				res3(auxig) = res3(auxig)+u_tilde+v_tilde*ve(k,1)
 				res8(auxig) = res8(auxig)+ve(k,1)
 			endif
-			if(stra(k).eq.1)then
-				res4(auxig) =res4(auxig)+((t1(k)/etaR)**betaR)*vet*dexp(u_tilde+v_tilde*ve(k,1))
-				
-				res5(auxig) = res5(auxig)+((t1(k)/etaR)**betaR)*vet* &
-				dexp(u_tilde+v_tilde*ve(k,1))*ve(k,1)
-				
-				res6(auxig) = res6(auxig)+((t1(k)/etaR)**betaR)*vet* &
-				dexp(u_tilde+v_tilde*ve(k,1))*(ve(k,1))**2
+			if(stra(k).eq.1)then	
+				som1=0.d0
+				som2=0.d0
+	
+				do gg=1,nbintervR
+					if ((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg)))) then
+						som1=betacoef(gg)*(t1(k)-ttt(gg-1))
+						if (gg.ge.2)then
+							do jj=1,gg-1
+								som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
+							end do
+						endif
+
+					end if
+				res4(auxig) =res4(auxig)+(som1+som2)*vet*dexp(u_tilde+v_tilde*ve(k,1))
+				res5(auxig) = res5(auxig)+(som1+som2)*vet*dexp(u_tilde+v_tilde*ve(k,1))*ve(k,1) 
+				res6(auxig) = res6(auxig)+(som1+som2)*vet*dexp(u_tilde+v_tilde*ve(k,1))*(ve(k,1))**2
+				end do
+
 			endif
 			if(stra(k).eq.2)then
-				res4(auxig) = res4(auxig) &
-				+((t1(k)/etaD)**betaD)*vet*dexp(u_tilde+v_tilde*ve(k,1))
-				
-				res5(auxig) = res5(auxig)+((t1(k)/etaD)**betaD)*vet* &
-				dexp(u_tilde+v_tilde*ve(k,1))*ve(k,1)
-				
-				res6(auxig) = res6(auxig)+((t1(k)/etaD)**betaD)*vet* &
-				dexp(u_tilde+v_tilde*ve(k,1))*(ve(k,1))**2
+				som1=0.d0
+				som2=0.d0	
+
+				do gg=1,nbintervR
+					if ((t1(k).ge.(ttt(gg-1))).and.(t1(k).lt.(ttt(gg)))) then
+						som1=betacoef(nbintervR+gg)*(t1(k)-ttt(gg-1))
+						if (gg.ge.2)then
+							do jj=1,gg-1
+								som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
+							end do
+						endif
+		
+
+					end if
+				res4(auxig) =res4(auxig)+(som1+som2)*vet*dexp(u_tilde+v_tilde*ve(k,1))
+				res5(auxig) = res5(auxig)+(som1+som2)*vet*dexp(u_tilde+v_tilde*ve(k,1))*ve(k,1) 
+				res6(auxig) = res6(auxig)+(som1+som2)*vet*dexp(u_tilde+v_tilde*ve(k,1))*(ve(k,1))**2
+				end do	
+
 			endif
 		
 		endif 
 	end do 
 		
-	res=-res3(auxig) + res4(auxig)+0.5d0*(((u_tilde)**2)/sigma2+((v_tilde)**2)/tau2 &
-	-2.d0*u_tilde*v_tilde*cov/(sigma2*tau2))/(1.d0-(cov**2)/(sigma2*tau2))         !-ka
+	res = - res3(auxig)+res4(auxig)+0.5d0*(((u_tilde)**2)/sigma2+((v_tilde)**2)/tau2 &
+	-2.d0*u_tilde*v_tilde*cov/(sigma2*tau2))/(1.d0-(cov**2)/(sigma2*tau2))
 	
-	funcpao_weib= -res
+	funcpaocpm=-res
 	
 	return
 	
-	end function funcpao_weib
+	end function funcpaocpm
+
+
+
+

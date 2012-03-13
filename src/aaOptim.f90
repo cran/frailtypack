@@ -1,134 +1,11 @@
-	module tailles
-	integer,save:: npmax,NSUJETMAX,nvarmax
-	integer,save:: ngmax                    !AD:,maxiter
-	integer,save:: ndatemax,ndatemaxdc,nzmax
-	integer,save::nssgbyg,nssgmax
-	end module tailles
 
-	module parameters
-		double precision,save::epsa,epsb,epsd
-		integer,save::maxiter
-	end module parameters
-	
-
-		
-	module comon
-	implicit none
-!*****************************************************************
-!*****dace1 
-	double precision,dimension(:),allocatable,save::date,datedc
-	double precision,dimension(:),allocatable,save::zi
-
-!*****dace2
-	double precision,dimension(:),allocatable,save::t0dc,t1dc
-	double precision,dimension(:),allocatable,save::t0,t1,t2,t3
-	integer,dimension(:),allocatable,save:: c, cdc
-	integer,dimension(:),allocatable,save:: nt0,nt1
-	integer,dimension(:),allocatable,save:: nt0dc,nt1dc
-	integer,save::nsujet,nva,nva1,nva2,ndate,ndatedc,nst
-!*****dace4
-	integer,dimension(:),allocatable,save::stra
-!*****ve1
-	double precision,dimension(:,:),allocatable,save::ve
-	double precision,dimension(:,:),allocatable,save::vedc
-!*****dace3
-	double precision,save::pe
-	integer,save::effet,nz1,nz2
-!*****dace7
-	double precision,dimension(:,:),allocatable,save::I_hess,H_hess
-	double precision,dimension(:,:),allocatable,save::Hspl_hess!(npmax,npmax)
-	double precision,dimension(:,:),allocatable,save::PEN_deri!(npmax,1)
-	double precision,dimension(:,:),allocatable,save::hess!(npmax,npmax)
-!*****contrib
-	integer,save::ng          !nb de gpes     
-!*****groupe
-	integer,dimension(:),allocatable,save::g!(nsujetmax)
-	integer,dimension(:),allocatable,save::nig!(ngmax)  ! nb d events recurrents par sujet
-!*****mem1
-	double precision,dimension(:),allocatable,save::mm3,mm2!(ndatemax)
-	double precision,dimension(:),allocatable,save::mm1,mm!(ndatemax)
-!*****mem2
-	double precision,dimension(:),allocatable,save::im3,im2,im1,im
-!*****pen1
-	double precision,dimension(:),allocatable,save::m3m3,m2m2,m1m1,mmm,m3m2
-!*****pen2
-	double precision,dimension(:),allocatable,save:: m3m1,m3m,m2m1,m2m,m1m,mi
-     
-!************************************************************ 
-!AD: add for death
-	double precision, dimension(:),allocatable,save::mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc  
-!AD:end
-!************************************************************
-! %%%%%%%%%%%%% ANDERSEN-GILL %%%%%%%%%%%%%%%%%%%%%%%%% 
-	integer,save::AG
-! %%%%%%%%%%%%% indic ALPHA %%%%%%%%%%%%%%%%%%%%%%%%% 
-	integer,save::indic_ALPHA
-!****  theta/alpha
-	double precision,save::theta,alpha,eta !en exposant pour la frailty deces 
-!****** indicateur de troncature
-	integer,save:: indictronq,indictronqdc ! =0 si donnees non tronquées reellement
-!*****auxig
-	integer,save :: auxig
-!******  aux1 aux2
-	double precision,dimension(:),allocatable,save::res1,res3,aux1,aux2
-	double precision,save::resnonpen
-	double precision,dimension(:),allocatable::kkapa
-!****** Type du modele
-	integer,save::model  
-	double precision,dimension(:),allocatable::vvv 
-!cpm
-	double precision ::cens
-	integer,save:: nbrecu,nbdeces,nbintervR,nbintervDC
-	integer,save::indic_eta
-!	double precision,save::eta !en exposant pour la frailty deces 
-	double precision,dimension(:),allocatable,save::res4
-	integer,save::typeof,typeof2
-        double precision,dimension(:),allocatable,save::ttt,tttdc
-        double precision,dimension(:),allocatable,save::betacoef
-!Weib
-	double precision,save::etaR,etaD,betaR,betaD
-	integer,save::indic_tronc
-	
-	end module comon
-	
-
-!===============================    MARQ98  HJ =================================
-!                                  Version optim
-!===============================================================================
-	module additiv	
-	implicit none	
-		integer,save::correlini,correl		
-!*****contrib
-		integer,save::ngexact       !nb EXACT de gpes   	
-!*****mij
-		integer,dimension(:),allocatable,save::mid ! nb de dc dans gpe i  
-!******indicateur du nb de parametres
-		integer,save::nbpara	
-		double precision,dimension(:,:),allocatable,save::ve2	
-!*****inversion
-		integer,save::indic_sousv,sousm	
-!*******sigma2tau2rho
-		double precision,save::sigma2,tau2,rho,cov  
-!*****ut1ut2
-		double precision,dimension(:),allocatable,save::dut1,dut2
-		double precision,dimension(:),allocatable,save::ut1,ut2	
-!**** betaaux
-		double precision,dimension(:),allocatable,save::betaaux
-!*****invD
-		double precision,dimension(:,:),allocatable,save::invD	
-		double precision,dimension(:),allocatable,save::aux1,aux2
-		double precision,dimension(:,:),allocatable,save::Xbeta
-		
-	end module additiv	
-
-!
 !- Version fortran 90
 !      
       
       module type	
        
       interface verif1    
-      subroutine marq98j(k0,b,m,ni,v,rl,ier,istop,effet,ca,cb,dd,fct_names)
+      subroutine marq98j(k0,b,m,ni,v,rl,ier,istop,effet,ca,cb,dd,fctnames)
          integer,intent(in) :: m,effet
          integer,intent(inout)::ni,ier,istop
          double precision,dimension(m*(m+3)/2),intent(out)::v
@@ -136,27 +13,27 @@
          double precision,intent(out)::rl
          double precision,dimension(m),intent(inout)::b	
 	 double precision,intent(out)::ca,cb,dd
-	 external::fct_names
-	 double precision::fct_names
+	 external::fctnames
+	 double precision::fctnames
 	  
       end subroutine marq98j    
         
-      subroutine derivaj(b,m,v,rl,k0,fct_names)
+      subroutine derivaj(b,m,v,rl,k0,fctnames)
         integer,intent(in)::m
 	double precision,dimension(2)::k0
         double precision,intent(inout)::rl
         double precision,dimension(m),intent(in)::b
         double precision,dimension((m*(m+3)/2)),intent(out)::v  
-	double precision,external::fct_names    
+	double precision,external::fctnames    
       end subroutine derivaj
       
-      subroutine searpasj(vw,step,b,bh,m,delta,fim,k0,fct_names)
+      subroutine searpasj(vw,step,b,bh,m,delta,fim,k0,fctnames)
         integer,intent(in)::m      
 	double precision,dimension(2)::k0
         double precision,dimension(m),intent(in)::b
         double precision,dimension(m),intent(inout)::bh,delta
         double precision,intent(inout)::vw,fim,step
-	double precision,external::fct_names       
+	double precision,external::fctnames       
       end subroutine searpasj
       
       subroutine dmfsdj(a,n,eps,ier)
@@ -166,14 +43,14 @@
         double precision,dimension(n*(n+1)/2),intent(inout)::A      
       end subroutine dmfsdj
    
-      subroutine valfpaj(vw,fi,b,bk,m,delta,k0,fct_names)
+      subroutine valfpaj(vw,fi,b,bk,m,delta,k0,fctnames)
         integer,intent(in)::m  
 	double precision,dimension(2)::k0
 	double precision,intent(in)::vw
         double precision,dimension(m),intent(in)::b,delta  
         double precision,dimension(m),intent(out)::bk 
         double precision,intent(out)::fi  
-	double precision,external::fct_names
+	double precision,external::fctnames
       end subroutine valfpaj
       
       subroutine dmaxt(maxt,delta,m)
@@ -199,29 +76,9 @@
       end interface verif2
                               
       end module type
-
-	module residusM
-		double precision,dimension(:),allocatable,save::Residus &
-		,varResidus,cumulhaz,vecuiRes,post_esp,post_SD,som_Xbeta
-		double precision,dimension(:),allocatable,save::ResidusRec,&
-		Residusdc,Rrec,Nrec,Rdc,Ndc,vecviRes,RisqCumul
-		double precision,save::cares,cbres,ddres
-		double precision,dimension(:),allocatable,save:: vres
-		integer , save :: ierres,nires,istopres,effetres,indg
-		double precision,save::rlres,varuiR,moyuiR,varviR,moyviR,corruiviR
-		double precision,dimension(:),allocatable::vuu,b_temp
-		integer,save::indic_cumul
-		integer,dimension(:),allocatable::n_ssgbygrp
-		double precision,dimension(:,:),allocatable,save::cumulhaz1,invsigma
-		double precision,save::detSigma
-		
-		
-	end module residusM 
-	
 !-----------------------------------------------------------
 ! Derniere mis a jour : 09/02/2011
 !-----------------------------------------------------------
-
 
 !-------------------------------------------------------------
 !                   MARQ98
@@ -244,7 +101,7 @@
 !-------------------------------------------------------------
 
 
-	subroutine marq98j(k0,b,m,ni,v,rl,ier,istop,effet,ca,cb,dd,fct_names)
+	subroutine marq98j(k0,b,m,ni,v,rl,ier,istop,effet,ca,cb,dd,fctnames)
 
 !
 !  fu = matrice des derivees secondes et premieres
@@ -279,8 +136,8 @@
 	double precision::da,dm,ga,tr
 	double precision::GHG,step,eps,vw,fi,maxt, &
 	z,rl1,th,ep
-	external::fct_names
-	double precision::fct_names
+	external::fctnames
+	double precision::fctnames
 !---------- ajout
 	integer::kkk
 
@@ -303,7 +160,7 @@
 	ep=1.d-20
 	Main:Do 
 
-        call derivaj(b,m,v,rl,k0,fct_names)   
+        call derivaj(b,m,v,rl,k0,fctnames)   
 
         rl1=rl
 	if(rl.eq.-1.D9) then
@@ -387,7 +244,7 @@
 				b1(i)=b(i)+delta(i)
 			end do
 			
-			rl=fct_names(b1,m,id,z,jd,z,k0)
+			rl=fctnames(b1,m,id,z,jd,z,k0)
 			if(rl.eq.-1.D9) then
 				istop=4
 				goto 110
@@ -413,7 +270,7 @@
 		endif
 		step=dlog(1.5d0)
 !      write(*,*) 'searpas'
-		call searpasj(vw,step,b,bh,m,delta,fi,k0,fct_names)
+		call searpasj(vw,step,b,bh,m,delta,fi,k0,fctnames)
 		rl=-fi
 		if(rl.eq.-1.D9) then
 			istop=4
@@ -453,7 +310,7 @@
 !================ pour les bandes de confiance
 !==== on ne retient que les para des splines
 
-	call derivaJ(b,m,v,rl,k0,fct_names)
+	call derivaJ(b,m,v,rl,k0,fctnames)
 	if(rl.eq.-1.D9) then
 		istop=4
 		goto 110
@@ -531,7 +388,7 @@
 
 	
 	ep=10.d-10
-	call derivaJ(b,m,vnonpen,rl,zero,fct_names)
+	call derivaJ(b,m,vnonpen,rl,zero,fctnames)
 	
 	do i=1,m
 		do j=i,m
@@ -577,7 +434,7 @@
 !                          DERIVA
 !------------------------------------------------------------
 
-	subroutine derivaj(b,m,v,rl,k0,fct_names)
+	subroutine derivaj(b,m,v,rl,k0,fctnames)
 	use comon,only:model
 	implicit none
 	
@@ -588,8 +445,8 @@
 	double precision,dimension((m*(m+3)/2)),intent(out)::v     
 	double precision,dimension(m)::fcith
 	integer ::i0,m1,ll,i,k,j,iun
-	double precision::fct_names,thn,th,z,vl,th2,vaux  
-	external::fct_names
+	double precision::fctnames,thn,th,z,vl,th2,vaux  
+	external::fctnames
       	
 	select case(model)
 	case(1)
@@ -608,13 +465,13 @@
 	i0=0
 	iun =1
 
-	rl=fct_names(b,m,iun,z,iun,z,k0)
+	rl=fctnames(b,m,iun,z,iun,z,k0)
         if(rl.eq.-1.d9) then
             rl=-1.d9
             goto 123
         end if	
 	do i=1,m
-		fcith(i)=fct_names(b,m,i,th,i0,z,k0)
+		fcith(i)=fctnames(b,m,i,th,i0,z,k0)
                 if(fcith(i).eq.-1.d9) then
                     rl=-1.d9
                     goto 123
@@ -627,7 +484,7 @@
 	
 	do i=1,m
 		ll=ll+1
-		vaux=fct_names(b,m,i,thn,i0,z,k0)
+		vaux=fctnames(b,m,i,thn,i0,z,k0)
                 if(vaux.eq.-1.d9) then
                     rl=-1.d9
                     goto 123
@@ -636,7 +493,7 @@
 		v(ll)=vl
 		do j=1,i
 			k=k+1
-			v(k)=-(fct_names(b,m,i,th,j,th,k0)-fcith(j)-fcith(i)+rl)/th2
+			v(k)=-(fctnames(b,m,i,th,j,th,k0)-fcith(j)-fcith(i)+rl)/th2
 		end do
 	end do
       
@@ -649,7 +506,7 @@
 !------------------------------------------------------------
 
 
-      subroutine searpasj(vw,step,b,bh,m,delta,fim,k0,fct_names)
+      subroutine searpasj(vw,step,b,bh,m,delta,fim,k0,fctnames)
 !
 !  MINIMISATION UNIDIMENSIONNELLE
 !
@@ -662,14 +519,14 @@
       double precision,intent(inout)::fim,step   
       double precision::vlw,vlw1,vlw2,vlw3,vm,fi1,fi2,fi3    
       double precision,dimension(2)::k0
-      double precision::fct_names
-      external::fct_names     
+      double precision::fctnames
+      external::fctnames     
       integer::i 
 
        vlw1=dlog(vw)
        vlw2=vlw1+step
-       call valfpaj(vlw1,fi1,b,bh,m,delta,k0,fct_names)
-       call valfpaj(vlw2,fi2,b,bh,m,delta,k0,fct_names)       
+       call valfpaj(vlw1,fi1,b,bh,m,delta,k0,fctnames)
+       call valfpaj(vlw2,fi2,b,bh,m,delta,k0,fctnames)       
 
        if(fi2.ge.fi1) then
 	  vlw3=vlw2
@@ -679,7 +536,7 @@
 	  step=-step
 
           vlw1=vlw2+step
-          call valfpaj(vlw1,fi1,b,bh,m,delta,k0,fct_names)   
+          call valfpaj(vlw1,fi1,b,bh,m,delta,k0,fctnames)   
           if(fi1.gt.fi2) goto 50
        else 
           vlw=vlw1
@@ -697,7 +554,7 @@
           fi2=fi1
 
           vlw1=vlw2+step
-          call valfpaj(vlw1,fi1,b,bh,m,delta,k0,fct_names)
+          call valfpaj(vlw1,fi1,b,bh,m,delta,k0,fctnames)
           if(fi1.gt.fi2) goto 50
           if(fi1.eq.fi2) then
              fim=fi2
@@ -713,7 +570,7 @@
 !  CALCUL MINIMUM QUADRIQUE
 !
       vm=vlw2-step*(fi1-fi3)/(2.d0*(fi1-2.d0*fi2+fi3))   
-      call valfpaj(vm,fim,b,bh,m,delta,k0,fct_names)	
+      call valfpaj(vm,fim,b,bh,m,delta,k0,fctnames)	
       if(fim.le.fi2) goto 100
       vm=vlw2
       fim=fi2
@@ -1085,7 +942,7 @@
 !                          VALFPA
 !------------------------------------------------------------
 
-	subroutine valfpaj(vw,fi,b,bk,m,delta,k0,fct_names)
+	subroutine valfpaj(vw,fi,b,bk,m,delta,k0,fctnames)
 	
 	implicit none
 	
@@ -1093,17 +950,17 @@
 	double precision,dimension(m),intent(in)::b,delta  
 	double precision,dimension(m),intent(out)::bk 
 	double precision,intent(out)::fi 
-	double precision::vw,fct_names,z	
+	double precision::vw,fctnames,z	
 	double precision,dimension(2)::k0
 	integer::i0,i
-	external::fct_names
+	external::fctnames
 	
 	z=0.d0
 	i0=1
 	do i=1,m
 	bk(i)=b(i)+dexp(vw)*delta(i)
 	end do
-	fi=-fct_names(bk,m,i0,z,i0,z,k0)
+	fi=-fctnames(bk,m,i0,z,i0,z,k0)
 	if(fi.eq.-1.D9) then
 		goto 1
 	end if

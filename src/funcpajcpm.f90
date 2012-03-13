@@ -1,6 +1,6 @@
 
 !========================          FUNCPAJ_CPM         ====================
-	double precision function funcpaj_cpm(b,np,id,thi,jd,thj,k0)
+	double precision function funcpajcpm(b,np,id,thi,jd,thj,k0)
 	
 	use tailles
 	use comon,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
@@ -104,7 +104,7 @@
 			end do
 		endif  
 		if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-			funcpaj_cpm=-1.d9
+			funcpajcpm=-1.d9
 			goto 123
 		end if	
 !cccccccccccccccccccccc
@@ -127,7 +127,7 @@
 			endif
 		end do
 		if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-			funcpaj_cpm=-1.d9
+			funcpajcpm=-1.d9
 			goto 123
 		end if	
 
@@ -152,7 +152,7 @@
 			endif
 		end do
 		if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-			funcpaj_cpm=-1.d9
+			funcpajcpm=-1.d9
 			goto 123
 		end if	
 	end do
@@ -183,7 +183,7 @@
 				endif
 			end do
 			if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
-				funcpaj_cpm=-1.d9
+				funcpajcpm=-1.d9
 				goto 123
 			end if	
 		endif 
@@ -209,7 +209,7 @@
 		end do
 
 		if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
-			funcpaj_cpm=-1.d9
+			funcpajcpm=-1.d9
 			goto 123
 		end if		
 	end do
@@ -250,7 +250,7 @@
  
 			endif
 			if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-				funcpaj_cpm=-1.d9
+				funcpajcpm=-1.d9
 				goto 123
 			end if	
 		endif 
@@ -258,7 +258,7 @@
 
 !!!	
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		funcpaj_cpm =-1.d9
+		funcpajcpm =-1.d9
 		Rrec = 0.d0
 		Nrec = 0.d0
 		Rdc = 0.d0
@@ -266,7 +266,7 @@
 		goto 123
 
 	else
-		funcpaj_cpm = res 
+		funcpajcpm = res 
 		
 		do k=1,ng
 			Rrec(k)=res1(k)
@@ -280,6 +280,6 @@
 
 	return
 	
-	end function funcpaj_cpm
+	end function funcpajcpm
 
 

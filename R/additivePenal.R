@@ -444,7 +444,7 @@ if((all.equal(length(hazard),1)==T)==T){
     else
      {
        fit$coef <- ans$coef
-       names(fit$coef) <- colnames(X)
+       names(fit$coef) <- factor.names(colnames(X))
      }
 
     fit$varH <- ans$varcoef

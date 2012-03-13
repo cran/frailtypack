@@ -1,43 +1,8 @@
-!==========================================================
-!
-!      Joint Latent class mixed model for continuous
-!          Gaussian outcome
-!
-!        Cecile Proust, Helene Jacqmin-Gadda
-!
-!
-!       Corresponding author :
-!       Cecile Proust, INSERM U897, ISPED,
-!       146  rue L\'eo Saignat,
-!       33076 Bordeaux cedex, France.
-!       Tel: (33) 5 57 57 45 79; Fax: (33) 5 56 24 00 81;
-!       e-mail : cecile.proust@isped.u-bordeaux2.fr
-!
-!                                       21/12/2010
-!===========================================================
-! - Version fortran 90
-!----------- PROGRAM COMPOSITION --------------------------
-!    - subroutine MARQ9
-!    - subroutine DERIVA
-!    - subroutine SEARPAS
-!    - subroutine VALFPA
-!    - subroutine MAXT
-!    - subroutine DCHOLE
-!    - subroutine DMFSD
-!    - subroutine DSINV
-!----------------------------------------------------------
-!
-!     INTERFACE TYPEc
-!
-!----------------------------------------------------------
-      
-
-
 
       module type	
        
       interface verif   
-      subroutine marq98(b,m,ni,v,rl,ier,istop,ca,cb,dd,namefunc)
+      subroutine marq98res(b,m,ni,v,rl,ier,istop,ca,cb,dd,namefunc)
          integer,intent(in) :: m
          integer,intent(inout)::ni,ier,istop
          double precision,dimension(m*(m+3)/2),intent(out)::v
@@ -45,7 +10,7 @@
          double precision,dimension(m),intent(inout)::b	
 	 double precision,intent(inout)::ca,cb,dd 
          double precision,external::namefunc
-      end subroutine marq98    
+      end subroutine marq98res    
         
       subroutine deriva(b,m,v,rl,namefunc)
         integer,intent(in)::m
@@ -79,11 +44,11 @@
         double precision,external::namefunc  
       end subroutine valfpa
       
-!      subroutine dmaxt(maxt,delta,m)
-!        integer,intent(in)::m
-!        double precision,dimension(m),intent(in)::delta 
-!        double precision,intent(out)::maxt
-!      end subroutine dmaxt              	                 
+     subroutine dmaxtres(maxt,delta,m)
+       integer,intent(in)::m
+       double precision,dimension(m),intent(in)::delta 
+       double precision,intent(out)::maxt
+     end subroutine dmaxtres              	                 
       end interface verif  
 
       interface veriff
@@ -104,47 +69,26 @@
                               
       end module type
 
-  
 
-!----------------------------------------------------------
-!
-!     MODULE PARAMETERS
-!
-! Derniere mise a jour : 09/02/2011
-!-----------------------------------------------------------
-
-
-!       module parameters
-!           double precision,save::epsa,epsb,epsd
-!           integer,save::maxiter
-!       end module parameters
-
-!-------------------------------------------------------------
-!    
-!          MODULE OPTIM avec MARQ98
-!
-!-------------------------------------------------------------
-
-
-      module optim2
+      module optimres
 
       implicit none
 ! -Interface permettant la verification des type des arguments      
       interface verif   
-        module procedure marq98,deriva,searpas,dmfsd,valfpa
+        module procedure marq98res,deriva,searpas,dmfsd,valfpa
       end interface verif
       
       interface veriff
-        module procedure dsinv,dchole!,dmaxt
+        module procedure dsinv,dchole,dmaxtres
       end interface veriff
 
       CONTAINS
 !-------------------------------------------------------------
-!                   MARQ98
+!                   MARQ98 Calcul residu
 !-------------------------------------------------------------
 
 
-      subroutine marq98(b,m,ni,v,rl,ier,istop,ca,cb,dd,namefunc)
+      subroutine marq98res(b,m,ni,v,rl,ier,istop,ca,cb,dd,namefunc)
 
 !
 !  fu = matrice des derivees secondes et premieres
@@ -155,9 +99,9 @@
 !  4: Erreur
 
       use parameters
-      use optim
       
       IMPLICIT NONE
+
 !   variables globales 
       integer,intent(in) :: m
       integer,intent(inout)::ni,ier,istop
@@ -197,7 +141,7 @@
 !   	write(*,*)'avant deriva'         
         call deriva(b,m,v,rl,namefunc)
 
-!	write(*,*)'iteration cecile',ni,'vrais',rl          
+!	write(*,*)'iteration optimres',ni,'vrais',rl          
         rl1=rl      
         dd = 0.d0     
         fu=0.D0
@@ -273,11 +217,10 @@
             endif
          endif
 !      write(6,*) 'loglikelihood not improved '
-         call dmaxt(maxt,delta,m)
+         call dmaxtres(maxt,delta,m)
          if(maxt.eq.0.D0) then
             vw=th
          else
-            call dmaxt(maxt,delta,m)
             vw=th/maxt
          endif
          step=dlog(1.5d0)
@@ -318,7 +261,7 @@
     
  110   continue
        return    
-       end subroutine marq98
+       end subroutine marq98res
 
 !------------------------------------------------------------
 !                          DERIVA
@@ -864,26 +807,27 @@
 !                            MAXT
 !------------------------------------------------------------
 
-! 
-!       subroutine dmaxt(maxt,delta,m)
-!       
-!       implicit none
-! 
-!        integer,intent(in)::m
-!        double precision,dimension(m),intent(in)::delta
-!        double precision,intent(out)::maxt
-!        integer::i 
-! 
-!        maxt=Dabs(delta(1))
-!        do i=2,m
-!          if(Dabs(delta(i)).gt.maxt)then
-! 	    maxt=Dabs(delta(i))
-! 	 end if
-!        end do 
-!             
-!        return
-!        end subroutine dmaxt
 
-      end module optim2
+      subroutine dmaxtres(maxt,delta,m)
+      
+      implicit none
+
+       integer,intent(in)::m
+       double precision,dimension(m),intent(in)::delta
+       double precision,intent(out)::maxt
+       integer::i 
+
+       maxt=Dabs(delta(1))
+       do i=2,m
+         if(Dabs(delta(i)).gt.maxt)then
+	    maxt=Dabs(delta(i))
+	 end if
+       end do 
+            
+       return
+
+       end subroutine dmaxtres
+
+      end module optimres
 
 

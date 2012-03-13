@@ -1,7 +1,7 @@
 
 
 !========================          FUNCPA_WEIB          ====================
-	double precision function funcpas_weib(b,np,id,thi,jd,thj,k0)
+	double precision function funcpasweib(b,np,id,thi,jd,thj,k0)
 	use tailles
 	use comon,only:t0,t1,c,nsujet,nva, &
 	nst,stra,ve,effet,ng,g,nig,AG,etaR,etaD,betaR,betaD,kkapa,theta
@@ -21,9 +21,8 @@
 	kkapa=k0
 	j=0
 	theta=0.d0
-	do i=1,np
-		bh(i)=b(i)
-	end do 
+
+	bh=b
 
 	if (id.ne.0) bh(id)=bh(id)+thi
 	if (jd.ne.0) bh(jd)=bh(jd)+thj    
@@ -50,12 +49,12 @@
 
 !--- avec ou sans variable explicative  ------cc
 
-	do k=1,ng
-		res1(k) = 0.d0
-		res2(k) = 0.d0
-		res3(k) = 0.d0
-		cpt(k) = 0
-	end do
+
+	res1= 0.d0
+	res2= 0.d0
+	res3= 0.d0
+	cpt = 0
+
 
 !*******************************************     
 !---- sans effet aleatoire dans le modele
@@ -83,7 +82,7 @@
 				res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
 			endif
 	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpas_weib=-1.d9
+                          funcpasweib=-1.d9
                           goto 123
                        end if	
 			if(stra(i).eq.1)then
@@ -96,7 +95,7 @@
 				RisqCumul(i) = ((t1(i)/etaD)**betaD)*vet
 			endif
 	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpas_weib=-1.d9
+                          funcpasweib=-1.d9
                           goto 123
                        end if			
 		end do       
@@ -111,7 +110,7 @@
 				res = res-res1(k)+res2(k) 
 				cptg = cptg + 1 
 			       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		                  funcpas_weib=-1.d9
+		                  funcpasweib=-1.d9
 		                  goto 123
 		               end if	
 			endif 
@@ -145,7 +144,7 @@
 				res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
 			endif  
 	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpas_weib=-1.d9
+                          funcpasweib=-1.d9
                           goto 123
                        end if	
 			if(stra(i).eq.1)then
@@ -156,7 +155,7 @@
 				res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet
 			endif
 	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpas_weib=-1.d9
+                          funcpasweib=-1.d9
                           goto 123
                        end if	
 ! modification pour nouvelle vraisemblance / troncature:
@@ -168,7 +167,7 @@
 				res3(g(i)) = res3(g(i)) + ((t0(i)/etaD)**betaD)*vet
 			endif
 	               if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-                          funcpas_weib=-1.d9
+                          funcpasweib=-1.d9
                           goto 123
                        end if			
 		end do 
@@ -217,7 +216,7 @@
 					endif
 				endif 
 			       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		                  funcpas_weib=-1.d9
+		                  funcpasweib=-1.d9
 		                  goto 123
 		               end if	
 			endif 
@@ -230,11 +229,11 @@
 
 !    Changed JRG 25 May 05
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		funcpas_weib=-1.d9
+		funcpasweib=-1.d9
 		goto 123
 	end if	
 
-	funcpas_weib = res 
+	funcpasweib = res 
 
 	do k=1,ng
 		cumulhaz(k)=res1(k)
@@ -244,7 +243,7 @@
 
 	return
 
-	end function funcpas_weib
+	end function funcpasweib
 
 
 !=================================================================================================

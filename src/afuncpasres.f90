@@ -14,7 +14,7 @@
 !!!!
 !!!! Calcul Residus shared
 !!!!
-	double precision function funcpas_res(uu,np,id,thi,jd,thj,k0)     
+	double precision function funcpasres(uu,np,id,thi,jd,thj,k0)     
  
 	use comon
         use residusM
@@ -35,12 +35,12 @@
 
 	frail1=bh(1)*bh(1)
 
-	funcpas_res = frail1**(nig(indg) + 1.d0/theta - 1.d0) &
+	funcpasres = frail1**(nig(indg) + 1.d0/theta - 1.d0) &
 	*dexp(-frail1*(1.d0/theta + cumulhaz(indg)))
 	
 	return
 		
-	end function funcpas_res
+	end function funcpasres
 	
 	
 	
@@ -138,7 +138,7 @@
 !!!! Calcul Residus additive
 !!!!
 
-	double precision function funcpaares(uu,np,id,thi,jd,thj,k0)
+	double precision function funcpaares(uu,np,id,thi,jd,thj)
 	
 	use comon
         use residusM
@@ -148,13 +148,12 @@
 
 	integer,intent(in)::id,jd,np
 	double precision,intent(in)::thi,thj
-	double precision,dimension(2),intent(in)::k0	
 	double precision,dimension(np),intent(in)::uu
-	integer::k,ip!,i,j
+	integer::k,ip
 	double precision,dimension(np)::bh
 	double precision::frail1,frail2,som1,som2
 	double precision,parameter::pi=3.141592653589793d0
-	double precision::kapa,result
+	double precision::result
 	double precision,dimension(1,2)::apres
 	double precision,dimension(2,1)::avant	
 	double precision,dimension(1,1)::res	
@@ -162,7 +161,7 @@
 
 
 	bh=uu
-	kapa=k0(1)
+!	kapa=k0(1)
 		
 	if (id.ne.0) bh(id)=bh(id)+thi
 	if (jd.ne.0) bh(jd)=bh(jd)+thj    
@@ -178,14 +177,7 @@
 	
 	res = (-1.d0/2) * matmul(apres,matmul(invsigma,avant))	
 	result = res(1,1)
-!!	if(indg==7) then
-!		do i=1,2
-!			write(*,*)'invsigma ',(invsigma(i,j),j=1,2)
-!		end do
-!		write(*,*)' u_i ',frail1
-!		write(*,*)' v_i ',frail2	
-!		write(*,*)'group ',indg,' dexp(result)',dexp(result)
-!	end if
+
 	som1 = 0.d0
 	do k=1,nsujet
 		if(g(k) == indg)then
@@ -194,9 +186,6 @@
 			end if
 		end if
 	end do
-
-!	write(*,*)'prod1',prod1,'som_Xbeta',som_Xbeta(indg)
-!	write(*,*)'cumulhaz',cumulhaz(indg)	
 	
 	som2 = 0.d0
 
@@ -210,18 +199,22 @@
 		else
 			vet=1.d0
 		endif
-		if(g(k) == indg)then	
-			if(stra(k).eq.1)then
-				som2 = som2  - 1.d0 * ut1(nt1(k)) * dexp(frail1 + frail2 * ve2(k,1) + dlog(vet))
+		if(typeof==0) then
+			if(g(k) == indg)then	
+				if(stra(k).eq.1)then
+					som2 = som2  - 1.d0 * ut1(nt1(k)) * dexp(frail1 + frail2 * ve2(k,1) + dlog(vet))
+				end if
+				if(stra(k).eq.2)then
+					som2 = som2 - 1.d0 * ut2(nt1(k)) * dexp(frail1 + frail2 * ve2(k,1) + dlog(vet))
+				end if
 			end if
-			if(stra(k).eq.2)then
-				som2 = som2 - 1.d0 * ut2(nt1(k)) * dexp(frail1 + frail2 * ve2(k,1) + dlog(vet))
+		else
+			if(g(k) == indg)then	
+				som2 = som2  - 1.d0 * cumulhaz(g(k)) * dexp(frail1 + frail2 * ve2(k,1) + dlog(vet))
 			end if
+
 		end if
 	end do
-
-!	prod2 = dexp(prod2)
-!	write(*,*)'prod2',prod2	
 
 	funcpaares = 1.d0/(2.d0 * pi * dsqrt(detSigma))* dexp(som1 + som2 + result)
 	

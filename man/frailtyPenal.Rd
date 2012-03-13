@@ -128,6 +128,7 @@ The following components are included in a 'frailtyPenal' object for shared frai
 \item{scale.weib}{scale parameter for the weibull hazard function.}
 \item{martingale.res}{martingale residuals for each cluster.}
 \item{martingaleCox}{martingale residuals for observation in the Cox model.}
+\item{Frailty}{Logical value. Was model with frailties fitted.}
 \item{frailty.pred}{empirical Bayes prediction of the frailty term (ie, using conditional posterior distributions).}
 \item{frailty.var}{variance of the empirical Bayes prediction of the frailty term.}
 \item{frailty.sd}{standard error of the frailty empirical Bayes prediction.}

@@ -1,6 +1,6 @@
 !===================================================================
 !========================          FUNCPA       ====================
-	double precision function funcpaa_splines(b,np,id,thi,jd,thj,k0)
+	double precision function funcpaasplines(b,np,id,thi,jd,thj,k0)
 	
 	use tailles
 	use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
@@ -72,7 +72,11 @@
 			the2(i-3)=(bh(j))*(bh(j))
 		endif
 	end do
-	
+	dut1=0.d0
+	dut2=0.d0
+	ut1=0.d0
+	ut2=0.d0
+		
 	if(effet.eq.1) then
 !terme de correlation entre 2 frailties/avec contraintes
 		sigma2 = (bh(np-nva-1)*bh(np-nva-1)) ! variance intercept
@@ -173,7 +177,7 @@
 			endif
 
 	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpaa_splines=-1.d9
+                          funcpaasplines=-1.d9
                           goto 123
                        end if
 
@@ -185,7 +189,7 @@
 				res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet-ut2(nt0(i))*vet 
 			endif
 	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpaa_splines=-1.d9
+                          funcpaasplines=-1.d9
                           goto 123
                        end if
 		end do
@@ -238,7 +242,7 @@
 					res2(g(k)) = res2(g(k))+dlog(dut2(nt1(k))*vet)
 				endif 
 			       if ((res2(g(k)).ne.res2(g(k))).or.(abs(res2(g(k))).ge. 1.d30)) then
-		                  funcpaa_splines=-1.d9
+		                  funcpaasplines=-1.d9
 		                  goto 123
 		               end if	
 
@@ -277,7 +281,7 @@
 
 	call marq98o(baux,npaux,niaux,vaux,resaux,ieraux,istopaux,funcpao)
        if (ieraux .eq.-1) then
-          funcpaa_splines=-1.d9
+          funcpaasplines=-1.d9
           goto 123
        end if
 				u_tilde = baux(1)!u_tilde
@@ -346,12 +350,12 @@
 					if(indictronq.eq.0)then
 						res = res+integrale1(k)!integrale1 donne le log de I directement
 					       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-						  funcpaa_splines=-1.d9
+						  funcpaasplines=-1.d9
 						  goto 123
 					       end if
 					else !troncature
 						indic_tronc = 1
-						funcpaa_splines=-1.d9
+						funcpaasplines=-1.d9
 						goto 123
 				!		write(*,*)'***TRAITER TRONCATURE**'
 				!		stop
@@ -395,7 +399,7 @@
 					res2(g(k)) = res2(g(k))+dlog(dut2(nt1(k))*vet)
 				endif 
 			       if ((res2(g(k)).ne.res2(g(k))).or.(abs(res2(g(k))).ge. 1.d30)) then
-			          funcpaa_splines=-1.d9
+			          funcpaasplines=-1.d9
 			          goto 123
 			       end if
 			        
@@ -427,7 +431,7 @@
 				end do
 	call marq98o(baux,npaux,niaux,vaux,resaux,ieraux,istopaux,funcpao)
        if (ieraux .eq.-1) then
-          funcpaa_splines=-1.d9
+          funcpaasplines=-1.d9
           goto 123
        end if		
 				u_tilde = baux(1)!u_tilde(ig)
@@ -509,12 +513,12 @@
 						res = res &
 						+integrale1(k)!integrale1 donne le log de I directement
 				       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-				          funcpaa_splines=-1.d9
+				          funcpaasplines=-1.d9
 				          goto 123
 				       end if
 					else !troncature
 						indic_tronc = 1
-						funcpaa_splines=-1.d9
+						funcpaasplines=-1.d9
 						goto 123
 					!	write(*,*)'***TRAITER TRONCATURE**'
 					!	stop
@@ -559,18 +563,18 @@
 	resnonpen = res
 	res = res - pe
        if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-          funcpaa_splines=-1.d9
+          funcpaasplines=-1.d9
           goto 123
        end if	
-	funcpaa_splines= res 
+	funcpaasplines= res 
 123     continue		
 	return
 	
-	end function funcpaa_splines
+	end function funcpaasplines
 	
 	
 
-	subroutine distancea_splines(nz1,nz2,b,effet,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)	
+	subroutine distanceasplines(nz1,nz2,b,effet,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)	
 	 	
 	use tailles
 	use comon,only:zi,date,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst, &
@@ -685,7 +689,7 @@
 		
 	return
 	
-	end subroutine distancea_splines
+	end subroutine distanceasplines
 
 !==========================  SUSP  ====================================
 
