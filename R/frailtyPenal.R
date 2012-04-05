@@ -307,9 +307,14 @@ if((all.equal(length(hazard),1)==T)==T){
 		newTerms <- Terms
 	}
 #newTerm vaut Terms - les variables dont les position sont dans drop
+	
 	X <- model.matrix(newTerms, m)  	
 	
 	assign <- lapply(attrassign(X, newTerms)[-1], function(x) x - 1)
+	Xlevels <- .getXlevels(newTerms, m)
+	contr.save <- attr(X, 'contrasts')
+
+	
 # assigne donne la position pour chaque variables
 #ncol(X) : nombre de variable sans sans les fonction speciaux comme terminal()...+id
 	if(length(vec.factor) > 0){
@@ -327,7 +332,8 @@ if((all.equal(length(hazard),1)==T)==T){
 		noVar1 <- 0
 	} 	
 # on enleve ensuite la premiere colonne correspondant a id
-		
+	
+
 	nvar<-ncol(X) #nvar==1 correspond a 2 situaions: 
 # au cas ou on a aucune var explicative dans la partie rec, mais X=0
 # cas ou on a 1seul var explicative, ici X est en general different de 0
@@ -377,9 +383,9 @@ if((all.equal(length(hazard),1)==T)==T){
 # Begin SHARED MODEL
 #
 
- if (!joint & !length(subcluster))  
+ if (!joint & !length(subcluster))
   {
-   
+
         if(equidistant %in% c(0,1)){
 		if (missing(nb.int1)) stop("Time interval 'nb.int1' is required")
 		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")	
@@ -468,13 +474,13 @@ if((all.equal(length(hazard),1)==T)==T){
 				frailty.sd=as.double(rep(0,as.integer(length(uni.cluster)))),
 				linear.pred=as.double(rep(0,n)),
 				time=as.double(rep(0,(nbintervR+1))),
-				PACKAGE = "frailtypack")    
+				PACKAGE = "frailtypack")
 #AD:
 
     if (ans$istop == 4){
 	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")    
      }
-    
+
     if (ans$istop == 2){
          warning("Model did not converge. Change the 'maxit' parameter")
     }
@@ -482,10 +488,10 @@ if((all.equal(length(hazard),1)==T)==T){
          warning("Matrix non-positive definite.")
     }
 
-#AD:  
+#AD:
 
     if (noVar1 == 1) nvar<-0
-    
+
     np <- ans[[20]]
     fit <- NULL
     fit$b <- ans$b
@@ -499,7 +505,7 @@ if((all.equal(length(hazard),1)==T)==T){
     }else{
         fit$logLik <- ans[[24]]
     }
-    
+
     if (Frailty) {
         fit$theta <- (ans[[21]][np - nvar])^2 
     }
@@ -524,14 +530,14 @@ if((all.equal(length(hazard),1)==T)==T){
          fit$varHIH <- temp2[(np - nvar + 1):np, (np - nvar + 1):np]
 	 if (Frailty) fit$varTheta <- c(temp1[(np - nvar),(np - nvar)],temp2[(np - nvar),(np - nvar)])
     }
-    
+
     fit$formula <- formula(Terms)
 
     fit$x1 <- ans[[26]]
     fit$lam <- matrix(ans[[27]], nrow = size1, ncol = 3)
     fit$x2 <- ans[[30]]
     fit$lam2 <- matrix(ans[[31]], nrow = size1, ncol = 3)
-    
+
     fit$surv <- matrix(ans[[29]], nrow = size2, ncol = 3)
     fit$surv2 <- matrix(ans[[33]], nrow = size2, ncol = 3)
 
@@ -543,7 +549,7 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$n.iter <- ans[[38]]
 
     if (typeof == 0){
-    	fit$n.knots<-n.knots
+	fit$n.knots<-n.knots
 	fit$kappa <- ans[[41]]    
 	fit$DoF <- ans[[42]]
 	fit$cross.Val<-cross.validation
@@ -552,7 +558,7 @@ if((all.equal(length(hazard),1)==T)==T){
     }
 	if(typeof == 1) fit$time <- ans$time
 #AD:
-    
+
     fit$LCV <- ans$LCV[1]
     fit$AIC <- ans$LCV[2]
     fit$npar <- np
@@ -569,7 +575,7 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$equidistant <- equidistant
     fit$nbintervR <- nbintervR
     fit$istop <- ans$istop
-    
+
     fit$shape.weib <- ans$shape.weib
     fit$scale.weib <- ans$scale.weib
     fit$Names.data <- Names.data
@@ -613,8 +619,8 @@ if((all.equal(length(hazard),1)==T)==T){
 	}
 
 #===============================================	
-
-
+if (length(Xlevels) >0)fit$Xlevels <- Xlevels
+    fit$contrasts <- contr.save
     attr(fit,"joint")<-joint
     attr(fit,"subcluster")<-FALSE
     class(fit) <- "frailtyPenal"
@@ -729,6 +735,8 @@ if((all.equal(length(hazard),1)==T)==T){
 			}
 #=========================================================>
 			assign <- lapply(attrassign(X2, newTerms2)[-1], function(x) x - 1)
+			Xlevels2 <- .getXlevels(newTerms2, m2)
+			contr.save2 <- attr(X2, 'contrasts')
 #========================================>
 			if(length(vec.factordc) > 0){
 				positiondc <- unlist(assign,use.names=F)
@@ -1099,8 +1107,11 @@ if((all.equal(length(hazard),1)==T)==T){
 		}
 	}else{
 		fit$global_chisq.test_d <- 0
-	}	
-  
+	}
+if (length(Xlevels) >0)	fit$Xlevels <- Xlevels
+    fit$contrasts <- contr.save
+if (length(Xlevels2) >0) fit$Xlevels2 <- Xlevels2
+    fit$contrasts2 <- contr.save2
 	attr(fit,"joint")<-joint
 	attr(fit,"subcluster")<-FALSE
 	class(fit) <- "jointPenal"
@@ -1414,8 +1425,8 @@ if (length(subcluster))
 	}else{
 		fit$global_chisq.test <- 0
 	}
-
-
+if (length(Xlevels) >0) fit$Xlevels <- Xlevels
+    fit$contrasts <- contr.save
     attr(fit,"joint")<-joint
     attr(fit,"subcluster")<-TRUE
     class(fit) <- "nestedPenal"

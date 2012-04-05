@@ -151,6 +151,10 @@ provided for print,  plot and summary. The following components are included in 
 \item{global_chisq.test}{a binary variable equals to 0 when no multivariate Wald is given, 1 otherwise.}
 \item{p.global_chisq}{a vector with the p_values for each global multivariate Wald test.}
 \item{names.factor}{Names of the "as.factor" variables.}
+\item{Xlevels}{vector of the values that factor might have taken for the recurrent part.}
+\item{contrasts}{type of contrast for factor variable for the recurrent part.}
+\item{Xlevels2}{vector of the values that factor might have taken for the death part.}
+\item{contrasts2}{type of contrast for factor variable for the death part.}
 }
 
 \note{
@@ -163,8 +167,8 @@ provided for print,  plot and summary. The following components are included in 
 
 
 \references{
-V. Rondeau, Y. Mazroui and J. R. Gonzalez. Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation.
-\emph{Journal of Statistical Software, In press}, 2012.
+V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametrical estimation.
+\emph{Journal of Statistical Software} \bold{47}, 1-28.
 
 V. Rondeau, S. Mathoulin-Pellissier, H. Jacqmin-Gadda, V. Brouste, P. Soubeyran (2007). Joint frailty models for recurring events and death using maximum penalized likelihood estimation:application on cancer events.
 \emph{Biostatistics}, \bold{8},4, 708-721.

@@ -1,16 +1,22 @@
 "summary.frailtyPenal"<-
  function(object,level=.95, len=6, d=2, lab="hr", ...)
 {
+	
 	x <- object
 	if (!inherits(x, "frailtyPenal")) 
 		stop("Object must be of class 'frailtyPenal'")
 
+	
 	if (is.null(x$coef)){
 		cat("     Shared Gamma Frailty model: No covariates and no confidence interval\n")
 	}else{
 		z<-abs(qnorm((1-level)/2))
 		co <- x$coef
-		se <- sqrt(diag(x$varH))#[-1]
+		if(is.matrix(x$varH)){
+			se <- sqrt(diag(x$varH))#[-1]
+		}else{
+			se <- sqrt(x$varH)
+		}
 		or <- exp(co)
 		li <- exp(co-z * se)
 		ls <- exp(co+z * se)

@@ -1,6 +1,6 @@
 
 \name{frailtypack-package}
-\Rdversion{2.2-22}
+\Rdversion{2.2-23}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
@@ -14,7 +14,7 @@
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.2-22\cr
+     Version: \tab 2.2-23\cr
      Date: \tab 2012-03-09\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab yes\cr
@@ -22,10 +22,11 @@
  Frailtypack now fits several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametrical estimation. 1) A shared gamma frailty model and Cox proportional hazard model. Left truncated, censored data and strata (max=2) are allowed. Clustered and recurrent survival times can be studied (the Andersen-Gill(1982) approach has been implemented for recurrent events). An automatic choice of the smoothing parameter is possible using an approximated cross-validation procedure. 2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope). 3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects. 4) Joint frailty models in the context of joint modelling of recurrent events with terminal event. Prediction values are available. The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 }
 
-\author{Juan R. Gonzalez, Virginie Rondeau, Yassin Mazroui, Audrey Mauguen and Amadou Diakite}
+\author{Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen and Amadou Diakite}
 
 \references{
-V. Rondeau, Y. Mazroui and J. R. Gonzalez. Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation. \emph{Journal of Statistical Software, In press}, 2012.
+V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametrical estimation.
+\emph{Journal of Statistical Software} \bold{47}, 1-28.
 
 V. Rondeau and J. R. Gonzalez. Frailtypack: A computer program for the analysis of correlated failure time data using penalized likelihood estimation. \emph{Computer Methods and Programs in Biomedicine, 80(2)}: \bold{154-164}, 2005.
 

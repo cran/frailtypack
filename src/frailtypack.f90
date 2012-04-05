@@ -345,6 +345,7 @@
 			date(k) = aux(i)
 		endif 
 	end do 
+
 	
 	if(typeof == 0) then
 		nzmax=nz+3

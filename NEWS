@@ -1,0 +1,18 @@
+Changes in Version 2.2-22
+
+  o Fit a Shared Gamma Frailty model using a parametrical estimation.
+
+  o Fit Joint Frailty model for recurrent and terminal events using a parametrical estimation.
+
+  o Fit a Nested Frailty model using a parametrical estimation.
+
+  o Fit an Additive Frailty model using a parametrical estimation.
+
+  o Concordance measures in shared frailty and Cox models (Cmeasures).
+
+  
+Changes in Version 2.2-10
+
+  o NEW VERSION OF FRAILTYPACK including Additive, Nested and Joint Frailty models
+  o Paper submitted to Journal of Stat Software
+
