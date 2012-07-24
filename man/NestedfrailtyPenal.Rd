@@ -29,7 +29,8 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{X_{ijk}}
 
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
              joint = FALSE, recurrentAG = FALSE, cross.validation =
-             FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard,nb.int1,nb.int2)
+             FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard = "Splines",nb.int1,nb.int2,
+             intcens = FALSE)
 }
 
 \arguments{
@@ -72,6 +73,7 @@ value for \code{kappa1} (or \code{kappa2}), a solution is to fit the correspondi
   \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard function with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametrical weibull functions. Default is "Splines".}
   
  \item{nb.int1}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi")}
+ \item{intcens}{Not implemented for nested frailty model.}
 
 }
 

@@ -1,3 +1,14 @@
+Changes in Version 2.2-24
+
+  o Fit a Shared Gamma Frailty or a Cox proportional hazard model for interval-censored data.
+	
+  o No longer need to use cluster function for fitting a Cox proportional hazard model
+
+  o Minor bug fixed in Nested Frailty model
+
+  o Printing bug fixed in multivariate Wald test
+
+
 Changes in Version 2.2-22
 
   o Fit a Shared Gamma Frailty model using a parametrical estimation.

@@ -23,6 +23,7 @@
 	double precision,dimension(ndatemax)::dut1,dut2
 	double precision,dimension(0:ndatemax)::ut1,ut2
 	
+
 	j=0
 	theta=0.d0
 	do i=1,np

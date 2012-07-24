@@ -2,6 +2,7 @@
 
 !========================          FUNCPA_WEIB          ====================
 	double precision function funcpasweib(b,np,id,thi,jd,thj,k0)
+
 	use tailles
 	use comon,only:t0,t1,c,nsujet,nva, &
 	nst,stra,ve,effet,ng,g,nig,AG,etaR,etaD,betaR,betaD,kkapa,theta
@@ -25,7 +26,7 @@
 	bh=b
 
 	if (id.ne.0) bh(id)=bh(id)+thi
-	if (jd.ne.0) bh(jd)=bh(jd)+thj    
+	if (jd.ne.0) bh(jd)=bh(jd)+thj
 	
 	if (nst == 1) then
 		betaR= bh(1)**2
@@ -56,16 +57,16 @@
 	cpt = 0
 
 
-!*******************************************     
+!*******************************************
 !---- sans effet aleatoire dans le modele
-!*******************************************     
+!*******************************************
 
 	if (effet.eq.0) then
 		do i=1,nsujet
 			cpt(g(i))=cpt(g(i))+1
 			
 			if(nva.gt.0)then
-				vet = 0.d0   
+				vet = 0.d0
 				do j=1,nva
 					vet =vet + bh(np-nva+j)*dble(ve(i,j))
 				end do
@@ -76,7 +77,7 @@
 			
 			if((c(i).eq.1).and.(stra(i).eq.1))then
 				res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
-			endif  
+			endif
 	
 			if((c(i).eq.1).and.(stra(i).eq.2))then
 				res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
@@ -137,6 +138,7 @@
 			else
 				vet=1.d0
 			endif
+
 			if((c(i).eq.1).and.(stra(i).eq.1))then
 				res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
 			endif  
@@ -233,7 +235,7 @@
 		goto 123
 	end if	
 
-	funcpasweib = res 
+	funcpasweib = res
 
 	do k=1,ng
 		cumulhaz(k)=res1(k)

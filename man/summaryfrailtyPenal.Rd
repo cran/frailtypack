@@ -44,9 +44,8 @@ modSha<-frailtyPenal(Surv(time,status)~age+sex+cluster(id),
 
 # /*** Cox proportional hazard model using Penalized likelihood ***/
 
-modCox<-frailtyPenal(Surv(time,status)~age+sex+cluster(id),
-          n.knots=8,kappa1=10000,data=kidney,Frailty=FALSE,
-	  hazard="Splines")
+modCox<-frailtyPenal(Surv(time,status)~age+sex,n.knots=8,
+	   kappa1=10000,data=kidney,Frailty=FALSE,hazard="Splines")
 
 
 # /*** confidence interval at 95% level (default) ***/

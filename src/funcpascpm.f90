@@ -29,7 +29,7 @@
 	bh=b
 
 	if (id.ne.0) bh(id)=bh(id)+thi
-	if (jd.ne.0) bh(jd)=bh(jd)+thj    
+	if (jd.ne.0) bh(jd)=bh(jd)+thj
 	
 	betacoef = 0.d0
 	
@@ -56,16 +56,16 @@
 	cpt= 0
 
 
-!*******************************************     
+!*******************************************
 !---- sans effet aleatoire dans le modele
-!*******************************************     
+!*******************************************
 
 	if (effet.eq.0) then
 		do i=1,nsujet
 			cpt(g(i))=cpt(g(i))+1
 			
 			if(nva.gt.0)then
-				vet = 0.d0   
+				vet = 0.d0
 				do j=1,nva
 					vet =vet + bh(np-nva+j)*dble(ve(i,j))
 				end do
@@ -100,7 +100,7 @@
 				som1=0.d0
 				som2=0.d0
 				somm1=0.d0
-				somm2=0.d0				
+				somm2=0.d0
 				do gg=1,nbintervR
 					if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
 						som1=betacoef(gg)*(t1(i)-ttt(gg-1))
@@ -167,21 +167,21 @@
 		               end if	
 			endif
 		
-		end do       
-		res = 0.d0         
+		end do
+		res = 0.d0
 		cptg = 0
 		
 ! k indice les groupes
-		do k=1,ng   
+		do k=1,ng
 			if(cpt(k).gt.0)then
 				nb = nig(k)
-				dnb = dble(nig(k))               
+				dnb = dble(nig(k))
 				res = res-res1(k)+res2(k) 
 				cptg = cptg + 1 
-			endif 
+			endif
 		end do
 
-!*******************************************         
+!*********************************************
 !----avec un effet aleatoire dans le modele
 !*********************************************
 

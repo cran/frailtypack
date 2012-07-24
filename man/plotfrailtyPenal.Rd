@@ -58,8 +58,8 @@ plot(modSha,type="surv",conf=FALSE)
 
 # /*** Cox proportional hazard model using Penalized likelihood ***/
 
-modCox<-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
-             n.knots=10,kappa1=10000,data=readmission,Frailty=FALSE,
+modCox<-frailtyPenal(Surv(time,event)~as.factor(dukes),n.knots=10,
+	     kappa1=10000,data=readmission,Frailty=FALSE,
 	     hazard="Splines")
 plot(modCox)
 
