@@ -4,8 +4,11 @@
 	if (!is.null(cl <- x$call)){
 		cat("Call:\n")
 		dput(cl)
-		if (x$type == "counting"){
+		if (x$type == "counting" | x$type == "intervaltronc"){
 			cat("\n      left truncated structure used")
+		}
+		if (x$intcens == TRUE){
+			cat("\n      interval censored data used")
 		}
 		cat("\n")
 	}

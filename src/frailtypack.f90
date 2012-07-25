@@ -6,7 +6,7 @@
 	AGAux,noVar,maxitAux,irep1,np,b,H_hessOut,HIHOut,resOut,LCV, &
 	x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt, &	
 	ni,cpt,ier,k0,ddl,istop,shapeweib,scaleweib,mt1,ziOut,Resmartingale,martingaleCox,&
-	frailtypred,frailtyvar,frailtysd,linearpred,time)
+	frailtypred,frailtyvar,frailtysd,linearpred,time,intcensAux,ttUAux) ! rajout
 
 
 !
@@ -22,22 +22,22 @@
 	integer::groupe,ij,kk,j,k,nz,n,np,cpt,ii,iii,ver,cptstr1,cptstr2, &
 	i,ic,ni,ier,istop,cptni,cptni1,cptni2,ibou,nbou2,id,cptbiais,l, &
 	icen,irep1,nvacross,nstcross,effetcross,mt,mt1
-	integer,dimension(nvaAux)::filtre 
+	integer,dimension(nvaAux)::filtre
 	integer,dimension(nsujetAux)::stracross
 	double precision,dimension(nvaAux)::vax
-	double precision::tt0,tt1
-	double precision::h,ax1,ax2,res,min,max,maxt,str
+	double precision::tt0,tt1,ttU ! rajout
+	double precision::h,ax1,ax2,res,min,max,maxt,str,mint ! rajout de mint
 	double precision,dimension(2)::auxkappa,k0,res01
-	double precision,dimension(2*nsujetAux)::aux
+	double precision,dimension(3*nsujetAux)::aux ! rajout dimension
 	double precision,dimension(np*(np+3)/2)::v
 	double precision,dimension(np)::b
 	double precision,dimension(np,np)::HIH,IH,HI	
 	!******************************************   Add JRG January 05
 	integer::ss,sss,noVar,AGAux,maxitAux,nsujetAux,ngAux,icenAux,nstAux,effetAux, &
-	nzAux,nvaAux
+	nzAux,nvaAux,intcensAux                                                       ! rajout de intcens
 	double precision,dimension(nzAux+6),intent(out)::ziOut
 	double precision::resOut
-	double precision,dimension(nsujetAux)::tt0Aux,tt1Aux
+	double precision,dimension(nsujetAux)::tt0Aux,tt1Aux,ttUAux ! rajout
 	integer,dimension(nsujetAux)::icAux,groupeAux
 	double precision,dimension(nsujetAux)::strAux
 	double precision,dimension(nsujetAux,nvaAux)::vaxAux
@@ -49,11 +49,11 @@
 	!*******************************************  Add JRG May 05 (Cross-validation)	
 	double precision::auxi,ax,bx,cx,tol,ddl,fa,fb,fc,goldens,estimvs, &
 	xmin1,xmin2
-	double precision,dimension(np,np)::y  
+	double precision,dimension(np,np)::y
 !AD:add
 	double precision,dimension(2),intent(out)::LCV,shapeweib,scaleweib
-	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib
-	external::funcpassplines,funcpascpm,funcpasweib
+	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib,funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
+	external::funcpassplines,funcpascpm,funcpasweib,funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
 !AD:	
 !Cpm
 	integer::typeof0,nbintervR0,equidistant,ent,indd
@@ -66,7 +66,19 @@
 	double precision,dimension(1,nsujetAux)::XBeta
 	double precision,dimension(nbintervR0+1)::time
 	integer,dimension(2)::istopp
-!cpm
+
+!verification
+	!print*,nsujetAux,ngAux,icenAux,nstAux,effetAux,nzAux,ax1,ax2,nvaAux
+	!do i =1,5
+	!	print*,i,tt0Aux(i),tt1Aux(i),ttUAux(i),icAux(i),groupeAux(i)
+	!end do
+	!do i=1,5
+	!	print*,(vaxAux(i,j),j=1,nvaAux)
+	!	print*,'--'
+	!end do
+	!STOP
+
+!cpm	
 	istopp=0
 	time = 0.d0
 	lamOut=0.d0
@@ -79,7 +91,8 @@
 	epsb=1.d-3
 	epsd=1.d-3
 !AD:end
-
+	
+	intcens = intcensAux
 	typeof = typeof0
 	model=4	
 	npmax=np
@@ -90,19 +103,21 @@
 	scaleweib = 0.d0
 
 	NSUJETMAX=nsujetAux
-	allocate(t0(nsujetmax),t1(nsujetmax),c(nsujetmax),stra(nsujetmax),g(nsujetmax))
+	allocate(t0(nsujetmax),t1(nsujetmax),tU(nsujetmax),c(nsujetmax),stra(nsujetmax),g(nsujetmax)) ! rajout
 
 	allocate(RisqCumul(nsujetmax))
 	if (typeof == 0) then
-		allocate(nt0(nsujetmax),nt1(nsujetmax))
+		allocate(nt0(nsujetmax),nt1(nsujetmax),ntU(nsujetmax)) ! rajout
 		nt0=0
-		nt1=0		
+		nt1=0
+		ntU=0 ! rajout
 	end if
 	c=0
 	g=0 
 		
-	ndatemax=2*nsujetAux
-
+	ndatemax=2*nsujetAux+sum(icAux) ! on ajoute le nombre de temps d'entree en plus : les tU
+                                    ! c'est a dire le nombre de censures par intervalle
+	
 	allocate(date(ndatemax))
 	date=0.d0
 
@@ -136,15 +151,15 @@
 	nsujet=0
 
 	ndate=0
-	nst=0    
-	ibou=1  
+	nst=0
+	ibou=1
 	ij=0
-	kk=0	
+	kk=0
 	ni=0
-	cpt=0  
+	cpt=0
 
 	b=0.d0
-	resOut=0.d0     
+	resOut=0.d0
 
 	nsujet=nsujetAux
 	ng=ngAux
@@ -172,7 +187,7 @@
 	allocate(ve(nsujetmax,nvarmax))
 
 	ve=0.d0
-	res=0.d0    
+	res=0.d0
 	v=0.d0
  
 	AG=AGAux
@@ -187,6 +202,7 @@
 !------------  lecture fichier -----------------------
 
 	maxt = 0.d0
+	mint = 0.d0
 	
 	cpt = 0
 	k = 0
@@ -195,9 +211,15 @@
 
 	do i = 1,nsujet 
 		str=1
-		if(nst.eq.2)then                     
+
+		if (i.eq.1) then
+			mint = tt0Aux(i) ! affectation du min juste une fois
+		endif
+
+		if(nst.eq.2)then
 			tt0=tt0Aux(i)
 			tt1=tt1Aux(i)
+			ttU=ttUAux(i) ! rajout
 			ic=icAux(i)
 			groupe=groupeAux(i)
 			str=strAux(i)
@@ -205,10 +227,11 @@
 			do j=1,nva
 				vax(j)=vaxAux(i,j)  
 			enddo
-		else 
+		else
 			
 			tt0=tt0Aux(i)
 			tt1=tt1Aux(i)
+			ttU=ttUAux(i) ! rajout
 			ic=icAux(i)
 			groupe=groupeAux(i)
 			
@@ -237,10 +260,12 @@
 			
 			t0(k) = tt0
 			t1(k) = tt1
+			tU(k) = ttU ! rajout
 			g(k) = groupe
 
 ! nb de dc dans un groupe
-			nig(groupe) = nig(groupe)+1 
+! attention on a un nombre de groupes, mais le numero de groupe peut depasser la liste
+			nig(groupe) = nig(groupe)+1
 
 
 			iii = 0
@@ -275,8 +300,9 @@
 				end do 
                       
               
-				t0(k) =  tt0
+				t0(k) = tt0
 				t1(k) = tt1
+				tU(k) = ttU ! rajout
 				g(k) = groupe
 			endif
 		endif
@@ -285,6 +311,14 @@
 			maxt = t1(k)
 		endif
 
+		if ((maxt.lt.tU(k)).and.(tU(k).ne.t1(k))) then ! rajout
+			maxt = tU(k)
+		endif
+		
+		if (mint.gt.t0(k)) then
+			mint = t0(k)
+		endif
+		
 	end do 
 
 !AD:
@@ -292,11 +326,28 @@
 		cens = maxt
 	end if
 !Ad
-! %%%%%%%%%%%%% SANS EFFET ALEATOIRE %%%%%%%%%%%%%%%%%%%%%%%%% 
+
+! rajout Alexandre 18/05/2012
+! création de d : nombre de censures par intervalle dans chaque groupe
+	allocate(d(ngmax))
+	d = 0
+	do i=1,nsujet
+		if (c(i).eq.1) then
+			d(g(i)) = d(g(i)) + 1
+		endif
+	enddo
+	
+	dmax = 0
+	do i=1,ng
+		if (dmax.lt.d(i)) then
+			dmax = d(i)
+		endif
+	enddo
+
+! %%%%%%%%%%%%% SANS EFFET ALEATOIRE %%%%%%%%%%%%%%%%%%%%%%%%%
 
 	nsujet = k
 	
-
 	
 	if (typeof == 0) then	
 		nz1=nz
@@ -317,35 +368,42 @@
 	min = 1.d-10
 	max = maxt
 	
-	do i = 1,2*nsujet
+	do i = 1,(2*nsujet+sum(icAux)) ! changement comme indiqué plus haut
 		do k = 1,nsujet
-			if((t0(k).ge.min))then
+			if (t0(k).ge.min) then
 				if(t0(k).lt.max)then
-				max = t0(k)
+					max = t0(k)
 				endif
 			endif
 			
-			if((t1(k).ge.min))then
+			if (t1(k).ge.min) then
 				if(t1(k).lt.max)then
-				max = t1(k)
+					max = t1(k)
 				endif
 			endif
-		end do  
+			
+			if (tU(k).ne.t1(k)) then
+				if((tU(k).ge.min))then
+					if (tU(k).lt.max) then ! rajout
+						max = tU(k)
+					endif
+				endif
+			endif
+		end do
 		
 		aux(i) = max
-		min = max + 1.d-12
+		min = max + 1.d-12 ! pour virer les doublons
 		max = maxt
 	end do
 	
 	date(1) = aux(1)
 	k = 1
-	do i=2,2*nsujet
+	do i=2,(2*nsujet+sum(icAux))
 		if(aux(i).gt.aux(i-1))then
 			k = k+1
 			date(k) = aux(i)
 		endif 
-	end do 
-
+	end do
 	
 	if(typeof == 0) then
 		nzmax=nz+3
@@ -367,17 +425,22 @@
 		zi(nz+2)=zi(nz)
 		zi(nz+3)=zi(nz)
 		ziOut = zi
- 
-!--------- affectation nt0,nt1----------------------------
+
+!--------- affectation nt0,nt1,ntU----------------------------
 	!	indictronq=0
-		do i=1,nsujet 
+		do i=1,nsujet
 			
 			if(t0(i).eq.0.d0)then
 				nt0(i) = 0
 			endif
 		!	if(t0(i).ne.0.d0)then
 		!		indictronq=1
-		!	endif	
+		!	endif
+!Al:
+			!if ((intcens.eq.1).and.(t1(i).eq.0.d0)) then
+			!	nt1(i) = 0
+			!endif
+!Al:
 			do j=1,ndate
 				if(date(j).eq.t0(i))then
 					nt0(i)=j
@@ -386,10 +449,14 @@
 				if(date(j).eq.t1(i))then
 					nt1(i)=j
 				endif
+
+				if(date(j).eq.tU(i))then ! rajout
+					ntU(i)=j
+				endif
 			end do
-		end do 
-	
-!--------- affectation des vecteurs de splines -----------------       
+		end do
+
+!--------- affectation des vecteurs de splines -----------------
 		n  = nz+2
 
 		call vecsplis(n,ndate) 
@@ -420,57 +487,61 @@
 	end if
 !    Esto se cambia ya que ahora xmin1 es kappa1
  
-      
 	xmin1=ax1 
 	if(nst.eq.2)then
 		xmin2 = ax2
 	else
-		xmin2 = 0.d0 
+		xmin2 = 0.d0
 	endif
 
+	ent = 0
+	indd = 1
 
 	if (typeof == 1) then
+		
+		if (intcens.eq.0) then !! enlever le piecewise-per pour la censure par intervalle
 !------- RECHERCHE DES NOEUDS
 !----------> Enlever les zeros dans le vecteur de temps
-		i=0
-		j=0
+			i=0
+			j=0
 
 !----------> taille - nb de recu
-		do i=1,nsujet
-			if(t1(i).ne.(0.d0).and.c(i).eq.1) then
-				j=j+1
-			endif
-		end do
-		nbrecu=j
+			do i=1,nsujet
+				if(t1(i).ne.(0.d0).and.c(i).eq.1) then
+					j=j+1
+				endif
+			end do
+			nbrecu=j
 
-		n = nbintervR
+			n = nbintervR
 !----------> allocation des vecteur temps
-		allocate(t2(nbrecu))
+			allocate(t2(nbrecu))
 		
 !----------> remplissage du vecteur de temps
-		j=0
-		do i=1,nsujet
-			if (t1(i).ne.(0.d0).and.c(i).eq.1) then
-				j=j+1
-				t2(j)=t1(i)
-			endif
-		end do
+			j=0
+			do i=1,nsujet
+				if (t1(i).ne.(0.d0).and.c(i).eq.1) then
+					j=j+1
+					t2(j)=t1(i)
+				endif
+			end do
 		
 !----------> tri du vecteur de temps
-		indd=1
-		do while (indd.eq.1)
-			indd=0
-			do i=1,nbrecu-1
-				if (t2(i).gt.t2(i+1)) then
-					temp=t2(i)
-					t2(i)=t2(i+1)
-					t2(i+1)=temp
-					indd=1        
-				end if
+			indd=1
+			do while (indd.eq.1)
+				indd=0
+				do i=1,nbrecu-1
+					if (t2(i).gt.t2(i+1)) then
+						temp=t2(i)
+						t2(i)=t2(i+1)
+						t2(i+1)=temp
+						indd=1
+					end if
+				end do
 			end do
-		end do	
 		
-		ent=int(nbrecu/nbintervR)
+			ent=int(nbrecu/nbintervR)
+		endif
 		
 		allocate(ttt(0:nbintervR))
 		
@@ -480,15 +551,17 @@
 		
 		j=0
 		do j=1,nbintervR-1
-			if (equidistant.eq.0) then
-				ttt(j)=(t2(ent*j)+t2(ent*j+1))/(2.d0)
+			if ((equidistant.eq.0).and.(intcens.eq.0)) then ! ici se fait la difference entre piecewise-per et equi
+				ttt(j) = (t2(ent*j)+t2(ent*j+1))/(2.d0)
 			else
-				ttt(j)=(cens/nbintervR)*j
+				ttt(j) = mint + ((cens-mint)/nbintervR)*j
 			endif
 		end do
 		time = ttt
-		deallocate(t2)
-!------- FIN RECHERCHE DES NOEUDS	
+		if (intcens.eq.0) then
+			deallocate(t2)
+		endif
+!------- FIN RECHERCHE DES NOEUDS
 	end if	
 
 !***********************************************************
@@ -510,7 +583,7 @@
 	do l=1,nsujet  
 		stra(l)=1
 	end do
-
+	!print*,"debut"
 	if(typeof == 0) then
 		if(irep1.eq.1)then   !pas recherche du parametre de lissage
 	
@@ -630,13 +703,16 @@
 			auxkappa(1)=xmin1*xmin1
 			auxkappa(2)=0.d0
 	
+			if (intcens.eq.1) then
+				call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+			else
+				call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+			endif
 
-			call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
-	
 			if (istop.ne.1) then
 				istopp(1)=1
 				goto 1000
-			end if	
+			end if
 			if (ni.ge.maxiter) then
 	!			write(*,*)' '
 	!			write(*,*) 'non convergence'
@@ -649,11 +725,11 @@
 	!	write(4,*)'nombre de noeuds:',nz
 	end if
 	nva=nvacross ! pour la recherche des parametres de regression
-	nst=nstcross ! avec stratification si n�cessaire
+	nst=nstcross ! avec stratification si necessaire
 	effet=effetcross ! avec effet initial
 
 	do l=1,nsujet  
-		stra(l)=stracross(l) !r�tablissement stratification
+		stra(l)=stracross(l) !retablissement stratification
 	end do
 
 	if (typeof .ne. 0) then
@@ -667,29 +743,40 @@
 		endif
 	end if
 !------------  indicateur d'effet aleatoire ou non dans le modele
-	!write(*,*)'np',np	
+	!write(*,*)'np',np
 	ca=0.d0
 	cb=0.d0
 	dd=0.d0
 	if (typeof .ne. 0) then
 		allocate(kkapa(2))
 	end if
-
+	!print*,"appel de funcpa"
 	select case(typeof)
 		case(0)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+			if (intcens.eq.1) then
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+			else
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+			endif
 		case(1)
 			allocate(betacoef(nst*nbintervR))
-			
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm)
-		case(2)
-			call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib)
-	end select
 
+			if (intcens.eq.1) then
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm_intcens)
+			else
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm)
+			endif
+		case(2)
+			if (intcens.eq.1) then
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib_intcens)
+			else
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib)
+			endif
+	end select
+	!print*,"fin de funcpa"
 	if (typeof .ne. 0) then
 		deallocate(kkapa)
-	end if	
-
+	end if
 
 	if (istop .ne.1) then
 		istopp(2)=1
@@ -735,11 +822,11 @@
 			Call distancecpm(b,nbintervR*nst,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
 		case(2)
 			typeof2 = 1
-			Call distanceweib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)		
+			Call distanceweib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
 	end select
 
 	resOut=res
-	
+		
 	if (nst == 1) then
 		scaleweib(1) = betaR
 		shapeweib(1) = etaR
@@ -754,17 +841,17 @@
 
 !AD:add LCV
 !LCV(1) The approximate like cross-validation Criterion
-!LCV(2) Akaike information Criterion 
+!LCV(2) Akaike information Criterion
 !     calcul de la trace, pour le LCV (likelihood cross validation)
 	LCV=0.d0
-	if (typeof == 0) then	
+	if (typeof == 0) then
 !		write(*,*)'The approximate like cross-validation Criterion in the non parametric case'
-		call multis(H_hess,I_hess,np,np,np,HI)	
+		call multis(H_hess,I_hess,np,np,np,HI)
 		do i =1,np
 			LCV(1) = LCV(1) + HI(i,i)
-		end do 	
+		end do
 		LCV(1) = (LCV(1)-resnonpen) / nsujet
-	else		
+	else
 !		write(*,*)'=========> Akaike information Criterion <========='
 !		LCV(2) = 2.d0 * np - 2.d0 * resOut
 		LCV(2) = (1.d0 / nsujet) *(np - resOut)
@@ -799,7 +886,7 @@
 	
 	if(typeof==0) then
 
-		if((istopp(1) == 0).and.(istopp(2) == 0)) then	
+		if((istopp(1) == 0).and.(istopp(2) == 0)) then
 			deallocate(I_hess,H_hess)
 			
 			allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1),post_esp(ng),post_SD(ng))	
@@ -868,11 +955,11 @@
 		end if
 	end if
 
-	deallocate(t0,t1,c,stra,g,nig,ve,Hspl_hess,hess, &
-	mm3,mm2,mm1,mm,im3,im2,im1,im,date,cumulhaz,Residus,vuu,RisqCumul)
+	deallocate(t0,t1,tU,c,d,stra,g,nig,ve,Hspl_hess,hess, &
+	mm3,mm2,mm1,mm,im3,im2,im1,im,date,cumulhaz,Residus,vuu,RisqCumul) ! rajouts
 	
 	if (typeof == 0) then
-		deallocate(nt0,nt1,zi)
+		deallocate(nt0,nt1,ntU,zi) ! rajout
 		deallocate(m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m)
 	end if
 	
@@ -883,8 +970,8 @@
 	if (typeof == 2) then
 		deallocate(vvv)
 	end if
-
-	return     
+	
+	return
 	
 	end subroutine frailpenal
       
@@ -1632,7 +1719,7 @@
 
 	use tailles,only:npmax,ndatemax,NSUJETMAX
 	use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst, &
-	date,zi,pe,effet,nz1,nz2,mm3,mm2,mm1,mm,im3,im2,im1,im,typeof
+	date,zi,pe,effet,nz1,nz2,mm3,mm2,mm1,mm,im3,im2,im1,im,typeof,intcens
 
 	use optim
 	implicit none
@@ -1646,8 +1733,8 @@
 	double precision::res,k00,som,h1
 	double precision::aux
 	integer::n,ij,i,k,j,vj,ier,istop,ni
-	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib
-	external::funcpassplines,funcpascpm,funcpasweib
+	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib,funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
+	external::funcpassplines,funcpascpm,funcpasweib,funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
       
 	j=0
 	estimvs=0.d0
@@ -1655,8 +1742,12 @@
 	k0(1) = k00*k00
 	k0(2) = 0.d0
 !	write(*,*)'dans estimvs',n
-
-	call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+	
+	if (intcens.eq.1) then
+		call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+	else
+		call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+	endif
 !AD:	
 	if (istop.eq.4) goto 50
 !AD:	
@@ -1854,32 +1945,33 @@
 	integer::k,l,j,ni,n,i
           
 !--------- calcul de la hessienne ij ------------------
+
 	res = 0.d0
 	res1 = 0.d0
 	do i=1,nsujet
 		if(c(i).eq.1)then  !event
-			u2 = dut(nt1(i)) 
+			u2 = dut(nt1(i))
 			do j = 2,n-2
 				if((date(nt1(i)).ge.zi(j-1)).and. &
 					(date(nt1(i)).lt.zi(j)))then
 					ni = j-1
 				endif
-			end do 
+			end do
 			if(date(nt1(i)).eq.zi(n-2))then
 				ni = n-2
-			endif   
-!------attention numero spline 
+			endif
+!------attention numero spline
 			aux2 = msps(nt1(i),ni,k)*msps(nt1(i),ni,l)
 			if (u2.le.0.d0)then
 				res1 = 0.d0
-			else   
+			else
 				res1 = - aux2/(u2*u2)
-			endif  
-		else !censure  
+			endif
+		else !censure
 			res1 = 0.d0
 		endif 
 		res = res + res1
-	end do   
+	end do
        
 	end subroutine mats
 

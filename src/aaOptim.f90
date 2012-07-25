@@ -147,10 +147,10 @@
 	z=0.d0
 	th=1.d-5
 	eps=1.d-7!1.d-6
-	nfmax=m*(m+1)/2  	  
+	nfmax=m*(m+1)/2
 	ca=epsa+1.d0
 	cb=epsb+1.d0
-	rl1=-1.d+10    
+	rl1=-1.d+10
 	ni=0
 	istop=0
 	da=0.01d0
@@ -160,7 +160,7 @@
 	ep=1.d-20
 	Main:Do 
 
-        call derivaj(b,m,v,rl,k0,fctnames)   
+        call derivaj(b,m,v,rl,k0,fctnames)
 
         rl1=rl
 	if(rl.eq.-1.D9) then
@@ -168,9 +168,9 @@
 		goto 110
 	end if
  
-!	write(*,*)'iteration***',ni,'vrais',rl  
+	!write(*,*)'iteration***',ni,'vrais',rl
 	   
-        dd = 0.d0    
+        dd = 0.d0
 	 
         fu=0.D0
 	
@@ -288,7 +288,7 @@
 		do i=1,m
 			ca=ca+delta(i)*delta(i)
 		end do
-!         write(6,*) 'ca =',ca,' cb =',cb,' dd =',dd
+        !write(6,*) 'ca =',ca,' cb =',cb,' dd =',dd
 		do i=1,m
 			b(i)=b(i)+delta(i)
 		end do
@@ -296,7 +296,7 @@
 		ni=ni+1
 		if (ni.ge.maxiter) then
 			istop=2
- !           write(6,*) 'maximum number of iteration reached'
+!            write(6,*) 'maximum number of iteration reached'
 			goto 110
 		end if	 
 	End do Main     
@@ -466,6 +466,7 @@
 	iun =1
 
 	rl=fctnames(b,m,iun,z,iun,z,k0)
+
         if(rl.eq.-1.d9) then
             rl=-1.d9
             goto 123
@@ -496,7 +497,7 @@
 			v(k)=-(fctnames(b,m,i,th,j,th,k0)-fcith(j)-fcith(i)+rl)/th2
 		end do
 	end do
-      
+
 123   continue	
 	return
 	

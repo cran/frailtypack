@@ -29,24 +29,22 @@ where \eqn{r_0(t)} (resp. \eqn{\lambda_0(t)}) is the recurrent (resp. terminal) 
 
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
             joint = FALSE, recurrentAG = FALSE, cross.validation =
-            FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard,nb.int1,nb.int2)
+            FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard = "Splines",nb.int1,nb.int2
+            intcens = FALSE)
 }
 
 \arguments{
+
   \item{formula}{ a formula object, with the response on the left of a \eqn{\texttildelow}
           operator, and the terms on the right.  The response must be a
           survival object as returned by the 'Surv' function like in survival package.}
 
+  \item{formula.terminalEvent}{a formula object, only requires terms on the right to indicate which variables are modelling the terminal event.}
 
-
-  \item{formula.terminalEvent}{ a formula object, only requires terms on the right to indicate which variables are modelling the terminal event.  }
-
-  \item{data}{ a 'data.frame' in which to interpret the variables named in the
- 'formula' and 'formula.terminalEvent'.}
-
+  \item{data}{a 'data.frame' in which to interpret the variables named in the 'formula' and 'formula.terminalEvent'.}
 
   \item{Frailty}{Logical value. Is model with frailties fitted? If so, variance of frailty parameter is estimated. The default is FALSE}
- 
+
   \item{joint}{Logical value. Is joint model fitted? If so, 'formula.terminalEvent' is required. The default is FALSE}
 
   \item{recurrentAG}{Logical value. Is Andersen-Gill model fitted? If so indicates that recurrent event times with the 
@@ -58,24 +56,31 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
                  The cross validation is not implemented for two strata. The cross validation has been implemented 
                  for a Cox proportional hazard model, with no covariates. The default is FALSE.}
 
-  \item{n.knots}{ integer giving the number of knots to use. Value required in the penalized likelihood estimation.
-  It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions. 
-  Number of knots must be between 4 and 20. (See Note)}
+  \item{n.knots}{integer giving the number of knots to use. Value required in the penalized likelihood estimation.
+                It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions.
+                Number of knots must be between 4 and 20. (See Note)}
 
-  \item{kappa1}{ positive smoothing parameter in the penalized likelihood estimation. The coefficient kappa of the integral of the squared
-          second derivative of hazard function in the fit (penalized log likelihood). To obtain a good
-value for \code{kappa1}, a solution is to fit the corresponding shared frailty model using cross validation (See cross.validation) with the event indicator as the event of interest. 
-We advise the user to identify several possible tuning parameters, note their defaults and look at the sensitivity 
-          of the results to varying them. Value required.(See Note)}
+  \item{kappa1}{positive smoothing parameter in the penalized likelihood estimation. The coefficient kappa of the integral of the squared
+              second derivative of hazard function in the fit (penalized log likelihood). To obtain a good
+              value for \code{kappa1}, a solution is to fit the corresponding shared frailty model using cross validation
+              (See cross.validation) with the event indicator as the event of interest. We advise the user to identify several 
+              possible tuning parameters, note their defaults and look at the sensitivity of the results to varying them. Value required.(See Note)}
 
-  \item{kappa2}{ positive smoothing parameter  in the penalized likelihood estimation for the terminal event rate. To obtain a good
-value for \code{kappa2}, a solution is to fit the corresponding Cox model using cross-validation (See cross.validation) with the death indicator as the event of interest. See kappa1. Stratification is not allowed here. }
+  \item{kappa2}{positive smoothing parameter in the penalized likelihood estimation for the terminal event rate. To obtain a good value
+              for \code{kappa2}, a solution is to fit the corresponding Cox model using cross-validation (See cross.validation) with the
+              death indicator as the event of interest. See kappa1. Stratification is not allowed here. }
 
-  \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350} 
- \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametrical weibull function. Default is "Splines".}
- 
+  \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
+
+  \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard functions with the penalized likelihood estimation,
+              "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant 
+               hazard function using equidistant intervals, "Weibull" for parametrical weibull function. Default is "Splines".}
+
   \item{nb.int1}{Number of intervals (between 1 and 20) for the recurrent parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
-   \item{nb.int2}{Number of intervals (between 1 and 20) for the death parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+
+  \item{nb.int2}{Number of intervals (between 1 and 20) for the death parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+
+  \item{intcens}{Not implemented for joint frailty model.}
 }
 
 

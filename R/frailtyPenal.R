@@ -1,7 +1,7 @@
 
 "frailtyPenal" <-
 function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, recurrentAG=FALSE, 
-             cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1,nb.int2)
+             cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1,nb.int2,intcens=FALSE) # rajout  intcens
 {
 
 #ad 15/02/12 :add Audrey
@@ -29,7 +29,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		if (typeof == 0){
 			size1 <- 100
 			size2 <- 100
-			equidistant <- 2	
+			equidistant <- 2
 			nbintervR <- 0
 			nbintervDC <- 0
 		}
@@ -42,7 +42,7 @@ if((all.equal(length(hazard),1)==T)==T){
 			size2 <- 100
 		}
 	}else{
-		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")		
+		stop ("The hazard argument is incorrectly specified. Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")		
 	}
    } 
 }else{
@@ -67,7 +67,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	if(class(formula)!="formula")stop("The argument formula must be a formula")
 	
 	if(typeof == 0){
-#AD:   
+#AD:
 		if (missing(n.knots))stop("number of knots are required")   
 #AD:	 
 		n.knots.temp <- n.knots	 
@@ -106,7 +106,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	call <- match.call()
 	
 	m <- match.call(expand.dots = FALSE)
-    m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <-  m$... <- NULL
+    m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <-  m$intcens <- m$... <- NULL
     
 
     special <- c("strata", "cluster", "subcluster", "terminal")
@@ -138,14 +138,17 @@ if((all.equal(length(hazard),1)==T)==T){
 	if (NROW(m) == 0)stop("No (non-missing) observations") #nombre ligne different de 0
 		
 	Y <- model.extract(m, "response") # objet de type Surv =Time
-		
-	if (!inherits(Y, "Surv"))stop("Response must be a survival object") #test si c bien un objet de type "Surv"
+	
+	if (intcens == TRUE) {
+		if (!inherits(Y, "SurvIC")) stop("When interval censoring, must use the SurvIC fonction") # rajout !!!!!!!!!
+	} else {
+		if (!inherits(Y, "Surv")) stop("Response must be a survival object") #test si c bien un objet de type "Surv"
+	}
 		
 	ll <- attr(Terms, "term.labels")#liste des variables explicatives
-#cluster(id) as.factor(dukes) as.factor(charlson) sex chemo terminal(death) 
+#cluster(id) as.factor(dukes) as.factor(charlson) sex chemo terminal(death)
 
 #=========================================================>
-
 
 	mt <- attr(m, "terms") #m devient de class "formula" et "terms"
 			
@@ -185,18 +188,17 @@ if((all.equal(length(hazard),1)==T)==T){
 	pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
 	pos2 <- length(unlist(strsplit(x,split="")))-1
 	return(substr(x,start=pos1,stop=pos2))})
-
+	
 	if(length(vec.factor) > 0){
 		vect.fact <- attr(X,"dimnames")[[2]]
-
 		vect.fact <- vect.fact[grep("factor",vect.fact)]
+
 		vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
 		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-		pos2 <- length(unlist(strsplit(x,split="")))-2
+		pos2 <- grep(")",unlist(strsplit(x,split="")))[1]-1
 		return(substr(x,start=pos1,stop=pos2))})		
 		occur <- rep(0,length(vec.factor))
 	
-
 		for(i in 1:length(vec.factor)){
 			occur[i] = sum(vec.factor[i] == vect.fact)
 		}
@@ -210,8 +212,8 @@ if((all.equal(length(hazard),1)==T)==T){
 	terminalEvent <- attr(Terms, "specials")$terminal #nbre de var qui sont en fonction de terminal()
 	
 	dropx <- NULL
-
-	if (length(cluster)){
+	
+	if (length(cluster) & Frailty == TRUE){
 		tempc <- untangle.specials(Terms, "cluster", 1:10)
 		ord <- attr(Terms, "order")[tempc$terms]
 		if (any(ord > 1))stop("Cluster can not be used in an interaction")
@@ -220,10 +222,18 @@ if((all.equal(length(hazard),1)==T)==T){
 		cluster <- strata(m[, tempc$vars], shortlabel = TRUE)
 		dropx <- tempc$terms
 		uni.cluster<-unique(cluster)
-	}else{
-		stop("grouping variable is needed")   
-	}
+	}else if (!length(cluster) & Frailty == TRUE){
 
+		stop("grouping variable is needed")
+
+	}else if (length(cluster) & Frailty == FALSE){
+		stop("cluster not necessary for proportional hazard model")
+	}
+	else if (!length(cluster) & Frailty == FALSE){
+		cluster <- 1:nrow(data) # valeurs inutiles pour un modèle de Cox
+		uni.cluster <- 1:nrow(data)
+	}
+	
 	if(length(uni.cluster)==1){ 
 		stop("grouping variable must have more than 1 level")   
 	}
@@ -291,13 +301,21 @@ if((all.equal(length(hazard),1)==T)==T){
 	
 	type <- attr(Y, "type")
 
-	if (type != "right" && type != "counting"){ 
+	if (type != "right" && type != "counting" && type != "interval" && type != "intervaltronc") { # Cox supporte desormais la censure par intervalle
 		stop(paste("Cox model doesn't support \"", type, "\" survival data", 
 		sep = ""))
 	}
 
-	if (type != "counting" && recurrentAG){
+	if ((type == "interval" || type == "interval2" || type == "intervaltronc") && intcens == FALSE) { # rajout
+		stop("You are trying to do interval censoring without intcens = TRUE")
+	}
+
+	if (type != "counting" && recurrentAG) {
 		stop("recurrentAG needs counting process formulation")
+	}
+	
+	if (intcens == TRUE & recurrentAG == TRUE) {
+		stop("recurrentAG invalid for interval censored data")
 	}
 	
 	#drop contient les position liees au fonction() ic ex:cluster(id) et terminal(death)
@@ -342,16 +360,36 @@ if((all.equal(length(hazard),1)==T)==T){
 	
 	n<-nrow(X)    
 
-	if (type=="right"){
-		tt0 <- rep(0,n)
-		tt1 <- Y[,1]
-		cens <- Y[,2]
-	}else{
-		tt0 <- Y[,1]
-		tt1 <- Y[,2]
-		cens <- Y[,3]
+
+#add Alexandre 04/06/2012
+#lire les données differemment si censure par intervalle
+	if (intcens==TRUE) {
+		if (type=="intervaltronc") {
+			tt0 <- Y[,1]
+			tt1 <- Y[,2]
+			ttU <- Y[,3]
+			cens <- Y[,4]
+		} else {
+			tt0 <- rep(0,n)
+			tt1 <- Y[,1]
+			ttU <- Y[,2]
+			cens <- Y[,3]
+			tt1[tt1==0] <- 0.1
+		}
+	} else {
+		if (type=="right"){
+			tt0 <- rep(0,n)
+			tt1 <- Y[,1]
+			cens <- Y[,2]
+			ttU <- Y[,1] # rajouter quand meme dans frailPenal mais ne sera pas utilisé
+		} else {
+			tt0 <- Y[,1]
+			tt1 <- Y[,2]
+			cens <- Y[,3]
+			ttU <- Y[,2] # ne sera pas pris en compte dans le tri des temps de survie dans frailtypack.f90
+		}			# attention ne pas mettre de 0 sinon en cas de left trunc probleme dans la logV
 	}
-	
+
 	if (min(cens)==0) cens.data<-1
 	if (min(cens)==1 && max(cens)==1) cens.data<-0
 
@@ -359,8 +397,8 @@ if((all.equal(length(hazard),1)==T)==T){
 	if (typeof == 0){
 		crossVal<-ifelse(cross.validation,0,1)
 	}	
-	
-	
+
+
 	flush.console()
 	
 	ptm<-proc.time()
@@ -378,7 +416,6 @@ if((all.equal(length(hazard),1)==T)==T){
 				k <- k + occur[i]-1
 		}
 	}
-
 #==================================
 # Begin SHARED MODEL
 #
@@ -394,7 +431,7 @@ if((all.equal(length(hazard),1)==T)==T){
 			 nb.int1 <-20
 			indic.nb.int1 <- 1 # equals 1 for nb.int1 > 20	 
 		}else{
-			indic.nb.int1 <- 0 # equals 1 for nb.int1 < 20
+			indic.nb.int1 <- 0 # equals 0 for nb.int1 < 20
 		}
 		nbintervR <- nb.int1
 		size1 <- 3*nbintervR
@@ -474,12 +511,14 @@ if((all.equal(length(hazard),1)==T)==T){
 				frailty.sd=as.double(rep(0,as.integer(length(uni.cluster)))),
 				linear.pred=as.double(rep(0,n)),
 				time=as.double(rep(0,(nbintervR+1))),
+				as.integer(intcens), # rajout
+				as.double(ttU), # rajout
 				PACKAGE = "frailtypack")
 #AD:
 
     if (ans$istop == 4){
 	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")    
-     }
+    }
 
     if (ans$istop == 2){
          warning("Model did not converge. Change the 'maxit' parameter")
@@ -500,7 +539,7 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$n <- n
     fit$groups <- length(uni.cluster)
     fit$n.events <- ans[[39]]
-    if(as.character(typeof)=="0"){    
+    if(as.character(typeof)=="0"){
         fit$logLikPenal <- ans[[24]]
     }else{
         fit$logLik <- ans[[24]]
@@ -576,15 +615,17 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$nbintervR <- nbintervR
     fit$istop <- ans$istop
 
+    fit$intcens <- intcens # rajout
+
     fit$shape.weib <- ans$shape.weib
     fit$scale.weib <- ans$scale.weib
     fit$Names.data <- Names.data
-    fit$Names.cluster <- Names.cluster
+    if (Frailty) fit$Names.cluster <- Names.cluster
     fit$Frailty <- Frailty
     if(Frailty){  
 	fit$martingale.res <- ans$martingale.res
 	fit$frailty.pred <- ans$frailty.pred
-	fit$frailty.var <- ans$frailty.var	
+	fit$frailty.var <- ans$frailty.var
 	fit$frailty.sd <- ans$frailty.sd
 	
     }else{
@@ -601,7 +642,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		VarBeta <- fit$varH#[2:(nvar+1),2:(nvar+1)] 
 		nfactor <- length(vec.factor)
 		p.wald <- rep(0,nfactor)
-		
+
 		fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
 		fit$dof_chisq <- occur
 		fit$global_chisq.test <- 1
@@ -1194,12 +1235,13 @@ if (length(subcluster))
 	subgbyg <- subgrpe(grp,as.integer(subcluster))
 	maxng <- max(subgbyg)
 	ngg <- length(uni.cluster)
+
 #	cat("nombre de sujet par groupe\n")
 #	print(grp)
 #	cat("nombre de sous-groupe par groupe\n")
 #	print(subgbyg)	
 #### group and subgroup
-
+	
     ans <- .Fortran("nested",
                 as.integer(n),
                 as.integer(length(uni.cluster)),
@@ -1365,7 +1407,11 @@ if (length(subcluster))
 	frailty.pred.subgroup <- as.data.frame(matrix(round(ans$frailty.pred.subgroup,6),ncol=maxng))
 	rownames(frailty.pred.subgroup) <- nom1
 	colnames(frailty.pred.subgroup) <- nom2
-	if(sum(which(subgbyg < max(subgbyg)))>0)frailty.pred.subgroup[which(subgbyg < max(subgbyg)),(subgbyg[which(subgbyg < max(subgbyg))]+1):max(subgbyg)] <- "."
+	for (i in 1:ngg) {
+		if (subgbyg[i] < max(subgbyg)) {
+			frailty.pred.subgroup[i,(subgbyg[i]+1):max(subgbyg)] <- "."
+		}
+	}
 	fit$frailty.pred.subgroup <- frailty.pred.subgroup
 
 #	fit$frailty.var.group <- ans$frailty.var.group

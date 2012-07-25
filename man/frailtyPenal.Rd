@@ -6,9 +6,9 @@
 \title{ Fit a Shared Gamma Frailty model using a semi-parametrical penalized likelihood estimation or parametrical estimation }
 
 \description{Fit a shared gamma frailty model using a semi-parametrical Penalized Likelihood estimation or parametrical estimation on the hazard function.
-Left truncated and censored data and strata (max=2) are allowed.
+Left truncated, right-censored data, interval-censored data and strata (max=2) are allowed.
 It allows to obtain a non-parametrical smooth hazard of survival function.
-This approach is different from the partial penalized likelihood approach of Therneau et al. 
+This approach is different from the partial penalized likelihood approach of Therneau et al.
  
 The hazard function, conditionnal on the frailty term \eqn{z_i}, of a shared frailty model for the \eqn{j^{th}} subject in the \eqn{i^{th}} group:
 
@@ -27,22 +27,25 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\bold{\beta}} the
 
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
             joint = FALSE, recurrentAG = FALSE, cross.validation =
-            FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard,
-	    nb.int1,nb.int2)
+            FALSE, n.knots, kappa1, kappa2, maxit = 350, hazard = "Splines",
+	    nb.int1,nb.int2,intcens = FALSE)
 }
 
 \arguments{
+
   \item{formula}{ a formula object, with the response on the left of a \eqn{\texttildelow}
           operator, and the terms on the right.  The response must be a
-          survival object as returned by the 'Surv' function like in survival package.}
+          survival object as returned by the 'Surv' function like in survival package.
+          In case of interval-censored data, the response must be an object as returned by
+          the 'SurvIC' function from this package }
 
   \item{formula.terminalEvent}{Not required.}
 
-  \item{data}{ a 'data.frame' in which to interpret the variables named in the
- 'formula'.}
-  
-  \item{Frailty}{Logical value. Is model with frailties fitted? If so, variance of frailty parameter is estimated. If not, Cox proportional hazard model is estimated using Penalized Likelihood on the hazard function. The default is TRUE}
- 
+  \item{data}{ a 'data.frame' in which to interpret the variables named in the 'formula'.}
+
+  \item{Frailty}{Logical value. Is model with frailties fitted? If so, variance of frailty parameter is estimated. 
+              If not, Cox proportional hazard model is estimated using Penalized Likelihood on the hazard function. The default is TRUE}
+
   \item{joint}{Not required.} 
 
   \item{recurrentAG}{Logical value. Is Andersen-Gill model fitted? If so indicates that recurrent event times with the 
@@ -52,27 +55,33 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
   \item{cross.validation}{Logical value. Is cross validation procedure used for estimating smoothing parameter 
                  in the penalized likelihood estimation?
                  If so a search of the smoothing parameter using cross validation is done, with kappa1 as the seed.
-                 The cross validation is not implemented for two strata. The cross validation has been implemented 
+                 The cross validation is not implemented for two strata, neither for interval-censored data. The cross validation has been implemented 
                  for a Cox proportional hazard model, with no covariates. The default is FALSE.}
 
   \item{n.knots}{ integer giving the number of knots to use. Value required in the penalized likelihood estimation.
-  It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions. 
-  Number of knots must be between 4 and 20. (See Note)}
+                It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions. 
+                Number of knots must be between 4 and 20. (See Note)}
 
   \item{kappa1}{ positive smoothing parameter in the penalized likelihood estimation. The coefficient kappa of the integral of the squared
           second derivative of hazard function in the fit (penalized log likelihood). To obtain an initial 
-value for \code{kappa1} (or \code{kappa2}), a solution is to fit the corresponding shared frailty model using cross validation (See cross.validation). 
-We advise the user to identify several possible tuning parameters, note their defaults and look at the sensitivity 
+          value for \code{kappa1} (or \code{kappa2}), a solution is to fit the corresponding shared frailty model using cross validation (See cross.validation).
+          We advise the user to identify several possible tuning parameters, note their defaults and look at the sensitivity 
           of the results to varying them. Value required.(See Note)}
 
   \item{kappa2}{positive smoothing parameter in the penalized likelihood estimation for the second stratum, when data are stratified. See kappa1. }
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
-  
- \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametrical weibull functions. Default is "Splines".}
- 
-\item{nb.int1}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
-\item{nb.int2}{Argument used only for the Joint frailty model.}
+
+  \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard functions with the penalized likelihood estimation, 
+            "Piecewise-per" for piecewise constant hazard function using percentile (not available for interval-censored data), "Piecewise-equi" for piecewise constant hazard 
+            function using equidistant intervals, "Weibull" for parametrical weibull functions. Default is "Splines".}
+
+  \item{nb.int1}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+
+  \item{nb.int2}{Argument used only for the Joint frailty model.}
+
+  \item{intcens}{Logical value. Is model with interval-censored data fitted ? To correctly input your times, please refer to the 'SurvIC' function. The default is FALSE.}
+
 }
 
 \details{
@@ -146,7 +155,7 @@ The following components are included in a 'frailtyPenal' object for shared frai
 
 \note{
 
-"Kappa" (kappa1 and kappa2) and "n.knots" are the arguments that the user have to change if the fitted model does not converge. 
+"Kappa" (kappa1 and kappa2) and "n.knots" are the arguments that the user have to change if the fitted model does not converge.
 "n.knots" takes integer values between 4 and 20. But with n.knots=20, the model would take a long time to converge. So, usually, begin first with n.knots=7, and increase it step by step until it converges.
 "Kappa" only takes positive values. So, choose a value for Kappa (for instance 10000), and if it does not converge, multiply or devide this value by 10 or 5 until it converges.
 
@@ -169,7 +178,7 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 
  }
 
- 
+
 
 \seealso{
 \code{\link{print.frailtyPenal}},
@@ -192,8 +201,8 @@ frailtyPenal(Surv(time,status)~ cluster(id)+sex+age,
  ###  COX proportional hazard model (SHARED without frailties) ### 
  ### estimated with penalized likelihood ###
 
-frailtyPenal(Surv(time,status)~sex+age+cluster(id),
-             n.knots=12,kappa1=10000,data=kidney,Frailty=FALSE)
+frailtyPenal(Surv(time,status)~sex+age,n.knots=12,kappa1=10000,
+	     data=kidney,Frailty=FALSE)
 
 ###  Shared model with truncated data ###
 

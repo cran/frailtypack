@@ -14,9 +14,9 @@ cat("frailtypack test for shared model ...\n")
 
 data("readmission")
 
-mod.cox.gap <- frailtyPenal(Surv(time, event) ~ cluster(id)+
-  dukes + charlson + sex + chemo, Frailty = FALSE,
-  n.knots = 10, kappa1 = 1, data = readmission, cross.validation = TRUE)
+mod.cox.gap <- frailtyPenal(Surv(time, event) ~ dukes + 
+  charlson + sex + chemo, Frailty = FALSE, n.knots = 10,
+  kappa1 = 1, data = readmission, cross.validation = TRUE)
 
 print(mod.cox.gap, digits = 4)
 
@@ -34,7 +34,7 @@ print(mod.sha.gap, digits = 4)
 ### Stratified shared frailty model with gap times
 #########################################################################
 
-mod.sha.str.gap <- frailtyPenal(Surv(time, event)~ cluster(id) +
+mod.sha.str.gap <- frailtyPenal(Surv(time, event) ~ cluster(id) +
   charlson + dukes + chemo + strata(sex), Frailty = TRUE,
   n.knots = 10, kappa1 = 2.11e+08, kappa2 = 2.11e+08,
   data = readmission)
@@ -52,4 +52,3 @@ plot(mod.cox.gap, type.plot = "survival", main = "Cox model", conf.bands = TRUE)
 plot(mod.sha.gap, type.plot = "survival", main = "Shared", conf.bands = TRUE)
 plot(mod.sha.str.gap, type.plot = "survival", main = "Shared + Stratification",
   conf.bands = TRUE, pos.legend = "bottomleft", cex.legend = 1)
-

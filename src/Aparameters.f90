@@ -21,9 +21,9 @@
 
 !*****dace2
 	double precision,dimension(:),allocatable,save::t0dc,t1dc
-	double precision,dimension(:),allocatable,save::t0,t1,t2,t3
+	double precision,dimension(:),allocatable,save::t0,t1,t2,t3,tU
 	integer,dimension(:),allocatable,save:: c, cdc
-	integer,dimension(:),allocatable,save:: nt0,nt1
+	integer,dimension(:),allocatable,save:: nt0,nt1,ntU
 	integer,dimension(:),allocatable,save:: nt0dc,nt1dc
 	integer,save::nsujet,nva,nva1,nva2,ndate,ndatedc,nst
 !*****dace4
@@ -88,6 +88,10 @@
 !Weib
 	double precision,save::etaR,etaD,betaR,betaD
 	integer,save::indic_tronc
+!censure par intervalle
+	integer,dimension(:),allocatable,save::d
+	integer,save::dmax
+	integer::intcens
 	
 	end module comon
 	

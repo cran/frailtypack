@@ -6,7 +6,8 @@ survival,
 slope,
 subcluster,
 terminal,
-Cmeasures
+Cmeasures,
+SurvIC
 )
 import("survival","boot")
 S3method(plot,frailtyPenal)
@@ -25,6 +26,6 @@ S3method(summary,frailtyPenal)
 S3method(summary,jointPenal)   
 S3method(summary,nestedPenal)  
 
-S3method(print,Cmeasures) 
+S3method(print,Cmeasures)
                 
 
