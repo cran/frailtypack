@@ -1,6 +1,6 @@
-6414844d87dca24d0e625aec70e7be6a *DESCRIPTION
+07aec3c82e9402a083d96c57fabf9bbb *DESCRIPTION
 bca7c6c813a28a907aa5af3e9d0d1869 *NAMESPACE
-469973f56d04ddc8a7c9eaf13343a45a *NEWS
+308825676f1ba42ae5f1839741fdf0a0 *NEWS
 f7d0751a0e7036fb9297fd2bfdcc785d *R/CbootstrapFP.R
 6a9ad6e502f4d9ebd310f7fc788d16df *R/Cmeasures.R
 dadbc75ebc6c9f1aeb9aa12d703c6e0b *R/SurvIC.R
@@ -37,6 +37,7 @@ fca5ecd90d6f651c93aeb8149b9ea984 *THANKS
 01e254beb228d8423e8e02bad08d01b7 *data/dataJoint.rda
 ad5bc915f52b8bdd060dd81bf289d53e *data/dataJointClus.rda
 be6e167944b7ee30df6f022df7103111 *data/dataNested.rda
+892e0104f1756f409153b55b413e8516 *data/diabetes.rda
 b81af115c94af71ee49b52dba2379e77 *data/readmission.rda
 a1fdfb372f22c5dac49689edef11da7e *demo/00Index
 0b9d7b169ea5b30cfe6d716901cee863 *demo/frailtypack_additivePenal.R
@@ -48,14 +49,15 @@ f5481f34092437d9279c54b3bcc19c23 *inst/CITATION
 0dc992c285353338bb232ece9d956e0b *man/ForInternalUse.Rd
 b62c79e2bb8219f823fa4e58bc834d5e *man/JointfrailtyPenal.Rd
 c941f4b0cb1a3f95d91cde79bea2aaa6 *man/NestedfrailtyPenal.Rd
-4066d15b6691ec7654834f360775f577 *man/SurvIC.Rd
+f4e88cee6959e842706e0c9b9bcf62c0 *man/SurvIC.Rd
 40ed22147b379b516cb7beeb56995035 *man/additivePenal.Rd
 b75be06056f2db226abb8a0cd80c41cb *man/dataAdditive.Rd
 e37425c2144e57531df9fb4cdf7e3539 *man/dataJoint.Rd
 a751253c03d476c3c301725f9b630b02 *man/dataJointClus.Rd
 1d0757a23c8ecad60b22a7f4774da9a6 *man/dataNested.Rd
+53398adf1e77b9be202d2dcf58d82e4e *man/diabetes.Rd
 81b86c549c99927bd5fe579e2fcabb20 *man/frailtyPenal.Rd
-2616c31f1c0bd469fde39fa02b0c4326 *man/frailtypack-package.Rd
+6c3d2721cd8ced82381f394811d964da *man/frailtypack-package.Rd
 04799dfac74eb1a4bd395fc02567bf2a *man/hazard.Rd
 e5979818141f263c8cca0274c1dfd02e *man/plotAdditive.Rd
 721364a0ec37542f8e3d5708446a3085 *man/plotFrailtyPenal.Rd
