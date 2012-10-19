@@ -105,11 +105,12 @@ if((all.equal(length(hazard),1)==T)==T){
 	}
 	call <- match.call()
 	
-	m <- match.call(expand.dots = FALSE)
-    m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <-  m$intcens <- m$... <- NULL
+	m <- match.call(expand.dots = FALSE) # recupere l'instruction de l'utilisateur
+
+	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <-  m$intcens <- m$... <- NULL
     
 
-    special <- c("strata", "cluster", "subcluster", "terminal")
+	special <- c("strata", "cluster", "subcluster", "terminal")
 		
 	Terms <- if (missing(data)){ 
 		terms(formula, special)
@@ -125,24 +126,65 @@ if((all.equal(length(hazard),1)==T)==T){
 	m$formula <- Terms
 	
 	
-	
-	
 	m[[1]] <- as.name("model.frame") ##m[[1]]=frailtypenal, il le remplace par model.frame en fait
-		
+
 #model.frame(formula = Surv(time, event) ~ cluster(id) + as.factor(dukes) + 
 #as.factor(charlson) + sex + chemo + terminal(death), data = readmission)
 		
 	m <- eval(m, sys.parent()) #ici la classe de m est un data.frame donc il recupere ce qu'on lui donne en argument
 
+	cluster <- attr(Terms, "specials")$cluster #nbre de var qui sont en fonction de cluster()
+	subcluster <- attr(Terms, "specials")$subcluster #nbre de var qui sont en fonction de subcluster()
+
+	classofY <- attr(model.extract(m, "response"),"class") # recuperation de la classe de reponse avant tri des donnees Surv ou SurvIC
+	typeofY <- attr(model.extract(m, "response"),"type") # type de reponse : interval etc..
+	
+#Al : tri du jeu de donnees par cluster croissant
+	if (length(cluster)){
+		tempc <- untangle.specials(Terms, "cluster", 1:10)
+		ord <- attr(Terms, "order")[tempc$terms]
+		if (any(ord > 1))stop("Cluster can not be used in an interaction")
+		m <- m[order(m[,tempc$vars]),] # soit que des nombres, soit des caracteres
+		cluster <- strata(m[, tempc$vars], shortlabel = TRUE)
+		uni.cluster <- unique(cluster)
+	}
+	
+# verification de la sutructure nested si besoin
+	if (length(subcluster) && Frailty == TRUE){
+		tempsub <- untangle.specials(Terms, "subcluster", 1:10)
+		ordsub <- attr(Terms, "order")[tempsub$terms]		
+		if (any(ordsub > 1))stop("subcluster can not be used in an interaction")
+
+		if (any(ifelse(apply(ifelse(table(m[,tempsub$vars],m[,tempc$vars])>0,1,0),1,sum)==1,FALSE,TRUE))){
+			stop("nested structure is necessary to fit a nested model")
+		}
 		
+		# tri par ordre croissant de subcluster a l'interieur des cluster
+		m <- m[order(m[,tempc$vars],m[,tempsub$vars]),]
+		subcluster <- strata(m[, tempsub$vars], shortlabel = TRUE)
+
+		subcluster <- as.integer(subcluster) # a determiner si il y en a besoin
+		curr <- subcluster[1]
+		subcluster[1] <- 1
+		for (i in 2:length(subcluster)) {
+			if (subcluster[i] == curr) { subcluster[i] <- subcluster[i-1] }
+			else {
+				curr <- subcluster[i]
+				subcluster[i] <- subcluster[i-1] + 1
+			}
+		}
+	}
+#Al
+
 	if (NROW(m) == 0)stop("No (non-missing) observations") #nombre ligne different de 0
 		
 	Y <- model.extract(m, "response") # objet de type Surv =Time
-	
+
 	if (intcens == TRUE) {
-		if (!inherits(Y, "SurvIC")) stop("When interval censoring, must use the SurvIC fonction") # rajout !!!!!!!!!
+		if (classofY != "SurvIC") stop("When interval censoring, must use the SurvIC fonction") # rajout !!!!!!!!!
 	} else {
-		if (!inherits(Y, "Surv")) stop("Response must be a survival object") #test si c bien un objet de type "Surv"
+		#if (!inherits(Y, "Surv")) stop("Response must be a survival object") #test si c bien un objet de type "Surv"
+		if (classofY != "Surv") stop("Response must be a survival object")
 	}
 		
 	ll <- attr(Terms, "term.labels")#liste des variables explicatives
@@ -153,7 +195,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	mt <- attr(m, "terms") #m devient de class "formula" et "terms"
 			
 	X <- if (!is.empty.model(mt))model.matrix(mt, m, contrasts) #idem que mt sauf que ici les factor sont divise en plusieurs variables
-			
+
 #=========================================================>
 # On determine le nombre de categorie pour chaque var categorielle
 	strats <- attr(Terms, "specials")$strata #nbre de var qui sont en fonction de strata()
@@ -170,7 +212,7 @@ if((all.equal(length(hazard),1)==T)==T){
 
 		pos1 <- grep("r",unlist(strsplit(ll_tmp,split="")))[1]+2
 		pos2 <- length(unlist(strsplit(ll_tmp,split="")))-1
-		Names.cluster <- substr(ll_tmp,start=pos1,stop=pos2)
+		Names.cluster <- substr(ll_tmp,start=pos1,stop=pos2) # nom du cluster
 	}
 	if (length(strats)){
 		ll <- ll[-grep("strata",ll)]
@@ -196,7 +238,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
 		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
 		pos2 <- grep(")",unlist(strsplit(x,split="")))[1]-1
-		return(substr(x,start=pos1,stop=pos2))})		
+		return(substr(x,start=pos1,stop=pos2))})
 		occur <- rep(0,length(vec.factor))
 	
 		for(i in 1:length(vec.factor)){
@@ -217,7 +259,6 @@ if((all.equal(length(hazard),1)==T)==T){
 		tempc <- untangle.specials(Terms, "cluster", 1:10)
 		ord <- attr(Terms, "order")[tempc$terms]
 		if (any(ord > 1))stop("Cluster can not be used in an interaction")
-		
 		
 		cluster <- strata(m[, tempc$vars], shortlabel = TRUE)
 		dropx <- tempc$terms
@@ -299,7 +340,8 @@ if((all.equal(length(hazard),1)==T)==T){
 
 	}
 	
-	type <- attr(Y, "type")
+	#type <- attr(Y, "type")
+	type <- typeofY
 
 	if (type != "right" && type != "counting" && type != "interval" && type != "intervaltronc") { # Cox supporte desormais la censure par intervalle
 		stop(paste("Cox model doesn't support \"", type, "\" survival data", 
@@ -627,7 +669,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	fit$frailty.pred <- ans$frailty.pred
 	fit$frailty.var <- ans$frailty.var
 	fit$frailty.sd <- ans$frailty.sd
-	
+
     }else{
 
 	fit$martingaleCox <- ans$martingaleCox
@@ -1166,7 +1208,7 @@ if (length(Xlevels2) >0) fit$Xlevels2 <- Xlevels2
 effet <- 1
 if (length(subcluster))  
  {
-         if(equidistant %in% c(0,1)){
+        if(equidistant %in% c(0,1)){
 		if (missing(nb.int1)) stop("Time interval 'nb.int1' is required")
 		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")	
 		if (nb.int1 < 1) stop("Number of Time 'nb.int2' interval must be between 1 and 20")
@@ -1213,9 +1255,9 @@ if (length(subcluster))
 		}
 		return(res)
 	}
-
+	
 	grp <- grpe(as.integer(cluster))
-
+	
 	subgrpe <- function(g,sg){
 
 		j <- 0
@@ -1231,8 +1273,9 @@ if (length(subcluster))
 		}
 		return(res)
 	}
-
+	
 	subgbyg <- subgrpe(grp,as.integer(subcluster))
+	
 	maxng <- max(subgbyg)
 	ngg <- length(uni.cluster)
 
@@ -1303,7 +1346,7 @@ if (length(subcluster))
 		frailty.sd.group=as.double(rep(0,as.integer(length(uni.cluster)))),
 		frailty.sd.subgroup=as.double(matrix(0,nrow=ngg,ncol=maxng)),
 		linear.pred=as.double(rep(0,n)),
-		PACKAGE = "frailtypack")    
+		PACKAGE = "frailtypack")
 
     if (ans$istop == 4){
 	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")    

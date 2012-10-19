@@ -95,12 +95,27 @@ if((all.equal(length(hazard),1)==T)==T){
     m$formula <- Terms
     m[[1]] <- as.name("model.frame")
     m <- eval(m, sys.parent())
-  
+
+    cluster <- attr(Terms, "specials")$cluster
+
+    classofY <- attr(model.extract(m, "response"),"class")
+    typeofY <- attr(model.extract(m, "response"),"type")
+#Al : tri du jeu de donnees par cluster croissant
+	if (length(cluster)){
+		tempc <- untangle.specials(Terms, "cluster", 1:10)
+		ord <- attr(Terms, "order")[tempc$terms]
+		if (any(ord > 1))stop("Cluster can not be used in an interaction")
+		m <- m[order(m[,tempc$vars]),] # soit que des nombres, soit des caracteres
+		cluster <- strata(m[, tempc$vars], shortlabel = TRUE)
+		uni.cluster <- unique(cluster)
+	}
+#Al
+
     if (NROW(m) == 0) 
         stop("No (non-missing) observations")
    
     Y <- model.extract(m, "response")
-    if (!inherits(Y, "Surv")) 
+    if (classofY != "Surv")
         stop("Response must be a survival object")
     ll <- attr(Terms, "term.labels")
 
@@ -218,7 +233,8 @@ if((all.equal(length(hazard),1)==T)==T){
      }
 
     
-    type <- attr(Y, "type")
+    #type <- attr(Y, "type")
+    type <- typeofY
     if (type != "right" && type != "counting") 
         stop(paste("Cox model doesn't support \"", type, "\" survival data", 
             sep = ""))
