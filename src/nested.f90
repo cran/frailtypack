@@ -840,8 +840,8 @@
 
 	np=nbpara 
 
-	b(np-nva-1)=bgpe!0.1d0! !initialisation alpha(groupe)
-	b(np-nva)=bssgpe!1.0d0!0.15d0   !initialisation eta(sous groupe)
+	b(np-nva-1)=1.d-1!bgpe! !initialisation alpha(groupe)
+	b(np-nva)=1.d0!bssgpe!0.15d0   !initialisation eta(sous groupe)
 
 !	write(*,*)'np ',np
 !	write(*,*)'b ',b
@@ -2435,7 +2435,7 @@
 				ss = ss+w(j)*(auxfunca)
 			else                   !choix=3,essai, res = -1
 				if (choix.eq.3) then
-					auxfunca=dexp(-x(j))
+					auxfunca=func3N(x(j)) !dexp(-x(j))
 					ss = ss+w(j)*(auxfunca)
 				endif
 			endif
@@ -2467,8 +2467,10 @@
 	ig=auxig
 !     initialisation de prod1 et prod2 par le numerateur de l integrant
      
-	prod1(ig)=(dexp(-frail/alpha))&
-	*(frail**(1.d0/alpha-1.d0+mid(ig)))
+	! prod1(ig)=(dexp(-frail/alpha))*(frail**(1.d0/alpha-1.d0+mid(ig)))
+	! reecriture du numerateur pour eviter les bugs quand alpha trop petit
+	prod1(ig) = dexp((1.d0/alpha-1.d0+mid(ig))*dlog(frail)-(frail/alpha))
+
 !	write(*,*)'groupe',ig,'mid',mid(ig),'n_ssgbygrp(ig)',n_ssgbygrp(ig)
 !	write(*,*)'eta',eta,'alpha',alpha,'frail',frail
 	
@@ -2552,8 +2554,12 @@
 !	PROD2(IG)=(DEXP(DBLE(-frail/ALPHA))) &
 !	*(DBLE(frail)**(1.d0/alpha-1.d0))
 	
-	PROD2(IG)=(DEXP(-frail/ALPHA)) &
-	*(frail**(1.d0/alpha-1.d0))	
+!	PROD2(IG)=(DEXP(-frail/ALPHA)) &
+!	*(frail**(1.d0/alpha-1.d0))
+
+	! reecriture du numerateur pour eviter les bugs quand alpha trop petit
+	prod2(ig) = dexp((1.d0/alpha-1.d0)*dlog(frail)-(frail/alpha))
+
 	do issg=1,n_ssgbygrp(ig)
 		do k=1,nsujet
 		if((g(k).eq.ig).and.(ssg(k,g(k)).eq.issg))then
@@ -2572,7 +2578,48 @@
 	
 	end function func2N
 
+!================================================
+!================================================
+
+	double precision function func3N(frail)
+
+	use tailles
+	use comon,only:auxig,g,nig &
+	,stra,alpha,eta,indictronq &
+	,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst
+	use commun,only:ssg,ngexact,nssgexact,aux1,aux2,mij,mid
+	use residusM,only:n_ssgbygrp
+	
+	Implicit none
+
+	integer::ig,issg,k
+	double precision::frail
+	double precision,dimension(ngexact)::prod3 !ngmax
+
+	ig = auxig
+	! prod3(ig) = (frail**(1.d0/alpha-1.d0+mid(ig)))*dexp(-frail/alpha)
+	! reecriture du numerateur pour eviter les bugs quand alpha trop petit
+	prod3(ig) = dexp((1.d0/alpha-1.d0+mid(ig))*dlog(frail)-(frail/alpha))
+	
+	do issg=1,n_ssgbygrp(ig)
+		do k=1,nsujet
+		if ((g(k).eq.ig).and.(ssg(k,g(k)).eq.issg)) then
+			if (indictronq.eq.1) then
+				prod3(ig) = prod3(ig)*(eta*frail*(aux1(g(k),ssg(k,g(k)))-aux2(g(k),ssg(k,g(k))))+1.d0)**(-(1.d0/eta)-mij(g(k),ssg(k,g(k))))
+			endif
+			exit
+		endif
+		end do
+	end do
+
+	func3N = prod3(ig)
+
+	return
+	
+	end function func3N
+
 !===============================================================================
 !===================================== END =====================================
 !===============================================================================
+
 

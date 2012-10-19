@@ -23,7 +23,7 @@
 	double precision,dimension(-2:np)::the1,the2
 	double precision,dimension(np)::b,bh
 	double precision,dimension(ngexact)::res1,res2,res3 &
-	,integrale1,integrale2,integrale3,sum1      
+	,integrale1,integrale2,integrale3,sum1
 	double precision,dimension(2)::k0
 	double precision,dimension(ndatemax)::dut1,dut2
 	double precision,dimension(0:ndatemax)::ut1,ut2
@@ -32,13 +32,13 @@
 	dut2=0.d0
 	ut1=0.d0
 	ut2=0.d0
-		
+
 	bh=b
 	j=0
 	theta=0.d0
 	res=0.d0
-	if (id.ne.0) bh(id)=bh(id)+thi 
-	if (jd.ne.0) bh(jd)=bh(jd)+thj    
+	if (id.ne.0) bh(id)=bh(id)+thi
+	if (jd.ne.0) bh(jd)=bh(jd)+thj
       
 	n = nz1+2
 	
@@ -333,6 +333,7 @@
 		aux2=0.d0
 		integrale1=0.d0
 		integrale2=0.d0
+		integrale3=0.d0
 
 !     === MODIFICATION DE LA VRAISEMBLANCE POUR LE NESTED FRAILTY MODEL
           
@@ -372,7 +373,7 @@
 		       
 			if(stra(k).eq.1)then
 				aux1(g(k),ssg(k,g(k)))=aux1(g(k),ssg(k,g(k)))+ut1(nt1(k))*vet
-				aux2(g(k),ssg(k,g(k)))=aux2(g(k),ssg(k,g(k)))+ut1(nt0(k))*vet  
+				aux2(g(k),ssg(k,g(k)))=aux2(g(k),ssg(k,g(k)))+ut1(nt0(k))*vet
 			endif
 			if(stra(k).eq.2)then
 				aux1(g(k),ssg(k,g(k)))=aux1(g(k),ssg(k,g(k)))+ut2(nt1(k))*vet
@@ -387,7 +388,7 @@
 				funcpansplines=-1.d9
 				goto 123
 			end if
-		end do  
+		end do
 
 !================== calcul des int�grales par Gauss LAGUERRE
 !     memes points et poids dans chq groupe
@@ -397,17 +398,17 @@
 			choix=1
 			call gaulagN(int,choix)
 			integrale1(auxig)=int
-!			write(*,*)'ig',ig,'integrale1',integrale1(auxig)
+			!write(*,*)'ig',ig,'integrale1',integrale1(auxig)
 !     integrale sur la troncature: 
 			if(indictronq.eq.1)then
 				if(AG.eq.1)then !andersen gill
 					choix=3
 					call gaulagN(int,choix)
-					integrale3(auxig)=int   
+					integrale3(auxig)=int
 				else !troncature classique
 					choix=2
 					call gaulagN(int,choix)
-					integrale2(auxig)=int    
+					integrale2(auxig)=int
 				endif
 			endif
 		end do
@@ -416,7 +417,7 @@
 
 		do ig=1,ngexact  
 			sum1(ig)=0.d0
-			do issg=1,n_ssgbygrp(ig)!nssgbyg !!! NON ICI NSSGBYG
+			do issg=1,n_ssgbygrp(ig) !nssgbyg !!! NON ICI NSSGBYG
 				if(mij(ig,issg).gt.1) then
 					do l=1,mij(ig,issg)
 				sum1(ig)=sum1(ig)+dlog(1.d0+eta*dble(mij(ig,issg)-l)) 
@@ -451,7 +452,7 @@
 				endif
 				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 					funcpansplines=-1.d9	
-			!	write(*,*)' ok 11',k,integrale1(k),gammlnN(1.d0/alpha),alpha
+					!write(*,*)' ok 11',k,integrale1(k),integrale2(k),gammlnN(1.d0/alpha),alpha
 					goto 123
 				end if
 			endif
@@ -498,7 +499,7 @@
 	    
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 		funcpansplines=-1.d9
-!				write(*,*)' ok 12'
+!		write(*,*)' ok 12'
 		goto 123
 	end if	 
 	

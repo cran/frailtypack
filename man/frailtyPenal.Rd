@@ -9,6 +9,7 @@
 Left truncated, right-censored data, interval-censored data and strata (max=2) are allowed.
 It allows to obtain a non-parametrical smooth hazard of survival function.
 This approach is different from the partial penalized likelihood approach of Therneau et al.
+
  
 The hazard function, conditionnal on the frailty term \eqn{z_i}, of a shared frailty model for the \eqn{j^{th}} subject in the \eqn{i^{th}} group:
 
@@ -155,6 +156,7 @@ The following components are included in a 'frailtyPenal' object for shared frai
 
 \note{
 
+From a prediction aim, we recommand you to input a data sorted by the group variable with numerical numbers from 1 to n (number of groups).
 "Kappa" (kappa1 and kappa2) and "n.knots" are the arguments that the user have to change if the fitted model does not converge.
 "n.knots" takes integer values between 4 and 20. But with n.knots=20, the model would take a long time to converge. So, usually, begin first with n.knots=7, and increase it step by step until it converges.
 "Kappa" only takes positive values. So, choose a value for Kappa (for instance 10000), and if it does not converge, multiply or devide this value by 10 or 5 until it converges.

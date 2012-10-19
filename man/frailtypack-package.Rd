@@ -1,6 +1,6 @@
 
 \name{frailtypack-package}
-\Rdversion{2.2-25}
+\Rdversion{2.2-26}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
@@ -14,8 +14,8 @@
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.2-25\cr
-     Date: \tab 2012-09-06\cr
+     Version: \tab 2.2-26\cr
+     Date: \tab 2012-10-19\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab yes\cr
   }  
@@ -59,7 +59,6 @@ V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum pena
 		
 
 ### Joint model (recurrent and terminal events) with 2 covariates ###
-### on a simulated dataset ###
 
  data(readmission)
  modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)

@@ -28,9 +28,9 @@
  
 }
 \source{
- Gonzalez, JR., Fernandez, E., Moreno, V. et al. Gender differences in hospital 
- readmission among colorectal cancer patients. Journal of Epidemiology and Community
- Health. In press, 2005.
+
+ Gonzalez, JR., Fernandez, E., Moreno, V., Ribes, J., Peris, M., Navarro, M., Cambray, M. and Borras, JM (2005). Sex differences in hospital readmission among colorectal cancer patients. \emph{Journal of Epidemiology and Community Health}, \bold{59}, 6, 506-511.
+
 }
 
 \keyword{datasets}
