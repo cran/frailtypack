@@ -3,11 +3,11 @@
 \alias{frailtyPenal}
 \alias{frailtyPenal for Shared frailty models}
 
-\title{ Fit a Shared Gamma Frailty model using a semi-parametrical penalized likelihood estimation or parametrical estimation }
+\title{ Fit a Shared Gamma Frailty model using a semi-parametric penalized likelihood estimation or parametric estimation }
 
-\description{Fit a shared gamma frailty model using a semi-parametrical Penalized Likelihood estimation or parametrical estimation on the hazard function.
+\description{Fit a shared gamma frailty model using a semi-parametric Penalized Likelihood estimation or parametric estimation on the hazard function.
 Left truncated, right-censored data, interval-censored data and strata (max=2) are allowed.
-It allows to obtain a non-parametrical smooth hazard of survival function.
+It allows to obtain a non-parametric smooth hazard of survival function.
 This approach is different from the partial penalized likelihood approach of Therneau et al.
 
  
@@ -28,8 +28,8 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\bold{\beta}} the
 
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
             joint = FALSE, recurrentAG = FALSE, cross.validation =
-            FALSE, n.knots, kappa1, kappa2, maxit = 350, hazard = "Splines",
-	    nb.int1,nb.int2,intcens = FALSE)
+            FALSE, n.knots, kappa1, kappa2, maxit = 350,
+            hazard = "Splines", nb.int1, nb.int2, intcens = FALSE)
 }
 
 \arguments{
@@ -73,11 +73,11 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
 
-  \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard functions with the penalized likelihood estimation, 
+  \item{hazard}{Type of hazard functions: "Splines" for semi-parametric hazard functions with the penalized likelihood estimation, 
             "Piecewise-per" for piecewise constant hazard function using percentile (not available for interval-censored data), "Piecewise-equi" for piecewise constant hazard 
-            function using equidistant intervals, "Weibull" for parametrical weibull functions. Default is "Splines".}
+            function using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
 
-  \item{nb.int1}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+  \item{nb.int1}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 
   \item{nb.int2}{Argument used only for the Joint frailty model.}
 
@@ -101,7 +101,7 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 \value{
 
 The following components are included in a 'frailtyPenal' object for shared frailty models.
-\item{b}{sequence of the corresponding estimation of the coefficients for the hazard functions (parametrical or semi-parametrical), the random effects variances and the regression coefficients.}
+\item{b}{sequence of the corresponding estimation of the coefficients for the hazard functions (parametric or semi-parametric), the random effects variances and the regression coefficients.}
 \item{call}{The code used for the model.}
 \item{coef}{the regression coefficients.}
 \item{cross.Val }{Logical value. Is cross validation procedure used for estimating the smoothing parameters in the penalized likelihood estimation?  }
@@ -111,8 +111,8 @@ The following components are included in a 'frailtyPenal' object for shared frai
 \item{kappa}{ A vector with the smoothing parameters  in the penalized likelihood estimation corresponding to each baseline function as components.}
 \item{lam}{matrix of hazard estimates and confidence bands.}
 \item{lam2}{the same value as lam for the second stratum.}
-\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametrical case.}
-\item{loglik}{the marginal log-likelihood in the parametrical case.}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametric case.}
+\item{loglik}{the marginal log-likelihood in the parametric case.}
 \item{n}{the number of observations used in the fit.}
 \item{n.events}{the number of events observed in the fit.}
 \item{n.iter}{number of iterations needed to converge.}
@@ -127,12 +127,12 @@ The following components are included in a 'frailtyPenal' object for shared frai
 \item{x2}{vector of times for the second stratum (see x1 value).}
 \item{type.of.hazard}{Type of hazard functions (0:"Splines", "1:Piecewise", "2:Weibull").}
 \item{type.of.Piecewise}{Type of Piecewise hazard functions (1:"percentile", 0:"equidistant").}
-\item{nbintervR}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+\item{nbintervR}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 \item{npar}{number of parameters.}
 \item{nvar}{number of explanatory variables.}
 \item{noVar}{indicator of explanatory variables.}
-\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametrical case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
-\item{AIC}{the Akaike information Criterion for the parametrical case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
+\item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{n.knots.temp}{initial value for the number of knots.}
 \item{shape.weib}{shape parameter for the weibull hazard function.}
 \item{scale.weib}{scale parameter for the weibull hazard function.}
@@ -166,7 +166,7 @@ From a prediction aim, we recommand you to input a data sorted by the group vari
 
 
 \references{
-V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametrical estimation.
+V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.
 \emph{Journal of Statistical Software} \bold{47}, 1-28.
 
 V. Rondeau, D Commenges, and P. Joly (2003). Maximum penalized likelihood estimation in a gamma-frailty model.

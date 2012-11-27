@@ -6,6 +6,7 @@
 	use tailles
 	use comon
         use residusM
+	use comongroup,only:vet,vet2
 		
 	implicit none
 
@@ -18,7 +19,7 @@
 	
 	integer::n,i,j,k,vj,ig,choix
 	integer,dimension(ngmax)::cpt
-	double precision::sum,res,vet,vet2
+	double precision::sum,res
 	
 	double precision,dimension(np)::bh
 	double precision,dimension(ngmax)::res2,res1dc,res2dc &
@@ -98,7 +99,7 @@
 			res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet) 
 			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
 				funcpajweib=-1.d9
-			!	print*,'ok 1'
+				!print*,'ok 1'
 				goto 123
 			end if	
 		endif  
@@ -138,7 +139,7 @@
 			res2dc(k) = (betaD-1.d0)*dlog(t1dc(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet2) 
 			if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
 				funcpajweib=-1.d9
-			!	print*,'ok 4'
+				!print*,'ok 4'
 				goto 123
 			end if	
 		endif 
@@ -158,6 +159,9 @@
 		choix = 3  
 		call gaulagJ(int,choix)
 		integrale3(ig) = int !moins bon
+		!if(integrale3(ig).lt.1.d-300)then
+		!		integrale3(ig) = 1.d-300
+		!endif
 	end do
 !************* FIN INTEGRALES **************************
                       
@@ -168,10 +172,15 @@
 		if(cpt(k).gt.0)then
 			if(theta.gt.(1.d-8)) then
 !cccc ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
-                   
-				res= res + res2(k) &
+                   		if (integrale3(k).eq.0.d0) then
+					res= res + res2(k) &
 !--      pour le deces:
-				+ res2dc(k)- gammaJ(1./theta)-dlog(theta)/theta+dlog(integrale3(k))
+					+ res2dc(k)- gammaJ(1./theta)-dlog(theta)/theta-112.d0
+				else
+					res= res + res2(k) &
+!--      pour le deces:
+					+ res2dc(k)- gammaJ(1./theta)-dlog(theta)/theta+dlog(integrale3(k))
+				endif
 			else
 !*************************************************************************
 !     developpement de taylor d ordre 3
@@ -182,7 +191,7 @@
 			endif
 			if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 				funcpajweib=-1.d9
-			!	print*,k,'ok 6',gammaJ(1./theta),theta,dlog(integrale3(k))
+				!print*,k,'ok 6',gammaJ(1./theta),theta,integrale3(k),dlog(integrale3(k))
 				goto 123
 			end if	
 		endif 

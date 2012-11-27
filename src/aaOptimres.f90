@@ -119,7 +119,7 @@
       z,rl1,th,ep
       double precision,external::namefunc
      
-             
+      !print*,"1:",v
       id=0
       jd=0
       z=0.d0
@@ -138,8 +138,13 @@
       ep=1.d-20
             
       Main:Do       
-!   	write(*,*)'avant deriva'         
+!	write(*,*)'avant deriva'         
         call deriva(b,m,v,rl,namefunc)
+
+	if(rl.eq.-1.D9) then
+               istop=4
+               goto 110
+        end if
 
 !	write(*,*)'iteration optimres',ni,'vrais',rl          
         rl1=rl      
@@ -151,9 +156,10 @@
               fu(ij)=v(ij)
            end do
         end do
-
+	!print*,"2:",v
         call dsinv(fu,m,ep,ier,det)  
         if (ier.eq.-1) then
+	   !print*,"here"
            dd=epsd+1.d0
         else
            GHG = 0.d0
@@ -177,7 +183,7 @@
            tr=tr+dabs(v(ii))
         end do
         tr=tr/dble(m)
-
+	!print*,"3:",v
         ncount=0
         ga=0.01d0
  400    do i=1,nfmax+m
@@ -237,7 +243,7 @@
             delta(i)=vw*delta(i)
          end do
          da=(dm-3.d0)*da
-
+	 !print*,"4:",v
  800     cb=dabs(rl1-rl)
          ca=0.d0
          do i=1,m
@@ -255,8 +261,9 @@
             goto 110
          end if	 
       End do Main       
-      v=0.D0	 
+      !v=0.D0	 
       v(1:m*(m+1)/2)=fu(1:m*(m+1)/2)
+      !print*,"5:",fu
       istop=1
     
  110   continue

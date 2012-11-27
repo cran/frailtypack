@@ -168,8 +168,8 @@
 		goto 110
 	end if
  
-	!write(*,*)'iteration***',ni,'vrais',rl
-	   
+!	write(*,*)'iteration***',ni,'vrais',rl
+
         dd = 0.d0
 	 
         fu=0.D0
@@ -184,6 +184,7 @@
         call dsinvj(fu,m,ep,ier)  
 	
 	if (ier.eq.-1) then
+		!print*,"here"
 		dd=epsd+1.d0
 	else
 		GHG = 0.d0
@@ -199,6 +200,14 @@
 		end do
 		dd=GHG/dble(m)
 	end if
+
+!	print*,ca,cb,dd
+!	if (ni.eq.40) then
+!		print*,"====================> FAUSSE CONVERGENCE"
+!		ca=1.d-4
+!		cb=1.d-4
+!		dd=1.d-4
+!	endif
 
 	if(ca.lt.epsa.and.cb.lt.epsb.and.dd.lt.epsd) exit main
 

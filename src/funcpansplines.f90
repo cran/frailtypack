@@ -314,6 +314,7 @@
 			do i= 1,ngmax
 				do j=1,n_ssgbygrp(i)
 					cumulhaz1(i,j) = res1((i-1)*n_ssgbygrp(i)+j)
+					cumulhaz0(i,j) = res3((i-1)*n_ssgbygrp(i)+j)
 				end do
 			end do
 		end if

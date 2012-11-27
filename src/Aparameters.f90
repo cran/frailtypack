@@ -11,7 +11,7 @@
 	end module parameters
 	
 
-		
+
 	module comon
 	implicit none
 !*****************************************************************
@@ -87,15 +87,28 @@
         double precision,dimension(:),allocatable,save::betacoef
 !Weib
 	double precision,save::etaR,etaD,betaR,betaD
-	integer,save::indic_tronc
+	integer,save::indic_tronc,typeJoint
 !censure par intervalle
 	integer,dimension(:),allocatable,save::d
 	integer,save::dmax
 	integer::intcens
-	
 	end module comon
-	
 
+	module comongroup
+!=== add:18/04/2012
+	integer,save::lignedc
+	double precision,save::vet,vet2	
+	double precision,dimension(:),allocatable,save::the1,the2
+	integer,dimension(:),allocatable,save::gsuj!attention gpe pour un sujet
+	integer,dimension(:),allocatable,save::nigdc  ! nb de recurr ou dc par gpe
+	integer,save::indic_joint
+	double precision,save::expb1,expb2
+	integer,dimension(:),allocatable,save::ictemp
+	double precision,dimension(:),allocatable,save::temps0dc,temps1dc
+	double precision,dimension(:,:),allocatable,save::variable
+	double precision,dimension(:),allocatable,save::Binit
+	double precision,dimension(:,:),allocatable,save::ve1,ve2
+	end module comongroup	
 
 	module additiv	
 	implicit none	
@@ -136,7 +149,7 @@
 		double precision,dimension(:),allocatable::vuu,b_temp
 		integer,save::indic_cumul
 		integer,dimension(:),allocatable::n_ssgbygrp
-		double precision,dimension(:,:),allocatable,save::cumulhaz1,invsigma
+		double precision,dimension(:,:),allocatable,save::cumulhaz1,cumulhaz0,invsigma
 		double precision,save::detSigma
 		
 		

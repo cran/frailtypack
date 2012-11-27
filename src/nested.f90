@@ -125,7 +125,7 @@
 	ngmax=ng0
 	
 	nssgbyg=nssgbyg0
-	ngexact=nssgbyg0 
+	ngexact=nssgbyg0
 	
 	xmin1=ax1
 	xmin2=ax2
@@ -351,7 +351,7 @@
 		endif
 
 	end do 
-
+!	print*,ngexact
 !AD:
 	if (typeof .ne. 0) then 
 		cens = maxtt
@@ -800,7 +800,8 @@
 	end do
 	
 	indic_cumul=1
-	allocate(mij(ng0,nssgmax),aux1(ngexact,nssgmax),aux2(ngexact,nssgmax),cumulhaz1(ngmax,nssgmax))
+	allocate(mij(ng0,nssgmax),aux1(ngexact,nssgmax),aux2(ngexact,nssgmax))
+	allocate(cumulhaz1(ngmax,nssgmax),cumulhaz0(ngmax,nssgmax))
 
 	effet=1
 	ngaux=ngexact
@@ -840,8 +841,8 @@
 
 	np=nbpara 
 
-	b(np-nva-1)=1.d-1!bgpe! !initialisation alpha(groupe)
-	b(np-nva)=1.d0!bssgpe!0.15d0   !initialisation eta(sous groupe)
+	b(np-nva-1)=1.d-1 !bgpe! !initialisation alpha(groupe)
+	b(np-nva)=1.d-1 !bssgpe!0.15d0   !initialisation eta(sous groupe)
 
 !	write(*,*)'np ',np
 !	write(*,*)'b ',b
@@ -1034,8 +1035,6 @@
 	
 1000    continue
 
-	
-
 
 	linearpred=0.d0
 	Resmartingale=0.d0
@@ -1045,13 +1044,14 @@
 	frailtyvarg=0.d0
 	frailtysd=0.d0
 	frailtysdg=0.d0	
+
 !---------------------Calcul residus de martingal
 !	write(*,*),'=========================================='
 !	write(*,*),'=============== Martingale =============',nva
 !	write(*,*),'====================================='
 
 	if(nva .gt. 0) then
-		do i=1,2
+		do i=1,nva !2
 			coefBeta(1,i)=b(np-nva-effet+i)
 		end do
 	
@@ -1059,14 +1059,14 @@
 
 		Call ResidusMartingalen(funcpanres,Resmartingale,frailtypred,maxngg,frailtypredg,&
 		frailtyvar,frailtyvarg,frailtysd,frailtysdg)
-	
+
 		do i=1,nsujet
 			linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i))*frailtypredg(g(i),ssg(i,g(i))))	
 		end do
 	end if
 
 	if((istopp(2)== 0).and.(istopp(3)== 0)) then
-		deallocate(mij,aux1,aux2,cumulhaz1)
+		deallocate(mij,aux1,aux2,cumulhaz1,cumulhaz0)
 	end if
 
 	deallocate(H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI,y,Hspl_hess,hess,gaux,gnew,aux,H_hess,I_hess) 

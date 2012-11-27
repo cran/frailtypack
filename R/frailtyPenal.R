@@ -110,7 +110,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <-  m$intcens <- m$... <- NULL
     
 
-	special <- c("strata", "cluster", "subcluster", "terminal")
+	special <- c("strata", "cluster", "subcluster", "terminal","num.id")
 		
 	Terms <- if (missing(data)){ 
 		terms(formula, special)
@@ -136,7 +136,11 @@ if((all.equal(length(hazard),1)==T)==T){
 	cluster <- attr(Terms, "specials")$cluster #nbre de var qui sont en fonction de cluster()
 	subcluster <- attr(Terms, "specials")$subcluster #nbre de var qui sont en fonction de subcluster()
 
-	classofY <- attr(model.extract(m, "response"),"class") # recuperation de la classe de reponse avant tri des donnees Surv ou SurvIC
+	# booleen pour voir si l'objet Y est reponse avant tri des donnees Surv ou SurvIC
+	classofY <- attr(model.extract(m, "response"),"class")
+	# attention le package pec rajoute un element dans l'attribut "class" des objets de survie
+	if (length(classofY)>1) classofY <- classofY[2]
+
 	typeofY <- attr(model.extract(m, "response"),"type") # type de reponse : interval etc..
 	
 #Al : tri du jeu de donnees par cluster croissant
@@ -200,7 +204,14 @@ if((all.equal(length(hazard),1)==T)==T){
 # On determine le nombre de categorie pour chaque var categorielle
 	strats <- attr(Terms, "specials")$strata #nbre de var qui sont en fonction de strata()
 	cluster <- attr(Terms, "specials")$cluster #nbre de var qui sont en fonction de cluster()
+	num.id <- attr(Terms, "specials")$num.id #nbre de var qui sont en fonction de patkey()
 	
+	if(is.null(num.id)){
+		joint.clust <- 1
+	}else{
+		joint.clust <- 0	
+	}
+
 	subcluster <- attr(Terms, "specials")$subcluster #nbre de var qui sont en fonction de subcluster()
 
 	if (length(subcluster)){
@@ -273,6 +284,12 @@ if((all.equal(length(hazard),1)==T)==T){
 	else if (!length(cluster) & Frailty == FALSE){
 		cluster <- 1:nrow(data) # valeurs inutiles pour un modèle de Cox
 		uni.cluster <- 1:nrow(data)
+	}
+	
+	if (length(num.id)){
+		temppat <- untangle.specials(Terms, "num.id", 1:10)
+		num.id <- m[,temppat$vars]
+		dropx <- c(dropx,temppat$terms)
 	}
 	
 	if(length(uni.cluster)==1){ 
@@ -657,6 +674,7 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$nbintervR <- nbintervR
     fit$istop <- ans$istop
 
+    fit$AG <- recurrentAG
     fit$intcens <- intcens # rajout
 
     fit$shape.weib <- ans$shape.weib
@@ -724,14 +742,39 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 			stop("For joint frailty models, 'Frailty' must be equal to 'TRUE' ")
 		}
 #AD
-
 		if (!recurrentAG)
 		{
-			tt1.death<-aggregate(tt1,by=list(cluster),FUN=sum)[,2]
-			tt0.death<-rep(0,length(tt1.death))
+			if(joint.clust==0){
+				tempdc <- aggregate(tt1,by=list(num.id),FUN=sum)[,2]	
+				lignedc0 <- length(tempdc)
+				tempdc <- cbind(rep(0,lignedc0),tempdc)
+				clusterdc <- aggregate(cluster,by=list(num.id),FUN=function(x) x[length(x)])[,2]
+				tt1.death <- 0
+				tt0.death <- 0
+			}else{
+				tt1.death<-aggregate(tt1,by=list(cluster),FUN=sum)[,2]
+				tt0.death<-rep(0,length(tt1.death))
+				clusterdc <- 0
+				lignedc0 <- 0
+				tempdc <- 0
+			}
      		}else{
-			tt1.death<-aggregate(tt1,by=list(cluster),FUN=function(x) x[length(x)])[,2]
-			tt0.death<-rep(0,length(tt1.death))
+			if(joint.clust==0){
+
+				#tempdc <- aggregate(tt1,by=list(num.id,cluster),FUN=sum)[,2]	
+				tempdc<-aggregate(tt1,by=list(num.id),FUN=function(x) x[length(x)])[,2]
+				lignedc0 <- length(tempdc)
+				tempdc <- cbind(rep(0,lignedc0),tempdc)
+				clusterdc <- aggregate(cluster,by=list(num.id),FUN=function(x) x[length(x)])[,2]
+				tt1.death <- 0
+				tt0.death <- 0
+			}else{
+				tt1.death<-aggregate(tt1,by=list(cluster),FUN=function(x) x[length(x)])[,2]
+				tt0.death<-rep(0,length(tt1.death))
+				clusterdc <- 0
+				lignedc0 <- 0
+				tempdc <- 0
+			}
 		}
 
        
@@ -751,10 +794,15 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		}
 #AD:
 
-
 #AD:Joint model needs "terminal()"
 		if (ind.terminal){
-			terminalEvent<-aggregate(terminal,by=list(cluster),FUN=function(x) x[length(x)])[,2]
+			if(joint.clust==0){
+				icdc00 <- aggregate(terminal,by=list(num.id),FUN=function(x) x[length(x)])[,2] #+aggregate(cens,by=list(num.id),FUN=function(x) x[length(x)])[,2]
+				terminalEvent <- 0
+			}else{
+				terminalEvent<-aggregate(terminal,by=list(cluster),FUN=function(x) x[length(x)])[,2]
+				icdc00 <- 0
+			}
 		}else{
 			stop(" Joint frailty model miss specified ")
 		}
@@ -762,8 +810,14 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
 
 # terminalEvent might be 0-1 
-		if (!all(terminalEvent%in%c(1,0))){ 
-			stop("terminal must contain a variable coded 0-1 and a non-factor variable")
+		if(joint.clust==0){
+			if (!all(icdc00%in%c(1,0))){ 
+				stop("terminal must contain a variable coded 0-1 and a non-factor variable")
+			}
+		}else{
+			if (!all(terminalEvent%in%c(1,0))){ 
+				stop("terminal must contain a variable coded 0-1 and a non-factor variable")
+			}
 		}
 	
 		m2 <- match.call(expand.dots = FALSE)
@@ -834,7 +888,6 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 				noVar2 <- 0 
 			} 
 
-
 			nvar2<-ncol(X2) 
 		
 			vardc.temp<-matrix(c(X2),nrow=nrow(X2),ncol=nvar2)
@@ -853,18 +906,37 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 	
 			}
 
-			if (!is.null(ncol(vardc.temp))){
-				vardc<-aggregate(vardc.temp[,1],by=list(cluster), FUN=function(x) x[length(x)])[,2] 
-				
-				if (ncol(vardc.temp)>1){
-				
-					for (i in 2:ncol(vardc.temp)){
-						vardc.i<-aggregate(vardc.temp[,i],by=list(cluster), FUN=function(x) x[length(x)])[,2] 
-						vardc<-cbind(vardc,vardc.i)
-					} 
+			if(joint.clust==0){
+				if (!is.null(ncol(vardc.temp))){
+					vaxdc00<-aggregate(vardc.temp[,1],by=list(num.id), FUN=function(x) x[length(x)])[,2]  # num.id au lieu de cluster
+					#print(head(vardc))
+					
+					if (ncol(vardc.temp)>1){
+					
+						for (i in 2:ncol(vardc.temp)){
+							vaxdc00.i<-aggregate(vardc.temp[,i],by=list(num.id), FUN=function(x) x[length(x)])[,2] 
+							vaxdc00<-cbind(vaxdc00,vaxdc00.i)
+						} 
+					}
+				}else{
+					vaxdc00<-aggregate(vardc.temp,by=list(num.id), FUN=function(x) x[length(x)])[,2]
 				}
+				vardc <- 0
 			}else{
-				vardc<-aggregate(vardc.temp,by=list(cluster), FUN=function(x) x[length(x)])[,2]
+				if (!is.null(ncol(vardc.temp))){
+					vardc<-aggregate(vardc.temp[,1],by=list(cluster), FUN=function(x) x[length(x)])[,2] 
+				
+					if (ncol(vardc.temp)>1){
+				
+						for (i in 2:ncol(vardc.temp)){
+							vardc.i<-aggregate(vardc.temp[,i],by=list(cluster), FUN=function(x) x[length(x)])[,2] 
+							vardc<-cbind(vardc,vardc.i)
+						} 
+					}
+				}else{
+					vardc<-aggregate(vardc.temp,by=list(cluster), FUN=function(x) x[length(x)])[,2]
+				}
+				vaxdc00 <- 0
 			}
 		}else{
 			noVar2 <- 1
@@ -886,10 +958,18 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		}
 
 #==================================
-		if(is.null(nrow(vardc))){
-			nvarEnd<-1
+		if(joint.clust==1){
+			if(is.null(nrow(vardc))){
+				nvarEnd<-1
+			}else{
+				nvarEnd<-ncol(vardc)
+			}
 		}else{
-			nvarEnd<-ncol(vardc)
+			if(is.null(nrow(vaxdc00))){
+				nvarEnd<-1
+			}else{
+				nvarEnd<-ncol(vaxdc00)
+			}
 		}
 	}else{
 		nvarEnd<-0
@@ -957,31 +1037,40 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		mt11 <- 100
 		mt12 <- 100
 	}
-   
+
+	initialize <- 1
+
+	npinit <- switch(as.character(typeof),
+		"0"=((n.knots + 2) + nvarRec + effet),
+		"1"=(nbintervR + nvarRec + nvarEnd + effet),
+		"2"=(2 + nvarRec + effet))
 
     ans <- .Fortran("joint",
                 as.integer(n),
                 as.integer(length(uni.cluster)), 
-
+		as.integer(lignedc0),###
                 as.integer(n.knots),
                 k0=c(as.double(kappa1),as.double(kappa2)),
                 as.double(tt0),
                 as.double(tt1),
                 as.integer(cens),
-                as.integer(cluster),       
-                as.double(tt0.death),        
+                as.integer(cluster),
+		as.integer(clusterdc),###
+                as.double(tt0.death),
                 as.double(tt1.death),
                 as.integer(terminalEvent),
+		as.double(tempdc),###
+		as.integer(icdc00),###
                 as.integer(nvarRec),
                 as.double(var),
                 as.integer(nvarEnd),
                 as.double(vardc),
-#AD:
-                as.integer(noVar1), 
-                as.integer(noVar2), 
-#AD:
+		as.double(vaxdc00),###
+                as.integer(noVar1),
+                as.integer(noVar2),
+		as.integer(recurrentAG),
                 as.integer(maxit),
-                np=as.integer(np),		
+                np=as.integer(np),
                 b=as.double(rep(0,np)),
                 H=as.double(matrix(0,nrow=np,ncol=np)),
                 HIH=as.double(matrix(0,nrow=np,ncol=np)),
@@ -995,14 +1084,11 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
                 lam2=as.double(matrix(0,nrow=size2,ncol=3)),
 		xSu2=as.double(xSu2),
                 surv2=as.double(matrix(0,nrow=mt12,ncol=3)),
-#
 		as.integer(typeof),
 		as.integer(equidistant),
 		as.integer(nbintervR),
 		as.integer(nbintervDC),
-		as.integer(size1),
-		as.integer(size2),
-#
+		as.integer(c(size1,size2,mt11,mt12)),###
                 ni=as.integer(0),
                 cpt=as.integer(0),
                 cpt.dc=as.integer(0),
@@ -1010,20 +1096,22 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		istop=as.integer(0),
 		shape.weib=as.double(rep(0,2)),
 		scale.weib=as.double(rep(0,2)),
-		as.integer(mt11),
-		as.integer(mt12),
-		
-		martingale.res=as.double(rep(0,as.integer(length(uni.cluster)))),
-		martingaledc.res=as.double(rep(0,as.integer(length(uni.cluster)))),
-		frailty.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
-		frailty.var=as.double(rep(0,as.integer(length(uni.cluster)))),
+		MartinGale=as.double(matrix(0,nrow=length(uni.cluster),ncol=4)),###
 		linear.pred=as.double(rep(0,n)),
 		lineardc.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
 		zi=as.double(rep(0,(n.knots+6))),
 		time=as.double(rep(0,(nbintervR+1))),
 		timedc=as.double(rep(0,(nbintervDC+1))),
-                PACKAGE = "frailtypack")  	
-		
+		kendall=as.double(matrix(0,nrow=4,ncol=2)),
+		as.integer(initialize),
+		as.integer(npinit),
+		Bshared=as.double(rep(0,npinit)),
+		linearpredG=as.double(rep(0,lignedc0)),
+		joint.clust=as.integer(joint.clust),
+                PACKAGE = "frailtypack")
+
+
+	MartinGale <- matrix(ans$MartinGale,nrow=as.integer(length(uni.cluster)),ncol=4)
 
 
     if (ans$istop == 4){
@@ -1037,6 +1125,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
          warning("Matrix non-positive definite.")
     }
 
+
 #AD:    
     if (noVar1==1 & noVar2==1) nvar<-0
 #AD:
@@ -1047,6 +1136,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     fit$na.action <- attr(m, "na.action")
     fit$call <- call
     fit$n <- n
+    if (joint.clust == 0) fit$ind <- lignedc0
     fit$groups <- length(uni.cluster)
     fit$n.events <- ans$cpt
     fit$n.deaths <- ans$cpt.dc
@@ -1128,18 +1218,36 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     fit$scale.weib <- ans$scale.weib
 #AD:
 
+    # verif que les martingales ont été bien calculées
+    msg <- "Problem in the estimation of the random effects (perhaps high number of events in some clusters)"
     if (Frailty){    
-		
-	fit$martingale.res <- ans$martingale.res
-	fit$martingaledeath.res <- ans$martingaledc.res
+	if (any(MartinGale[,1]==0)){
+		fit$martingale.res <- msg
+		fit$martingaledeath.res <- msg
 	
-	fit$frailty.pred <- ans$frailty.pred
-	fit$frailty.var <- ans$frailty.var
+		fit$frailty.pred <- msg
+#		fit$frailty.var <- msg
 	
-	fit$linear.pred <- ans$linear.pred  
-	fit$lineardeath.pred <- ans$lineardc.pred
-    }    
- 
+		fit$linear.pred <- msg
+		fit$lineardeath.pred <- msg
+	}else{
+		fit$martingale.res <- MartinGale[,1]#ans$martingale.res
+		fit$martingaledeath.res <- MartinGale[,2]#ans$martingaledc.res
+	
+		fit$frailty.pred <- MartinGale[,3]#ans$frailty.pred
+#		fit$frailty.var <- MartinGale[,4]#ans$frailty.var
+	
+		fit$linear.pred <- ans$linear.pred
+		if (joint.clust==0){ fit$lineardeath.pred <- ans$linearpredG }
+		else{ fit$lineardeath.pred <- ans$lineardc.pred }
+	}
+    }
+
+#    if (joint.clust==0){
+#        fit$kendall <- matrix(ans$kendall,nrow=4,ncol=2)
+#    }
+    fit$joint.clust <- ans$joint.clust
+    fit$AG <- recurrentAG
 
 
 #================================> For the reccurrent
@@ -1439,8 +1547,20 @@ if (length(subcluster))
     fit$istop <- ans$istop
     fit$shape.weib <- ans$shape.weib
     fit$scale.weib <- ans$scale.weib
+    fit$AG <- recurrentAG
  
  #   if (Frailty){    
+
+    msg <- "Problem in the estimation of the random effects (perhaps high number of events in some clusters)"
+    if (any(ans$martingale.res==0)){
+
+	fit$martingale.res <- msg
+	fit$frailty.pred.group <- msg
+	fit$frailty.pred.subgroup <- msg
+	fit$linear.pred <- msg
+
+    }else{
+
 	fit$martingale.res <- ans$martingale.res
 	fit$frailty.pred.group <- ans$frailty.pred.group
 
@@ -1475,9 +1595,8 @@ if (length(subcluster))
 #	if(sum(which(subgbyg < max(subgbyg)))>0)frailty.sd.subgroup[which(subgbyg < max(subgbyg)),(subgbyg[which(subgbyg < max(subgbyg))]+1):max(subgbyg)] <- "."
 	
 #	fit$frailty.sd.subgroup <- frailty.sd.subgroup
-
-
-	fit$linear.pred <- ans$linear.pred  
+	fit$linear.pred <- ans$linear.pred
+    }
 	fit$subgbyg <- subgbyg
  #   }      
     if(ans$ier==2000)
