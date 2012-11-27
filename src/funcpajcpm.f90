@@ -6,7 +6,8 @@
 	use comon,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
 	effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
 	auxig,aux1,aux2,res1,res3,res4,ttt,tttdc,betacoef,kkapa
-        use residusM     
+        use residusM
+	use comongroup,only:vet,vet2
       
 	implicit none
 	
@@ -16,7 +17,7 @@
 	double precision::som11,som21,somf
 	integer::jj,gg,gg2
 !yasyas
-	double precision::thi,thj,sum,res,vet,vet2
+	double precision::thi,thj,sum,res
 	double precision,dimension(np)::b,bh
 	double precision,dimension(ngmax)::res2,res1dc,res2dc
 	double precision,dimension(ngmax)::integrale1,integrale2,integrale3, &
@@ -251,6 +252,7 @@
 			endif
 			if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 				funcpajcpm=-1.d9
+				!print*,k,'ok 6',gammaJ(1./theta),theta,integrale3(k),dlog(integrale3(k))
 				goto 123
 			end if	
 		endif 

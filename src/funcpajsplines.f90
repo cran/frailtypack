@@ -7,6 +7,7 @@
 	use tailles
 	use comon
         use residusM
+	use comongroup,only:vet,vet2,the1,the2
 		
 	IMPLICIT NONE
 
@@ -19,9 +20,8 @@
 	
 	integer::n,i,j,k,vj,ig,choix
 	integer,dimension(ngmax)::cpt
-	double precision::pe1,pe2,sum,inv,som1,som2,res,vet,vet2,h1
+	double precision::pe1,pe2,sum,inv,som1,som2,res,h1
 	
-	double precision,dimension(-2:npmax):: the1,the2
 	double precision,dimension(np)::bh
 	double precision,dimension(ngmax)::res2,res1dc,res2dc &
 	,res3dc,integrale1,integrale2,integrale3
@@ -43,7 +43,7 @@
 	ut1=0.d0
 	ut2=0.d0
 	dut2=0.d0
-	dut1=0.d0		
+	dut1=0.d0
 	do i=1,np
 	bh(i)=b(i)
 	end do 
@@ -286,6 +286,7 @@
 				+ dlog(integrale3(k)) 
 			endif
 			if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+!				print*,"here",k,integrale3(40),integrale3(41),integrale3(42)
 				funcpajsplines=-1.d9
 				goto 123
 			end if	

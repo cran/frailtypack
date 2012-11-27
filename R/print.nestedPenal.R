@@ -4,8 +4,11 @@
 	if (!is.null(cl <- x$call)) {
 		cat("Call:\n")
 		dput(cl)
-		if (x$type == "counting") {
+		if (x$type == "counting" & x$AG == FALSE) {
 			cat("\n      left truncated structure used")
+		}
+		if (x$AG == TRUE){
+			cat("\n      Calendar timescale")
 		}
 		cat("\n")
 	}

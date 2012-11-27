@@ -3,9 +3,9 @@
 \name{frailtyPenal for Nested frailty models}
 \alias{frailtyPenal for Nested frailty models}
 
-\title{Fit a Nested Frailty model using a semi-parametrical penalized likelihood estimation or a parametrical estimation }
+\title{Fit a Nested Frailty model using a semi-parametric penalized likelihood estimation or a parametric estimation }
 
-\description{Fit a nested frailty model using a Penalized Likelihood on the hazard function or using a parametrical estimation. Nested frailty models allow survival studies for hierarchically clustered data by including two iid gamma random effects.
+\description{Fit a nested frailty model using a Penalized Likelihood on the hazard function or using a parametric estimation. Nested frailty models allow survival studies for hierarchically clustered data by including two iid gamma random effects.
 Left truncated and censored data are allowed. Stratification analysis is allowed(maximum of strata=2).
 
 The hazard function conditional on the two frailties \eqn{v_i} and \eqn{w_{ij}} for the \eqn{k^{th}} individual of the \eqn{j^{th}} subgroup of the \eqn{i^{th}} group is :
@@ -29,8 +29,8 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{X_{ijk}}
 
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
              joint = FALSE, recurrentAG = FALSE, cross.validation =
-             FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard = "Splines",nb.int1,nb.int2,
-             intcens = FALSE)
+             FALSE, n.knots, kappa1, kappa2, maxit = 350,
+             hazard = "Splines", nb.int1, nb.int2, intcens = FALSE)
 }
 
 \arguments{
@@ -70,9 +70,9 @@ value for \code{kappa1} (or \code{kappa2}), a solution is to fit the correspondi
   \item{kappa2}{positive smoothing parameter in the penalized likelihood estimation for the second stratum, when data are stratified. See kappa1. }
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
-  \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard function with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametrical weibull functions. Default is "Splines".}
+  \item{hazard}{Type of hazard functions: "Splines" for semi-parametric hazard function with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
   
- \item{nb.int1}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi")}
+ \item{nb.int1}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi")}
  \item{intcens}{Not implemented for nested frailty model.}
 
 }
@@ -119,8 +119,8 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 \item{kappa}{ A vector with the smoothing parameters corresponding to each baseline function as components.}
 \item{lam}{matrix of hazard estimates and confidence bands.}
 \item{lam2}{the same value as lam for  the second stratum.}
-\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametrical case.}
-\item{loglik}{the marginal log-likelihood in the parametrical case.}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametric case.}
+\item{loglik}{the marginal log-likelihood in the parametric case.}
 \item{n}{the number of observations used in the fit.}
 \item{n.events}{the number of events observed in the fit.}
 \item{n.iter}{number of iterations needed to converge.}
@@ -134,12 +134,12 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 \item{x2}{vector of times for the second stratum (see x1 value).}
 \item{type.of.hazard}{Type of hazard functions (0:"Splines", "1:Piecewise", "2:Weibull").}
 \item{type.of.Piecewise}{Type of Piecewise hazard functions (1:"percentile", 0:"equidistant").}
-\item{nbintervR}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+\item{nbintervR}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 \item{npar}{number of parameters.}
 \item{nvar}{number of explanatory variables.}
 \item{noVar}{indicator of explanatory variables.}
-\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametrical case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
-\item{AIC}{the Akaike information Criterion for the parametrical case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
+\item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{n.knots.temp}{initial value for the number of knots.}
 \item{shape.weib}{shape parameters for the weibull hazard function.}
 \item{scale.weib}{scale parameters for the weibull hazard function.}
@@ -168,7 +168,7 @@ From a prediction aim, we recommand you to input a data sorted by the group vari
 
 
 \references{
-V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametrical estimation.
+V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.
 \emph{Journal of Statistical Software} \bold{47}, 1-28.
 
 V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum penalized likelihood estimation.

@@ -4,23 +4,39 @@
 \alias{frailtyPenal for Joint models}
 
 
-\title{ Fit Joint Frailty model for recurrent and terminal events using semi-parametrical penalized likelihood estimation or a parametrical estimation }
+\title{ Fit Joint Frailty model for recurrent and terminal events using semi-parametric penalized likelihood estimation or a parametric estimation }
 
 \description{
-Fit a joint frailty model for recurrent and terminal events using a penalized likelihood estimation on the hazard function or a parametrical estimation. Left-truncated and right-censored data are allowed. Stratified analysis is not possible. Joint frailty models allow studying, jointly, survival processes of recurrent and terminal events, by considering the terminal event 
-as an informative censoring. A common frailty term \eqn{(\omega_i)}  for the two rates will take into account the heterogeneity in the data, associated with unobserved covariates. The frailty term acts differently for the two rates ( \eqn{\omega_i} for the recurrent rate and \eqn{\omega_i^{\alpha}} for death rate). The covariates could be different for the recurrent rate and death rate.
+Fit a joint frailty model for recurrent and terminal events using a penalized likelihood estimation on the hazard function or a parametric estimation. Right-censored data is allowed. Left-truncated data and stratified analysis are not possible. Joint frailty models allow studying, jointly, survival processes of recurrent and terminal events, by considering the terminal event as an informative censoring. 
 
-The joint model for the hazard function for recurrent event \eqn{r_i(.)} and death \eqn{\lambda_i(.)} is :
+There is two kinds of joint frailty models that can be fitted with \code{frailtyPenal} :
+
+- The first one (Rondeau et al. 2007) includes a common frailty term to the individuals \eqn{(\omega_i)} for the two rates which will take into account the heterogeneity in the data, associated with unobserved covariates. The frailty term acts differently for the two rates ( \eqn{\omega_i} for the recurrent rate and \eqn{\omega_i^{\alpha}} for the death rate). The covariates could be different for the recurrent rate and death rate.
+
+For the \eqn{j^{th}}{j^th} recurrence \eqn{(j=1,...,n_i)} and the \eqn{i^{th}}{i^th} subject \eqn{(i=1,...,G)}, the joint model for recurrent event hazard function \eqn{r_{ij}(.)} and death rate \eqn{\lambda_i(.)} is :
 
 \deqn{\left\{
 \begin{array}{ll}
-r_i(t|\omega_i)=\omega_ir_0(t)exp(\bold{\beta_1^{'}Z_i(t)}) \\
-\lambda_i(t|\omega_i)=\omega_i^{\alpha}\lambda_0(t)exp(\bold{\beta_2^{'}Z_i(t)})
+r_{ij}(t|\omega_i)=\omega_ir_0(t)\exp(\bold{\beta_1^{'}Z_i(t)}) & \mbox{(Recurrent)} \\
+\lambda_i(t|\omega_i)=\omega_i^{\alpha}\lambda_0(t)\exp(\bold{\beta_2^{'}Z_i(t)}) & \mbox{(Death)} \\
  \end{array}
  \right.
 }
 
-where \eqn{r_0(t)} (resp. \eqn{\lambda_0(t)}) is the recurrent (resp. terminal) event baseline hazard function, \eqn{\bold{\beta_1}} (resp. \eqn{\bold{\beta_2}}) the regression coefficient vector, \eqn{\bold{Z_i(t)}} the covariate vector. And where \eqn{\omega_i\sim\bold{\Gamma}(\frac{1}{\theta},\frac{1}{\theta})}  is iid. 
+where \eqn{r_0(t)} (resp. \eqn{\lambda_0(t)}) is the recurrent (resp. terminal) event baseline hazard function, \eqn{\bold{\beta_1}} (resp. \eqn{\bold{\beta_2}}) the regression coefficient vector, \eqn{\bold{Z_i(t)}} the covariate vector. The random effects of frailties \eqn{\omega_i\sim\bold{\Gamma}(\frac{1}{\theta},\frac{1}{\theta})} and are iid.
+
+
+- The second one (Rondeau et al. 2011) is quite similar but the frailty term is common to the individuals from a same group. This model is useful for joint modelling two clustered survival outcomes. In this case, j is for the subject and i for the cluster.
+
+\deqn{\left\{
+\begin{array}{ll}
+r_{ij}(t|u_i)=u_ir_0(t)\exp(\bold{\beta_1^{'}Z_{ij}(t)}) & \mbox{(Time to event)} \\
+\lambda_{ij}(t|u_i)=u_i^{\alpha}\lambda_0(t)\exp(\bold{\beta_2^{'}Z_{ij}(t)}) & \mbox{(Death)} \\
+ \end{array}
+ \right.
+}
+
+This joint frailty model can also be applied to clustered recurrent events and a terminal event (example on "readmission" data below).
 
 }
 
@@ -29,15 +45,16 @@ where \eqn{r_0(t)} (resp. \eqn{\lambda_0(t)}) is the recurrent (resp. terminal) 
 
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
             joint = FALSE, recurrentAG = FALSE, cross.validation =
-            FALSE, n.knots, kappa1, kappa2, maxit = 350,hazard = "Splines",nb.int1,nb.int2
-            intcens = FALSE)
+            FALSE, n.knots, kappa1, kappa2, maxit = 350,
+            hazard = "Splines", nb.int1, nb.int2,i ntcens = FALSE)
 }
 
 \arguments{
 
   \item{formula}{ a formula object, with the response on the left of a \eqn{\texttildelow}
           operator, and the terms on the right.  The response must be a
-          survival object as returned by the 'Surv' function like in survival package.}
+          survival object as returned by the 'Surv' function like in survival package.
+          To fit a joint model for clustered data, the \code{num.id()} function is required.}
 
   \item{formula.terminalEvent}{a formula object, only requires terms on the right to indicate which variables are modelling the terminal event.}
 
@@ -72,13 +89,13 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
 
-  \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard functions with the penalized likelihood estimation,
+  \item{hazard}{Type of hazard functions: "Splines" for semi-parametric hazard functions with the penalized likelihood estimation,
               "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant 
-               hazard function using equidistant intervals, "Weibull" for parametrical weibull function. Default is "Splines".}
+               hazard function using equidistant intervals, "Weibull" for parametric weibull function. Default is "Splines".}
 
-  \item{nb.int1}{Number of intervals (between 1 and 20) for the recurrent parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+  \item{nb.int1}{Number of intervals (between 1 and 20) for the recurrent parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 
-  \item{nb.int2}{Number of intervals (between 1 and 20) for the death parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+  \item{nb.int2}{Number of intervals (between 1 and 20) for the death parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 
   \item{intcens}{Not implemented for joint frailty model.}
 }
@@ -88,7 +105,7 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
 
 \details{
 
-  The estimated parameter are obtained by maximizing the semi-parametrical penalized loglikelihood estimation or a parametrical estimation using the robust Marquardt algorithm (Marquardt, 1963) which is a combination between a Newton-Raphson algorithm and a steepest descent algorithm. When frailty parameter is small, numerical problems may arise. To solve this problem, an alternative formula of the penalized log-likelihood is used (see Rondeau, 2003 for further details). 
+  The estimated parameter are obtained by maximizing the semi-parametric penalized loglikelihood estimation or a parametric estimation using the robust Marquardt algorithm (Marquardt, 1963) which is a combination between a Newton-Raphson algorithm and a steepest descent algorithm. When frailty parameter is small, numerical problems may arise. To solve this problem, an alternative formula of the penalized log-likelihood is used (see Rondeau, 2003 for further details). 
   Cubic M-splines of order 4 are used for the hazard function, and I-splines (integrated M-splines) are used for the cumulative hazard function.
 The inverse of the hessian matrix is the variance estimator and to deal with thepositivity constraint of the variance component, a squared transformation is used and the Standard errors are computed by the \eqn{\Delta}-method (Knight & Xekalaki, 2000). The smooth parameter can be chosen by maximizing a likelihood cross validation criterion (Joly and other, 1998). The integrations in the full log likelihood were evaluated using Gaussian quadrature. Laguerre polynomials with 20 points were used to treat the integrations on \eqn{[0,\infty[}.
 
@@ -115,8 +132,8 @@ provided for print,  plot and summary. The following components are included in 
 \item{kappa}{ A vector with the smoothing parameters  in the penalized likelihood estimation corresponding to each baseline function as components.}
 \item{lam}{matrix of hazard estimates and confidence bands.}
 \item{lam2}{the same value as lam for  the second stratum.}
-\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametrical case.}
-\item{loglik}{the marginal log-likelihood in the parametrical case.}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametric case.}
+\item{loglik}{the marginal log-likelihood in the parametric case.}
 \item{n}{the number of observations used in the fit.}
 \item{n.events}{the number of events observed in the fit.}
 \item{n.knots}{number of knots for estimating the baseline functions.}
@@ -131,23 +148,22 @@ provided for print,  plot and summary. The following components are included in 
 \item{x2}{vector of times for the second stratum (see x1 value).}
 \item{type.of.hazard}{Type of hazard functions (0:"Splines", "1:Piecewise", "2:Weibull").}
 \item{type.of.Piecewise}{Type of Piecewise hazard functions (1:"percentile", 0:"equidistant").}
-\item{nbintervR}{Number of intervals (between 1 and 20) for the recurrent parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
-\item{nbintervDC}{Number of intervals (between 1 and 20) for the death parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+\item{nbintervR}{Number of intervals (between 1 and 20) for the recurrent parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
+\item{nbintervDC}{Number of intervals (between 1 and 20) for the death parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 \item{npar}{number of parameters.}
 \item{nvar}{A vector with the number of covariates of each type of hazard function as components.}
 \item{nvarRec}{number of recurrent explanatory vairables.}
 \item{nvarEnd}{number of death explanatory vairables.}
 \item{noVar1}{indicator of recurrent explanatory vairables.}
 \item{noVar2}{indicator of death explanatory vairables.}
-\item{LCV}{the approximated likelihood cross-validation criterion in the semi parametrical case (with H minus the converged hessien matrix, and l(.) the full log-likelihood.\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
-\item{AIC}{the Akaike information Criterion for the parametrical case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semi parametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood.\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
+\item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{n.knots.temp}{initial value for the number of knots.}
 \item{shape.weib}{shape parameters for the weibull hazard function.}
 \item{scale.weib}{scale parameters for the weibull hazard function.}
 \item{martingale.res}{martingale residuals for each cluster (recurrent).}
 \item{martingaledeath.res}{martingale residuals for each cluster (death).}
 \item{frailty.pred}{empirical Bayes prediction of the frailty term.}
-\item{frailty.var}{variance of the empirical Bayes prediction of the frailty term.}
 \item{linear.pred}{linear predictor: uses "Beta'X + log w_i" in the joint Frailty models.}
 \item{lineardeath.pred}{linear predictor for the terminal part form the joint model: "Beta'X + alpha.log w_i".}
 
@@ -172,17 +188,20 @@ provided for print,  plot and summary. The following components are included in 
 
 
 \references{
-V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametrical estimation.
+V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.
 \emph{Journal of Statistical Software} \bold{47}, 1-28.
 
-V. Rondeau, S. Mathoulin-Pellissier, H. Jacqmin-Gadda, V. Brouste, P. Soubeyran (2007). Joint frailty models for recurring events and death using maximum penalized likelihood estimation:application on cancer events.
-\emph{Biostatistics}, \bold{8},4, 708-721.
+V. Rondeau, J.P. Pignon, S. Michiels (2011). A joint model for the dependance between clustered times to tumour progression and deaths: A meta-analysis of chemotherapy in head and neck cancer.
+\emph{Statistical methods in medical research} \bold{897}, 1-19.
 
-V. Rondeau, D Commenges, and P. Joly (2003). Maximum penalized likelihood estimation in a gamma-frailty model.
+V. Rondeau, S. Mathoulin-Pellissier, H. Jacqmin-Gadda, V. Brouste, P. Soubeyran (2007). Joint frailty models for recurring events and death using maximum penalized likelihood estimation:application on cancer events.
+\emph{Biostatistics} \bold{8},4, 708-721.
+
+V. Rondeau, D. Commenges, and P. Joly (2003). Maximum penalized likelihood estimation in a gamma-frailty model.
 \emph{Lifetime Data Analysis} \bold{9}, 139-153.
 
-D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear parameters. 
-\emph{SIAM Journal of Applied Mathematics}, 431-441. 
+D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear parameters.
+\emph{SIAM Journal of Applied Mathematics}, 431-441.
 
  }
  
@@ -207,22 +226,23 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 
 data(readmission)
 
-## Gap-time ##
+### Joint Frailty model ###
 
+## Gap-time ##
 modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)
 	      +as.factor(charlson)+terminal(death),
 	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
 	      data=readmission,n.knots=14,kappa1=9550000000,kappa2=1410000000000,
 	      Frailty=TRUE,joint=TRUE,recurrentAG=FALSE)
 
-## Calendar time ##
 
+## Calendar time ##
 modJoint_calendar<-frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
 	      +as.factor(dukes)+as.factor(charlson)+terminal(death),
 	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
 	      data=readmission,n.knots=10,kappa1=9550000000,kappa2=1410000000000,
 	      Frailty=TRUE,joint=TRUE,recurrentAG=TRUE)
-    
+
 print(modJoint_gap)
 summary(modJoint_gap)
 plot(modJoint_gap)
@@ -231,11 +251,19 @@ print(modJoint_calendar)
 summary(modJoint_calendar)
 plot(modJoint_calendar)
 
-}
-
 # A model takes around 1 minute to converge #
 
+### Joint Frailty model for clustered data ###
+
+# here is a generated cluster (31 clusters of 13 subjects)
+readmission <- transform(readmission,group=id\%\%31+1)
+
+joi.clus <- frailtyPenal(formula = Surv(t.start, t.stop, event) ~ cluster(group) + 
+              num.id(id) + dukes + charlson + sex + chemo + terminal(death),
+              formula.terminalEvent = ~dukes + charlson + sex + chemo,
+              data = readmission, Frailty = TRUE, joint = TRUE, recurrentAG = TRUE,
+              n.knots = 10, kappa1 = 2.11e+08, kappa2 = 9.53e+11)
 
 }
-
+}
 \keyword{models}

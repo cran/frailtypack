@@ -1,8 +1,8 @@
 Package: frailtypack
-Version: 2.2-26
-Date: 2012-10-19
-Title: General Frailty models using a semi_parametrical penalized
-        likelihood estimation or a parametrical estimation
+Version: 2.2-27
+Date: 2012-11-27
+Title: General Frailty models using a semi_parametric penalized
+        likelihood estimation or a parametric estimation
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
         Mauguen, Amadou Diakite and Alexandre Laurent
 Maintainer: Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr>
@@ -10,7 +10,7 @@ Depends: R (>= 2.10), survival, boot
 LazyLoad: no
 Description: Frailtypack now fits several classes of frailty models
         using a penalized likelihood estimation on the hazard function
-        but also a parametrical estimation. 1) A shared gamma frailty
+        but also a parametric estimation. 1) A shared gamma frailty
         model and Cox proportional hazard model. Clustered and
         recurrent survival times can be studied (the
         Andersen-Gill(1982) approach has been implemented for recurrent
@@ -21,8 +21,9 @@ Description: Frailtypack now fits several classes of frailty models
         slope). 3) Nested frailty models for hierarchically clustered
         data (with 2 levels of clustering) by including two iid gamma
         random effects. 4) Joint frailty models in the context of joint
-        modelling of recurrent events with terminal event. Prediction
-        values are available. Left truncated, right-censored data,
+        modelling for recurrent events with terminal event for
+        clustered data or not. Prediction values are available. Left
+        truncated (not for Joint model), right-censored data,
         interval-censored data (only for Cox proportional hazard and
         shared frailty model) and strata (max=2) are allowed. The
         package includes concordance measures for Cox proportional
@@ -31,5 +32,5 @@ License: GPL (>= 2.0)
 URL: http://www.r-project.org
 Encoding: latin1
 Repository: CRAN
-Date/Publication: 2012-10-19 17:40:45
-Packaged: 2012-10-19 15:11:44 UTC; al7
+Date/Publication: 2012-11-27 09:35:29
+Packaged: 2012-11-27 08:40:24 UTC; al7

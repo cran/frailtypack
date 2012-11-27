@@ -98,8 +98,13 @@ if((all.equal(length(hazard),1)==T)==T){
 
     cluster <- attr(Terms, "specials")$cluster
 
+    # booleen pour voir si l'objet Y est reponse avant tri des donnees Surv ou SurvIC
     classofY <- attr(model.extract(m, "response"),"class")
+    # attention le package pec rajoute un element dans l'attribut "class" des objets de survie
+    if (length(classofY)>1) classofY <- classofY[2]
+
     typeofY <- attr(model.extract(m, "response"),"type")
+
 #Al : tri du jeu de donnees par cluster croissant
 	if (length(cluster)){
 		tempc <- untangle.specials(Terms, "cluster", 1:10)
@@ -502,6 +507,8 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$xSu1 <- ans$xSu1
     fit$xSu2 <- ans$xSu2
     fit$npar <- np
+    fit$type <- type
+    fit$AG <- recurrentAG
 
 #AD:
     fit$noVar <- noVar

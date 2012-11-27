@@ -1,11 +1,11 @@
 \name{additivePenal}
 \alias{additivePenal}
 \Rdversion{1.1}
-\title{Fit an Additive Frailty model using a semi-parametrical penalized likelihood estimation or a parametrical estimation}
+\title{Fit an Additive Frailty model using a semi-parametric penalized likelihood estimation or a parametric estimation}
 
 \description{
 
-Fit an additive frailty model using a semi-parametrical penalized likelihood estimation or a parametrical estimation.
+Fit an additive frailty model using a semi-parametric penalized likelihood estimation or a parametric estimation.
 The main issue in a meta-analysis study is how to take into account
 the heterogeneity between trials and between the treatment effects across
  trials. Additive models are proportional hazard model with two correlated
@@ -75,16 +75,16 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
  Default is 350}
  
  
- \item{hazard}{Type of hazard functions: "Splines" for semi-parametrical hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazards functions using percentile, "Piecewise-equi" for piecewise constant hazard functions using equidistant intervals, "Weibull" for parametrical weibull functions. Default is "Splines".}
+ \item{hazard}{Type of hazard functions: "Splines" for semi-parametric hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazards functions using percentile, "Piecewise-equi" for piecewise constant hazard functions using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
  
- \item{nb.int1}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+ \item{nb.int1}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 }
 
 
 \details{
  
 The estimated parameter are obtained by maximizing the penalized
- log-likelihood or by a simple log-likelihood (in the parametrical case) using
+ log-likelihood or by a simple log-likelihood (in the parametric case) using
   the robust Marquardt algorithm (Marquardt,1963).
  The parameters are initialized with values obtained with Cox proportional
  hazard model. The iterations are stopped when the difference between two
@@ -128,8 +128,8 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 \item{kappa}{ A vector with the smoothing parameters  in the penalized likelihood estimation corresponding to each baseline function as components.}
 \item{lam}{matrix of hazard estimates and confidence bands.}
 \item{lam2}{the same value as lam for  the second stratum.}
-\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametrical case.}
-\item{loglik}{the marginal log-likelihood in the parametrical case.}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametric case.}
+\item{loglik}{the marginal log-likelihood in the parametric case.}
 \item{n}{the number of observations used in the fit.}
 \item{n.events}{the number of events observed in the fit.}
 \item{n.iter}{number of iterations needed to converge.}
@@ -149,12 +149,12 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 \item{x2}{vector of times for the second stratum (see x1 value).}
 \item{type.of.hazard}{Type of hazard functions (0:"Splines", "1:Piecewise", "2:Weibull").}
 \item{type.of.Piecewise}{Type of Piecewise hazard functions (1:"percentile", 0:"equidistant").}
-\item{nbintervR}{Number of intervals (between 1 and 20) for the parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+\item{nbintervR}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 \item{npar}{number of parameters.}
 \item{nvar}{number of explanatory variables.}
 \item{noVar}{indicator of explanatory variable.}
-\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametrical case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
-\item{AIC}{the Akaike information Criterion for the parametrical case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
+\item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{n.knots.temp}{initial value for the number of knots.}
 \item{shape.weib}{shape parameter for the weibull hazard function.}
 \item{scale.weib}{scale parameter for the weibull hazard function.}
@@ -182,7 +182,7 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 
 
 \references{ 
-V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametrical estimation.
+V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.
 \emph{Journal of Statistical Software} \bold{47}, 1-28.
 
 V. Rondeau, S. Michiels, B. Liquet, and J. P. Pignon (2008).

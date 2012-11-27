@@ -4,8 +4,11 @@
 	if (!is.null(cl <- x$call)){
 		cat("Call:\n")
 		dput(cl)
-		if (x$type == "counting"){
-			cat("\n      left truncated structure used")
+		#if (x$type == "counting" & x$AG == FALSE){ # pour l'instant joint n'accepte pas la vraie troncature à gauche
+		#	cat("\n      left truncated structure used")
+		#}
+		if (x$AG == TRUE){
+			cat("\n      Calendar timescale")
 		}
 		cat("\n")
 	}
@@ -54,6 +57,7 @@
 				if(x$global_chisq.test_d==1) tmpwalddc <- cbind(x$global_chisq_d,x$dof_chisq_d,x$p.global_chisq_d)
 			}
 			cat("\n")
+			if (x$joint.clust == 0) cat("  For clustered data","\n")
 			cat("  Joint gamma frailty model for recurrent and a terminal event processes","\n")
 			if (x$typeof == 0){
 				cat("  using a Penalized Likelihood on the hazard function","\n")
@@ -169,13 +173,21 @@
 		}
 #AD:
 		cat("\n")
-		cat("   n=", x$n)
+		if (x$joint.clust == 0){
+			cat("   n observations=", x$n, " n subjects=", x$ind, " n groups=", x$groups)
+		}else{
+			cat("   n observations=", x$n, " n subjects=", x$groups)
+		}
 		if (length(x$na.action)){
 			cat("      (", length(x$na.action), " observation deleted due to missing) \n")
 		}else{ 
 			cat("\n")
 		}
-		cat("   n recurrent events=", x$n.event, " n groups=", x$groups)
+		if (x$joint.clust == 0){
+			cat("   n events=", x$n.event)
+		}else{
+			cat("   n recurrent events=", x$n.event)
+		}
 		cat("\n")
 		cat("   n terminal events=", x$n.deaths)
 		cat("\n")
@@ -202,11 +214,12 @@
 		if (!is.null(coef)){ 
 			cat("\n")
 			cat("  Joint gamma frailty model for recurrent and a terminal event processes","\n")
+			if (x$joint.clust == 0) cat("  for clustered data","\n")
 			if (x$typeof == 0){
 				cat("  using a Penalized Likelihood on the hazard function","\n")
 			}else{
 				cat("  using a Parametrical approach for the hazard function","\n")
-			}	
+			}
 			
 			if (x$noVar1 == 1){
 				cat("\n")
@@ -219,7 +232,7 @@
 				cat("    Terminal event: No covariates \n")
 				cat("    -------------- \n")
 				cat("\n")
-			}	
+			}
 			
 			cat("\n")
 			cat("   n=", x$n)

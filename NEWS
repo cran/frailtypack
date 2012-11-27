@@ -1,3 +1,8 @@
+Changes in Version 2.2-27
+
+  o Fit now a Joint Frailty model for clustered data
+
+
 Changes in Version 2.2-26
 
   o Minor bug fixed about loglikelihood in Nested Frailty model.
@@ -23,13 +28,13 @@ Changes in Version 2.2-24
 
 Changes in Version 2.2-22
 
-  o Fit a Shared Gamma Frailty model using a parametrical estimation.
+  o Fit a Shared Gamma Frailty model using a parametric estimation.
 
-  o Fit Joint Frailty model for recurrent and terminal events using a parametrical estimation.
+  o Fit Joint Frailty model for recurrent and terminal events using a parametric estimation.
 
-  o Fit a Nested Frailty model using a parametrical estimation.
+  o Fit a Nested Frailty model using a parametric estimation.
 
-  o Fit an Additive Frailty model using a parametrical estimation.
+  o Fit an Additive Frailty model using a parametric estimation.
 
   o Concordance measures in shared frailty and Cox models (Cmeasures).
 

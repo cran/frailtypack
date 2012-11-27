@@ -7,10 +7,9 @@ Identify subclusters
 }
 \description{
 This is a special function used in the context of survival nested models.  It
-identifies correlated groups of observations within other groups defined
- by using 
+identifies correlated groups of observations within other groups defined by using 
 'cluster' function from 'survival' package, and is used on the right hand
-side of a formula of a 'frailtyPenal' object for fitting a nested model.  Using \code{subcluster()} in a formula implies that
+side of 'frailtyPenal' formula for fitting a nested model.  Using \code{subcluster()} in a formula implies that
 a nested frailty model is estimated. 
 }
 

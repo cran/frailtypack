@@ -14,7 +14,7 @@
 !!!!
 !!!! Calcul Residus shared
 !!!!
-	double precision function funcpasres(uu,np,id,thi,jd,thj,k0)     
+	double precision function funcpasres(uu,np,id,thi,jd,thj)
  
 	use comon
         use residusM
@@ -25,11 +25,9 @@
 	double precision,dimension(np)::bh
 	double precision,dimension(np),intent(in)::uu
 	double precision,intent(in)::thi,thj
-	double precision,dimension(2),intent(in)::k0
-	double precision::frail1,kapp0
+	double precision::frail1
 
 	bh=uu
-	kapp0=k0(1)
 	if (id.ne.0) bh(id)=bh(id)+thi
 	if (jd.ne.0) bh(jd)=bh(jd)+thj    
 
@@ -41,15 +39,15 @@
 	return
 		
 	end function funcpasres
-	
-	
-	
+
 
 !!!!
 !!!! Calcul Residus joint
 !!!!
+! la differenciation dans le calcul entre joint cluster
+! et classique se fait dans le funcpa
 
-	double precision function funcpajres(uu,np,id,thi,jd,thj,k0)
+	double precision function funcpajres(uu,np,id,thi,jd,thj)
 
 	use comon
         use residusM
@@ -59,34 +57,46 @@
 	integer,intent(in)::id,jd,np
 	double precision,intent(in)::thi,thj
 	double precision,dimension(np)::uu,bh
-	double precision,dimension(2),intent(in)::k0
-	double precision::frail1,kapp0
+	double precision::frail1,res
 	double precision,parameter::pi=3.141592653589793d0
 
 	bh=uu
-	kapp0=k0(1)
 	if (id.ne.0) bh(id)=bh(id)+thi
 	if (jd.ne.0) bh(jd)=bh(jd)+thj    
 	
 	frail1=bh(1)*bh(1)
 
-!---------- calcul de la penalisation -------------------
+!	funcpajres = frail1**(Ndc(indg) + Nrec(indg) + 1.d0/theta - 1.d0 + &
+!	alpha * (Nrec(indg) + Ndc(indg))) * dexp(-frail1*(1.d0/theta + &
+!	Rrec(indg))) * dexp(-(frail1**alpha)*Rdc(indg))
 
-	funcpajres = frail1**(Ndc(indg) + Nrec(indg) + 1.d0/theta - 1.d0 + &
-	alpha * (Nrec(indg) + Ndc(indg))) * dexp(-frail1*(1/theta + &
+	res = frail1**(Nrec(indg) + 1.d0/theta - 1.d0 + &
+	alpha * Ndc(indg)) * dexp(-frail1*(1.d0/theta + &
 	Rrec(indg))) * dexp(-(frail1**alpha)*Rdc(indg))
+
+!	res = dexp(-(frail1**alpha)*Rdc(indg)) * frail1**Nrec(indg) &
+!	* frail1**(1.d0/theta - 1.d0) * frail1**(alpha * Ndc(indg)) &
+!	* dexp(-frail1*(1.d0/theta + Rrec(indg)))
+
+	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then ! limite à e+300, ce n'est pas une log-vraisemblance
+		funcpajres=-1.d9
+		goto 222
+	end if
+
+	funcpajres = res
+
+222	continue
 
 	return
 	
 	end function funcpajres
-	  
 
 
 !!!!
 !!!! Calcul Residus nested
 !!!!
 
-	double precision function funcpanres(uu,np,id,thi,jd,thj,k0)
+	double precision function funcpanres(uu,np,id,thi,jd,thj)
 	
 	use comon,only:alpha,eta
         use residusM
@@ -96,19 +106,14 @@
 	implicit none
 
 	integer,intent(in)::id,jd,np
-	double precision,intent(in)::thi,thj
-	double precision,dimension(2),intent(in)::k0	
+	double precision,intent(in)::thi,thj	
 	double precision,dimension(np),intent(in)::uu
 	integer::j
 	double precision,dimension(np)::bh
-	double precision::frail1,prod1,prod2
+	double precision::frail1,prod1,prod2,prod3,res
 	double precision,dimension(np-1)::frail2
-	double precision,parameter::pi=3.141592653589793d0
-	double precision::kapa
 
 	bh=uu
-	kapa=k0(1)
-	
 	
 	if (id.ne.0) bh(id)=bh(id)+thi
 	if (jd.ne.0) bh(jd)=bh(jd)+thj    
@@ -121,15 +126,25 @@
 
 	prod1 = 1.d0
 	prod2 = 1.d0
+	prod3 = 1.d0
 	
-
 	do j=1,n_ssgbygrp(indg)
 		prod1 = prod1 * (frail2(j)**mij(indg,j)) * dexp(-frail1 * frail2(j) * cumulhaz1(indg,j))
-		prod2 = prod2 * frail2(j)**((1.d0/eta) - 1) * dexp(-frail2(j)/eta)
+		prod2 = prod2 * frail2(j)**((1.d0/eta) - 1.d0) * dexp(-frail2(j)/eta)
+		prod3 = prod3 * dexp(-frail1 * frail2(j) * cumulhaz0(indg,j))
 	end do
 
-	funcpanres = frail1**(mid(indg)+1.d0/alpha - 1) * prod1 * dexp(-frail1/alpha) * prod2
+	res = frail1**(mid(indg)+1.d0/alpha - 1.d0) * prod1 * prod3 * dexp(-frail1/alpha) * prod2
 	
+	if ((res.ne.res).or.(abs(res).ge. 1.d300)) then
+		funcpanres=-1.d9
+		goto 333
+	end if
+
+	funcpanres = res
+
+333	continue
+
 	return
 	
 	end function funcpanres	
