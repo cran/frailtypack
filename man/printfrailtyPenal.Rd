@@ -3,7 +3,7 @@
 \Rdversion{1.1}
 \alias{print.frailtyPenal}
 
-\title{Print a Short Summary of parameter estimates of a shared gamma frailty model}
+\title{Print a Short Summary of parameter estimates of a shared frailty model}
 \description{
   Prints a short summary of parameter estimates of a 'frailtyPenal' object 
 }
@@ -35,30 +35,34 @@
 
 
 \seealso{
- \code{\link{summary.frailtyPenal}},  
+\code{\link{summary.frailtyPenal}},  
 \code{\link{frailtyPenal for Shared frailty models}},
- \code{\link{plot.frailtyPenal}}
-  }
+\code{\link{plot.frailtyPenal}}
+}
 
 \examples{
+
+\dontrun{
 
 data(readmission)
 
 # /*** Shared frailty model ***/
 
-modSha<-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
+modSha <- frailtyPenal(Surv(time,event)~dukes+cluster(id),
              n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,
-	     hazard="Splines")
+             hazard="Splines")
 
-print(modSha,type="surv",conf=FALSE)
+print(modSha)
 
 # /*** Cox proportional hazard model using Penalized likelihood ***/
 
-modCox<-frailtyPenal(Surv(time,event)~as.factor(dukes),n.knots=10,
-	     kappa1=10000,data=readmission,Frailty=FALSE,
-	     hazard="Splines")
+modCox <- frailtyPenal(Surv(time,event)~dukes,n.knots=10,
+             kappa1=10000,data=readmission,Frailty=FALSE,
+             hazard="Splines")
+
 print(modCox)
 
+}
 
 }
 

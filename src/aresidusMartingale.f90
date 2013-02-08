@@ -4,14 +4,14 @@
 	subroutine ResidusMartingale(b,np,namesfuncres,Resmartingale,frailtypred,frailtyvar,frailtysd)
 
 	use residusM
-	use optim
+	use optimres
 	use comon
 
 	implicit none
 	
 	integer::np
 	double precision,external::namesfuncres
-	double precision,dimension(np),intent(in)::b	
+	double precision,dimension(np),intent(in)::b
 	double precision,dimension(ng),intent(out)::Resmartingale
 	double precision,dimension(ng),intent(out)::frailtypred,frailtysd,frailtyvar
 
@@ -22,25 +22,41 @@
 	cares=0.d0
 	cbres=0.d0
 	ddres=0.d0
-	
-	
-	do indg=1,ng 
-		post_esp(indg)=(nig(indg)+1/(b(np-nva)*b(np-nva)))/(cumulhaz(indg)+1/(b(np-nva)*b(np-nva)))
-		
-		post_SD(indg)=dsqrt((nig(indg)+1/(b(np-nva)*b(np-nva)))/((cumulhaz(indg)+1/(b(np-nva)*b(np-nva)))**2))
-		
-		Resmartingale(indg)=nig(indg)-(post_esp(indg))*cumulhaz(indg)
-		
-		frailtypred(indg) = post_esp(indg)
-		
-		frailtysd(indg) = post_SD(indg)
-		
-		frailtyvar(indg) = frailtysd(indg)**2
-	end do
 
-	
+! la prediction des effets aleatoires n'est pas la meme pour gamma ou log-normal
+	if (logNormal.eq.0) then
+		do indg=1,ng
+			post_esp(indg)=(nig(indg)+1/(b(np-nva)*b(np-nva)))/(cumulhaz(indg)+1/(b(np-nva)*b(np-nva)))
+			post_SD(indg)=dsqrt((nig(indg)+1/(b(np-nva)*b(np-nva)))/((cumulhaz(indg)+1/(b(np-nva)*b(np-nva)))**2))
+
+			Resmartingale(indg)=nig(indg)-(post_esp(indg))*cumulhaz(indg)
+
+			frailtypred(indg) = post_esp(indg)
+			frailtysd(indg) = post_SD(indg)
+			frailtyvar(indg) = frailtysd(indg)**2
+		end do
+	else
+		do indg=1,ng
+			vuu=0.9d0
+			call marq98res(vuu,1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
+
+			if (istopres.eq.1) then
+				Resmartingale(indg)=nig(indg)-((vuu(1)*vuu(1)))*cumulhaz(indg)
+				frailtypred(indg) = vuu(1)*vuu(1)
+				frailtyvar(indg) = ((2.d0*vuu(1))**2)*vres(1)
+				frailtysd(indg) = dsqrt(frailtyvar(indg))
+			else
+				! non convergence ou erreur de calcul de la fonction a maximiser
+				Resmartingale(indg) = 0.d0
+				frailtypred(indg) = 0.d0
+				frailtyvar(indg) = 0.d0
+				frailtysd(indg) = 0.d0
+			endif
+		end do
+	endif
+
 	end subroutine ResidusMartingale
-	
+
 
 !=============================================================================
 !                       CALCUL DES RESIDUS de MARTINGALES Joint

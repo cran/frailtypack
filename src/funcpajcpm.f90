@@ -1,20 +1,20 @@
 
 !========================          FUNCPAJ_CPM         ====================
 	double precision function funcpajcpm(b,np,id,thi,jd,thj,k0)
-	
+
 	use tailles
 	use comon,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
 	effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
 	auxig,aux1,aux2,res1,res3,res4,ttt,tttdc,betacoef,kkapa
         use residusM
 	use comongroup,only:vet,vet2
-      
+
 	implicit none
-	
+
 	integer::np,id,jd,i,j,k,ig,choix
 	integer,dimension(ngmax)::cpt
 !yasyas
-	double precision::som11,som21,somf
+	double precision::som11,som21
 	integer::jj,gg,gg2
 !yasyas
 	double precision::thi,thj,sum,res
@@ -22,19 +22,18 @@
 	double precision,dimension(ngmax)::res2,res1dc,res2dc
 	double precision,dimension(ngmax)::integrale1,integrale2,integrale3, &
 	integrale3gap
-! yas 
+! yas
 	double precision,dimension(ngmax)::integrale4
 	double precision::gammaJ,int
 	double precision,dimension(2)::k0
-	
-	
+
 
 	kkapa=k0
 	bh=b
- 
+
 	if (id.ne.0) bh(id)=bh(id)+thi
-	if (jd.ne.0) bh(jd)=bh(jd)+thj    
-	
+	if (jd.ne.0) bh(jd)=bh(jd)+thj
+
 ! Allocation des parametre des fcts de risque cte par morceaux
 !cpm
 	betacoef = 0.d0
@@ -43,21 +42,17 @@
 	end do
 !cpm
 
-
-	
 	if(effet.eq.1) then
 		theta = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
 		alpha = bh(np-nva)
 	endif
 
-
-!-------------------------------------------------------
-!---------- calcul de la vraisemblance ------------------
+!---------------------------------------------------------
+!---------- calcul de la vraisemblance -------------------
 !---------------------------------------------------------
 
 !---- avec ou sans variable explicative  ------cc
 
-	
 	do k=1,ng
 		res1(k) = 0.d0
 		res2(k) = 0.d0
@@ -78,7 +73,7 @@
 		aux2(k)=0.d0
 	end do
 
-!********************************************         
+!**********************************************
 !-----avec un effet aleatoire dans le modele
 !**********************************************
 
@@ -86,28 +81,28 @@
 !ccccccccccccccccccccccccccccccccccccccccc
 !     pour les donnees recurrentes
 !ccccccccccccccccccccccccccccccccccccccccc
-	do i=1,nsujet 
-		cpt(g(i))=cpt(g(i))+1  
+	do i=1,nsujet
+		cpt(g(i))=cpt(g(i))+1
 		if(nva1.gt.0)then
-			vet = 0.d0   
+			vet = 0.d0
 			do j=1,nva1
 				vet =vet + bh(np-nva+j)*dble(ve(i,j))
 			end do
 			vet = dexp(vet)
 		else
 			vet=1.d0
-		endif           
+		endif
 		if((c(i).eq.1))then
 			do gg=1,nbintervR
 				if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
 					res2(g(i)) =  res2(g(i))+ dlog(betacoef(gg)*vet)
 				endif
 			end do
-		endif  
+		endif
 		if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
 			funcpajcpm=-1.d9
 			goto 123
-		end if	
+		end if
 !cccccccccccccccccccccc
 ! Fonction de risque cumulée de recidive au tepms T_ij
 !cccccccccccccccccccccc
@@ -130,7 +125,7 @@
 		if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
 			funcpajcpm=-1.d9
 			goto 123
-		end if	
+		end if
 
 
 !cccccccccccccccccc
@@ -155,15 +150,15 @@
 		if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
 			funcpajcpm=-1.d9
 			goto 123
-		end if	
+		end if
 	end do
 
 !ccccccccccccccccccccccccccccccccccccccccc
-! pour le deces 
-!ccccccccccccccccccccccccccccccccccccccccc 
+! pour le deces
+!ccccccccccccccccccccccccccccccccccccccccc
 	do k=1,ng  
 		if(nva2.gt.0)then
-			vet2 = 0.d0   
+			vet2 = 0.d0
 			do j=1,nva2
 				vet2 =vet2 + bh(np-nva2+j)*dble(vedc(k,j))
 			end do
@@ -177,7 +172,6 @@
 !cccccccccccccccccc
 
 		if(cdc(k).eq.1)then
-
 			do gg=1,nbintervDC
 				if ((t1dc(k).gt.(tttdc(gg-1))).and.(t1dc(k).le.(tttdc(gg)))) then
 					res2dc(k) = dlog(betacoef(nbintervR+gg)*vet2)
@@ -186,15 +180,14 @@
 			if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
 				funcpajcpm=-1.d9
 				goto 123
-			end if	
-		endif 
+			end if
+		endif
 !cccccccccccccccccc
 ! Fonction de risque cumulée de dcd au tepms T_i*
 !cccccccccccccccccc
-		
+
 		som11=0.d0
 		som21=0.d0
-		somf=0.d0
 		gg2=0
 		do gg=1,nbintervDC
 			if((t1dc(k).gt.(tttdc(gg-1))).and.(t1dc(k).le.(tttdc(gg))))then
@@ -212,13 +205,13 @@
 		if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
 			funcpajcpm=-1.d9
 			goto 123
-		end if		
+		end if
 	end do
- 
+
 !***************INTEGRALES ****************************
-	do ig=1,ng 
-		auxig=ig 
-		choix = 3  
+	do ig=1,ng
+		auxig=ig
+		choix = 3
 		call gaulagj(int,choix)
 		integrale3(ig) = int !moins bon
 	end do
@@ -227,38 +220,36 @@
 
 !!!!!! new
 
-	res = 0.d0 
-	do k=1,ng  
+	res = 0.d0
+	do k=1,ng
 		sum=0.d0
 		if(cpt(k).gt.0)then
 			if(theta.gt.(1.d-8)) then
 !cccc ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
-                   
 				res= res + res2(k) &
 !--      pour le deces:
 				+ res2dc(k)  &
 				- gammaJ(1./theta)-dlog(theta)/theta  &
-				+ dlog(integrale3(k))		
+				+ dlog(integrale3(k))
 			else
 !*************************************************************************
 !     developpement de taylor d ordre 3
 !*************************************************************************
-!                   write(*,*)'************** TAYLOR *************'                   
+!                   write(*,*)'************** TAYLOR *************'
 				res= res + res2(k) &
-				+ res2dc(k)  &
-				- gammaJ(1./theta)-dlog(theta)/theta  &
-				+ dlog(integrale3(k)) 
- 
+				+ res2dc(k) &
+				- gammaJ(1./theta)-dlog(theta)/theta &
+				+ dlog(integrale3(k))
 			endif
 			if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 				funcpajcpm=-1.d9
 				!print*,k,'ok 6',gammaJ(1./theta),theta,integrale3(k),dlog(integrale3(k))
 				goto 123
-			end if	
-		endif 
+			end if
+		endif
 	end do
 
-!!!	
+!!!
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 		funcpajcpm =-1.d9
 		Rrec = 0.d0
@@ -266,10 +257,8 @@
 		Rdc = 0.d0
 		Ndc = 0.d0
 		goto 123
-
 	else
-		funcpajcpm = res 
-		
+		funcpajcpm = res
 		do k=1,ng
 			Rrec(k)=res1(k)
 			Nrec(k)=nig(k)
@@ -277,11 +266,11 @@
 			Ndc(k)=cdc(k)
 		end do
 	end if
-	
+
 123     continue
 
 	return
-	
+
 	end function funcpajcpm
 
 

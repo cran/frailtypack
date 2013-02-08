@@ -40,7 +40,7 @@
 	double precision,dimension(:,:),allocatable,save::PEN_deri!(npmax,1)
 	double precision,dimension(:,:),allocatable,save::hess!(npmax,npmax)
 !*****contrib
-	integer,save::ng          !nb de gpes     
+	integer,save::ng          !nb de gpes
 !*****groupe
 	integer,dimension(:),allocatable,save::g!(nsujetmax)
 	integer,dimension(:),allocatable,save::nig!(ngmax)  ! nb d events recurrents par sujet
@@ -54,17 +54,17 @@
 !*****pen2
 	double precision,dimension(:),allocatable,save:: m3m1,m3m,m2m1,m2m,m1m,mi
      
-!************************************************************ 
+!************************************************************
 !AD: add for death
 	double precision, dimension(:),allocatable,save::mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc  
 !AD:end
 !************************************************************
-! %%%%%%%%%%%%% ANDERSEN-GILL %%%%%%%%%%%%%%%%%%%%%%%%% 
+! %%%%%%%%%%%%% ANDERSEN-GILL %%%%%%%%%%%%%%%%%%%%%%%%%
 	integer,save::AG
-! %%%%%%%%%%%%% indic ALPHA %%%%%%%%%%%%%%%%%%%%%%%%% 
+! %%%%%%%%%%%%% indic ALPHA %%%%%%%%%%%%%%%%%%%%%%%%%
 	integer,save::indic_ALPHA
 !****  theta/alpha
-	double precision,save::theta,alpha,eta !en exposant pour la frailty deces 
+	double precision,save::theta,alpha,eta !en exposant pour la frailty deces
 !****** indicateur de troncature
 	integer,save:: indictronq,indictronqdc ! =0 si donnees non tronquées reellement
 !*****auxig
@@ -74,13 +74,13 @@
 	double precision,save::resnonpen
 	double precision,dimension(:),allocatable::kkapa
 !****** Type du modele
-	integer,save::model  
-	double precision,dimension(:),allocatable::vvv 
+	integer,save::model
+	double precision,dimension(:),allocatable::vvv
 !cpm
 	double precision ::cens
 	integer,save:: nbrecu,nbdeces,nbintervR,nbintervDC
 	integer,save::indic_eta
-!	double precision,save::eta !en exposant pour la frailty deces 
+!double precision,save::eta !en exposant pour la frailty deces
 	double precision,dimension(:),allocatable,save::res4
 	integer,save::typeof,typeof2
         double precision,dimension(:),allocatable,save::ttt,tttdc
@@ -92,6 +92,11 @@
 	integer,dimension(:),allocatable,save::d
 	integer,save::dmax
 	integer::intcens
+	double precision,dimension(:),allocatable,save::resL,resU
+! distribution des frailty par une log-normale
+	integer::logNormal
+	double precision,save::sig2
+	double precision,dimension(:),allocatable,save::res5
 	end module comon
 
 	module comongroup

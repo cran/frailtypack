@@ -3,24 +3,28 @@
 \alias{frailtyPenal}
 \alias{frailtyPenal for Shared frailty models}
 
-\title{ Fit a Shared Gamma Frailty model using a semi-parametric penalized likelihood estimation or parametric estimation }
+\title{ Fit a Shared Frailty model using a semiparametric penalized likelihood estimation or parametric estimation }
 
-\description{Fit a shared gamma frailty model using a semi-parametric Penalized Likelihood estimation or parametric estimation on the hazard function.
+\description{Fit a shared gamma or log-normal frailty model using a semiparametric Penalized Likelihood estimation or parametric estimation on the hazard function.
 Left truncated, right-censored data, interval-censored data and strata (max=2) are allowed.
 It allows to obtain a non-parametric smooth hazard of survival function.
 This approach is different from the partial penalized likelihood approach of Therneau et al.
 
- 
-The hazard function, conditionnal on the frailty term \eqn{z_i}, of a shared frailty model for the \eqn{j^{th}} subject in the \eqn{i^{th}} group:
 
-\deqn{\lambda_{ij}(t|z_i)=\lambda_0(t)z_iexp(\bold{\beta^{'}X_{ij}})}
+The hazard function, conditionnal on the frailty term \eqn{\omega_i}, of a shared gamma frailty model for the \eqn{j^{th}} subject in the \eqn{i^{th}} group:
 
-\deqn{z_i\sim\Gamma\left(\frac{1}{\theta},\frac{1}{\theta}\right)
- \hspace{0.5cm} \bold{E}(z_i)=1 \hspace{0.5cm}\bold{Var}(z_i)=\theta}
+\deqn{\lambda_{ij}(t|\omega_i)=\lambda_0(t)\omega_i\exp(\bold{\beta^{'}Z_{ij}})}
 
-where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\bold{\beta}} the vector of the regression coefficient associated to the covariate vector \eqn{\bold{X_{ij}}} for the \eqn{j^{th}} individual in the \eqn{i^{th}} group.
+\deqn{\omega_i\sim\Gamma\left(\frac{1}{\theta},\frac{1}{\theta}\right)
+ \hspace{0.5cm} \bold{E}(\omega_i)=1 \hspace{0.5cm}\bold{Var}(\omega_i)=\theta}
 
+where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\bold{\beta}} the vector of the regression coefficient associated to the covariate vector \eqn{\bold{Z_{ij}}} for the \eqn{j^{th}} individual in the \eqn{i^{th}} group.
 
+Otherwise, in case of a shared log-normal frailty model, we have for the \eqn{j^{th}} subject in the \eqn{i^{th}} group:
+
+\deqn{\lambda_{ij}(t|\eta_i)=\lambda_0(t)\exp(\eta_i+\bold{\beta^{'}Z_{ij}})}
+
+\deqn{\eta_i\sim N(0,\sigma^2)}
 
 }
 
@@ -29,7 +33,7 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\bold{\beta}} the
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
             joint = FALSE, recurrentAG = FALSE, cross.validation =
             FALSE, n.knots, kappa1, kappa2, maxit = 350,
-            hazard = "Splines", nb.int1, nb.int2, intcens = FALSE)
+            hazard = "Splines", nb.int1, nb.int2, RandDist = "Gamma")
 }
 
 \arguments{
@@ -73,7 +77,7 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
 
-  \item{hazard}{Type of hazard functions: "Splines" for semi-parametric hazard functions with the penalized likelihood estimation, 
+  \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions with the penalized likelihood estimation, 
             "Piecewise-per" for piecewise constant hazard function using percentile (not available for interval-censored data), "Piecewise-equi" for piecewise constant hazard 
             function using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
 
@@ -81,7 +85,7 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
 
   \item{nb.int2}{Argument used only for the Joint frailty model.}
 
-  \item{intcens}{Logical value. Is model with interval-censored data fitted ? To correctly input your times, please refer to the 'SurvIC' function. The default is FALSE.}
+  \item{RandDist}{Type of random effect distribution: "Gamma" for a gamma distribution, "LogN" for a log-normal distribution. Default is "Gamma".}
 
 }
 
@@ -101,7 +105,7 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 \value{
 
 The following components are included in a 'frailtyPenal' object for shared frailty models.
-\item{b}{sequence of the corresponding estimation of the coefficients for the hazard functions (parametric or semi-parametric), the random effects variances and the regression coefficients.}
+\item{b}{sequence of the corresponding estimation of the coefficients for the hazard functions (parametric or semiparametric), the random effects variances and the regression coefficients.}
 \item{call}{The code used for the model.}
 \item{coef}{the regression coefficients.}
 \item{cross.Val }{Logical value. Is cross validation procedure used for estimating the smoothing parameters in the penalized likelihood estimation?  }
@@ -111,7 +115,7 @@ The following components are included in a 'frailtyPenal' object for shared frai
 \item{kappa}{ A vector with the smoothing parameters  in the penalized likelihood estimation corresponding to each baseline function as components.}
 \item{lam}{matrix of hazard estimates and confidence bands.}
 \item{lam2}{the same value as lam for the second stratum.}
-\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametric case.}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semiparametric case.}
 \item{loglik}{the marginal log-likelihood in the parametric case.}
 \item{n}{the number of observations used in the fit.}
 \item{n.events}{the number of events observed in the fit.}
@@ -120,7 +124,8 @@ The following components are included in a 'frailtyPenal' object for shared frai
 \item{n.strat}{ number of stratum.}
 \item{surv}{matrix of baseline survival estimates and confidence bands.}
 \item{surv2}{the same value as surv for the second stratum.}
-\item{theta}{variance of frailty parameter.}
+\item{theta}{variance of the gamma frailty parameter \eqn{(\bold{Var}(\omega_i))}}
+\item{sigma2}{variance of the log-normal frailty parameter \eqn{(\bold{Var}(\eta_i))}}
  \item{varH}{the variance matrix of all parameters before positivity constraint transformation (theta, the regression coefficients and the spline coefficients). Thenafter, the delta method is needed to obtain the estimated variance parameters.}
  \item{varHIH}{the robust estimation of the variance matrix of all parameters (theta, the regression coefficients and the spline coefficients).}
 \item{x1}{vector of times where both survival and hazard function are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
@@ -131,7 +136,7 @@ The following components are included in a 'frailtyPenal' object for shared frai
 \item{npar}{number of parameters.}
 \item{nvar}{number of explanatory variables.}
 \item{noVar}{indicator of explanatory variables.}
-\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semiparametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
 \item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{n.knots.temp}{initial value for the number of knots.}
 \item{shape.weib}{shape parameter for the weibull hazard function.}
@@ -140,9 +145,9 @@ The following components are included in a 'frailtyPenal' object for shared frai
 \item{martingaleCox}{martingale residuals for observation in the Cox model.}
 \item{Frailty}{Logical value. Was model with frailties fitted.}
 \item{frailty.pred}{empirical Bayes prediction of the frailty term (ie, using conditional posterior distributions).}
-\item{frailty.var}{variance of the empirical Bayes prediction of the frailty term.}
-\item{frailty.sd}{standard error of the frailty empirical Bayes prediction.}
-\item{linear.pred}{linear predictor: uses simply "Beta'X" in the cox proportional hazard model or "Beta'X + log z_i" in the shared Frailty models.}
+\item{frailty.var}{variance of the empirical Bayes prediction of the frailty term (only for gamma frailty models).}
+\item{frailty.sd}{standard error of the frailty empirical Bayes prediction (only for gamma frailty models).}
+\item{linear.pred}{linear predictor: uses simply "Beta'X" in the cox proportional hazard model or "Beta'X + log w_i" in the shared gamma frailty models, otherwise uses "Beta'X + w_i" in log-normal.}
 
 \item{global_chisq}{a vector with the values of each multivariate Wald test.}
 \item{dof_chisq}{a vector with the degree of freedom for each multivariate Wald test.}
@@ -159,7 +164,7 @@ The following components are included in a 'frailtyPenal' object for shared frai
 From a prediction aim, we recommand you to input a data sorted by the group variable with numerical numbers from 1 to n (number of groups).
 "Kappa" (kappa1 and kappa2) and "n.knots" are the arguments that the user have to change if the fitted model does not converge.
 "n.knots" takes integer values between 4 and 20. But with n.knots=20, the model would take a long time to converge. So, usually, begin first with n.knots=7, and increase it step by step until it converges.
-"Kappa" only takes positive values. So, choose a value for Kappa (for instance 10000), and if it does not converge, multiply or devide this value by 10 or 5 until it converges.
+"Kappa" only takes positive values. So, choose a value for Kappa (for instance 10000), and if it does not converge, multiply or divide this value by 10 or 5 until it converges.
 
 }
 
@@ -175,8 +180,8 @@ V. Rondeau, D Commenges, and P. Joly (2003). Maximum penalized likelihood estima
 McGilchrist CA and Aisbett CW (1991). Regression with frailty in survival analysis.
 \emph{Biometrics} \bold{47}, 461-466.
 
-D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear parameters. 
-\emph{SIAM Journal of Applied Mathematics}, 431-441. 
+D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear parameters.
+\emph{SIAM Journal of Applied Mathematics}, 431-441.
 
  }
 
@@ -189,22 +194,25 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 \code{\link{cluster}},
 \code{\link{strata}},
 \code{\link[survival]{Surv}}
+\code{\link{SurvIC}}
 }
 
 
 \examples{
 
- ###  Shared model  ###
+\dontrun{
+
+###  Shared model  ###
 
 data(kidney)
-frailtyPenal(Surv(time,status)~ cluster(id)+sex+age,
+frailtyPenal(Surv(time,status)~cluster(id)+sex+age,
              n.knots=12,kappa1=10000,data=kidney,Frailty=TRUE)
 
- ###  COX proportional hazard model (SHARED without frailties) ### 
- ### estimated with penalized likelihood ###
+###  COX proportional hazard model (SHARED without frailties) ###
+###  estimated with penalized likelihood ###
 
-frailtyPenal(Surv(time,status)~sex+age,n.knots=12,kappa1=10000,
-	     data=kidney,Frailty=FALSE)
+frailtyPenal(Surv(time,status)~sex+age,
+             n.knots=12,kappa1=10000,data=kidney,Frailty=FALSE)
 
 ###  Shared model with truncated data ###
 
@@ -220,22 +228,29 @@ frailtyPenal(Surv(tt0,time,status)~sex+age+cluster(id),
 ###  Shared model - stratified analysis ###
 
 data(readmission)
-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id)+strata(sex),
+frailtyPenal(Surv(time,event)~cluster(id)+dukes+strata(sex),
              n.knots=10,kappa1=10000,kappa2=10000,data=readmission,
-	     Frailty=TRUE)
+             Frailty=TRUE)
 
 ###  Shared model - recurrentAG=TRUE ###
 
-frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+
-           as.factor(charlson)+cluster(id),data=readmission,Frailty=TRUE,
-           n.knots=6,kappa1=100000,recurrentAG=TRUE)
+frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+dukes+
+             charlson,data=readmission,Frailty=TRUE,
+             n.knots=6,kappa1=100000,recurrentAG=TRUE)
 
 ###  Shared model - cross.validation=TRUE ###
 
-\dontrun{ 
-frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+
-          as.factor(charlson)+cluster(id),data=readmission, Frailty=TRUE,
-          n.knots=6,kappa1=5000,recurrentAG=TRUE,cross.validation=TRUE)
+frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+dukes+
+             charlson,data=readmission, Frailty=TRUE,n.knots=6,
+             kappa1=5000,recurrentAG=TRUE,cross.validation=TRUE)
+
+
+### Shared model - log-normal distribution ###
+
+frailtyPenal(Surv(t.start,t.stop,event)~sex+dukes+charlson+cluster(id),
+             data=readmission, Frailty=TRUE,n.knots=6,kappa1=5000,
+             recurrentAG=TRUE,RandDist="LogN")
+
 }
 
 }

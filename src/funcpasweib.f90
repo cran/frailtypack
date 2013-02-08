@@ -37,7 +37,7 @@
 		betaR= bh(1)**2
 		etaR= bh(2)**2
 		betaD= bh(3)**2
-		etaD= bh(4)**2		
+		etaD= bh(4)**2
 	end if
 
 	if(effet.eq.1) then
@@ -171,7 +171,7 @@
 	               if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                           funcpasweib=-1.d9
                           goto 123
-                       end if			
+                       end if
 		end do 
 
 		res = 0.d0
@@ -225,9 +225,7 @@
 		end do
 
 
-       	endif !fin boucle effet=0
-
-!--------- calcul de la penalisation -------------------
+	endif !fin boucle effet=0
 
 !    Changed JRG 25 May 05
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then

@@ -1001,15 +1001,15 @@
 	end select
 
 	if (nst == 1) then
-		scaleweib(1) = betaR
-		shapeweib(1) = etaR
+		scaleweib(1) = etaR !betaR
+		shapeweib(1) = betaR !etaR
 		scaleweib(2) = 0.d0
 		shapeweib(2) = 0.d0
 	else
-		scaleweib(1) = betaR
-		shapeweib(1) = etaR
-		scaleweib(2) = betaD
-		shapeweib(2) = etaD
+		scaleweib(1) = etaR !betaR
+		shapeweib(1) = betaR !etaR
+		scaleweib(2) = etaD !betaD
+		shapeweib(2) = betaD !etaD
 	end if	
 
 !AD:add LCV

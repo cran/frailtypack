@@ -16,7 +16,7 @@
   \item{\dots}{ other unusued arguments }
 }
 \value{
- 
+
 
  \item{n}{the number of observations used in the fit.}
  \item{n.groups}{the maximum number of groups used in the fit}
@@ -39,7 +39,7 @@
 \code{\link{frailtyPenal for Nested frailty models}},
 \code{\link{plot.nestedPenal}},
 
- }
+}
 
 \examples{
 
@@ -47,15 +47,15 @@
 
 \dontrun{
 
- data(dataNested)
- 
- modNested<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+subcluster(subgroup)+
-            cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000,
-	    kappa2=50000,hazard="Splines")
+data(dataNested)
+
+modNested <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+subcluster(subgroup)+
+               cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000,
+               kappa2=50000,hazard="Splines")
 
 # It takes around 24 minutes to converge (depends on the processor) #
 
- print(modNested)
+print(modNested)
 
 }
 

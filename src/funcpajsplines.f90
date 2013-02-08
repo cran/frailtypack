@@ -5,7 +5,11 @@
 	double precision function funcpajsplines(b,np,id,thi,jd,thj,k0)
 	
 	use tailles
-	use comon
+	use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m,mm3,mm2,mm1,mm,&
+	im3,im2,im1,im,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,date,datedc,zi,&
+	t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst, &
+	effet,stra,ve,vedc,pe,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
+	auxig,aux1,aux2,res1,res3,res4,kkapa,resnonpen
         use residusM
 	use comongroup,only:vet,vet2,the1,the2
 		
@@ -168,7 +172,7 @@
 		aux2(k)=0.d0
 	end do
 
-!*******************************************         
+!*********************************************
 !-----avec un effet aleatoire dans le modele
 !*********************************************
 
@@ -212,13 +216,12 @@
 			goto 123
 		end if	
 	end do
-!	print*,'ok 1',res1(1)
-!           stop
-!ccccccccccccccccccccccccccccccccccccccccc
-! pour le deces 
-!ccccccccccccccccccccccccccccccccccccccccc 
 
-	do k=1,ng  
+!ccccccccccccccccccccccccccccccccccccccccc
+! pour le deces
+!ccccccccccccccccccccccccccccccccccccccccc
+
+	do k=1,ng ! dans Joint ng=nb individus
 		if(nva2.gt.0)then
 			vet2 = 0.d0   
 			do j=1,nva2
@@ -229,15 +232,15 @@
 			vet2=1.d0
 		endif
 		if(cdc(k).eq.1)then
-			res2dc(k) = dlog(dut2(nt1dc(k))*vet2)  
+			res2dc(k) = dlog(dut2(nt1dc(k))*vet2)
 			if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
 				funcpajsplines=-1.d9
 !				print*,'gt 1'
 				goto 123
-			end if	
-		endif 
-             
-! pour le calcul des integrales / pour la survie, pas les donn�es recurrentes:
+			end if
+		endif
+
+! pour le calcul des integrales / pour la survie, pas les donnees recurrentes:
 		aux1(k)=ut2(nt1dc(k))*vet2
 		aux2(k)=aux2(k)+ut2(nt0(k))*vet2 !vraie troncature
 		
@@ -257,19 +260,19 @@
 !**************INTEGRALES ****************************
 	do ig=1,ng 
 		auxig=ig 
-		choix = 3  
+		choix = 3
 		call gaulagJ(int,choix)
 		integrale3(ig) = int !moins bon
 	end do
 !************* FIN INTEGRALES **************************
-                      
-	res = 0.d0 
-	do k=1,ng  
+
+	res = 0.d0
+	do k=1,ng
 		sum=0.d0
 		if(cpt(k).gt.0)then
 			if(theta.gt.(1.d-8)) then
 !cccc ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
-                   
+
 				res= res + res2(k) &
 !--      pour le deces:
 				+ res2dc(k)  &
@@ -353,117 +356,4 @@
 
 
 
-!==========================  DISTANCE   =================================
-         
-	subroutine distanceJsplines(nz1,nz2,b,mt1,mt2,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
-	
-	use tailles
-	use comon,only:date,datedc,zi,t0,t1,t0dc,t1dc,c,cdc &
-	,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst &
-	,PEN_deri,I_hess,H_hess,Hspl_hess,hess
-	
-	Implicit none  
-	
-	
-	integer,intent(in):: nz1,nz2,mt1,mt2
-	double precision ,dimension(npmax),intent(in):: b
-	integer::i,j,n,k,l      
-	double precision::x1,x2,h,su,bsup,binf,lam,lbinf,lbsup
-	double precision ,dimension(npmax,npmax)::hes1,hes2
-	double precision ,dimension(-2:npmax):: the1,the2     
-	double precision,dimension(mt1)::x1Out
-	double precision,dimension(mt2)::x2Out
-	double precision,dimension(mt1,3):: lamOut,suOut
-	double precision,dimension(mt2,3):: lam2Out,su2Out
-		
-	n  = nz1+2
-	do i=1,nz1+2
-		do j=1,nz1+2
-			hes1(i,j)=h_Hess(i,j)
-		end do
-	end do 
-
-	if(nst.eq.2)then  
-		k = 0
-		do i=nz1+3,nz1+2+nz2+2
-			k = k + 1 
-			l = 0
-			do j=nz1+3,nz1+2+nz2+2
-				l = l + 1
-				hes2(k,l)=H_hess(i,j)
-			end do
-		end do   
-	endif
-
-	do i=1,nz1+2
-		the1(i-3)=(b(i))*(b(i))
-	end do
-	if(nst.eq.2)then  
-		do i=1,nz2+2
-			j = nz1+2+i
-			the2(i-3)=(b(j))*(b(j))
-		end do
-	endif
-	h = (zi(n)-zi(1))*0.01d0
-	x1 = zi(1)
-	x2 = zi(1)     
-  
-! Recurrent          
-	do i=1,mt1
-		if(i .ne.1)then
-			x1 = x1 + h 
-		end if
-		call cospJ(x1,the1,nz1+2,hes1,zi,binf,su,bsup,lbinf,lam,lbsup)
-				
-		if(bsup.lt.0.d0)then
-			bsup = 0.d0
-		endif
-		if(binf.gt.1.d0)then
-			binf = 1.d0 
-		endif
-		if(lbinf.lt.0.d0)then
-			lbinf = 0.d0
-		endif 
-!!!   Replaced by next sentences and add new ones JRG January 05
-
-		x1Out(i)=x1
-		lamOut(i,1)=lam
-		lamOut(i,2)=lbinf
-		lamOut(i,3)=lbsup 
-		suOut(i,1)=su
-		suOut(i,2)=bsup
-		suOut(i,3)=binf
-	end do   
-
-! Death  
-	if(nst.eq.2)then        
-		do i=1,mt2
-!!!   Replaced by next sentences and add new ones JRG January 05	
-			if(i.ne.1)then
-				x2 = x2 + h 
-			endif	
-			call cospJ(x2,the2,nz2+2,hes2,zi,binf,su,bsup,lbinf,lam,lbsup)
-			if(bsup.lt.0.d0)then
-				bsup = 0.d0
-			endif
-			if(binf.gt.1.d0)then
-				binf = 1.d0 
-			endif
-			if(lbinf.lt.0.d0)then
-				lbinf = 0.d0
-			endif 
-
-			x2Out(i)=x2
-			lam2Out(i,1)=lam
-			lam2Out(i,2)=lbinf
-			lam2Out(i,3)=lbsup 
-			su2Out(i,1)=su
-			su2Out(i,2)=binf
-			su2Out(i,3)=bsup 
-		end do  
-	endif
-	          
-	return
-		
-	end subroutine distanceJsplines
 

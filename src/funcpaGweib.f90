@@ -26,8 +26,6 @@
 	if (id.ne.0) bh(id)=bh(id)+thi
 	if (jd.ne.0) bh(jd)=bh(jd)+thj
 
-! Allocation des parametre des fcts de risque cte par morceaux
-
 	if(indic_joint.eq.0)then
 		if(nst==2) then
 			betaR= bh(1)**2
@@ -138,16 +136,15 @@
 		
 		res = 0.d0
 		cptg = 0
-!     gam2 = gammaJ(inv)
+
 ! k indice les groupes
 
-		do k=1,ng  
+		do k=1,ng
 			sum=0.d0
 			if(cpt(k).gt.0)then
 				nb = nig(k)
 				dnb = dble(nig(k))
-!                write(*,*)'nb,dnb',nb,dnb,k
-!     gam1 = gammaJ(dnb + inv) 
+
 				if (dnb.gt.1.d0) then
 					do l=1,nb
 						sum=sum+dlog(1.d0+theta*dble(nb-l))
@@ -155,20 +152,16 @@
 				endif
 
 				if(theta.gt.(1.d-5)) then
-!				print*,'==== ici ===='
 ! ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
 					if(AG.EQ.1)then
 						res= res-(inv+dnb)*dlog(theta*(res1(k)-res3(k))+1.d0) &
-						+ res2(k) + sum  
+						+ res2(k) + sum
 ! nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccc
 					else
-!          write(*,*)'*** funcpaGweib frailty**',res,dnb,theta,res1(k),
-!     &                  res1(k),res2(k),sum,res3(k)
 						res = res-(inv+dnb)*dlog(theta*res1(k)+1.d0) &
-						+(inv)*dlog(theta*res3(k)+1.d0) + res2(k) + sum  
+						+(inv)*dlog(theta*res3(k)+1.d0) + res2(k) + sum
 					endif
 				else
-					
 !     developpement de taylor d ordre 3
 !                   write(*,*)'************** TAYLOR *************'
 ! ancienne vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
@@ -189,16 +182,16 @@
 				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 					funcpaGweib=-1.d9
 					goto 123
-				end if	 
-			endif 
+				end if
+			endif
 		end do
 	else !passage au modele conjoint
 
 
 !********************************************
-!*******************************************         
-!----- JOINT FRAILTY MODEL  
-!*********************************************
+!********************************************
+!----- JOINT FRAILTY MODEL
+!********************************************
 		nst=2
 		inv = 1.d0/theta
 !     pour les donnees recurrentes
@@ -206,7 +199,7 @@
 		do i=1,nsujet 
 			cpt(g(i))=cpt(g(i))+1  !nb obser dans groupe
 			if(nva1.gt.0)then
-				vet = 0.d0   
+				vet = 0.d0
 				do j=1,nva1
 					vet =vet + bh(np-nva+j)*dble(ve(i,j))
 				end do
@@ -245,7 +238,7 @@
 ! 
 		do k=1,lignedc!ng  
 			if(nva2.gt.0)then
-				vet2 = 0.d0   
+				vet2 = 0.d0
 				do j=1,nva2
 					vet2 =vet2 + bh(np-nva2+j)*dble(vedc(k,j))
 				end do
@@ -279,11 +272,8 @@
 				funcpaGweib=-1.d9
 				goto 123
 			end if
-!           write(*,*)'*** vet2',vet2
-!           write(*,*)'*** ut2(nt1dc(k))',ut2(nt1dc(k)),k
-!           write(*,*)'***gsuj(k)',gsuj(k),k
 		end do
-!!!		stop
+
 !**************INTEGRALES ****************************
 		do ig=1,ng 
 			auxig=ig 

@@ -10,6 +10,9 @@
 		if (x$AG == TRUE){
 			cat("\n      Calendar timescale")
 		}
+		if (x$intcens == TRUE){
+			cat("\n      interval censored data used")
+		}
 		cat("\n")
 	}
 	if (!is.null(x$fail)) {
@@ -22,43 +25,59 @@
 	nvar <- length(x$coef)
 	
 	if (is.null(coef)){
-		x$varH<-matrix(x$varH) 
+		x$varH<-matrix(x$varH)
 		x$varHIH<-matrix(x$varHIH)
 	}
-#AD:      
+#AD:
 	if (x$typeof == 0){
 		if (x$n.knots.temp < 4){
 			cat("\n")
-			cat("  The minimum number of knots is 4","\n")	
+			cat("  The minimum number of knots is 4","\n")
 			cat("\n")
 		} 
 		if (x$n.knots.temp > 20){
 			cat("\n")
-			cat("  The maximum number of knots is 20","\n")	
-		}  
+			cat("  The maximum number of knots is 20","\n")
+		}
 	}else{
 		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)) cat("  The maximum number of time intervals nb.int1 is 20","\n")
 		if ((x$typeof == 1) & (x$indic.nb.int2 == 1)) cat("  The maximum number of time intervals nb.int2 is 20","\n")
-	}     
-#AD    
+	}
+#AD
+
+	if (x$logNormal == 0) frail <- x$theta
+	else frail <- x$sigma2
+
 	if (x$istop == 1){
-		if (!is.null(coef)){ 
+		if (!is.null(coef)){
 			seH <- sqrt(diag(x$varH))[-c(1,2)]
 			seHIH <- sqrt(diag(x$varHIH))[-c(1,2)]
 			if (x$typeof == 0){
-				tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, signif(1 - 
+				tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, signif(1 -
 				pchisq((coef/seH)^2, 1), digits - 1))
 				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)
 				if(x$global_chisq.test_d==1) tmpwalddc <- cbind(x$global_chisq_d,x$dof_chisq_d,x$p.global_chisq_d)
 			}else{
-				tmp <- cbind(coef, exp(coef), seH, coef/seH, signif(1 - 
+				tmp <- cbind(coef, exp(coef), seH, coef/seH, signif(1 -
 				pchisq((coef/seH)^2, 1), digits - 1))
 				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)
 				if(x$global_chisq.test_d==1) tmpwalddc <- cbind(x$global_chisq_d,x$dof_chisq_d,x$p.global_chisq_d)
 			}
 			cat("\n")
 			if (x$joint.clust == 0) cat("  For clustered data","\n")
-			cat("  Joint gamma frailty model for recurrent and a terminal event processes","\n")
+			if (x$joint.clust == 0){
+				if (x$logNormal == 0){
+					cat("  Joint gamma frailty model for a survival and a terminal event processes","\n")
+				}else{
+					cat("  Joint Log-Normal frailty model for a survival and a terminal event processes","\n")
+				}
+			}else{
+				if (x$logNormal == 0){
+					cat("  Joint gamma frailty model for recurrent and a terminal event processes","\n")
+				}else{
+					cat("  Joint Log-Normal frailty model for recurrent and a terminal event processes","\n")
+				}
+			}
 			if (x$typeof == 0){
 				cat("  using a Penalized Likelihood on the hazard function","\n")
 			}else{
@@ -73,7 +92,7 @@
 					dimnames(tmpwalddc) <- list(x$names.factordc,c("chisq", "df", "global p"))
 					
 				}
-				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
+				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)",
 				"SE coef (H)", "SE coef (HIH)", "z", "p"))
 			}else{
 				if(x$global_chisq.test==1){
@@ -84,14 +103,15 @@
 					dimnames(tmpwalddc) <- list(x$names.factordc,c("chisq", "df", "global p"))
 					
 				}
-				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
+				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)",
 				"SE coef (H)", "z", "p"))
 			}
-	
-		
+
+
 			if (x$noVar1 == 0){
 				cat("\n")
-				cat("Recurrences:\n")
+				if (x$joint.clust == 0) cat("Survival event:\n")
+				if (x$joint.clust == 1) cat("Recurrences:\n")
 				cat("------------- \n")
 				prmatrix(tmp[1:x$nvar[1], ,drop=FALSE])
 				if(x$global_chisq.test==1){
@@ -100,7 +120,7 @@
 				}
 			}
 			cat("\n")
-		
+
 			if (x$noVar2 == 0){	
 				cat("Terminal event:\n")
 				cat("---------------- \n")
@@ -112,15 +132,16 @@
 				cat("\n")
 			}
 		}
-		theta <- x$theta
+		#theta <- x$theta
 		temp <- diag(x$varH)[1]
-		seH.theta <- sqrt(((2 * (theta^0.5))^2) * temp)
+		seH.frail <- sqrt(((2 * (frail^0.5))^2) * temp)
 		temp <- diag(x$varHIH)[1]
-		seHIH.theta <- sqrt(((2 * (theta^0.5))^2) * temp)
+		seHIH.frail <- sqrt(((2 * (frail^0.5))^2) * temp)
 #AD:
 		if (x$noVar1 == 1){
 			cat("\n")
-			cat("    Recurrences: No covariates \n")
+			if (x$joint.clust == 0) cat("    Survival event: No covariates \n")
+			if (x$joint.clust == 1) cat("    Recurrences: No covariates \n")
 			cat("    ----------- \n")
 		}
 		
@@ -133,17 +154,23 @@
 #AD:  
 		cat(" Frailty parameters: \n")
 		if (x$typeof == 0){
-			cat("   theta (variance of Frailties, Z):", theta, "(SE (H):",
-				seH.theta, ")", "(SE (HIH):", seHIH.theta, ")", "\n")
-			cat("   alpha (Z^alpha for terminal event):", x$alpha, "(SE (H):",
-				sqrt(diag(x$varH))[2], ")", "(SE (HIH):", sqrt(diag(x$varHIH))[2],")", "\n")
+			if (x$logNormal == 0){
+				cat("   theta (variance of Frailties, w):", frail, "(SE (H):",seH.frail, ")", "(SE (HIH):", seHIH.frail, ")", "\n")
+				cat("   alpha (w^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")","(SE (HIH):",sqrt(diag(x$varHIH))[2],")","\n")
+			}else{
+				cat("   sigma square (variance of Frailties, eta):", frail, "(SE (H):",seH.frail, ")", "(SE (HIH):", seHIH.frail, ")", "\n")
+				cat("   alpha (exp(alpha.eta) for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")","(SE (HIH):",sqrt(diag(x$varHIH))[2],")","\n")
+			}
 			cat(" \n")
 		}else{
-			cat("   theta (variance of Frailties, Z):", theta, "(SE (H):",
-				seH.theta, ")", ")", "\n")
-			cat("   alpha (Z^alpha for terminal event):", x$alpha, "(SE (H):",
-				sqrt(diag(x$varH))[2], ")", "\n")
-			cat(" \n")	
+			if (x$logNormal == 0){
+				cat("   theta (variance of Frailties, Z):", frail, "(SE (H):",seH.frail, ")", ")", "\n")
+				cat("   alpha (w^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "\n")
+			}else{
+				cat("   sigma square (variance of Frailties, Z):", frail, "(SE (H):",seH.frail, ")", ")", "\n")
+				cat("   alpha (exp(alpha.eta) for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "\n")
+			}
+			cat(" \n")
 		}
 		if (x$typeof == 0){
 			cat(paste("   penalized marginal log-likelihood =", round(x$logLikPenal,2)))
@@ -213,8 +240,20 @@
 	}else{
 		if (!is.null(coef)){ 
 			cat("\n")
-			cat("  Joint gamma frailty model for recurrent and a terminal event processes","\n")
-			if (x$joint.clust == 0) cat("  for clustered data","\n")
+			if (x$joint.clust == 0) cat("  For clustered data","\n")
+			if (x$joint.clust == 0){
+				if (x$logNormal == 0){
+					cat("  Joint gamma frailty model for a survival and a terminal event processes","\n")
+				}else{
+					cat("  Joint Log-Normal frailty model for a survival and a terminal event processes","\n")
+				}
+			}else{
+				if (x$logNormal == 0){
+					cat("  Joint gamma frailty model for recurrent and a terminal event processes","\n")
+				}else{
+					cat("  Joint Log-Normal frailty model for recurrent and a terminal event processes","\n")
+				}
+			}
 			if (x$typeof == 0){
 				cat("  using a Penalized Likelihood on the hazard function","\n")
 			}else{
@@ -223,7 +262,8 @@
 			
 			if (x$noVar1 == 1){
 				cat("\n")
-				cat("    Recurrences: No covariates \n")
+				if (x$joint.clust == 0) cat("    Survival event: No covariates \n")
+				if (x$joint.clust == 1) cat("    Recurrences: No covariates \n")
 				cat("    ----------- \n")
 			}
 			
@@ -238,10 +278,14 @@
 			cat("   n=", x$n)
 			if (length(x$na.action)){
 				cat("      (", length(x$na.action), " observation deleted due to missing) \n")
-			}else{ 
+			}else{
 				cat("\n")
 			}
-			cat("   n recurrent events=", x$n.event, " n groups=", x$groups)
+			if (x$joint.clust == 0){
+				cat("   n events=", x$n.event)
+			}else{
+				cat("   n recurrent events=", x$n.event)
+			}
 			cat("\n")
 			cat("   n terminal events=", x$n.deaths)
 			cat("\n")

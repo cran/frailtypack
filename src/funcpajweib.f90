@@ -4,7 +4,10 @@
 	double precision function funcpajweib(b,np,id,thi,jd,thj,k0)
 	
 	use tailles
-	use comon
+	use comon,only:etaR,etaD,betaR,betaD, &
+	t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
+	effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
+	auxig,aux1,aux2,res1,res3,res4,kkapa
         use residusM
 	use comongroup,only:vet,vet2
 		
@@ -35,12 +38,10 @@
 	j=0
 	do i=1,np
 		bh(i)=b(i)
-	end do 
+	end do
 
 	if (id.ne.0) bh(id)=bh(id)+thi
-	if (jd.ne.0) bh(jd)=bh(jd)+thj    
-
-
+	if (jd.ne.0) bh(jd)=bh(jd)+thj
 
 	n = (np-nva-effet-indic_ALPHA)/nst
 
@@ -71,7 +72,7 @@
 		aux2(k)=0.d0
 	end do
 
-!*******************************************         
+!*********************************************
 !-----avec un effet aleatoire dans le modele
 !*********************************************
 
@@ -81,11 +82,11 @@
 !     pour les donnees recurrentes
 !ccccccccccccccccccccccccccccccccccccccccc
 
-	
-	do i=1,nsujet 
-		cpt(g(i))=cpt(g(i))+1  
+
+	do i=1,nsujet
+		cpt(g(i))=cpt(g(i))+1
 		if(nva1.gt.0)then
-			vet = 0.d0   
+			vet = 0.d0
 			do j=1,nva1
 				vet =vet + bh(np-nva+j)*dble(ve(i,j))
 			end do
@@ -93,41 +94,40 @@
 		else
 			vet=1.d0
 		endif
-            
+
 		if((c(i).eq.1))then
-			
-			res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet) 
+			res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
 			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
 				funcpajweib=-1.d9
 				!print*,'ok 1'
 				goto 123
-			end if	
-		endif  
+			end if
+		endif
 !     nouvelle version
-		res1(g(i)) = res1(g(i))+((t1(i)/etaR)**betaR)*vet 
- 		if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
+		res1(g(i)) = res1(g(i))+((t1(i)/etaR)**betaR)*vet
+		if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
 			funcpajweib=-1.d9
 			!print*,'ok 2'
 			goto 123
-		end if	         
+		end if
 !     modification pour nouvelle vraisemblance / troncature:
 		res3(g(i)) = res3(g(i))+((t0(i)/etaR)**betaR)*vet
 		if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
 			funcpajweib=-1.d9
 			!print*,'ok 3'
 			goto 123
-		end if	
+		end if
 	!	write(*,*)'***res3',res3(g(i)),vet,i,g(i) 
 	end do
-	 
+
 !           stop
 !ccccccccccccccccccccccccccccccccccccccccc
-! pour le deces 
-!ccccccccccccccccccccccccccccccccccccccccc 
+! pour le deces
+!ccccccccccccccccccccccccccccccccccccccccc
 
-	do k=1,ng  
+	do k=1,ng
 		if(nva2.gt.0)then
-			vet2 = 0.d0   
+			vet2 = 0.d0
 			do j=1,nva2
 				vet2 =vet2 + bh(np-nva2+j)*dble(vedc(k,j))
 			end do
@@ -136,43 +136,43 @@
 			vet2=1.d0
 		endif
 		if(cdc(k).eq.1)then
-			res2dc(k) = (betaD-1.d0)*dlog(t1dc(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet2) 
+			res2dc(k) = (betaD-1.d0)*dlog(t1dc(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet2)
 			if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
 				funcpajweib=-1.d9
 				!print*,'ok 4'
 				goto 123
-			end if	
-		endif 
-             
+			end if
+		endif
+
 ! pour le calcul des integrales / pour la survie, pas les donn�es recurrentes:
 		aux1(k)=((t1dc(k)/etaD)**betaD)*vet2
 		if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
 			funcpajweib=-1.d9
 			!print*,'ok 5'
 			goto 123
-		end if		
+		end if
 	end do
 
 !**************INTEGRALES ****************************
-	do ig=1,ng 
-		auxig=ig 
-		choix = 3  
+	do ig=1,ng
+		auxig=ig
+		choix = 3
 		call gaulagJ(int,choix)
 		integrale3(ig) = int !moins bon
 		!if(integrale3(ig).lt.1.d-300)then
-		!		integrale3(ig) = 1.d-300
+		!	integrale3(ig) = 1.d-300
 		!endif
 	end do
 !************* FIN INTEGRALES **************************
-                      
-	res = 0.d0 
 
-	do k=1,ng  
+	res = 0.d0
+
+	do k=1,ng
 		sum=0.d0
 		if(cpt(k).gt.0)then
 			if(theta.gt.(1.d-8)) then
 !cccc ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
-                   		if (integrale3(k).eq.0.d0) then
+				if (integrale3(k).eq.0.d0) then
 					res= res + res2(k) &
 !--      pour le deces:
 					+ res2dc(k)- gammaJ(1./theta)-dlog(theta)/theta-112.d0
@@ -185,20 +185,20 @@
 !*************************************************************************
 !     developpement de taylor d ordre 3
 !*************************************************************************
-!                   write(*,*)'************** TAYLOR *************'                   
+!                   write(*,*)'************** TAYLOR *************'
 				res= res + res2(k)+res2dc(k)-gammaJ(1./theta)-dlog(theta)/theta  &
-				+ dlog(integrale3(k)) 
+				+ dlog(integrale3(k))
 			endif
 			if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 				funcpajweib=-1.d9
 				!print*,k,'ok 6',gammaJ(1./theta),theta,integrale3(k),dlog(integrale3(k))
 				goto 123
-			end if	
-		endif 
+			end if
+		endif
 	end do
-               
-!---------- calcul de la penalisation -------------------
-	
+
+!--------------------------------------------------------
+
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 		funcpajweib =-1.d9
 		Rrec = 0.d0
@@ -207,9 +207,8 @@
 		Ndc = 0.d0
 		!print*,'ok 7'
 		goto 123
-
 	else
-		funcpajweib = res 
+		funcpajweib = res
 		
 		do k=1,ng
 			Rrec(k)=res1(k)
@@ -223,7 +222,7 @@
 123     continue
 
 	return
-		
+
 	end function funcpajweib
-	
+
 !=================================================================================================

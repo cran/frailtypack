@@ -1,7 +1,7 @@
 Package: frailtypack
-Version: 2.2-27
-Date: 2012-11-27
-Title: General Frailty models using a semi_parametric penalized
+Version: 2.3
+Date: 2013-02-08
+Title: General Frailty models using a semiparametric penalized
         likelihood estimation or a parametric estimation
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
         Mauguen, Amadou Diakite and Alexandre Laurent
@@ -10,27 +10,31 @@ Depends: R (>= 2.10), survival, boot
 LazyLoad: no
 Description: Frailtypack now fits several classes of frailty models
         using a penalized likelihood estimation on the hazard function
-        but also a parametric estimation. 1) A shared gamma frailty
-        model and Cox proportional hazard model. Clustered and
-        recurrent survival times can be studied (the
-        Andersen-Gill(1982) approach has been implemented for recurrent
-        events). An automatic choice of the smoothing parameter is
-        possible using an approximated cross-validation procedure. 2)
-        Additive frailty models for proportional hazard models with two
-        correlated random effects (intercept random effect with random
-        slope). 3) Nested frailty models for hierarchically clustered
-        data (with 2 levels of clustering) by including two iid gamma
-        random effects. 4) Joint frailty models in the context of joint
-        modelling for recurrent events with terminal event for
-        clustered data or not. Prediction values are available. Left
-        truncated (not for Joint model), right-censored data,
-        interval-censored data (only for Cox proportional hazard and
-        shared frailty model) and strata (max=2) are allowed. The
-        package includes concordance measures for Cox proportional
-        hazards models and for shared frailty models.
+        but also a parametric estimation. 1) A shared frailty model
+        (with gamma or log-normal frailty distribution) and Cox
+        proportional hazard model. Clustered and recurrent survival
+        times can be studied (the Andersen-Gill(1982) approach has been
+        implemented for recurrent events). An automatic choice of the
+        smoothing parameter is possible using an approximated
+        cross-validation procedure. 2) Additive frailty models for
+        proportional hazard models with two correlated random effects
+        (intercept random effect with random slope). 3) Nested frailty
+        models for hierarchically clustered data (with 2 levels of
+        clustering) by including two iid gamma random effects. 4) Joint
+        frailty models in the context of joint modelling for recurrent
+        events with terminal event for clustered data or not.
+        Prediction values are available. Left truncated (not for Joint
+        model), right-censored data, interval-censored data (only for
+        Cox proportional hazard and shared frailty model) and strata
+        (max=2) are allowed. In each model, the random effects have a
+        gamma distribution, but you can switch to a log-normal in
+        shared and joint models. The package includes concordance
+        measures for Cox proportional hazards models and for shared
+        frailty models.
 License: GPL (>= 2.0)
-URL: http://www.r-project.org
+URL:
+        http://virginierondeau.com/BiostatisticalConsulting/Liste_of_examples.html
 Encoding: latin1
 Repository: CRAN
-Date/Publication: 2012-11-27 09:35:29
-Packaged: 2012-11-27 08:40:24 UTC; al7
+Date/Publication: 2013-02-09 07:49:17
+Packaged: 2013-02-08 18:03:57 UTC; al7

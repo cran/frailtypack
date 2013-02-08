@@ -45,28 +45,22 @@ Print, separately for each type of event (recurrent and terminal), the parameter
 \examples{
 
 # /*** Joint frailty model ***/
- 
 
 \dontrun{
 
-  data(readmission)
+data(readmission)
 
 ## Gap-time ##
-modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)
-	      +as.factor(charlson)+terminal(death),
-	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
-	      data=readmission,n.knots=14,kappa1=9550000000,kappa2=1410000000000,
-	      Frailty=TRUE,joint=TRUE,recurrentAG=FALSE,hazard="Splines")
+modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes
+                +charlson+terminal(death),formula.terminalEvent=~sex
+                +dukes+charlson,data=readmission,n.knots=14,
+                kappa1=9.55e+9,kappa2=1.41e+12,Frailty=TRUE,joint=TRUE)
 
-    
- # It takes around 1 minute to converge.#
+# It takes around 1 minute to converge #
 
-  print(modJoint_gap)
+print(modJoint.gap)
 
 }
-
-
-
 
 }
 

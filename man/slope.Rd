@@ -7,7 +7,7 @@ Identify variable associated with the random slope
 }
 
 \description{
-This is a special function used in the context of survival additive models. It identifies the variable which is in interaction with the random slope (\bold{\eqn{v_i}}). Generally, this variable is the treatment variable. Using \code{interaction()} in a formula implies that an additive frailty model is fitted.    
+This is a special function used in the context of survival additive models. It identifies the variable which is in interaction with the random slope (\bold{\eqn{v_i}}). Generally, this variable is the treatment variable. Using \code{interaction()} in a formula implies that an additive frailty model is fitted.
 }
 
 \usage{
@@ -34,33 +34,30 @@ It is necessary to specify which variable is in interaction with the random slop
 
 \dontrun{
 
-
 library(frailtypack)
 data(dataAdditive)
 
-
 # Additive with one covariate #
 
-modAdd1cov<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1)
-            ,data=dataAdditive,n.knots=8,kappa1=10000,hazard="Splines")
-
+modAdd1cov <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
+                data=dataAdditive,n.knots=8,kappa1=10000,hazard="Splines")
 
 # Additive with two covariates #
 
 set.seed(1234)
-dataAdditive$var2<-rbinom(nrow(dataAdditive),1,0.5)
+dataAdditive$var2 <- rbinom(nrow(dataAdditive),1,0.5)
 
-modAdd2cov<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+var2+
-    slope(var1),data=dataAdditive,n.knots=8,kappa1=10000,hazard="Splines")
-
+modAdd2cov <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+var2+
+                slope(var1),data=dataAdditive,n.knots=8,kappa1=10000,
+                hazard="Splines")
 
 # Additive with 2 covariates and stratification #
 
-dataAdditive$var2<-rbinom(nrow(dataAdditive),1,0.5)
+dataAdditive$var2 <- rbinom(nrow(dataAdditive),1,0.5)
 
-modAddstrat<-additivePenal(Surv(t1,t2,event)~cluster(group)+strata(var2)+var1+
-      slope(var1),data=dataAdditive,n.knots=8,kappa1=10000,kappa2=10000,
-      hazard="Splines")
+modAddstrat <- additivePenal(Surv(t1,t2,event)~cluster(group)+strata(var2)+var1+
+                 slope(var1),data=dataAdditive,n.knots=8,kappa1=10000,kappa2=10000,
+                 hazard="Splines")
 
 }
 

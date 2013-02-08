@@ -1,25 +1,25 @@
 
 \name{frailtypack-package}
-\Rdversion{2.2-27}
+\Rdversion{2.2-28}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
 
-\title{General Frailty models using a semi-parametric penalized likelihood estimation or a parametric estimation}
+\title{General Frailty models using a semiparametric penalized likelihood estimation or a parametric estimation}
 
 \description{
- Frailtypack now fits several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation. 1) A shared gamma frailty model and Cox proportional hazard model. Clustered and recurrent survival times can be studied (the Andersen-Gill(1982) approach has been implemented for recurrent events). An automatic choice of the smoothing parameter is possible using an approximated cross-validation procedure. 2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope). 3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects. 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. Prediction values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard and shared frailty model) and strata (max=2) are allowed. The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
+ Frailtypack now fits several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation. 1) A shared frailty model and Cox proportional hazard model. Clustered and recurrent survival times can be studied (the Andersen-Gill(1982) approach has been implemented for recurrent events). An automatic choice of the smoothing parameter is possible using an approximated cross-validation procedure. 2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope). 3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects. 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. Prediction values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard and shared frailty model) and strata (max=2) are allowed. In each model, the random effects have a gamma distribution, but you can switch to a log-normal in shared and joint. The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 }
 \details{
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.2-27\cr
-     Date: \tab 2012-11-27\cr
+     Version: \tab 2.3\cr
+     Date: \tab 2013-02-08\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab yes\cr
   }  
- Frailtypack now fits several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation. 1) A shared gamma frailty model and Cox proportional hazard model. Clustered and recurrent survival times can be studied (the Andersen-Gill(1982) approach has been implemented for recurrent events). An automatic choice of the smoothing parameter is possible using an approximated cross-validation procedure. 2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope). 3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects. 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. Prediction values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard and shared frailty model) and strata (max=2) are allowed. The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
+ Frailtypack now fits several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation. 1) A shared frailty model and Cox proportional hazard model. Clustered and recurrent survival times can be studied (the Andersen-Gill(1982) approach has been implemented for recurrent events). An automatic choice of the smoothing parameter is possible using an approximated cross-validation procedure. 2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope). 3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects. 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. Prediction values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard and shared frailty model) and strata (max=2) are allowed. In each model, the random effects have a gamma distribution, but you can switch to a log-normal in shared and joint. The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 }
 
 \author{Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen, Amadou Diakite and Alexandre Laurent}
@@ -49,46 +49,47 @@ V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum pena
 
 
 \examples{
+
 \dontrun{
 ### Additive model with 1 covariate ###
 
- data(dataAdditive) 
- modAdd<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
+data(dataAdditive)
+modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
                 correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=10000,
-		hazard="Splines")
-		
+                hazard="Splines")
+
 
 ### Joint model (recurrent and terminal events) with 2 covariates ###
 
- data(readmission)
- modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)
-	      +as.factor(charlson)+terminal(death),
-	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
-	      data=readmission,n.knots=14,kappa1=9550000000,kappa2=1410000000000,
-	      Frailty=TRUE,joint=TRUE,recurrentAG=FALSE,hazard="Splines")
+data(readmission)
+modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+charlson+
+                  terminal(death),formula.terminalEvent=~sex+dukes+charlson,
+                  data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
+                  Frailty=TRUE,joint=TRUE,recurrentAG=FALSE,hazard="Splines")
 
  ### Nested model (or hierarchical model) with 2 covariates ###
- 
- data(dataNested)
- modClu<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+
- subcluster(subgroup)+cov1+cov2,Frailty=TRUE,data=dataNested,
- n.knots=8,kappa1=50000,hazard="Splines") 
 
- ###  Semi-parametric Shared model   ###
- 
- data(readmission)
- frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+
+data(dataNested)
+modClu <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
+            subcluster(subgroup)+cov1+cov2,Frailty=TRUE,data=dataNested,
+            n.knots=8,kappa1=50000,hazard="Splines")
+
+###  Semiparametric Shared model   ###
+
+data(readmission)
+frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+
           as.factor(charlson)+cluster(id),data=readmission, Frailty=TRUE,
           n.knots=6,kappa1=5000,recurrentAG=TRUE,cross.validation=TRUE,
-	  hazard="Splines")
-	  
+          hazard="Splines")
+
 ###  Parametric Shared model   ###
 
- data(readmission)
- frailtyPenal(Surv(t.start,t.stop,event)~as.factor(sex)+as.factor(dukes)+
-          as.factor(charlson)+cluster(id),data=readmission, Frailty=TRUE,
-	  hazard="Piecewise-per",nb.int1=6)
+data(readmission)
+frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+dukes+charlson,
+          data=readmission,Frailty=TRUE,recurrentAG=TRUE,
+          hazard="Piecewise-per",nb.int1=6)
 }
+
 }
 
 \keyword{package}

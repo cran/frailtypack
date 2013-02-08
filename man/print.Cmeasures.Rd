@@ -47,19 +47,26 @@ Other unused arguments
 }
 
 \examples{
+
+\dontrun{
+
 ## load data
 data(readmission)
 
 ## a frailtypenal fit
-fit.frailtypenal <-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id)+
-as.factor(charlson)+strata(sex)+as.factor(chemo),data=readmission,Frailty=TRUE,
-cross.validation=FALSE,n.knots=10,kappa1=1,kappa2=1,hazard="Splines")
+fit.frailtypenal <- frailtyPenal(Surv(time,event)~dukes+cluster(id)+
+                       charlson+chemo+strata(sex),data=readmission,
+                       Frailty=TRUE,n.knots=10,kappa1=1,kappa2=1)
 
 ## a Cmeasures call
 fit.Cmeasures <- Cmeasures(fit.frailtypenal)
 
 ## a short summary
 print(fit.Cmeasures)
+
 }
+
+}
+
 \keyword{methods}
 

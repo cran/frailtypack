@@ -136,12 +136,12 @@
 		res2=0.d0
 		res3=0.d0
 
-		do i=1,nsujetmax 
-             
-			cpt(g(i))=cpt(g(i))+1 
-		
+		do i=1,nsujetmax
+
+			cpt(g(i))=cpt(g(i))+1
+
 			if(nva.gt.0)then
-				vet = 0.d0   
+				vet = 0.d0
 				do j=1,nva
 					vet =vet + bh(np-nva+j)*dble(ve(i,j))
 				end do
@@ -149,28 +149,30 @@
 			else
 				vet=1.d0
 			endif
+
 			if((c(i).eq.1).and.(stra(i).eq.1))then
 				res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
-			endif  
+			endif
+
 			if((c(i).eq.1).and.(stra(i).eq.2))then
 				res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
-			endif  
-			
+			endif
+
 			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
 				funcpanweib=-1.d9
 				goto 123
 			end if
-			
+
 			if(stra(i).eq.1)then
 ! nouvelle version
-				res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet 
+				res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet
 			endif
-			
+
 			if(stra(i).eq.2)then
 ! nouvelle version
-				res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet   
+				res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet
 			endif
-			
+
 			if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
 				funcpanweib=-1.d9
 				goto 123
@@ -179,16 +181,16 @@
 			if(stra(i).eq.1)then
 				res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet
 			endif
-			
+
 			if(stra(i).eq.2)then
-				res3(g(i)) = res3(g(i)) + ((t0(i)/etaD)**betaD)*vet 
+				res3(g(i)) = res3(g(i)) + ((t0(i)/etaD)**betaD)*vet
 			endif
 
 			if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
 				funcpanweib=-1.d9
 				goto 123
-			end if  
-		end do 
+			end if
+		end do
 
 		res = 0.d0
 		cptg = 0
@@ -200,33 +202,33 @@
 			if(c(k).eq.1)then
 				mid(g(k))=mid(g(k))+1
 			endif
-		end do 
+		end do
 
-		do k=1,ngexact 
+		do k=1,ngexact
 			sum=0.d0
 			if(cpt(k).gt.0)then
 
 				nb = mid(k)!nb de deces par groupe
 				dnb = dble(nb)
-            
+
 				if (dnb.gt.1.d0) then
 					do l=1,nb
 						sum=sum+dlog(1.d0+theta*dble(nb-l))
 					end do
-				endif 
+				endif
 				if(theta.gt.(1.d-5)) then
 !cccc ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
 					if(AG.EQ.1)then
 						res= res-(inv+dnb)*dlog(theta*(res1(k)-res3(k))+1.d0) &
-						+ res2(k) + sum  
+						+ res2(k) + sum
 !cccc nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
 					else
 						res= res-(inv+dnb)*dlog(theta*(res1(k))+1.d0) &
 						+inv*dlog(theta*res3(k)+1.d0) &
-						+ res2(k) + sum  
+						+ res2(k) + sum
 					endif
 
-				else              
+				else
 !     developpement de taylor d ordre 3
 !cccc ancienne vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
 					if(AG.EQ.1)then
@@ -248,7 +250,7 @@
 					funcpanweib=-1.d9
 					goto 123
 				end if
-			endif 
+			endif
 		end do
 		if (indic_cumul==1) then
 			do i= 1,ngmax
@@ -265,7 +267,7 @@
 !*********************************************
 
 	if (effet.eq.2) then
-        
+
 		mid=0
 		mij=0
 		res1=0.d0
@@ -276,15 +278,15 @@
 		integrale2=0.d0
 
 !     === MODIFICATION DE LA VRAISEMBLANCE POUR LE NESTED FRAILTY MODEL
-          
+
 		do k=1,nsujetmax
 			if(c(k).eq.1)then
 				mid(g(k))=mid(g(k))+1
-				mij(g(k),ssg(k,g(k)))=mij(g(k),ssg(k,g(k)))+1 
-!nb de dc ds ss gpe ssg(k)                
-             		endif
-          	end do 
-        
+				mij(g(k),ssg(k,g(k)))=mij(g(k),ssg(k,g(k)))+1
+!nb de dc ds ss gpe ssg(k)
+			endif
+		end do
+
 		do k=1,nsujetmax
 			if(nva.gt.0)then
 				vet = 0.d0 
@@ -309,11 +311,11 @@
 			end if
 			
 			if(stra(k).eq.1)then
-				aux1(g(k),ssg(k,g(k)))=aux1(g(k),ssg(k,g(k)))+((t1(k)/etaR)**betaR)*vet 
-				aux2(g(k),ssg(k,g(k)))=aux2(g(k),ssg(k,g(k)))+((t0(k)/etaR)**betaR)*vet   
+				aux1(g(k),ssg(k,g(k)))=aux1(g(k),ssg(k,g(k)))+((t1(k)/etaR)**betaR)*vet
+				aux2(g(k),ssg(k,g(k)))=aux2(g(k),ssg(k,g(k)))+((t0(k)/etaR)**betaR)*vet
 			endif
 			if(stra(k).eq.2)then
-				aux1(g(k),ssg(k,g(k)))=aux1(g(k),ssg(k,g(k)))+((t1(k)/etaD)**betaD)*vet 
+				aux1(g(k),ssg(k,g(k)))=aux1(g(k),ssg(k,g(k)))+((t1(k)/etaD)**betaD)*vet
 				aux2(g(k),ssg(k,g(k)))=aux2(g(k),ssg(k,g(k)))+((t0(k)/etaD)**betaD)*vet
 			endif
 			
@@ -325,7 +327,7 @@
 				funcpanweib=-1.d9
 				goto 123
 			end if
-		end do  
+		end do
 
 !================== calcul des int�grales par Gauss LAGUERRE
 !     memes points et poids dans chq groupe
@@ -335,25 +337,23 @@
 			choix=1
 			call gaulagN(int,choix)
 			integrale1(auxig)=int
-!     integrale sur la troncature: 
+!     integrale sur la troncature:
 			if(indictronq.eq.1)then
 				if(AG.eq.1)then !andersen gill
 					choix=3
 					call gaulagN(int,choix)
-					integrale3(auxig)=int   
+					integrale3(auxig)=int
 				else !troncature classique
 					choix=2
 					call gaulagN(int,choix)
-					integrale2(auxig)=int    
+					integrale2(auxig)=int
 				endif
 			endif
 		end do
 
 !======================================================================
 
-
-
-		do ig=1,ngexact  
+		do ig=1,ngexact
 			sum1(ig)=0.d0
 			do issg=1,n_ssgbygrp(ig)!nssgbyg !!! NON ICI NSSGBYG
 				if(mij(ig,issg).gt.1) then
@@ -366,7 +366,7 @@
 
 		res = 0.d0
 
-		do k=1,ngexact  
+		do k=1,ngexact
 			if(nig(k).gt.0)then
 				if(indictronq.eq.0)then
 					res = res+res2(k)+sum1(k) &
@@ -401,8 +401,8 @@
 		funcpanweib=-1.d9
 		goto 123
 	end if 
-	            	 
-	funcpanweib = res 
+
+	funcpanweib = res
 
 123     continue
 

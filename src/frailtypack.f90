@@ -6,7 +6,7 @@
 	AGAux,noVar,maxitAux,irep1,np,b,H_hessOut,HIHOut,resOut,LCV, &
 	x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt, &	
 	ni,cpt,ier,k0,ddl,istop,shapeweib,scaleweib,mt1,ziOut,Resmartingale,martingaleCox,&
-	frailtypred,frailtyvar,frailtysd,linearpred,time,intcensAux,ttUAux) ! rajout
+	frailtypred,frailtyvar,frailtysd,linearpred,time,intcensAux,ttUAux,logNormal0) ! rajout
 
 
 !
@@ -52,9 +52,13 @@
 	double precision,dimension(np,np)::y
 !AD:add
 	double precision,dimension(2),intent(out)::LCV,shapeweib,scaleweib
-	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib,funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
-	external::funcpassplines,funcpascpm,funcpasweib,funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
-!AD:	
+	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib
+	double precision::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
+	double precision::funcpassplines_log,funcpasweib_log,funcpascpm_log
+	external::funcpassplines,funcpascpm,funcpasweib
+	external::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
+	external::funcpassplines_log,funcpasweib_log,funcpascpm_log
+!AD:
 !Cpm
 	integer::typeof0,nbintervR0,equidistant,ent,indd
 	double precision::temp
@@ -66,6 +70,7 @@
 	double precision,dimension(1,nsujetAux)::XBeta
 	double precision,dimension(nbintervR0+1)::time
 	integer,dimension(2)::istopp
+	integer,intent(in)::logNormal0
 
 !verification
 	!print*,nsujetAux,ngAux,icenAux,nstAux,effetAux,nzAux,ax1,ax2,nvaAux
@@ -92,6 +97,7 @@
 	epsd=1.d-3
 !AD:end
 	
+	logNormal = logNormal0
 	intcens = intcensAux
 	typeof = typeof0
 	model=4	
@@ -118,7 +124,7 @@
 	ndatemax=2*nsujetAux+sum(icAux) ! on ajoute le nombre de temps d'entree en plus : les tU
                                     ! c'est a dire le nombre de censures par intervalle
 	
-	allocate(date(ndatemax))
+	allocate(date(0:ndatemax))
 	date=0.d0
 
 	allocate(mm3(ndatemax),mm2(ndatemax),mm1(ndatemax),mm(ndatemax),im3(ndatemax), &
@@ -131,10 +137,14 @@
 	mm3=0.d0
 		
 	ngmax=ngAux
-	
+
+!Al: utile pour le calcul d'integrale avec distribution log normale
+	allocate(res3(ngmax),res5(nsujetmax),res1(ngmax))
+!Al
+
 	allocate(nig(ngmax))
 	nig=0
-	allocate(Residus(ngmax),cumulhaz(ngmax),vuu(1))	
+	allocate(Residus(ngmax),cumulhaz(ngmax),vuu(1))
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	j=0
 	nbou2=0
@@ -209,7 +219,7 @@
 	cptstr1 = 0
 	cptstr2 = 0
 
-	do i = 1,nsujet 
+	do i = 1,nsujet
 		str=1
 
 		if (i.eq.1) then
@@ -225,7 +235,7 @@
 			str=strAux(i)
 			
 			do j=1,nva
-				vax(j)=vaxAux(i,j)  
+				vax(j)=vaxAux(i,j)
 			enddo
 		else
 			
@@ -236,7 +246,7 @@
 			groupe=groupeAux(i)
 			
 			do j=1,nva
-				vax(j)=vaxAux(i,j)  
+				vax(j)=vaxAux(i,j)
 			enddo
 		endif
 		k = k +1
@@ -272,9 +282,9 @@
 			do ii = 1,ver
 				if(filtre(ii).eq.1)then
 				iii = iii + 1
-				ve(i,iii) = vax(ii)	
+				ve(i,iii) = vax(ii)
 				endif
-			end do   
+			end do
 
 		else 
 !------------------   censure a droite  c=0
@@ -319,7 +329,7 @@
 			mint = t0(k)
 		endif
 		
-	end do 
+	end do
 
 !AD:
 	if (typeof .ne. 0) then 
@@ -343,6 +353,7 @@
 			dmax = d(i)
 		endif
 	enddo
+
 
 ! %%%%%%%%%%%%% SANS EFFET ALEATOIRE %%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -702,11 +713,15 @@
 			
 			auxkappa(1)=xmin1*xmin1
 			auxkappa(2)=0.d0
-	
-			if (intcens.eq.1) then
-				call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+			
+			if (logNormal.eq.0) then
+				if (intcens.eq.1) then
+					call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+				else
+					call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+				endif
 			else
-				call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+				call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_log)
 			endif
 
 			if (istop.ne.1) then
@@ -753,24 +768,36 @@
 	!print*,"appel de funcpa"
 	select case(typeof)
 		case(0)
-			if (intcens.eq.1) then
-				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+			if (logNormal.eq.0) then
+				if (intcens.eq.1) then
+					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+				else
+					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+				endif
 			else
-				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_log)
 			endif
 		case(1)
 			allocate(betacoef(nst*nbintervR))
 
-			if (intcens.eq.1) then
-				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm_intcens)
+			if (logNormal.eq.0) then
+				if (intcens.eq.1) then
+					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm_intcens)
+				else
+					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm)
+				endif
 			else
-				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm)
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm_log)
 			endif
 		case(2)
-			if (intcens.eq.1) then
-				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib_intcens)
+			if (logNormal.eq.0) then
+				if (intcens.eq.1) then
+					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib_intcens)
+				else
+					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib)
+				endif
 			else
-				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib)
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib_log)
 			endif
 	end select
 	!print*,"fin de funcpa"
@@ -826,17 +853,17 @@
 	end select
 
 	resOut=res
-		
+
 	if (nst == 1) then
-		scaleweib(1) = betaR
-		shapeweib(1) = etaR
+		scaleweib(1) = etaR !betaR
+		shapeweib(1) = betaR !etaR
 		scaleweib(2) = 0.d0
 		shapeweib(2) = 0.d0
 	else
-		scaleweib(1) = betaR
-		shapeweib(1) = etaR
-		scaleweib(2) = betaD
-		shapeweib(2) = etaD
+		scaleweib(1) = etaR !betaR
+		shapeweib(1) = betaR !etaR
+		scaleweib(2) = etaD !betaD
+		shapeweib(2) = betaD !etaD
 	end if
 
 !AD:add LCV
@@ -865,13 +892,13 @@
 		do sss=1,npmax
 			HIHOut(ss,sss) = HIH(ss,sss)
 			H_hessOut(ss,sss)= H_hess(ss,sss)
-		end do  
+		end do
 	end do
 
 
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-! 
-!    Bias and Var eliminated  
+!
+!    Bias and Var eliminated
 !
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !AD:
@@ -903,7 +930,11 @@
 	
 			do i=1,nsujet
 				if (effet == 1) then
-					linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
+					if (logNormal.eq.0) then
+						linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
+					else
+						linearpred(i)=Xbeta(1,i)+frailtypred(g(i))
+					endif
 				else
 					linearpred(i)=Xbeta(1,i)
 					martingaleCox(i) = c(i) - RisqCumul(i)
@@ -956,7 +987,7 @@
 	end if
 
 	deallocate(t0,t1,tU,c,d,stra,g,nig,ve,Hspl_hess,hess, &
-	mm3,mm2,mm1,mm,im3,im2,im1,im,date,cumulhaz,Residus,vuu,RisqCumul) ! rajouts
+	mm3,mm2,mm1,mm,im3,im2,im1,im,date,cumulhaz,Residus,vuu,RisqCumul,res5,res3,res1) ! rajouts
 	
 	if (typeof == 0) then
 		deallocate(nt0,nt1,ntU,zi) ! rajout
@@ -1404,7 +1435,7 @@
 
 	res=-res
 	pm = dsqrt(res)
-               
+
 	end subroutine confs
 
 
@@ -1653,7 +1684,7 @@
 		goto 1
 	endif
 
-	return 
+	return
 
 	end subroutine mnbraks
 
@@ -1670,7 +1701,7 @@
 	parameter (r=0.61803399d0,c=1.d0-r)
 	double precision::f1,f2,x0,x1,x2,x3,estimvs
 	integer::n,ni
-      
+ 
 	x0 = ax
 	x3 = cx
 	if(abs(cx-bx).gt.abs(bx-ax))then
@@ -1683,7 +1714,7 @@
 
          f1 = estimvs(x1,n,b,y,aux,ni,res)
          f2 = estimvs(x2,n,b,y,aux,ni,res)
-         
+ 
  1       if(abs(x3-x0).gt.tol*(abs(x1)+abs(x2)))then
 		if(f2.lt.f1)then
 			x0 = x1
@@ -1719,7 +1750,7 @@
 
 	use tailles,only:npmax,ndatemax,NSUJETMAX
 	use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst, &
-	date,zi,pe,effet,nz1,nz2,mm3,mm2,mm1,mm,im3,im2,im1,im,typeof,intcens
+	date,zi,pe,effet,nz1,nz2,mm3,mm2,mm1,mm,im3,im2,im1,im,typeof,intcens,logNormal
 
 	use optim
 	implicit none
@@ -1733,9 +1764,13 @@
 	double precision::res,k00,som,h1
 	double precision::aux
 	integer::n,ij,i,k,j,vj,ier,istop,ni
-	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib,funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
-	external::funcpassplines,funcpascpm,funcpasweib,funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
-      
+	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib
+	double precision::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
+	double precision::funcpassplines_log
+	external::funcpassplines,funcpascpm,funcpasweib
+	external::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
+	external::funcpassplines_log
+ 
 	j=0
 	estimvs=0.d0
 
@@ -1743,14 +1778,18 @@
 	k0(2) = 0.d0
 !	write(*,*)'dans estimvs',n
 	
-	if (intcens.eq.1) then
-		call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+	if (logNormal.eq.0) then
+		if (intcens.eq.1) then
+			call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+		else
+			call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+		endif
 	else
-		call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+		call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_log)
 	endif
-!AD:	
+!AD:
 	if (istop.eq.4) goto 50
-!AD:	
+!AD:
 	
 	if(k0(1).gt.0.d0)then
 		do ij=1,n
@@ -1789,12 +1828,12 @@
 		aux = -n
 	endif
 !AD:
-50	continue      
+50	continue
 !AD:
 	return
 
 	end function estimvs
-      
+
 !=================calcul de la hessienne  et de omega  ==============
 	subroutine tests(dut,k0,n,res,y)
 
@@ -1941,7 +1980,7 @@
 	implicit none
 
 	double precision::res,res1,msps,aux2,u2
-	double precision,dimension(ndatemax)::dut
+	double precision,dimension(0:ndatemax)::dut
 	integer::k,l,j,ni,n,i
           
 !--------- calcul de la hessienne ij ------------------
@@ -2307,7 +2346,7 @@
 		
 		if(j.ne.n)then
 			dum = 1.d0/a(j,j)
-			do i = j+1,n
+			do i=j+1,n
 				a(i,j) = a(i,j)*dum
 			end do
 		endif
@@ -2317,3 +2356,131 @@
 	
 	end subroutine ludcmps
 
+!=============================================================
+! gauss hermite
+! func est l integrant, ss le resultat de l integrale sur -infty , +infty
+
+	SUBROUTINE gauherS(ss,choix)
+
+	use tailles
+	use donnees,only:x2,w2,x3,w3
+	use comon,only:auxig,typeof
+
+	Implicit none
+	
+	double precision,intent(out)::ss
+	integer,intent(in)::choix
+	
+	double precision::auxfunca,func1S,func2S,func3S
+	external::func1S,func2S,func3S
+	integer::j
+
+	ss=0.d0
+	if (typeof.eq.0) then
+		do j=1,20
+			if (choix.eq.1) then
+				auxfunca=func1S(x2(j))
+				ss = ss+w2(j)*(auxfunca)
+			else                   !choix=2, troncature
+				if (choix.eq.2) then
+					auxfunca=func2S(x2(j))
+					ss = ss+w2(j)*(auxfunca)
+				else
+					if (choix.eq.3) then
+						auxfunca=func3S(x2(j))
+						ss = ss+w2(j)*(auxfunca)
+					endif
+				endif
+			endif
+		end do
+	else
+		do j=1,32
+			if (choix.eq.1) then
+				auxfunca=func1S(x3(j))
+				ss = ss+w3(j)*(auxfunca)
+			else                   !choix=2, troncature
+				if (choix.eq.2) then
+					auxfunca=func2S(x3(j))
+					ss = ss+w3(j)*(auxfunca)
+				else
+					if (choix.eq.3) then
+						auxfunca=func3S(x3(j))
+						ss = ss+w3(j)*(auxfunca)
+					endif
+				endif
+			endif
+		end do
+	endif
+
+	return
+	
+	END SUBROUTINE gauherS
+
+!=====================================================================
+
+	double precision function func1S(frail)
+
+	use tailles
+	use comon,only:auxig,sig2,stra,c,g,res5
+	
+	IMPLICIT NONE
+
+	double precision,intent(in)::frail
+
+	integer::i
+	double precision::prod
+	double precision,parameter::pi=3.141592653589793d0
+
+	prod = 1.d0
+	do i=1,nsujetmax
+		if (g(i).eq.auxig) then
+			prod = prod * (dexp(frail)**c(i)) * &
+			dexp(-dexp(frail)*res5(i))
+		endif
+	enddo
+
+	func1S = prod*(1.d0/dsqrt(2.d0*pi*sig2))* &
+	dexp(-(frail**2.d0)/(2.d0*sig2))
+	
+	return
+	
+	end function func1S
+
+!=====================================================================
+
+	double precision function func2S(frail)
+
+	use comon,only:auxig,sig2,res3
+	
+	IMPLICIT NONE
+
+	double precision,intent(in)::frail
+	double precision,parameter::pi=3.141592653589793d0
+
+	func2S = dexp(-dexp(frail)*res3(auxig))* &
+	(1.d0/dsqrt(2.d0*pi*sig2))* &
+	dexp(-(frail**2.d0)/(2.d0*sig2))
+
+	return
+	
+	end function func2S
+
+!=====================================================================
+
+	double precision function func3S(frail)
+
+	use comon,only:auxig,sig2,res1,res3,nig
+	
+	IMPLICIT NONE
+
+	double precision,intent(in)::frail
+
+!	func3S = dexp(frail*nig(auxig))* &
+!	dexp(-dexp(frail)*(res1(auxig)-res3(auxig))-(frail**2.d0)/(2.d0*sig2))
+
+	func3S = dexp(frail*nig(auxig) &
+	-dexp(frail)*(res1(auxig)-res3(auxig))-(frail**2.d0)/(2.d0*sig2))
+	
+	return
+	
+	end function func3S

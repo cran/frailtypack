@@ -25,7 +25,7 @@
  0: Index 0; 1: Index 1-2; 3: Index >=3 }
 	\item{death}{death indicator. 1:dead and 0:alive }
   }
- 
+
 }
 \source{
 

@@ -15,7 +15,7 @@
 \usage{
 
 \method{plot}{jointPenal}(x, event = "both", type.plot = "hazard", conf.bands = FALSE,
- pos.legend="topright", cex.legend=0.7, ylim, main, ...)
+ pos.legend="topright", cex.legend=0.7, ylim, main, color1, color2, ...)
 
 
 }
@@ -36,7 +36,9 @@
           'par("cex")'. Default is 0.7}
   \item{ylim}{y-axis limits}
   \item{main}{plot title}
-  \item{\dots}{ Other graphical parameters}
+  \item{color1}{color of the curve (integer or color name in quotation marks)}
+  \item{color2}{color of the second curve if both recurrent and terminal events are plotted}
+  \item{...}{other unused arguments}
 }
 
 \value{
@@ -53,30 +55,25 @@
 
 \dontrun{
 
-  data(readmission)
+data(readmission)
 
 ## Gap-time ##
-modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)
-	      +as.factor(charlson)+terminal(death),
-	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
-	      data=readmission,n.knots=14,kappa1=9550000000,
-	      kappa2=1410000000000,Frailty=TRUE,joint=TRUE,recurrentAG=FALSE
-	      ,hazard="Splines")
-
+modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
+                  charlson+terminal(death),formula.terminalEvent=~sex+
+                  dukes+charlson,data=readmission,n.knots=14,
+                  kappa1=9.55e+9,kappa2=1.41e+12,Frailty=TRUE,joint=TRUE)
 
 # It takes around 1 minute to converge. #
 
-
-plot(modJoint_gap,type.plot="haz",event="recurrent",conf.bands=TRUE)
-plot(modJoint_gap,type.plot="haz",event="terminal",conf.bands=TRUE)
-plot(modJoint_gap,type.plot="haz",event="both",conf.bands=TRUE))
-plot(modJoint_gap,type.plot="su",event="recurrent",conf.bands=TRUE))
-plot(modJoint_gap,type.plot="su",event="terminal",conf.bands=TRUE))
-plot(modJoint_gap, event="terminal",type.plot="su",conf.bands=TRUE))
-plot(modJoint_gap,type.plot="su","terminal",conf.bands=TRUE))
+plot(modJoint.gap,type.plot="haz",event="recurrent",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="haz",event="terminal",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="haz",event="both",conf.bands=TRUE))
+plot(modJoint.gap,type.plot="su",event="recurrent",conf.bands=TRUE))
+plot(modJoint.gap,type.plot="su",event="terminal",conf.bands=TRUE))
+plot(modJoint.gap, event="terminal",type.plot="su",conf.bands=TRUE))
+plot(modJoint.gap,type.plot="su","terminal",conf.bands=TRUE))
 
 }
-
 
 }
 

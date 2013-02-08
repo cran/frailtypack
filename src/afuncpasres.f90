@@ -12,32 +12,32 @@
 !========================    FUNCPARES RESIDUS MATRINGALE DENSITE A POSTERIORI       ====================
 
 !!!!
-!!!! Calcul Residus shared
+!!!! Calcul Residus shared log-normal
 !!!!
 	double precision function funcpasres(uu,np,id,thi,jd,thj)
- 
+
 	use comon
-        use residusM
-	
+	use residusM
+
 	implicit none
 
 	integer,intent(in)::id,jd,np
 	double precision,dimension(np)::bh
 	double precision,dimension(np),intent(in)::uu
 	double precision,intent(in)::thi,thj
-	double precision::frail1
+	double precision::frail
 
 	bh=uu
 	if (id.ne.0) bh(id)=bh(id)+thi
-	if (jd.ne.0) bh(jd)=bh(jd)+thj    
+	if (jd.ne.0) bh(jd)=bh(jd)+thj
 
-	frail1=bh(1)*bh(1)
+	frail = bh(1)*bh(1)
 
-	funcpasres = frail1**(nig(indg) + 1.d0/theta - 1.d0) &
-	*dexp(-frail1*(1.d0/theta + cumulhaz(indg)))
+	funcpasres = dexp(nig(indg)*frail - &
+	dexp(frail)*cumulhaz(indg) - (frail**2.d0)/(2.d0*sig2))
 	
 	return
-		
+
 	end function funcpasres
 
 
@@ -62,7 +62,7 @@
 
 	bh=uu
 	if (id.ne.0) bh(id)=bh(id)+thi
-	if (jd.ne.0) bh(jd)=bh(jd)+thj    
+	if (jd.ne.0) bh(jd)=bh(jd)+thj
 	
 	frail1=bh(1)*bh(1)
 
@@ -91,6 +91,45 @@
 	
 	end function funcpajres
 
+!!!!
+!!!! Calcul Residus joint log-normal
+!!!!
+
+	double precision function funcpajres_log(uu,np,id,thi,jd,thj)
+
+	use comon
+        use residusM
+	
+	implicit none
+
+	integer,intent(in)::id,jd,np
+	double precision,intent(in)::thi,thj
+	double precision,dimension(np)::uu,bh
+	double precision::frail,res
+	double precision,parameter::pi=3.141592653589793d0
+
+	bh=uu
+	if (id.ne.0) bh(id)=bh(id)+thi
+	if (jd.ne.0) bh(jd)=bh(jd)+thj
+	
+	frail=bh(1)*bh(1)
+
+	res = dexp((Nrec(indg)+alpha*Ndc(indg))*frail- &
+	dexp(frail)*Rrec(indg) - dexp(alpha*frail)*Rdc(indg)- &
+	(frail**2.d0)/(2.d0*sig2))
+
+	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+		funcpajres_log=-1.d9
+		goto 222
+	end if
+
+	funcpajres_log = res
+
+222	continue
+
+	return
+	
+	end function funcpajres_log
 
 !!!!
 !!!! Calcul Residus nested
