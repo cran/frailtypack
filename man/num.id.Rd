@@ -34,6 +34,8 @@ V. Rondeau, J.P. Pignon, S. Michiels (2011). A joint model for the dependance be
 
 \examples{
 
+\dontrun{
+
 data(readmission)
 # here is a generated cluster (31 clusters of 13 subjects)
 readmission <- transform(readmission,group=id\%\%31+1)
@@ -41,11 +43,13 @@ readmission <- transform(readmission,group=id\%\%31+1)
 ### Joint Frailty model for clustered data ###
 
 ## Splines ##
-joi.clus <- frailtyPenal(formula = Surv(t.start, t.stop, event) ~ cluster(group) + 
-              num.id(id) + dukes + charlson + sex + chemo + terminal(death),
-              formula.terminalEvent = ~dukes + charlson + sex + chemo,
-              data = readmission, Frailty = TRUE, joint = TRUE, recurrentAG = TRUE,
-              n.knots = 10, kappa1 = 2.11e+08, kappa2 = 9.53e+11)
+joi.clus <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(group)+
+               num.id(id)+dukes+charlson+sex+chemo+terminal(death),
+               formula.terminalEvent=~dukes+charlson+sex+chemo,
+               data=readmission,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE,
+               n.knots=10,kappa1=2.11e+08,kappa2=9.53e+11)
+
+}
 
 }
 

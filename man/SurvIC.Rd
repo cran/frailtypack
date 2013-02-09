@@ -8,7 +8,7 @@ Create a survival object for interval censoring and possibly left truncated data
 This is a function used in case of interval-censoring as a response variable in a model formula only for Cox proportional hazard or shared frailty model. Sometimes, an unobserved event might occur in a time interval [L,U]. RecurrentAG argument gets invalid with the use of SurvIC. Time dependant variables are not allowed.
 }
 \usage{
-SurvIC(lower, upper, event, tronc = FALSE, t0)
+SurvIC(t0, lower, upper, event)
 }
 
 \arguments{
@@ -21,32 +21,36 @@ Ending time of the interval for interval-censored data. For right-censored data,
   \item{event}{
 Status indicator 0=right-censored, 1=interval-censored
 }
-  \item{tronc}{
-Truncation indicator, logical value. There is a possiblity to add a truncature time, if TRUE then t0 is needed. The default is FALSE.
-}
   \item{t0}{
-Truncation time. Must be deleted if no left truncation.
+Truncation time for left truncated data only. To be ignored otherwise.
 }
+}
+
+\details{
+Typical usages are
+\code{SurvIC(lower,upper,event)}
+\code{SurvIC(t0,lower,upper,event)}
 }
 
 \examples{
 
-data(diabetes)
-# here is created the needed variable event
-diabetes <- transform(diabetes,event=ifelse(left!=right,1,0))
-# here is created a hypothetical groupement
-diabetes$groupe <- rep(1:146,c(rep(5,145),6))
+\dontrun{
+
+data(bcos)
+bcos$event <- ifelse(bcos$left!=bcos$right,1,0)
 
 ###  Cox proportional hazard model with interval censoring  ###
 
-frailtyPenal(SurvIC(left,right,event)~gender,
-             data=diabetes,Frailty=FALSE,n.knots=8,cross.validation=FALSE,
-             kappa1=3309,intcens=TRUE)
+frailtyPenal(SurvIC(left,right,event)~treatment,
+             data=bcos,Frailty=FALSE,n.knots=8,kappa1=10000)
 
 ###  Shared model with interval censoring  ###
 
-frailtyPenal(SurvIC(left,right,event)~cluster(groupe)+gender,
-             data=diabetes,Frailty=TRUE,n.knots=8,cross.validation=FALSE,
-             kappa1=3309,intcens=TRUE)
+bcos$group <- c(rep(1:20,4),1:14)
+
+frailtyPenal(SurvIC(left,right,event)~cluster(group)+treatment,
+             data=bcos,Frailty=TRUE,n.knots=8,kappa1=10000)
+
+}
 
 }

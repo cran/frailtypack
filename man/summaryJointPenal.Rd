@@ -25,7 +25,7 @@
 
 
 \value{
-  Prints HR and its confidence intervals for each covariate. Confidence level is allowed (level argument) 
+  Prints HR and its confidence intervals for each covariate. Confidence level is allowed (level argument)
 }
 
 
@@ -37,31 +37,28 @@
 
 \dontrun{
 
-  data(readmission)
+data(readmission)
 
 ## Gap-time ##
-modJoint_gap<-frailtyPenal(Surv(time,event)~cluster(id)+sex+as.factor(dukes)
-	      +as.factor(charlson)+terminal(death),
-	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
-	      data=readmission,n.knots=14,kappa1=9550000000,kappa2=1410000000000,
-	      Frailty=TRUE,joint=TRUE,recurrentAG=FALSE,hazard="Splines")
+modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
+                   charlson+terminal(death),formula.terminalEvent=~sex+
+                   dukes+charlson,data=readmission,n.knots=14,kappa1=9.55e+9,
+                   kappa2=1.41e+12,Frailty=TRUE,joint=TRUE)
 
 ## Calendar time ##
-modJoint_calendar<-frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
-	      +as.factor(dukes)+as.factor(charlson)+terminal(death),
-	      formula.terminalEvent=~sex+as.factor(dukes)+as.factor(charlson),
-	      data=readmission,n.knots=10,kappa1=9550000000,
-	      kappa2=1410000000000,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE
-	      ,hazard="Splines")
-	 
-# It takes around 1 minute to converge  
+modJoint.calendar <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+
+                        dukes+charlson+terminal(death),formula.terminalEvent=~
+                        sex+dukes+charlson,data=readmission,n.knots=10,
+                        kappa1=9.55e+9,kappa2=1.41e+12,Frailty=TRUE,
+                        joint=TRUE,recurrentAG=TRUE)
 
-  summary(modJoint_gap)
-  summary(modJoint_calendar)
-}
+# It takes around 1 minute to converge
 
+summary(modJoint_gap)
+summary(modJoint_calendar)
 
 }
 
+}
 
 \keyword{methods}

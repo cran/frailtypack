@@ -30,12 +30,17 @@ V. Rondeau
 
 \examples{
 
+\dontrun{
+
 ###  a fit Shared
 data(readmission)
-fit.shared <- frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id)+
-             strata(sex),n.knots=10,kappa1=10000,kappa2=10000,data=readmission,
-             Frailty=TRUE)
+fit.shared <- frailtyPenal(Surv(time,event)~dukes+cluster(id)+
+             strata(sex),n.knots=10,kappa1=10000,kappa2=10000,
+             data=readmission,Frailty=TRUE)
 
 ### calling survival
-hazard(20,fit.shared) 
+hazard(20,fit.shared)
+
+}
+
 }

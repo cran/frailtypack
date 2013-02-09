@@ -73,13 +73,17 @@ Gonen M, Heller G. Concordance probability and discriminatory power in proportio
 \code{\link{frailtyPenal}}
 }
 \examples{
+
+\dontrun{
+
 ## load data
 data(readmission)
 
 ## a frailtypenal fit
-fit.frailtypenal <-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id)+
-as.factor(charlson)+as.factor(chemo),data=readmission,Frailty=TRUE,
-cross.validation=FALSE,n.knots=10,kappa1=1,hazard="Splines")
+fit.frailtypenal <- frailtyPenal(Surv(time,event)~cluster(id)+dukes+
+                      charlson+chemo,data=readmission,Frailty=TRUE,
+                      cross.validation=FALSE,n.knots=10,kappa1=1,
+                      hazard="Splines")
 
 ## a Cmeasures call
 fit.Cmeasures <- Cmeasures(fit.frailtypenal)
@@ -88,6 +92,8 @@ fit.Cmeasures.noties <- Cmeasures(fit.frailtypenal, ties=0)
 ## a short summary
 fit.Cmeasures
 fit.Cmeasures.noties
+
+}
 }
 
 \keyword{concordance}

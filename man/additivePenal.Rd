@@ -1,18 +1,18 @@
 \name{additivePenal}
 \alias{additivePenal}
 \Rdversion{1.1}
-\title{Fit an Additive Frailty model using a semi-parametric penalized likelihood estimation or a parametric estimation}
+\title{Fit an Additive Frailty model using a semiparametric penalized likelihood estimation or a parametric estimation}
 
 \description{
 
-Fit an additive frailty model using a semi-parametric penalized likelihood estimation or a parametric estimation.
+Fit an additive frailty model using a semiparametric penalized likelihood estimation or a parametric estimation.
 The main issue in a meta-analysis study is how to take into account
 the heterogeneity between trials and between the treatment effects across
  trials. Additive models are proportional hazard model with two correlated
  random trial effects that act either multiplicatively on the hazard function
  or in interaction with the treatment, which allows studying for instance meta-analysis or multicentric datasets.
  Right-censored data are allowed, but not the left-truncated data. A stratified analysis is possible (maximum number of strata: 2).
-This approach is different from the shared gamma frailty models.  
+This approach is different from the shared frailty models.
 
 
 In an additive model, the hazard function for the \eqn{j^{th}} subject in the \eqn{i^{th}} trial with random trial effect \eqn{u_i} as well as the random treatment-by-trial interaction \eqn{v_i} is:
@@ -34,7 +34,7 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\beta_k} the fixe
 \usage{
 additivePenal(formula, data, correlation = FALSE, recurrentAG =
              FALSE, cross.validation = FALSE, n.knots, kappa1,
-             kappa2, maxit = 350,hazard,nb.int1)
+             kappa2, maxit = 350, hazard = "Splines", nb.int1)
 }
 
 
@@ -75,7 +75,7 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
  Default is 350}
  
  
- \item{hazard}{Type of hazard functions: "Splines" for semi-parametric hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazards functions using percentile, "Piecewise-equi" for piecewise constant hazard functions using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
+ \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazards functions using percentile, "Piecewise-equi" for piecewise constant hazard functions using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
  
  \item{nb.int1}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 }
@@ -128,7 +128,7 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 \item{kappa}{ A vector with the smoothing parameters  in the penalized likelihood estimation corresponding to each baseline function as components.}
 \item{lam}{matrix of hazard estimates and confidence bands.}
 \item{lam2}{the same value as lam for  the second stratum.}
-\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametric case.}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semiparametric case.}
 \item{loglik}{the marginal log-likelihood in the parametric case.}
 \item{n}{the number of observations used in the fit.}
 \item{n.events}{the number of events observed in the fit.}
@@ -153,7 +153,7 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 \item{npar}{number of parameters.}
 \item{nvar}{number of explanatory variables.}
 \item{noVar}{indicator of explanatory variable.}
-\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semiparametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
 \item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{n.knots.temp}{initial value for the number of knots.}
 \item{shape.weib}{shape parameter for the weibull hazard function.}
@@ -205,18 +205,18 @@ V. Rondeau, S. Michiels, B. Liquet, and J. P. Pignon (2008).
 
 
 \examples{
- ### Additive model with 1 covariate ###
+### Additive model with 1 covariate ###
 
 \dontrun{
-  data(dataAdditive) 
-  modAdd<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
+
+data(dataAdditive)
+
+modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
                 correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=10000)
 
-# It takes around 4 minutes to converge. Var1 is boolean as a treatment variable. #
+# It takes around 4 minutes to converge
+# Var1 is boolean as a treatment variable
 
-  print(modAdd)
-  summary(modAdd)
-  plot(modAdd)
 }
 
 }

@@ -17,7 +17,7 @@
   \item{\dots}{ other unusued arguments }
 }
 \value{
- 
+
  \item{n}{the number of observations used in the fit.}
  \item{n.groups}{the maximum number of groups used in the fit}
  \item{n.events}{the number of events observed in the fit}
@@ -29,7 +29,7 @@
  \item{p}{p-value}
  \item{Variance for the random intercept}{Variance for the random effect associated to the baseline risk functon}
  \item{Variance for the random slope}{Variance for the random effect associated to the treatment effects across trials}
- 
+
 
 }
 
@@ -42,23 +42,21 @@
 
 \examples{
 
-#  /*** Additive frailty model with 1 covariate ***/  
+#  /*** Additive frailty model with 1 covariate ***/
 
 \dontrun{
 
-  data(dataAdditive) 
-  modAdd<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
+data(dataAdditive)
+modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
                   correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862,
-		  hazard="Splines")
-
+                  hazard="Splines")
 
 # It takes around 4 minutes to converge. 'var1' is boolean as a treatment variable. #
 
-  print(modAdd)
+print(modAdd)
 
 }
 
-} 
-
+}
 
 \keyword{methods}

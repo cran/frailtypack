@@ -3,7 +3,7 @@
 \name{frailtyPenal for Nested frailty models}
 \alias{frailtyPenal for Nested frailty models}
 
-\title{Fit a Nested Frailty model using a semi-parametric penalized likelihood estimation or a parametric estimation }
+\title{Fit a Nested Frailty model using a semiparametric penalized likelihood estimation or a parametric estimation }
 
 \description{Fit a nested frailty model using a Penalized Likelihood on the hazard function or using a parametric estimation. Nested frailty models allow survival studies for hierarchically clustered data by including two iid gamma random effects.
 Left truncated and censored data are allowed. Stratification analysis is allowed(maximum of strata=2).
@@ -30,7 +30,7 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{X_{ijk}}
 frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
              joint = FALSE, recurrentAG = FALSE, cross.validation =
              FALSE, n.knots, kappa1, kappa2, maxit = 350,
-             hazard = "Splines", nb.int1, nb.int2, intcens = FALSE)
+             hazard = "Splines", nb.int1, nb.int2, RandDist = "Gamma")
 }
 
 \arguments{
@@ -44,7 +44,7 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
  'formula'.}
 
   \item{Frailty}{Logical value. Is model with frailties fitted? If so, variance of frailty parameter is estimated. If not, Cox proportional hazards model is estimated using Penalized Likelihood on the hazardfunction. The default is FALSE.}
- 
+
   \item{joint}{Not required}
 
   \item{recurrentAG}{Logical value. Is Andersen-Gill model fitted? If so indicates that recurrent event times with the 
@@ -70,10 +70,10 @@ value for \code{kappa1} (or \code{kappa2}), a solution is to fit the correspondi
   \item{kappa2}{positive smoothing parameter in the penalized likelihood estimation for the second stratum, when data are stratified. See kappa1. }
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
-  \item{hazard}{Type of hazard functions: "Splines" for semi-parametric hazard function with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
+  \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard function with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
   
  \item{nb.int1}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi")}
- \item{intcens}{Not implemented for nested frailty model.}
+ \item{RandDist}{Not implemented for nested frailty model}
 
 }
 
@@ -119,7 +119,7 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 \item{kappa}{ A vector with the smoothing parameters corresponding to each baseline function as components.}
 \item{lam}{matrix of hazard estimates and confidence bands.}
 \item{lam2}{the same value as lam for  the second stratum.}
-\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametric case.}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semiparametric case.}
 \item{loglik}{the marginal log-likelihood in the parametric case.}
 \item{n}{the number of observations used in the fit.}
 \item{n.events}{the number of events observed in the fit.}
@@ -138,7 +138,7 @@ The splines and the regression coefficients are initialized to 0.1. The program 
 \item{npar}{number of parameters.}
 \item{nvar}{number of explanatory variables.}
 \item{noVar}{indicator of explanatory variables.}
-\item{LCV}{the approximated likelihood cross-validation criterion in the semi-parametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semiparametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
 \item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{n.knots.temp}{initial value for the number of knots.}
 \item{shape.weib}{shape parameters for the weibull hazard function.}
@@ -184,7 +184,7 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 
  }
 
- 
+
 
 \seealso{
  \code{\link{print.nestedPenal}},
@@ -203,28 +203,21 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 
 \dontrun{
 
-  data(dataNested)
-  modClu<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+
-  subcluster(subgroup)+cov1+cov2,Frailty=TRUE,data=dataNested,
-  n.knots=8,kappa1=50000)
+data(dataNested)
+modClu <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
+             subcluster(subgroup)+cov1+cov2,Frailty=TRUE,
+             data=dataNested,n.knots=8,kappa1=50000)
 
 # It takes around 24 minutes to converge (depends on the processor)#
 
-  print(modClu)
-  summary(modClu)
-  plot(modClu)
-  
-  modClu.str<-frailtyPenal(Surv(t1,t2,event)~cluster(group)+
-  subcluster(subgroup)+cov1+strata(cov2),Frailty=TRUE,data=dataNested,
-  n.knots=8,kappa1=20000,kappa2=20000)
-  
- # It takes around 8 minutes to converge (depends on the processor)#
- 
-  print(modClu.str)
-  summary(modClu.str)
-  plot(modClu.str)
-  
+modClu.str <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
+                subcluster(subgroup)+cov1+strata(cov2),Frailty=TRUE,
+                data=dataNested,n.knots=8,kappa1=20000,kappa2=20000)
+
+# It takes around 8 minutes to converge (depends on the processor)#
+
 }
+
 }
 
 \keyword{models}

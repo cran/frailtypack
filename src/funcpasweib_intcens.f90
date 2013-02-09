@@ -237,9 +237,14 @@
 ! r indice les éléments dans le produit de Kronecker
 				do r=1,2**d(k)
 					num = ((-1)**nbU(r,k))*((1.d0+theta*res3(k))**inv)
+					!print*,((-1)**nbU(r,k)),((1.d0+theta*res3(k))**inv),nbU(r,k),res3(k),inv
 					den = (1.d0+theta*res1(k)+theta*dlog(p(r,k)))**inv
 					res2(k) = res2(k) + num/den
 				enddo
+				if (res2(k).eq.0.d0) then
+					res2(k) = 1.d-300
+				endif
+
 				if ((res2(k).ne.res2(k)).or.(abs(res2(k)).ge.1.d30)) then
 				  funcpasweib_intcens=-1.d9
 				  goto 123
@@ -247,13 +252,15 @@
 
 				res = res + dlog(res2(k))
 				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+					!print*,"here"
+					!print*,res2(k),dlog(res2(k)),inv*dlog(theta)
 				  funcpasweib_intcens=-1.d9
 				  goto 123
 				end if
-			endif 
+			endif
 		end do
-	
-       	endif !fin boucle effet=0
+
+	endif !fin boucle effet=0
 	
 !--------------------------------------------------
 

@@ -5,9 +5,9 @@
 !========================          funcpajng NEW         ====================
 	double precision function funcpaGcpm(b,np,id,thi,jd,thj,k0)
 
-	use comon,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,&
-	nst,effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,alpha,theta,auxig,aux1,aux2,res1,res3&
-	,ttt,tttdc,betacoef,kkapa
+	use comon,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2, &
+	nst,effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,alpha,theta,auxig,aux1,aux2,res1,res3, &
+	ttt,tttdc,betacoef,kkapa
 	use tailles
 	use comongroup
         use residusM
@@ -369,7 +369,7 @@
 				end if	
 !			      write(*,*)'*** res2dc',res2dc(k),dut2(nt1dc(k)),nt1dc(k),vet2,k,ng
 			endif 
-! pour le calcul des integrales / pour la survie, pas pour donn�es recur:
+! pour le calcul des integrales / pour la survie, pas pour donnees recur:
 			!aux1(gsuj(k))=aux1(gsuj(k))+ut2(nt1dc(k))*vet2
 
 			som11=0.d0

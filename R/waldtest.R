@@ -30,7 +30,7 @@ waldtest <- function(N,nfact,place,modality,b,Varb,Lfirts=NULL,Llast=NULL,Ntot=N
 			Lavant <- matrix(0,nrow=modality[i],ncol=taillecol)	
 			taillecol <- N-modality[i]-taillecol
 			Lapres <- matrix(0,nrow=modality[i],ncol=taillecol)
-			Lvar <- diag(rep(1,modality[i]))		
+			Lvar <- diag(rep(1,modality[i]))
 			L <- cbind(Lavant,cbind(Lvar,Lapres))
 			if(!is.null(Lfirts)) L <- cbind(matrix(0,nrow=modality[i],ncol=Lfirts),L)
 			if(!is.null(Llast)) L <- cbind(L,matrix(0,nrow=modality[i],ncol=Llast))
@@ -44,8 +44,8 @@ waldtest <- function(N,nfact,place,modality,b,Varb,Lfirts=NULL,Llast=NULL,Ntot=N
 				as.integer(modality[i]),
 				Wald=as.double(0),
 				PACKAGE = "frailtypack")
-		wald[i] <- out$Wald	
+		wald[i] <- out$Wald
 	}
 	return(wald)
 }
-# # end Wald 
+# # end Wald

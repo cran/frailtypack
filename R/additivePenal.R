@@ -34,7 +34,7 @@ if((all.equal(length(hazard),1)==T)==T){
 			size1 <- 100
 		}
 	}else{
-		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")		
+		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
 	}
    } 
 }else{

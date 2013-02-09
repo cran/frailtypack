@@ -150,8 +150,8 @@
 			if (x$typeof == 2){
 				cat("\n")
 				if (x$n.strat == 1){
-					cat("      Scale for the weibull hazard function is :",round(x$shape.weib[1],2),"\n")	
-					cat("      Shape for the weibull hazard function is :",round(x$scale.weib[1],2),"\n")
+					cat("      Scale for the weibull hazard function is :",round(x$scale.weib[1],2),"\n")	
+					cat("      Shape for the weibull hazard function is :",round(x$shape.weib[1],2),"\n")
 				}else{
 					cat("      Scale for the weibull hazard function is :",round(x$scale.weib[1],2),round(x$scale.weib[2],2),"\n")	
 					cat("      Shape for the weibull hazard function is :",round(x$shape.weib[1],2),round(x$shape.weib[2],2),"\n")

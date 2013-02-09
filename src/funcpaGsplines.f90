@@ -293,19 +293,19 @@
 				goto 123
 			end if
 !     modification pour nouvelle vraisemblance / troncature:
-			res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet 
+			res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
 			if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
 				funcpaGsplines=-1.d9
 				goto 123
-			end if	
+			end if
 		end do
 
 !
-! pour le deces 
-! 
-		do k=1,lignedc!ng  
+! pour le deces
+!
+		do k=1,lignedc!ng
 			if(nva2.gt.0)then
-				vet2 = 0.d0   
+				vet2 = 0.d0
 				do j=1,nva2
 					vet2 =vet2 + bh(np-nva2+j)*dble(vedc(k,j))
 				end do
@@ -318,26 +318,24 @@
 				if ((res2dc(gsuj(k)).ne.res2dc(gsuj(k))).or.(abs(res2dc(gsuj(k))).ge. 1.d30)) then	
 					funcpaGsplines=-1.d9
 					goto 123
-				end if	
-!			      write(*,*)'*** res2dc',res2dc(k),dut2(nt1dc(k)),nt1dc(k),vet2,k,ng
-			endif 
-! pour le calcul des integrales / pour la survie, pas pour donn�es recur:
+				end if
+			endif
+! pour le calcul des integrales / pour la survie, pas pour donnees recur:
 			aux1(gsuj(k))=aux1(gsuj(k))+ut2(nt1dc(k))*vet2
 			aux2(gsuj(k))=aux2(gsuj(k))+ut2(nt0dc(k))*vet2 !vraie troncature
 			if ((aux1(gsuj(k)).ne.aux1(gsuj(k))).or.(abs(aux1(gsuj(k))).ge. 1.d30)) then
 				funcpaGsplines=-1.d9
 				goto 123
-			end if	
+			end if
 			if ((aux2(gsuj(k)).ne.aux2(gsuj(k))).or.(abs(aux2(gsuj(k))).ge. 1.d30)) then
 				funcpaGsplines=-1.d9
 				goto 123
 			end if
-
 		end do
 
 !**************INTEGRALES ****************************
-		do ig=1,ng 
-			auxig=ig 
+		do ig=1,ng
+			auxig=ig
 !              choix=1
 !              call gaulagJ(int,choix)
 !              integrale1(ig) = int
@@ -353,7 +351,7 @@
 !              endif
 
 !              if(AG.eq.1)then
-			choix = 3  
+			choix = 3
 !                 write(*,*)')))))))))ig avant gaulag',auxig,ig
 			call gaulagJ(int,choix)
 !                 write(*,*)'))apres gaulag',int,ig

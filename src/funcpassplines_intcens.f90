@@ -37,7 +37,7 @@
 	if (jd.ne.0) bh(jd)=bh(jd)+thj
 	
 	n = (np-nva-effet)/nst ! nombre de eta (coef des splines)
-          
+
 	do i=1,n
 		the1(i-3)=(bh(i))*(bh(i))
 		j = n+i
@@ -304,7 +304,7 @@
 				  funcpassplines_intcens=-1.d9
 				  goto 123
 				end if
-			endif 
+			endif
 		end do
 	
        	endif !fin boucle effet=0

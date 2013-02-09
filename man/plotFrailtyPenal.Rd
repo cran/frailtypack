@@ -14,7 +14,7 @@
 \usage{
 
 \method{plot}{frailtyPenal}(x, type.plot = "hazard", conf.bands=TRUE, pos.legend="topright",
- cex.legend=0.7, main, ...)
+ cex.legend=0.7, main, color, ...)
 
 }
 
@@ -30,7 +30,8 @@
   \item{cex.legend}{character expansion factor *relative* to current
           'par("cex")'. Default is 0.7}
   \item{main}{title of plot}
-  \item{\dots}{ Other graphical parameters}
+  \item{color}{color of the curve (integer or color name in quotation marks)}
+  \item{...}{other unused arguments}
 }
 
 \value{
@@ -46,26 +47,31 @@
 
 \examples{
 
+\dontrun{
+
 data(readmission)
 
 # /*** Shared frailty model ***/
 
-modSha<-frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
+modSha <- frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
              n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,
-	     hazard="Splines")
+             hazard="Splines")
 
 plot(modSha,type="surv",conf=FALSE)
 
 # /*** Cox proportional hazard model using Penalized likelihood ***/
 
-modCox<-frailtyPenal(Surv(time,event)~as.factor(dukes),n.knots=10,
-	     kappa1=10000,data=readmission,Frailty=FALSE,
-	     hazard="Splines")
+modCox <- frailtyPenal(Surv(time,event)~as.factor(dukes),n.knots=10,
+             kappa1=10000,data=readmission,Frailty=FALSE,
+             hazard="Splines")
+
 plot(modCox)
 
 # no confidence bands
 plot(modSha,conf.bands=FALSE)
 plot(modCox,conf.bands=FALSE)
+}
+
 }
 
 \keyword{ file }

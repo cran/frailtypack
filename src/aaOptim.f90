@@ -120,7 +120,7 @@
 	use additiv,only:correl
       
 	IMPLICIT NONE
-!   variables globales 
+!   variables globales
 	integer,intent(in) :: m,effet
 	integer,intent(inout)::ni,ier,istop
 	double precision,dimension(m*(m+3)/2),intent(out)::v
@@ -141,7 +141,7 @@
 !---------- ajout
 	integer::kkk
 
-	zero=0.d0     
+	zero=0.d0
 	id=0
 	jd=0
 	z=0.d0
@@ -158,20 +158,20 @@
 	nql=1
 	m1=m*(m+1)/2
 	ep=1.d-20
-	Main:Do 
+	Main:Do
 
         call derivaj(b,m,v,rl,k0,fctnames)
 
-        rl1=rl
+	rl1=rl
 	if(rl.eq.-1.D9) then
 		istop=4
 		goto 110
 	end if
- 
+
 !	write(*,*)'iteration***',ni,'vrais',rl
 
         dd = 0.d0
-	 
+
         fu=0.D0
 	
 	do i=1,m
@@ -181,9 +181,9 @@
 		end do
 	end do
 	
-        call dsinvj(fu,m,ep,ier)  
+        call dsinvj(fu,m,ep,ier)
 	
-	if (ier.eq.-1) then
+	if (ier.eq.-1) then ! hessienne non inversible
 		!print*,"here"
 		dd=epsd+1.d0
 	else
@@ -202,7 +202,9 @@
 	end if
 
 !	print*,ca,cb,dd
-!	if (ni.eq.40) then
+!	print*,b
+!	print*,"-------------------------"
+!	if (ni.eq.50) then
 !		print*,"====================> FAUSSE CONVERGENCE"
 !		ca=1.d-4
 !		cb=1.d-4
@@ -451,23 +453,23 @@
 	double precision,intent(inout)::rl
 	double precision,dimension(2)::k0
 	double precision,dimension(m),intent(in)::b
-	double precision,dimension((m*(m+3)/2)),intent(out)::v     
+	double precision,dimension((m*(m+3)/2)),intent(out)::v
 	double precision,dimension(m)::fcith
 	integer ::i0,m1,ll,i,k,j,iun
-	double precision::fctnames,thn,th,z,vl,th2,vaux  
+	double precision::fctnames,thn,th,z,vl,th2,vaux
 	external::fctnames
       	
 	select case(model)
 	case(1)
-		th=1.d-3 !joint	
+		th=1.d-3 !joint
 	case(2)
 		th=5.d-3 !additive
 	case(3)
-		th=1.d-5 !nested		
+		th=1.d-5 !nested
 	case(4)
 		th=1.d-5 !shared
 	end select
-	
+
 	thn=-th
 	th2=th*th
 	z=0.d0

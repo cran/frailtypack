@@ -33,21 +33,20 @@
 
 \examples{
 
-
 \dontrun{
-  
-  data(dataAdditive) 
-  modAdd<-additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
-	          correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862,
-		  hazard="Splines")
 
-# It takes around 4 minutes to converge. 'var1' is boolean as a treatment variable. #
+data(dataAdditive)
 
-  plot(modAdd)
+modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
+                correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862,
+                hazard="Splines")
 
-} 
+# It takes around 4 minutes to converge
+# 'var1' is boolean as a treatment variable
 
+plot(modAdd)
 
+}
 
 }
 
