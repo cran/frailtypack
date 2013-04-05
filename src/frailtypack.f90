@@ -6,7 +6,8 @@
 	AGAux,noVar,maxitAux,irep1,np,b,H_hessOut,HIHOut,resOut,LCV, &
 	x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt, &	
 	ni,cpt,ier,k0,ddl,istop,shapeweib,scaleweib,mt1,ziOut,Resmartingale,martingaleCox,&
-	frailtypred,frailtyvar,frailtysd,linearpred,time,intcensAux,ttUAux,logNormal0) ! rajout
+	frailtypred,frailtyvar,frailtysd,linearpred,time,intcensAux,ttUAux,logNormal0, &
+	timedep0,nbinnerknots0,qorder0,filtretps0,BetaTpsMat) ! rajout
 
 
 !
@@ -16,12 +17,13 @@
 	use comon
 	use optim
 	use residusM
+	use betatttps
 	
 	implicit none
 
 	integer::groupe,ij,kk,j,k,nz,n,np,cpt,ii,iii,ver,cptstr1,cptstr2, &
 	i,ic,ni,ier,istop,cptni,cptni1,cptni2,ibou,nbou2,id,cptbiais,l, &
-	icen,irep1,nvacross,nstcross,effetcross,mt,mt1
+	icen,irep1,nvacross,nstcross,effetcross,mt,mt1,p
 	integer,dimension(nvaAux)::filtre
 	integer,dimension(nsujetAux)::stracross
 	double precision,dimension(nvaAux)::vax
@@ -58,6 +60,7 @@
 	external::funcpassplines,funcpascpm,funcpasweib
 	external::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
 	external::funcpassplines_log,funcpasweib_log,funcpascpm_log
+	double precision,external::funcpas_tps
 !AD:
 !Cpm
 	integer::typeof0,nbintervR0,equidistant,ent,indd
@@ -67,10 +70,15 @@
 	double precision,external::funcpasres
 	double precision,dimension(nsujetAux),intent(out)::linearpred,martingaleCox
 	double precision,dimension(1,nvaAux)::coefBeta
+	double precision::coefBeta2
 	double precision,dimension(1,nsujetAux)::XBeta
 	double precision,dimension(nbintervR0+1)::time
 	integer,dimension(2)::istopp
 	integer,intent(in)::logNormal0
+	integer,intent(in)::timedep0,nbinnerknots0,qorder0
+	integer,dimension(nvaAux),intent(in)::filtretps0
+	double precision,dimension(0:100,0:4*sum(filtretps0))::BetaTpsMat ! matrice des effets depedants du temps (4 colonnes par effet dep du tps)
+	double precision,dimension(nbinnerknots0+qorder0)::basis
 
 !verification
 	!print*,nsujetAux,ngAux,icenAux,nstAux,effetAux,nzAux,ax1,ax2,nvaAux
@@ -92,15 +100,19 @@
 	su2Out=0.d0
 
 !AD:add for new marq
-	epsa=1.d-3
-	epsb=1.d-3
-	epsd=1.d-3
+	epsa=1.d-4
+	epsb=1.d-4
+	epsd=1.d-4
 !AD:end
-	
+
+	timedep = timedep0
+	npbetatps = (nbinnerknots0+qorder0-1)*sum(filtretps0)
+	nbinnerknots = nbinnerknots0
+	qorder = qorder0
 	logNormal = logNormal0
 	intcens = intcensAux
 	typeof = typeof0
-	model=4	
+	model=4
 	npmax=np
 	if (typeof .ne. 0) then
 		nbintervR = nbintervR0
@@ -179,7 +191,10 @@
 	nz=nzAux
 
 	nvarmax=nvaAux
-		
+
+	allocate(filtretps(nvarmax),betatps(nvarmax),betatps3(nvarmax))
+	filtretps = filtretps0
+
 	if (noVar.eq.1) then 
 		do i=1,nvaAux
 			filtre(i)=0
@@ -202,7 +217,7 @@
  
 	AG=AGAux
 	maxiter=maxitAux 
-	
+
 !**************************************************
 !**************************************************
 !********************* prog spline****************
@@ -332,13 +347,13 @@
 	end do
 
 !AD:
-	if (typeof .ne. 0) then 
+!	if (typeof .ne. 0) then
 		cens = maxt
-	end if
+!	end if
 !Ad
 
 ! rajout Alexandre 18/05/2012
-! création de d : nombre de censures par intervalle dans chaque groupe
+! crÃ©ation de d : nombre de censures par intervalle dans chaque groupe
 	allocate(d(ngmax))
 	d = 0
 	do i=1,nsujet
@@ -359,7 +374,6 @@
 
 	nsujet = k
 	
-	
 	if (typeof == 0) then	
 		nz1=nz
 		nz2=nz
@@ -379,7 +393,7 @@
 	min = 1.d-10
 	max = maxt
 	
-	do i = 1,(2*nsujet+sum(icAux)) ! changement comme indiqué plus haut
+	do i = 1,(2*nsujet+sum(icAux)) ! changement comme indiquÃ© plus haut
 		do k = 1,nsujet
 			if (t0(k).ge.min) then
 				if(t0(k).lt.max)then
@@ -413,20 +427,20 @@
 		if(aux(i).gt.aux(i-1))then
 			k = k+1
 			date(k) = aux(i)
-		endif 
+		endif
 	end do
 	
 	if(typeof == 0) then
 		nzmax=nz+3
 		allocate(zi(-2:nzmax))
 		ndate = k
-       
+		
 		zi(-2) = date(1)
 		zi(-1) = date(1)
 		zi(0) = date(1)
 		zi(1) = date(1)
 		h = (date(ndate)-date(1))/dble(nz-1)
-	
+		
 		do i=2,nz-1
 			zi(i) =zi(i-1) + h
 		end do
@@ -468,9 +482,9 @@
 		end do
 
 !--------- affectation des vecteurs de splines -----------------
-		n  = nz+2
+		n = nz+2
 
-		call vecsplis(n,ndate) 
+		call vecsplis(n,ndate)
 		
 		allocate(m3m3(nzmax),m2m2(nzmax),m1m1(nzmax),mmm(nzmax),m3m2(nzmax),m3m1(nzmax),m3m(nzmax), &
 		m2m1(nzmax),m2m(nzmax),m1m(nzmax))
@@ -478,8 +492,8 @@
 		call vecpens(n)
 	end if
 
-	allocate(H_hess(npmax,npmax),Hspl_hess(npmax,npmax),hess(npmax,npmax), &
-	I_hess(npmax,npmax))
+	allocate(H_hess(npmax,npmax),Hspl_hess(npmax,npmax), &
+	hess(npmax,npmax),I_hess(npmax,npmax))
 
 	H_hess=0.d0
 	I_hess=0.d0
@@ -488,7 +502,7 @@
 	HI=0.d0
 
 !------ initialisation des parametres
-              
+
 	b=1.d-1
 
 	if (typeof == 1) then
@@ -497,8 +511,8 @@
 		end if
 	end if
 !    Esto se cambia ya que ahora xmin1 es kappa1
- 
-	xmin1=ax1 
+
+	xmin1=ax1
 	if(nst.eq.2)then
 		xmin2 = ax2
 	else
@@ -506,7 +520,11 @@
 	endif
 
 	ent = 0
+	entTPS = 0
 	indd = 1
+
+	allocate(knotsTPS(-qorder+1:nbinnerknots+qorder))
+	allocate(innerknots(nbinnerknots))
 
 	if (typeof == 1) then
 		
@@ -552,11 +570,12 @@
 			end do
 		
 			ent=int(nbrecu/nbintervR)
+			entTPS=int(nbrecu/(nbinnerknots+1))! ajout 24/02/2012
 		endif
 		
 		allocate(ttt(0:nbintervR))
 		
-		ttt(0)=0.d0
+		ttt(0) = mint !0.d0 pour prendre en compte une eventuelle troncature
 		
 		ttt(nbintervR)=cens
 		
@@ -568,18 +587,99 @@
 				ttt(j) = mint + ((cens-mint)/nbintervR)*j
 			endif
 		end do
-		time = ttt
+
 		if (intcens.eq.0) then
+			! ajout beta tps 24/02/2012
+			do j=1,nbinnerknots
+!				if (equidistantTPS.eq.0) then
+					knotsTPS(j)=(t2(entTPS*j)+t2(entTPS*j+1))/(2.d0)
+!				else
+!					knotsTPS(j)=(cens/(nbinnerknots+1))*j
+!				endif
+			end do
+	
+			knotsTPS(-qorder+1:0)=ttt(0)
+			knotsTPS(nbinnerknots+1:nbinnerknots+qorder)=cens
+!			write(*,*),'knotsTPS',knotsTPS
+			time = ttt
+		
 			deallocate(t2)
 		endif
 !------- FIN RECHERCHE DES NOEUDS
-	end if	
+
+	end if
+
+	if (typeof.ne.1) then
+		
+		if (intcens.eq.0) then !! enlever le piecewise-per pour la censure par intervalle
+!------- RECHERCHE DES NOEUDS
+!----------> Enlever les zeros dans le vecteur de temps
+			i=0
+			j=0
+
+!----------> taille - nb de recu
+			do i=1,nsujet
+				if(t1(i).ne.(0.d0).and.c(i).eq.1) then
+					j=j+1
+				endif
+			end do
+			nbrecu=j
+
+			!n = nbintervR
+!----------> allocation des vecteur temps
+			allocate(t2(nbrecu))
+		
+!----------> remplissage du vecteur de temps
+			j=0
+			do i=1,nsujet
+				if (t1(i).ne.(0.d0).and.c(i).eq.1) then
+					j=j+1
+					t2(j)=t1(i)
+				endif
+			end do
+		
+!----------> tri du vecteur de temps
+			indd=1
+			do while (indd.eq.1)
+				indd=0
+				do i=1,nbrecu-1
+					if (t2(i).gt.t2(i+1)) then
+						temp=t2(i)
+						t2(i)=t2(i+1)
+						t2(i+1)=temp
+						indd=1
+					end if
+				end do
+			end do
+		
+			entTPS=int(nbrecu/(nbinnerknots+1))! ajout 24/02/2012
+!		endif
+
+		! ajout beta tps 24/02/2012
+		do j=1,nbinnerknots
+!			if (equidistant.eq.0) then
+				!print*,knotsTPS(j)
+				knotsTPS(j)=(t2(entTPS*j)+t2(entTPS*j+1))/(2.d0)
+!			else
+!				knotsTPS(j)=(cens/(nbinnerknots+1))*j
+!			endif
+		end do
+!		censTPS=cens
+		knotsTPS(-qorder+1:0)= mint !t2(1)
+		knotsTPS(nbinnerknots+1:nbinnerknots+qorder)=cens
+!		write(*,*),'knotsTPS',knotsTPS
+
+!		if (intcens.eq.0) then
+			deallocate(t2)
+		endif
+!------- FIN RECHERCHE DES NOEUDS
+	end if
 
 !***********************************************************
 !************** NEW : cross validation  ***********************
 !       sur une seule strate, sans var expli , sans frailties ****
 !***********************************************************
-         
+
 	nvacross=nva !pour la recherche du parametre de lissage sans var expli
 	nva=0
 	effetcross=effet
@@ -591,13 +691,13 @@
 		stracross(l)=stra(l)
 	end do
 	
-	do l=1,nsujet  
+	do l=1,nsujet
 		stra(l)=1
 	end do
+
 	!print*,"debut"
 	if(typeof == 0) then
 		if(irep1.eq.1)then   !pas recherche du parametre de lissage
-	
 			xmin1 = dsqrt(xmin1)
 			auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
 		
@@ -606,7 +706,7 @@
 	!			write(*,*) 'no convergence with the chosen smoothing parameter'
 				do i=1,nz+2
 					b(i)=1.d-1
-				end do 
+				end do
 				
 				xmin1 = sqrt(10.d0)*xmin1
 				auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
@@ -619,7 +719,7 @@
 				else
 					do i=1,nz+2
 						b(i)=1.d-1
-					end do   
+					end do
 					
 					xmin1 = sqrt(10.d0)*xmin1
 					auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
@@ -629,13 +729,13 @@
 	!					,real(xmin1*xmin1), '  DoF :',-ddl
 	!					write(*,*)' '
 	!					write(*,*)'Log-vraisemblance :',res	
-					endif   
+					endif
 				endif
 			else
 	!			write(*,*)' '
 	!			write(4,*)'Value of the smoothing parameter :' &
 	!			,real(xmin1*xmin1), '  DoF :',-ddl
-	!			write(4,*)' ' 
+	!			write(4,*)' '
 	!			write(*,*)' '
 	!			write(*,*)'                Searching smoothing parameter'
 	!			write(*,*)' Value of the smoothing parameter :' &
@@ -652,7 +752,7 @@
 			endif 
 	!		write(*,*)' '
 	!		write(*,*)'                Searching smoothing parameter'
-	!		write(*,*)' '		 
+	!		write(*,*)' '
 			xmin1 = dsqrt(xmin1)
 		
 			auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
@@ -677,29 +777,29 @@
 				
 							if(ddl.gt.-2.5d0)then
 								xmin1 = dsqrt(xmin1)
-							endif   
-						endif   
-					endif   
+							endif
+						endif
+					endif
 				endif
-			endif 
+			endif
 		
 			if (ni.ge.maxiter) then
 				do i=1,nz+2
 					b(i)=1.d-1
-				end do     
+				end do
 				xmin1 = sqrt(10.d0)*xmin1
 				auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
 	
 				if (ni.ge.maxiter) then
 					do i=1,nz+2
 					b(i)=1.d-1
-				end do     
+				end do
 					xmin1 = sqrt(10.d0)*xmin1
 				endif
-			endif 
+			endif
 			
 			ax = xmin1
-			bx = xmin1*dsqrt(1.5d0)  
+			bx = xmin1*dsqrt(1.5d0)
 	
 			call mnbraks(ax,bx,cx,fa,fb,fc,b,n)
 		
@@ -709,11 +809,11 @@
 	!		write(4,*)'******************************************* '
 	!		write(4,*)'Best smoothing parameter',real(xmin1*xmin1), '  DoF :',-ddl
 	!		write(4,*)'******************************************* '
-	!		write(*,*)'Best smoothing parameter',real(xmin1*xmin1), '  DoF :',-ddl	
+	!		write(*,*)'Best smoothing parameter',real(xmin1*xmin1), '  DoF :',-ddl
 			
 			auxkappa(1)=xmin1*xmin1
 			auxkappa(2)=0.d0
-			
+
 			if (logNormal.eq.0) then
 				if (intcens.eq.1) then
 					call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
@@ -734,24 +834,24 @@
 			else
 	!			write(*,*)' '
 	!			write(*,*)'Log-vraisemblance :',res
-			endif				
+			endif
 
-		endif  
+		endif
 	!	write(4,*)'nombre de noeuds:',nz
 	end if
 	nva=nvacross ! pour la recherche des parametres de regression
 	nst=nstcross ! avec stratification si necessaire
 	effet=effetcross ! avec effet initial
 
-	do l=1,nsujet  
+	do l=1,nsujet
 		stra(l)=stracross(l) !retablissement stratification
 	end do
 
 	if (typeof .ne. 0) then
-		allocate(vvv((npmax*(npmax+1)/2)))	
+		allocate(vvv((npmax*(npmax+1)/2)))
 	end if
 	
-	if (typeof == 0) then 	
+	if (typeof == 0) then
 		k0(1) = xmin1*xmin1
 		if(nst.eq.2)then
 			k0(2) = xmin2
@@ -762,48 +862,60 @@
 	ca=0.d0
 	cb=0.d0
 	dd=0.d0
-	if (typeof .ne. 0) then
-		allocate(kkapa(2))
-	end if
+!	if (typeof .ne. 0) then
+!		allocate(kkapa(2))
+!	end if
 	!print*,"appel de funcpa"
 	select case(typeof)
 		case(0)
-			if (logNormal.eq.0) then
-				if (intcens.eq.1) then
-					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+			if (timedep.eq.0) then
+				if (logNormal.eq.0) then
+					if (intcens.eq.1) then
+						call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
+					else
+						call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+					endif
 				else
-					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)
+					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_log)
 				endif
 			else
-				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_log)
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_tps)
 			endif
 		case(1)
 			allocate(betacoef(nst*nbintervR))
 
-			if (logNormal.eq.0) then
-				if (intcens.eq.1) then
-					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm_intcens)
+			if (timedep.eq.0) then
+				if (logNormal.eq.0) then
+					if (intcens.eq.1) then
+						call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm_intcens)
+					else
+						call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm)
+					endif
 				else
-					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm)
+					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm_log)
 				endif
 			else
-				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpascpm_log)
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_tps)
 			endif
 		case(2)
-			if (logNormal.eq.0) then
-				if (intcens.eq.1) then
-					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib_intcens)
+			if (timedep.eq.0) then
+				if (logNormal.eq.0) then
+					if (intcens.eq.1) then
+						call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib_intcens)
+					else
+						call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib)
+					endif
 				else
-					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib)
+					call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib_log)
 				endif
 			else
-				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpasweib_log)
+				call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_tps)
 			endif
 	end select
 	!print*,"fin de funcpa"
-	if (typeof .ne. 0) then
-		deallocate(kkapa)
-	end if
+!	if (typeof .ne. 0) then
+!		deallocate(kkapa)
+!	end if
 
 	if (istop .ne.1) then
 		istopp(2)=1
@@ -815,7 +927,7 @@
 
 	call multis(I_hess,H_hess,np,np,np,IH)
 	call multis(H_hess,IH,np,np,np,HIH)
-	
+
 !	if(effet.eq.1)then
 !		j=(np-nva)*(np-nva+1)/2
 	!	write(*,*)''
@@ -904,19 +1016,53 @@
 !AD:
 1000    continue
 
+	if (timedep.eq.1) then
 
-!---------------------Calcul residus de martingal
+		BetaTpsMat = 0.d0
 
-	coefBeta(1,:)=b((np-nva+1):np)
+! CALCUL DES ESTIMATIONS DES beta DEPENDANTS DU TEMPS
 
-	Xbeta = matmul(coefBeta,transpose(ve))
-	
+		if(nva.gt.0)then
+			call drawTimeCoef(np,b,nva,filtretps,BetaTpsMat)
+		endif
+
+	endif
+
+!---------------------Calcul residus de martingales
+
+	deallocate(I_hess,H_hess)
+
+	coefBeta = 0.d0
+	Xbeta = 0.d0
+
+	if (timedep.eq.0) then
+		coefBeta(1,:) = b((np-(nva+npbetatps)+1):np)
+		Xbeta = matmul(coefBeta,transpose(ve))
+	else
+		do j=1,nsujet
+			p=1
+			call splinebasisIndiv(qorder-1,nbinnerknots+2*qorder,nbinnerknots,nbinnerknots+qorder,t1(j),innerknots,boundaryknots,basis)
+			do i=1,nva
+				coefBeta2 = 0.d0
+				if (filtretps(i).eq.1) then
+					do k=-qorder+1,nbinnerknots
+						coefBeta2 = coefBeta2 + b(np-(nva+npbetatps)+p-1+k+qorder)*basis(k+qorder)
+					end do
+				else
+					coefBeta2 = b(np-(nva+npbetatps)+p)
+				endif
+				Xbeta(1,j) = Xbeta(1,j) + coefBeta2*dble(ve(j,i))
+				p=p+filtretps(i)*(nbinnerknots+qorder-1)+1
+			end do
+		enddo
+	endif
+
 	if(typeof==0) then
 
 		if((istopp(1) == 0).and.(istopp(2) == 0)) then
-			deallocate(I_hess,H_hess)
+			!deallocate(I_hess,H_hess)
 			
-			allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1),post_esp(ng),post_SD(ng))	
+			allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1),post_esp(ng),post_SD(ng))
 			effetres = effet
 
 			if (effet == 1) then
@@ -943,17 +1089,17 @@
 	
 			deallocate(I_hess,H_hess,vres,vecuiRes,post_esp,post_SD)
 		else
-			deallocate(I_hess,H_hess)
+			!deallocate(I_hess,H_hess)
 			Resmartingale=0.d0
 			frailtypred=0.d0
 			linearpred=0.d0
 			martingaleCox=0.d0
 		end if	
 	
-	else	
+	else
 		if((istopp(2) == 0)) then
 	
-			deallocate(I_hess,H_hess)
+			!deallocate(I_hess,H_hess)
 			
 			allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1),post_esp(ng),post_SD(ng))	
 			effetres = effet	
@@ -978,7 +1124,7 @@
 	
 			deallocate(I_hess,H_hess,vres,vecuiRes,post_esp,post_SD)
 		else
-			deallocate(I_hess,H_hess)
+			!deallocate(I_hess,H_hess)
 			Resmartingale=0.d0
 			frailtypred=0.d0
 			linearpred=0.d0
@@ -987,7 +1133,8 @@
 	end if
 
 	deallocate(t0,t1,tU,c,d,stra,g,nig,ve,Hspl_hess,hess, &
-	mm3,mm2,mm1,mm,im3,im2,im1,im,date,cumulhaz,Residus,vuu,RisqCumul,res5,res3,res1) ! rajouts
+	mm3,mm2,mm1,mm,im3,im2,im1,im,date,cumulhaz,Residus,vuu, &
+	RisqCumul,res5,res3,res1,filtretps,knotsTPS,innerknots,betatps,betatps3) ! rajouts
 	
 	if (typeof == 0) then
 		deallocate(nt0,nt1,ntU,zi) ! rajout
@@ -1001,12 +1148,13 @@
 	if (typeof == 2) then
 		deallocate(vvv)
 	end if
-	
+
+
 	return
 	
 	end subroutine frailpenal
-      
-  
+
+
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -1018,7 +1166,7 @@
 
 
 !========================== VECSPLI ==============================
-	subroutine vecsplis(n,ndate) 
+	subroutine vecsplis(n,ndate)
 
 	use tailles,only:ndatemax,NSUJETMAX,npmax,nvarmax
 	use comon,only:ve,date,zi,mm3,mm2,mm1,mm,im3,im2,im1,im
@@ -1026,7 +1174,7 @@
 	implicit none
 	
 	integer::n,ndate,i,j,k
-	double precision::ht,htm,h2t,ht2,ht3,hht,h,hh,h2,h3,h4,h3m,h2n,hn,hh3,hh2	
+	double precision::ht,htm,h2t,ht2,ht3,hht,h,hh,h2,h3,h4,h3m,h2n,hn,hh3,hh2
 
 !---------  calcul de u(ti) ---------------------------
 
@@ -1070,9 +1218,9 @@
 	end do
 	
 	end subroutine vecsplis
-	
+
 !========================== VECPEN ==============================
-	subroutine vecpens(n) 
+	subroutine vecpens(n)
 	use tailles,only:ndatemax,npmax
 	use comon,only:date,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
 	
@@ -1237,8 +1385,9 @@
 			if (j.gt.1)then
 				do i=2,j
 					som = som+the(i-4)
-				end do  
-			endif   
+				end do
+			endif
+			
 			ht = x-zi(j)
 			htm= x-zi(j-1)
 			h2t= x-zi(j+2)
@@ -1270,7 +1419,7 @@
 			lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
 		endif
 	end do
-   
+
 	if(x.ge.zi(n))then
 		som = 0.d0
 		do i=1,n+1
@@ -1286,7 +1435,7 @@
 	end subroutine susps
 
 !==========================  COSP  ====================================
-! calcul les points pour les fonctions 
+! calcul les points pour les fonctions
 ! et leur bandes de confiance
 
 	subroutine cosps(x,the,n,y,zi,binf,su,bsup,lbinf,lam,lbsup)
@@ -1345,7 +1494,7 @@
 			lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
 		endif
 	end do
-   
+
 	if(x.ge.zi(n))then
 		som = 0.d0
 		do i=1,n
@@ -1370,7 +1519,7 @@
 
 
 !=====================  CONF1  =============================
-	subroutine conf1s(x,ni,n,y,pm,zi) 
+	subroutine conf1s(x,ni,n,y,pm,zi)
 
 	use tailles,only:npmax,ndatemax
 
@@ -1380,18 +1529,18 @@
 	double precision::mmsps,x,pm,res
 	double precision,dimension(-2:npmax)::zi
 	double precision,dimension(npmax)::vecti,aux
-	double precision,dimension(npmax,npmax)::y 
-                 
+	double precision,dimension(npmax,npmax)::y
+
 	do i=1,n
 	    vecti(i) = mmsps(x,ni,i,zi)
 	end do
-      
+
 	do i=1,n
 		aux(i) = 0.d0
 		do j=1,n
 			aux(i) = aux(i) - y(i,j)*vecti(j)
 		end do
-	end do 
+	end do
 
 	res = 0.d0
 	do i=1,n
@@ -1400,7 +1549,7 @@
 
 	res=-res
 	pm = dsqrt(res)
-             
+
 	end subroutine conf1s
 
 
@@ -1419,18 +1568,18 @@
 
 	do i=1,n
 		vecti(i) = isps(x,ni,i,zi)
-	end do   
+	end do
 
 	do i=1,n
 		aux(i) = 0.d0
 		do j=1,n
-			aux(i) = aux(i) - y(i,j)*vecti(j)
+			aux(i) = aux(i) - y(i,j)*vecti(j) ! multiplication matrice H*BaseSpl=aux
 		end do
-	end do   
+	end do
 
 	res = 0.d0
 	do i=1,n
-		res = res + aux(i)*vecti(i)
+		res = res + aux(i)*vecti(i) ! BaseSpl*aux
 	end do
 
 	res=-res
@@ -1471,19 +1620,19 @@
 						val = 1.d0
 					endif
 				endif
-			endif   
+			endif
 		endif
-	else   
+	else
 		if(ni.lt.ns-3)then
 			val = 0.d0
 		else
 			if(ni.eq.ns-3)then
 				val = (x-zi(ni))*mmsps(x,ni,ns,zi)*0.25d0
-			else  
+			else
 				if(ni.eq.ns-2)then
 					val = ((x-zi(ni-1))*mmsps(x,ni,ns,zi)+ &
 					(zi(ni+4)-zi(ni))*mmsps(x,ni,ns+1,zi))*0.25d0
-				else   
+				else
 					if (ni.eq.ns-1)then
 						val =((x-zi(ni-2))*mmsps(x,ni,ns,zi)+ &
 						(zi(ni+3)-zi(ni-1))*mmsps(x,ni,ns+1,zi) &
@@ -1500,7 +1649,7 @@
 					endif
 				endif
 			endif
-		endif 
+		endif
 	endif
 
 	isps = val
@@ -1528,18 +1677,18 @@
 		if(ns-3.eq.ni)then
 			if(x.eq.zi(ni))then
 			    val = 0.d0
-			else  
+			else
 				val = (4.d0*(x-zi(ni))*(x-zi(ni)) &
 				*(x-zi(ni)))/((zi(ni+4)-zi(ni))*(zi(ni+3) &
 				-zi(ni))*(zi(ni+2)-zi(ni))*(zi(ni+1)-zi(ni)))
 			endif
-		else 
+		else
 			if(ns-2.eq.ni)then
 				if(x.eq.zi(ni))then
 					val = (4.d0*(zi(ni)-zi(ni-1))*(zi(ni)-zi(ni-1))) &
 					/((zi(ni+3)-zi(ni-1))*(zi(ni+2)-zi(ni-1)) &
 					*(zi(ni+1)-zi(ni-1)))
-				else  
+				else
 					val = (4.d0*(x-zi(ni-1))*(x-zi(ni-1)) &
 					*(zi(ni+1)-x))/((zi(ni+3)-zi(ni-1))*(zi(ni+2) &
 					-zi(ni-1))*(zi(ni+1)-zi(ni-1))*(zi(ni+1)-zi(ni))) &
@@ -1550,7 +1699,7 @@
 					*(zi(ni+3)-x))/((zi(ni+3)-zi(ni-1))*(zi(ni+3) &
 					-zi(ni))*(zi(ni+2)-zi(ni))*(zi(ni+1)-zi(ni)))
 				endif
-			else   
+			else
 				if (ns-1.eq.ni)then
 					if(x.eq.zi(ni))then
 						val = (4.d0*((zi(ni)-zi(ni-2))*(zi(ni+1) &
@@ -1572,7 +1721,7 @@
 						*(x-zi(ni)))/((zi(ni+2)-zi(ni-2)) &
 						*(zi(ni+2)-zi(ni))*(zi(ni+2)-zi(ni-1))* &
 						(zi(ni+1)-zi(ni)))))
-					endif 
+					endif
 				else
 					if(ni.eq.ns)then
 						if(x.eq.zi(ni))then
@@ -1650,7 +1799,7 @@
 					cx = u
 					fc = fu
 					return
-				endif   
+				endif
 			endif
 			u = cx + gold*(cx-bx)
 			fu = estimvs(u,n,b,y,aux,ni,res)
@@ -1664,7 +1813,7 @@
 					fb = fc
 					fc = fu
 					fu = estimvs(u,n,b,y,aux,ni,res)
-				endif  
+				endif
 			else
 				if((u-ulim)*(ulim-cx).ge.0.d0)then
 					u = ulim
@@ -1673,7 +1822,7 @@
 					u = cx + gold*(cx-bx)
 					fu = estimvs(u,n,b,y,aux,ni,res)
 				endif
-			endif   
+			endif
 		endif
 		ax = bx
 		bx = cx
@@ -1710,7 +1859,7 @@
 	else
 		x2 = bx
 		x1 = bx - c*(bx-ax)
-         endif
+	endif
 
          f1 = estimvs(x1,n,b,y,aux,ni,res)
          f2 = estimvs(x2,n,b,y,aux,ni,res)
@@ -1764,20 +1913,15 @@
 	double precision::res,k00,som,h1
 	double precision::aux
 	integer::n,ij,i,k,j,vj,ier,istop,ni
-	double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib
-	double precision::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
-	double precision::funcpassplines_log
-	external::funcpassplines,funcpascpm,funcpasweib
-	external::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
-	external::funcpassplines_log
- 
+	double precision::ca,cb,dd
+	double precision,external::funcpassplines,funcpassplines_intcens,funcpassplines_log
+
 	j=0
 	estimvs=0.d0
 
 	k0(1) = k00*k00
 	k0(2) = 0.d0
-!	write(*,*)'dans estimvs',n
-	
+
 	if (logNormal.eq.0) then
 		if (intcens.eq.1) then
 			call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
@@ -1787,10 +1931,11 @@
 	else
 		call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_log)
 	endif
+
 !AD:
 	if (istop.eq.4) goto 50
 !AD:
-	
+
 	if(k0(1).gt.0.d0)then
 		do ij=1,n
 			the(ij-3)=(b(ij))*(b(ij))
@@ -1808,9 +1953,9 @@
 					if ((j.gt.1).and.(j.gt.vj))then
 						som = som+the(j-4)
 						vj  = j
-					endif   
+					endif
 				endif
-			end do 
+			end do
 			ut(i) = som +(the(j-3)*im3(i))+(the(j-2)*im2(i)) &
 			    +(the(j-1)*im1(i))+(the(j)*im(i))
 			dut(i) = (the(j-3)*mm3(i))+(the(j-2)*mm2(i)) &
@@ -1820,10 +1965,9 @@
 		h1 = (zi(i)-zi(i-1))
 		ut(ndate) = som+ the(i-4) + the(i-3)+the(i-2)+the(i-1)
 		dut(ndate) = (4.d0*the(i-1)/h1)
-		
+
 		call tests(dut,k0,n,aux,y)
 		estimvs = - ((res-pe)) - aux
-
 	else
 		aux = -n
 	endif
@@ -1854,30 +1998,29 @@
 
 	do i = 1,n
 		do j = 1,n
-			hess(i,j) = 0.d0 
+			hess(i,j) = 0.d0
 		end do
 	end do
-   
- 
+
 	do i = 1,n
 		do j = i,n
 			call mats(hess(i,j),dut,i,j,n)
 		end do
 	end do
+
 	do i = 2,n
 		do j = 1,i-1
 			hess(i,j)=hess(j,i)
 		end do
 	end do
 
-
 	call calcomegs(n,omeg)
 
 	do i = 1,n
 		do j = 1,n
 			hessh(i,j)=-hess(i,j)
-			hess(i,j) = hess(i,j) - (2.d0*k0(1)*omeg(i,j)) 
-		end do   
+			hess(i,j) = hess(i,j) - (2.d0*k0(1)*omeg(i,j))
+		end do
 	end do
 
 	np = n
@@ -1888,10 +2031,10 @@
 		y(i,i)=1.d0
 	end do
 
-	call ludcmps(hess,n,indx,d)
+	call ludcmps(hess,n,indx,d) ! decomposition LU
 
 	do j=1,n
-		call lubksbs(hess,n,indx,y(1,j))
+		call lubksbs(hess,n,indx,y(1,j)) ! resolution AX=B
 	end do
 
 	tra = 0.d0
@@ -1923,7 +2066,7 @@
 			omeg(i,j)=0.d0
 		end do
 	end do
-      
+
 	omeg(1,1)=calc00s(1,n)
 	omeg(1,2)=calc01s(1,n)
 	omeg(1,3)=calc02s(1,n)
@@ -1948,8 +2091,8 @@
 		omeg(i,i+1)=calc01s(i,n)
 		omeg(i,i+2)=calc02s(i,n)
 		omeg(i,i+3)=m3m(i)
-	end do  
- 
+	end do
+
 	omeg(n-2,n-5)=omeg(n-5,n-2)
 	omeg(n-2,n-4)=omeg(n-4,n-2)
 	omeg(n-2,n-3)=omeg(n-3,n-2)
@@ -1976,13 +2119,12 @@
 	use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
 	nst
 
-
 	implicit none
 
 	double precision::res,res1,msps,aux2,u2
-	double precision,dimension(0:ndatemax)::dut
+	double precision,dimension(ndatemax)::dut
 	integer::k,l,j,ni,n,i
-          
+
 !--------- calcul de la hessienne ij ------------------
 
 	res = 0.d0
@@ -2008,16 +2150,16 @@
 			endif
 		else !censure
 			res1 = 0.d0
-		endif 
+		endif
 		res = res + res1
 	end do
-       
+
 	end subroutine mats
 
 !==========================  MSP   ==================================
 	double precision function msps(i,ni,ns)
 
-	use tailles,only:npmax,ndatemax   
+	use tailles,only:npmax,ndatemax
 	use comon,only:date,zi
 
 	implicit none
@@ -2036,7 +2178,7 @@
 				*(date(i)-zi(ni)))/((zi(ni+4)-zi(ni))*(zi(ni+3) &
 				-zi(ni))*(zi(ni+2)-zi(ni))*(zi(ni+1)-zi(ni)))
 			endif
-		else 
+		else
 			if(ns-2.eq.ni)then
 				if(date(i).eq.zi(ni))then
 					val = (4.d0*(zi(ni)-zi(ni-1))*(zi(ni)-zi(ni-1))) &
@@ -2053,7 +2195,7 @@
 					*(zi(ni+3)-date(i)))/((zi(ni+3)-zi(ni-1))*(zi(ni+3) &
 					-zi(ni))*(zi(ni+2)-zi(ni))*(zi(ni+1)-zi(ni)))
 				endif
-			else   
+			else
 				if (ns-1.eq.ni)then
 					if(date(i).eq.zi(ni))then
 						val = (4.d0*((zi(ni)-zi(ni-2))*(zi(ni+1) &
@@ -2075,14 +2217,14 @@
 						*(date(i)-zi(ni)))/((zi(ni+2)-zi(ni-2)) &
 						*(zi(ni+2)-zi(ni))*(zi(ni+2)-zi(ni-1))* &
 						(zi(ni+1)-zi(ni)))))
-					endif 
+					endif
 				else
 					if(ni.eq.ns)then
 						if(date(i).eq.zi(ni))then
 							val =(4.d0*(date(i)-zi(ni+1))*(date(i) &
 							-zi(ni+1))/((zi(ni+1)-zi(ni-1))*(zi(ni+1) &
 							-zi(ni-2))*(zi(ni+1)-zi(ni-3))))
-						else   
+						else
 							val =(4.d0*(date(i)-zi(ni+1))*(date(i) &
 							-zi(ni+1))*(zi(ni+1)-date(i))/((zi(ni+1) &
 							-zi(ni-1))*(zi(ni+1)-zi(ni-2))*(zi(ni+1) &
@@ -2104,7 +2246,7 @@
 
 
 !=========================  CALC00  =========================
-	double precision function calc00s(j,n) 
+	double precision function calc00s(j,n)
 
 	use tailles,only:npmax
 	use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
@@ -2131,14 +2273,14 @@
 					else
 						if(j.eq.n)then
 							part = mmm(j-3)
-						else   
+						else
 							part=mmm(j-3)+m1m1(j-2)+m2m2(j-1)+m3m3(j)
 						endif
 					endif
-				endif   
-			endif   
-                endif   
-	endif 
+				endif
+			endif
+                endif
+	endif
 
 	calc00s = part
 
@@ -2160,31 +2302,32 @@
 
 	if(j.eq.1)then
 		part = m3m2(j)
-	else   
+	else
 		if(j.eq.2)then
-			part = m3m2(j) + m2m1(j-1) 
+			part = m3m2(j) + m2m1(j-1)
 		else
 			if(j.eq.n-2)then
-				part = m1m(j-2) + m2m1(j-1) 
+				part = m1m(j-2) + m2m1(j-1)
 			else
 				if(j.ne.n-1)then
 					part = m3m2(j) + m2m1(j-1) + m1m(j-2)
 				else
 					part = m1m(j-2)
 				endif
-			endif   
+			endif
 		endif
-	endif   
+	endif
 
 	calc01s = part
 
 	return
 
 	end function calc01s
+
 !=========================  CALC02  =========================
 	double precision function calc02s(j,n)
 
-	use tailles,only:npmax	
+	use tailles,only:npmax
 	use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
 
 	implicit none
@@ -2194,13 +2337,13 @@
 
 	if(j.eq.1)then
 		part = m3m1(j)
-	else   
+	else
 		if(j.ne.n-2)then
-			part = m3m1(j) + m2m(j-1) 
+			part = m3m1(j) + m2m(j-1)
 		else
 			part = m2m(j-1)
 		endif
-	endif   
+	endif
 
 	calc02s = part
 
@@ -2210,9 +2353,9 @@
 
 
 !================== multiplication de matrice  ==================
-	
-	! multiplie A par B avec le resultat dans C
-	
+
+! multiplie A par B avec le resultat dans C
+
 	subroutine multis(A,B,IrowA,JcolA,JcolB,C)
 	
 	use tailles,only:npmax
@@ -2236,7 +2379,6 @@
 	return
 	
 	end subroutine multis
-			     
 
 !======================  LUBKSB  ======================================
 	subroutine lubksbs(a,n,indx,b)
@@ -2267,7 +2409,7 @@
 		endif
 		b(i)=sum
 	end do
-	
+
 	do i=n,1,-1
 		sum = b(i)
 		do j = i+1,n
@@ -2275,18 +2417,18 @@
 		end do
 		b(i)=sum/a(i,i)
 	end do
-       
+
 	return
 
 	end subroutine lubksbs	
-	
+
 !======================  LUDCMP  ======================================
        subroutine ludcmps(a,n,indx,d)
-    	
+
 	use tailles,only:npmax
-	
+
 	implicit none
-	
+
 	integer::n,i,imax,j,k
 	integer,dimension(n)::indx
 	double precision::d
@@ -2295,7 +2437,7 @@
 	double precision,parameter::tiny=1.d-20
 	double precision aamax,dum,sum
 	double precision,dimension(nmax)::vv
-	
+
 	imax=0
 	d = 1.d0
 	do i=1,n
@@ -2307,6 +2449,7 @@
 		end do
 		vv(i) = 1.d0/aamax
 	end do
+	
 	
 	do j = 1,n
 		do i=1,j-1

@@ -25,12 +25,6 @@ Two independent gamma frailty parameters with a variance fixed at 0.1 for the cl
   }
 }
 
-\seealso{
-
-\code{\link{frailtyPenal for Nested frailty models}}
-}
-
-
 \source{
 
 V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum penalized likelihood estimation.

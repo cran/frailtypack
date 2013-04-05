@@ -11,13 +11,24 @@
 	end module parameters
 	
 
+! time dependant janvier 2013
+	module betatttps
+	integer,save::npbetatps,npbetatps1,npbetatps2,nbrecuTPS,nbrecumetaTPS,nbdecesTPS &
+	,entTPS,entmetaTPS,entdcTPS,npbetatpscross,nbinnerknots,qorder,equidistantTPS
+        integer,dimension(:),allocatable,save::filtretps,filtre2tps
+	double precision,dimension(:),allocatable,save::knotsTPS,knotsdcTPS,knotsmetaTPS,the1TPS,the2TPS &
+	,betatps,betatps2,betatps3,betatpsX,theTPS,betatpsminX,betatpsmaxX,varBetatps,varBetatpsHIH &
+	,innerknots,innerknotsdc,innerknotsmeta,BasisSinhaTPS
+	double precision,save::censtps,boundaryknots(2)
+	end module betatttps
+!
 
 	module comon
 	implicit none
 !*****************************************************************
 !*****dace1 
 	double precision,dimension(:),allocatable,save::date,datedc
-	double precision,dimension(:),allocatable,save::zi
+	double precision,dimension(:),allocatable,save::zi,zidc
 
 !*****dace2
 	double precision,dimension(:),allocatable,save::t0dc,t1dc
@@ -33,7 +44,7 @@
 	double precision,dimension(:,:),allocatable,save::vedc
 !*****dace3
 	double precision,save::pe
-	integer,save::effet,nz1,nz2
+	integer,save::effet,nz1,nz2,nzloco,nzdc
 !*****dace7
 	double precision,dimension(:,:),allocatable,save::I_hess,H_hess
 	double precision,dimension(:,:),allocatable,save::Hspl_hess!(npmax,npmax)
@@ -66,13 +77,13 @@
 !****  theta/alpha
 	double precision,save::theta,alpha,eta !en exposant pour la frailty deces
 !****** indicateur de troncature
-	integer,save:: indictronq,indictronqdc ! =0 si donnees non tronquées reellement
+	integer,save:: indictronq,indictronqdc ! =0 si donnees non tronquÃ©es reellement
 !*****auxig
 	integer,save :: auxig
 !******  aux1 aux2
 	double precision,dimension(:),allocatable,save::res1,res3,aux1,aux2
 	double precision,save::resnonpen
-	double precision,dimension(:),allocatable::kkapa
+	double precision,dimension(2)::kkapa
 !****** Type du modele
 	integer,save::model
 	double precision,dimension(:),allocatable::vvv
@@ -94,7 +105,7 @@
 	integer::intcens
 	double precision,dimension(:),allocatable,save::resL,resU
 ! distribution des frailty par une log-normale
-	integer::logNormal
+	integer::logNormal,timedep
 	double precision,save::sig2
 	double precision,dimension(:),allocatable,save::res5
 	end module comon

@@ -7,51 +7,45 @@
 \description{
   Prints a short summary of  parameter estimates of a nested frailty model  
 }
+
 \usage{
 \method{print}{nestedPenal}(x, digits = max(options()$digits - 4, 6), ...)
 }
+
 \arguments{
   \item{x}{the result of a call to the frailtyPenal function for nested frailty models}
   \item{digits}{number of digits to print}
   \item{\dots}{ other unusued arguments }
 }
+
 \value{
-
-
  \item{n}{the number of observations used in the fit.}
  \item{n.groups}{the maximum number of groups used in the fit}
  \item{n.events}{the number of events observed in the fit}
- \item{eta}{variance of the subcluster effect \eqn{(Var(w_{ij})}})
- \item{theta}{variance of the cluster effect \eqn{(Var(v_{i})}})
-  \item{coef}{the coefficients of the linear predictor, which
-          multiply the columns of the model matrix. }
+ \item{eta}{variance of the subcluster effect \eqn{(Var(w_{ij}))}}
+ \item{theta}{variance of the cluster effect \eqn{(Var(v_{i}))}}
+ \item{coef}{the coefficients of the linear predictor, which multiply the columns of the model matrix.}
  \item{SE(H)}{the standard error of the estimates deduced from the variance matrix of theta and of the coefficients.}
  \item{SE(HIH)}{the standard error of the estimates deduced from the robust estimation of the variance matrix of theta and of the coefficients.}
-
  \item{p}{p-value}
-
-
 }
 
 
 \seealso{
-\code{\link{summary.nestedPenal}},
-\code{\link{frailtyPenal for Nested frailty models}},
-\code{\link{plot.nestedPenal}},
-
+ \code{\link{frailtyPenal}}
 }
 
 \examples{
 
-# /*** Nested frailty model ***/
+# Nested frailty model
 
 \dontrun{
 
 data(dataNested)
 
 modNested <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+subcluster(subgroup)+
-               cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000,
-               kappa2=50000,hazard="Splines")
+cov1+cov2,Frailty=TRUE,data=dataNested,n.knots=8,kappa1=50000,
+kappa2=50000,hazard="Splines")
 
 # It takes around 24 minutes to converge (depends on the processor) #
 

@@ -16,7 +16,7 @@
   \item{\dots}{other unusued arguments.}
 }
 \value{
- 
+
 
  \item{n}{the number of observations used in the fit.}
  \item{n.groups}{the maximum number of groups used in the fit}
@@ -35,9 +35,7 @@
 
 
 \seealso{
-\code{\link{summary.frailtyPenal}},  
-\code{\link{frailtyPenal for Shared frailty models}},
-\code{\link{plot.frailtyPenal}}
+ \code{\link{frailtyPenal}}
 }
 
 \examples{
@@ -46,19 +44,18 @@
 
 data(readmission)
 
-# /*** Shared frailty model ***/
+# Shared frailty model
 
 modSha <- frailtyPenal(Surv(time,event)~dukes+cluster(id),
-             n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,
-             hazard="Splines")
+n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,
+hazard="Splines")
 
 print(modSha)
 
-# /*** Cox proportional hazard model using Penalized likelihood ***/
+# Cox proportional hazard model using Penalized likelihood
 
 modCox <- frailtyPenal(Surv(time,event)~dukes,n.knots=10,
-             kappa1=10000,data=readmission,Frailty=FALSE,
-             hazard="Splines")
+kappa1=10000,data=readmission,Frailty=FALSE,hazard="Splines")
 
 print(modCox)
 

@@ -1,6 +1,14 @@
 
 "print.frailtyPenal" <- function (x, digits = max(options()$digits - 4, 6), ...) 
 {
+# plot des coefficient dependant du temps
+	if ((x$nvartimedep != 0) & (x$istop == 1)){
+		par(mfrow=c(1,x$nvartimedep))
+		for (i in 0:(x$nvartimedep-1)){
+			matplot(x$BetaTpsMat[,1],x$BetaTpsMat[,(2:4)+4*i],col="blue",type="l",lty=c(1,2,2),xlab="t",ylab="beta(t)",main=x$Names.vardep[i+1],ylim=c(min(x$BetaTpsMat[,-1]),max(x$BetaTpsMat[,-1])))
+		}
+	}
+
 	if (!is.null(cl <- x$call)){
 		cat("Call:\n")
 		dput(cl)
@@ -25,7 +33,7 @@
 	on.exit(options(savedig))
 	
 	coef <- x$coef
-	nvar <- length(x$coef)
+	nvar <- length(x$coef) #+x$nvartimedep
  
 #	if (is.null(coef))
 #	{
@@ -53,7 +61,7 @@
 
 	if (x$istop == 1){
 		if (!is.null(coef)){
-			if(x$nvar != 1){
+			if(nvar != 1){
 				seH <- sqrt(diag(x$varH))
 				seHIH <- sqrt(diag(x$varHIH))
 			}else{
@@ -80,7 +88,7 @@
 				}else{
 					cat("  using a Parametrical approach for the hazard function","\n")
 				}
-		
+				if (x$nvartimedep != 0) cat("  and some time-dependant covariates","\n")
 				if (x$n.strat>1) cat("  (Stratification structure used)", "\n")
 			}else{
 				if (x$typeof == 0){
@@ -90,7 +98,7 @@
 					cat("  Cox proportional hazards model parameter estimates ","\n")
 					cat("  using a Parametrical approach for the hazard function","\n")
 				}
-				
+				if (x$nvartimedep != 0) cat("  and some time-dependant covariates","\n")
 				if (x$n.strat>1) cat("  (Stratification structure used)", "\n")
 			}
 			
@@ -99,7 +107,6 @@
 					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
 					
 				}
-
 				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)",
 				"SE coef (H)", "SE coef (HIH)", "z", "p"))
 
@@ -113,11 +120,17 @@
 
 			}
 			cat("\n")
-			prmatrix(tmp)
-			if(x$global_chisq.test==1){
-				cat("\n")
-				prmatrix(tmpwald)
+#AL:
+			if (nvar == 0){
+				cat("No constant coefficients, only time-varying effects of the covariates \n")
+			}else{
+				prmatrix(tmp)
+				if(x$global_chisq.test==1){
+					cat("\n")
+					prmatrix(tmpwald)
+				}
 			}
+#AL
 			cat("\n")
 		}
 	
@@ -238,7 +251,7 @@
 			}else{
 				cat("  using a Parametrical approach for the hazard function","\n")
 			}
-
+			if (x$nvartimedep != 0) cat("  and some time-dependant covariates","\n")
 			if (x$n.strat>1) cat("  (Stratification structure used)", "\n")
 			if (x$noVar1 == 1){
 				cat("\n")
@@ -256,7 +269,7 @@
 				cat("  Cox proportional hazards model parameter estimates ","\n")
 				cat("  using a Parametrical approach for the hazard function","\n")
 			}
-			
+			if (x$nvartimedep != 0) cat("  and some time-dependant covariates","\n")
 			if (x$n.strat>1) cat("  (Stratification structure used)", "\n")
 		}
 		cat("\n")

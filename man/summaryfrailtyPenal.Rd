@@ -31,9 +31,7 @@
 
 
 \seealso{
-\code{\link{frailtyPenal for Shared frailty models}},
-\code{\link{plot.frailtyPenal}},
-\code{\link{summary.frailtyPenal}}
+ \code{\link{frailtyPenal}}
 }
 
 \examples{
@@ -42,23 +40,22 @@
 
 data(kidney)
 
-# /*** Shared frailty model ***/
+# Shared frailty model
 
 modSha <- frailtyPenal(Surv(time,status)~age+sex+cluster(id),
-             Frailty=TRUE,n.knots=8,kappa1=10000,data=kidney,
-             hazard="Splines")
+Frailty=TRUE,n.knots=8,kappa1=10000,data=kidney,hazard="Splines")
 
-# /*** Cox proportional hazard model using Penalized likelihood ***/
+# Cox proportional hazard model using Penalized likelihood
 
 modCox <- frailtyPenal(Surv(time,status)~age+sex,n.knots=8,
-             kappa1=10000,data=kidney,Frailty=FALSE,hazard="Splines")
+kappa1=10000,data=kidney,Frailty=FALSE,hazard="Splines")
 
-# /*** confidence interval at 95% level (default) ***/
+# confidence interval at 95% level (default)
 
 summary(modSha)
 summary(modCox)
 
-# /*** confidence interval at 99% level ***/
+# confidence interval at 99% level
 
 summary(modSha,level=0.99)
 summary(modCox,level=0.99)

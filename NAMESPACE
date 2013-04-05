@@ -8,25 +8,25 @@ subcluster,
 terminal,
 num.id,
 Cmeasures,
-SurvIC
+SurvIC,
+timedep
 )
 import("survival","boot")
+
 S3method(plot,frailtyPenal)
 S3method(lines,frailtyPenal)
-S3method(plot,jointPenal)      
+S3method(plot,jointPenal)
 S3method(plot,nestedPenal)
 S3method(plot,additivePenal)
-S3method(print,additivePenal)  
+
+S3method(print,additivePenal)
 S3method(print,frailtyPenal)
-S3method(print,jointPenal)     
-S3method(print,nestedPenal) 
-  
+S3method(print,jointPenal)
+S3method(print,nestedPenal)
 
 S3method(summary,additivePenal)
-S3method(summary,frailtyPenal) 
-S3method(summary,jointPenal)   
-S3method(summary,nestedPenal)  
+S3method(summary,frailtyPenal)
+S3method(summary,jointPenal)
+S3method(summary,nestedPenal)
 
 S3method(print,Cmeasures)
-                
-

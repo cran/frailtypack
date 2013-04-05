@@ -25,10 +25,7 @@ terminal(x)
 
 
 \seealso{
-\code{\link{frailtyPenal for Joint frailty models}},
-\code{\link{plot.jointPenal}},
-\code{\link{print.jointPenal}},
-\code{\link{summary.jointPenal}}
+ \code{\link{frailtyPenal}}
 }
 
 \keyword{misc}

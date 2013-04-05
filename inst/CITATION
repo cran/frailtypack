@@ -9,7 +9,7 @@ citEntry(entry = "Article",
   year         = "2012",
   volume       = "47",
   number       = "4",
-  pages        = "1--28",
+  pages        = "1-28",
   url          = "http://www.jstatsoft.org/v47/i04/",
 
   textVersion  =
@@ -17,4 +17,20 @@ citEntry(entry = "Article",
         "frailtypack: An R Package for the Analysis of Correlated Survival Data with Frailty Models Using Penalized Likelihood Estimation or Parametrical Estimation.",
         "Journal of Statistical Software, 47(4), 1-28.",
         "URL http://www.jstatsoft.org/v47/i04/.")
+)
+
+citEntry(entry = "Article",
+  title        = "{Frailtypack}: A computer program for the analysis of correlated failure time data using penalized likelihood estimation",
+  author       = personList(as.person("Virginie Rondeau"),
+                   as.person("Juan R. Gonzalez")),
+  journal      = "Computer Methods and Programs in Biomedicine",
+  year         = "2005",
+  volume       = "80",
+  number       = "2",
+  pages        = "154-164",
+
+  textVersion  =
+  paste("Virginie Rondeau, Juan R. Gonzalez (2005).",
+        "{Frailtypack}: A computer program for the analysis of correlated failure time data using penalized likelihood estimation",
+        "Computer Methods and Programs in Biomedicine, 80(2), 154-164.")
 )

@@ -1,3 +1,8 @@
+Changes in Version 2.4           Apr 2013
+
+  o Fit now a model with time-varying effects for covariates (only for Cox, shared gamma and a joint gamma frailty model).
+
+
 Changes in Version 2.3           Feb 2013
 
   o Fit now a Shared and a Joint Frailty model with a log-normal distribution for the random effects.

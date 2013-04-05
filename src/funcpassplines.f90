@@ -189,9 +189,7 @@
 				do j=1,nva
 					vet =vet + bh(np-nva+j)*dble(ve(i,j))
 				end do
-				!if (i.eq.699) print*,"vet",vet,bh(np-nva+1),dble(ve(i,1)),nva
 				vet = dexp(vet)
-				!if (i.eq.699) print*,"vet",vet
 			else
 				vet=1.d0
 			endif
@@ -217,12 +215,12 @@
 				res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet
 			endif
 
-			!if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
+			if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
 			!	print*,b
 			!	print*,"hereres1",res1(g(i)),ut1(nt1(i))*vet,i,g(i),ut1(nt1(i)),vet
-			!	funcpassplines=-1.d9
-			!	goto 123
-			!end if
+				funcpassplines=-1.d9
+				goto 123
+			end if
 
 ! modification pour nouvelle vraisemblance / troncature:
 			if(stra(i).eq.1)then
@@ -233,11 +231,11 @@
 				res3(g(i)) = res3(g(i)) + ut2(nt0(i))*vet
 			endif
 
-			!if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
+			if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
 			!	print*,"hereres3"
-			!	funcpassplines=-1.d9
-			!	goto 123
-			!end if
+				funcpassplines=-1.d9
+				goto 123
+			end if
 		end do
 
 		res = 0.d0
@@ -266,11 +264,11 @@
 						res = res-(inv+dnb)*dlog(theta*res1(k)+1.d0)  &
 						+(inv)*dlog(theta*res3(k)+1.d0)+ res2(k) + sum
 					endif
-					!if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+					if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 					!	print*,"here1"
-					!	funcpassplines=-1.d9
-					!	goto 123
-					!end if
+						funcpassplines=-1.d9
+						goto 123
+					end if
 				else
 !     developpement de taylor d ordre 3
 !                   write(*,*)'************** TAYLOR *************'
@@ -287,11 +285,11 @@
 						+res3(k)*(1.d0-theta*res3(k)/2.d0 &
 						+theta*theta*res3(k)*res3(k)/3.d0)
 					endif
-					!if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+					if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 					!	print*,"here2"
-					!!	funcpassplines=-1.d9
-					!	goto 123
-					!end if
+						funcpassplines=-1.d9
+						goto 123
+					end if
 				endif
 			endif
 		end do
