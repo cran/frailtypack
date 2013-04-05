@@ -103,9 +103,9 @@
 	auxssng=0
 		
 	maxiter=maxiter0
-	epsa=1.d-3
-	epsb=1.d-3
-	epsd=1.d-2
+	epsa=1.d-4
+	epsb=1.d-4
+	epsd=1.d-4
 	ca=0.d0
 	cb=0.d0
 	dd=0.d0	
@@ -698,7 +698,7 @@
 	end select 
 	
 	if (typeof .ne. 0) then
-		allocate(kkapa(2))
+		!allocate(kkapa(2))
 		allocate(betacoef(nst*nbintervR))
 	end if
 
@@ -1085,9 +1085,9 @@
 		deallocate(vvv,betacoef)	
 	end if
 
-	if (typeof .ne. 0) then
-		deallocate(kkapa)
-	end if
+!	if (typeof .ne. 0) then
+!		deallocate(kkapa)
+!	end if
 !	write(*,*) '====Fin nested  === '
 
 	end subroutine nested!FIN prog principal

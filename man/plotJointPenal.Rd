@@ -45,8 +45,8 @@
      Print a plot of the baseline survival or hazard functions for each type of event or both with the confidence bands or not (conf.bands argument)
 }
 
-\seealso{\code{\link{print.jointPenal}},\code{\link{summary.jointPenal}},\code{\link{frailtyPenal for Joint frailty models}}
-
+\seealso{
+ \code{\link{frailtyPenal}}
 }
 
 
@@ -59,9 +59,9 @@ data(readmission)
 
 ## Gap-time ##
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
-                  charlson+terminal(death),formula.terminalEvent=~sex+
-                  dukes+charlson,data=readmission,n.knots=14,
-                  kappa1=9.55e+9,kappa2=1.41e+12,Frailty=TRUE,joint=TRUE)
+charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
+data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
+Frailty=TRUE,joint=TRUE)
 
 # It takes around 1 minute to converge. #
 

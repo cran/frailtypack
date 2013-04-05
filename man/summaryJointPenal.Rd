@@ -29,10 +29,10 @@
 }
 
 
-\seealso{ \code{\link{frailtyPenal for Joint frailty models}},
-\code{\link{plot.jointPenal}},
-\code{\link{print.jointPenal}},
+\seealso{
+ \code{\link{frailtyPenal}}
 }
+
 \examples{
 
 \dontrun{
@@ -41,16 +41,15 @@ data(readmission)
 
 ## Gap-time ##
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
-                   charlson+terminal(death),formula.terminalEvent=~sex+
-                   dukes+charlson,data=readmission,n.knots=14,kappa1=9.55e+9,
-                   kappa2=1.41e+12,Frailty=TRUE,joint=TRUE)
+charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
+data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
+Frailty=TRUE,joint=TRUE)
 
 ## Calendar time ##
-modJoint.calendar <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+
-                        dukes+charlson+terminal(death),formula.terminalEvent=~
-                        sex+dukes+charlson,data=readmission,n.knots=10,
-                        kappa1=9.55e+9,kappa2=1.41e+12,Frailty=TRUE,
-                        joint=TRUE,recurrentAG=TRUE)
+modJoint.calendar <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+
+sex+dukes+charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
+data=readmission,n.knots=10,kappa1=9.55e+9,kappa2=1.41e+12,Frailty=TRUE,
+joint=TRUE,recurrentAG=TRUE)
 
 # It takes around 1 minute to converge
 

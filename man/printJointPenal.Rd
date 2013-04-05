@@ -40,11 +40,13 @@ Print, separately for each type of event (recurrent and terminal), the parameter
 }
 
 
-\seealso{ \code{\link{summary.jointPenal}},  \code{\link{frailtyPenal for Joint frailty models}},\code{\link{plot.jointPenal}} }
+\seealso{
+ \code{\link{frailtyPenal}}
+}
 
 \examples{
 
-# /*** Joint frailty model ***/
+# Joint frailty model
 
 \dontrun{
 
@@ -52,9 +54,9 @@ data(readmission)
 
 ## Gap-time ##
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes
-                +charlson+terminal(death),formula.terminalEvent=~sex
-                +dukes+charlson,data=readmission,n.knots=14,
-                kappa1=9.55e+9,kappa2=1.41e+12,Frailty=TRUE,joint=TRUE)
++charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
+data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
+Frailty=TRUE,joint=TRUE)
 
 # It takes around 1 minute to converge #
 

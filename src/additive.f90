@@ -668,7 +668,7 @@
 	end if
 
 	if (typeof .ne. 0) then
-		allocate(vvv((npmax*(npmax+1)/2)),kkapa(2))	
+		allocate(vvv((npmax*(npmax+1)/2))) !,kkapa(2))
 	end if
 !=============================- fin cross validation
 	
@@ -989,7 +989,7 @@
 		deallocate(mm3,mm2,mm1,mm,im3,im2,im1,im,dut1,dut2,ut1,ut2)
 		deallocate(zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m)
 	else
-		deallocate(vvv,kkapa)
+		deallocate(vvv) !,kkapa)
 		if (typeof == 1) then
 			deallocate(ttt,betacoef)
 		end if

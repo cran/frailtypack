@@ -55,8 +55,8 @@ data(readmission)
 
 ## a frailtypenal fit
 fit.frailtypenal <- frailtyPenal(Surv(time,event)~dukes+cluster(id)+
-                       charlson+chemo+strata(sex),data=readmission,
-                       Frailty=TRUE,n.knots=10,kappa1=1,kappa2=1)
+charlson+chemo+strata(sex),data=readmission,Frailty=TRUE,n.knots=10,
+kappa1=1,kappa2=1)
 
 ## a Cmeasures call
 fit.Cmeasures <- Cmeasures(fit.frailtypenal)

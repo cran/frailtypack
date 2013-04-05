@@ -194,13 +194,7 @@ V. Rondeau, S. Michiels, B. Liquet, and J. P. Pignon (2008).
 
 
 \seealso{
-\code{\link{print.additivePenal}}, 
-\code{\link{plot.additivePenal}},
-\code{\link{summary.additivePenal}},
-\code{\link{cluster}},
-\code{\link{slope}},
-\code{\link{strata}},
-\code{\link[survival]{Surv}}
+ \code{\link{slope}}
 }
 
 
@@ -211,10 +205,10 @@ V. Rondeau, S. Michiels, B. Liquet, and J. P. Pignon (2008).
 
 data(dataAdditive)
 
-modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
-                correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=10000)
+modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+
+var1+slope(var1),correlation=TRUE,data=dataAdditive,
+n.knots=8,kappa1=10000)
 
-# It takes around 4 minutes to converge
 # Var1 is boolean as a treatment variable
 
 }

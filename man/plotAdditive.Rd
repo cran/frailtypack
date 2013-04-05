@@ -18,7 +18,7 @@
 }
 
 \arguments{
-  \item{x}{ An fitted additive frailty model (output from calling \code{additivePenal}}
+  \item{x}{ A fitted additive frailty model (output from calling \code{additivePenal})}
   \item{\dots}{ Other graphical parameters like those in \code{\link{plot.frailtyPenal}}}
 
 }
@@ -27,7 +27,8 @@
      Print a plot of HR and survival function of a class \code{additivePenal} object
 }
 
-\seealso{\code{\link{print.additivePenal}},\code{\link{summary.additivePenal}},\code{\link{additivePenal}},
+\seealso{
+ \code{\link{additivePenal}}
 }
 
 
@@ -38,10 +39,8 @@
 data(dataAdditive)
 
 modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
-                correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862,
-                hazard="Splines")
+correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862,hazard="Splines")
 
-# It takes around 4 minutes to converge
 # 'var1' is boolean as a treatment variable
 
 plot(modAdd)

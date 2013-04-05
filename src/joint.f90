@@ -1,32 +1,35 @@
 !mtaille =c(mt1,mt2,mt11,mt12)
+!paraweib =c(shapeweib(1),shapeweib(2),scaleweib(1),scaleweib(2))
 !tempdc=matrice(tt0dc0,tt1dc0) pour les deces
 !kendall: 1ere colonne ss0, 2eme colonne tau
+!paratps = c(timedep0,nbinnerknots,qorder0)
 
 	module splines
 	
-	double precision,dimension(:),allocatable,save::aux
+	double precision,dimension(:),allocatable,save::aux,auxmeta
 	double precision,dimension(:),allocatable,save:: v
 	double precision,dimension(:,:),allocatable,save::I1_hess,H1_hess
 	double precision,dimension(:,:),allocatable,save::I2_hess,H2_hess
 	double precision,dimension(:,:),allocatable,save::HI2
 	double precision,dimension(:,:),allocatable,save::HIH,IH,HI
 	double precision,dimension(:,:),allocatable,save::BIAIS
-	double precision,dimension(:),allocatable,save:: vax,vaxdc
-	integer,dimension(:),allocatable,save::filtre,filtre2
-	character(LEN=20),dimension(:),allocatable,save:: nomvar,nomvar2
+	double precision,dimension(:),allocatable,save:: vax,vaxdc,vaxmeta
+	integer,dimension(:),allocatable,save::filtre,filtre2,filtre3
+	character(LEN=20),dimension(:),allocatable,save:: nomvar,nomvar2,nomvar3
 	integer,save::ver
-	
+
 	end module splines
 !--entête pour fortran
 	subroutine joint(nsujet0,ng0,lignedc0,nz0,k0,tt00,tt10,ic0,groupe0,groupe00      &
 	,tt0dc0,tt1dc0,icdc0,tempdc,icdc00,nva10,vax0,nva20,vaxdc0,vaxdc00,noVar1,noVar2,ag0,maxit0   &
 	,np,b,H_hessOut,HIHOut,resOut,LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out &
 	,typeof0,equidistant,nbintervR0,nbintervDC0,mtaille &
-	,ni,cpt,cpt_dc,ier,istop,shapeweib,scaleweib &
+	,ni,cpt,cpt_dc,ier,istop,paraweib & !shapeweib,scaleweib &
 	,MartinGales &
 !	,Resmartingale,Resmartingaledc,frailtypred,frailtyvar
-	,linearpred,linearpreddc,ziOut,time,timedc &
-	,kendall,initialisation,nn,Bshared,linearpredG,typeJoint0,intcens0,ttU0,logNormal0)
+	,linearpred,linearpreddc,ziOut,time,timedc,kendall &
+!	,initialisation,nn,Bshared ! enleve pour le moment
+	,linearpredG,typeJoint0,intcens0,ttU0,logNormal0,paratps,filtretps0,BetaTpsMat,BetaTpsMatDc)
 
 !AD: add for new marq
 	use parameters
@@ -39,10 +42,11 @@
 	use sortie
 	use residusM
 	use comongroup
+	use betatttps
 !AD:
 	implicit none
 	
-	integer::maxit0,npinit,nvatmp,mt1,mt2,mt11,mt12,nn
+	integer::maxit0,npinit,nvatmp,mt1,mt2,mt11,mt12 !nn
 	integer,dimension(4),intent(in)::mtaille
 	integer,intent(in)::nsujet0,ng0,nz0,nva10,nva20,lignedc0,ag0
 	double precision,dimension(nz0+6),intent(out)::ziOut
@@ -68,15 +72,17 @@
 	double precision,dimension(mtaille(4),3)::su2Out
 	integer::ss,sss
 	double precision,dimension(np):: b
-	double precision,dimension(2),intent(out)::LCV,shapeweib,scaleweib
+	double precision,dimension(2),intent(out)::LCV
+	double precision,dimension(2)::shapeweib,scaleweib
+	double precision,dimension(4),intent(out)::paraweib
 	
 	integer,intent(in)::noVar1,noVar2,intcens0 !! rajout
 	integer,intent(out)::cpt,cpt_dc,ier,ni
 	integer::groupe,ij,kk,j,k,nz,n,ii,iii,iii2,cptstr1,cptstr2   &
 	,i,ic,icdc,istop,cptni,cptni1,cptni2,nb_echec,nb_echecor,id,cptbiais &
-	,cptauxdc
-	double precision::tt0,tt0dc,tt1,tt1dc,h,res,min,mindc,max, &
-	maxdc,maxt,maxtdc,moy_peh0,moy_peh1,lrs,BIAIS_moy,ttU !! rajout
+	,cptauxdc,p
+	double precision::tt0,tt0dc,tt1,tt1dc,h,hdc,res,min,mindc,max, &
+	maxdc,maxt,maxtdc,moy_peh0,moy_peh1,lrs,BIAIS_moy,ttU,mint,mintdc !! rajout
 	double precision,dimension(2)::res01
 !AD: add for new marq
 	double precision::ca,cb,dd
@@ -86,6 +92,7 @@
 	double precision,external::funcpaGsplines,funcpaGcpm,funcpaGweib
 	double precision,external::funcpaGsplines_intcens,funcpaGcpm_intcens,funcpaGweib_intcens
 	double precision,external::funcpaGsplines_log,funcpaGcpm_log,funcpaGweib_log
+	double precision,external::funcpaj_tps
 	double precision,dimension(100)::xSu1,xSu2
 !cpm
 	integer::indd,ent,entdc,typeof0,nbintervR0,nbintervDC0
@@ -100,6 +107,7 @@
 	double precision,dimension(lignedc0),intent(out)::linearpredG
 	double precision,dimension(1,nva10)::coefBeta
 	double precision,dimension(1,nva20)::coefBetadc
+	double precision::coefBeta2
 	double precision,dimension(1,nsujet0)::XBeta
 
 	double precision,dimension(1,ng0)::XBetadc
@@ -111,11 +119,16 @@
 
 	double precision,dimension(4,2),intent(out)::kendall!ss0,tau
 	double precision::sstmp
-	integer,intent(in)::initialisation,typeJoint0
-	double precision,dimension(nn)::Bshared
+	integer,intent(in)::typeJoint0 !initialisation
+!	double precision,dimension(nn)::Bshared
 	integer::ngtemp
 	integer,intent(in)::logNormal0
 
+	integer,dimension(3),intent(in)::paratps
+	integer,dimension(nva10+nva20),intent(in)::filtretps0
+	double precision,dimension(0:100,0:4*sum(filtretps0(1:nva10)))::BetaTpsMat !!! a refaire
+	double precision,dimension(0:100,0:4*sum(filtretps0(nva10+1:nva10+nva20)))::BetaTpsMatDc
+	double precision,dimension(paratps(2)+paratps(3))::basis
 
 	mt1=mtaille(1)
 	mt2=mtaille(2)
@@ -123,10 +136,23 @@
 	mt12=mtaille(4)
 	allocate(vaxdc(nva20),vax(nva10))
 
+	timedep = paratps(1)
+	nbinnerknots = paratps(2)
+	qorder = paratps(3)
+
+	allocate(filtretps(nva10),filtre2tps(nva20))
+	allocate(betatps(nva10),betatps2(nva20))
+	filtretps = filtretps0(1:nva10)
+	filtre2tps = filtretps0(nva10+1:nva10+nva20)
+
+	npbetatps1 = (nbinnerknots+qorder-1)*sum(filtretps)
+	npbetatps2 = (nbinnerknots+qorder-1)*sum(filtre2tps)
+	npbetatps = npbetatps1 + npbetatps2
+
 	logNormal = logNormal0
 	intcens = intcens0
 	typeJoint = typeJoint0
-	ag=ag0
+	ag = ag0
 	typeof = typeof0
 	model = 1
 	
@@ -141,9 +167,9 @@
 
 	maxiter = maxit0
 !AD:add for new marq
-	epsa = 1.d-3
-	epsb = 1.d-3
-	epsd = 1.d-3
+	epsa = 1.d-4
+	epsb = 1.d-4
+	epsd = 1.d-4
 !AD:end
 
 	lrs = 0.d0
@@ -265,7 +291,11 @@
 
 !------------  lecture fichier -----------------------
 	maxt = 0.d0
+	mint = 0.d0
+	
 	maxtdc = 0.d0
+	mintdc = 0.d0
+	
 	cpt = 0
 	cptcens = 0
 	cpt_dc = 0
@@ -278,6 +308,11 @@
 ! pour le deces
 !cccccccccccccccccccc
 	do k = 1,ngtemp
+	
+		if (k.eq.1) then
+			mintdc = temps0dc(k) ! affectation du min juste une fois
+		endif
+		
 		tt0dc=temps0dc(k)
 		tt1dc=temps1dc(k)
 		icdc=ictemp(k)
@@ -328,8 +363,13 @@
 				if(typeJoint.ne.1) gsuj(k) = groupe
 			endif
 		endif
+		
 		if (maxtdc.lt.t1dc(k))then
 			maxtdc = t1dc(k)
+		endif
+		
+		if (mintdc.gt.t0dc(k)) then
+			mintdc = t0dc(k)
 		endif
 	end do
 
@@ -347,6 +387,11 @@
 ! pour les donnees recurrentes
 !cccccccccccccccccccccccccccccccccc
 	do i = 1,nsujet     !sur les observations
+	
+		if (i.eq.1) then
+			mint = tt00(i) ! affectation du min juste une fois
+		endif
+		
 		tt0=tt00(i)
 		tt1=tt10(i)
 		ttU=ttU0(i) !! rajout
@@ -411,6 +456,10 @@
 		if ((maxt.lt.tU(i)).and.(tU(i).ne.t1(i))) then
 			maxt = tU(i)
 		endif
+		
+		if (mint.gt.t0(i)) then
+			mint = t0(i)
+		endif
 	end do
 
 
@@ -421,7 +470,10 @@
 		nz=nz0
 		nz1=nz
 		nz2=nz
-		
+
+		nzloco=nz1
+		nzdc=nz2
+
 		if(nz.gt.20)then
 			nz = 20
 		endif
@@ -538,6 +590,33 @@
 		zi(nz+2)=zi(nz)
 		zi(nz+3)=zi(nz)
 		ziOut = zi
+
+! ajout TPS
+	allocate(zidc(-2:(nzdc+3)))
+
+!-------------------------------------------------------------------
+	zidc(-2) = datedc(1) 
+	zidc(-1)= datedc(1) 
+	zidc(0)= datedc(1) 
+	zidc(1)= datedc(1) 
+!
+	hdc =(datedc(ndatedc)-datedc(1))/dble(nzdc-1)
+	do i=2,nzdc-1
+		zidc(i) =zidc(i-1)+hdc
+	end do 
+! 	 hh=0
+! 	do i=2,nzdc-1
+! 	 hh=int(i*ndatedc/nzdc)
+!          zidc(i)=datedc(hh)
+! 	end do
+
+	zidc(nzdc) = datedc(ndatedc)
+	zidc(nzdc+1)=zidc(nzdc)
+	zidc(nzdc+2)=zidc(nzdc)
+	zidc(nzdc+3)=zidc(nzdc)
+!
+! fin ajout TPS
+
 	end if
 !---------- affectation nt0dc,nt1dc DECES ----------------------------
 	indictronqdc=0
@@ -625,6 +704,7 @@
 	,H1_hess(npmax,npmax),I2_hess(npmax,npmax),H2_hess(npmax,npmax),HI2(npmax,npmax) & 
 	,HIH(npmax,npmax),IH(npmax,npmax),HI(npmax,npmax),BIAIS(npmax,1))
 	!Hspl_hess(npmax,npmax),PEN_deri(npmax,1),
+
 !------- initialisation des parametres
 
 	do i=1,npmax
@@ -695,7 +775,7 @@
 		
 		allocate(ttt(0:nbintervR))
 
-		ttt(0)=0.d0
+		ttt(0)=mint !0.d0
 		ttt(nbintervR)=cens
 
 		j=0
@@ -703,7 +783,7 @@
 			if (equidistant.eq.0) then
 				ttt(j)=(t2(ent*j)+t2(ent*j+1))/(2.d0)
 			else
-				ttt(j)=(cens/nbintervR)*j
+				ttt(j)=(cens/nbintervR)*j !! ici c'est surement faux, car la troncature n'est pas prise en compte
 			endif
 		end do
 		time = ttt
@@ -742,7 +822,7 @@
 
 		entdc=int(nbdeces/nbintervDC)
 		allocate(tttdc(0:nbintervDC))
-		tttdc(0)=0.d0
+		tttdc(0)=mintdc !0.d0
 		tttdc(nbintervDC)=cens
 
 		j=0
@@ -762,7 +842,22 @@
 	cb=0.d0
 	dd=0.d0
 
-	if (typeof.ne.0)allocate(kkapa(2))
+	allocate(knotsTPS(-qorder+1:nbinnerknots+qorder))
+	allocate(knotsdcTPS(-qorder+1:nbinnerknots+qorder))
+	allocate(innerknots(nbinnerknots))
+	allocate(innerknotsdc(nbinnerknots))
+
+! ajout TPS
+	call searchknotstps(t1,knotsTPS,nbinnerknots,qorder,nsujet,equidistantTPS,c,mint)
+	call searchknotstps(t1dc,knotsdcTPS,nbinnerknots,qorder,ng,equidistantTPS,cdc,mintdc) !! pas ng ?
+
+	innerknots(1:nbinnerknots)=knotsTPS(1:nbinnerknots)
+	innerknotsdc(1:nbinnerknots)=knotsdcTPS(1:nbinnerknots)
+	boundaryknots(1)=knotsdcTPS(0)
+	boundaryknots(2)=knotsdcTPS(nbinnerknots+1)
+! fin ajout TPS
+
+	!if (typeof.ne.0)allocate(kkapa(2))
 
 	if(typeJoint .ne. 1) then
 !====== INITIALISATION SUR SHARED Frailty MODEL
@@ -785,8 +880,8 @@
 
 		nst=1
 		stra=1
-		select case(initialisation)
-			case(1)
+!		select case(initialisation)
+!			case(1)
 				!=======> initialisation par shared
 				Binit=1.d-1 !5.d-1
 				if(typeof==0) then
@@ -820,15 +915,15 @@
 
 			b(1:npinit) = Binit
 
-			case(2)
-			!=======> initialisation par utilisateur
-				do i=1,npinit
-					b(i) = Bshared(i)
-				end do
-			case(3)
-			!=======> initialisation par defaut
-			b(1:npinit)=1.d-5
-		end select
+!			case(2)
+!			!=======> initialisation par utilisateur
+!				do i=1,npinit
+!					b(i) = Bshared(i)
+!				end do
+!			case(3)
+!			!=======> initialisation par defaut
+!			b(1:npinit)=1.d-5
+!		end select
 
 		deallocate(Binit)
 
@@ -887,30 +982,42 @@
 	if(typeJoint == 1) then
 		select case(typeof)
 			case(0)
-				if (logNormal.eq.0) then
-					if (intcens.eq.1) then
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines_intcens)
+				if (timedep.eq.0) then
+					if (logNormal.eq.0) then
+						if (intcens.eq.1) then
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines_intcens)
+						else
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines)
+						endif
 					else
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines)
+						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines_log)
 					endif
 				else
-					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines_log)
+					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaj_tps)
 				endif
 			case(1)
-				if (logNormal.eq.0) then
-					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajcpm)
-				else
-					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajcpm_log)
-				endif
-			case(2)
-				if (logNormal.eq.0) then
-					if (intcens.eq.1) then
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajweib_intcens)
+				if (timedep.eq.0) then
+					if (logNormal.eq.0) then
+						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajcpm)
 					else
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajweib)
+						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajcpm_log)
 					endif
 				else
-					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajweib_log)
+					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaj_tps)
+				endif
+			case(2)
+				if (timedep.eq.0) then
+					if (logNormal.eq.0) then
+						if (intcens.eq.1) then
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajweib_intcens)
+						else
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajweib)
+						endif
+					else
+						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajweib_log)
+					endif
+				else
+					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaj_tps)
 				endif
 		end select
 	else
@@ -983,6 +1090,10 @@
 		scaleweib(2) = etaD !betaD
 		shapeweib(2) = betaD !etaD
 	end if
+	paraweib(1) = shapeweib(1)
+	paraweib(2) = shapeweib(2)
+	paraweib(3) = scaleweib(1)
+	paraweib(4) = scaleweib(2)
 
 	do ss=1,npmax
 		do sss=1,npmax
@@ -1013,9 +1124,33 @@
 1000 continue
 !AD:end
 
+	if (timedep.eq.1) then
+
+		BetaTpsMat = 0.d0
+		BetaTpsMatDc = 0.d0
+	
+! CALCUL DES ESTIMATIONS DES beta DEPENDANTS DU TEMPS
+
+		if (nva1.gt.0) then
+			call drawTimeCoef(np,b,nva1,filtretps,BetaTpsMat)
+		end if
+
+		if (nva2.gt.0) then
+			call drawTimeCoefdc(np,b,nva2,filtre2tps,BetaTpsMatDc)
+		end if
+
+	endif
+
+
 !	write(*,*)'======== Calcul des residus de martingale ========'
-	coefBeta(1,:) = b((np-nva+effet):(np-nva+nva1)) !b((np-nva+effet):(np-nva+effet+nva1))
-	coefBetadc(1,:) = b((np-nva+effet+nva1):np) !b((np-nva+effet+nva1+1):np)
+
+	deallocate(I_hess,H_hess)
+
+	coefBeta = 0.d0
+	coefBetadc = 0.d0
+	Xbeta = 0.d0
+	Xbetadc = 0.d0
+	XbetaG = 0.d0
 
 	do i=1,nsujet
 		do j=1,nva1
@@ -1028,17 +1163,56 @@
 		end do
 	end do
 
-	Xbeta = matmul(coefBeta,transpose(ve1))
-
-	if(typeJoint==1)then
-		Xbetadc = matmul(coefBetadc,transpose(ve2))
+	if (timedep.eq.0) then
+		coefBeta(1,:) = b((np-nva+effet):(np-nva+nva1)) !b((np-nva+effet):(np-nva+effet+nva1))
+		coefBetadc(1,:) = b((np-nva+effet+nva1):np) !b((np-nva+effet+nva1+1):np)
+		Xbeta = matmul(coefBeta,transpose(ve1))
+		if(typeJoint==1)then
+			Xbetadc = matmul(coefBetadc,transpose(ve2))
+		else
+			XbetaG = matmul(coefBetadc,transpose(ve2))
+		endif
 	else
-		XbetaG = matmul(coefBetadc,transpose(ve2))
+		do j=1,nsujet
+			p=1
+			call splinebasisIndiv(qorder-1,nbinnerknots+2*qorder,nbinnerknots,nbinnerknots+qorder,t1(j),innerknots,boundaryknots,basis)
+			do i=1,nva1
+				coefBeta2 = 0.d0
+				if (filtretps(i).eq.1) then
+					do k=-qorder+1,nbinnerknots
+						coefBeta2 = coefBeta2 + b(np-(nva+npbetatps)+p-1+k+qorder)*basis(k+qorder)
+					end do
+				else
+					coefBeta2 = b(np-(nva+npbetatps)+p)
+				endif
+				Xbeta(1,j) = Xbeta(1,j) + coefBeta2*dble(ve(j,i))
+				p=p+filtretps(i)*(nbinnerknots+qorder-1)+1
+			end do
+		enddo
+		do j=1,ngtemp
+			p=1
+			call splinebasisIndiv(qorder-1,nbinnerknots+2*qorder,nbinnerknots,nbinnerknots+qorder,t1dc(j),innerknots,boundaryknots,basis)
+			do i=1,nva2
+				coefBeta2 = 0.d0
+				if (filtre2tps(i).eq.1) then
+					do k=-qorder+1,nbinnerknots
+						coefBeta2 = coefBeta2 + b(np-(nva+npbetatps)+nva1+p-1+k+qorder)*basis(k+qorder)
+					end do
+				else
+					coefBeta2 = b(np-(nva+npbetatps)+nva1+p)
+				endif
+				if (typeJoint==1) Xbetadc(1,j) = Xbetadc(1,j) + coefBeta2*dble(vedc(j,i))
+				if (typeJoint==0) XbetaG(1,j) = XbetaG(1,j) + coefBeta2*dble(vedc(j,i))
+				p=p+filtre2tps(i)*(nbinnerknots+qorder-1)+1
+			end do
+		enddo
 	endif
+
+
+	!deallocate(I_hess,H_hess)
 
 	if((istop == 1) .and. (effet == 1)) then
 
-		deallocate(I_hess,H_hess)
 !		if(typeJoint == 1) then
 			allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1))
 			effetres = effet
@@ -1101,7 +1275,7 @@
 		deallocate(I_hess,H_hess,vres,vecuiRes)
 
 	else
-		deallocate(I_hess,H_hess)
+		!deallocate(I_hess,H_hess)
 
 ! les 4 variables suivantes sont maintenant dans MartinGales
 ! 		Resmartingale=0.d0
@@ -1114,7 +1288,6 @@
 		linearpreddc=0.d0
 		linearpredG=0.d0
 	end if
-
 
 	if(typeJoint.ne.1)then
 !add for joint group
@@ -1180,14 +1353,17 @@
 	deallocate(hess,v,I1_hess,H1_hess,I2_hess,H2_hess,HI2,HIH,IH,HI,BIAIS,date,datedc)
 	deallocate(ResidusRec,Residusdc,Rrec,Nrec,Rdc,Ndc,vuu,ve1,ve2)
 	deallocate(the1,the2,nigdc,gsuj)
+	deallocate(filtretps,filtre2tps)
+	deallocate(betatps,betatps2)
+	deallocate(knotsTPS,knotsdcTPS,innerknots,innerknotsdc)
 
 	if (typeof == 0) then
 		deallocate(nt0dc,nt1dc,nt0,nt1,ntU,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc, &
-		mm3,mm2,mm1,mm,im3,im2,im1,im,zi,m3m3,m2m2,m1m1,mmm,&
+		mm3,mm2,mm1,mm,im3,im2,im1,im,zi,zidc,m3m3,m2m2,m1m1,mmm,&
 		m3m2,m3m1,m3m,m2m1,m2m,m1m)
 	end if
 
-	if (typeof .ne. 0)deallocate(vvv,kkapa)
+	if (typeof .ne. 0)deallocate(vvv) !,kkapa)
 	
 	if (typeof == 1) then
 		deallocate(ttt,tttdc,betacoef)
@@ -1200,7 +1376,7 @@
 
 !========================== VECSPLI ==============================
 !AD:add argument:ndatedc
-	subroutine vecspliJ(n,ndate,ndatedc) 
+	subroutine vecspliJ(n,ndate,ndatedc)
 !AD:end
 	use tailles
 !AD:
@@ -1253,7 +1429,7 @@
 		im(i)  = ht*mm(i)*0.25d0
 
 	end do
-!AD: add for death 
+!AD: add for death
 !----------  calcul de u(ti) :  STRATE2 ---------------------------
 !    attention the(1)  sont en nz=1
 !        donc en ti on a the(i)
@@ -1295,7 +1471,7 @@
 
 	end do
 !AD:end	    
-	end subroutine vecspliJ  
+	end subroutine vecspliJ
 
 !========================== VECPEN ==============================
 	subroutine vecpenJ(n) 
@@ -1960,8 +2136,7 @@
 	double precision function func3J(frail)
 ! calcul de l integrant, pour un effet aleatoire donne frail et un groupe donne auxig (cf funcpa)
 	use tailles
-	use comon,only:nig,auxig,alpha,theta,res1,res3,aux1, &
-        cdc
+	use comon,only:nig,auxig,alpha,theta,res1,res3,aux1,cdc
 
 	IMPLICIT NONE
 
@@ -1969,11 +2144,13 @@
 !      double precision func3
 
 	func3J = (nig(auxig)+ alpha*cdc(auxig)+ 1./theta-1.)*dlog(frail) &
-		- frail*(res1(auxig)-res3(auxig)) &!res3=0 si AG=0
-		- (frail**alpha)*(aux1(auxig))- frail/theta
+	- frail*(res1(auxig)-res3(auxig)) & !res3=0 si AG=0
+	- (frail**alpha)*(aux1(auxig))- frail/theta
 
 	func3J = exp(func3J)
-
+!print*,func3J
+!print*,nig(auxig),alpha,cdc(auxig),theta,frail
+!print*,"res",res1(auxig),res3(auxig),aux1(auxig)
 	return
 
 	end function func3J
@@ -2014,13 +2191,13 @@
 
 !==================================================================
 
-	SUBROUTINE gaulagJ(ss,choix)
+	subroutine gaulagJ(ss,choix)
 
 	use tailles
 	use comon,only:auxig,typeof,typeJoint
 	use donnees,only:w,x,w1,x1
 	
-	IMPLICIT NONE
+	implicit none
 
 	integer,intent(in)::choix
 	double precision,intent(out):: ss
@@ -2031,7 +2208,7 @@
 	integer :: j
 
 	ss=0.d0
-	if (typeof == 0)then
+!	if (typeof == 0)then
 ! Will be twice the average value of the function,since the ten
 ! wei hts (five numbers above each used twice) sum to 2.
 		do j=1,20
@@ -2054,42 +2231,43 @@
 				endif
 			endif
 		end do
-	else
-		do j=1,32
-			if (choix.eq.1) then !integrale 1
-				auxfunca=func1j(x1(j))
-				ss = ss+w1(j)*(auxfunca)
-			else                   !choix=2, survie marginale, vraie troncature
-				if (choix.eq.2) then 
-					auxfunca=func2j(x1(j))
-					ss = ss+w1(j)*(auxfunca)
-				else                   !choix=3, AG model
-					if (choix.eq.3) then
-						if(typeJoint==1)then
-							auxfunca=func3j(x1(j))
-						else
-							auxfunca=func3bis(x1(j))
-						endif
-						ss = ss+w1(j)*(auxfunca)
-					endif
-				endif
-			endif
-		end do
-	end if
+! 	else
+! 		do j=1,32
+! 			if (choix.eq.1) then !integrale 1
+! 				auxfunca=func1j(x1(j))
+! 				ss = ss+w1(j)*(auxfunca)
+! 			else                   !choix=2, survie marginale, vraie troncature
+! 				if (choix.eq.2) then 
+! 					auxfunca=func2j(x1(j))
+! 					ss = ss+w1(j)*(auxfunca)
+! 				else                   !choix=3, AG model
+! 					if (choix.eq.3) then
+! 						if(typeJoint==1)then
+! 							auxfunca=func3j(x1(j))
+! 						else
+! 							auxfunca=func3bis(x1(j))
+! 						endif
+! 						ss = ss+w1(j)*(auxfunca)
+! 						print*,ss
+! 					endif
+! 				endif
+! 			endif
+! 		end do
+! 	end if
 
 	return
 
-	END subroutine gaulagJ
+	end subroutine gaulagJ
 
 !==================================================================
 
-	SUBROUTINE gaulagJ_intcens(ss,choix)
+	subroutine gaulagJ_intcens(ss,choix)
 	
 	use tailles
 	use comon,only:auxig,typeof
 	use donnees,only:w,x,w1,x1
 	
-	IMPLICIT NONE
+	implicit none
 	
 	integer,intent(in)::choix
 	double precision,intent(out)::ss
@@ -2127,7 +2305,7 @@
 
 	return
 
-	END subroutine gaulagJ_intcens
+	end subroutine gaulagJ_intcens
 
 !==================================================================
 

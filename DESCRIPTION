@@ -1,8 +1,8 @@
 Package: frailtypack
-Version: 2.3
-Date: 2013-02-08
-Title: General Frailty models using a semiparametric penalized
-        likelihood estimation or a parametric estimation
+Version: 2.4
+Date: 2013-04-05
+Title: General Frailty models: shared, joint and nested frailty models
+        with prediction
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
         Mauguen, Amadou Diakite and Alexandre Laurent
 Maintainer: Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr>
@@ -13,10 +13,7 @@ Description: Frailtypack now fits several classes of frailty models
         but also a parametric estimation. 1) A shared frailty model
         (with gamma or log-normal frailty distribution) and Cox
         proportional hazard model. Clustered and recurrent survival
-        times can be studied (the Andersen-Gill(1982) approach has been
-        implemented for recurrent events). An automatic choice of the
-        smoothing parameter is possible using an approximated
-        cross-validation procedure. 2) Additive frailty models for
+        times can be studied. 2) Additive frailty models for
         proportional hazard models with two correlated random effects
         (intercept random effect with random slope). 3) Nested frailty
         models for hierarchically clustered data (with 2 levels of
@@ -28,13 +25,14 @@ Description: Frailtypack now fits several classes of frailty models
         Cox proportional hazard and shared frailty model) and strata
         (max=2) are allowed. In each model, the random effects have a
         gamma distribution, but you can switch to a log-normal in
-        shared and joint models. The package includes concordance
-        measures for Cox proportional hazards models and for shared
-        frailty models.
+        shared and joint models. Now, you can also consider
+        time-varying covariates effects in Cox, shared and joint
+        models. The package includes concordance measures for Cox
+        proportional hazards models and for shared frailty models.
 License: GPL (>= 2.0)
 URL:
         http://virginierondeau.com/BiostatisticalConsulting/Liste_of_examples.html
-Encoding: latin1
 Repository: CRAN
-Date/Publication: 2013-02-09 07:49:17
-Packaged: 2013-02-08 18:03:57 UTC; al7
+Date/Publication: 2013-04-05 15:29:13
+Packaged: 2013-04-05 09:34:08 UTC; alexandre
+NeedsCompilation: yes

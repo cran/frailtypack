@@ -17,7 +17,7 @@
 	double precision::thi,thj,dnb,sum,inv,res,vet
 	double precision,dimension(np)::b,bh
 	double precision,dimension(ngmax)::res1,res2,res3
-	double precision,dimension(2)::k0 
+	double precision,dimension(2)::k0
 
 	kkapa=k0
 	j=0
@@ -82,42 +82,45 @@
 			if((c(i).eq.1).and.(stra(i).eq.2))then
 				res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
 			endif
-	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpasweib=-1.d9
-                          goto 123
-                       end if	
+
+			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
+				funcpasweib=-1.d9
+				goto 123
+			end if
+
 			if(stra(i).eq.1)then
-				res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet - ((t0(i)/etaR)**betaR)*vet  
+				res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet - ((t0(i)/etaR)**betaR)*vet
 				RisqCumul(i) = ((t1(i)/etaR)**betaR)*vet
 			endif
 	
 			if(stra(i).eq.2)then
-				res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet - ((t0(i)/etaD)**betaD)*vet 
+				res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet - ((t0(i)/etaD)**betaD)*vet
 				RisqCumul(i) = ((t1(i)/etaD)**betaD)*vet
 			endif
-	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpasweib=-1.d9
-                          goto 123
-                       end if			
-		end do       
-		res = 0.d0         
+
+			if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
+				funcpasweib=-1.d9
+				goto 123
+			end if
+		end do
+		res = 0.d0
 		cptg = 0
-		
+
 ! k indice les groupes
-		do k=1,ng   
+		do k=1,ng
 			if(cpt(k).gt.0)then
 				nb = nig(k)
-				dnb = dble(nig(k))               
-				res = res-res1(k)+res2(k) 
+				dnb = dble(nig(k))
+				res = res-res1(k)+res2(k)
 				cptg = cptg + 1 
-			       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		                  funcpasweib=-1.d9
-		                  goto 123
-		               end if	
-			endif 
+				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+					funcpasweib=-1.d9
+					goto 123
+				end if
+			endif
 		end do
 
-!*******************************************         
+!*********************************************
 !----avec un effet aleatoire dans le modele
 !*********************************************
 
@@ -127,10 +130,10 @@
 !     i indice les sujets
 		do i=1,nsujet 
 			
-			cpt(g(i))=cpt(g(i))+1 
+			cpt(g(i))=cpt(g(i))+1
 		
 			if(nva.gt.0)then
-				vet = 0.d0   
+				vet = 0.d0
 				do j=1,nva
 					vet =vet + bh(np-nva+j)*dble(ve(i,j))
 				end do
@@ -141,25 +144,30 @@
 
 			if((c(i).eq.1).and.(stra(i).eq.1))then
 				res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
-			endif  
+			endif
+
 			if((c(i).eq.1).and.(stra(i).eq.2))then
 				res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
-			endif  
-	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpasweib=-1.d9
-                          goto 123
-                       end if	
+			endif
+
+			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
+				funcpasweib=-1.d9
+				goto 123
+			end if
+
 			if(stra(i).eq.1)then
 				res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet
 			endif
-			
+
 			if(stra(i).eq.2)then
 				res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet
 			endif
-	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpasweib=-1.d9
-                          goto 123
-                       end if	
+
+			if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
+				funcpasweib=-1.d9
+				goto 123
+			end if
+
 ! modification pour nouvelle vraisemblance / troncature:
 			if(stra(i).eq.1)then
 				res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet
@@ -168,17 +176,19 @@
 			if(stra(i).eq.2)then
 				res3(g(i)) = res3(g(i)) + ((t0(i)/etaD)**betaD)*vet
 			endif
-	               if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-                          funcpasweib=-1.d9
-                          goto 123
-                       end if
-		end do 
+
+			if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
+				funcpasweib=-1.d9
+				goto 123
+			end if
+		end do
 
 		res = 0.d0
 		cptg = 0
+
 !     gam2 = gamma(inv)
 ! k indice les groupes
-		do k=1,ng  
+		do k=1,ng
 			sum=0.d0
 			if(cpt(k).gt.0)then
 				nb = nig(k)
@@ -199,7 +209,7 @@
 						res = res-(inv+dnb)*dlog(theta*res1(k)+1.d0)  &
 						+(inv)*dlog(theta*res3(k)+1.d0)+ res2(k) + sum  
 					endif
-				else              
+				else
 !     developpement de taylor d ordre 3
 !                   write(*,*)'************** TAYLOR *************'
 !cccc ancienne vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
@@ -207,31 +217,29 @@
 						res = res-dnb*dlog(theta*(res1(k)-res3(k))+1.d0) &
 						-(res1(k)-res3(k))*(1.d0-theta*(res1(k)-res3(k))/2.d0 &
 						+theta*theta*(res1(k)-res3(k))*(res1(k)-res3(k))/3.d0)+res2(k)+sum
-
 !cccc nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
 					else
 						res = res-dnb*dlog(theta*res1(k)+1.d0)-res1(k)*(1.d0-theta*res1(k) &
 						/2.d0+theta*theta*res1(k)*res1(k)/3.d0) &
 						+res2(k)+sum &
 						+res3(k)*(1.d0-theta*res3(k)/2.d0 &
-							+theta*theta*res3(k)*res3(k)/3.d0)
+						+theta*theta*res3(k)*res3(k)/3.d0)
 					endif
-				endif 
-			       if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		                  funcpasweib=-1.d9
-		                  goto 123
-		               end if	
-			endif 
+				endif
+
+				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+					funcpasweib=-1.d9
+					goto 123
+				end if
+			endif
 		end do
-
-
 	endif !fin boucle effet=0
 
 !    Changed JRG 25 May 05
 	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 		funcpasweib=-1.d9
 		goto 123
-	end if	
+	end if
 
 	funcpasweib = res
 

@@ -39,9 +39,7 @@
 }
 
 \seealso{
-\code{\link{print.frailtyPenal}},
-\code{\link{summary.frailtyPenal}},
-\code{\link{frailtyPenal for Shared frailty models}}
+ \code{\link{frailtyPenal}}
 }
 
 
@@ -51,19 +49,17 @@
 
 data(readmission)
 
-# /*** Shared frailty model ***/
+# Shared frailty model
 
 modSha <- frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
-             n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,
-             hazard="Splines")
+n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,hazard="Splines")
 
 plot(modSha,type="surv",conf=FALSE)
 
-# /*** Cox proportional hazard model using Penalized likelihood ***/
+# Cox proportional hazard model using Penalized likelihood
 
 modCox <- frailtyPenal(Surv(time,event)~as.factor(dukes),n.knots=10,
-             kappa1=10000,data=readmission,Frailty=FALSE,
-             hazard="Splines")
+kappa1=10000,data=readmission,Frailty=FALSE,hazard="Splines")
 
 plot(modCox)
 

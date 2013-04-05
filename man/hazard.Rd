@@ -24,10 +24,6 @@ an object from the frailtypack fit.
 return the value of hazard function in t.
 }
 
-\author{
-V. Rondeau
-}
-
 \examples{
 
 \dontrun{
@@ -35,8 +31,8 @@ V. Rondeau
 ###  a fit Shared
 data(readmission)
 fit.shared <- frailtyPenal(Surv(time,event)~dukes+cluster(id)+
-             strata(sex),n.knots=10,kappa1=10000,kappa2=10000,
-             data=readmission,Frailty=TRUE)
+strata(sex),n.knots=10,kappa1=10000,kappa2=10000,data=readmission,
+Frailty=TRUE)
 
 ### calling survival
 hazard(20,fit.shared)

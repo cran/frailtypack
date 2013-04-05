@@ -28,8 +28,7 @@ Truncation time for left truncated data only. To be ignored otherwise.
 
 \details{
 Typical usages are
-\code{SurvIC(lower,upper,event)}
-\code{SurvIC(t0,lower,upper,event)}
+\code{SurvIC(lower,upper,event)} or \code{SurvIC(t0,lower,upper,event)}
 }
 
 \examples{
@@ -41,15 +40,15 @@ bcos$event <- ifelse(bcos$left!=bcos$right,1,0)
 
 ###  Cox proportional hazard model with interval censoring  ###
 
-frailtyPenal(SurvIC(left,right,event)~treatment,
-             data=bcos,Frailty=FALSE,n.knots=8,kappa1=10000)
+cox.ic <- frailtyPenal(SurvIC(left,right,event)~treatment,
+data=bcos,Frailty=FALSE,n.knots=8,kappa1=10000)
 
 ###  Shared model with interval censoring  ###
 
 bcos$group <- c(rep(1:20,4),1:14)
 
-frailtyPenal(SurvIC(left,right,event)~cluster(group)+treatment,
-             data=bcos,Frailty=TRUE,n.knots=8,kappa1=10000)
+sha.ic <- frailtyPenal(SurvIC(left,right,event)~cluster(group)+
+treatment,data=bcos,Frailty=TRUE,n.knots=8,kappa1=10000)
 
 }
 

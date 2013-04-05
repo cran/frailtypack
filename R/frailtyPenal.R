@@ -1,14 +1,18 @@
 
 "frailtyPenal" <-
 function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, recurrentAG=FALSE,
-             cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1,nb.int2,RandDist="Gamma")
+             cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1,nb.int2,
+             RandDist="Gamma", betaknots=1, betaorder=3)
 {
 
 #ad 15/02/12 :add Audrey
 m2 <- match.call()
-m2$formula <- m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$recurrentAG <- m2$cross.validation <- m2$n.knots <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <-m2$nb.int2 <- m2$RandDist <- m2$...<-NULL
+m2$formula <- m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$recurrentAG <- m2$cross.validation <- m2$n.knots <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <-m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$... <- NULL
 Names.data <- m2$data
 #
+#### Betaknots et betaorder ####
+if (betaknots > 10) stop("Number of knots for beta(t) greater than 10 is useless, please choose a number between 0 and 10 (3 is optimal)")
+if ((betaorder == 0)|(betaorder > 4)) stop("B-splines order for beta(t) must be a number between 1 and 4 (3 is optimal)")
 
 #### Frailty distribution specification ####
 if (!(RandDist %in% c("Gamma","LogN"))) { stop("Only 'Gamma' and 'LogN' distributions for frailties are allowed") }
@@ -112,10 +116,10 @@ if((all.equal(length(hazard),1)==T)==T){
 	
 	m <- match.call(expand.dots = FALSE) # recupere l'instruction de l'utilisateur
 
-	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$... <- NULL
+	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$... <- NULL
 
 
-	special <- c("strata", "cluster", "subcluster", "terminal","num.id")
+	special <- c("strata", "cluster", "subcluster", "terminal","num.id","timedep")
 	
 	Terms <- if (missing(data)){ 
 		terms(formula, special)
@@ -126,7 +130,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	ord <- attr(Terms, "order") ## longueur de ord=nbre de var.expli
 	
 	if (length(ord) & any(ord != 1))stop("Interaction terms are not valid for this function")
-#si pas vide tous si il ya au moins un qui vaut 1 on arrête
+#si pas vide tous si il ya au moins un qui vaut 1 on arrÃªte
 	
 	m$formula <- Terms
 	
@@ -217,7 +221,14 @@ if((all.equal(length(hazard),1)==T)==T){
 	strats <- attr(Terms, "specials")$strata #nbre de var qui sont en fonction de strata()
 	cluster <- attr(Terms, "specials")$cluster #nbre de var qui sont en fonction de cluster()
 	num.id <- attr(Terms, "specials")$num.id #nbre de var qui sont en fonction de patkey()
-	
+	vartimedep <- attr(Terms, "specials")$timedep #nbre de var en fonction de timedep()
+
+	#booleen pour savoir si au moins une var depend du tps
+	if (is.null(vartimedep)) timedep <- 0
+	else timedep <- 1
+
+	if (intcens & timedep) stop("You can not use time varing-effect covariate with interval censoring")
+
 	if(is.null(num.id)){
 		joint.clust <- 1
 	}else{
@@ -295,7 +306,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		stop("cluster not necessary for proportional hazard model")
 	}
 	else if (!length(cluster) & Frailty == FALSE){
-		cluster <- 1:nrow(data) # valeurs inutiles pour un modèle de Cox
+		cluster <- 1:nrow(data) # valeurs inutiles pour un modÃ¨le de Cox
 		uni.cluster <- 1:nrow(data)
 	}
 	
@@ -361,7 +372,7 @@ if((all.equal(length(hazard),1)==T)==T){
 #AD:
 	if (length(terminalEvent)){
 	
-		tempterm <- untangle.specials(Terms, "terminal", 1:10) 
+		tempterm <- untangle.specials(Terms, "terminal", 1:10)
 #ici on comme terme tempterm$vars qui est le nom dans l'appel(ex;"terminal(death)"
 #et tempterm$terms qui est la position de la variable dans l'appel, ici elle vient a la position 6
 	
@@ -394,15 +405,17 @@ if((all.equal(length(hazard),1)==T)==T){
 	}
 	
 	#drop contient les position liees au fonction() ic ex:cluster(id) et terminal(death)
+
 	if (length(dropx)){
 		newTerms <- Terms[-dropx]
 	}else{
 		newTerms <- Terms
 	}
+
 #newTerm vaut Terms - les variables dont les position sont dans drop
 	
 	X <- model.matrix(newTerms, m)
-	
+
 	assign <- lapply(attrassign(X, newTerms)[-1], function(x) x - 1)
 	Xlevels <- .getXlevels(newTerms, m)
 	contr.save <- attr(X, 'contrasts')
@@ -430,14 +443,27 @@ if((all.equal(length(hazard),1)==T)==T){
 	nvar<-ncol(X) #nvar==1 correspond a 2 situaions:
 # au cas ou on a aucune var explicative dans la partie rec, mais X=0
 # cas ou on a 1seul var explicative, ici X est en general different de 0
+
+	varnotdep <- colnames(X)[-grep("timedep",colnames(X))]
+	vardep <- colnames(X)[grep("timedep",colnames(X))]
+	vardep <- apply(matrix(vardep,ncol=1,nrow=length(vardep)),1,timedep.names)
 	
+	if (length(intersect(varnotdep,vardep)) != 0) {
+		stop("A variable is both used as a constant and time-varying effect covariate")
+	}
+
+	nvartimedep <- length(vardep)
+
+	filtretps <- rep(0,nvar)
+	filtretps[grep("timedep",colnames(X))] <- 1
+
 	var<-matrix(c(X),nrow=nrow(X),ncol=nvar) #matrix sans id et sans partie ex terminal(death)
 	
 	n<-nrow(X)
 
 
 #add Alexandre 04/06/2012
-#lire les données differemment si censure par intervalle
+#lire les donnÃ©es differemment si censure par intervalle
 	if (intcens==TRUE) {
 		if (type=="intervaltronc") {
 			tt0 <- Y[,1]
@@ -456,7 +482,7 @@ if((all.equal(length(hazard),1)==T)==T){
 			tt0 <- rep(0,n)
 			tt1 <- Y[,1]
 			cens <- Y[,2]
-			ttU <- Y[,1] # rajouter quand meme dans frailPenal mais ne sera pas utilisé
+			ttU <- Y[,1] # rajouter quand meme dans frailPenal mais ne sera pas utilise
 		} else {
 			tt0 <- Y[,1]
 			tt1 <- Y[,2]
@@ -513,13 +539,18 @@ if((all.equal(length(hazard),1)==T)==T){
 	}
 	if ((typeof == 0) | (typeof == 2)) indic.nb.int1 <- 0
 
-
 	if (sum(as.double(var))==0) nvar <- 0
 
+	if (timedep==0){
+		npbetatps <- 0
+	}else{
+		npbetatps <- (betaknots+betaorder-1)*nvartimedep
+	}
+
 	np <- switch(as.character(typeof),
-		"0"=(as.integer(uni.strat) * (as.integer(n.knots) + 2) + as.integer(nvar) + as.integer(Frailty)),
-		"1"=(as.integer(uni.strat) * nbintervR + nvar + as.integer(Frailty)),
-		"2"=(as.integer(uni.strat) * 2 + nvar + as.integer(Frailty)))
+		"0"=(as.integer(uni.strat) * (as.integer(n.knots) + 2) + as.integer(nvar) + as.integer(Frailty)) + npbetatps,
+		"1"=(as.integer(uni.strat) * nbintervR + nvar + as.integer(Frailty)) + npbetatps,
+		"2"=(as.integer(uni.strat) * 2 + nvar + as.integer(Frailty)) + npbetatps)
 
 		xSu1 <- rep(0,100)
 		xSu2 <- rep(0,100)
@@ -589,6 +620,11 @@ if((all.equal(length(hazard),1)==T)==T){
 				as.integer(intcens), # rajout
 				as.double(ttU), # rajout
 				logNormal=as.integer(logNormal),
+				timedep=as.integer(timedep),
+				as.integer(betaknots),
+				as.integer(betaorder),
+				as.integer(filtretps),
+				BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
 				PACKAGE = "frailtypack")
 #AD:
 
@@ -622,8 +658,9 @@ if((all.equal(length(hazard),1)==T)==T){
     }
 
     if (Frailty) {
-	if (logNormal == 0) fit$theta <- (ans[[21]][np - nvar])^2
-	else fit$sigma2 <- (ans[[21]][np - nvar])^2
+	fit$coef <- ans[[21]][(np - nvar - npbetatps + 1):np]
+	if (logNormal == 0) fit$theta <- (ans[[21]][np - nvar - npbetatps])^2
+	else fit$sigma2 <- (ans[[21]][np - nvar - npbetatps])^2
     }
     if (!Frailty) {
 	if (logNormal == 0) fit$theta <- NULL
@@ -634,8 +671,16 @@ if((all.equal(length(hazard),1)==T)==T){
     } 
     else
      {
-	fit$coef <- ans[[21]][(np - nvar + 1):np]
-       names(fit$coef) <- factor.names(colnames(X))
+	fit$coef <- ans[[21]][(np - nvar - npbetatps + 1):np]
+	noms <- factor.names(colnames(X))
+	if (timedep == 1){ # on enleve les parametres des B-splines qui ne serviront pas à l'utilisateur
+		while (length(grep("timedep",noms))!=0){
+			pos <- grep("timedep",noms)[1]
+			noms <- noms[-pos]
+			fit$coef <- fit$coef[-(pos:(pos+betaorder+betaknots-1))]
+		}
+	}
+	names(fit$coef) <- noms
      }
 
 #AD:modification des dimensions des tableaux
@@ -643,9 +688,18 @@ if((all.equal(length(hazard),1)==T)==T){
          temp1 <- matrix(ans[[22]], nrow = np, ncol = np)
          temp2 <- matrix(ans[[23]], nrow = np, ncol = np)
 
-         fit$varH <- temp1[(np - nvar + 1):np, (np - nvar + 1):np]
-         fit$varHIH <- temp2[(np - nvar + 1):np, (np - nvar + 1):np]
-	 if (Frailty) fit$varTheta <- c(temp1[(np - nvar),(np - nvar)],temp2[(np - nvar),(np - nvar)])
+         fit$varH <- temp1[(np - nvar - npbetatps + 1):np, (np - nvar - npbetatps + 1):np]
+         fit$varHIH <- temp2[(np - nvar - npbetatps + 1):np, (np - nvar - npbetatps + 1):np]
+	noms <- factor.names(colnames(X))
+	if (timedep == 1){ # on enleve les variances des parametres des B-splines
+		while (length(grep("timedep",noms))!=0){
+			pos <- grep("timedep",noms)[1]
+			noms <- noms[-pos]
+			fit$varH <- fit$varH[-(pos:(pos+betaorder+betaknots-1)),-(pos:(pos+betaorder+betaknots-1))]
+			fit$varHIH <- fit$varHIH[-(pos:(pos+betaorder+betaknots-1)),-(pos:(pos+betaorder+betaknots-1))]
+		}
+	}
+	 if (Frailty) fit$varTheta <- c(temp1[(np - nvar - npbetatps),(np - nvar - npbetatps)],temp2[(np - nvar - npbetatps),(np - nvar - npbetatps)])
     }
 
     fit$formula <- formula(Terms)
@@ -712,9 +766,14 @@ if((all.equal(length(hazard),1)==T)==T){
     }else{
 	fit$martingaleCox <- ans$martingaleCox
     }
-
     if (Frailty) fit$linear.pred <- ans$linear.pred[order(ordre)] # pour remettre dans le bon ordre
-    else fit$linear.pred <- ans$linear.pred # pas besoin dans le cox
+    else fit$linear.pred <- ans$linear.pred
+
+  fit$BetaTpsMat <- matrix(ans$BetaTpsMat,nrow=101,ncol=1+4*nvartimedep)
+  fit$nvartimedep <- nvartimedep
+
+  fit$Names.vardep <- vardep
+
 #
 #========================= Test de Wald pour shared
 
@@ -947,9 +1006,9 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
 ## AD: modified 20 06 2011, for no covariates on terminal event part
 		if (missing(formula.terminalEvent)){
-			m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$... <- NULL
+			m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$... <- NULL
 		}else{
-			m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$... <- NULL
+			m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$... <- NULL
 		}
 
 		
@@ -1010,8 +1069,26 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 				noVar2 <- 0
 			}
 
-			nvar2<-ncol(X2) 
+			nvar2 <- ncol(X2)
+
+			vartimedep2 <- attr(Terms2, "specials")$timedep #nbre de var en fonction de timedep()
+
+			# verifier qu'il y ait du timedep dans la deuxieme formule
+			if (!is.null(vartimedep2)) timedep <- 1
+
+			varnotdep2 <- colnames(X2)[-grep("timedep",colnames(X2))]
+			vardep2 <- colnames(X2)[grep("timedep",colnames(X2))]
+			vardep2 <- apply(matrix(vardep2,ncol=1,nrow=length(vardep2)),1,timedep.names)
+			
+			if (length(intersect(varnotdep2,vardep2)) != 0) {
+				stop("A variable is both used as a constant and time-varying effect covariate in the formula of terminal event")
+			}
 		
+			nvartimedep2 <- length(vardep2)
+
+			filtretps2 <- rep(0,nvar2)
+			filtretps2[grep("timedep",colnames(X2))] <- 1
+
 			vardc.temp<-matrix(c(X2),nrow=nrow(X2),ncol=nvar2)
 
 
@@ -1106,7 +1183,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 #AD:
 	effet <- 1
 	indic_alpha <- 1
-	nst=2
+	nst <- 2
 	
         if(equidistant %in% c(0,1)){
 		if (missing(nb.int1)) stop("Recurrent Time interval 'nb.int1' is required")
@@ -1138,13 +1215,23 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 	if ((typeof == 0) | (typeof == 2)){
 		indic.nb.int1 <- 0
 		indic.nb.int2 <- 0
-	}	
+	}
+
+	if (timedep==0){
+		npbetatps1 <- 0
+		npbetatps2 <- 0
+	}else{
+		npbetatps1 <- (betaknots+betaorder-1)*nvartimedep
+		npbetatps2 <- (betaknots+betaorder-1)*nvartimedep2
+	}
+	npbetatps <- npbetatps1 + npbetatps2
+
 	np <- switch(as.character(typeof),
-		"0"=(nst * (n.knots + 2) + nvarRec + nvarEnd + effet + indic_alpha),
+		"0"=(nst * (n.knots + 2) + nvarRec + nvarEnd + effet + indic_alpha + npbetatps),
 
-		"1"=(nbintervR + nbintervDC + nvarRec + nvarEnd + effet + indic_alpha),
+		"1"=(nbintervR + nbintervDC + nvarRec + nvarEnd + effet + indic_alpha + npbetatps),
 
-		"2"=(2*nst + nvar + effet + indic_alpha))
+		"2"=(2*nst + nvar + effet + indic_alpha + npbetatps))
 
 
 	if (all(all.equal(as.numeric(cens),terminal)==T)){
@@ -1217,8 +1304,9 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
                 cpt.dc=as.integer(0),
                 ier=as.integer(0),
 		istop=as.integer(0),
-		shape.weib=as.double(rep(0,2)),
-		scale.weib=as.double(rep(0,2)),
+		paraweib=as.double(rep(0,4)),
+#		shape.weib=as.double(rep(0,2)),
+#		scale.weib=as.double(rep(0,2)),
 		MartinGale=as.double(matrix(0,nrow=length(uni.cluster),ncol=4)),###
 		linear.pred=as.double(rep(0,n)),
 		lineardc.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
@@ -1226,14 +1314,18 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		time=as.double(rep(0,(nbintervR+1))),
 		timedc=as.double(rep(0,(nbintervDC+1))),
 		kendall=as.double(matrix(0,nrow=4,ncol=2)),
-		as.integer(initialize),
-		as.integer(npinit),
-		Bshared=as.double(rep(0,npinit)),
+#		as.integer(initialize),
+#		as.integer(npinit),
+#		Bshared=as.double(rep(0,npinit)),
 		linearpredG=as.double(rep(0,lignedc0)),
 		joint.clust=as.integer(joint.clust),
 		as.integer(intcens), # censure par intervalle
 		as.double(ttU),
 		logNormal=as.integer(logNormal),
+		paratps=as.integer(c(timedep,betaknots,betaorder)),
+		as.integer(c(filtretps,filtretps2)),
+		BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
+		BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep2)),
                 PACKAGE = "frailtypack")
 
 
@@ -1281,10 +1373,10 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     fit$AIC <- ans$LCV[2]
 #AD:
 
-    if (logNormal == 0) fit$theta <- ans$b[np - nvar-1]^2
-    else fit$sigma2 <- ans$b[np - nvar-1]^2
+    if (logNormal == 0) fit$theta <- ans$b[np - nvar - npbetatps - 1]^2
+    else fit$sigma2 <- ans$b[np - nvar - npbetatps - 1]^2
 
-    fit$alpha <- ans$b[np - nvar]
+    fit$alpha <- ans$b[np - nvar - npbetatps]
     fit$npar <- np
 
 #AD:
@@ -1293,21 +1385,40 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     }
     else
      {
-       fit$coef <- ans$b[(np - nvar + 1):np]
-
-	if (missing(formula.terminalEvent)){
-	   names(fit$coef) <- c(factor.names(colnames(X)))
-	}else{
-           names(fit$coef) <- c(factor.names(colnames(X)), factor.names(colnames(X2)))
-        }
+       fit$coef <- ans$b[(np - nvar - npbetatps + 1):np]
+	noms <- c(factor.names(colnames(X)),factor.names(colnames(X2)))
+	if (timedep == 1){
+		while (length(grep("timedep",noms))!=0){
+			pos <- grep("timedep",noms)[1]
+			noms <- noms[-pos]
+			fit$coef <- fit$coef[-(pos:(pos+betaorder+betaknots-1))]
+		}
+	}
+	names(fit$coef) <- noms
+#	if (missing(formula.terminalEvent)){
+#	   names(fit$coef) <- c(factor.names(colnames(X)))
+#	}else{
+#          names(fit$coef) <- c(factor.names(colnames(X)), factor.names(colnames(X2)))
+#      }
      }
-    
+
 #AD:
     temp1 <- matrix(ans$H, nrow = np, ncol = np)
     temp2 <- matrix(ans$HIH, nrow = np, ncol = np)
+
+    fit$varH <- temp1[(np - nvar - npbetatps - 1):np, (np - nvar - npbetatps - 1):np] # erreur il y a -1 ?
+    fit$varHIH <- temp2[(np - nvar - npbetatps - 1):np, (np - nvar - npbetatps - 1):np]
+	noms <- c("theta","alpha",factor.names(colnames(X)),factor.names(colnames(X2)))
+	if (timedep == 1){ # on enleve les variances des parametres des B-splines
+		while (length(grep("timedep",noms))!=0){
+			pos <- grep("timedep",noms)[1]
+			noms <- noms[-pos]
+			fit$varH <- fit$varH[-(pos:(pos+betaorder+betaknots-1)),-(pos:(pos+betaorder+betaknots-1))]
+			fit$varHIH <- fit$varHIH[-(pos:(pos+betaorder+betaknots-1)),-(pos:(pos+betaorder+betaknots-1))]
+		}
+	}
     fit$nvar<-c(nvarRec,nvarEnd)
-    fit$varH <- temp1[(np - (nvar) - 1):np, (np - (nvar) - 1):np]
-    fit$varHIH <- temp2[(np - (nvar) - 1):np, (np - (nvar) - 1):np]
+    fit$nvarnotdep<-c(nvarRec-nvartimedep,nvarEnd-nvartimedep2)
     fit$formula <- formula(Terms)
     fit$x1 <- ans$x1
     fit$lam <- matrix(ans$lam, nrow = size1, ncol = 3)
@@ -1332,7 +1443,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 	fit$cross.Val<-cross.validation
 	fit$n.knots.temp <- n.knots.temp
 	fit$zi <- ans$zi
-    }	
+    }
     if(typeof == 1){
 	fit$time <- ans$time
 	fit$timedc <- ans$timedc
@@ -1347,11 +1458,11 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     fit$istop <- ans$istop
     fit$indic.nb.int1 <- indic.nb.int1
     fit$indic.nb.int2 <- indic.nb.int2
-    fit$shape.weib <- ans$shape.weib
-    fit$scale.weib <- ans$scale.weib
+    fit$shape.weib <- ans$paraweib[1:2]#ans$shape.weib
+    fit$scale.weib <- ans$paraweib[3:4]#ans$scale.weib
 #AD:
 
-    # verif que les martingales ont été bien calculées
+    # verif que les martingales ont ete bien calculees
     msg <- "Problem in the estimation of the random effects (perhaps high number of events in some clusters)"
     if (Frailty){
 	if (any(MartinGale[,1]==0)){
@@ -1383,6 +1494,13 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     fit$AG <- recurrentAG
     fit$intcens <- intcens # rajout
     fit$logNormal <- ans$logNormal
+    fit$BetaTpsMat <- matrix(ans$BetaTpsMat,nrow=101,ncol=1+4*nvartimedep)
+    fit$BetaTpsMatDc <- matrix(ans$BetaTpsMatDc,nrow=101,ncol=1+4*nvartimedep2)
+    fit$nvartimedep <- c(nvartimedep,nvartimedep2)
+
+    fit$Names.vardep <- vardep
+    fit$Names.vardepdc <- vardep2
+
 
 
 #================================> For the reccurrent

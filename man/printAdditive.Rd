@@ -35,23 +35,20 @@
 
 
 \seealso{
-\code{\link{summary.additivePenal}},
-\code{\link{additivePenal}},
-\code{\link{plot.additivePenal}}
- }
+ \code{\link{additivePenal}}
+}
 
 \examples{
 
-#  /*** Additive frailty model with 1 covariate ***/
+# Additive frailty model with 1 covariate
 
 \dontrun{
 
 data(dataAdditive)
 modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
-                  correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862,
-                  hazard="Splines")
+correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862,hazard="Splines")
 
-# It takes around 4 minutes to converge. 'var1' is boolean as a treatment variable. #
+# 'var1' is boolean as a treatment variable.
 
 print(modAdd)
 

@@ -1,6 +1,19 @@
 
 "print.jointPenal" <- function (x, digits = max(options()$digits - 4, 6), ...) 
 {
+# plot des coefficient dependant du temps
+	if (any(x$nvartimedep != 0)) par(mfrow=c(sum(as.logical(x$nvartimedep)),max(x$nvartimedep)))
+	if ((x$nvartimedep[1] != 0) & (x$istop == 1)){
+		for (i in 0:(x$nvartimedep[1]-1)){
+			matplot(x$BetaTpsMat[,1],x$BetaTpsMat[,(2:4)+4*i],col="blue",type="l",lty=c(1,2,2),xlab="t",ylab="beta(t)",main=paste("Recurrent : ",x$Names.vardep[i+1]),ylim=c(min(x$BetaTpsMat[,-1]),max(x$BetaTpsMat[,-1])))
+		}
+	}
+	if ((x$nvartimedep[2] != 0) & (x$istop == 1)){
+		for (i in 0:(x$nvartimedep[2]-1)){
+			matplot(x$BetaTpsMatDc[,1],x$BetaTpsMatDc[,(2:4)+4*i],col="blue",type="l",lty=c(1,2,2),xlab="t",ylab="beta(t)",main=paste("Death : ",x$Names.vardepdc[i+1]),ylim=c(min(x$BetaTpsMatDc[,-1]),max(x$BetaTpsMatDc[,-1])))
+		}
+	}
+
 	if (!is.null(cl <- x$call)){
 		cat("Call:\n")
 		dput(cl)
@@ -23,7 +36,7 @@
 	on.exit(options(savedig))
 	coef <- x$coef
 	nvar <- length(x$coef)
-	
+
 	if (is.null(coef)){
 		x$varH<-matrix(x$varH)
 		x$varHIH<-matrix(x$varHIH)
@@ -83,6 +96,7 @@
 			}else{
 				cat("  using a Parametrical approach for the hazard function","\n")
 			}
+			if (any(x$nvartimedep != 0)) cat("  and some time-dependant covariates","\n")
 			if (x$typeof == 0){
 				if(x$global_chisq.test==1){
 					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
@@ -106,31 +120,43 @@
 				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)",
 				"SE coef (H)", "z", "p"))
 			}
+			cat("\n")
 
-
-			if (x$noVar1 == 0){
-				cat("\n")
+			if (x$nvarnotdep[1] == 0){
 				if (x$joint.clust == 0) cat("Survival event:\n")
 				if (x$joint.clust == 1) cat("Recurrences:\n")
 				cat("------------- \n")
-				prmatrix(tmp[1:x$nvar[1], ,drop=FALSE])
-				if(x$global_chisq.test==1){
-					cat("\n")
-					prmatrix(tmpwald)
+				cat("No constant coefficients, only time-varying effects of the covariates \n")
+			}else{
+				if (x$noVar1 == 0){
+					if (x$joint.clust == 0) cat("Survival event:\n")
+					if (x$joint.clust == 1) cat("Recurrences:\n")
+					cat("------------- \n")
+					prmatrix(tmp[1:x$nvarnotdep[1], ,drop=FALSE])
+					if(x$global_chisq.test==1){
+						cat("\n")
+						prmatrix(tmpwald)
+					}
 				}
 			}
 			cat("\n")
 
-			if (x$noVar2 == 0){	
+			if (x$nvarnotdep[2] == 0){
 				cat("Terminal event:\n")
 				cat("---------------- \n")
-				prmatrix(tmp[-c(1:x$nvar[1]), ,drop=FALSE])
-				if(x$global_chisq.test_d==1){
-					cat("\n")
-					prmatrix(tmpwalddc)
+				cat("No constant coefficients, only time-varying effects of the covariates \n")
+			}else{
+				if (x$noVar2 == 0){
+					cat("Terminal event:\n")
+					cat("---------------- \n")
+					prmatrix(tmp[-c(1:x$nvarnotdep[1]), ,drop=FALSE])
+					if(x$global_chisq.test_d==1){
+						cat("\n")
+						prmatrix(tmpwalddc)
+					}
 				}
-				cat("\n")
 			}
+			cat("\n")
 		}
 		#theta <- x$theta
 		temp <- diag(x$varH)[1]
@@ -259,7 +285,7 @@
 			}else{
 				cat("  using a Parametrical approach for the hazard function","\n")
 			}
-			
+			if (any(x$nvartimedep != 0)) cat("  and some time-dependant covariates","\n")
 			if (x$noVar1 == 1){
 				cat("\n")
 				if (x$joint.clust == 0) cat("    Survival event: No covariates \n")
