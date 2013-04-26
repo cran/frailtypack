@@ -244,7 +244,11 @@
 	funcpasweib = res
 
 	do k=1,ng
-		cumulhaz(k)=res1(k)
+		if (AG.eq.1) then
+			cumulhaz(k)=res1(k)-res3(k)
+		else 
+			cumulhaz(k)=res1(k)
+		endif
 	end do
 
 123     continue

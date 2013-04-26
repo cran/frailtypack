@@ -180,7 +180,7 @@
 	ni=0
 	cpt=0
 
-	b=0.d0
+!	b=0.d0 on veut pouvoir laisser l'utilisateur initialiser
 	resOut=0.d0
 
 	nsujet=nsujetAux
@@ -393,7 +393,7 @@
 	min = 1.d-10
 	max = maxt
 	
-	do i = 1,(2*nsujet+sum(icAux)) ! changement comme indiquÃ© plus haut
+	do i = 1,(2*nsujet+sum(icAux)) ! changement comme indique plus haut
 		do k = 1,nsujet
 			if (t0(k).ge.min) then
 				if(t0(k).lt.max)then
@@ -452,15 +452,15 @@
 		ziOut = zi
 
 !--------- affectation nt0,nt1,ntU----------------------------
-	!	indictronq=0
+		indictronq=0
 		do i=1,nsujet
 			
 			if(t0(i).eq.0.d0)then
 				nt0(i) = 0
 			endif
-		!	if(t0(i).ne.0.d0)then
-		!		indictronq=1
-		!	endif
+			if(t0(i).ne.0.d0)then
+				indictronq=1
+			endif
 !Al:
 			!if ((intcens.eq.1).and.(t1(i).eq.0.d0)) then
 			!	nt1(i) = 0
@@ -503,7 +503,10 @@
 
 !------ initialisation des parametres
 
-	b=1.d-1
+	! savoir si l'utilisateur a entre des parametres initiaux !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (sum(b).eq.0.d0) then
+		b=1.d-1
+	endif
 
 	if (typeof == 1) then
 		if (nst == 2) then
@@ -866,6 +869,7 @@
 !		allocate(kkapa(2))
 !	end if
 	!print*,"appel de funcpa"
+
 	select case(typeof)
 		case(0)
 			if (timedep.eq.0) then
@@ -2581,10 +2585,10 @@
 			dexp(-dexp(frail)*res5(i))
 		endif
 	enddo
-
+!print*,(dexp(frail)**c(i)),dexp(-dexp(frail)*res5(i))
 	func1S = prod*(1.d0/dsqrt(2.d0*pi*sig2))* &
 	dexp(-(frail**2.d0)/(2.d0*sig2))
-	
+!	print*,func1S,prod,dsqrt(2.d0*pi*sig2),dexp(-(frail**2.d0)/(2.d0*sig2))
 	return
 	
 	end function func1S

@@ -251,12 +251,10 @@
 		end if	
 		if ((aux2(k).ne.aux2(k)).or.(abs(aux2(k)).ge. 1.d30)) then
 			funcpajsplines=-1.d9
-!			print*,'gt 3'
-!			print*,k,'(aux2(k)',aux2(k),'nt0(k)',nt0(k),'vet2',vet2,'ut2(nt0(k))',ut2(nt0(k))
 			goto 123
 		end if	
 	end do
-!	print*,'ok 2',res1(1)
+
 !**************INTEGRALES ****************************
 	do ig=1,ng 
 		auxig=ig 
@@ -289,7 +287,7 @@
 				+ dlog(integrale3(k)) 
 			endif
 			if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-!				print*,"here",k,integrale3(40),integrale3(41),integrale3(42)
+!				print*,"here",k
 				funcpajsplines=-1.d9
 				goto 123
 			end if	

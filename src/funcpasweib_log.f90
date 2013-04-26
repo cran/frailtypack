@@ -83,14 +83,16 @@
 			if((c(i).eq.1).and.(stra(i).eq.1))then
 				res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
 			endif
-	
+			
 			if((c(i).eq.1).and.(stra(i).eq.2))then
 				res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
 			endif
-	               if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpasweib_log=-1.d9
-                          goto 123
-                       end if	
+			
+			if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
+				funcpasweib_log=-1.d9
+				goto 123
+			end if
+			
 			if(stra(i).eq.1)then
 				res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet - ((t0(i)/etaR)**betaR)*vet
 				RisqCumul(i) = ((t1(i)/etaR)**betaR)*vet
@@ -100,11 +102,13 @@
 				res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet - ((t0(i)/etaD)**betaD)*vet
 				RisqCumul(i) = ((t1(i)/etaD)**betaD)*vet
 			endif
-	               if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpasweib_log=-1.d9
-                          goto 123
-                       end if
+			
+			if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
+				funcpasweib_log=-1.d9
+				goto 123
+			end if
 		end do
+		
 		res = 0.d0
 		cptg = 0
 
@@ -116,8 +120,8 @@
 				res = res-res1(k)+res2(k)
 				cptg = cptg + 1
 				if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-		                  funcpasweib_log=-1.d9
-		                  goto 123
+					funcpasweib_log=-1.d9
+					goto 123
 				end if
 			endif
 		end do
@@ -228,8 +232,8 @@
 						-dlog(integrale2(k))
 					endif
 					if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-						!print*,integrale3
-						!print*,"here8",k,res,res2(k),integrale3(k),dlog(integrale3(k))
+						!print*,"here8",k,res,res2(k),integrale1(k),integrale2(k),dlog(integrale1(k)),dlog(integrale2(k))
+						!print*,integrale3(k),dlog(integrale3(k))
 				          funcpasweib_log=-1.d9
 				          goto 123
 					end if

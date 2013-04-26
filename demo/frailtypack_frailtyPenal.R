@@ -27,7 +27,7 @@ print(mod.cox.gap, digits = 4)
 mod.sha.gap <- frailtyPenal(Surv(time,event) ~ cluster(id) +
   dukes + charlson + sex + chemo, Frailty = TRUE,
   n.knots = 10, kappa1 = 1, data = readmission, cross.validation = TRUE)
-
+  
 print(mod.sha.gap, digits = 4)
 
 #########################################################################

@@ -679,7 +679,7 @@
 	end if
 
 !=============================- fin cross validation           
-!===== initialisation des parametres de regression/pas effets aleatopires
+!===== initialisation des parametres de regression/pas effets aleatoires
 
 !	write(*,*),'====================================='
 !	write(*,*),'== avec var explicatives !t ============='

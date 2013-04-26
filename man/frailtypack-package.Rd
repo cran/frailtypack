@@ -1,6 +1,6 @@
 
 \name{frailtypack-package}
-\Rdversion{2.4}
+\Rdversion{2.4.1}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
@@ -8,14 +8,22 @@
 \title{General Frailty models: shared, joint and nested frailty models with prediction}
 
 \description{
- Frailtypack now fits several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation. 1) A shared frailty model and Cox proportional hazard model. Clustered and recurrent survival times can be studied. 2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope). 3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects. 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. Prediction values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard and shared frailty model) and strata (max=2) are allowed. In each model, the random effects have a gamma distribution, but you can switch to a log-normal in shared and joint. Now, you can also consider time-varying effect covariates in Cox, shared and joint models. The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
+ Frailtypack now fits several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation.
+ 1) A shared frailty model and Cox proportional hazard model. Clustered and recurrent survival times can be studied.
+ 2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope).
+ 3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects.
+ 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. Prediction
+ values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard
+ and shared frailty model) and strata (max=2) are allowed. In each model, the random effects have a gamma distribution, but you can switch
+ to a log-normal in shared and joint. Now, you can also consider time-varying effect covariates in Cox, shared and joint models. The
+ package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 }
 \details{
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.4\cr
-     Date: \tab 2013-02-08\cr
+     Version: \tab 2.4.1\cr
+     Date: \tab 2013-04-26\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab yes\cr
   }
@@ -44,6 +52,7 @@ V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum pena
 \examples{
 
 \dontrun{
+
 ### Additive model with 1 covariate ###
 
 data(dataAdditive)
@@ -51,7 +60,6 @@ modAdd <- additivePenal(Surv(t1,t2,event)~
 cluster(group)+var1+slope(var1),
 correlation=TRUE,data=dataAdditive,
 n.knots=8,kappa1=10000,hazard="Splines")
-
 
 ### Joint model (recurrent and terminal events) with 2 covariates ###
 
@@ -63,7 +71,7 @@ data=readmission,n.knots=14,kappa1=9.55e+9,
 kappa2=1.41e+12,Frailty=TRUE,joint=TRUE,
 recurrentAG=FALSE,hazard="Splines")
 
- ### Nested model (or hierarchical model) with 2 covariates ###
+### Nested model (or hierarchical model) with 2 covariates ###
 
 data(dataNested)
 modClu <- frailtyPenal(Surv(t1,t2,event)~

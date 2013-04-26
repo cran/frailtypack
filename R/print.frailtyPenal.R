@@ -136,10 +136,10 @@
 	
 		if (!is.null(frail)) {
 			#tetha <- x$theta
-			temp <- x$varTheta[1]
-			seH <- sqrt(((2 * (frail^0.5))^2) * temp)
-			temp <- x$varTheta[2]
-			seHIH <- sqrt(((2 * (frail^0.5))^2) * temp)
+			#temp <- x$varTheta[1]
+			seH <- sqrt(x$varTheta[1]) #sqrt(((2 * (frail^0.5))^2) * temp)
+			#temp <- x$varTheta[2]
+			seHIH <- sqrt(x$varTheta[2]) #sqrt(((2 * (frail^0.5))^2) * temp)
 			
 			
 #AD:

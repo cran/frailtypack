@@ -9,6 +9,8 @@ terminal,
 num.id,
 Cmeasures,
 SurvIC,
+event2,
+multivePenal,
 timedep
 )
 import("survival","boot")
@@ -30,3 +32,7 @@ S3method(summary,jointPenal)
 S3method(summary,nestedPenal)
 
 S3method(print,Cmeasures)
+
+S3method(print,multivePenal)
+S3method(summary,multivePenal)
+S3method(plot,multivePenal)
