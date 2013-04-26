@@ -92,7 +92,7 @@
 	double precision,external::funcpaGsplines,funcpaGcpm,funcpaGweib
 	double precision,external::funcpaGsplines_intcens,funcpaGcpm_intcens,funcpaGweib_intcens
 	double precision,external::funcpaGsplines_log,funcpaGcpm_log,funcpaGweib_log
-	double precision,external::funcpaj_tps
+	double precision,external::funcpaj_tps,funcpaG_tps
 	double precision,dimension(100)::xSu1,xSu2
 !cpm
 	integer::indd,ent,entdc,typeof0,nbintervR0,nbintervDC0
@@ -707,9 +707,12 @@
 
 !------- initialisation des parametres
 
-	do i=1,npmax
-		b(i)=5.d-1
-	end do
+	! savoir si l'utilisateur a entre des parametres initiaux !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (sum(b).eq.0.d0) then
+		do i=1,npmax
+			b(i)=5.d-1
+		end do
+	endif
 
 	if(typeof ==1) then
 		b(1:nbintervR) = 0.8d0!1.d-2!
@@ -898,15 +901,27 @@
 
 				select case(typeof)
 					case(0)
-						if (logNormal.eq.0) then
-							call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines)
+						if (timedep.eq.0) then
+							if (logNormal.eq.0) then
+								call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines)
+							else
+								call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines_log)
+							endif
 						else
-							call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines_log)
+							call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaG_tps)
 						endif
 					case(1)
-						call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGcpm)
+						if (timedep.eq.0) then
+							call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGcpm)
+						else
+							call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaG_tps)
+						endif
 					case(2)
-						call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGweib)
+						if (timedep.eq.0) then
+							call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGweib)
+						else
+							call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaG_tps)
+						endif
 				end select
 			deallocate(I_hess,H_hess,v)
 
@@ -1023,34 +1038,46 @@
 	else
 		select case(typeof)
 			case(0)
-				if (logNormal.eq.0) then
-					if (intcens.eq.1) then
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines_intcens)
+				if (timedep.eq.0) then
+					if (logNormal.eq.0) then
+						if (intcens.eq.1) then
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines_intcens)
+						else
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines)
+						endif
 					else
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines)
+						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines_log)
 					endif
 				else
-					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines_log)
+					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaG_tps)
 				endif
 			case(1)
-				if (logNormal.eq.0) then
-					if (intcens.eq.1) then
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGcpm_intcens)
+				if (timedep.eq.0) then
+					if (logNormal.eq.0) then
+						if (intcens.eq.1) then
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGcpm_intcens)
+						else
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGcpm)
+						endif
 					else
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGcpm)
+						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGcpm_log)
 					endif
 				else
-					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGcpm_log)
+					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaG_tps)
 				endif
 			case(2)
-				if (logNormal.eq.0) then
-					if (intcens.eq.1) then
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGweib_intcens)
+				if (timedep.eq.0) then
+					if (logNormal.eq.0) then
+						if (intcens.eq.1) then
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGweib_intcens)
+						else
+							call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGweib)
+						endif
 					else
-						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGweib)
+						call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGweib_log)
 					endif
 				else
-					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGweib_log)
+					call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaG_tps)
 				endif
 		end select
 	end if

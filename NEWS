@@ -1,5 +1,14 @@
-Changes in Version 2.4           Apr 2013
+Changes in Version 2.4.1         Apr 2013
 
+  o Bug fixed about estimation of frailties in shared models using recurrentAG=TRUE
+  
+  o Printing bug about standard deviation of the random effet variance in a model without covariate.
+
+  o Possibility to initialize regression coefficients in shared and joint frailty models 
+
+  
+Changes in Version 2.4           Apr 2013
+  
   o Fit now a model with time-varying effects for covariates (only for Cox, shared gamma and a joint gamma frailty model).
 
 

@@ -531,10 +531,10 @@
 	
 		irep1=irep10
 
-		if(irep1.eq.0.and.nst.ge.2)then
+!		if(irep1.eq.0.and.nst.ge.2)then
 ! ne se produit jamais maintenant (1 seule strate pour CV): changement de juin 2009
-			stop
-		endif
+!			stop
+!		endif
 	
 		xmin1=xmin10
 		

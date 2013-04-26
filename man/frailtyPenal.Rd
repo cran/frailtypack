@@ -118,7 +118,7 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
              joint = FALSE, recurrentAG = FALSE, cross.validation =
              FALSE, n.knots, kappa1, kappa2, maxit = 350, hazard =
              "Splines", nb.int1, nb.int2, RandDist = "Gamma",
-             betaknots = 1, betaorder = 3)
+             betaknots = 1, betaorder = 3, B)
 }
 
 \arguments{
@@ -175,6 +175,8 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
   \item{betaknots}{Number of inner knots used for the estimation of B-splines. Default is 1. See 'timedep' function for more details. Not implemented for nested model.}
 
   \item{betaorder}{Order of the B-splines. Defaut is cubic B-splines (order = 3). See 'timedep' function for more details. Not implemented for nested model.}
+  
+  \item{B}{A vector of inital values for regression coefficients. This vector should be of the same size as the whole vector of covariates. Default is 0.1 for each.}
 
 }
 
@@ -394,15 +396,18 @@ n.knots=12,kappa1=10000,data=kidney,Frailty=FALSE)
 frailtyPenal(Surv(time,status)~cluster(id)+sex+age,
 n.knots=12,kappa1=10000,data=kidney,Frailty=TRUE)
 
+# with an initialisation of regression coefficients
+
+frailtyPenal(Surv(time,status)~cluster(id)+sex+age,
+n.knots=12,kappa1=10000,data=kidney,Frailty=TRUE,B=c(-1.44,0))
+
 # with truncated data
 
-# here is created a hypothetical truncated data
-kidney$tt0<-rep(0,nrow(kidney))
-kidney$tt0[1:3]<-c(2,9,13)
+data(dataNested)
 
-# then, we fit the model
-frailtyPenal(Surv(tt0,time,status)~sex+age+cluster(id),
-n.knots=12,kappa1=10000,data=kidney,Frailty=TRUE)
+frailtyPenal(Surv(t1,t2,event) ~ cluster(group),
+data=dataNested,n.knots=10,kappa1=10000,
+Frailty=TRUE,cross.validation=TRUE,recurrentAG=F)
 
 # stratified analysis
 

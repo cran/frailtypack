@@ -38,9 +38,6 @@
 	dut2=0.d0
 	dut1=0.d0
 
-
-
-
 	bh=b
 
 	if (id.ne.0) bh(id)=bh(id)+thi
@@ -146,7 +143,7 @@
 !*******************************************         
 !----- A SIMPLE SHARED FRAILTY  MODEL  
 !      write(*,*)'SIMPLE SHARED FRAILTY MODEL'
-!***********************
+!*******************************************
 	if(indic_joint.eq.0)then
 		inv = 1.d0/theta
 !    i indice les sujets
@@ -260,10 +257,9 @@
 	else !passage au modele conjoint
 
 
-!********************************************
 !*******************************************         
 !----- JOINT FRAILTY MODEL  
-!*********************************************
+!*******************************************
 		nst=2
 		inv = 1.d0/theta
 !     pour les donnees recurrentes
@@ -336,44 +332,14 @@
 !**************INTEGRALES ****************************
 		do ig=1,ng
 			auxig=ig
-!              choix=1
-!              call gaulagJ(int,choix)
-!              integrale1(ig) = int
-!        write(*,*)'integrale1',integrale1(ig),frail,theta,&
-!                  alpha,aux1(auxig),ig
-!              if(indictronq.eq.1.and.AG.eq.0)then
-!                 choix = 2
-!                 call gaulagJ(int,choix)
-!                 integrale2(ig) = int
-!                 write(*,*)'integrale2',integrale2(ig),ig
-!              else 
-!                 integrale2(ig) = 1.d0
-!              endif
-
-!              if(AG.eq.1)then
 			choix = 3
-!                 write(*,*)')))))))))ig avant gaulag',auxig,ig
 			call gaulagJ(int,choix)
-!                 write(*,*)'))apres gaulag',int,ig
-
-!                 integrale3(ig) = dexp(gammaJ(1.d0/theta +nig(ig)))*&
-!                     (1.d0/theta + res1(ig)- res3(ig))** &
-!                     (-nig(ig) - 1.d0 / theta)
-
 			integrale3(ig) = int !moins bon 
-! parfois , quand bcp de deces par groupe integrale3=0**/
+! parfois quand bcp de deces par groupe integrale3=0
 !			if(integrale3(ig).lt.1.d-300)then
 !				integrale3(ig) = 1.d-300
 !			endif
-!                 write(*,*)'integrale3',integrale3(ig),ig
-!                 stop
-!                 write(*,*)'i'
-!             endif
-!                 if(ig.eq.37)stop
 		end do
-!                 write(*,*)'integrale3',integrale3(ng)
-
-!      stop
 !************* FIN INTEGRALES **************************
 		res = 0.d0 
 		do k=1,ng  
@@ -385,12 +351,6 @@
 !--      pour le deces:
 					+ res2dc(k)-gammaJ(1.d0/theta)-dlog(theta)/theta &
 					+ dlog(integrale3(k))
-!                  if(res.eq.nan) write(*,*)'--func',res2(k),res2dc(k),integrale3(k),theta,res,k
-!                   if(res.gt.0) write(*,*)'--func',res2(k),res2dc(k),integrale3(k),theta,res,k
-!                     if(k.eq.600) stop
-!                   if(k0(1).eq.0.d0) write(*,*)'kappa  ',k0(1),k0(2)
-!                      stop
-!               endif
 				else
 !*******************************************************
 !     developpement de taylor d ordre 3
@@ -406,7 +366,7 @@
 				end if
 			endif 
 		end do   
-       endif !fin boucle indic_joint=0 or 1
+	endif !fin boucle indic_joint=0 or 1
 !---------- calcul de la penalisation -------------------
 
 	pe1 = 0.d0

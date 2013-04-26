@@ -5,7 +5,7 @@
 	use tailles
 	use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
 	mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-	nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta
+	nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,indictronq
 	use residusM
 
 
@@ -249,7 +249,7 @@
 				nb = nig(k)
 				dnb = dble(nig(k))
 
-				if (dnb.gt.1.d0) then
+				if (dnb.gt.1.d0) then ! ce serait pas .ge. plutot ?
 					do l=1,nb
 						sum=sum+dlog(1.d0+theta*dble(nb-l))
 					end do
@@ -339,7 +339,11 @@
 	funcpassplines = res 
 
 	do k=1,ng
-		cumulhaz(k)=res1(k)
+		if (AG.eq.1) then
+			cumulhaz(k)=res1(k)-res3(k)
+		else 
+			cumulhaz(k)=res1(k)
+		endif
 	end do
 
 123     continue

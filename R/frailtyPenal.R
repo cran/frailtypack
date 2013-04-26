@@ -2,14 +2,14 @@
 "frailtyPenal" <-
 function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, recurrentAG=FALSE,
              cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1,nb.int2,
-             RandDist="Gamma", betaknots=1, betaorder=3)
+             RandDist="Gamma", betaknots=1, betaorder=3, B)
 {
 
 #ad 15/02/12 :add Audrey
 m2 <- match.call()
-m2$formula <- m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$recurrentAG <- m2$cross.validation <- m2$n.knots <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <-m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$... <- NULL
+m2$formula <- m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$recurrentAG <- m2$cross.validation <- m2$n.knots <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <-m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$... <- NULL
 Names.data <- m2$data
-#
+
 #### Betaknots et betaorder ####
 if (betaknots > 10) stop("Number of knots for beta(t) greater than 10 is useless, please choose a number between 0 and 10 (3 is optimal)")
 if ((betaorder == 0)|(betaorder > 4)) stop("B-splines order for beta(t) must be a number between 1 and 4 (3 is optimal)")
@@ -116,7 +116,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	
 	m <- match.call(expand.dots = FALSE) # recupere l'instruction de l'utilisateur
 
-	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$... <- NULL
+	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$B <- m$... <- NULL
 
 
 	special <- c("strata", "cluster", "subcluster", "terminal","num.id","timedep")
@@ -127,7 +127,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		terms(formula, special, data = data)
 	}
 	
-	ord <- attr(Terms, "order") ## longueur de ord=nbre de var.expli
+	ord <- attr(Terms, "order") # longueur de ord=nbre de var.expli
 	
 	if (length(ord) & any(ord != 1))stop("Interaction terms are not valid for this function")
 #si pas vide tous si il ya au moins un qui vaut 1 on arrÃªte
@@ -135,7 +135,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	m$formula <- Terms
 	
 	
-	m[[1]] <- as.name("model.frame") ##m[[1]]=frailtypenal, il le remplace par model.frame en fait
+	m[[1]] <- as.name("model.frame") # m[[1]]=frailtypenal, il le remplace par model.frame en fait
 
 #model.frame(formula = Surv(time, event) ~ cluster(id) + as.factor(dukes) +
 #as.factor(charlson) + sex + chemo + terminal(death), data = readmission)
@@ -552,6 +552,14 @@ if((all.equal(length(hazard),1)==T)==T){
 		"1"=(as.integer(uni.strat) * nbintervR + nvar + as.integer(Frailty)) + npbetatps,
 		"2"=(as.integer(uni.strat) * 2 + nvar + as.integer(Frailty)) + npbetatps)
 
+	# traitement de l'initialisation du Beta rentre par l'utilisateur
+	Beta <- rep(0,np)
+	if (!missing(B)) {
+		if (length(B) != nvar) stop("Wrong number of regression coefficients in B")
+		if (timedep) stop("You can hardly know initial regression coefficient while time-varying effect")
+		Beta <- c(rep(0.1,np-nvar),B)
+	}
+
 		xSu1 <- rep(0,100)
 		xSu2 <- rep(0,100)
 		if (typeof==0){
@@ -583,7 +591,7 @@ if((all.equal(length(hazard),1)==T)==T){
 				as.integer(maxit),
 				as.integer(crossVal),
 				np=as.integer(np),
-				b=as.double(rep(0,np)),
+				b=as.double(Beta),
 				as.double(matrix(0,nrow=np,ncol=np)),
 				as.double(matrix(0,nrow=np,ncol=np)),
 				as.double(0),
@@ -683,12 +691,17 @@ if((all.equal(length(hazard),1)==T)==T){
 	names(fit$coef) <- noms
      }
 
+     temp1 <- matrix(ans[[22]], nrow = np, ncol = np)
+     temp2 <- matrix(ans[[23]], nrow = np, ncol = np)
+     if (Frailty) {
+	fit$varTheta <- c(temp1[(np - nvar - npbetatps),(np - nvar - npbetatps)],temp2[(np - nvar - npbetatps),(np - nvar - npbetatps)])
+	fit$varTheta <- ((2*ans[[21]][np - nvar - npbetatps])^2)*fit$varTheta # delta-method
+     }
+     
 #AD:modification des dimensions des tableaux
     if(nvar > 0){
-         temp1 <- matrix(ans[[22]], nrow = np, ncol = np)
-         temp2 <- matrix(ans[[23]], nrow = np, ncol = np)
 
-         fit$varH <- temp1[(np - nvar - npbetatps + 1):np, (np - nvar - npbetatps + 1):np]
+	 fit$varH <- temp1[(np - nvar - npbetatps + 1):np, (np - nvar - npbetatps + 1):np]
          fit$varHIH <- temp2[(np - nvar - npbetatps + 1):np, (np - nvar - npbetatps + 1):np]
 	noms <- factor.names(colnames(X))
 	if (timedep == 1){ # on enleve les variances des parametres des B-splines
@@ -699,8 +712,7 @@ if((all.equal(length(hazard),1)==T)==T){
 			fit$varHIH <- fit$varHIH[-(pos:(pos+betaorder+betaknots-1)),-(pos:(pos+betaorder+betaknots-1))]
 		}
 	}
-	 if (Frailty) fit$varTheta <- c(temp1[(np - nvar - npbetatps),(np - nvar - npbetatps)],temp2[(np - nvar - npbetatps),(np - nvar - npbetatps)])
-    }
+   }
 
     fit$formula <- formula(Terms)
 
@@ -1006,9 +1018,9 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
 ## AD: modified 20 06 2011, for no covariates on terminal event part
 		if (missing(formula.terminalEvent)){
-			m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$... <- NULL
+			m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$... <- NULL
 		}else{
-			m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$... <- NULL
+			m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$... <- NULL
 		}
 
 		
@@ -1238,6 +1250,14 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		stop("'Recurrent event' variable and 'Terminal event' variable need to be different")
 	}
 
+	# traitement de l'initialisation du Beta rentre par l'utilisateur
+	Beta <- rep(0,np)
+	if (!missing(B)) {
+		if (length(B) != nvar) stop("Wrong number of regression coefficients in B")
+		if (timedep) stop("You can hardly know initial regression coefficient while time-varying effect")
+		Beta <- c(rep(0.5,np-nvar),B)
+	}
+	
 	xSu1 <- rep(0,100)
 	xSu2 <- rep(0,100)
 	if (typeof==0){
@@ -1255,78 +1275,78 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		"1"=(nbintervR + nvarRec + nvarEnd + effet),
 		"2"=(2 + nvarRec + effet))
 
-    ans <- .Fortran("joint",
-                as.integer(n),
-                as.integer(length(uni.cluster)),
-		as.integer(lignedc0),###
-                as.integer(n.knots),
-                k0=c(as.double(kappa1),as.double(kappa2)),
-                as.double(tt0),
-                as.double(tt1),
-                as.integer(cens),
-                as.integer(cluster),
-		as.integer(clusterdc),###
-                as.double(tt0.death),
-                as.double(tt1.death),
-                as.integer(terminalEvent),
-		as.double(tempdc),###
-		as.integer(icdc00),###
-                as.integer(nvarRec),
-                as.double(var),
-                as.integer(nvarEnd),
-                as.double(vardc),
-		as.double(vaxdc00),###
-                as.integer(noVar1),
-                as.integer(noVar2),
-		as.integer(recurrentAG),
-                as.integer(maxit),
-                np=as.integer(np),
-                b=as.double(rep(0,np)),
-                H=as.double(matrix(0,nrow=np,ncol=np)),
-                HIH=as.double(matrix(0,nrow=np,ncol=np)),
-                loglik=as.double(0),
-		LCV=as.double(rep(0,2)),
-                x1=as.double(rep(0,size1)),
-                lam=as.double(matrix(0,nrow=size1,ncol=3)),
-                xSu1=as.double(xSu1),
-                surv=as.double(matrix(0,nrow=mt11,ncol=3)),
-                x2=as.double(rep(0,size2)),
-                lam2=as.double(matrix(0,nrow=size2,ncol=3)),
-		xSu2=as.double(xSu2),
-                surv2=as.double(matrix(0,nrow=mt12,ncol=3)),
-		as.integer(typeof),
-		as.integer(equidistant),
-		as.integer(nbintervR),
-		as.integer(nbintervDC),
-		as.integer(c(size1,size2,mt11,mt12)),###
-                ni=as.integer(0),
-                cpt=as.integer(0),
-                cpt.dc=as.integer(0),
-                ier=as.integer(0),
-		istop=as.integer(0),
-		paraweib=as.double(rep(0,4)),
-#		shape.weib=as.double(rep(0,2)),
-#		scale.weib=as.double(rep(0,2)),
-		MartinGale=as.double(matrix(0,nrow=length(uni.cluster),ncol=4)),###
-		linear.pred=as.double(rep(0,n)),
-		lineardc.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
-		zi=as.double(rep(0,(n.knots+6))),
-		time=as.double(rep(0,(nbintervR+1))),
-		timedc=as.double(rep(0,(nbintervDC+1))),
-		kendall=as.double(matrix(0,nrow=4,ncol=2)),
-#		as.integer(initialize),
-#		as.integer(npinit),
-#		Bshared=as.double(rep(0,npinit)),
-		linearpredG=as.double(rep(0,lignedc0)),
-		joint.clust=as.integer(joint.clust),
-		as.integer(intcens), # censure par intervalle
-		as.double(ttU),
-		logNormal=as.integer(logNormal),
-		paratps=as.integer(c(timedep,betaknots,betaorder)),
-		as.integer(c(filtretps,filtretps2)),
-		BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
-		BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep2)),
-                PACKAGE = "frailtypack")
+	ans <- .Fortran("joint",
+			as.integer(n),
+			as.integer(length(uni.cluster)),
+			as.integer(lignedc0),###
+			as.integer(n.knots),
+			k0=c(as.double(kappa1),as.double(kappa2)),
+			as.double(tt0),
+			as.double(tt1),
+			as.integer(cens),
+			as.integer(cluster),
+			as.integer(clusterdc),###
+			as.double(tt0.death),
+			as.double(tt1.death),
+			as.integer(terminalEvent),
+			as.double(tempdc),###
+			as.integer(icdc00),###
+			as.integer(nvarRec),
+			as.double(var),
+			as.integer(nvarEnd),
+			as.double(vardc),
+			as.double(vaxdc00),###
+			as.integer(noVar1),
+			as.integer(noVar2),
+			as.integer(recurrentAG),
+			as.integer(maxit),
+			np=as.integer(np),
+			b=as.double(Beta),
+			H=as.double(matrix(0,nrow=np,ncol=np)),
+			HIH=as.double(matrix(0,nrow=np,ncol=np)),
+			loglik=as.double(0),
+			LCV=as.double(rep(0,2)),
+			x1=as.double(rep(0,size1)),
+			lam=as.double(matrix(0,nrow=size1,ncol=3)),
+			xSu1=as.double(xSu1),
+			surv=as.double(matrix(0,nrow=mt11,ncol=3)),
+			x2=as.double(rep(0,size2)),
+			lam2=as.double(matrix(0,nrow=size2,ncol=3)),
+			xSu2=as.double(xSu2),
+			surv2=as.double(matrix(0,nrow=mt12,ncol=3)),
+			as.integer(typeof),
+			as.integer(equidistant),
+			as.integer(nbintervR),
+			as.integer(nbintervDC),
+			as.integer(c(size1,size2,mt11,mt12)),###
+			ni=as.integer(0),
+			cpt=as.integer(0),
+			cpt.dc=as.integer(0),
+			ier=as.integer(0),
+			istop=as.integer(0),
+			paraweib=as.double(rep(0,4)),
+#			shape.weib=as.double(rep(0,2)),
+#			scale.weib=as.double(rep(0,2)),
+			MartinGale=as.double(matrix(0,nrow=length(uni.cluster),ncol=4)),###
+			linear.pred=as.double(rep(0,n)),
+			lineardc.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
+			zi=as.double(rep(0,(n.knots+6))),
+			time=as.double(rep(0,(nbintervR+1))),
+			timedc=as.double(rep(0,(nbintervDC+1))),
+			kendall=as.double(matrix(0,nrow=4,ncol=2)),
+#			as.integer(initialize),
+#			as.integer(npinit),
+#			Bshared=as.double(rep(0,npinit)),
+			linearpredG=as.double(rep(0,lignedc0)),
+			joint.clust=as.integer(joint.clust),
+			as.integer(intcens), # censure par intervalle
+			as.double(ttU),
+			logNormal=as.integer(logNormal),
+			paratps=as.integer(c(timedep,betaknots,betaorder)),
+			as.integer(c(filtretps,filtretps2)),
+			BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
+			BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep2)),
+			PACKAGE = "frailtypack")
 
 
 	MartinGale <- matrix(ans$MartinGale,nrow=as.integer(length(uni.cluster)),ncol=4)
@@ -1406,7 +1426,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     temp1 <- matrix(ans$H, nrow = np, ncol = np)
     temp2 <- matrix(ans$HIH, nrow = np, ncol = np)
 
-    fit$varH <- temp1[(np - nvar - npbetatps - 1):np, (np - nvar - npbetatps - 1):np] # erreur il y a -1 ?
+    fit$varH <- temp1[(np - nvar - npbetatps - 1):np, (np - nvar - npbetatps - 1):np]
     fit$varHIH <- temp2[(np - nvar - npbetatps - 1):np, (np - nvar - npbetatps - 1):np]
 	noms <- c("theta","alpha",factor.names(colnames(X)),factor.names(colnames(X2)))
 	if (timedep == 1){ # on enleve les variances des parametres des B-splines
