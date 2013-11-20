@@ -160,9 +160,9 @@
 		}
 		#theta <- x$theta
 		temp <- diag(x$varH)[1]
-		seH.frail <- sqrt(((2 * (frail^0.5))^2) * temp)
+		seH.frail <- sqrt(((2 * (frail^0.5))^2) * temp) # delta methode
 		temp <- diag(x$varHIH)[1]
-		seHIH.frail <- sqrt(((2 * (frail^0.5))^2) * temp)
+		seHIH.frail <- sqrt(((2 * (frail^0.5))^2) * temp) # delta methode
 #AD:
 		if (x$noVar1 == 1){
 			cat("\n")
@@ -201,13 +201,19 @@
 		if (x$typeof == 0){
 			cat(paste("   penalized marginal log-likelihood =", round(x$logLikPenal,2)))
 			cat("\n")
+			cat("   Convergence criteria: \n")
+			cat("   parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
+			cat("\n")
 			cat("   LCV = the approximate likelihood cross-validation criterion\n")
 			cat("         in the semi parametric case     =",x$LCV,"\n")
 		}else{
 			cat(paste("   marginal log-likelihood =", round(x$logLik,2)))
 			cat("\n")
+			cat("   Convergence criteria: \n")
+			cat("   parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
+			cat("\n")
 #			cat("   LCV = the approximate likelihood cross-validation criterion\n")
-#			cat("         in the parametric case     =",x$LCV,"\n")	
+#			cat("         in the parametric case     =",x$LCV,"\n")
 			cat("   AIC = Aikaike information Criterion     =",x$AIC,"\n")
 			cat("\n")
 			cat("The expression of the Aikaike Criterion is:","\n")
@@ -237,9 +243,9 @@
 			cat("\n")
 		}
 		if (x$joint.clust == 0){
-			cat("   n events=", x$n.event)
+			cat("   n events=", x$n.events)
 		}else{
-			cat("   n recurrent events=", x$n.event)
+			cat("   n recurrent events=", x$n.events)
 		}
 		cat("\n")
 		cat("   n terminal events=", x$n.deaths)
@@ -301,6 +307,11 @@
 			}
 			
 			cat("\n")
+			
+			cat("   Convergence criteria: \n")
+			cat("   parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
+			
+			cat("\n")
 			cat("   n=", x$n)
 			if (length(x$na.action)){
 				cat("      (", length(x$na.action), " observation deleted due to missing) \n")
@@ -308,9 +319,9 @@
 				cat("\n")
 			}
 			if (x$joint.clust == 0){
-				cat("   n events=", x$n.event)
+				cat("   n events=", x$n.events)
 			}else{
-				cat("   n recurrent events=", x$n.event)
+				cat("   n recurrent events=", x$n.events)
 			}
 			cat("\n")
 			cat("   n terminal events=", x$n.deaths)

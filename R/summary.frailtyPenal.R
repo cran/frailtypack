@@ -1,5 +1,4 @@
-"summary.frailtyPenal"<-
- function(object,level=.95, len=6, d=2, lab="hr", ...)
+"summary.frailtyPenal" <- function(object,level=.95, len=6, d=2, lab="hr", ...)
 {
 
 	x <- object
@@ -45,7 +44,7 @@
 	
 			mx <- max(nchar(lab)) + 1
 			cat(paste(rep(" ",mx),collapse=""),paste("   ",dimnames(n)[[2]]),"\n")
-	
+			
 			for(i in (1):dd[1]) {
 				lab[i] <- paste(c(rep(" ", mx - nchar(lab[i])), lab[i]),collapse = "")
 				cat(lab[i], a[i, 1], "(", a[i, 2], "-", a[i, 3], ") \n")

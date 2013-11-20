@@ -1,3 +1,16 @@
+Changes in Version 2.5         Nov 2013
+
+  o New dynamic tool of prediction added for Cox proportionnal hazard, shared and joint frailty model
+  
+  o Add IPCW estimation of concordance measures as Uno (Stat Med 2011). Significant changes in the printing of 'Cmeasures' function.
+  
+  o Bug fixed about parametrical survival functions plotting with left truncated data
+  
+  o Bug fixed which allowed cross validation with interval-censored data
+  
+  o Possibility to print and change the three convergence criterions in frailtyPenal and additivePenal
+ 
+
 Changes in Version 2.4.1         Apr 2013
 
   o Bug fixed about estimation of frailties in shared models using recurrentAG=TRUE

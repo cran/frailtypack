@@ -1,5 +1,6 @@
 "additivePenal" <-
-function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1)
+function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1, kappa2,
+             maxit=350, hazard="Splines", nb.int1, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-3)
 {
 
 ##### hazard specification ######
@@ -15,7 +16,7 @@ if((all.equal(length(hazard),1)==T)==T){
    if(!(hazard %in% c("Weibull","Piecewise","Splines"))){
 	stop("Only 'Weibull', 'Splines' or 'Piecewise' hazard can be specified in hazard argument.")
    }else{
-	typeof <- switch(hazard,"Splines"=0,"Piecewise"=1,"Weibull"=2)	
+	typeof <- switch(hazard,"Splines"=0,"Piecewise"=1,"Weibull"=2)
 	if(typeof %in% c(0,2)){
 ### Splines
 		if (!(missing(nb.int1))){
@@ -24,7 +25,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		if (typeof == 0){
 			size1 <- 100
 			size2 <- 100
-			equidistant <- 2	
+			equidistant <- 2
 			nbintervR <- 0
 		}
 ### Weibull
@@ -78,13 +79,13 @@ if((all.equal(length(hazard),1)==T)==T){
 		kappa1 <- 0
 		kappa2 <- 0
 		crossVal <- 0
-	}	
+	}
     
     
     
     call <- match.call()
     m <- match.call(expand.dots = FALSE)
-    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-  m$... <- NULL
+    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$... <- NULL
     special <- c("strata", "cluster", "slope")
     Terms <- if (missing(data)) 
         terms(formula, special)
@@ -418,8 +419,8 @@ if((all.equal(length(hazard),1)==T)==T){
 				frailty.var2=as.double(rep(0,as.integer(length(uni.cluster)))),
 				frailty.cov=as.double(rep(0,as.integer(length(uni.cluster)))),
 				linear.pred=as.double(rep(0,n)),
-
-				PACKAGE = "frailtypack") 
+				EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
+				PACKAGE = "frailtypack")  # 62
 		
 
     if (ans$trunc == 1){
@@ -430,7 +431,7 @@ if((all.equal(length(hazard),1)==T)==T){
      }
     
     if (ans$istop == 2){
-         warning("Model did not converge. Change the 'maxit' parameter")
+         warning("Model did not converge.")
     }
     if (ans$istop == 3){
          warning("Matrix non-positive definite.")
@@ -537,6 +538,7 @@ if((all.equal(length(hazard),1)==T)==T){
 # 	fit$frailty.cov <- ans$frailty.cov
 	fit$linear.pred <- ans$linear.pred  
 ##
+    fit$EPS <- ans$EPS
 
 #AD
     if(ans$ier==2000)

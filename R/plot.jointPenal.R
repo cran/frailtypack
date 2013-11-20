@@ -8,8 +8,7 @@ function (x, event="both", type.plot="hazard", conf.bands=FALSE, pos.legend="top
     }
 
 
-   plot.type <- charmatch(type.plot, c("hazard", "survival"), 
-        nomatch = 0)
+   plot.type <- charmatch(type.plot, c("hazard", "survival"), nomatch = 0)
     if (plot.type == 0) {
         stop("estimator must be 'hazard' or 'survival'")
     }

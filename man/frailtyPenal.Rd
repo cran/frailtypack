@@ -118,7 +118,8 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
              joint = FALSE, recurrentAG = FALSE, cross.validation =
              FALSE, n.knots, kappa1, kappa2, maxit = 350, hazard =
              "Splines", nb.int1, nb.int2, RandDist = "Gamma",
-             betaknots = 1, betaorder = 3, B)
+             betaknots = 1, betaorder = 3, B, LIMparam = 1e-4,
+             LIMlogl = 1e-4, LIMderiv = 1e-4)
 }
 
 \arguments{
@@ -177,6 +178,12 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
   \item{betaorder}{Order of the B-splines. Defaut is cubic B-splines (order = 3). See 'timedep' function for more details. Not implemented for nested model.}
   
   \item{B}{A vector of inital values for regression coefficients. This vector should be of the same size as the whole vector of covariates. Default is 0.1 for each.}
+  
+  \item{LIMparam}{Convergence threshold of the Marquard algorithm for the parameters (see Details), \eqn{10^{-4}} by default.}
+  
+  \item{LIMlogl}{Convergence threshold of the Marquard algorithm for the log-likelihood (see Details), \eqn{10^{-4}} by default.}
+  
+  \item{LIMderiv}{Convergence threshold of the Marquard algorithm for the gradient (see Details), \eqn{10^{-4}} by default.}
 
 }
 
@@ -207,7 +214,7 @@ for a nested model
 The estimated parameter are obtained using the robust Marquardt algorithm (Marquardt, 1963) which is a combination
 between a Newton-Raphson algorithm and a steepest descent algorithm. The iterations are stopped when the difference
 between two consecutive loglikelihoods was small \eqn{(<10^{-4})}, the estimated coefficients were stable
-(consecutive values \eqn{(<10^{-4})}, and the gradient small enough \eqn{(<10^{-4})}.When frailty parameter
+(consecutive values \eqn{(<10^{-4})}, and the gradient small enough \eqn{(<10^{-4})}. When frailty parameter
 is small, numerical problems may arise. To solve this problem, an alternative formula of the penalized
 log-likelihood is used (see Rondeau, 2003 for further details). Cubic M-splines of order 4 are used for
 the hazard function, and I-splines (integrated M-splines) are used for the cumulative hazard function.
@@ -263,7 +270,7 @@ The following components are included in a 'frailtyPenal' object for each model.
 \item{n.strat}{ number of stratum.}
 \item{surv}{matrix of baseline survival estimates and confidence bands.}
 \item{surv2}{the same value as surv for the second stratum.}
-\item{varH}{the variance matrix of all parameters before positivity constraint transformation. Thenafter, the delta method is needed to obtain the estimated variance parameters.}
+\item{varH}{the variance matrix of all parameters before positivity constraint transformation. Thenafter, the delta method is needed to obtain the estimated variance parameters. That is why some variances don't match with the printed values at the end of the model.}
 \item{varHIH}{the robust estimation of the variance matrix of all parameters.}
 \item{x1}{vector of times where both survival and hazard function are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
 \item{x2}{vector of times for the second stratum or the terminal event (see x1 value).}
@@ -280,7 +287,7 @@ The following components are included in a 'frailtyPenal' object for each model.
 \item{scale.weib}{scale parameter for the Weibull hazard function.}
 \item{martingale.res}{martingale residuals for each cluster.}
 \item{martingaleCox}{martingale residuals for observation in the Cox model.}
-\item{Frailty}{Logical value. Was model with frailties fitted.}
+\item{Frailty}{Logical value. Was model with frailties fitted ?}
 \item{frailty.pred}{empirical Bayes prediction of the frailty term (ie, using conditional posterior distributions).}
 \item{frailty.var}{variance of the empirical Bayes prediction of the frailty term (only for gamma frailty models).}
 \item{frailty.sd}{standard error of the frailty empirical Bayes prediction (only for gamma frailty models).}
@@ -292,14 +299,14 @@ The following components are included in a 'frailtyPenal' object for each model.
 \item{Xlevels}{vector of the values that factor might have taken.}
 \item{contrasts}{type of contrast for factor variable.}
 
-The following components are unique to \bold{shared} models.
+The following components are specific to \bold{shared} models.
 
 \item{theta}{variance of the gamma frailty parameter \eqn{(\bold{Var}(\omega_i))}}
 \item{sigma2}{variance of the log-normal frailty parameter \eqn{(\bold{Var}(\eta_i))}}
-\item{linear.pred}{linear predictor: uses simply "Beta'X" in the cox proportional hazard model or "Beta'X + log w_i" in the shared gamma frailty models, otherwise uses "Beta'X + w_i" in log-normal.}
+\item{linear.pred}{linear predictor: uses simply "Beta'X" in the cox proportional hazard model or "Beta'X + log w_i" in the shared gamma frailty models, otherwise uses "Beta'X + w_i" for log-normal frailty distribution.}
 \item{BetaTpsMat}{matrix of time varying-effects and confidence bands (the first column used for absciss of times)}
 
-The following components are unique to \bold{joint} models.
+The following components are specific to \bold{joint} models.
 
 \item{theta}{variance of the gamma frailty parameter \eqn{(\bold{Var}(\omega_i))} or \eqn{(\bold{Var}(u_i))}}
 \item{sigma2}{variance of the log-normal frailty parameter \eqn{(\bold{Var}(\eta_i))} or \eqn{(\bold{Var}(v_i))}}
@@ -313,8 +320,8 @@ The following components are unique to \bold{joint} models.
 \item{noVar2}{indicator of death explanatory variables.}
 \item{martingale.res}{martingale residuals for each cluster (recurrent).}
 \item{martingaledeath.res}{martingale residuals for each cluster (death).}
-\item{linear.pred}{linear predictor: uses "Beta'X + log w_i" in the gamma frailty model, otherwise uses "Beta'X + eta_i" in log-normal}
-\item{lineardeath.pred}{linear predictor for the terminal part : "Beta'X + alpha.log w_i" for gamma, "Beta'X + alpha.eta_i" .}
+\item{linear.pred}{linear predictor: uses "Beta'X + log w_i" in the gamma frailty model, otherwise uses "Beta'X + eta_i" for log-normal frailty distribution}
+\item{lineardeath.pred}{linear predictor for the terminal part : "Beta'X + alpha.log w_i" for gamma, "Beta'X + alpha.eta_i" for log-normal frailty distribution}
 \item{Xlevels}{vector of the values that factor might have taken for the recurrent part.}
 \item{contrasts}{type of contrast for factor variable for the recurrent part.}
 \item{Xlevels2}{vector of the values that factor might have taken for the death part.}
@@ -322,7 +329,7 @@ The following components are unique to \bold{joint} models.
 \item{BetaTpsMat}{matrix of time varying-effects and confidence bands for recurrent event (the first column used for absciss of times of recurrence)}
 \item{BetaTpsMatDc}{matrix of time varying-effects and confidence bands for terminal event (the first column used for absciss of times of death)}
 
-The following components are unique to \bold{nested} models.
+The following components are specific to \bold{nested} models.
 
 \item{alpha}{variance of the cluster effect \eqn{(\bold{Var}(v_{i}))}}
 \item{eta}{variance of the subcluster effect \eqn{(\bold{Var}(w_{ij}))}}
@@ -364,7 +371,7 @@ V. Rondeau, S. Mathoulin-Pellissier, H. Jacqmin-Gadda, V. Brouste, P. Soubeyran 
 V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum penalized likelihood estimation.
 \emph{Statistics in Medecine}, \bold{25}, 4036-4052.
 
-V. Rondeau, D Commenges, and P. Joly (2003). Maximum penalized likelihood estimation in a gamma-frailty model.
+V. Rondeau, D. Commenges, and P. Joly (2003). Maximum penalized likelihood estimation in a gamma-frailty model.
 \emph{Lifetime Data Analysis} \bold{9}, 139-153.
 
 McGilchrist CA and Aisbett CW (1991). Regression with frailty in survival analysis.
@@ -384,72 +391,72 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 
 \dontrun{
 
-###  COX proportional hazard model (SHARED without frailties) ###
-###  estimated with penalized likelihood ###
+###---  COX proportional hazard model (SHARED without frailties) ---###
+###---  estimated with penalized likelihood ---###
 
 data(kidney)
 frailtyPenal(Surv(time,status)~sex+age,
 n.knots=12,kappa1=10000,data=kidney,Frailty=FALSE)
 
-###  Shared Frailty model  ###
+###---  Shared Frailty model  ---###
 
 frailtyPenal(Surv(time,status)~cluster(id)+sex+age,
 n.knots=12,kappa1=10000,data=kidney,Frailty=TRUE)
 
-# with an initialisation of regression coefficients
+#-- with an initialisation of regression coefficients
 
 frailtyPenal(Surv(time,status)~cluster(id)+sex+age,
 n.knots=12,kappa1=10000,data=kidney,Frailty=TRUE,B=c(-1.44,0))
 
-# with truncated data
+#-- with truncated data
 
 data(dataNested)
 
 frailtyPenal(Surv(t1,t2,event) ~ cluster(group),
 data=dataNested,n.knots=10,kappa1=10000,
-Frailty=TRUE,cross.validation=TRUE,recurrentAG=F)
+Frailty=TRUE,cross.validation=TRUE,recurrentAG=FALSE)
 
-# stratified analysis
+#-- stratified analysis
 
 data(readmission)
 frailtyPenal(Surv(time,event)~cluster(id)+dukes+strata(sex),
 n.knots=10,kappa1=10000,kappa2=10000,data=readmission,
 Frailty=TRUE)
 
-# recurrentAG=TRUE
+#-- recurrentAG=TRUE
 
 frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+dukes+
 charlson,data=readmission,Frailty=TRUE,
 n.knots=6,kappa1=100000,recurrentAG=TRUE)
 
-# cross.validation=TRUE
+#-- cross.validation=TRUE
 
 frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+dukes+
 charlson,data=readmission, Frailty=TRUE,n.knots=6,
 kappa1=5000,recurrentAG=TRUE,cross.validation=TRUE)
 
-# log-normal distribution
+#-- log-normal distribution
 
 frailtyPenal(Surv(t.start,t.stop,event)~sex+dukes+charlson+cluster(id),
 data=readmission, Frailty=TRUE,n.knots=6,kappa1=5000,
 recurrentAG=TRUE,RandDist="LogN")
 
-### Joint Frailty model (recurrent and terminal events) ###
+###--- Joint Frailty model (recurrent and terminal events) ---###
 
 data(readmission)
-# Gap-time
+#-- Gap-time
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+charlson+
 terminal(death),formula.terminalEvent=~sex+dukes+charlson,
 data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
 Frailty=TRUE,joint=TRUE,recurrentAG=FALSE)
 
-# Calendar time
+#-- Calendar time
 modJoint.calendar <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
 +dukes+charlson+terminal(death),formula.terminalEvent=~sex
 +dukes+charlson,data=readmission,n.knots=10,kappa1=9.55e9,
 kappa2=1.41e12,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE)
 
-# log-normal distribution
+#-- log-normal distribution
 
 modJoint.log <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
 +dukes+charlson+terminal(death),formula.terminalEvent=~sex
@@ -457,9 +464,9 @@ modJoint.log <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
 kappa2=1.41e12,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE,
 RandDist="LogN")
 
-### Joint Frailty model for clustered data ###
+###--- Joint Frailty model for clustered data ---###
 
-# here is a generated cluster (31 clusters of 13 subjects)
+#-- here is a generated cluster (31 clusters of 13 subjects)
 readmission <- transform(readmission,group=id\%\%31+1)
 
 joi.clus <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(group)+
@@ -468,7 +475,7 @@ formula.terminalEvent=~dukes+charlson+sex+chemo,
 data=readmission,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE,
 n.knots=10,kappa1=2.11e+08,kappa2=9.53e+11)
 
-### Nested Frailty model ###
+###--- Nested Frailty model ---###
 
 data(dataNested)
 modClu <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+

@@ -16,7 +16,7 @@ When considering time-varying effects in a survival model, regression coefficien
 
 You can notice that a linear combination of B-splines of order 1 without any interior knots (0 interior knot) is the same as a model without time-varying effect (or with constant effect over time).
 
-Statistical tests (likelihood ratio tests) can be done in order to know whether the time-dependant coefficients are significantly different from zero or to test whether a covariate has a time-dependant effect significantly different from zero or not.
+Statistical tests (likelihood ratio tests) can be done in order to know whether the time-dependant coefficients are significantly different from zero or to test whether a covariate has a time-dependant effect significantly different from zero or not. These tests are correct only with a parametric approach yet.
 
 - Proportional Hazard assumption ?
 
@@ -49,7 +49,7 @@ timedep(x)
 }
 
 \references{
-Y. Mazroui, A. Mauguen, S. Mathoulin-Pellissier, G. MacGrogan, V. Brouste, V. Rondeau (2013). Time-varying coefficients in a multivariate frailty model: Application to breast cancer recurrences of several types and death. To appear.
+Y. Mazroui, A. Mauguen, S. Mathoulin-Pelissier, G. MacGrogan, V. Brouste, V. Rondeau (2013). Time-varying coefficients in a multivariate frailty model: Application to breast cancer recurrences of several types and death. To appear.
 }
 
 \examples{
@@ -58,17 +58,17 @@ Y. Mazroui, A. Mauguen, S. Mathoulin-Pellissier, G. MacGrogan, V. Brouste, V. Ro
 
 data(readmission)
 
-### Shared Frailty model with time-varying effect ###
+###--- Shared Frailty model with time-varying effect ---###
 
 sha.time <- frailtyPenal(Surv(time,event)~cluster(id)+dukes+charlson+
 timedep(sex)+chemo,Frailty=TRUE,data=readmission,n.knots=8,kappa1=1,
 betaknots=3,betaorder=1)
 
-# print results of the fit and the associated curves for the
-# time-dependant effects
+#-- print results of the fit and the associated curves for the
+#-- time-dependant effects
 print(sha.time)
 
-### Joint Frailty model with time-varying effect ###
+###--- Joint Frailty model with time-varying effect ---###
 
 joi.time <- frailtyPenal(Surv(time,event)~cluster(id)+timedep(sex)+
 chemo+terminal(death),formula.terminalEvent=~timedep(sex)+chemo,

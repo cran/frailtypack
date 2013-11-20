@@ -34,11 +34,13 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\beta_k} the fixe
 \usage{
 additivePenal(formula, data, correlation = FALSE, recurrentAG =
              FALSE, cross.validation = FALSE, n.knots, kappa1,
-             kappa2, maxit = 350, hazard = "Splines", nb.int1)
+             kappa2, maxit = 350, hazard = "Splines", nb.int1,
+             LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-3)
 }
 
 
 \arguments{
+
   \item{formula}{ a formula object, with the response on the left of a \eqn{\texttildelow} operator, and the terms on the right. 
  The response must be a survival object as returned by the 'Surv' function like in survival
  package. The \code{slope()} function is required.}
@@ -52,7 +54,7 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
 
   \item{recurrentAG}{Always FALSE for additive models (left-truncated data are not allowed).}
 
-    \item{cross.validation}{Logical value. Is cross validation procedure used
+  \item{cross.validation}{Logical value. Is cross validation procedure used
  for estimating smoothing parameter in the penalized likelihood estimation?
                  If so a search of the smoothing parameter using cross
  validation is done, with kappa1 as the seed.
@@ -69,15 +71,21 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
  defaults and look at the sensitivity 
           of the results to varying them. Value required. (See Note)}
 
- \item{kappa2}{Positive smoothing parameter in the penalized likelihood estimation for the second stratum when data are stratified. See kappa1.}
+  \item{kappa2}{Positive smoothing parameter in the penalized likelihood estimation for the second stratum when data are stratified. See kappa1.}
  
   \item{maxit}{maximum number of iterations for the Marquardt algorithm.
  Default is 350}
  
  
- \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazards functions using percentile, "Piecewise-equi" for piecewise constant hazard functions using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
+  \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazards functions using percentile, "Piecewise-equi" for piecewise constant hazard functions using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
  
- \item{nb.int1}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
+  \item{nb.int1}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
+ 
+  \item{LIMparam}{Convergence threshold of the Marquard algorithm for the parameters (see Details), \eqn{10^{-4}} by default.}
+  
+  \item{LIMlogl}{Convergence threshold of the Marquard algorithm for the log-likelihood (see Details), \eqn{10^{-4}} by default.}
+ 
+  \item{LIMderiv}{Convergence threshold of the Marquard algorithm for the gradient (see Details), \eqn{10^{-3}} by default.}
 }
 
 
@@ -199,9 +207,10 @@ V. Rondeau, S. Michiels, B. Liquet, and J. P. Pignon (2008).
 
 
 \examples{
-### Additive model with 1 covariate ###
 
 \dontrun{
+
+###--- Additive model with 1 covariate ---###
 
 data(dataAdditive)
 
@@ -209,7 +218,7 @@ modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+
 var1+slope(var1),correlation=TRUE,data=dataAdditive,
 n.knots=8,kappa1=10000)
 
-# Var1 is boolean as a treatment variable
+#-- Var1 is boolean as a treatment variable
 
 }
 

@@ -1,70 +1,70 @@
 
-      module typeres	
+      module typeres    
        
       interface verifres
-		subroutine marq98res(b,m,ni,v,rl,ier,istop,ca,cb,dd,namefunc)
-		integer,intent(in) :: m
-		integer,intent(inout)::ni,ier,istop
-		double precision,dimension(m*(m+3)/2),intent(out)::v
-		double precision,intent(out)::rl
-		double precision,dimension(m),intent(inout)::b	
-		double precision,intent(inout)::ca,cb,dd 
-		double precision,external::namefunc
-		end subroutine marq98res    
-		
-		subroutine deriva(b,m,v,rl,namefunc)
-		integer,intent(in)::m
-		double precision,intent(inout)::rl
-		double precision,dimension(m),intent(in)::b
-		double precision,dimension((m*(m+3)/2)),intent(out)::v    
-		double precision,external::namefunc   
-		end subroutine deriva
-		
-		subroutine searpas(vw,step,b,bh,m,delta,fim,namefunc)
-		integer,intent(in)::m      
-		double precision,dimension(m),intent(in)::b
-		double precision,dimension(m),intent(inout)::bh,delta
-		double precision,intent(inout)::vw,fim,step  
-		double precision,external::namefunc
-		end subroutine searpas
-		
-		subroutine dmfsd(a,n,eps,ier)
-		integer,intent(in)::n
-		integer,intent(inout)::ier
-		double precision,intent(inout)::eps 
-		double precision,dimension(n*(n+1)/2),intent(inout)::A      
-		end subroutine dmfsd
-		
-		subroutine valfpa(vw,fi,b,bk,m,delta,namefunc)
-		integer,intent(in)::m  
-		double precision,intent(in)::vw
-		double precision,dimension(m),intent(in)::b,delta  
-		double precision,dimension(m),intent(out)::bk 
-		double precision,intent(out)::fi
-		double precision,external::namefunc  
-		end subroutine valfpa
+        subroutine marq98res(b,m,ni,v,rl,ier,istop,ca,cb,dd,namefunc)
+        integer,intent(in) :: m
+        integer,intent(inout)::ni,ier,istop
+        double precision,dimension(m*(m+3)/2),intent(out)::v
+        double precision,intent(out)::rl
+        double precision,dimension(m),intent(inout)::b    
+        double precision,intent(inout)::ca,cb,dd 
+        double precision,external::namefunc
+        end subroutine marq98res    
+        
+        subroutine deriva(b,m,v,rl,namefunc)
+        integer,intent(in)::m
+        double precision,intent(inout)::rl
+        double precision,dimension(m),intent(in)::b
+        double precision,dimension((m*(m+3)/2)),intent(out)::v    
+        double precision,external::namefunc   
+        end subroutine deriva
+        
+        subroutine searpas(vw,step,b,bh,m,delta,fim,namefunc)
+        integer,intent(in)::m      
+        double precision,dimension(m),intent(in)::b
+        double precision,dimension(m),intent(inout)::bh,delta
+        double precision,intent(inout)::vw,fim,step  
+        double precision,external::namefunc
+        end subroutine searpas
+        
+        subroutine dmfsd(a,n,eps,ier)
+        integer,intent(in)::n
+        integer,intent(inout)::ier
+        double precision,intent(inout)::eps 
+        double precision,dimension(n*(n+1)/2),intent(inout)::A      
+        end subroutine dmfsd
+        
+        subroutine valfpa(vw,fi,b,bk,m,delta,namefunc)
+        integer,intent(in)::m  
+        double precision,intent(in)::vw
+        double precision,dimension(m),intent(in)::b,delta  
+        double precision,dimension(m),intent(out)::bk 
+        double precision,intent(out)::fi
+        double precision,external::namefunc  
+        end subroutine valfpa
 
-		subroutine dmaxtres(maxt,delta,m)
-		integer,intent(in)::m
-		double precision,dimension(m),intent(in)::delta 
-		double precision,intent(out)::maxt
-		end subroutine dmaxtres
+        subroutine dmaxtres(maxt,delta,m)
+        integer,intent(in)::m
+        double precision,dimension(m),intent(in)::delta 
+        double precision,intent(out)::maxt
+        end subroutine dmaxtres
       end interface verifres  
 
       interface veriffres
-		subroutine dsinv(A,N,EPS,IER,DET)
-		integer,intent(in)::n
-		integer,intent(inout)::ier
-		double precision,intent(inout)::eps      
-		double precision,intent(inout),optional::det     
-		double precision,dimension(n*(n+1)/2),intent(inout)::A  
-		end subroutine dsinv 
-		
-		subroutine dchole(a,k,nq,idpos)
-		integer,intent(in)::k,nq
-		integer,intent(inout)::idpos
-		double precision,dimension(k*(k+3)/2),intent(inout)::a      
-		end subroutine dchole    
+        subroutine dsinv(A,N,EPS,IER,DET)
+        integer,intent(in)::n
+        integer,intent(inout)::ier
+        double precision,intent(inout)::eps      
+        double precision,intent(inout),optional::det     
+        double precision,dimension(n*(n+1)/2),intent(inout)::A  
+        end subroutine dsinv 
+        
+        subroutine dchole(a,k,nq,idpos)
+        integer,intent(in)::k,nq
+        integer,intent(inout)::idpos
+        double precision,dimension(k*(k+3)/2),intent(inout)::a      
+        end subroutine dchole    
       end interface veriffres
 
       end module typeres
@@ -138,15 +138,15 @@
       ep=1.d-20
             
       Main:Do       
-!	write(*,*)'avant deriva'         
+!    write(*,*)'avant deriva'         
         call deriva(b,m,v,rl,namefunc)
 
-	if(rl.eq.-1.D9) then
+    if(rl.eq.-1.D9) then
                istop=4
                goto 110
         end if
 
-!	write(*,*)'iteration optimres',ni,'vrais',rl          
+!    write(*,*)'iteration optimres',ni,'vrais',rl          
         rl1=rl      
         dd = 0.d0     
         fu=0.D0
@@ -156,10 +156,10 @@
               fu(ij)=v(ij)
            end do
         end do
-	!print*,"2:",v
+    !print*,"2:",v
         call dsinv(fu,m,ep,ier,det)  
         if (ier.eq.-1) then
-	   !print*,"here"
+       !print*,"here"
            dd=epsd+1.d0
         else
            GHG = 0.d0
@@ -171,7 +171,7 @@
                     ij=(i-1)*i/2+j
                  end if
                  GHG = GHG + v(m1+i)*fu(ij)*V(m1+j)
-	      end do
+          end do
            end do
            dd=GHG/dble(m)
         end if
@@ -183,7 +183,7 @@
            tr=tr+dabs(v(ii))
         end do
         tr=tr/dble(m)
-	!print*,"3:",v
+    !print*,"3:",v
         ncount=0
         ga=0.01d0
  400    do i=1,nfmax+m
@@ -243,7 +243,7 @@
             delta(i)=vw*delta(i)
          end do
          da=(dm-3.d0)*da
-	 !print*,"4:",v
+     !print*,"4:",v
  800     cb=dabs(rl1-rl)
          ca=0.d0
          do i=1,m
@@ -259,9 +259,9 @@
             istop=2
 !            write(6,*) 'maximum number of iteration reached'
             goto 110
-         end if	 
+         end if     
       End do Main       
-      !v=0.D0	 
+      !v=0.D0     
       v(1:m*(m+1)/2)=fu(1:m*(m+1)/2)
       !print*,"5:",fu
       istop=1
@@ -293,7 +293,7 @@
 !
       z=0.d0
       i0=0
-	
+    
       rl=namefunc(b,m,i0,z,i0,z)    
 !      write(*,*)'dans deriva',rl
 
@@ -370,11 +370,11 @@
        call valfpa(vlw2,fi2,b,bh,m,delta,namefunc)       
 
        if(fi2.ge.fi1) then
-	  vlw3=vlw2
-	  vlw2=vlw1
-	  fi3=fi2
-	  fi2=fi1
-	  step=-step
+      vlw3=vlw2
+      vlw2=vlw1
+      fi3=fi2
+      fi2=fi1
+      step=-step
 
           vlw1=vlw2+step
           call valfpa(vlw1,fi1,b,bh,m,delta,namefunc)   
@@ -411,7 +411,7 @@
 !  CALCUL MINIMUM QUADRIQUE
 !
       vm=vlw2-step*(fi1-fi3)/(2.d0*(fi1-2.d0*fi2+fi3))   
-      call valfpa(vm,fim,b,bh,m,delta,namefunc)	
+      call valfpa(vm,fim,b,bh,m,delta,namefunc)    
       if(fim.le.fi2) goto 100
       vm=vlw2
       fim=fi2
@@ -435,10 +435,10 @@
       integer,intent(in)::k,nq
       integer,intent(inout)::idpos
       double precision,dimension(k*(k+3)/2),intent(inout)::a
-		
+        
       integer::i,ii,i1,i2,i3,m,j,k2,jmk
       integer::ijm,irm,jji,jjj,l,jj,iil,jjl,il
-      integer,dimension(k)::is	
+      integer,dimension(k)::is    
       double precision ::term,xn,diag,p
       equivalence (term,xn)
       
@@ -473,7 +473,7 @@
              if(is(l).ge.0) goto 3
 2            p=-p
 3            diag=diag-p
-         end do	 
+         end do     
          
 4        if(diag.lt.0) goto 5
          if(diag.eq.0) goto 50
@@ -508,7 +508,7 @@
 12             term=term-p
             end do
 13            a(jj)=term/diag
-	   end do  
+       end do  
       end do   
       
 !       calcul des solutions
@@ -587,7 +587,7 @@
 !   START FACTORIZATION-LOOP OVER K-TH ROW
 !
          do i=k,n
-	    dsum=0.d0
+        dsum=0.d0
             if (lend.lt.0) goto 2
             if (lend.eq.0) goto 4
             if (lend.gt.0) goto 2
@@ -597,19 +597,19 @@
 2           do l=1,lend
                lanf=kpiv-l
                lind=ind-l
-	       dsum=dsum+A(lanf)*A(lind)
+           dsum=dsum+A(lanf)*A(lind)
             end do 
-	      
+          
 !     
 !   END OF INNEF LOOP
 !
 !   TRANSFORM ELEMENT A(IND)
-! 	
+!     
 4           dsum=A(ind)-dsum
             if (i-k.ne.0) goto 10
             if (i-k.eq.0) goto 5
 !   TEST FOR NEGATIVE PIVOT ELEMENT AND FOR LOSS OF SIGNIFICANCE
-!	
+!    
 
 
 5           if (sngl(dsum)-tol.le.0) goto 6
@@ -719,25 +719,25 @@
 !     INITIALIZE ROW-LOOP
 !
          do k=1,kend
-	    work=0.d0
-	    min=min-1
-	    lhor=ipiv
-	    lver=j
+        work=0.d0
+        min=min-1
+        lhor=ipiv
+        lver=j
 !
 !     START INNER LOOP
 !
             do l=lanf,min 
-	        lver=lver+1
-		lhor=lhor+l
+            lver=lver+1
+        lhor=lhor+l
                 work=work+A(lver)*A(lhor)
-	    end do	    
+        end do        
 !
 !     END OF INNER LOOP
 !
             A(j)=-work*din
             j=j-min
-	 end do
-	 
+     end do
+     
 !
 !     END OF ROW-LOOP
 !
@@ -754,27 +754,27 @@
 !
       do i=1,n
          ipiv=ipiv+i
-	 j=ipiv
+     j=ipiv
 !
 !     INITIALIZE ROW-LOOP
 !
-	 do k=i,n
-	    work=0.d0
-	    lhor=j
+     do k=i,n
+        work=0.d0
+        lhor=j
 !
 !     START INNER LOOP
 !
             do l=k,n
-	        lver=lhor+k-i
-		work=work+A(lhor)*A(lver)
-   		lhor=lhor+l
-            end do	    
+            lver=lhor+k-i
+        work=work+A(lhor)*A(lver)
+           lhor=lhor+l
+            end do        
 !
 !     END OF INNER LOOP
 !       
             A(j)=work
             j=j+k
-	 end do
+     end do
       end do
       
 !
@@ -795,19 +795,19 @@
         double precision,dimension(m),intent(in)::b,delta  
         double precision,dimension(m),intent(out)::bk 
         double precision,intent(out)::fi 
-	double precision::vw,z	
-	integer::i0,i
+    double precision::vw,z    
+    integer::i0,i
         double precision,external::namefunc
-	
+    
          z=0.d0
          i0=1
          do i=1,m
             bk(i)=b(i)+dexp(vw)*delta(i)
-	 end do
+     end do
          fi=-namefunc(bk,m,i0,z,i0,z)
 
          return
-	 
+     
          end subroutine valfpa
 
 !------------------------------------------------------------
@@ -827,8 +827,8 @@
        maxt=Dabs(delta(1))
        do i=2,m
          if(Dabs(delta(i)).gt.maxt)then
-	    maxt=Dabs(delta(i))
-	 end if
+        maxt=Dabs(delta(i))
+     end if
        end do 
             
        return

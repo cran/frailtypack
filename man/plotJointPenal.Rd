@@ -52,26 +52,25 @@
 
 \examples{
 
-
 \dontrun{
 
 data(readmission)
 
-## Gap-time ##
+#-- Gap-time
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
 charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
 data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
 Frailty=TRUE,joint=TRUE)
 
-# It takes around 1 minute to converge. #
+#-- It takes around 1 minute to converge --#
 
 plot(modJoint.gap,type.plot="haz",event="recurrent",conf.bands=TRUE)
 plot(modJoint.gap,type.plot="haz",event="terminal",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="haz",event="both",conf.bands=TRUE))
-plot(modJoint.gap,type.plot="su",event="recurrent",conf.bands=TRUE))
-plot(modJoint.gap,type.plot="su",event="terminal",conf.bands=TRUE))
-plot(modJoint.gap, event="terminal",type.plot="su",conf.bands=TRUE))
-plot(modJoint.gap,type.plot="su","terminal",conf.bands=TRUE))
+plot(modJoint.gap,type.plot="haz",event="both",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="su",event="recurrent",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="su",event="terminal",conf.bands=TRUE)
+plot(modJoint.gap, event="terminal",type.plot="su",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="su","terminal",conf.bands=TRUE)
 
 }
 

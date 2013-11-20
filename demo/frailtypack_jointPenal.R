@@ -4,6 +4,8 @@ options(digits=12)
 if(!require("frailtypack"))stop("this test requires package frailtypack.")
 if(!require("survival"))stop("this test requires survival.")
 if(!require("boot"))stop("this test requires boot.")
+if(!require("MASS"))stop("this test requires MASS.")
+if(!require("survC1"))stop("this test requires survC1.")
 
 cat("frailtypack test for joint model ...\n")
 
@@ -13,7 +15,7 @@ cat("frailtypack test for joint model ...\n")
 
 data("readmission")
 
-modJoint.gap <- frailtyPenal( Surv(time,event)~ cluster(id) +
+modJoint.gap <- frailtyPenal(Surv(time,event)~ cluster(id) +
   dukes + charlson + sex + chemo + terminal(death),
   formula.terminalEvent = ~ dukes + charlson + sex + chemo,
   data = readmission, n.knots = 8, kappa1 = 2.11e+08, kappa2 = 9.53e+11,

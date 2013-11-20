@@ -39,9 +39,7 @@
 data(dataNested)
 modNested <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
 subcluster(subgroup)+cov1+cov2,data=dataNested,n.knots=8,
-kappa1=50000,hazard="Splines")
-
-# It takes around 90 minutes to converge (depends on the processor)  #
+kappa1=50000,hazard="Splines",Frailty=TRUE)
 
 plot(modNested,conf.bands=FALSE)
 

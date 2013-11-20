@@ -33,15 +33,14 @@ It is necessary to specify which variable is in interaction with the random slop
 
 \dontrun{
 
-library(frailtypack)
 data(dataAdditive)
 
-# Additive with one covariate #
+##-- Additive with one covariate --##
 
 modAdd1cov <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+
 slope(var1),data=dataAdditive,n.knots=8,kappa1=10000,hazard="Splines")
 
-# Additive with two covariates #
+##-- Additive with two covariates --##
 
 set.seed(1234)
 dataAdditive$var2 <- rbinom(nrow(dataAdditive),1,0.5)
@@ -50,7 +49,7 @@ modAdd2cov <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+
 var2+slope(var1),data=dataAdditive,n.knots=8,kappa1=10000,
 hazard="Splines")
 
-# Additive with 2 covariates and stratification #
+##-- Additive with 2 covariates and stratification --##
 
 dataAdditive$var2 <- rbinom(nrow(dataAdditive),1,0.5)
 

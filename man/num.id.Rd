@@ -36,12 +36,12 @@ V. Rondeau, J.P. Pignon, S. Michiels (2011). A joint model for the dependance be
 \dontrun{
 
 data(readmission)
-# here is a generated cluster (31 clusters of 13 subjects)
+#-- here is a generated cluster (31 clusters of 13 subjects)
 readmission <- transform(readmission,group=id\%\%31+1)
 
-### Joint Frailty model for clustered data ###
+###--- Joint Frailty model for clustered data ---###
 
-## Splines ##
+#-- splines
 joi.clus <- frailtyPenal(Surv(t.start,t.stop,event)~
 cluster(group)+num.id(id)+dukes+charlson+sex+chemo+terminal(death),
 formula.terminalEvent=~dukes+charlson+sex+chemo,

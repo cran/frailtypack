@@ -1,6 +1,6 @@
 
 \name{frailtypack-package}
-\Rdversion{2.4.1}
+\Rdversion{2.5}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
@@ -22,8 +22,8 @@
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.4.1\cr
-     Date: \tab 2013-04-26\cr
+     Version: \tab 2.5\cr
+     Date: \tab 2013-11-20\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab yes\cr
   }
@@ -53,7 +53,7 @@ V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum pena
 
 \dontrun{
 
-### Additive model with 1 covariate ###
+###--- Additive model with 1 covariate ---###
 
 data(dataAdditive)
 modAdd <- additivePenal(Surv(t1,t2,event)~
@@ -61,7 +61,7 @@ cluster(group)+var1+slope(var1),
 correlation=TRUE,data=dataAdditive,
 n.knots=8,kappa1=10000,hazard="Splines")
 
-### Joint model (recurrent and terminal events) with 2 covariates ###
+###--- Joint model (recurrent and terminal events) with 2 covariates ---###
 
 data(readmission)
 modJoint.gap <- frailtyPenal(Surv(time,event)~
@@ -71,7 +71,7 @@ data=readmission,n.knots=14,kappa1=9.55e+9,
 kappa2=1.41e+12,Frailty=TRUE,joint=TRUE,
 recurrentAG=FALSE,hazard="Splines")
 
-### Nested model (or hierarchical model) with 2 covariates ###
+###--- Nested model (or hierarchical model) with 2 covariates ---###
 
 data(dataNested)
 modClu <- frailtyPenal(Surv(t1,t2,event)~
@@ -79,7 +79,7 @@ cluster(group)+subcluster(subgroup)+cov1+cov2,
 Frailty=TRUE,data=dataNested,n.knots=8,
 kappa1=50000,hazard="Splines")
 
-###  Semiparametric Shared model   ###
+###--- Semiparametric Shared model ---###
 
 data(readmission)
 frailtyPenal(Surv(t.start,t.stop,event)~
@@ -88,7 +88,7 @@ cluster(id),data=readmission, Frailty=TRUE,
 n.knots=6,kappa1=5000,recurrentAG=TRUE,
 cross.validation=TRUE,hazard="Splines")
 
-###  Parametric Shared model   ###
+###--- Parametric Shared model ---###
 
 data(readmission)
 frailtyPenal(Surv(t.start,t.stop,event)~

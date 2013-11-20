@@ -1,13 +1,13 @@
 
 "frailtyPenal" <-
 function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, recurrentAG=FALSE,
-             cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350,hazard="Splines",nb.int1,nb.int2,
-             RandDist="Gamma", betaknots=1, betaorder=3, B)
+             cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350, hazard="Splines", nb.int1, nb.int2,
+             RandDist="Gamma", betaknots=1, betaorder=3, B, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-4)
 {
 
 #ad 15/02/12 :add Audrey
 m2 <- match.call()
-m2$formula <- m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$recurrentAG <- m2$cross.validation <- m2$n.knots <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <-m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$... <- NULL
+m2$formula <- m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$recurrentAG <- m2$cross.validation <- m2$n.knots <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <-m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$... <- NULL
 Names.data <- m2$data
 
 #### Betaknots et betaorder ####
@@ -116,7 +116,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	
 	m <- match.call(expand.dots = FALSE) # recupere l'instruction de l'utilisateur
 
-	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$B <- m$... <- NULL
+	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <-  m$... <- NULL
 
 
 	special <- c("strata", "cluster", "subcluster", "terminal","num.id","timedep")
@@ -130,7 +130,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	ord <- attr(Terms, "order") # longueur de ord=nbre de var.expli
 	
 	if (length(ord) & any(ord != 1))stop("Interaction terms are not valid for this function")
-#si pas vide tous si il ya au moins un qui vaut 1 on arrÃªte
+#si pas vide tous si il ya au moins un qui vaut 1 on arrete
 	
 	m$formula <- Terms
 	
@@ -228,6 +228,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	else timedep <- 1
 
 	if (intcens & timedep) stop("You can not use time varing-effect covariate with interval censoring")
+	if (intcens & cross.validation) stop("You can not do cross validation with interval censoring")
 
 	if(is.null(num.id)){
 		joint.clust <- 1
@@ -306,7 +307,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		stop("cluster not necessary for proportional hazard model")
 	}
 	else if (!length(cluster) & Frailty == FALSE){
-		cluster <- 1:nrow(data) # valeurs inutiles pour un modÃ¨le de Cox
+		cluster <- 1:nrow(data) # valeurs inutiles pour un modele de Cox
 		uni.cluster <- 1:nrow(data)
 	}
 	
@@ -463,7 +464,7 @@ if((all.equal(length(hazard),1)==T)==T){
 
 
 #add Alexandre 04/06/2012
-#lire les donnÃ©es differemment si censure par intervalle
+#lire les donnees differemment si censure par intervalle
 	if (intcens==TRUE) {
 		if (type=="intervaltronc") {
 			tt0 <- Y[,1]
@@ -633,7 +634,8 @@ if((all.equal(length(hazard),1)==T)==T){
 				as.integer(betaorder),
 				as.integer(filtretps),
 				BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
-				PACKAGE = "frailtypack")
+				EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
+				PACKAGE = "frailtypack") # 63
 #AD:
 
     if (ans$istop == 4){
@@ -641,7 +643,7 @@ if((all.equal(length(hazard),1)==T)==T){
     }
 
     if (ans$istop == 2){
-         warning("Model did not converge. Change the 'maxit' parameter")
+         warning("Model did not converge.")
     }
     if (ans$istop == 3){
          warning("Matrix non-positive definite.")
@@ -659,6 +661,9 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$n <- n
     fit$groups <- length(uni.cluster)
     fit$n.events <- ans[[39]]
+#Al:
+    fit$n.eventsbygrp <- table(cens,cluster)[2,]
+    
     if(as.character(typeof)=="0"){
         fit$logLikPenal <- ans[[24]]
     }else{
@@ -713,6 +718,10 @@ if((all.equal(length(hazard),1)==T)==T){
 		}
 	}
    }
+   
+   fit$varHtotal <- temp1 # new Al: 20/06/13
+   fit$varHIHtotal <- temp2
+   
 
     fit$formula <- formula(Terms)
 
@@ -785,6 +794,8 @@ if((all.equal(length(hazard),1)==T)==T){
   fit$nvartimedep <- nvartimedep
 
   fit$Names.vardep <- vardep
+  
+  fit$EPS <- ans$EPS
 
 #
 #========================= Test de Wald pour shared
@@ -1018,9 +1029,9 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
 ## AD: modified 20 06 2011, for no covariates on terminal event part
 		if (missing(formula.terminalEvent)){
-			m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$... <- NULL
+			m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$... <- NULL
 		}else{
-			m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$... <- NULL
+			m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$... <- NULL
 		}
 
 		
@@ -1333,7 +1344,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 			zi=as.double(rep(0,(n.knots+6))),
 			time=as.double(rep(0,(nbintervR+1))),
 			timedc=as.double(rep(0,(nbintervDC+1))),
-			kendall=as.double(matrix(0,nrow=4,ncol=2)),
+# 			kendall=as.double(matrix(0,nrow=4,ncol=2)),
 #			as.integer(initialize),
 #			as.integer(npinit),
 #			Bshared=as.double(rep(0,npinit)),
@@ -1346,7 +1357,8 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 			as.integer(c(filtretps,filtretps2)),
 			BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
 			BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep2)),
-			PACKAGE = "frailtypack")
+			EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
+			PACKAGE = "frailtypack") # 65 = max
 
 
 	MartinGale <- matrix(ans$MartinGale,nrow=as.integer(length(uni.cluster)),ncol=4)
@@ -1357,7 +1369,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
      }
 
     if (ans$istop == 2){
-         warning("Model did not converge. Change the 'maxit' parameter")
+         warning("Model did not converge.")
     }
     if (ans$istop == 3){
          warning("Matrix non-positive definite.")
@@ -1375,9 +1387,12 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     fit$call <- call
     if (classofY == "SurvIC"){
         fit$n <- nobs
+        if (typeofY == "intervaltronc") fit$indic.trunc <- 1
+        else fit$indic.trunc <- 0
     }else{
         fit$n <- n
     }
+
     if (joint.clust == 0) fit$ind <- lignedc0
     fit$groups <- length(uni.cluster)
     fit$n.events <- ans$cpt
@@ -1425,7 +1440,10 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 #AD:
     temp1 <- matrix(ans$H, nrow = np, ncol = np)
     temp2 <- matrix(ans$HIH, nrow = np, ncol = np)
-
+    
+#Al:
+    fit$varHIHtotal <- temp2
+    
     fit$varH <- temp1[(np - nvar - npbetatps - 1):np, (np - nvar - npbetatps - 1):np]
     fit$varHIH <- temp2[(np - nvar - npbetatps - 1):np, (np - nvar - npbetatps - 1):np]
 	noms <- c("theta","alpha",factor.names(colnames(X)),factor.names(colnames(X2)))
@@ -1520,6 +1538,8 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
     fit$Names.vardep <- vardep
     fit$Names.vardepdc <- vardep2
+    
+    fit$EPS <- ans$EPS
 
 
 
@@ -1729,14 +1749,15 @@ if (length(subcluster))
 		frailty.sd.group=as.double(rep(0,as.integer(length(uni.cluster)))),
 		frailty.sd.subgroup=as.double(matrix(0,nrow=ngg,ncol=maxng)),
 		linear.pred=as.double(rep(0,n)),
-		PACKAGE = "frailtypack")
+		EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
+		PACKAGE = "frailtypack") # 58
 
     if (ans$istop == 4){
 	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")
      }
 
     if (ans$istop == 2){
-         warning("Model did not converge. Change the 'maxit' parameter")
+         warning("Model did not converge.")
     }
     if (ans$istop == 3){
          warning("Matrix non-positive definite.")
@@ -1823,6 +1844,7 @@ if (length(subcluster))
     fit$shape.weib <- ans$shape.weib
     fit$scale.weib <- ans$scale.weib
     fit$AG <- recurrentAG
+    fit$EPS <- ans$EPS
 
  #   if (Frailty){
 

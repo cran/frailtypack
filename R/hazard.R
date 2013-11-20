@@ -7,7 +7,7 @@
 		zi <- ObjFrailty$zi
 
 		res <- NULL
-		if((ObjFrailty$x1 > t) || (max(ObjFrailty$x1) < t)) stop(" Time exceeds the range allowed ")
+		if((ObjFrailty$x1 > t) || ((max(ObjFrailty$x1)+0.00001) <= t)) stop(" Time exceeds the range allowed ") # rajout du 0.00001
 		if(class(ObjFrailty) == "jointPenal"){
 			nb1 <- nz+3
 			nb2 <- 2*(nz+2)
@@ -20,7 +20,7 @@
 				nb1 <- nz+3
 				nb2 <- 2*(nz+2)
 				b <- ObjFrailty$b[nb1:nb2]
-				the1 <- b * b	
+				the1 <- b * b
 				nst <- 2
 				if((ObjFrailty$x2 > t) || (max(ObjFrailty$x2) < t)) stop(" Time exceeds the range allowed ")
 			}else{

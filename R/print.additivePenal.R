@@ -135,11 +135,17 @@
 			cat(paste("    penalized marginal log-likelihood =", round(x$logLikPenal,2)))
 #AD:
 			cat("\n")
+			cat("    Convergence criteria: \n")
+			cat("    parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
+			cat("\n")
 			cat("    LCV = the approximate likelihood cross-validation criterion\n")
 			cat("    in the semi parametrical case     =",x$LCV,"\n")
 #AD:
 		}else{
 			cat(paste("    marginal log-likelihood =", round(x$logLik,2)))
+			cat("\n")
+			cat("      Convergence criteria: \n")
+			cat("      parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
 			cat("\n")
 #			cat("      LCV = the approximate likelihood cross-validation criterion\n")
 #			cat("            in the parametrical case     =",x$LCV,"\n")	
@@ -200,7 +206,7 @@
 		cat(", DoF: ", formatC(-x$DoF, format="f",digits=2))	
 		}
 	}else{
-		if (!is.null(coef)){ 	
+		if (!is.null(coef)){
 			cat("\n")
 			cat("  Additive gaussian frailty model parameter estimates ","\n")	
 			if (x$typeof == 0){
@@ -217,6 +223,11 @@
 			cat("    ------------------------------- \n")
 			cat("\n")
 		}
+		cat("\n")
+		
+		cat("    Convergence criteria: \n")
+		cat("    parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
+		
 		cat("\n")
 		cat("    n=", x$n)
 		if (length(x$na.action)){ 
