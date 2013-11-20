@@ -1,11 +1,17 @@
 
               
-cindexes.B  <- function(lp, stime, status, groupe, ties, cindex) {
+cindexes.B  <- function(lp, stime, status, groupe, ties, cindex, tau) {
 
 	n <- length(lp)
-	Npairs  <- comparable  <- unusable  <- concordante  <- discordante  <- tiedcomp <- tiedtot  <- tiedtime  <- rep(NA,(n-1))
+	Npairs  <- comparable  <- unusable  <- concordante  <- discordante  <- tiedcomp <- tiedtot  <- tiedtime <- uno.comparable <- uno.concordante <- uno.tiedcomp <- rep(NA,(n-1))
 	sumCPEj <- rep(NA,(n-1));sumCPE <- 0;
-  
+
+	##### Calcul des poids selon Uno 
+	if(tau==0)   if(tau==0) tau=max(stime[status==1])
+	cens <- kmcens(stime, status, tau)
+	GXi <- cens$surv[match(stime, cens$distinct, nomatch = 1)]
+	Wi <- 1/GXi/GXi * status * as.numeric(stime < tau)
+	
 	for (i in 1:(n-1)) {
   
 		Npairs[i] <- sum((groupe[i] != groupe)[(i+1):n])
@@ -36,19 +42,36 @@ cindexes.B  <- function(lp, stime, status, groupe, ties, cindex) {
 		if (ties==1) {sumCPEj <- ( ((bxjxi<=0)/(1+exp(bxjxi)) + (bxixj<0)/(1+exp(bxixj))) * (groupe != groupe[i]) )}
 		if (ties==0) {sumCPEj <- ( ((bxjxi<0)/(1+exp(bxjxi)) + (bxixj<0)/(1+exp(bxixj))) * (groupe != groupe[i]) )}
 		sumCPE[i] <- sum(sumCPEj[(i+1):n])
+		
+		#C-Uno
+		uno.comparablej   <- (groupe[i] != groupe) * status[i] * Wi[i] * (stime[i]<stime & stime[i] < tau)
+		uno.comparable[i] <- sum(uno.comparablej)
+		uno.concordantej  <- (groupe[i] != groupe) * (status[i] * Wi[i] * (stime[i]<stime & stime[i] < tau) * (lp[i]>lp))
+		uno.concordante[i]<- sum(uno.concordantej)
+		uno.tiedcompj     <- (groupe[i] != groupe) * (status[i] * Wi[i] * (stime[i]<stime & stime[i] < tau) * (lp[i]==lp))
+		uno.tiedcomp[i]   <- sum(uno.tiedcompj)  
 	}
+	 # patient n pour Uno
+	uno.comparablej   <- (groupe[i] != groupe) * status[n] * Wi[n] * (stime[n]<stime & stime[n] < tau)
+	uno.comparable[n] <- sum(uno.comparablej)
+	uno.concordantej  <- (groupe[i] != groupe) * (status[n] * Wi[n] * (stime[n]<stime & stime[n] < tau) * (lp[n]>lp))
+	uno.concordante[n]<- sum(uno.concordantej)
+	uno.tiedcompj     <- (groupe[i] != groupe) * (status[n] * Wi[n] * (stime[n]<stime & stime[n] < tau) * (lp[n]==lp))
+	uno.tiedcomp[n]   <- sum(uno.tiedcompj) 
 
 	if (ties==1) {
 		if(cindex==1) cindex_global <- (sum(concordante) + sum(tiedcomp)/2)/sum(comparable)
 		res.cpe <- sum(sumCPE)/sum(Npairs)
+		uno.cindex <- (sum(as.numeric(uno.concordante) + as.numeric(uno.tiedcomp)/2)/sum(as.numeric(uno.comparable)))
 	}
 	if (ties==0) {
 		if(cindex==1) cindex_global <- sum(concordante)/(sum(comparable)-sum(tiedcomp))
 		res.cpe <- sum(sumCPE)/(sum(Npairs)-sum(tiedtot))
+		uno.cindex <- (sum(as.numeric(uno.concordante))/sum(as.numeric(uno.comparable)))
 	}
-	out <- list(CPE=res.cpe,Npairs=sum(Npairs),tiedtot=sum(tiedtot)) 
+	out <- list(CPE=res.cpe,Npairs=sum(Npairs),comparable=sum(comparable),tiedtot=sum(tiedtot),c.uno=uno.cindex) 
 	if(cindex==1){	
-		out <- c(out,comparable=sum(comparable), concordante=sum(concordante),discordante=sum(discordante),tiedcomp=sum(tiedcomp),tiedtime=sum(tiedtime),
+		out <- c(out, concordante=sum(concordante),discordante=sum(discordante),tiedcomp=sum(tiedcomp),tiedtime=sum(tiedtime),
 		unusable=sum(unusable),cindex=cindex_global)
 	}
 	return(out)

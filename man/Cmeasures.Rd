@@ -8,18 +8,22 @@
 \alias{statFP}
 
 \title{
-Concordance measures in shared frailty and Cox models
+Concordance measures in shared frailty and Cox proportional hazard models
 }
 \description{
-Compute concordance probability estimation for Cox models or shared frailty models in case of grouped data (Mauguen et al. 2012). Concordance is given at different levels of comparison, taking into account the cluster membership: between-groups, within-groups and an overall measure, being a weighted average of the previous two. Can also compute the c-index (Harrell et al. 1996) at these three levels. It is possible to exclude tied pairs from concordance estimation (otherwise, account for 1/2). 
+Compute concordance probability estimation for Cox proportional hazard or shared frailty models in case of grouped data (Mauguen et al. 2012). Concordance is given at different levels of comparison, taking into account the cluster membership: between-groups, within-groups and an overall measure, being a weighted average of the previous two. Can also compute the c-index (Harrell et al. 1996) at these three levels. It is possible to exclude tied pairs from concordance estimation (otherwise, account for 1/2). 
 }
+
 \usage{
-Cmeasures(fitc, ties = 1, marginal = 0, cindex = 0, Nboot = 0)
+
+Cmeasures(fitc, ties = 1, marginal = 0, cindex = 0, Nboot = 0,
+          tau = 0, data.val)
+          
 }
 
 \arguments{
   \item{fitc}{
-A frailtyPenal object , for a shared frailty model. If the fit is a Cox model (Frailty=FALSE), no clustering membership is taken into account and only marginal concordance probability estimation is provided. Only an overall measure is given, where all patients are compared two by two.
+A frailtyPenal object, for a shared frailty model. If the fit is a Cox model (Frailty=FALSE), no clustering membership is taken into account and only marginal concordance probability estimation is provided. Only an overall measure is given, where all patients are compared two by two.
 If a counting process formulation is used to performed the fit, with 't.start' and 't.stop', the gap-times (t.stop-t.start) are used in the concordance estimation.
 
 }
@@ -35,64 +39,83 @@ Indicates if the c-index (Harrell et al. 1996) must be computed (cindex=1) in ad
   \item{Nboot}{
 Number of bootstrap resamplings to compute standard-error of the concordances measures, as well as a percentile 95\% confidence interval. Nboot=0 indicates no bootstrap procedure. Maximum admitted is 1000. Minimum admitted is 2. Default is 0. Resampling is done at the group level. If Cox model is used, resampling is done at individual level.
 }
+  \item{tau}{Time used to limit the interval on which the concordance is estimated. Note that the survival function for the underlying censoring time distribution needs to be positive at tau. If tau=0, the maximum of the observed event times is used. Default is tau=0.}
+  
+  \item{data.val}{A dataframe. It is possible to specify a different dataset than the one used in the model input in the argument 'fitc'. This new dataset will be a validation population and the function will compute new concordance measures from the parameters estimated on the development population. In this case for conditional measures, the frailties are a posteriori predicted. The two datasets must have the same covariates with the same coding without missing data.}
 }
 
 \value{
 \item{call}{The shared frailty model evaluated.}
 \item{Frailty}{Logical value. Was model with frailties fitted.}
 \item{frequencies}{Numbers of patients, events and groups used to fit the model.}
+\item{Npairs}{Number of pairs of subjects, between-groups, within-groups and over all the population. If cindex=1, number of comparable (useable) pairs also available.}
 \item{Nboot}{Number of bootstrap resamplings required.}
-\item{Nbproblem}{Number of bootstrap resamplings in which the model did not converge. Those are excluded when computing the 
-			standard-error and the percentile 95\% confidence interval.}
 \item{ties}{A binary, indicating if the tied pairs on prediction were used to compute the concordance.}
-\item{CPEcond}{Values of the Concordance Probability Estimations (conditional) and the number of pairs used. If Nboot>0, give SE, the 
+\item{CPEcond}{Values of Gonen & Heller's measure (conditional). If Nboot>0, give SE, the 
+			standard-error of the parameters evaluated by bootstrap, IC.low and IC.high, the lower and upper bounds of the percentile 
+			confidence interval evaluated by bootstrap (2.5\% and 97.5\% percentiles).}
+\item{Cunocond}{Values of Uno's measure (conditional). If Nboot>0, give SE, the 
 			standard-error of the parameters evaluated by bootstrap, IC.low and IC.high, the lower and upper bounds of the percentile 
 			confidence interval evaluated by bootstrap (2.5\% and 97.5\% percentiles).}
 \item{marginal}{A binary, indicating if the marginal values were computed.}
-\item{CPEmarg}{Values of the Concordance Probability Estimations (marginal)  and the number of pairs used, if marginal=1. If Nboot>0, 
+\item{CPEmarg}{Values of Gonen & Heller's measure (marginal), if marginal=1. If Nboot>0, 
+			give SE, the standard-error of the parameters evaluated by bootstrap, IC.low and IC.high, the lower and upper bounds of the 
+			percentile confidence interval evaluated by bootstrap (2.5\% and 97.5\% percentiles).}
+\item{Cunomarg}{Values of Uno's measure (marginal), if marginal=1. If Nboot>0, 
 			give SE, the standard-error of the parameters evaluated by bootstrap, IC.low and IC.high, the lower and upper bounds of the 
 			percentile confidence interval evaluated by bootstrap (2.5\% and 97.5\% percentiles).}
 \item{cindex}{A binary, indicating if the c-indexes were computed.}
-\item{cindexcond}{Values of the C-index (conditional)  and the number of pairs used. If Nboot>0, give SE, the standard-error of the 
+
+\item{cindexcond}{Values of the C-index of Harrell (conditional). If Nboot>0, give SE, the standard-error of the 
 			parameters evaluated by bootstrap, IC.low and IC.high, the lower and upper bounds of the percentile confidence interval 
 			evaluated by bootstrap (2.5\% and 97.5\% percentiles).}
-\item{cindexmarg}{Values of the C-index (marginal) and the number of pairs used, if marginal=1. If Nboot>0, give SE, the 
+\item{cindexmarg}{Values of the C-index of Harrell (marginal), if marginal=1. If Nboot>0, give SE, the 
 			standard-error of the parameters evaluated by bootstrap, IC.low and IC.high, the lower and upper bounds of the percentile 
 			confidence interval evaluated by bootstrap (2.5\% and 97.5\% percentiles).}
 }
 \references{
-Concordance measures in shared frailty models: application to multicenter data in cancer prognosis. Mauguen A, Collette S, Pignon JP, Collette L and Rondeau V. (submitted 2012).
 
-Harrell FE et al. Tutorial in biostatistics: multivariable prognostic models: issues in developing models, evaluating assumptions and adequacy, and measuring and reducing errors. Statistics in Medicine 1996; 15:361-387.
+Mauguen, A., Collette, S., Pignon, J. P. and Rondeau, V. (2013). Concordance measures in shared frailty models: application to clustered data in cancer prognosis.
+\emph{Statistics in Medicine} \bold{32}, 27, 4803-4820
 
-Gonen M, Heller G. Concordance probability and discriminatory power in proportional hazards regression. Biometrika 2005; 92:965-970.
+Harrell, F.E. et al. (1996). Tutorial in biostatistics: multivariable prognostic models: issues in developing models, evaluating assumptions and adequacy, and measuring and reducing errors.
+\emph{Statistics in Medicine} \bold{15}, 361-387.
+
+Gonen, M., Heller, G. (2005). Concordance probability and discriminatory power in proportional hazards regression.
+\emph{Biometrika} \bold{92}, 965-970.
+
 }
 
 \seealso{
-\code{\link{print.Cmeasures}},
-\code{\link{frailtyPenal}}
+\code{\link{print.Cmeasures}},\code{\link{frailtyPenal}}
 }
+
 \examples{
 
 \dontrun{
 
-## load data
+#-- load data
 data(readmission)
 
-## a frailtypenal fit
-fit.frailtypenal <- frailtyPenal(Surv(time,event)~cluster(id)+dukes+
+#-- a frailtypenal fit
+fit <- frailtyPenal(Surv(time,event)~cluster(id)+dukes+
 charlson+chemo,data=readmission,Frailty=TRUE,cross.validation=FALSE,
 n.knots=10,kappa1=1,hazard="Splines")
 
-## a Cmeasures call
-fit.Cmeasures <- Cmeasures(fit.frailtypenal)
-fit.Cmeasures.noties <- Cmeasures(fit.frailtypenal, ties=0)
+#-- a Cmeasures call
+fit.Cmeasures <- Cmeasures(fit)
+fit.Cmeasures.noties <- Cmeasures(fit, ties=0)
+fit.Cmeasures.marginal <- Cmeasures(fit, marginal=1)
+fit.Cmeasures.cindex <- Cmeasures(fit, cindex=1)
 
-## a short summary
+#-- a short summary
 fit.Cmeasures
 fit.Cmeasures.noties
+fit.Cmeasures.marginal
+fit.Cmeasures.cindex
 
 }
+
 }
 
 \keyword{concordance}

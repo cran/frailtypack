@@ -9,11 +9,10 @@ terminal,
 num.id,
 Cmeasures,
 SurvIC,
-event2,
-multivePenal,
-timedep
+timedep,
+prediction
 )
-import("survival","boot")
+import("survival","boot","MASS","survC1")
 
 S3method(plot,frailtyPenal)
 S3method(lines,frailtyPenal)
@@ -33,6 +32,7 @@ S3method(summary,nestedPenal)
 
 S3method(print,Cmeasures)
 
-S3method(print,multivePenal)
-S3method(summary,multivePenal)
-S3method(plot,multivePenal)
+S3method(plot,predJoint)
+S3method(print,predJoint)
+S3method(print,predFrailty)
+S3method(plot,predFrailty)

@@ -129,10 +129,16 @@
 		if (x$typeof == 0){
 			cat(paste("    penalized marginal log-likelihood =", round(x$logLikPenal,2)))
 			cat("\n")
+			cat("    Convergence criteria: \n")
+			cat("    parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
+			cat("\n")
 			cat("    LCV = the approximate likelihood cross-validation criterion\n")
 			cat("          in the semi parametrical case     =",x$LCV,"\n")
 		}else{
 			cat(paste("    marginal log-likelihood =", round(x$logLik,2)))
+			cat("\n")
+			cat("    Convergence criteria: \n")
+			cat("    parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
 			cat("\n")
 #			cat("    LCV = the approximate likelihood cross-validation criterion\n")
 #			cat("          in the parametrical case     =",x$LCV,"\n")	
@@ -165,7 +171,7 @@
 		}else{
 			cat("\n")
 		}
-		cat("    n events=", x$n.event, " n groups=", x$groups)
+		cat("    n events=", x$n.events, " n groups=", x$groups)
 		cat( "\n")
 		cat("    number of iterations: ", x$n.iter,"\n")
 		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)){
@@ -201,13 +207,18 @@
 		}
 		
 		cat("\n")
+		
+		cat("    Convergence criteria: \n")
+		cat("    parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
+		
+		cat("\n")
 		cat("    n=", x$n)
 		if (length(x$na.action)){ 
 			cat("  (", length(x$na.action), " observation deleted due to missing) \n")
 		}else{
 			cat("\n")
 		}
-		cat("    n events=", x$n.event, " n groups=", x$groups)
+		cat("    n events=", x$n.events, " n groups=", x$groups)
 		cat( "\n")
 		cat("    number of iterations: ", x$n.iter)	
 	}

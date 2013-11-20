@@ -38,12 +38,12 @@ Typical usages are
 data(bcos)
 bcos$event <- ifelse(bcos$left!=bcos$right,1,0)
 
-###  Cox proportional hazard model with interval censoring  ###
+###---  Cox proportional hazard model with interval censoring ---###
 
 cox.ic <- frailtyPenal(SurvIC(left,right,event)~treatment,
 data=bcos,Frailty=FALSE,n.knots=8,kappa1=10000)
 
-###  Shared model with interval censoring  ###
+###---  Shared model with interval censoring ---###
 
 bcos$group <- c(rep(1:20,4),1:14)
 

@@ -42,30 +42,30 @@
  \code{\link{frailtyPenal}}
 }
 
-
 \examples{
 
 \dontrun{
 
 data(readmission)
 
-# Shared frailty model
+###--- Shared frailty model ---###
 
 modSha <- frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
 n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,hazard="Splines")
 
 plot(modSha,type="surv",conf=FALSE)
 
-# Cox proportional hazard model using Penalized likelihood
+###--- Cox proportional hazard model ---###
 
 modCox <- frailtyPenal(Surv(time,event)~as.factor(dukes),n.knots=10,
 kappa1=10000,data=readmission,Frailty=FALSE,hazard="Splines")
 
 plot(modCox)
 
-# no confidence bands
+#-- no confidence bands
 plot(modSha,conf.bands=FALSE)
 plot(modCox,conf.bands=FALSE)
+
 }
 
 }

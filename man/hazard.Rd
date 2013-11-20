@@ -28,13 +28,13 @@ return the value of hazard function in t.
 
 \dontrun{
 
-###  a fit Shared
+#-- a fit Shared
 data(readmission)
 fit.shared <- frailtyPenal(Surv(time,event)~dukes+cluster(id)+
 strata(sex),n.knots=10,kappa1=10000,kappa2=10000,data=readmission,
 Frailty=TRUE)
 
-### calling survival
+#-- calling survival
 hazard(20,fit.shared)
 
 }
