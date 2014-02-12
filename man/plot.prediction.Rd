@@ -28,8 +28,6 @@
 
 \examples{
 
-\dontrun{
-
 data(readmission)
 
 ##-- predictions on a Cox proportionnal hazard model --##
@@ -48,8 +46,6 @@ datapred[2,] <- c(2,3)
 #-- prediction of the event for two patients, between time 100 and time 2000
 pred.cox <- prediction(cox,datapred,100,50,2000)
 plot(pred.cox)
-
-}
 
 }
 

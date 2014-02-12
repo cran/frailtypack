@@ -277,6 +277,5 @@
     end function funcpaares    
 
 
-
     
       

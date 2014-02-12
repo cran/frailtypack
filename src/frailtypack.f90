@@ -455,7 +455,7 @@
 !--------- affectation nt0,nt1,ntU----------------------------
         indictronq=0
         do i=1,nsujet
-            
+
             if(t0(i).eq.0.d0)then
                 nt0(i) = 0
             endif
@@ -468,6 +468,7 @@
             !endif
 !Al:
             do j=1,ndate
+            
                 if(date(j).eq.t0(i))then
                     nt0(i)=j
                 endif
@@ -699,12 +700,12 @@
         stra(l)=1
     end do
 
-    !print*,"debut"
+!    print*,"debut"
     if(typeof == 0) then
         if(irep1.eq.1)then   !pas recherche du parametre de lissage
             xmin1 = dsqrt(xmin1)
             auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
-            
+
             if (ni.ge.maxiter) then
     !            write(*,*) ' '
     !            write(*,*) 'no convergence with the chosen smoothing parameter'
@@ -843,6 +844,7 @@
         endif
     !    write(4,*)'nombre de noeuds:',nz
     end if
+
     nva=nvacross ! pour la recherche des parametres de regression
     nst=nstcross ! avec stratification si necessaire
     effet=effetcross ! avec effet initial
@@ -869,7 +871,7 @@
 !    if (typeof .ne. 0) then
 !        allocate(kkapa(2))
 !    end if
-    !print*,"appel de funcpa"
+!    print*,"appel de funcpa"
 
     select case(typeof)
         case(0)
@@ -917,7 +919,7 @@
                 call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpas_tps)
             endif
     end select
-    !print*,"fin de funcpa"
+
 !    if (typeof .ne. 0) then
 !        deallocate(kkapa)
 !    end if
@@ -1920,7 +1922,7 @@
     double precision,dimension((npmax*(npmax+3)/2))::v
     double precision,dimension(-2:npmax)::the
     double precision,dimension(2)::k0
-    double precision,dimension(ndatemax)::ut,dut
+    double precision,dimension(ndate)::ut,dut
     double precision,dimension(npmax)::bh,b
     double precision::res,k00,som,h1
     double precision::aux
@@ -1986,6 +1988,7 @@
 !AD:
 50    continue
 !AD:
+
     return
 
     end function estimvs
@@ -2004,7 +2007,7 @@
     integer,dimension(npmax)::indx
     integer::n,i,j,np
     double precision,dimension(2)::k0
-    double precision,dimension(ndatemax)::dut
+    double precision,dimension(ndate)::dut
     double precision::d,res,tra
 
 
@@ -2042,7 +2045,7 @@
         end do
         y(i,i)=1.d0
     end do
-
+    
     call ludcmps(hess,n,indx,d) ! decomposition LU
 
     do j=1,n
@@ -2134,7 +2137,7 @@
     implicit none
 
     double precision::res,res1,msps,aux2,u2
-    double precision,dimension(ndatemax)::dut
+    double precision,dimension(ndate)::dut
     integer::k,l,j,ni,n,i
 
 !--------- calcul de la hessienne ij ------------------
@@ -2163,9 +2166,8 @@
         else !censure
             res1 = 0.d0
         endif
-        res = res + res1
+        res = res + res1  
     end do
-
     end subroutine mats
 
 !==========================  MSP   ==================================

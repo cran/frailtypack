@@ -12,6 +12,14 @@ Cmeasures <- function(fitc, ties=1, marginal=0, cindex=0, Nboot=0, tau=0, data.v
 	if (!missing(data.val)) data <- data.val
 	else data <- eval(fitc$Names.data)
 	
+	# enlever les NA du data s'il y en a
+	drop <- rep(TRUE,nrow(data))
+	if (any(is.na(data))){
+		drop <- complete.cases(data)
+		warning("Missing observations in data ( ",length(drop==FALSE)," rows removed )")
+		data <- data[drop,]
+	}
+	
 	update(fitc$formula,"~1")
 	if(length(all.names(update(fitc$formula,"~1")))==4){
 		Names.time <- as.character(fitc$formula[[2]][[2]])
@@ -45,6 +53,7 @@ Cmeasures <- function(fitc, ties=1, marginal=0, cindex=0, Nboot=0, tau=0, data.v
 		m$formula[[2]] <- NULL # pas besoin du Surv dans formula
 		
 		dataset <- eval(m, sys.parent())
+		dataset <- dataset[drop,] # enlever les NA si y en a
 		
 		class(m$formula) <- "formula"
 		special <- c("strata", "cluster", "subcluster", "terminal", "num.id", "timedep")

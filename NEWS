@@ -1,23 +1,28 @@
+Changes in Version 2.5.1       Feb 2014
+
+  o Bug fixed about joint frailty model without any covariate.
+
+
 Changes in Version 2.5         Nov 2013
 
-  o New dynamic tool of prediction added for Cox proportionnal hazard, shared and joint frailty model
+  o New dynamic tool of prediction added for Cox proportionnal hazard, shared and joint frailty model.
   
   o Add IPCW estimation of concordance measures as Uno (Stat Med 2011). Significant changes in the printing of 'Cmeasures' function.
   
-  o Bug fixed about parametrical survival functions plotting with left truncated data
+  o Bug fixed about parametrical survival functions plotting with left truncated data.
   
-  o Bug fixed which allowed cross validation with interval-censored data
+  o Bug fixed which allowed cross validation with interval-censored data.
   
-  o Possibility to print and change the three convergence criterions in frailtyPenal and additivePenal
+  o Possibility to print and change the three convergence criterions in frailtyPenal and additivePenal.
  
 
 Changes in Version 2.4.1         Apr 2013
 
-  o Bug fixed about estimation of frailties in shared models using recurrentAG=TRUE
+  o Bug fixed about estimation of frailties in shared models using recurrentAG=TRUE.
   
   o Printing bug about standard deviation of the random effet variance in a model without covariate.
 
-  o Possibility to initialize regression coefficients in shared and joint frailty models 
+  o Possibility to initialize regression coefficients in shared and joint frailty models.
 
   
 Changes in Version 2.4           Apr 2013
