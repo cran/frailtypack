@@ -295,7 +295,7 @@
     end do
 
     end subroutine ResidusMartingalea
-    
+
 
 
 

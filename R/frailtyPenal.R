@@ -439,9 +439,10 @@ if((all.equal(length(hazard),1)==T)==T){
 		noVar1 <- 0
 	}
 # on enleve ensuite la premiere colonne correspondant a id
-	
+
 
 	nvar<-ncol(X) #nvar==1 correspond a 2 situaions:
+
 # au cas ou on a aucune var explicative dans la partie rec, mais X=0
 # cas ou on a 1seul var explicative, ici X est en general different de 0
 
@@ -459,7 +460,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	filtretps[grep("timedep",colnames(X))] <- 1
 
 	var<-matrix(c(X),nrow=nrow(X),ncol=nvar) #matrix sans id et sans partie ex terminal(death)
-	
+
 	n<-nrow(X)
 
 
@@ -1249,13 +1250,16 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 	}
 	npbetatps <- npbetatps1 + npbetatps2
 
+	if (sum(as.double(var))==0) nvarRec <- 0
+	if ((joint.clust==0) & sum(as.double(vaxdc00))==0) nvarEnd <- 0
+	if ((joint.clust==1) & sum(as.double(vardc))==0) nvarEnd <- 0
+
 	np <- switch(as.character(typeof),
 		"0"=(nst * (n.knots + 2) + nvarRec + nvarEnd + effet + indic_alpha + npbetatps),
 
 		"1"=(nbintervR + nbintervDC + nvarRec + nvarEnd + effet + indic_alpha + npbetatps),
 
-		"2"=(2*nst + nvar + effet + indic_alpha + npbetatps))
-
+		"2"=(2*nst + nvarRec + nvarEnd + effet + indic_alpha + npbetatps))
 
 	if (all(all.equal(as.numeric(cens),terminal)==T)){
 		stop("'Recurrent event' variable and 'Terminal event' variable need to be different")

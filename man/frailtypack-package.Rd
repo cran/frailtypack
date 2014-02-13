@@ -1,6 +1,6 @@
 
 \name{frailtypack-package}
-\Rdversion{2.5}
+\Rdversion{2.5.1}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
@@ -22,8 +22,8 @@
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.5\cr
-     Date: \tab 2013-11-20\cr
+     Version: \tab 2.5.1\cr
+     Date: \tab 2014-02-12\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab yes\cr
   }

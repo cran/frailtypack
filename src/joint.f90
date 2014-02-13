@@ -721,9 +721,9 @@
     endif
 
     if(typeof ==1) then
-        b(1:nbintervR) = 0.8d0!1.d-2!
-        b((nbintervR+1):(nbintervR+nbintervDC)) = 0.8d0!1.d-2
-        b(np-nva-indic_alpha)=5.d-1 ! pour theta
+!         b(1:nbintervR) = 0.8d0!1.d-2!
+!         b((nbintervR+1):(nbintervR+nbintervDC)) = 0.8d0!1.d-2
+!         b(np-nva-indic_alpha)=5.d-1 ! pour theta
     end if
 
 !    write(*,*)'typeof',typeof
@@ -735,7 +735,7 @@
     end if
 
     if (typeof == 0) then
-        b(np-nva-indic_alpha)=1.d0 ! pour theta
+!        b(np-nva-indic_alpha)=5.d-1 !1.d0 ! pour theta
     end if
 
     b(np-nva)=1.d0

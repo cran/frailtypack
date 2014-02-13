@@ -44,8 +44,6 @@
 
 \examples{
 
-\dontrun{
-
 data(readmission)
 
 ###--- Shared frailty model ---###
@@ -65,8 +63,6 @@ plot(modCox)
 #-- no confidence bands
 plot(modSha,conf.bands=FALSE)
 plot(modCox,conf.bands=FALSE)
-
-}
 
 }
 

@@ -226,11 +226,14 @@
         if(cpt(k).gt.0)then
             if(theta.gt.(1.d-8)) then
 !cccc ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
-                res= res + res2(k) &
+                if (integrale3(k).eq.0.d0) then
+                    res= res + res2(k) &
 !--      pour le deces:
-                + res2dc(k)  &
-                - gammaJ(1./theta)-dlog(theta)/theta  &
-                + dlog(integrale3(k))
+                    + res2dc(k) - gammaJ(1./theta)-dlog(theta)/theta -112.d0
+                else
+                    res= res + res2(k) &
+                    + res2dc(k) - gammaJ(1./theta)-dlog(theta)/theta+dlog(integrale3(k))
+                endif
             else
 !*************************************************************************
 !     developpement de taylor d ordre 3
