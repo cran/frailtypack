@@ -60,11 +60,17 @@
 
 	if (x$logNormal == 0) frail <- x$theta
 	else frail <- x$sigma2
+	indic_alpha <- x$indic_alpha
 
 	if (x$istop == 1){
 		if (!is.null(coef)){
-			seH <- sqrt(diag(x$varH))[-c(1,2)]
-			seHIH <- sqrt(diag(x$varHIH))[-c(1,2)]
+			if (indic_alpha == 1) {
+				seH <- sqrt(diag(x$varH))[-c(1,2)]
+				seHIH <- sqrt(diag(x$varHIH))[-c(1,2)]
+			}else{
+				seH <- sqrt(diag(x$varH))[-1]
+				seHIH <- sqrt(diag(x$varHIH))[-1]
+			}
 			if (x$typeof == 0){
 				tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, signif(1 -
 				pchisq((coef/seH)^2, 1), digits - 1))
@@ -182,19 +188,23 @@
 		if (x$typeof == 0){
 			if (x$logNormal == 0){
 				cat("   theta (variance of Frailties, w):", frail, "(SE (H):",seH.frail, ")", "(SE (HIH):", seHIH.frail, ")", "\n")
-				cat("   alpha (w^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")","(SE (HIH):",sqrt(diag(x$varHIH))[2],")","\n")
+				if (indic_alpha == 1) cat("   alpha (w^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")","(SE (HIH):",sqrt(diag(x$varHIH))[2],")","\n")
+				else cat("   alpha is fixed (=1) \n")
 			}else{
 				cat("   sigma square (variance of Frailties, eta):", frail, "(SE (H):",seH.frail, ")", "(SE (HIH):", seHIH.frail, ")", "\n")
-				cat("   alpha (exp(alpha.eta) for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")","(SE (HIH):",sqrt(diag(x$varHIH))[2],")","\n")
+				if (indic_alpha == 1) cat("   alpha (exp(alpha.eta) for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")","(SE (HIH):",sqrt(diag(x$varHIH))[2],")","\n")
+				else cat("   alpha is fixed (=1) \n")
 			}
 			cat(" \n")
 		}else{
 			if (x$logNormal == 0){
-				cat("   theta (variance of Frailties, Z):", frail, "(SE (H):",seH.frail, ")", ")", "\n")
-				cat("   alpha (w^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "\n")
+				cat("   theta (variance of Frailties, Z):", frail, "(SE (H):",seH.frail, ")", "\n")
+				if (indic_alpha == 1) cat("   alpha (w^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "\n")
+				else cat("   alpha is fixed (=1) \n")
 			}else{
-				cat("   sigma square (variance of Frailties, Z):", frail, "(SE (H):",seH.frail, ")", ")", "\n")
-				cat("   alpha (exp(alpha.eta) for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "\n")
+				cat("   sigma square (variance of Frailties, Z):", frail, "(SE (H):",seH.frail, ")", "\n")
+				if (indic_alpha == 1) cat("   alpha (exp(alpha.eta) for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "\n")
+				else cat("   alpha is fixed (=1) \n")
 			}
 			cat(" \n")
 		}

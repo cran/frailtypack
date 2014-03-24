@@ -1,14 +1,4 @@
     
-    module commun
-    implicit none
-    integer,save::ngexact,nssgexact
-    integer,dimension(:,:),allocatable,save::ssg
-    integer,dimension(:),allocatable,save:: mid 
-    integer,dimension(:,:),allocatable,save::mij 
-    integer,save::nbpara
-    double precision,dimension(:,:),allocatable,save::aux1,aux2
-    end module commun 
-
 !========================    FUNCPARES RESIDUS MATRINGALE DENSITE A POSTERIORI       ====================
 
 !!!!
@@ -275,6 +265,54 @@
     return
     
     end function funcpaares    
+
+
+
+
+!========================    FUNCPARES MULTIVE RESIDUS MATRINGALE DENSITE A POSTERIORI       ====================
+
+
+    double precision function funcpamultires(uu,np,id,thi,jd,thj)
+    
+    use comonmultiv,only:eta,theta,alpha,alpha1,alpha2
+    use residusMmultiv
+    
+    IMPLICIT NONE
+    
+    integer,intent(in)::id,jd,np
+    double precision,dimension(np)::bh
+    double precision,dimension(np),intent(in)::uu
+!    double precision,dimension(3),intent(in)::k0
+    double precision,intent(in)::thi,thj
+    double precision::frail1,frail2
+    double precision,parameter::pi=3.141592653589793d0
+!    double precision,dimension(3)::kappa_tmp
+
+!    kappa_tmp = k0
+    bh=uu
+
+    if (id.ne.0) bh(id)=bh(id)+thi
+    if (jd.ne.0) bh(jd)=bh(jd)+thj    
+
+    
+    frail1=bh(1)
+    frail2=bh(2) 
+
+
+!---------- calcul de la penalisation -------------------
+
+    funcpamultires= frail1*(Ndc(indg)*alpha1+Nrec(indg)) &
+    +frail2*(Ndc(indg)*alpha2+Nrec2(indg)) &
+    -dexp(frail1)*Rrec(indg)-dexp(frail2)*Rrec2(indg) &
+    -dexp(frail1*alpha1+frail2*alpha2)*Rdc(indg) &
+    +(2.d0*((2.d0*dexp(alpha)/(dexp(alpha)+1.d0))-1.d0) &
+    *frail1*frail2/sqrt(theta*eta)  &
+    -(frail1**2.d0)/theta -(frail2**2.d0)/eta) &
+    /(2.d0*(1.d0-((2.d0*dexp(alpha)/(dexp(alpha)+1.d0))-1.d0)**2.d0)) 
+
+    return
+    
+    end function funcpamultires
 
 
     

@@ -32,8 +32,7 @@ return the value of survival function in t.
 data(readmission)
 
 fit.shared <- frailtyPenal(Surv(time,event)~dukes+cluster(id)+
-strata(sex),n.knots=10,kappa1=10000,kappa2=10000,data=readmission,
-Frailty=TRUE)
+strata(sex),n.knots=10,kappa1=10000,kappa2=10000,data=readmission)
 
 #-- calling survival
 survival(20,fit.shared)

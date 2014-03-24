@@ -1,3 +1,26 @@
+Changes in Version 2.6       Mar 2014
+
+  o NEW: Fit now a multivariate gaussian frailty model (two types of recurrent events and a terminal event). 
+
+  o Major evolution of frailtyPenal function. 'Frailty' and 'joint' arguments removed.
+
+  o Now estimation of baseline hazard functions with splines, knots are placed using percentile (previously using equidistant intervals).
+
+  o Significant change of prediction function. You can compute predictions in two different ways: with a variable prediction time or a variable window of prediction.
+
+  o 'type' argument of prediction function removed. As long as there is a 'group' argument, for a shared model, computation of conditional predictions will be done.
+
+  o 'B' argument added in 2.4.1 to initialize regression coefficients was renamed 'init.B'
+
+  o Possibility to initialize the variance of the frailties with argument 'init.Theta' in shared and joint frailty models.
+
+  o Possibility to initialize the coefficient with argument 'init.Alpha' in joint frailty model.
+
+  o Moreover, with 'Alpha="none"', frailtyPenal can fit a joint model with a fixed alpha (=1). 
+
+  o New argument: 'print.times', added in every model to print iteration process.
+
+
 Changes in Version 2.5.1       Feb 2014
 
   o Bug fixed about joint frailty model without any covariate.
@@ -75,7 +98,7 @@ Changes in Version 2.2-24        Jul 2012
   o Printing bug fixed in multivariate Wald test.
 
 
-Changes in Version 2.2-22        mar 2012
+Changes in Version 2.2-22        Mar 2012
 
   o Fit a Shared Gamma Frailty model using a parametric estimation.
 

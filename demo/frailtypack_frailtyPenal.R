@@ -1,4 +1,4 @@
-# Virgine Rondeau 2012-4-12 for optimx
+# Virginie Rondeau 2012-4-12 for optimx
 
 options(digits=12)
 if(!require("frailtypack"))stop("this test requires package frailtypack.")
@@ -17,8 +17,8 @@ cat("frailtypack test for shared model ...\n")
 data("readmission")
 
 mod.cox.gap <- frailtyPenal(Surv(time, event) ~ dukes + 
-  charlson + sex + chemo, Frailty = FALSE, n.knots = 10,
-  kappa1 = 1, data = readmission, cross.validation = TRUE)
+  charlson + sex + chemo, n.knots = 10, kappa1 = 1,
+  data = readmission, cross.validation = TRUE)
 
 print(mod.cox.gap, digits = 4)
 
@@ -27,8 +27,8 @@ print(mod.cox.gap, digits = 4)
 ########################################################################
 
 mod.sha.gap <- frailtyPenal(Surv(time,event) ~ cluster(id) +
-  dukes + charlson + sex + chemo, Frailty = TRUE,
-  n.knots = 10, kappa1 = 1, data = readmission, cross.validation = TRUE)
+  dukes + charlson + sex + chemo, n.knots = 10, kappa1 = 1,
+  data = readmission, cross.validation = TRUE)
   
 print(mod.sha.gap, digits = 4)
 
@@ -37,9 +37,8 @@ print(mod.sha.gap, digits = 4)
 #########################################################################
 
 mod.sha.str.gap <- frailtyPenal(Surv(time, event) ~ cluster(id) +
-  charlson + dukes + chemo + strata(sex), Frailty = TRUE,
-  n.knots = 10, kappa1 = 2.11e+08, kappa2 = 2.11e+08,
-  data = readmission)
+  charlson + dukes + chemo + strata(sex), n.knots = 10, 
+  kappa1 = 2.11e+08, kappa2 = 2.11e+08, data = readmission)
 
 print(mod.sha.str.gap, digits = 4)
 

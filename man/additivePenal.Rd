@@ -35,7 +35,8 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\beta_k} the fixe
 additivePenal(formula, data, correlation = FALSE, recurrentAG =
              FALSE, cross.validation = FALSE, n.knots, kappa1,
              kappa2, maxit = 350, hazard = "Splines", nb.int1,
-             LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-3)
+             LIMparam = 1e-4, LIMlogl = 1e-4, LIMderiv = 1e-3,
+             print.times = TRUE)
 }
 
 
@@ -45,8 +46,7 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
  The response must be a survival object as returned by the 'Surv' function like in survival
  package. The \code{slope()} function is required.}
 
-  \item{data}{ a 'data.frame' in which to interpret the variables named in the
- 'formula'.}
+  \item{data}{a 'data.frame' with the variables used in 'formula'.}
 
   \item{correlation}{ Logical value. Are the random effects correlated? If so,
  the correlation coefficient is estimated. The default is FALSE.}
@@ -86,6 +86,8 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
   \item{LIMlogl}{Convergence threshold of the Marquard algorithm for the log-likelihood (see Details), \eqn{10^{-4}} by default.}
  
   \item{LIMderiv}{Convergence threshold of the Marquard algorithm for the gradient (see Details), \eqn{10^{-3}} by default.}
+
+  \item{print.times}{a logical parameter to print iteration process. Default is TRUE.}
 }
 
 

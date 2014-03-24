@@ -9,6 +9,8 @@ terminal,
 num.id,
 Cmeasures,
 SurvIC,
+event2,
+multivPenal,
 timedep,
 prediction
 )
@@ -37,4 +39,6 @@ S3method(print,predJoint)
 S3method(print,predFrailty)
 S3method(plot,predFrailty)
 
-
+S3method(print,multivPenal)
+S3method(summary,multivPenal)
+S3method(plot,multivPenal)

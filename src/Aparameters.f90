@@ -10,6 +10,15 @@
         integer,save::maxiter
     end module parameters
     
+    module commun
+    implicit none
+    integer,save::ngexact,nssgexact
+    integer,dimension(:,:),allocatable,save::ssg
+    integer,dimension(:),allocatable,save:: mid 
+    integer,dimension(:,:),allocatable,save::mij 
+    integer,save::nbpara
+    double precision,dimension(:,:),allocatable,save::aux1,aux2
+    end module commun 
 
 ! time dependant janvier 2013
     module betatttps

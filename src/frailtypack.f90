@@ -28,7 +28,7 @@
     integer,dimension(nsujetAux)::stracross
     double precision,dimension(nvaAux)::vax
     double precision::tt0,tt1,ttU ! rajout
-    double precision::h,ax1,ax2,res,min,max,maxt,str
+    double precision::h,ax1,ax2,res,min,max,maxt,str,pord
     double precision,dimension(2)::auxkappa,k0,res01
     double precision,dimension(3*nsujetAux)::aux ! rajout dimension
     double precision,dimension(np*(np+3)/2)::v
@@ -354,7 +354,7 @@
 !Ad
 
 ! rajout Alexandre 18/05/2012
-! crÃ©ation de d : nombre de censures par intervalle dans chaque groupe
+! creation de d : nombre de censures par intervalle dans chaque groupe
     allocate(d(ngmax))
     d = 0
     do i=1,nsujet
@@ -432,25 +432,69 @@
     end do
     
     if(typeof == 0) then
-        nzmax=nz+3
-        allocate(zi(-2:nzmax))
-        ndate = k
+
+! Al:10/03/2014 emplacement des noeuds splines en percentile (sans censure par intervalle)
+        if(intcens.eq.0) then
+            i=0
+            j=0
+!----------> taille - nb de recu
+            do i=1,nsujet
+                if(t1(i).ne.(0.d0).and.c(i).eq.1) then
+                    j=j+1
+                endif
+            end do
+            nbrecu=j
+
+!----------> allocation des vecteur temps
+            allocate(t2(nbrecu))
         
-        zi(-2) = date(1)
-        zi(-1) = date(1)
-        zi(0) = date(1)
-        zi(1) = date(1)
-        h = (date(ndate)-date(1))/dble(nz-1)
-        
-        do i=2,nz-1
-            zi(i) =zi(i-1) + h
-        end do
-        
-        zi(nz) = date(ndate)
-        zi(nz+1)=zi(nz)
-        zi(nz+2)=zi(nz)
-        zi(nz+3)=zi(nz)
-        ziOut = zi
+!----------> remplissage du vecteur de temps
+            j=0
+            do i=1,nsujet
+                if (t1(i).ne.(0.d0).and.c(i).eq.1) then
+                    j=j+1
+                    t2(j)=t1(i)
+                endif
+            end do
+            
+            nzmax=nz+3
+            allocate(zi(-2:nzmax))
+            ndate = k
+
+            zi(-2) = mint
+            zi(-1) = mint !date(1)
+            zi(0) = mint !date(1)
+            zi(1) = mint !date(1) 
+            j=0
+            do j=1,nz-2
+                pord = dble(j)/(dble(nz)-1.d0)
+                call percentile3(t2,nbrecu,pord,zi(j+1))
+            end do
+            zi(nz) = maxt !date(ndate)
+            zi(nz+1) = maxt !zi(nz)
+            zi(nz+2) = maxt !zi(nz)
+            zi(nz+3) = maxt !zi(nz)
+            ziOut = zi
+            deallocate(t2)
+        else
+            nzmax=nz+3
+            allocate(zi(-2:nzmax))
+            ndate = k
+
+            zi(-2) = date(1)
+            zi(-1) = date(1)
+            zi(0) = date(1)
+            zi(1) = date(1)
+            h = (date(ndate)-date(1))/dble(nz-1)
+            do i=2,nz-1
+                zi(i) =zi(i-1) + h
+            end do  
+            zi(nz) = date(ndate)
+            zi(nz+1)=zi(nz)
+            zi(nz+2)=zi(nz)
+            zi(nz+3)=zi(nz)
+            ziOut = zi
+        endif
 
 !--------- affectation nt0,nt1,ntU----------------------------
         indictronq=0
@@ -505,9 +549,17 @@
 
 !------ initialisation des parametres
 
-    ! savoir si l'utilisateur a entre des parametres initiaux !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ! savoir si l'utilisateur entre des parametres initiaux
     if (sum(b).eq.0.d0) then
-        b=1.d-1
+        b = 1.d-1
+    else if (sum(b(np-nva+1:np)).eq.0.d0) then
+        b(1:np-nva-1) = 1.d-1
+        b(np-nva+1:np) = 1.d-1
+    else if (b(np-nva).eq.0.d0) then
+        b(1:np-nva-1) = 1.d-1
+        b(np-nva) = 1.d-1
+    else
+        b(1:np-nva-1) = 1.d-1
     endif
 
     if (typeof == 1) then
@@ -872,7 +924,6 @@
 !        allocate(kkapa(2))
 !    end if
 !    print*,"appel de funcpa"
-
     select case(typeof)
         case(0)
             if (timedep.eq.0) then

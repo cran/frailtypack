@@ -1,6 +1,6 @@
 
 \name{frailtypack-package}
-\Rdversion{2.5.1}
+\Rdversion{2.6}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
@@ -8,7 +8,7 @@
 \title{General Frailty models: shared, joint and nested frailty models with prediction}
 
 \description{
- Frailtypack now fits several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation.
+ Frailtypack fits several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation.
  1) A shared frailty model and Cox proportional hazard model. Clustered and recurrent survival times can be studied.
  2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope).
  3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects.
@@ -22,10 +22,10 @@
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.5.1\cr
-     Date: \tab 2014-02-12\cr
+     Version: \tab 2.6\cr
+     Date: \tab 2014-03-24\cr
      License: \tab GPL (>= 2.0)\cr
-     LazyLoad: \tab yes\cr
+     LazyLoad: \tab no\cr
   }
 }
 
@@ -67,33 +67,30 @@ data(readmission)
 modJoint.gap <- frailtyPenal(Surv(time,event)~
 cluster(id)+sex+dukes+charlson+terminal(death),
 formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=14,kappa1=9.55e+9,
-kappa2=1.41e+12,Frailty=TRUE,joint=TRUE,
-recurrentAG=FALSE,hazard="Splines")
+data=readmission,n.knots=10,kappa1=100,
+kappa2=100,recurrentAG=FALSE,hazard="Splines")
 
 ###--- Nested model (or hierarchical model) with 2 covariates ---###
 
 data(dataNested)
 modClu <- frailtyPenal(Surv(t1,t2,event)~
 cluster(group)+subcluster(subgroup)+cov1+cov2,
-Frailty=TRUE,data=dataNested,n.knots=8,
-kappa1=50000,hazard="Splines")
+data=dataNested,n.knots=8,kappa1=50000,hazard="Splines")
 
 ###--- Semiparametric Shared model ---###
 
 data(readmission)
-frailtyPenal(Surv(t.start,t.stop,event)~
-as.factor(sex)+as.factor(dukes)+as.factor(charlson)+
-cluster(id),data=readmission, Frailty=TRUE,
+sha.sp <- frailtyPenal(Surv(t.start,t.stop,event)~
+sex+dukes+charlson+cluster(id),data=readmission,
 n.knots=6,kappa1=5000,recurrentAG=TRUE,
 cross.validation=TRUE,hazard="Splines")
 
 ###--- Parametric Shared model ---###
 
 data(readmission)
-frailtyPenal(Surv(t.start,t.stop,event)~
+sha.p <- frailtyPenal(Surv(t.start,t.stop,event)~
 cluster(id)+sex+dukes+charlson,
-data=readmission,Frailty=TRUE,recurrentAG=TRUE,
+data=readmission,recurrentAG=TRUE,
 hazard="Piecewise-per",nb.int1=6)
 
 }

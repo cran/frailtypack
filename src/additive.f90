@@ -49,7 +49,7 @@
 !------------------
     real::tt0,tt1
     integer,dimension(nva0)::filtre,filtre2
-    double precision::h,xmin1,xmin2,res,min,max,maxt, &
+    double precision::xmin1,xmin2,res,min,max,maxt,pord, &
     lrs,trace,trace1,trace2,auxi,ax,bx,cx,tol,ddl, &
     fa,fb,fc,goldenadd,estimvadd,f1,f2,f3,varcov    
     double precision,dimension(2):: auxkappa,k0 
@@ -175,12 +175,18 @@
     g=0  
 !------------  lecture fichier -----------------------
     maxt = 0.d0
+    mint = 0.d0
     cpt = 0
     k = 0
     cptstr1 = 0
     cptstr2 = 0
 
-    do i = 1,nsujet    
+    do i = 1,nsujet
+
+        if (i.eq.1) then
+            mint = tt00(i) ! affectation du min juste une fois
+        endif
+
         if(nst.eq.2)then
             tt0=tt00(i)
             tt1=tt10(i)
@@ -305,6 +311,9 @@
         if (maxt.lt.t1(k))then
             maxt = t1(k)
         endif
+        if (mint.gt.t0(k)) then
+            mint = t0(k)
+        endif
     end do 
 !AD:
     if (typeof .ne. 0) then 
@@ -360,25 +369,70 @@
     end do 
     
     if(typeof == 0) then
+
+! Al:10/03/2014 emplacement des noeuds splines en percentile (sans censure par intervalle)
+        i=0
+        j=0
+!----------> taille - nb de recu
+        do i=1,nsujet
+            if(t1(i).ne.(0.d0).and.c(i).eq.1) then
+                j=j+1
+            endif
+        end do
+        nbrecu=j
+
+!----------> allocation des vecteur temps
+        allocate(t2(nbrecu))
+        
+!----------> remplissage du vecteur de temps
+        j=0
+        do i=1,nsujet
+            if (t1(i).ne.(0.d0).and.c(i).eq.1) then
+                j=j+1
+                t2(j)=t1(i)
+            endif
+        end do
+            
         nzmax=nz+3
         allocate(zi(-2:nzmax))
-    
         ndate = k
 
-        zi(-2) = date(1)
-        zi(-1) = date(1)
-        zi(0) = date(1)
-        zi(1) = date(1)
-        h = (date(ndate)-date(1))/dble(nz-1)
-        do i=2,nz-1
-            zi(i) =zi(i-1) + h   
+        zi(-2) = mint
+        zi(-1) = mint !date(1)
+        zi(0) = mint !date(1)
+        zi(1) = mint !date(1) 
+        j=0
+        do j=1,nz-2
+            pord = dble(j)/(dble(nz)-1.d0)
+            call percentile3(t2,nbrecu,pord,zi(j+1))
         end do
-
-        zi(nz) = date(ndate)
-        zi(nz+1)=zi(nz)
-        zi(nz+2)=zi(nz)
-        zi(nz+3)=zi(nz)
+        zi(nz) = maxt !date(ndate)
+        zi(nz+1) = maxt !zi(nz)
+        zi(nz+2) = maxt !zi(nz)
+        zi(nz+3) = maxt !zi(nz)
         ziOut = zi
+        deallocate(t2)
+
+!         nzmax=nz+3
+!         allocate(zi(-2:nzmax))
+!     
+!         ndate = k
+! 
+!         zi(-2) = date(1)
+!         zi(-1) = date(1)
+!         zi(0) = date(1)
+!         zi(1) = date(1)
+!         h = (date(ndate)-date(1))/dble(nz-1)
+!         do i=2,nz-1
+!             zi(i) =zi(i-1) + h   
+!         end do
+! 
+!         zi(nz) = date(ndate)
+!         zi(nz+1)=zi(nz)
+!         zi(nz+2)=zi(nz)
+!         zi(nz+3)=zi(nz)
+!         ziOut = zi
+
     end if
 !---------- affectation nt0,nt1----------------------------
 

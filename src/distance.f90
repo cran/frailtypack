@@ -1585,6 +1585,898 @@ use tailles,only:ndatemax,npmax,NSUJETMAX
     end subroutine distanceJweib
 
 
+
+!======================================== Joint mulive   ============================
+    subroutine distancej_cpm(b,m,mt1,mt2,mt3,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC,x3M,moyLamM,xSu3,moysuM)
+    
+    use taillesmultiv
+    use comonmultiv,only:cens,vvv,t0,t1,t0dc,t1dc,t0meta,t1meta,cmeta,c,cdc,nsujet,nsujetmeta, &
+    nva,nva1,nva2,nva3,nst,nbintervR,nbintervDC,nbintervM,ttt,tttDC,tttmeta,date
+    use optim
+    
+    implicit none
+    
+    integer::m,i,j,ier,t,k,gg,jj,uu,ii,ncur,mt1,mt2,mt3,l
+    double precision::sx,som,som11R,som21R,som11RW,som21RW, &
+    glRW,x
+    double precision,dimension(m)::b
+    double precision,dimension(m)::bgen
+    double precision,dimension(1000,m)::u,v
+    double precision,dimension(1000)::lamR,lamDC,suR,glR    
+    double precision,dimension((m*(m+1)/2))::vv
+    double precision,dimension(m)::tempsR,tempsDC,tempsM
+    
+    double precision::lamR25,lamDC25,suR25,lamR975,lamDC975,suR975, &
+    LamRW,LamDCW,suRW
+!AD: sorties
+    double precision::ep
+    double precision,dimension(mt1)::x1R    !0:nbintervR*3
+    double precision,dimension(mt1,3)::moyLamR
+    double precision,dimension(100,3)::moysuR
+    double precision,dimension(mt2)::x2DC !0:nbintervDC*3
+    double precision,dimension(mt2,3)::moyLamDC
+    double precision,dimension(100,3)::moysuDC
+    double precision,dimension(mt3)::x3M    !0:nbintervR*3
+    double precision,dimension(mt3,3)::moyLamM
+    double precision,dimension(100,3)::moysuM
+    double precision,dimension(100)::xSu1,xSu2,xSu3
+    
+    
+    uu=0
+    bgen=0.d0
+    sx=1.d0 ! ecart-type ou variance des réalisations gaussiennes générées
+    
+    do i=1,nbintervR
+        tempsR(i)=(ttt(i-1)+ttt(i))/(2.d0)
+    end do
+    
+    do i=1,nbintervDC
+        tempsDC(i)=(tttdc(i-1)+tttdc(i))/(2.d0)
+    end do
+    
+    
+    do i=1,nbintervM
+        tempsM(i)=(tttmeta(i-1)+tttmeta(i))/(2.d0)
+    end do
+        
+    do i=1,m*(m+1)/2
+        vv(i)=vvv(i)
+    end do
+!AD: ep=10.d-10 
+       ep=10.d-10
+    call dmfsdj(vv,m,ep,ier)
+
+!      ns=m-nva-3! ns est le nombre de paramètres intervenat dans la fonctionde
+! risque ici 3 car on estime p param : alpha,eta,theta
+!     Pour chaque temps de 0 à la censure du décès par pas cens/100
+!      x=-cens/100 !permet de commencer à 0 dans la boucle
+
+!      n=0 ! permet de commencer à 0 dans la boucle
+!==========================================================================================
+!=============== hazard loco
+!==========================================================================================
+    ncur = 1
+    do t=1,nbintervR
+        lamR=0.d0
+!         n=n+1 ! compteur sur nième temps
+        x=tempsR(t)
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Pour chaque paramètre estimé                         
+            do i=1,nbintervR!m
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                    call bgos(SX,0,u(k,j),v(k,j),0.d0)  
+                    som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                bgen(i)=(b(i)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+                      
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR        
+!     fct de survie           : su  = dexp(-gl)    
+
+            lamR(k)=0.d0
+            lamRW=0.d0
+
+            do gg=1,nbintervR
+                if ((x.ge.(ttt(gg-1))).and.(x.lt.(ttt(gg)))) then
+                    lamR(k)=bgen(gg)
+                endif
+            end do
+
+            do gg=1,nbintervR
+                if ((x.ge.(ttt(gg-1))).and.(x.lt.(ttt(gg)))) then    
+                    lamRW=b(gg)**2
+                endif
+            end do
+                    
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+
+        call percentile(lamR,lamR25,lamR975)
+
+        do ii=1,nbintervR
+            if (x.gt.ttt(ii-1).and.x.lt.ttt(ii))then
+                uu=ii
+            endif
+        end do
+        if(t.ne.1) then 
+            x1R(ncur) = real(ttt(uu-1))    
+        else
+            x1R=date(1)
+        end if        
+        x1R(ncur+1) = real(x)
+        x1R(ncur+2) = real(ttt(uu))
+        
+        moyLamR(ncur,1) = real(LamRW)
+        moyLamR(ncur+1,1) = moyLamR(ncur,1)
+        moyLamR(ncur+2,1) = moyLamR(ncur,1)
+        
+        moyLamR(ncur,2) = real(lamR25)
+        moyLamR(ncur+1,2) = moyLamR(ncur,2)
+        moyLamR(ncur+2,2) = moyLamR(ncur,2)
+        
+        
+        moyLamR(ncur,3) = real(lamR975)
+        moyLamR(ncur+1,3) = moyLamR(ncur,3)
+        moyLamR(ncur+2,3) = moyLamR(ncur,3)
+        
+        ncur=ncur+3
+    end do
+
+!==========================================================================================
+!=============== hazard dc
+!==========================================================================================
+    ncur = 1
+    do t=1,nbintervDC    
+        x=tempsDC(t)
+        lamDC=0.d0
+
+!         n=n+1 ! compteur sur nième temps
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Pour chaque paramètre estimé                         
+            do i=1,nbintervDC!m
+            
+                som=0.d0
+                
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                    call bgos(SX,0,u(k,j),v(k,j),0.d0)  
+                    som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                
+                bgen(i)=(b(nbintervR + i)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+    
+    
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR        
+!     fct de survie           : su  = dexp(-gl)    
+    
+            lamDC(k)=0.d0
+            lamDCW=0.d0
+    
+            do gg=1,nbintervDC
+                if((x.ge.(tttdc(gg-1))).and.(x.lt.(tttdc(gg))))then
+                    lamDC(k)=bgen(gg)
+                endif
+            end do            
+
+            do gg=1,nbintervDC
+                if((x.ge.(tttdc(gg-1))).and.(x.lt.(tttdc(gg))))then
+                    lamDCW=b(gg+nbintervR)**2
+                endif
+            end do                 
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+
+        call percentile(lamDC,lamDC25,lamDC975)
+        
+
+        
+        do ii=1,nbintervDC
+            if (x.gt.tttdc(ii-1).and.x.lt.tttdc(ii))then
+                uu=ii
+            endif
+        end do
+        if(t.ne.1) then 
+            x2DC(ncur) = real(tttdc(uu-1))
+        else
+            x2DC(ncur) = date(1)
+        end if
+        x2DC(ncur+1) = real(x)
+        x2DC(ncur+2) = real(tttdc(uu))
+
+        moyLamDC(ncur,1) = real(lamDCW)
+        moyLamDC(ncur+1,1) = moyLamDC(ncur,1)        
+        moyLamDC(ncur+2,1) = moyLamDC(ncur,1)        
+        
+        moyLamDC(ncur,2) = real(lamDC25)
+        moyLamDC(ncur+1,2) = moyLamDC(ncur,2)
+        moyLamDC(ncur+2,2) = moyLamDC(ncur,2)
+                        
+        moyLamDC(ncur,3) = real(lamDC975)
+        moyLamDC(ncur+1,3) = moyLamDC(ncur,3)
+        moyLamDC(ncur+2,3) = moyLamDC(ncur,3)
+    
+        ncur=ncur+3
+    end do
+
+!==========================================================================================
+!=============== hazard Meta
+!==========================================================================================
+    ncur = 1
+    do t=1,nbintervM    
+        x=tempsM(t)
+        lamDC=0.d0
+
+!         n=n+1 ! compteur sur nième temps
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Pour chaque paramètre estimé                         
+            do i=1,nbintervM!m
+            
+                som=0.d0
+                
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                    call bgos(SX,0,u(k,j),v(k,j),0.d0)  
+                    som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                
+                bgen(i)=(b(nbintervR + nbintervDC + i)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+    
+    
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR        
+!     fct de survie           : su  = dexp(-gl)    
+    
+            lamDC(k)=0.d0
+            lamDCW=0.d0
+    
+            do gg=1,nbintervM
+                if((x.ge.(tttmeta(gg-1))).and.(x.lt.(tttmeta(gg))))then
+                    lamDC(k)=bgen(gg)
+                endif
+            end do            
+
+            do gg=1,nbintervM
+                if((x.ge.(tttmeta(gg-1))).and.(x.lt.(tttmeta(gg))))then
+                    lamDCW=b(gg+nbintervR+nbintervDC)**2
+                endif
+            end do                 
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+
+        call percentile(lamDC,lamDC25,lamDC975)
+        
+
+        
+        do ii=1,nbintervM
+            if (x.gt.tttmeta(ii-1).and.x.lt.tttmeta(ii))then
+                uu=ii
+            endif
+        end do
+        if(t.ne.1) then 
+            x3M(ncur) = real(tttmeta(uu-1))
+        else
+            x3M(ncur) = date(1)
+        end if
+        x3M(ncur+1) = real(x)
+        x3M(ncur+2) = real(tttmeta(uu))
+
+        moyLamM(ncur,1) = real(lamDCW)
+        moyLamM(ncur+1,1) = moyLamM(ncur,1)        
+        moyLamM(ncur+2,1) = moyLamM(ncur,1)        
+        
+        moyLamM(ncur,2) = real(lamDC25)
+        moyLamM(ncur+1,2) = moyLamM(ncur,2)
+        moyLamM(ncur+2,2) = moyLamM(ncur,2)
+                        
+        moyLamM(ncur,3) = real(lamDC975)
+        moyLamM(ncur+1,3) = moyLamM(ncur,3)
+        moyLamM(ncur+2,3) = moyLamM(ncur,3)
+    
+        ncur=ncur+3
+    end do
+    
+    
+!==========================================================================================
+!=============== Survie loco
+!==========================================================================================    
+    
+!--------------- Fontion de survie recurrent ----------------
+    bgen=0.d0
+    
+    x=date(1)
+
+    do t=1,100
+
+!         n=n+1 ! compteur sur nième temps
+        if(t.ne.1) then
+            x=x+ttt(nbintervR)/100
+        end if
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Pour chaque paramètre estimé                         
+            do i=1,nbintervR!m
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                    call bgos(SX,0,u(k,j),v(k,j),0.d0)  
+                    som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                bgen(i)=(b(i)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+                      
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR        
+!     fct de survie           : su  = dexp(-gl)    
+
+            som11R=0.d0
+            som21R=0.d0    
+            glR(k)=0.d0
+            suR(k)=0.d0
+
+            do gg=1,nbintervR
+                if ((x.ge.(ttt(gg-1))).and.(x.lt.(ttt(gg)))) then
+                
+                    som11R=bgen(gg)*(x-ttt(gg-1))
+                    
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som21R=som21R+bgen(jj)*(ttt(jj)-ttt(jj-1))
+                        end do
+                    endif
+                    
+                    glR(k)=(som11R+som21R)
+                    suR(k)=dexp(-glR(k))
+                endif
+            end do
+       
+        end do
+
+        som11RW=0.d0
+        som21RW=0.d0
+        glRW=0.d0
+        suRW=0.d0
+        do l=1,nbintervR
+            if ((x.ge.(ttt(l-1))).and.(x.lt.(ttt(l)))) then
+            
+                som11RW=(b(l)**2)*(x-ttt(l-1))
+                
+                if (l.ge.2)then
+                    do jj=1,l-1
+                        som21RW=som21RW+(b(jj)**2)*(ttt(jj)-ttt(jj-1))
+                    end do
+                endif
+                
+                glRW=(som11RW+som21RW)
+                suRW=dexp(-glRW)
+            endif
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+        suR25=0.d0
+        suR975=0.d0
+        call percentile(suR,suR25,suR975)
+        if(t.ne.1) then
+            xSu1(t) = real(x)
+        else
+            xSu1(t) = date(1)
+        end if
+        moysuR(t,1) = suRW
+
+        moysuR(t,2) = suR25
+
+        moysuR(t,3) = suR975
+        
+        if(moysuR(t,1).lt.0.d0)then
+            moysuR(t,1) = 0.d0
+        endif
+        if(moysuR(t,1).gt.1.d0)then
+            moysuR(t,1) = 1.d0 
+        endif
+        
+        if(moysuR(t,2).lt.0.d0)then
+            moysuR(t,2) = 0.d0
+        endif
+        if(moysuR(t,2).gt.1.d0)then
+            moysuR(t,2) = 1.d0 
+        endif    
+        if(moysuR(t,3).lt.0.d0)then
+            moysuR(t,3) = 0.d0
+        endif
+        if(moysuR(t,3).gt.1.d0)then
+            moysuR(t,3) = 1.d0 
+        endif        
+
+    end do
+!==========================================================================================
+!=============== Survie dc
+!==========================================================================================    
+!--------------- Fontion de survie ----------------
+    bgen=0.d0
+
+    x=date(1)
+    do t=1,100
+
+!         n=n+1 ! compteur sur nième temps
+        if(t.ne.1) then
+            x=x+tttdc(nbintervDC)/100
+        end if
+        
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Pour chaque paramètre estimé                         
+            do i=1,nbintervDC!m
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                    call bgos(SX,0,u(k,j),v(k,j),0.d0)  
+                    som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                bgen(i)=(b(i+nbintervR)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+                      
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR        
+!     fct de survie           : su  = dexp(-gl)    
+
+            som11R=0.d0
+            som21R=0.d0    
+            glR(k)=0.d0
+            suR(k)=0.d0
+
+
+
+            do gg=1,nbintervDC
+                if ((x.ge.(tttdc(gg-1))).and.(x.lt.(tttdc(gg)))) then
+                
+                    som11R=bgen(gg)*(x-tttdc(gg-1))
+                    
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som21R=som21R+bgen(jj)*(tttdc(jj)-tttdc(jj-1))
+                        end do
+                    endif
+                    
+                    glR(k)=(som11R+som21R)
+                    suR(k)=dexp(-glR(k))
+                endif
+            end do
+
+
+                       
+        
+!            moysuR0=moysuR0+suR(k)/1000
+            
+        end do
+    
+        som11RW=0.d0
+        som21RW=0.d0
+        glRW=0.d0
+        suRW=0.d0
+        do l=1,nbintervDC
+            if ((x.ge.(tttdc(l-1))).and.(x.lt.(tttdc(l)))) then
+            
+                som11RW=(b(l+nbintervR)**2)*(x-tttdc(l-1))
+                
+                if (l.ge.2)then
+                    do jj=1,l-1
+                        som21RW=som21RW+(b(jj+nbintervR)**2)*(tttdc(jj)-tttdc(jj-1))
+                    end do
+                endif
+                
+                glRW=(som11RW+som21RW)
+                suRW=dexp(-glRW)
+            endif
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+        suR25=0.d0
+        suR975=0.d0
+        call percentile(suR,suR25,suR975)
+        if(t.ne.1) then
+            xSu2(t) = real(x)
+        else
+            xSu2(t) = date(1)
+        end if
+
+        moysuDC(t,1) = suRW
+
+        moysuDC(t,2) = suR25
+
+        moysuDC(t,3) = suR975
+        
+        if(moysuDC(t,1).lt.0.d0)then
+            moysuDC(t,1) = 0.d0
+        endif
+        if(moysuDC(t,1).gt.1.d0)then
+            moysuDC(t,1) = 1.d0 
+        endif
+        
+        if(moysuDC(t,2).lt.0.d0)then
+            moysuDC(t,2) = 0.d0
+        endif
+        if(moysuDC(t,2).gt.1.d0)then
+            moysuDC(t,2) = 1.d0 
+        endif    
+        if(moysuDC(t,3).lt.0.d0)then
+            moysuDC(t,3) = 0.d0
+        endif
+        if(moysuDC(t,3).gt.1.d0)then
+            moysuDC(t,3) = 1.d0 
+        endif    
+
+    end do
+!==========================================================================================
+!=============== Survie loco
+!==========================================================================================    
+!--------------- Fontion de survie ----------------
+    bgen=0.d0
+
+    x=date(1)
+    do t=1,100
+
+!         n=n+1 ! compteur sur nième temps
+        if(t.ne.1) then
+            x=x+tttmeta(nbintervM)/100
+        end if
+        
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Pour chaque paramètre estimé                         
+            do i=1,nbintervM!m
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                    call bgos(SX,0,u(k,j),v(k,j),0.d0)  
+                    som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                bgen(i)=(b(i+nbintervR+nbintervDC)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+                      
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR        
+!     fct de survie           : su  = dexp(-gl)    
+
+            som11R=0.d0
+            som21R=0.d0    
+            glR(k)=0.d0
+            suR(k)=0.d0
+
+
+
+            do gg=1,nbintervM
+                if ((x.ge.(tttmeta(gg-1))).and.(x.lt.(tttmeta(gg)))) then
+                
+                    som11R=bgen(gg)*(x-tttmeta(gg-1))
+                    
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som21R=som21R+bgen(jj)*(tttmeta(jj)-tttmeta(jj-1))
+                        end do
+                    endif
+                    
+                    glR(k)=(som11R+som21R)
+                    suR(k)=dexp(-glR(k))
+                endif
+            end do
+
+
+                       
+        
+!            moysuR0=moysuR0+suR(k)/1000
+            
+        end do
+    
+        som11RW=0.d0
+        som21RW=0.d0
+        glRW=0.d0
+        suRW=0.d0
+        do l=1,nbintervM
+            if ((x.ge.(tttmeta(l-1))).and.(x.lt.(tttmeta(l)))) then
+            
+                som11RW=(b(l+nbintervR+nbintervDC)**2)*(x-tttmeta(l-1))
+                
+                if (l.ge.2)then
+                    do jj=1,l-1
+                        som21RW=som21RW+(b(jj+nbintervR+nbintervDC)**2)*(tttmeta(jj)-tttmeta(jj-1))
+                    end do
+                endif
+                
+                glRW=(som11RW+som21RW)
+                suRW=dexp(-glRW)
+            endif
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+        suR25=0.d0
+        suR975=0.d0
+        call percentile(suR,suR25,suR975)
+        if(t.ne.1) then
+            xSu3(t) = real(x)
+        else
+            xSu3(t) = date(1)
+        end if
+
+        moysuM(t,1) = suRW
+
+        moysuM(t,2) = suR25
+
+        moysuM(t,3) = suR975
+        
+        if(moysuM(t,1).lt.0.d0)then
+            moysuM(t,1) = 0.d0
+        endif
+        if(moysuM(t,1).gt.1.d0)then
+            moysuM(t,1) = 1.d0 
+        endif
+        
+        if(moysuM(t,2).lt.0.d0)then
+            moysuM(t,2) = 0.d0
+        endif
+        if(moysuM(t,2).gt.1.d0)then
+            moysuM(t,2) = 1.d0 
+        endif    
+        if(moysuM(t,3).lt.0.d0)then
+            moysuM(t,3) = 0.d0
+        endif
+        if(moysuM(t,3).gt.1.d0)then
+            moysuM(t,3) = 1.d0 
+        endif    
+
+    end do
+
+    end subroutine distancej_cpm
+
+
+    subroutine distanceJ_weib(b,m,mt1,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC,x3M,moyLamM,xSu3,moysuM)
+    
+    use taillesmultiv
+    use comonmultiv,only:cens,vvv,t0,t1,t0dc,t1dc,t0meta,t1meta,c,cmeta,cdc,nsujet,nsujetmeta &
+    ,nva,nva1,nva2,nva3,nst,etaR,etaD,etaM,betaR,betaD,betaM,date,datedc,datemeta
+    use optim
+    
+    implicit none
+    
+    integer::m,i,j,ier,t,k,ns,mt1
+    double precision::lamR25,lamM25,lamDC25,suR25,suM25,suDC25,lamR975,lamM975,lamDC975,suR975,suM975,suDC975, &
+    LamRW,LamMW,LamDCW,suRW,suMW,suDCW 
+        double precision,dimension(m*(m+1)/2)::vv
+    double precision,dimension(m)::b,bgen
+    double precision,dimension(1000,m)::u
+    double precision::sx,som,x,zz,zy 
+    double precision,dimension(1000):: lamR,lamDC,lamM,suR,suDC,suM,glDC,glR,glM
+    
+! theorique - estimés après Max de Vrais
+      double precision::glDCW,glRW,glMW
+
+    double precision,dimension(mt1)::x1R,x2DC,x3M
+    double precision,dimension(mt1,3)::moyLamR,moyLamDC,moyLamM
+    double precision,dimension(100,3)::moysuR,moysuDC,moysuM    
+    double precision,dimension(100)::xSu1,xSu2,xSu3
+    double precision::ep
+    
+    
+    lamR25=0.d0
+    lamM25=0.d0
+    lamDC25=0.d0
+    suR25=0.d0
+    suM25=0.d0    
+    suDC25=0.d0
+    lamR975=0.d0
+    lamM975=0.d0    
+    lamDC975=0.d0
+    suR975=0.d0
+    suM975=0.d0
+    suDC975=0.d0
+    LamRW=0.d0
+    LamMW=0.d0    
+    LamDCW=0.d0
+    suRW=0.d0
+    suMW=0.d0
+    suDCW=0.d0
+    
+    sx=1.d0 ! ecart-type ou variance des réalisations gaussiennes générées
+    ns=m-nva-2
+
+    do i=1,ns*(ns+1)/2
+        vv(i)=vvv(i)
+    end do
+
+    ep=10.d-10
+    call dmfsdj(vv,m,ep,ier)
+
+    do k=1,1000
+        do j=1,ns   
+            call bgos(SX,0,zz,zy,0.d0)
+            u(k,j)=zz
+        end do
+    end do
+
+    betaR = b(1)**2
+    etaR =  b(2)**2
+    
+
+    if (nst == 3) then
+        betaD = b(3)**2
+        etaD = b(4)**2
+        betaM = b(5)**2
+        etaM = b(6)**2        
+    else
+        etaD = 0.d0
+        betaD = 0.d0
+    end if
+
+
+!============================ Surv strat 1    
+!------------------- Pour les recurents
+!     Pour chaque temps de 0 à la censure du décès par pas cens/100
+!    x=-cens/100 !permet de commencer à 0 dans la boucle
+
+    x=date(1)
+    do t=1,100
+
+        glR=0.d0
+        suR=0.d0  
+!         n=n+1 ! compteur sur nième temps
+        if (t.ne.1) then
+            x=x+cens/100
+        end if
+
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR
+!     fct de survie           : su  = dexp(-gl)
+            do i=1,ns
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+
+                bgen(i)=(b(i)+som)**2
+            end do
+
+            lamR(k)=(bgen(1)*(x**(bgen(1)-1.d0)))/(bgen(2)**bgen(1))
+            lamRW=((b(1)**2)*(x**((b(1)**2)-1.d0)))/((b(2)**2)**(b(1)**2))
+
+            if(nst == 3) then
+                lamDC(k)=(bgen(3)*(x**(bgen(3)-1.d0)))/(bgen(4)**bgen(3))
+                lamDCW=((b(3)**2)*(x**((b(3)**2)-1.d0)))/((b(4)**2)**(b(3)**2))
+                
+                lamM(k)=(bgen(5)*(x**(bgen(5)-1.d0)))/(bgen(6)**bgen(5))
+                lamMW=((b(5)**2)*(x**((b(5)**2)-1.d0)))/((b(6)**2)**(b(5)**2))                
+            end if
+
+            glR(k)  =  (x/bgen(2))**bgen(1)
+            suR(k)  = dexp(-glR(k))
+            glRW  =  (x/(b(2)**2))**(b(1)**2)
+            suRW  = dexp(-glRW)
+            
+            if(nst == 3) then
+                glDC(k)  =  (x/bgen(4))**bgen(3)
+                suDC(k)  = dexp(-glDC(k))
+                glDCW  =  (x/(b(4)**2))**(b(3)**2)
+                suDCW  = dexp(-glDCW)    
+
+                glM(k)  =  (x/bgen(6))**bgen(5)
+                suM(k)  = dexp(-glM(k))
+                glMW  =  (x/(b(6)**2))**(b(5)**2)
+                suMW  = dexp(-glMW)                    
+            end if
+        end do
+    
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+        call percentile(lamR,lamR25,lamR975)
+        if(nst == 3) then
+            call percentile(lamDC,lamDC25,lamDC975)
+            call percentile(lamM,lamM25,lamM975)            
+        end if
+
+        call percentile(suR,suR25,suR975)
+        if(nst == 3) then
+            call percentile(suDC,suDC25,suDC975)
+            call percentile(suM,suM25,suM975)            
+        end if
+        
+        if(t == 1) then
+            x1R(t) = date(1)
+        else
+            x1R(t) = real(x)
+        end if
+        moyLamR(t,1) = real(LamRW)
+        moyLamR(t,2) = real(lamR25)
+        moyLamR(t,3) = real(lamR975)
+        
+        if(nst == 3) then
+            x2DC(t) = x1R(t)
+            moyLamDC(t,1) = real(lamDCW)
+            moyLamDC(t,2) = real(lamDC25)
+            moyLamDC(t,3) = real(lamDC975)
+            
+            x3M(t) = x1R(t)
+            moyLamM(t,1) = real(lamMW)
+            moyLamM(t,2) = real(lamM25)
+            moyLamM(t,3) = real(lamM975)            
+            
+        end if
+
+        if(t == 1) then
+            xSu1(t) = date(1)
+        else
+            xSu1(t) = real(x)
+        end if
+        
+        moysuR(t,1) = real(suRW)
+        moysuR(t,2) = real(suR25)
+        moysuR(t,3) = real(suR975)
+            
+        if(nst == 3) then
+            xSu2(t) = xSu1(t) 
+            moysuDC(t,1) = real(suDCW)
+            moysuDC(t,2) = real(suDC25)
+            moysuDC(t,3) = real(suDC975)
+            
+            xSu3(t) = xSu1(t) 
+            moysuM(t,1) = real(suMW)
+            moysuM(t,2) = real(suM25)
+            moysuM(t,3) = real(suM975)            
+            
+        end if
+            
+    end do
+    if (nst == 1) then
+        moyLamDC = 0.d0
+        moysuDC = 0.d0
+        moysuM = 0.d0
+    end if
+    end subroutine distanceJ_weib
     
 
 

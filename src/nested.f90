@@ -47,7 +47,7 @@
     double precision,dimension(np,np),intent(out)::HIHOut,H_hessOut  
     integer::ni,ier,nz,k,j,ii,iii,l
     double precision,dimension(2)::k0,res01   
-    double precision::xmin1,xmin2,maxtt,min,max,h
+    double precision::xmin1,xmin2,maxtt,min,max,pord,mint
     double precision,dimension(np)::b
     !declaration pour R
     double precision,dimension(mt),intent(out)::x1Out,x2Out
@@ -177,7 +177,8 @@
     nig = 0
     ssg=0
     g=0
-  
+
+    mint = 0.d0
     maxtt = 0.d0
     cpt = 0
     k = 0
@@ -187,6 +188,11 @@
     allocate(vax(nva))
     nst=nst0
     do i = 1,ns0    
+
+        if (i.eq.1) then
+            mint = tt00(i) ! affectation du min juste une fois
+        endif
+
         if(nst.eq.2)then
             tt0=tt00(i)
             tt1=tt10(i)
@@ -349,8 +355,13 @@
                  nig(g(k)) = nig(g(k))+1
             endif
         endif
+
         if (maxtt.lt.t1(k))then
             maxtt = t1(k)
+        endif
+
+        if (mint.gt.t0(k)) then
+            mint = t0(k)
         endif
 
     end do 
@@ -416,29 +427,70 @@
     end do 
         
     if(typeof == 0) then
-        nzmax=nz+3
 
-        allocate(zi(-2:nzmax))
-    
-        ndate = k
-        zi(-2) = date(1)
-        zi(-1) = date(1)
-        zi(0) = date(1)
-        zi(1) = date(1)
-        h = (date(ndate)-date(1))/(nz-1)
+! Al:10/03/2014 emplacement des noeuds splines en percentile
+        i=0
+        j=0
+!----------> taille - nb de recu
+        do i=1,nsujet
+            if(t1(i).ne.(0.d0).and.c(i).eq.1) then
+                j=j+1
+            endif
+        end do
+        nbrecu=j
+
+!----------> allocation des vecteur temps
+        allocate(t2(nbrecu))
         
-        do i=2,nz-1
-            zi(i) =zi(i-1) + h
+!----------> remplissage du vecteur de temps
+        j=0
+        do i=1,nsujet
+            if (t1(i).ne.(0.d0).and.c(i).eq.1) then
+                j=j+1
+                t2(j)=t1(i)
+            endif
         end do
         
-        zi(nz) = date(ndate)
-        zi(nz+1)=zi(nz)
-        zi(nz+2)=zi(nz)
-        zi(nz+3)=zi(nz)
+        nzmax=nz+3
+        allocate(zi(-2:nzmax))
+        ndate = k
+
+        zi(-2) = mint
+        zi(-1) = mint
+        zi(0) = mint
+        zi(1) = mint
+        j=0
+        do j=1,nz-2
+            pord = dble(j)/(dble(nz)-1.d0)
+            call percentile3(t2,nbrecu,pord,zi(j+1))
+        end do
+        zi(nz) = maxtt
+        zi(nz+1) = maxtt
+        zi(nz+2) = maxtt
+        zi(nz+3) = maxtt
         ziOut = zi
+        deallocate(t2)
+
+    end if
+!         nzmax=nz+3
+!         allocate(zi(-2:nzmax))
+!         ndate = k
+! 
+!         zi(-2) = date(1)
+!         zi(-1) = date(1)
+!         zi(0) = date(1)
+!         zi(1) = date(1)
+!         h = (date(ndate)-date(1))/(nz-1)
+!         do i=2,nz-1
+!             zi(i) =zi(i-1) + h
+!         end do
+!         zi(nz) = date(ndate)
+!         zi(nz+1)=zi(nz)
+!         zi(nz+2)=zi(nz)
+!         zi(nz+3)=zi(nz)
+!         ziOut = zi
 
 !---------- affectation nt0,nt1----------------------------
-    end if
 
     indictronq=0
     do i=1,ns0 
@@ -2376,7 +2428,7 @@
     double precision ::auxfunc1a,auxfunc1b
 !      external :: func1N
 !      Returns as ss the integral of the function func1 between a and b, by ten-point Gauss-Legendre integration: the function is evaluated exactly ten times at interior points in the range of integration.
-! func1 est l int�grant, ss le r�sultat de l integrale
+! func1 est l integrant, ss le resultat de l integrale
       
     integer::j
     double precision::func1N
@@ -2414,7 +2466,7 @@
     ,func5N,func6N
     external::func0N,func1N,func2N,func3N,func4N,func5N,func6N
 ! gauss laguerre
-! func1 est l int�grant, ss le r�sultat de l integrale sur 0 ,  +infty      
+! func1 est l integrant, ss le resultat de l integrale sur 0 ,  +infty      
     integer::j,choix
     double precision,dimension(20)::x,w!The abscissas-weights.
     SAVE  w,x
@@ -2458,7 +2510,7 @@
 !================================================
 
     double precision function func1N(frail) 
-! calcul de l integrant, pour un effet aleatoire donn� frail et un groupe donne auxig (cf funcpa)      
+! calcul de l integrant, pour un effet aleatoire donne frail et un groupe donne auxig (cf funcpa)      
  
     use tailles
     use comon,only:auxig,g,nig,stra &
@@ -2482,7 +2534,7 @@
 !    write(*,*)'groupe',ig,'mid',mid(ig),'n_ssgbygrp(ig)',n_ssgbygrp(ig)
 !    write(*,*)'eta',eta,'alpha',alpha,'frail',frail
     
-    do issg=1,n_ssgbygrp(ig) !!! attention sous gpe pour un gpe donn�
+    do issg=1,n_ssgbygrp(ig) !!! attention sous gpe pour un gpe donne
         do k=1,nsujet
             if((g(k).eq.ig).and.(ssg(k,g(k)).eq.issg))then  
                 prod1(ig)=prod1(ig) &
@@ -2514,7 +2566,7 @@
     double precision::a,b,ss,func2N
     double precision::auxfunc2a,auxfunc2b
 !      Returns as ss the integral of the function func between a and b, by ten-point Gauss-Legendre integration: the function is evaluated exactly ten times at interior points in the range of integration.
-! func2 est l int�grant
+! func2 est l integrant
     integer::j
     double precision,dimension(5)::w,x
     double precision::dx,xm,xr  !     The abscissas and weights.
@@ -2541,7 +2593,7 @@
 
 
     double precision function func2N(frail) ! calcul de l integrant, pour le calcul d intregrale avec troncature
-! calcul de l integrant, pour un effet aleatoire donn� frail et un groupe donne auxig (cf funcpa)
+! calcul de l integrant, pour un effet aleatoire donne frail et un groupe donne auxig (cf funcpa)
  
     use tailles
     use comon,only:auxig,g,nig &

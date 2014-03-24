@@ -1,4 +1,4 @@
-# Virgine Rondeau 2012-4-12 for optimx
+# Virginie Rondeau 2012-4-12 for optimx
 
 options(digits=12)
 if(!require("frailtypack"))stop("this test requires package frailtypack.")
@@ -17,6 +17,6 @@ data("dataNested")
 
 modNested <- frailtyPenal(Surv(t1, t2, event) ~ cluster(group) +
   subcluster(subgroup) + cov1 + cov2, data = dataNested,
-  n.knots = 8, kappa1 = 50000, cross.validation = TRUE, Frailty = TRUE)
+  n.knots = 8, kappa1 = 50000, cross.validation = TRUE)
 
 print(modNested, digits = 4)

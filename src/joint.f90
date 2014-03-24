@@ -76,12 +76,13 @@
     double precision,dimension(2)::shapeweib,scaleweib
     double precision,dimension(4),intent(out)::paraweib
     
-    integer,intent(in)::noVar1,noVar2,intcens0 !! rajout
+    integer,intent(in)::noVar1,noVar2
+    integer,dimension(2),intent(in)::intcens0 !! rajout
     integer,intent(out)::cpt,cpt_dc,ier,ni
     integer::groupe,ij,kk,j,k,nz,n,ii,iii,iii2,cptstr1,cptstr2   &
     ,i,ic,icdc,istop,cptni,cptni1,cptni2,nb_echec,nb_echecor,id,cptbiais &
     ,cptauxdc,p
-    double precision::tt0,tt0dc,tt1,tt1dc,h,hdc,res,min,mindc,max, &
+    double precision::tt0,tt0dc,tt1,tt1dc,h,hdc,res,min,mindc,max,pord, &
     maxdc,maxt,maxtdc,moy_peh0,moy_peh1,lrs,BIAIS_moy,ttU,mintdc !! rajout
     double precision,dimension(2)::res01
 !AD: add for new marq
@@ -131,6 +132,19 @@
     double precision,dimension(paratps(2)+paratps(3))::basis
     double precision,dimension(3),intent(inout)::EPS ! seuils de convergence : on recupere les valeurs obtenues lors de l'algorithme a la fin
 
+
+!     do i=1,10
+!         print*,vax0(i,1)
+!     enddo
+! 
+!     do i=1,10
+!         print*,vaxdc0(i,1)
+!     enddo
+! 
+!     do i=1,10
+!         print*,(vaxdc00(i,j),j=1,6)
+!     enddo
+!     print*,typeof0,equidistant,nbintervR0,nbintervDC0,mtaille,ni,cpt,cpt_dc,ier,istop,paraweib
     mt1=mtaille(1)
     mt2=mtaille(2)
     mt11=mtaille(3)
@@ -151,13 +165,13 @@
     npbetatps = npbetatps1 + npbetatps2
 
     logNormal = logNormal0
-    intcens = intcens0
+    intcens = intcens0(1)
     typeJoint = typeJoint0
     ag = ag0
     typeof = typeof0
     model = 1
-    
-    indic_alpha = 1
+
+    indic_alpha = intcens0(2)
 
     if (typeof .ne. 0) then
         nbintervR = nbintervR0
@@ -171,11 +185,6 @@
     epsa = EPS(1) !1.d-4
     epsb = EPS(2) !1.d-4
     epsd = EPS(3) !1.d-4
-!     if (intcens0.eq.1) then
-!         epsa = 1.d-2
-!         epsb = 1.d-2
-!         epsd = 1.d-2
-!     endif
 !AD:end
 
     lrs = 0.d0
@@ -575,52 +584,127 @@
     end do
     
     if(typeof == 0) then
-        ndate = k
-        nzmax=nz+3
+
+! Al:10/03/2014 emplacement des noeuds splines en percentile (sans censure par intervalle)
+        if(intcens.eq.0) then
+            i=0
+            j=0
+!----------> taille - nb de recu
+            do i=1,nsujet
+                if(t1(i).ne.(0.d0).and.c(i).eq.1) then
+                    j=j+1
+                endif
+            end do
+            nbrecu=j
+
+!----------> allocation des vecteur temps
+            allocate(t2(nbrecu))
+        
+!----------> remplissage du vecteur de temps
+            j=0
+            do i=1,nsujet
+                if (t1(i).ne.(0.d0).and.c(i).eq.1) then
+                    j=j+1
+                    t2(j)=t1(i)
+                endif
+            end do
             
-        allocate(zi(-2:nzmax))
-        zi(-2) =0
-        zi(-2) = date(1)
-        zi(-1) = date(1)
-        zi(0) = date(1)
-        zi(1) = date(1)
+            nzmax=nz+3
+            allocate(zi(-2:nzmax))
+            ndate = k
 
-        h = (date(ndate)-date(1))/dble(nz-1)
+            zi(-2) = mint
+            zi(-1) = mint !date(1)
+            zi(0) = mint !date(1)
+            zi(1) = mint !date(1) 
+            j=0
+            do j=1,nz-2
+                pord = dble(j)/(dble(nz)-1.d0)
+                call percentile3(t2,nbrecu,pord,zi(j+1))
+            end do
+            zi(nz) = maxt !date(ndate)
+            zi(nz+1) = maxt !zi(nz)
+            zi(nz+2) = maxt !zi(nz)
+            zi(nz+3) = maxt !zi(nz)
+            ziOut = zi
+            deallocate(t2)
+        else
+            nzmax=nz+3
+            allocate(zi(-2:nzmax))
+            ndate = k
 
-        do i=2,nz-1
-            zi(i) =zi(i-1) + h
-        end do
+            zi(-2) = date(1)
+            zi(-1) = date(1)
+            zi(0) = date(1)
+            zi(1) = date(1)
+            h = (date(ndate)-date(1))/dble(nz-1)
+            do i=2,nz-1
+                zi(i) =zi(i-1) + h
+            end do  
+            zi(nz) = date(ndate)
+            zi(nz+1)=zi(nz)
+            zi(nz+2)=zi(nz)
+            zi(nz+3)=zi(nz)
+            ziOut = zi
+        endif
 
-        zi(nz) = date(ndate)
-        zi(nz+1)=zi(nz)
-        zi(nz+2)=zi(nz)
-        zi(nz+3)=zi(nz)
-        ziOut = zi
+! ajout TPS : noeuds des deces
+        if(intcens.eq.0) then
+            i=0
+            j=0
+!----------> taille - nb de deces
+            do i=1,nsujet
+                if(t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
+                    j=j+1
+                endif
+            end do
+            nbdeces=j
 
-! ajout TPS
-    allocate(zidc(-2:(nzdc+3)))
+!----------> allocation des vecteur temps
+            allocate(t3(nbdeces))
+        
+!----------> remplissage du vecteur de temps
+            j=0
+            do i=1,nsujet
+                if (t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
+                    j=j+1
+                    t3(j)=t1dc(i)
+                endif
+            end do
+            
+            allocate(zidc(-2:(nzdc+3)))
 
-!-------------------------------------------------------------------
-    zidc(-2) = datedc(1) 
-    zidc(-1)= datedc(1) 
-    zidc(0)= datedc(1) 
-    zidc(1)= datedc(1) 
-!
-    hdc =(datedc(ndatedc)-datedc(1))/dble(nzdc-1)
-    do i=2,nzdc-1
-        zidc(i) =zidc(i-1)+hdc
-    end do 
-!      hh=0
-!     do i=2,nzdc-1
-!      hh=int(i*ndatedc/nzdc)
-!          zidc(i)=datedc(hh)
-!     end do
+            zidc(-2) = mintdc
+            zidc(-1) = mintdc
+            zidc(0) = mintdc
+            zidc(1) = mintdc
+            j=0
+            do j=1,nzdc-2
+                pord = dble(j)/(dble(nzdc)-1.d0)
+                call percentile3(t3,nbdeces,pord,zidc(j+1))
+            end do
+            zidc(nzdc) = maxtdc
+            zidc(nzdc+1) = maxtdc
+            zidc(nzdc+2) = maxtdc
+            zidc(nzdc+3) = maxtdc
+            deallocate(t3)
+        else
+            allocate(zidc(-2:(nzdc+3)))
 
-    zidc(nzdc) = datedc(ndatedc)
-    zidc(nzdc+1)=zidc(nzdc)
-    zidc(nzdc+2)=zidc(nzdc)
-    zidc(nzdc+3)=zidc(nzdc)
-!
+            zidc(-2) = datedc(1)
+            zidc(-1) = datedc(1)
+            zidc(0) = datedc(1)
+            zidc(1) = datedc(1)
+            hdc = (datedc(ndatedc)-datedc(1))/dble(nzdc-1)
+            do i=2,nzdc-1
+                zidc(i) =zidc(i-1) + hdc
+            end do  
+            zidc(nzdc) = datedc(ndatedc)
+            zidc(nzdc+1)=zidc(nzdc)
+            zidc(nzdc+2)=zidc(nzdc)
+            zidc(nzdc+3)=zidc(nzdc)
+        endif
+
 ! fin ajout TPS
 
     end if
@@ -655,7 +739,6 @@
     end do
 
 !---------- affectation nt0,nt1,ntU RECURRENTS----------------------------
-
     indictronq=0
     do i=1,nsujet
         if (typeof == 0) then
@@ -713,32 +796,49 @@
 
 !------- initialisation des parametres
 
-    ! savoir si l'utilisateur a entre des parametres initiaux !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ! savoir si l'utilisateur entre des parametres initiaux
     if (sum(b).eq.0.d0) then
-        do i=1,npmax
-            b(i)=5.d-1
-        end do
+        b = 5.d-1
+        if (indic_alpha.eq.1) then 
+            b(np-nva) = 1.d0
+        endif
+    else
+        b(1:np-nva-1-indic_alpha) = 5.d-1 ! hazard coef
+
+        if (sum(b(np-nva+1:np)).eq.0.d0) then ! beta
+            b(np-nva+1:np) = 5.d-1
+        endif 
+        
+        if (b(np-nva-indic_alpha).eq.0.d0) then ! theta
+            if (typeof == 0) then
+                b(np-nva-indic_alpha) = 1.d0
+            else
+                b(np-nva-indic_alpha) = 5.d-1
+            endif
+        endif
+
+        if ((indic_alpha.eq.1).and.(b(np-nva).eq.0.d0)) then ! alpha
+            b(np-nva) = 1.d0
+        endif
     endif
 
     if(typeof ==1) then
-!         b(1:nbintervR) = 0.8d0!1.d-2!
-!         b((nbintervR+1):(nbintervR+nbintervDC)) = 0.8d0!1.d-2
+        b(1:nbintervR) = 0.8d0!1.d-2!
+        b((nbintervR+1):(nbintervR+nbintervDC)) = 0.8d0!1.d-2
 !         b(np-nva-indic_alpha)=5.d-1 ! pour theta
     end if
 
-!    write(*,*)'typeof',typeof
-
     if (typeof == 2) then
-!        b(1:4)=1.d-1!0.8d0
+        b(1:4)=1.d-1!0.8d0
 !        b(np-nva-indic_alpha)=5.d-1 ! pour theta
 !        b(np-nva-indic_alpha)=1.d0 ! pour theta
     end if
 
-    if (typeof == 0) then
-!        b(np-nva-indic_alpha)=5.d-1 !1.d0 ! pour theta
-    end if
+!     if (typeof == 0) then
+!         b(np-nva-indic_alpha)=1.d0 ! pour theta
+!     end if
 
-    b(np-nva)=1.d0
+!     b(np-nva)=1.d0
 
 
 
@@ -857,13 +957,15 @@
     allocate(innerknotsdc(nbinnerknots))
 
 ! ajout TPS
-    call searchknotstps(t1,knotsTPS,nbinnerknots,qorder,nsujet,equidistantTPS,c,mint)
-    call searchknotstps(t1dc,knotsdcTPS,nbinnerknots,qorder,ng,equidistantTPS,cdc,mintdc) !! pas ng ?
+    if (timedep.eq.1) then
+        call searchknotstps(t1,knotsTPS,nbinnerknots,qorder,nsujet,equidistantTPS,c,mint)
+        call searchknotstps(t1dc,knotsdcTPS,nbinnerknots,qorder,ng,equidistantTPS,cdc,mintdc) !! pas ng ?
 
-    innerknots(1:nbinnerknots)=knotsTPS(1:nbinnerknots)
-    innerknotsdc(1:nbinnerknots)=knotsdcTPS(1:nbinnerknots)
-    boundaryknots(1)=knotsdcTPS(0)
-    boundaryknots(2)=knotsdcTPS(nbinnerknots+1)
+        innerknots(1:nbinnerknots)=knotsTPS(1:nbinnerknots)
+        innerknotsdc(1:nbinnerknots)=knotsdcTPS(1:nbinnerknots)
+        boundaryknots(1)=knotsdcTPS(0)
+        boundaryknots(2)=knotsdcTPS(nbinnerknots+1)
+    endif
 ! fin ajout TPS
 
     !if (typeof.ne.0)allocate(kkapa(2))
@@ -989,7 +1091,7 @@
 
         nst=2
         indic_joint = 1
-        indic_alpha = 1
+        indic_alpha = intcens0(2) !!
 
         if (typeof.ne.0) deallocate(vvv)
         if(typeof==1)deallocate(betacoef)
@@ -2243,7 +2345,7 @@
     integer :: j
 
     ss=0.d0
-!    if (typeof == 0)then
+    if (typeof == 0)then
 ! Will be twice the average value of the function,since the ten
 ! wei hts (five numbers above each used twice) sum to 2.
         do j=1,20
@@ -2266,29 +2368,28 @@
                 endif
             endif
         end do
-!     else
-!         do j=1,32
-!             if (choix.eq.1) then !integrale 1
-!                 auxfunca=func1j(x1(j))
-!                 ss = ss+w1(j)*(auxfunca)
-!             else                   !choix=2, survie marginale, vraie troncature
-!                 if (choix.eq.2) then 
-!                     auxfunca=func2j(x1(j))
-!                     ss = ss+w1(j)*(auxfunca)
-!                 else                   !choix=3, AG model
-!                     if (choix.eq.3) then
-!                         if(typeJoint==1)then
-!                             auxfunca=func3j(x1(j))
-!                         else
-!                             auxfunca=func3bis(x1(j))
-!                         endif
-!                         ss = ss+w1(j)*(auxfunca)
-!                         print*,ss
-!                     endif
-!                 endif
-!             endif
-!         end do
-!     end if
+    else
+        do j=1,32
+            if (choix.eq.1) then !integrale 1
+                auxfunca=func1j(x1(j))
+                ss = ss+w1(j)*(auxfunca)
+            else                   !choix=2, survie marginale, vraie troncature
+                if (choix.eq.2) then 
+                    auxfunca=func2j(x1(j))
+                    ss = ss+w1(j)*(auxfunca)
+                else                   !choix=3, AG model
+                    if (choix.eq.3) then
+                        if(typeJoint==1)then
+                            auxfunca=func3j(x1(j))
+                        else
+                            auxfunca=func3bis(x1(j))
+                        endif
+                        ss = ss+w1(j)*(auxfunca)
+                    endif
+                endif
+            endif
+        end do
+    end if
 
     return
 

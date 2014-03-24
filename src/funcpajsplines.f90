@@ -70,7 +70,11 @@
     
     if(effet.eq.1) then
         theta = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
-        alpha = bh(np-nva)
+        if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
+            alpha = bh(np-nva)
+        else
+            alpha = 1.d0
+        endif
     endif
 
 !----------  calcul de ut1(ti) et ut2(ti) ---------------------------
@@ -200,21 +204,21 @@
             res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet) 
         endif  
         if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-            !print*,"here1"
+!             print*,"here1"
             funcpajsplines=-1.d9
             goto 123
         end if    
 !     nouvelle version
         res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet  
         if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-            !print*,"here2"
+!             print*,"here2"
             funcpajsplines=-1.d9
             goto 123
         end if              
 !     modification pour nouvelle vraisemblance / troncature:
         res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet 
         if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-            !print*,"here3"
+!             print*,"here3"
             funcpajsplines=-1.d9
             goto 123
         end if    
@@ -238,7 +242,7 @@
             res2dc(k) = dlog(dut2(nt1dc(k))*vet2)
             if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
                 funcpajsplines=-1.d9
-                !print*,'gt 1'
+!                 print*,'gt 1'
                 goto 123
             end if
         endif
@@ -249,7 +253,7 @@
         
         if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
             funcpajsplines=-1.d9
-            !print*,'gt 2'
+!             print*,'gt 2'
             goto 123
         end if    
         if ((aux2(k).ne.aux2(k)).or.(abs(aux2(k)).ge. 1.d30)) then
@@ -290,7 +294,7 @@
                 + dlog(integrale3(k)) 
             endif
             if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-                !print*,"here",k,res2(k),res2dc(k),gammaJ(1./theta),dlog(theta),dlog(integrale3(k))
+!                 print*,"here",k,res2(k),res2dc(k),gammaJ(1./theta),dlog(theta),dlog(integrale3(k))
                 funcpajsplines=-1.d9
                 goto 123
             end if    
@@ -324,7 +328,7 @@
             *the2(i)*m1m(i))
         endif
     end do
-    
+  
     pe = k0(1)*pe1 + k0(2)*pe2 
     
     resnonpen = res

@@ -44,7 +44,11 @@
 
     if(effet.eq.1) then
         theta = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
-        alpha = bh(np-nva)
+        if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
+            alpha = bh(np-nva)
+        else
+            alpha = 1.d0
+        endif
     endif
 
 !---------------------------------------------------------
@@ -226,14 +230,14 @@
         if(cpt(k).gt.0)then
             if(theta.gt.(1.d-8)) then
 !cccc ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
-                if (integrale3(k).eq.0.d0) then
-                    res= res + res2(k) &
-!--      pour le deces:
-                    + res2dc(k) - gammaJ(1./theta)-dlog(theta)/theta -112.d0
-                else
+!                 if (integrale3(k).eq.0.d0) then
+!                     res= res + res2(k) &
+! !--      pour le deces:
+!                     + res2dc(k) - gammaJ(1./theta)-dlog(theta)/theta -112.d0
+!                 else
                     res= res + res2(k) &
                     + res2dc(k) - gammaJ(1./theta)-dlog(theta)/theta+dlog(integrale3(k))
-                endif
+!                 endif
             else
 !*************************************************************************
 !     developpement de taylor d ordre 3
@@ -246,7 +250,7 @@
             endif
             if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
                 funcpajcpm=-1.d9
-                !print*,k,'ok 6',gammaJ(1./theta),theta,integrale3(k),dlog(integrale3(k))
+!                 print*,k,'ok 6',gammaJ(1./theta),theta,integrale3(k),dlog(integrale3(k))
                 goto 123
             end if
         endif

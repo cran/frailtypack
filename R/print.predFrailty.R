@@ -16,7 +16,7 @@ print.predFrailty <- function(x, digits = 3, ...)
 			dput(cl)
 			cat("\n")
 		}
-		print(cbind(x$time,x$pred))
+		print(t(x$pred))
 	}
 }
 

@@ -18,24 +18,24 @@ print.predJoint <- function(x, digits = 3, ...)
 		}
 		if (!x$intcens) {
 			cat("\n")
-			cat("--------- Probability 1 (exactly j recurrences) ---------\n")
+			cat("--------- Prediction 1 (exactly j recurrences) ---------\n")
 			cat("\n")
-			print(x$proba1,row.names=F,digits=digits)
+			print(x$pred1,row.names=F,digits=digits)
 			
 			cat("\n")
-			cat("--------- Probability 2 (at least j recurrences) ---------\n")
+			cat("--------- Prediction 2 (at least j recurrences) ---------\n")
 			cat("\n")
-			print(x$proba2,row.names=F,digits=digits)
+			print(x$pred2,row.names=F,digits=digits)
 			
 			cat("\n")
-			cat("--------- Probability 3 (only parameters) ---------\n")
+			cat("--------- Prediction 3 (only parameters) ---------\n")
 			cat("\n")
-			print(x$proba3,row.names=F,digits=digits)
+			print(x$pred3,row.names=F,digits=digits)
 		}else{
 			cat("\n")
-			cat("--------- Probability  ---------\n")
+			cat("--------- Prediction  ---------\n")
 			cat("\n")
-			print(x$proba2,row.names=F,digits=digits)
+			print(x$pred2,row.names=F,digits=digits)
 		}
 	}
 }

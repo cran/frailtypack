@@ -99,7 +99,7 @@ data(readmission)
 
 #-- a frailtypenal fit
 fit <- frailtyPenal(Surv(time,event)~cluster(id)+dukes+
-charlson+chemo,data=readmission,Frailty=TRUE,cross.validation=FALSE,
+charlson+chemo,data=readmission,cross.validation=FALSE,
 n.knots=10,kappa1=1,hazard="Splines")
 
 #-- a Cmeasures call

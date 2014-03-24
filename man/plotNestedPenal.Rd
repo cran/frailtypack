@@ -39,7 +39,7 @@
 data(dataNested)
 modNested <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
 subcluster(subgroup)+cov1+cov2,data=dataNested,n.knots=8,
-kappa1=50000,hazard="Splines",Frailty=TRUE)
+kappa1=50000,hazard="Splines")
 
 plot(modNested,conf.bands=FALSE)
 

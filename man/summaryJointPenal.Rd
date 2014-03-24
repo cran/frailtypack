@@ -42,14 +42,12 @@ data(readmission)
 #-- gap-time
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
 charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
-Frailty=TRUE,joint=TRUE)
+data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12)
 
 #-- calendar time
 modJoint.calendar <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+
 sex+dukes+charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=10,kappa1=9.55e+9,kappa2=1.41e+12,Frailty=TRUE,
-joint=TRUE,recurrentAG=TRUE)
+data=readmission,n.knots=10,kappa1=9.55e+9,kappa2=1.41e+12,recurrentAG=TRUE)
 
 #-- It takes around 1 minute to converge
 

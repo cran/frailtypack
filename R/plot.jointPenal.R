@@ -61,7 +61,7 @@ function (x, event="both", type.plot="hazard", conf.bands=FALSE, pos.legend="top
 			}
 		}
 	}        
-        legend(pos.legend, c("recurrent events", "terminal event"), lty=c(1,1),col=c(color1,color2), xjust=1, cex=cex.legend, ...)
+        legend(pos.legend, c("recurrent event", "terminal event"), lty=c(1,1),col=c(color1,color2), xjust=1, cex=cex.legend, ...)
 
    }
 
@@ -92,7 +92,7 @@ function (x, event="both", type.plot="hazard", conf.bands=FALSE, pos.legend="top
 			}
 		}
 	}        
-        legend(pos.legend, c("recurrent events"), lty=c(1),col=c(color1), xjust=1, cex=cex.legend, ...)
+        legend(pos.legend, c("recurrent event"), lty=c(1),col=c(color1), xjust=1, cex=cex.legend, ...)
    }
 
 
@@ -105,26 +105,26 @@ function (x, event="both", type.plot="hazard", conf.bands=FALSE, pos.legend="top
 	if(plot.type==1){
 
 		if (conf.bands){
-			matplot(x$x1, x$lam2, col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
+			matplot(x$x1, x$lam2, col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
 		}else{
-			plot(x$x1, x$lam2[,1], col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
+			plot(x$x1, x$lam2[,1], col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
 		} 
 	}else{
 		if (x$typeof == 0){
 			if (conf.bands){
-				matplot(x$x1, x$surv2, col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				matplot(x$x1, x$surv2, col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
 			}else{        
-				plot(x$x1, x$surv2[,1], col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				plot(x$x1, x$surv2[,1], col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
 			}
 		}else{
 			if (conf.bands){
-				matplot(x$xSu2, x$surv2, col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				matplot(x$xSu2, x$surv2, col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
 			}else{        
-				plot(x$xSu2, x$surv2[,1], col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				plot(x$xSu2, x$surv2[,1], col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
 			}
 		}
 	}        
-        legend(pos.legend, c("terminal event"), lty=c(1), col=c(color1), xjust=1, cex=cex.legend,...)
+        legend(pos.legend, c("terminal event"), lty=c(1), col=c(color2), xjust=1, cex=cex.legend,...)
    }
 
     return(invisible())

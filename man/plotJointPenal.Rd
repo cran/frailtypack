@@ -36,8 +36,8 @@
           'par("cex")'. Default is 0.7}
   \item{ylim}{y-axis limits}
   \item{main}{plot title}
-  \item{color1}{color of the curve (integer or color name in quotation marks)}
-  \item{color2}{color of the second curve if both recurrent and terminal events are plotted}
+  \item{color1}{curve color for recurrent event (integer or color name in quotation marks)}
+  \item{color2}{curve color for terminal event (integer or color name in quotation marks)}
   \item{...}{other unused arguments}
 }
 
@@ -59,8 +59,7 @@ data(readmission)
 #-- Gap-time
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
 charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
-Frailty=TRUE,joint=TRUE)
+data=readmission,n.knots=14,kappa1=100,kappa2=100)
 
 #-- It takes around 1 minute to converge --#
 

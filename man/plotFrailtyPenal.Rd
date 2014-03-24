@@ -49,14 +49,14 @@ data(readmission)
 ###--- Shared frailty model ---###
 
 modSha <- frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
-n.knots=10,kappa1=10000,data=readmission,Frailty=TRUE,hazard="Splines")
+n.knots=10,kappa1=10000,data=readmission,hazard="Splines")
 
 plot(modSha,type="surv",conf=FALSE)
 
 ###--- Cox proportional hazard model ---###
 
 modCox <- frailtyPenal(Surv(time,event)~as.factor(dukes),n.knots=10,
-kappa1=10000,data=readmission,Frailty=FALSE,hazard="Splines")
+kappa1=10000,data=readmission,hazard="Splines")
 
 plot(modCox)
 

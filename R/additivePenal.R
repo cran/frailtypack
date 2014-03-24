@@ -1,6 +1,6 @@
 "additivePenal" <-
 function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1, kappa2,
-             maxit=350, hazard="Splines", nb.int1, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-3)
+             maxit=350, hazard="Splines", nb.int1, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-3, print.times=TRUE)
 {
 
 ##### hazard specification ######
@@ -85,7 +85,7 @@ if((all.equal(length(hazard),1)==T)==T){
     
     call <- match.call()
     m <- match.call(expand.dots = FALSE)
-    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$... <- NULL
+    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$... <- NULL
     special <- c("strata", "cluster", "slope")
     Terms <- if (missing(data)) 
         terms(formula, special)
@@ -352,9 +352,11 @@ if((all.equal(length(hazard),1)==T)==T){
 		}
 		size2 <- mt1
 			
-			ptm<-proc.time()
-			cat("\n")
-			cat("Be patient. The program is computing ... \n")
+			if (print.times){
+				ptm<-proc.time()
+				cat("\n")
+				cat("Be patient. The program is computing ... \n")
+			}
 
 			ans <- .Fortran("additive",
 				as.integer(n),
@@ -438,8 +440,10 @@ if((all.equal(length(hazard),1)==T)==T){
     }
     
     flush.console()
-    cost<-proc.time()-ptm
-    cat("The program took", round(cost[3],2), "seconds \n")
+    if (print.times){
+        cost<-proc.time()-ptm
+        cat("The program took", round(cost[3],2), "seconds \n")
+    }
 
     if (noVar==1) nvar<-0
 

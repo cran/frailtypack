@@ -57,7 +57,11 @@
 
     if(effet.eq.1) then
         theta = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
-        alpha = bh(np-nva)
+        if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
+            alpha = bh(np-nva)
+        else
+            alpha = 1.d0
+        endif
     endif
 
 !---------------------------------------------------------

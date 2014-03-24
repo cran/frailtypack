@@ -1,22 +1,26 @@
 
-prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", group, MC.sample=0){
+prediction <- function(fit, data, t, window, group, MC.sample=0){
 
 	if (missing(fit)) stop("Need a fit")
 	if ((class(fit)!="frailtyPenal") & (class(fit)!="jointPenal")) stop("The argument fit must be a frailtyPenal or jointPenal object")
 	if (fit$istop != 1) stop("Attempting to do predictions with a wrong model")
 	if (missing(data)) stop("Need data to do some predictions")
-	if (missing(predTime) | missing(horizon) | missing(predMax)) stop("Need a first and a last time with an horizon to do predictions")
-	if (horizon <= 0) stop("Horizon must be positive")
-	if (predTime >= predMax) stop("Last time of predictions must be greater than first one")
-	if (predTime < 0) stop("Be careful, negative time input")
+	if (missing(t) | missing(window)) stop("Need times and a window to do predictions")
+
+	if (length(t)!=1 & length(window)!=1) stop("t and window can not be vector both at the same time")
+	if (any(window <= 0)) stop("Window must be positive")
+	if (is.unsorted(t)) stop("Last time of predictions must be greater than first one")
+	if (any(t < 0)) stop("Be careful, negative time input")
 	if ((MC.sample < 0) | (MC.sample > 1000))  stop("MC.sample needs to be positive integer up to 1000")
 	
-	if ((class(fit)=="jointPenal") & (!missing(type))) stop("No need for 'type' argument for predictions on a joint model")
-	
+	if ((class(fit)=="jointPenal") & (!missing(group))) stop("No need for 'group' argument for predictions on a joint model")
+	if (max(t+window) > max(fit$x1)) stop("Prediction times cannot exceed maximum time of observation")
+
 	# seulement dans le cas du shared
-	if (!(type %in% c("marginal","conditional"))) stop("Only 'marginal' or 'conditional' type of predictions can be specified")
-	if (predMax > max(fit$x1)) stop("Prediction times cannot exceed maximum time of event")
-	#if (!(predTime >= min(fit$x1))) stop("predtime must be in the right range")
+	if (missing(group)) type <- "marginal"
+	else type <- "conditional"
+	
+	# if (!(predTime >= min(fit$x1))) stop("predtime must be in the right range")
 	# mettre un warning quand une variable est un factor dans le fit et pas dans le datapred => source d'erreur
 	
 	if (MC.sample==0) ICproba <- FALSE
@@ -52,14 +56,24 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 	}
 	
 	# nombre de predictions a faire pour chaque individu
-	timeAll <- seq(predTime+horizon,predMax,by=horizon)
+	moving.window <- FALSE
+	if (length(t)==1) moving.window <- TRUE
+
+	if (moving.window){
+		predTime <- t
+		timeAll <- t+window #seq(predTime+window,predMax,by=window)
+		if (class(fit) == "jointPenal") window <- 0
+	}else{
+		predTime <- t[1]
+		timeAll <- t+window
+	}
 	ntimeAll <- length(timeAll)
 	
 	# recuperation des profils d'individus pour la prediction
 	m <- fit$call
 	m2 <- match.call()
 	
-	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$... <- NULL
+	m$formula.terminalEvent <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$Alpha <- m$... <- NULL
 	
 	m[[1]] <- as.name("model.frame")
 	m3 <- m # pour recuperer les donnees du dataset initial en plus
@@ -99,7 +113,7 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 	
 	dataset <- eval(m, sys.parent())
 	dataset3 <- eval(m3, sys.parent())
-	
+
 	typeofY <- attr(model.extract(dataset3, "response"),"type")
 	Y <- model.extract(dataset3, "response")
 	
@@ -207,8 +221,6 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 	if (ncol(X) > 1) X <- X[, -1, drop = FALSE]
 	
 	if (class(fit) == "jointPenal"){
-	
-		if (max(predtimerec) >= predTime) stop("Recurrences observed for each subject have to be less than predTime")
 		
 		if (fit$joint.clust==1) vaxpred <- aggregate(X,by=list(cluster),FUN=function(x) {x[1]})[,-1]
 		else vaxpred <- aggregate(X,by=list(num.id),FUN=function(x) {x[1]})[,-1]
@@ -217,7 +229,7 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 		m3 <- fit$call
 		m2 <- match.call()
 		
-		m3$Frailty <- m3$joint <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa1 <- m3$kappa2 <- m3$maxit <- m3$hazard <- m3$nb.int1 <-m3$nb.int2 <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$... <- NULL
+		m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa1 <- m3$kappa2 <- m3$maxit <- m3$hazard <- m3$nb.int1 <-m3$nb.int2 <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$... <- NULL
 		
 		m3$formula[[3]] <- m3$formula.terminalEvent[[2]]
 		m3$formula.terminalEvent <- NULL
@@ -267,49 +279,78 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 				as.integer(ntimeAll),
 				as.integer(npred),
 				as.double(predTime),
-				as.double(horizon),
+				as.double(window),
 				as.double(predtimerec),
 				as.integer(nrec),
 				as.double(as.matrix(vaxpred)),
 				as.double(as.matrix(vaxdcpred)),
-				proba1=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
-				proba2=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
-				proba3=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
-				probalow1=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
-				probahigh1=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
-				probalow2=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
-				probahigh2=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
-				probalow3=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
-				probahigh3=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+				pred1=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+				pred2=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+				pred3=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+				predlow1=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+				predhigh1=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+				predlow2=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+				predhigh2=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+				predlow3=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+				predhigh3=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
 				icproba=as.integer(ICproba),
 				as.integer(MC.sample),
 				as.integer(fit$intcens),
 				as.double(trunctime),
 				as.double(lowertime),
 				as.double(uppertime),
+				as.integer(moving.window),
+				as.double(timeAll),
 				PACKAGE = "frailtypack")
-		
+
 		out <- NULL
-		out$call <- fit$call
+		out$call <- match.call()
 		out$npred <- npred
-		out$time <- timeAll
+		out$window <- window
+		out$predtimerec <- predtimerec
+		out$moving.window <- moving.window
+		if (moving.window){
+			out$x.time <- timeAll
+			out$t <- predTime
+		}else{ 
+			out$x.time <- timeAll - window
+		}
 		if (fit$joint.clust==1) out$group <- uni.cluster
 		else out$group <- uni.num.id
+
 		if (!fit$intcens){
-			out$proba1 <- matrix(ans$proba1,nrow=npred,ncol=ntimeAll)
-			out$proba3 <- matrix(ans$proba3,nrow=npred,ncol=ntimeAll)
+			out$pred1 <- matrix(ans$pred1,nrow=npred,ncol=ntimeAll)
+			rownames(out$pred1) <- paste("ind",out$group)
+			colnames(out$pred1) <- c("times",rep(" ",ntimeAll-1))
+			out$pred3 <- matrix(ans$pred3,nrow=npred,ncol=ntimeAll)
+			rownames(out$pred3) <- paste("ind",out$group)
+			colnames(out$pred3) <- c("times",rep(" ",ntimeAll-1))
 		}
-		out$proba2 <- matrix(ans$proba2,nrow=npred,ncol=ntimeAll)
+		out$pred2 <- matrix(ans$pred2,nrow=npred,ncol=ntimeAll)
+		rownames(out$pred2) <- paste("ind",out$group)
+		colnames(out$pred2) <- c("times",rep(" ",ntimeAll-1))
 		out$icproba <- ICproba
 		if (ICproba){
 			if (!fit$intcens){
-				out$probalow1 <- matrix(ans$probalow1,nrow=npred,ncol=ntimeAll)
-				out$probahigh1 <- matrix(ans$probahigh1,nrow=npred,ncol=ntimeAll)
-				out$probalow3 <- matrix(ans$probalow3,nrow=npred,ncol=ntimeAll)
-				out$probahigh3 <- matrix(ans$probahigh3,nrow=npred,ncol=ntimeAll)
+				out$predlow1 <- matrix(ans$predlow1,nrow=npred,ncol=ntimeAll)
+				out$predhigh1 <- matrix(ans$predhigh1,nrow=npred,ncol=ntimeAll)
+				rownames(out$predlow1) <- paste("ind",out$group)
+				colnames(out$predlow1) <- c("times",rep(" ",ntimeAll-1))
+				rownames(out$predhigh1) <- paste("ind",out$group)
+				colnames(out$predhigh1) <- c("times",rep(" ",ntimeAll-1))
+				out$predlow3 <- matrix(ans$predlow3,nrow=npred,ncol=ntimeAll)
+				out$predhigh3 <- matrix(ans$predhigh3,nrow=npred,ncol=ntimeAll)
+				rownames(out$predlow3) <- paste("ind",out$group)
+				colnames(out$predlow3) <- c("times",rep(" ",ntimeAll-1))
+				rownames(out$predhigh3) <- paste("ind",out$group)
+				colnames(out$predhigh3) <- c("times",rep(" ",ntimeAll-1))
 			}
-			out$probalow2 <- matrix(ans$probalow2,nrow=npred,ncol=ntimeAll)
-			out$probahigh2 <- matrix(ans$probahigh2,nrow=npred,ncol=ntimeAll)
+			out$predlow2 <- matrix(ans$predlow2,nrow=npred,ncol=ntimeAll)
+			out$predhigh2 <- matrix(ans$predhigh2,nrow=npred,ncol=ntimeAll)
+			rownames(out$predlow2) <- paste("ind",out$group)
+			colnames(out$predlow2) <- c("times",rep(" ",ntimeAll-1))
+			rownames(out$predhigh2) <- paste("ind",out$group)
+			colnames(out$predhigh2) <- c("times",rep(" ",ntimeAll-1))
 		}
 		out$joint.clust <- fit$joint.clust
 		out$intcens <- fit$intcens
@@ -317,32 +358,37 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 		cat("Predictions done for",npred,"subjects and",ntimeAll,"times \n")
 		
 		class(out) <- c("predJoint")
-	}else{
+	}else{ ## predictions shared
 		cat("\n")
 		cat("Calculating the probabilities ... \n")
 		
 		expBX <- exp(X %*% fit$coef)
 		
 		# nombre de predictions a faire pour chaque individu
-		# sequence <- seq(predTime,predMax,length=50)
-		sequence <- seq(predTime+horizon,predMax,by=horizon)
+		if (moving.window){ # 2 facons differentes de faire des predictions, soit h evolue, soit t evolue
+			sequence2 <- t+window #seq(predTime+window,predMax,by=window)
+			sequence <- rep(predTime,times=length(sequence2))
+		}else{
+			sequence <- t #seq(predTime,predMax,length=50)
+			sequence2 <- t+window #sequence+window
+		}
+
 		predMat <- NULL
 		
 		if (fit$Frailty){
 			if (type=="marginal"){ ## marginal ##
 				for (k in 1:nrow(data)){
-					vect.survival.X <- survival(predTime,ObjFrailty=fit)**expBX[k] # sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
-					vect.survival.X.horizon <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
+					vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
+					vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]
 					pred <- 1-((1+fit$theta*(-log(vect.survival.X)))/(1+fit$theta*(-log(vect.survival.X.horizon))))**(1/fit$theta)
 					predMat <- cbind(predMat,pred)
 				}
 			}else{ ## conditional ##
-				if (missing(group)) stop("For conditional predictions, a group need to be input")
 				if (!(group %in% uni.cluster)) stop("Are you sure that the group is present in your cluster variable ?")
 				
 				for (k in 1:nrow(data)){
-					vect.survival.X <- survival(predTime,ObjFrailty=fit)**expBX[k] # sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
-					vect.survival.X.horizon <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
+					vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
+					vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]
 					pred <- 1-(vect.survival.X.horizon/vect.survival.X)**fit$frailty.pred[uni.cluster==group]
 					predMat <- cbind(predMat,pred)
 				}
@@ -351,8 +397,8 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 			if (!missing(group)) stop("No need for a group to predict on a proportionnal hazard model")
 			
 			for (k in 1:nrow(data)){
-				vect.survival.X <- survival(predTime,ObjFrailty=fit)**expBX[k] # sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
-				vect.survival.X.horizon <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
+				vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
+				vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]
 				pred <- 1-(vect.survival.X.horizon/vect.survival.X)
 				predMat <- cbind(predMat,pred)
 			}
@@ -448,8 +494,8 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 					for (k in 1:nrow(data)){
 						realisations <- NULL
 						for (i in 1:MC.sample){
-							vect.survival.X <- survival.mc(predTime,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i] # sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
-							vect.survival.X.horizon <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+							vect.survival.X <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+							vect.survival.X.horizon <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
 							pred <- 1-((1+theta.mc[i]*(-log(vect.survival.X)))/(1+theta.mc[i]*(-log(vect.survival.X.horizon))))**(1/theta.mc[i])
 							realisations <- cbind(realisations,pred)
 						}
@@ -463,8 +509,8 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 						
 							if (k == 1) frailty.mc <- c(frailty.mc,rgamma(1,shape=fit$n.eventsbygrp[uni.cluster==group]+1/theta.mc[i],scale=1/(res1+1/theta.mc[i])))
 							
-							vect.survival.X <- survival.mc(predTime,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i] # sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
-							vect.survival.X.horizon <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+							vect.survival.X <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+							vect.survival.X.horizon <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
 							pred <- 1-(vect.survival.X.horizon/vect.survival.X)**frailty.mc[i]
 							realisations <- cbind(realisations,pred)
 						}
@@ -476,8 +522,8 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 				for (k in 1:nrow(data)){
 					realisations <- NULL
 					for (i in 1:MC.sample){
-						vect.survival.X <- survival.mc(predTime,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i] # sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
-						vect.survival.X.horizon <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+						vect.survival.X <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+						vect.survival.X.horizon <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
 						pred <- 1-(vect.survival.X.horizon/vect.survival.X)
 						realisations <- cbind(realisations,pred)
 					}
@@ -488,16 +534,29 @@ prediction <- function(fit, data, predTime, horizon, predMax, type="marginal", g
 		}
 		
 		out <- NULL
-		out$call <- fit$call
-		out$time <- sequence
+		out$call <- match.call()
+		out$npred <- nrow(data)
+		out$moving.window <- moving.window
+		if (moving.window){
+			out$x.time <- sequence2
+			out$t <- predTime
+		}else{
+			out$x.time <- sequence
+		}
 		out$pred <- predMat
+		rownames(out$pred) <- c("times",rep(" ",dim(out$pred)[1]-1))
+		colnames(out$pred) <- paste("ind",1:out$npred)
 		out$icproba <- ICproba
 		if (ICproba){
 			out$predLow <- predMatLow
 			out$predHigh <- predMatHigh
+			rownames(out$predLow) <- c("times",rep(" ",dim(out$predLow)[1]-1))
+			colnames(out$predLow) <- paste("ind",1:out$npred)
+			rownames(out$predHigh) <- c("times",rep(" ",dim(out$predHigh)[1]-1))
+			colnames(out$predHigh) <- paste("ind",1:out$npred)
 		}
 		if (fit$Frailty) out$type <- type
-		out$horizon <- horizon
+		out$window <- window
 		if (type == "conditional") out$group <- group
 		
 		cat("Predictions done for",nrow(data),"subjects \n")

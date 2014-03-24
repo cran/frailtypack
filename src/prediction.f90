@@ -3,14 +3,14 @@
 ! ============================================== prediction Joint
     
     subroutine predict(np,b,nz,nbintervR,nbintervDC,nva1,nva2,nst,typeof,zi,HIHOut,time,timedc, &
-    ntimeAll,npred0,predTime,predHorizon,predtimerec,nrec0,vaxpred0,vaxdcpred0, &
+    ntimeAll,npred0,predTime,window,predtimerec,nrec0,vaxpred0,vaxdcpred0, &
     predAll1,predAll2,predAll3,predAlllow1,predAllhigh1,predAlllow2,predAllhigh2,predAlllow3,predAllhigh3, &
-    icproba,nsample,intcens,trunctime,lowertime,uppertime)
+    icproba,nsample,intcens,trunctime,lowertime,uppertime,movingwindow,timeAll)
     
     implicit none
     
     integer::i,ii,iii,j
-    integer,intent(in)::np,nz,nbintervR,nbintervDC,nva1,nva2,nst,typeof,ntimeAll,icproba,intcens
+    integer,intent(in)::np,nz,nbintervR,nbintervDC,nva1,nva2,nst,typeof,ntimeAll,icproba,intcens,movingwindow
     double precision,dimension(np),intent(in)::b
     double precision,dimension(nz+6),intent(in)::zi
     double precision,dimension(np,np),intent(in)::HIHOut
@@ -21,7 +21,7 @@
     double precision,dimension(1,npred0)::XbetapredR,XbetapredDC,XbetapredRalea,XbetapredDCalea
     integer,dimension(npred0)::nreci
     integer::npred0,nrec0,nsample
-    double precision::predTime,predHorizon,predTime2,scR,shR,scDC,shDC, &
+    double precision::predTime,window,predTime2,scR,shR,scDC,shDC, &
     scRalea,shRalea,scDCalea,shDCalea,alea,thetaalea,alphaalea,alpha,theta
     double precision::ss11,ss12,ss21,ss22,ss31,ss32
     double precision,dimension(npred0)::predProba1,predProba2,predProba3
@@ -40,7 +40,7 @@
     double precision,dimension(1,nva2)::coefBetadcalea
     double precision,dimension(npred0,nrec0)::predtimerec
     double precision,dimension(npred0,nrec0+2)::predtimerec2
-    double precision,dimension(npred0)::trunctime,lowertime,uppertime
+    double precision,dimension(npred0)::trunctime,lowertime,uppertime,lowertime2,uppertime2
     double precision,dimension(1,nva1)::coefBeta
     double precision,dimension(1,nva2)::coefBetadc
     
@@ -53,26 +53,45 @@
     ! Determine when to calculate Survival function (gap time)
     ! and the number of recurrences in the prediction (for each pred i)
 
-    timeAll(1) = predTime + predHorizon
-    do i=2,ntimeAll
-        timeAll(i) = timeAll(i-1) + predHorizon !0.5
-    end do
+!     timeAll(1) = predTime + window
+!     do i=2,ntimeAll
+!         timeAll(i) = timeAll(i-1) + window
+!     end do
 
     do iii=1,ntimeAll
         do i=1,npred0
-            predtimerec2(i,1) = predTime
-            predtimerec2(i,2) = predtimerec(i,1)
+            if (movingwindow.eq.1) then 
+                predtimerec2(i,1) = predTime
+            else 
+                predtimerec2(i,1) = timeAll(iii) - window
+            endif
+
+            !predtimerec2(i,2) = predtimerec(i,1)
             nreci(i) = 0
-            do ii=2,nrec0
-                predtimerec2(i,ii+1) = predtimerec(i,ii)
-                if ((predtimerec(i,ii-1).gt.0).and.(predtimerec(i,ii).eq.0)) then
-                    nreci(i) = ii-1
+            do ii=2,nrec0+1
+                if (predtimerec(i,ii-1).le.predtimerec2(i,1)) then ! check if relapse happened before prediction time
+                    predtimerec2(i,ii) = predtimerec(i,ii-1)
+                else ! otherwise 0
+                    predtimerec2(i,ii) = 0
+                endif
+                if ((ii.gt.2).and.(predtimerec2(i,ii-1).gt.0).and.(predtimerec2(i,ii).eq.0)) then
+                    nreci(i) = ii-2
                 endif
             end do
-            if (predtimerec(i,nrec0).gt.0) nreci(i) = nrec0
+            if (predtimerec2(i,nrec0+1).gt.0) nreci(i) = nrec0
             predtimerec2(i,nrec0+2) = timeAll(iii)
+
+            if (intcens.eq.1) then
+                if (uppertime(i).gt.predtimerec2(i,1)) then
+                    uppertime2(i) = 0.d0
+                    lowertime2(i) = 0.d0
+                else
+                    uppertime2(i) = uppertime(i)
+                    lowertime2(i) = lowertime(i)
+                endif
+            endif
         end do
-        
+
         ! Calcul des risques de base
         ! A chaque fois, calculé pour : 
         ! DC au temps de base (predtimerec2(1,1)) et à l'horizon (predtimerec2(1,nrec0+2))
@@ -94,9 +113,9 @@
                     call survival(trunctime(i),theR,theDC,nz+2,zi,surv,lam,nst)
                     survLT(i) = surv(1)
                     if (trunctime(i).eq.0.d0) survLT(i) = 1.d0
-                    call survival(lowertime(i),theR,theDC,nz+2,zi,surv,lam,nst)
+                    call survival(lowertime2(i),theR,theDC,nz+2,zi,surv,lam,nst)
                     survL(i) = surv(1)
-                    call survival(uppertime(i),theR,theDC,nz+2,zi,surv,lam,nst) !!
+                    call survival(uppertime2(i),theR,theDC,nz+2,zi,surv,lam,nst) !!
                     survU(i) = surv(1)
                 endif
                 
@@ -126,10 +145,10 @@
                     ,time,timedc,surv)
                     survLT(i) = surv(1)
                     if (trunctime(i).eq.0.d0) survLT(i) = 1.d0
-                    call survivalj_cpm(lowertime(i),b(1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
+                    call survivalj_cpm(lowertime2(i),b(1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
                     ,time,timedc,surv)
                     survL(i) = surv(1)
-                    call survivalj_cpm(uppertime(i),b(1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
+                    call survivalj_cpm(uppertime2(i),b(1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
                     ,time,timedc,surv)
                     survU(i) = surv(1)
                 endif
@@ -161,8 +180,8 @@
                 if (intcens.eq.1) then
                     survLT(i) = exp(-(trunctime(i)/scR)**shR) !!
                     if (trunctime(i).eq.0.d0) survLT(i) = 1.d0
-                    survL(i) = exp(-(lowertime(i)/scR)**shR) !!
-                    survU(i) = exp(-(uppertime(i)/scR)**shR) !!
+                    survL(i) = exp(-(lowertime2(i)/scR)**shR) !!
+                    survU(i) = exp(-(uppertime2(i)/scR)**shR) !!
                 endif
                 
                 do ii=1,nrec0+1
@@ -209,6 +228,7 @@
 !        predProbaalea3(:,:)=0.d0;predProbaalea4(:,:)=0.d0;
         
         if (icproba.eq.1) then ! calcul de l'intervalle de confiance seulement si demande
+
             do j=1,nsample
                 ss11 = 0.d0
                 ss12 = 0.d0
@@ -347,18 +367,18 @@
                     endif
                 end do
             end do
-            
-            ! utilisation de la fonction percentile de aaUseFunction
+
+            ! utilisation de la fonction percentile2 de aaUseFunction
             do i=1,npred0
-                call percentile(predProbaalea1(:,i),predAlllow1(i,iii),predAllhigh1(i,iii))
-                call percentile(predProbaalea2(:,i),predAlllow2(i,iii),predAllhigh2(i,iii))
-                call percentile(predProbaalea3(:,i),predAlllow3(i,iii),predAllhigh3(i,iii))
+                call percentile2(predProbaalea1(:,i),nsample,predAlllow1(i,iii),predAllhigh1(i,iii))
+                call percentile2(predProbaalea2(:,i),nsample,predAlllow2(i,iii),predAllhigh2(i,iii))
+                call percentile2(predProbaalea3(:,i),nsample,predAlllow3(i,iii),predAllhigh3(i,iii))
             end do
             
         endif ! calcul de l'intervalle de confiance seulement si demande
 
     end do
-    
+
     end subroutine predict
     
     

@@ -1,4 +1,4 @@
-# Virgine Rondeau 2012-4-12 for optimx
+# Virginie Rondeau 2012-4-12 for optimx
 
 options(digits=12)
 if(!require("frailtypack"))stop("this test requires package frailtypack.")

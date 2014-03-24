@@ -61,7 +61,7 @@ data(readmission)
 ###--- Shared Frailty model with time-varying effect ---###
 
 sha.time <- frailtyPenal(Surv(time,event)~cluster(id)+dukes+charlson+
-timedep(sex)+chemo,Frailty=TRUE,data=readmission,n.knots=8,kappa1=1,
+timedep(sex)+chemo,data=readmission,n.knots=8,kappa1=1,
 betaknots=3,betaorder=1)
 
 #-- print results of the fit and the associated curves for the
@@ -72,8 +72,7 @@ print(sha.time)
 
 joi.time <- frailtyPenal(Surv(time,event)~cluster(id)+timedep(sex)+
 chemo+terminal(death),formula.terminalEvent=~timedep(sex)+chemo,
-joint=TRUE,Frailty=TRUE,data=readmission,n.knots=8,kappa1=1,kappa2=1,
-betaknots=3,betaorder=1)
+data=readmission,n.knots=8,kappa1=1,kappa2=1,betaknots=3,betaorder=1)
 
 print(joi.time)
 

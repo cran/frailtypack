@@ -77,8 +77,85 @@
 
 
 
+    subroutine percentile3(t,n,p,out)
 
-    subroutine percentile(t,t25,t975) ! pour le MCMC
+    implicit none
+
+    integer::n,ib,i,indd
+    double precision::a,b,c,temp,p
+    double precision,dimension(n)::t
+    double precision,intent(out)::out
+
+    n=size(t)
+
+    ! tri des temps
+    indd=1
+    do while (indd.eq.1)
+        indd=0
+        do i=1,(n-1)
+            if (t(i).gt.t(i+1)) then
+                temp=t(i)
+                t(i)=t(i+1)
+                t(i+1)=temp
+                indd=1
+            end if
+        end do
+    end do
+
+    ! quantile d'ordre p%
+    a=(n-1)*p
+    b=mod(a,1.0d0)
+    c=a-b
+    ib=int(c)
+    out= (1-b)*t(ib+1)+b*t(ib+2)
+
+    end subroutine percentile3
+
+
+    subroutine percentile2(t,n,t25,t975)
+
+    implicit none
+    ! Based on discussion in this paper http://www.haiweb.org/medicineprices/manual/quartiles_iTSS.pdf
+
+    integer::n,ib,i,indd
+    double precision::a,b,c,temp
+    double precision,dimension(n)::t
+    double precision,intent(out)::t25,t975
+
+    n=size(t)
+
+    ! tri des temps
+    indd=1
+    do while (indd.eq.1)
+        indd=0
+        do i=1,(n-1)
+            if (t(i).gt.t(i+1)) then
+                temp=t(i)
+                t(i)=t(i+1)
+                t(i+1)=temp
+                indd=1
+            end if
+        end do
+    end do
+
+    ! quantile d'ordre 2.5%
+    a=(n-1)*0.025d0
+    b=mod(a,1.0d0)
+    c=a-b
+    ib=int(c)
+    t25= (1-b)*t(ib+1)+b*t(ib+2)
+
+    ! quantile d'ordre 97.5%
+    a=(n-1)*0.975d0
+    b=mod(a,1.0d0)
+    c=a-b
+    ib=int(c)
+    t975= (1-b)*t(ib+1)+b*t(ib+2)
+
+    end subroutine percentile2
+
+
+    subroutine percentile(t,t25,t975) ! pour le MCMC : version qui ne marche qu'avec 1000 echantillons
     
     integer::indd,i
     double precision::t25,t975,temp

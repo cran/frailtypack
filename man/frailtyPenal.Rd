@@ -114,12 +114,13 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{X_{ijk}}
 
 \usage{
 
-frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
-             joint = FALSE, recurrentAG = FALSE, cross.validation =
-             FALSE, n.knots, kappa1, kappa2, maxit = 350, hazard =
+frailtyPenal(formula, formula.terminalEvent, data, 
+             recurrentAG = FALSE, cross.validation = FALSE,
+             n.knots, kappa1, kappa2, maxit = 350, hazard =
              "Splines", nb.int1, nb.int2, RandDist = "Gamma",
-             betaknots = 1, betaorder = 3, B, LIMparam = 1e-4,
-             LIMlogl = 1e-4, LIMderiv = 1e-4)
+             betaknots = 1, betaorder = 3, init.B, init.Theta,
+             init.Alpha, Alpha, LIMparam = 1e-4, LIMlogl = 1e-4,
+             LIMderiv = 1e-4, print.times = TRUE)
 }
 
 \arguments{
@@ -132,12 +133,7 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
 
   \item{formula.terminalEvent}{only for joint model: a formula object, only requires terms on the right to indicate which variables are modelling the terminal event.}
 
-  \item{data}{ a 'data.frame' in which to interpret the variables named in the 'formula'}
-
-  \item{Frailty}{Logical value. Is model with frailties fitted? If so, variance of frailty parameter is estimated. 
-              If not, Cox proportional hazard model is estimated. The default is FALSE}
-
-  \item{joint}{Logical value. Is joint model fitted? If so, 'formula.terminalEvent' is required. The default is FALSE}
+  \item{data}{a 'data.frame' with the variables used in 'formula'.}
 
   \item{recurrentAG}{Logical value. Is Andersen-Gill model fitted? If so indicates that recurrent event times with the
                  counting process approach of Andersen and Gill is used. This formulation can be used for dealing with
@@ -150,7 +146,8 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
                  for a Cox proportional hazard model, with no covariates. The default is FALSE.}
 
   \item{n.knots}{ integer giving the number of knots to use. Value required in the penalized likelihood estimation.
-                It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions. 
+                It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions.
+                We estimate I or M-splines of order 4. When the user set a number of knots equals to k (n.knots=k) then the number of interior knots is (k-2) and the number of splines is (k-2)+order.  
                 Number of knots must be between 4 and 20. (See Note)}
 
   \item{kappa1}{ positive smoothing parameter in the penalized likelihood estimation. The coefficient kappa of the integral of the squared
@@ -169,7 +166,7 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
 
   \item{nb.int1}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi"). In a joint model, this argument is used for the recurrent hazard function.}
 
-  \item{nb.int2}{only for joint model : number of intervals (between 1 and 20) for the death parametric hazard function ("Piecewise-per", "Piecewise-equi").}
+  \item{nb.int2}{Only for joint model : number of intervals (between 1 and 20) for the death parametric hazard function ("Piecewise-per", "Piecewise-equi").}
 
   \item{RandDist}{Type of random effect distribution: "Gamma" for a gamma distribution, "LogN" for a log-normal distribution. Default is "Gamma". Not implemented for nested model.}
 
@@ -177,14 +174,21 @@ frailtyPenal(formula, formula.terminalEvent, data, Frailty = FALSE,
 
   \item{betaorder}{Order of the B-splines. Defaut is cubic B-splines (order = 3). See 'timedep' function for more details. Not implemented for nested model.}
   
-  \item{B}{A vector of inital values for regression coefficients. This vector should be of the same size as the whole vector of covariates. Default is 0.1 for each.}
+  \item{init.B}{A vector of inital values for regression coefficients. This vector should be of the same size as the whole vector of covariates. Default is 0.1 for each (for Cox and shared model) or 0.5 (for joint model).}
   
+  \item{init.Theta}{Inital value for variance of the frailties.}
+  
+  \item{init.Alpha}{Only for joint model : initial value for parameter alpha.}
+
+  \item{Alpha}{Only for joint model : input "none" so as to fit a joint model without the parameter alpha.}
+
   \item{LIMparam}{Convergence threshold of the Marquard algorithm for the parameters (see Details), \eqn{10^{-4}} by default.}
   
   \item{LIMlogl}{Convergence threshold of the Marquard algorithm for the log-likelihood (see Details), \eqn{10^{-4}} by default.}
   
   \item{LIMderiv}{Convergence threshold of the Marquard algorithm for the gradient (see Details), \eqn{10^{-4}} by default.}
 
+  \item{print.times}{a logical parameter to print iteration process. Default is TRUE.}
 }
 
 \details{
@@ -194,22 +198,21 @@ for a Cox model
 
 for a shared model
 \preformatted{frailtyPenal(Surv(time,event)~cluster(group)+var1+var2,
-             data, Frailty = TRUE, \dots)}
+             data, \dots)}
 
 for a joint model
 \preformatted{frailtyPenal(Surv(time,event)~cluster(group)+var1+var2+
              var3+terminal(death), formula.terminalEvent=~
-             var1+var4, data, Frailty = TRUE, joint = TRUE, \dots)}
+             var1+var4, data, \dots)}
 
 for a joint model for clustered data
 \preformatted{frailtyPenal(Surv(time,event)~cluster(group)+num.id(group2)+
              var1+var2+var3+terminal(death),
-             formula.terminalEvent=~var1+var4, data,
-             Frailty = TRUE, joint = TRUE, \dots)}
+             formula.terminalEvent=~var1+var4, data, \dots)}
 
 for a nested model
 \preformatted{frailtyPenal(Surv(time,event)~cluster(group)+subcluster(sbgroup)+
-             var1+var2, data, Frailty = TRUE, \dots)}
+             var1+var2, data, \dots)}
 
 The estimated parameter are obtained using the robust Marquardt algorithm (Marquardt, 1963) which is a combination
 between a Newton-Raphson algorithm and a steepest descent algorithm. The iterations are stopped when the difference
@@ -310,7 +313,8 @@ The following components are specific to \bold{joint} models.
 
 \item{theta}{variance of the gamma frailty parameter \eqn{(\bold{Var}(\omega_i))} or \eqn{(\bold{Var}(u_i))}}
 \item{sigma2}{variance of the log-normal frailty parameter \eqn{(\bold{Var}(\eta_i))} or \eqn{(\bold{Var}(v_i))}}
-\item{alpha}{the coefficient associated with the frailty parameter in the terminal hazard function.}
+\item{indic_alpha}{indicator if a joint frailty model with \eqn{\alpha} parameter was fitted}
+\item{alpha}{the coefficient \eqn{\alpha} associated with the frailty parameter in the terminal hazard function.}
 \item{nbintervR}{Number of intervals (between 1 and 20) for the recurrent parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 \item{nbintervDC}{Number of intervals (between 1 and 20) for the death parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 \item{nvar}{A vector with the number of covariates of each type of hazard function as components.}
@@ -396,17 +400,17 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 
 data(kidney)
 frailtyPenal(Surv(time,status)~sex+age,
-n.knots=12,kappa1=10000,data=kidney,Frailty=FALSE)
+n.knots=12,kappa1=10000,data=kidney)
 
 ###---  Shared Frailty model  ---###
 
 frailtyPenal(Surv(time,status)~cluster(id)+sex+age,
-n.knots=12,kappa1=10000,data=kidney,Frailty=TRUE)
+n.knots=12,kappa1=10000,data=kidney)
 
 #-- with an initialisation of regression coefficients
 
 frailtyPenal(Surv(time,status)~cluster(id)+sex+age,
-n.knots=12,kappa1=10000,data=kidney,Frailty=TRUE,B=c(-1.44,0))
+n.knots=12,kappa1=10000,data=kidney,init.B=c(-1.44,0))
 
 #-- with truncated data
 
@@ -414,32 +418,30 @@ data(dataNested)
 
 frailtyPenal(Surv(t1,t2,event) ~ cluster(group),
 data=dataNested,n.knots=10,kappa1=10000,
-Frailty=TRUE,cross.validation=TRUE,recurrentAG=FALSE)
+cross.validation=TRUE,recurrentAG=FALSE)
 
 #-- stratified analysis
 
 data(readmission)
 frailtyPenal(Surv(time,event)~cluster(id)+dukes+strata(sex),
-n.knots=10,kappa1=10000,kappa2=10000,data=readmission,
-Frailty=TRUE)
+n.knots=10,kappa1=10000,kappa2=10000,data=readmission)
 
 #-- recurrentAG=TRUE
 
 frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+dukes+
-charlson,data=readmission,Frailty=TRUE,
-n.knots=6,kappa1=100000,recurrentAG=TRUE)
+charlson,data=readmission,n.knots=6,kappa1=1e5,recurrentAG=TRUE)
 
 #-- cross.validation=TRUE
 
 frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+dukes+
-charlson,data=readmission, Frailty=TRUE,n.knots=6,
-kappa1=5000,recurrentAG=TRUE,cross.validation=TRUE)
+charlson,data=readmission,n.knots=6,kappa1=5000,recurrentAG=TRUE,
+cross.validation=TRUE)
 
 #-- log-normal distribution
 
-frailtyPenal(Surv(t.start,t.stop,event)~sex+dukes+charlson+cluster(id),
-data=readmission, Frailty=TRUE,n.knots=6,kappa1=5000,
-recurrentAG=TRUE,RandDist="LogN")
+frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex+dukes+
+charlson,data=readmission,n.knots=6,kappa1=5000,recurrentAG=TRUE,
+RandDist="LogN")
 
 ###--- Joint Frailty model (recurrent and terminal events) ---###
 
@@ -447,44 +449,49 @@ data(readmission)
 #-- Gap-time
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+charlson+
 terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
-Frailty=TRUE,joint=TRUE,recurrentAG=FALSE)
+data=readmission,n.knots=10,kappa1=100,kappa2=100,
+recurrentAG=FALSE)
 
 #-- Calendar time
 modJoint.calendar <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
 +dukes+charlson+terminal(death),formula.terminalEvent=~sex
-+dukes+charlson,data=readmission,n.knots=10,kappa1=9.55e9,
-kappa2=1.41e12,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE)
++dukes+charlson,data=readmission,n.knots=10,kappa1=100,
+kappa2=100,recurrentAG=TRUE)
+
+#-- without alpha parameter
+modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+charlson+
+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
+data=readmission,n.knots=10,kappa1=100,kappa2=100,
+recurrentAG=FALSE,Alpha="none")
 
 #-- log-normal distribution
 
 modJoint.log <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
 +dukes+charlson+terminal(death),formula.terminalEvent=~sex
-+dukes+charlson,data=readmission,n.knots=10,kappa1=9.55e9,
-kappa2=1.41e12,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE,
-RandDist="LogN")
++dukes+charlson,data=readmission,n.knots=10,kappa1=100,
+kappa2=100,recurrentAG=TRUE,RandDist="LogN")
 
 ###--- Joint Frailty model for clustered data ---###
 
 #-- here is a generated cluster (31 clusters of 13 subjects)
-readmission <- transform(readmission,group=id\%\%31+1)
+readmission <- transform(readmission,group=id%%31+1)
 
 joi.clus <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(group)+
 num.id(id)+dukes+charlson+sex+chemo+terminal(death),
 formula.terminalEvent=~dukes+charlson+sex+chemo,
-data=readmission,Frailty=TRUE,joint=TRUE,recurrentAG=TRUE,
-n.knots=10,kappa1=2.11e+08,kappa2=9.53e+11)
+data=readmission,recurrentAG=TRUE,n.knots=10,
+kappa1=100,kappa2=100)
 
 ###--- Nested Frailty model ---###
 
 data(dataNested)
 modClu <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
-subcluster(subgroup)+cov1+cov2,Frailty=TRUE,
-data=dataNested,n.knots=8,kappa1=50000)
+subcluster(subgroup)+cov1+cov2,data=dataNested,
+n.knots=8,kappa1=50000)
 
 modClu.str <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
-subcluster(subgroup)+cov1+strata(cov2),Frailty=TRUE,
-data=dataNested,n.knots=8,kappa1=50000,kappa2=50000)
+subcluster(subgroup)+cov1+strata(cov2),data=dataNested,
+n.knots=8,kappa1=50000,kappa2=50000)
 
 }
 

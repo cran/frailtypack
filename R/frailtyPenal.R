@@ -1,13 +1,18 @@
 
 "frailtyPenal" <-
-function (formula, formula.terminalEvent, data, Frailty = FALSE, joint=FALSE, recurrentAG=FALSE,
-             cross.validation=FALSE, n.knots, kappa1 , kappa2, maxit=350, hazard="Splines", nb.int1, nb.int2,
-             RandDist="Gamma", betaknots=1, betaorder=3, B, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-4)
+function (formula, formula.terminalEvent, data, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1 , kappa2,
+             maxit=350, hazard="Splines", nb.int1, nb.int2, RandDist="Gamma", betaknots=1, betaorder=3, 
+             init.B, init.Theta, init.Alpha, Alpha, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-4, print.times=TRUE)
 {
+
+# al suppression de l'argument joint
+if (!missing(formula.terminalEvent)) joint <- TRUE
+else joint <- FALSE
+if ((!missing(Alpha) | !missing(init.Alpha)) & !joint) stop("init.Alpha and Alpha parameters belong to joint frailty model")
 
 #ad 15/02/12 :add Audrey
 m2 <- match.call()
-m2$formula <- m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$recurrentAG <- m2$cross.validation <- m2$n.knots <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <-m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$... <- NULL
+m2$formula <- m2$formula.terminalEvent <- m2$recurrentAG <- m2$cross.validation <- m2$n.knots <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <-m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$init.Theta <- m2$init.Alpha <- m2$Alpha <- m2$... <- NULL
 Names.data <- m2$data
 
 #### Betaknots et betaorder ####
@@ -79,7 +84,7 @@ if((all.equal(length(hazard),1)==T)==T){
 #AD:
 		if (missing(n.knots))stop("number of knots are required")   
 #AD:	 
-		n.knots.temp <- n.knots	 
+		n.knots.temp <- n.knots	
 #AD
 		if (n.knots<4) n.knots<-4
 		if (n.knots>20) n.knots<-20
@@ -116,7 +121,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	
 	m <- match.call(expand.dots = FALSE) # recupere l'instruction de l'utilisateur
 
-	m$formula.terminalEvent <- m$Frailty <- m$joint <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <-  m$... <- NULL
+	m$formula.terminalEvent <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <-  m$print.times <- m$init.Theta <- m$init.Alpha <- m$Alpha <- m$... <- NULL
 
 
 	special <- c("strata", "cluster", "subcluster", "terminal","num.id","timedep")
@@ -144,6 +149,9 @@ if((all.equal(length(hazard),1)==T)==T){
 
 	cluster <- attr(Terms, "specials")$cluster # (indice) nbre de var qui sont en fonction de cluster()
 
+	# al 13/02/14 : suppression de l'argument Frailty
+	if (length(cluster)) Frailty <- TRUE
+	else Frailty <- FALSE
 
 	subcluster <- attr(Terms, "specials")$subcluster #nbre de var qui sont en fonction de subcluster()
 
@@ -201,7 +209,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	else intcens <- FALSE
 
 	if (intcens == TRUE) {
-		if (classofY != "SurvIC") stop("When interval censoring, must use the SurvIC fonction") # rajout !!!!!!!!!
+		if (classofY != "SurvIC") stop("When interval censoring, must use the SurvIC fonction")
 	} else {
 		#if (!inherits(Y, "Surv")) stop("Response must be a survival object") #test si c bien un objet de type "Surv"
 		if (classofY != "Surv") stop("Response must be a survival object")
@@ -227,8 +235,10 @@ if((all.equal(length(hazard),1)==T)==T){
 	if (is.null(vartimedep)) timedep <- 0
 	else timedep <- 1
 
-	if (intcens & timedep) stop("You can not use time varing-effect covariate with interval censoring")
+	if (intcens & timedep) stop("You can not use time-varying effect covariates with interval censoring")
 	if (intcens & cross.validation) stop("You can not do cross validation with interval censoring")
+	if (intcens & logNormal) stop("It is currently impossible to fit a model with interval censoring and a log normal distribution of the frailties")
+	if (timedep & logNormal) stop("You can not use time-varying effect covariates with a log normal distribution of the frailties")
 
 	if(is.null(num.id)){
 		joint.clust <- 1
@@ -502,13 +512,6 @@ if((all.equal(length(hazard),1)==T)==T){
 	}
 
 
-	flush.console()
-	
-	ptm<-proc.time()
-	cat("\n")
-	cat("Be patient. The program is computing ... \n")
-
-	
 #=======================================>
 #======= Construction du vecteur des indicatrice
 	if(length(vec.factor) > 0){
@@ -556,10 +559,15 @@ if((all.equal(length(hazard),1)==T)==T){
 
 	# traitement de l'initialisation du Beta rentre par l'utilisateur
 	Beta <- rep(0,np)
-	if (!missing(B)) {
-		if (length(B) != nvar) stop("Wrong number of regression coefficients in B")
+	if (!missing(init.B)) {
+		if (length(init.B) != nvar) stop("Wrong number of regression coefficients in init.B")
 		if (timedep) stop("You can hardly know initial regression coefficient while time-varying effect")
-		Beta <- c(rep(0.1,np-nvar),B)
+		Beta <- c(rep(0,np-nvar),init.B)
+	}
+	if (!missing(init.Theta)) {
+		if (!is.numeric(init.Theta)) stop("init.Theta must be numeric")
+		if (Frailty==FALSE) stop("init.Theta does not exist in a Cox proportional hazard model")
+		Beta[np-nvar] <- init.Theta
 	}
 
 		xSu1 <- rep(0,100)
@@ -570,6 +578,13 @@ if((all.equal(length(hazard),1)==T)==T){
 			mt1 <- 100
 		}
 		size2 <- mt1
+
+		flush.console()
+		if (print.times){
+			ptm<-proc.time()
+			cat("\n")
+			cat("Be patient. The program is computing ... \n")
+		}
 
 		ans <- .Fortran("frailpenal",
 		
@@ -1030,9 +1045,9 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
 ## AD: modified 20 06 2011, for no covariates on terminal event part
 		if (missing(formula.terminalEvent)){
-			m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$... <- NULL
+			m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$init.Theta <- m2$init.Alpha <- m2$Alpha <- m$... <- NULL
 		}else{
-			m2$formula.terminalEvent <- m2$Frailty <- m2$joint <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$... <- NULL
+			m2$formula.terminalEvent <- m2$n.knots <- m2$recurrentAG <- m2$cross.validation <- m2$kappa1 <- m2$kappa2 <- m2$maxit <- m2$hazard <- m2$nb.int1 <- m2$nb.int2 <- m2$RandDist <- m2$betaorder <- m2$betaknots <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$init.Theta <- m2$init.Alpha <- m2$Alpha <- m$... <- NULL
 		}
 
 		
@@ -1199,14 +1214,21 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		nvarEnd<-0
 	}
 
+	if (sum(as.double(var))==0) nvarRec <- 0
+	if ((joint.clust==0) & sum(as.double(vaxdc00))==0) nvarEnd <- 0
+	if ((joint.clust==1) & sum(as.double(vardc))==0) nvarEnd <- 0
+
 	nvar<-nvarRec+nvarEnd
-	
-	
 
 # ... end preparing data
 #AD:
 	effet <- 1
 	indic_alpha <- 1
+	if (!missing(Alpha)) { # new : joint more flexible alpha = 0
+		if (Alpha=="none") indic_alpha <- 0
+		else stop("Did you know that Alpha could only take 'none' as value ?")
+	}
+	
 	nst <- 2
 	
         if(equidistant %in% c(0,1)){
@@ -1232,7 +1254,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		}
 		
 		nbintervR <- nb.int1
-		size1 <- 3*nbintervR	
+		size1 <- 3*nbintervR
 		nbintervDC <- nb.int2
 		size2 <- 3*nbintervDC
 	}
@@ -1250,10 +1272,6 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 	}
 	npbetatps <- npbetatps1 + npbetatps2
 
-	if (sum(as.double(var))==0) nvarRec <- 0
-	if ((joint.clust==0) & sum(as.double(vaxdc00))==0) nvarEnd <- 0
-	if ((joint.clust==1) & sum(as.double(vardc))==0) nvarEnd <- 0
-
 	np <- switch(as.character(typeof),
 		"0"=(nst * (n.knots + 2) + nvarRec + nvarEnd + effet + indic_alpha + npbetatps),
 
@@ -1267,10 +1285,19 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
 	# traitement de l'initialisation du Beta rentre par l'utilisateur
 	Beta <- rep(0,np)
-	if (!missing(B)) {
-		if (length(B) != nvar) stop("Wrong number of regression coefficients in B")
+	if (!missing(init.B)) {
+		if (length(init.B) != nvar) stop("Wrong number of regression coefficients in init.B")
 		if (timedep) stop("You can hardly know initial regression coefficient while time-varying effect")
-		Beta <- c(rep(0.5,np-nvar),B)
+		Beta <- c(rep(0,np-nvar),init.B)
+	}
+	if (!missing(init.Theta)) {
+		if (!is.numeric(init.Theta)) stop("init.Theta must be numeric")
+		Beta[np-nvar-indic_alpha] <- init.Theta
+	}
+	if (!missing(init.Alpha)) {
+		if (!missing(Alpha)) stop("You can not both initialize alpha parameter and fit a joint model without it")
+		if (!is.numeric(init.Alpha)) stop("init.Alpha must be numeric")
+		Beta[np-nvar] <- init.Alpha
 	}
 	
 	xSu1 <- rep(0,100)
@@ -1289,6 +1316,13 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 		"0"=((n.knots + 2) + nvarRec + effet),
 		"1"=(nbintervR + nvarRec + nvarEnd + effet),
 		"2"=(2 + nvarRec + effet))
+
+	flush.console()
+	if (print.times){
+		ptm<-proc.time()
+		cat("\n")
+		cat("Be patient. The program is computing ... \n")
+	}
 
 	ans <- .Fortran("joint",
 			as.integer(n),
@@ -1354,7 +1388,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 #			Bshared=as.double(rep(0,npinit)),
 			linearpredG=as.double(rep(0,lignedc0)),
 			joint.clust=as.integer(joint.clust),
-			as.integer(intcens), # censure par intervalle
+			as.integer(c(intcens,indic_alpha)), # censure par intervalle, indic_alpha
 			as.double(ttU),
 			logNormal=as.integer(logNormal),
 			paratps=as.integer(c(timedep,betaknots,betaorder)),
@@ -1412,10 +1446,10 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     fit$AIC <- ans$LCV[2]
 #AD:
 
-    if (logNormal == 0) fit$theta <- ans$b[np - nvar - npbetatps - 1]^2
-    else fit$sigma2 <- ans$b[np - nvar - npbetatps - 1]^2
+    if (logNormal == 0) fit$theta <- ans$b[np - nvar - npbetatps - indic_alpha]^2
+    else fit$sigma2 <- ans$b[np - nvar - npbetatps - indic_alpha]^2
 
-    fit$alpha <- ans$b[np - nvar - npbetatps]
+    if (indic_alpha == 1) fit$alpha <- ans$b[np - nvar - npbetatps]
     fit$npar <- np
 
 #AD:
@@ -1448,9 +1482,10 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 #Al:
     fit$varHIHtotal <- temp2
     
-    fit$varH <- temp1[(np - nvar - npbetatps - 1):np, (np - nvar - npbetatps - 1):np]
-    fit$varHIH <- temp2[(np - nvar - npbetatps - 1):np, (np - nvar - npbetatps - 1):np]
-	noms <- c("theta","alpha",factor.names(colnames(X)),factor.names(colnames(X2)))
+    fit$varH <- temp1[(np - nvar - npbetatps - indic_alpha):np, (np - nvar - npbetatps - indic_alpha):np]
+    fit$varHIH <- temp2[(np - nvar - npbetatps - indic_alpha):np, (np - nvar - npbetatps - indic_alpha):np]
+	if (indic_alpha == 1) noms <- c("theta","alpha",factor.names(colnames(X)),factor.names(colnames(X2)))
+	else noms <- c("theta",factor.names(colnames(X)),factor.names(colnames(X2)))
 	if (timedep == 1){ # on enleve les variances des parametres des B-splines
 		while (length(grep("timedep",noms))!=0){
 			pos <- grep("timedep",noms)[1]
@@ -1535,6 +1570,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     fit$joint.clust <- ans$joint.clust
     fit$AG <- recurrentAG
     fit$intcens <- intcens # rajout
+    fit$indic_alpha <- indic_alpha
     fit$logNormal <- ans$logNormal
     fit$BetaTpsMat <- matrix(ans$BetaTpsMat,nrow=101,ncol=1+4*nvartimedep)
     fit$BetaTpsMatDc <- matrix(ans$BetaTpsMatDc,nrow=101,ncol=1+4*nvartimedep2)
@@ -1691,6 +1727,13 @@ if (length(subcluster))
 #	cat("nombre de sous-groupe par groupe\n")
 #	print(subgbyg)	
 #### group and subgroup
+
+	flush.console()
+	if (print.times){
+		ptm<-proc.time()
+		cat("\n")
+		cat("Be patient. The program is computing ... \n")
+	}
 
     ans <- .Fortran("nested",
                 as.integer(n),
@@ -1940,9 +1983,10 @@ if (length(Xlevels) >0) fit$Xlevels <- Xlevels
 
  } # End NESTED MODEL
 
-cost<-proc.time()-ptm
-cat("The program took", round(cost[3],2), "seconds \n")
-
+	if (print.times){
+		cost<-proc.time()-ptm
+		cat("The program took", round(cost[3],2), "seconds \n")
+	}
  fit
 
 }

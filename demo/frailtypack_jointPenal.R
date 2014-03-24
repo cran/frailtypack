@@ -1,4 +1,4 @@
-# Virgine Rondeau 2012-4-12 for optimx
+# Virginie Rondeau 2012-4-12 for optimx
 
 options(digits=12)
 if(!require("frailtypack"))stop("this test requires package frailtypack.")
@@ -18,8 +18,7 @@ data("readmission")
 modJoint.gap <- frailtyPenal(Surv(time,event)~ cluster(id) +
   dukes + charlson + sex + chemo + terminal(death),
   formula.terminalEvent = ~ dukes + charlson + sex + chemo,
-  data = readmission, n.knots = 8, kappa1 = 2.11e+08, kappa2 = 9.53e+11,
-  Frailty = TRUE, joint = TRUE)
+  data = readmission, n.knots = 10, kappa1 = 100, kappa2 = 100)
 
 print(modJoint.gap, digits = 4)
 

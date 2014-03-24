@@ -295,8 +295,79 @@
     end do
 
     end subroutine ResidusMartingalea
+    
 
 
+
+!=============================================================================
+!                       CALCUL DES RESIDUS de MARTINGALES Joint multive
+!=============================================================================
+        
+    subroutine Residus_Martingale_multive(b,np,names_func_res,Res_martingale,Res_martingaledc,Res_martingale2,&
+    frailtypred,frailtypred2,frailtyvar,frailtyvar2,frailtyCorr)
+    
+
+    use residusMmultiv
+!    use optim
+    use optimres
+    use comonmultiv
+
+    implicit none
+    
+    integer::np
+    double precision,external::names_func_res
+    double precision,dimension(np),intent(in)::b
+    double precision,dimension(np)::bint
+    double precision,dimension(ng),intent(out)::Res_martingale,Res_martingaledc,Res_martingale2
+    double precision,dimension(ng),intent(out)::frailtypred,frailtypred2,frailtyvar,frailtyvar2,frailtyCorr    
+!    double precision,dimension(3)::k0
+    double precision::ca,cb,dd,rl
+    integer::ni,ier
+    
+    bint=b
+    ResidusRec=0.d0
+    Residusdc=0.d0
+    ResidusRec2=0.d0!Residusmeta
+    moyuiR=0.d0
+!     open(15,file='NNNNN.txt',status='old')
+!     open(16,file='NNNNNres.txt',status='old')    
+    do indg=1,ng
+!        print*,'theta',theta,eta,alpha1,alpha2,alpha
+!        k0=0.d0
+        ca=0.d0
+        cb=0.d0
+        dd=0.d0
+        ni=0
+        vuu=0.1d0
+        
+!        write(15,*)indg,Nrec(indg),Rrec(indg),Nrec2(indg),Rrec2(indg),Ndc(indg),Rdc(indg)
+
+        
+!        call marq98j(k0,vuu,2,ni,vres,rl,ier,istopres,1,ca,cb,dd,names_func_res)
+        call marq98res(vuu,2,ni,vres,rl,ier,istopres,ca,cb,dd,names_func_res)
+!        write(*,*)'groupe',indg,'ier',ier,'istopres',istopres
+        
+        ResidusRec(indg)=Nrec(indg)-dexp(vuu(1))**Rrec(indg)
+        Residusdc(indg)=Ndc(indg)-dexp(vuu(1)*alpha1+vuu(2)*alpha2)*Rdc(indg)
+        ResidusRec2(indg)=Nrec2(indg)-dexp(vuu(2))*Rrec2(indg)
+        
+        Res_martingale(indg) = ResidusRec(indg)
+        Res_martingaledc(indg) = Residusdc(indg)
+        Res_martingale2(indg) = ResidusRec2(indg)    
+            
+!        write(16,*)indg,Res_martingale(indg),Res_martingaledc(indg),Res_martingale2(indg),vuu(1),vuu(2)
+        
+        frailtypred(indg) = vuu(1)
+        frailtypred2(indg) = vuu(2)        
+        
+
+        frailtyvar(indg) = vres(1)
+        frailtyvar2(indg) = vres(3)    
+        frailtyCorr(indg) = vres(2)/dsqrt(vres(1)*vres(2))
+    end do    
+!     close(15)
+!     close(16)    
+    end subroutine Residus_Martingale_multive    
 
 
 
