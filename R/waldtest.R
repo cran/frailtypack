@@ -18,9 +18,9 @@ waldtest <- function(N,nfact,place,modality,b,Varb,Lfirts=NULL,Llast=NULL,Ntot=N
 			if(!is.null(Llast)) L <- cbind(L,matrix(0,nrow=modality[i],ncol=Llast))
 		}
 		if(place[i] == 2){
-			Lvar <- diag(rep(1,modality[i]))
 			taillecol <- N-modality[i]
 			Lapres <- matrix(0,nrow=modality[i],ncol=taillecol-1)
+			Lvar <- diag(rep(1,modality[i]))
 			L <- cbind(cbind(rep(0,modality[i]),Lvar),Lapres)
 			if(!is.null(Lfirts)) L <- cbind(matrix(0,nrow=modality[i],ncol=Lfirts),L)
 			if(!is.null(Llast)) L <- cbind(L,matrix(0,nrow=modality[i],ncol=Llast))

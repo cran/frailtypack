@@ -12,7 +12,9 @@ SurvIC,
 event2,
 multivPenal,
 timedep,
-prediction
+prediction,
+epoce,
+Diffepoce
 )
 import("survival","boot","MASS","survC1")
 
@@ -42,3 +44,8 @@ S3method(plot,predFrailty)
 S3method(print,multivPenal)
 S3method(summary,multivPenal)
 S3method(plot,multivPenal)
+
+S3method(print,epoce)
+S3method(plot,epoce)
+S3method(print,Diffepoce)
+S3method(plot,Diffepoce)

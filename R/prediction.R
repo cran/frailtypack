@@ -425,7 +425,7 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 				if(fit$n.strat == 2) para.mc2 <- balea[,(fit$n.knots+3):(2*(fit$n.knots+2))]^2
 				else para.mc2 <- matrix(0,nrow=MC.sample,ncol=fit$n.knots+2)
 			}else if (fit$typeof == 1){
-				para.mc <- balea[,1:(fit$nbintervR)] # attention de ne pas éléever au carré
+				para.mc <- balea[,1:(fit$nbintervR)] # attention de ne pas élever au carré
 				if(fit$n.strat == 2) para.mc2 <- balea[,(fit$nbintervR+1):(2*fit$nbintervR)]
 				else para.mc2 <- matrix(0,nrow=MC.sample,ncol=fit$nbintervR)
 			}else{

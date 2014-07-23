@@ -52,7 +52,7 @@ prediction(fit, data, t, window, group, MC.sample=0)
 }
 
 \arguments{
-  \item{fit}{A frailtyPenal or jointPenal object}
+  \item{fit}{A frailtyPenal or jointPenal object.}
   \item{data}{Dataframe for the prediction. See Details.}
   \item{t}{Time or vector of times for prediction.}
   \item{window}{Window or vector of windows for prediction.}

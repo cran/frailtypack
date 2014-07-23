@@ -182,9 +182,9 @@
 
     maxiter = maxit0
 !AD:add for new marq
-    epsa = EPS(1) !1.d-4
-    epsb = EPS(2) !1.d-4
-    epsd = EPS(3) !1.d-4
+    epsa = EPS(1) !1.d-3
+    epsb = EPS(2) !1.d-3
+    epsd = EPS(3) !1.d-3
 !AD:end
 
     lrs = 0.d0
@@ -586,7 +586,7 @@
     if(typeof == 0) then
 
 ! Al:10/03/2014 emplacement des noeuds splines en percentile (sans censure par intervalle)
-        if(intcens.eq.0) then
+        if(equidistant.eq.0) then ! percentile
             i=0
             j=0
 !----------> taille - nb de recu
@@ -611,7 +611,6 @@
             
             nzmax=nz+3
             allocate(zi(-2:nzmax))
-            ndate = k
 
             zi(-2) = mint
             zi(-1) = mint !date(1)
@@ -628,7 +627,7 @@
             zi(nz+3) = maxt !zi(nz)
             ziOut = zi
             deallocate(t2)
-        else
+        else ! equidistant
             nzmax=nz+3
             allocate(zi(-2:nzmax))
             ndate = k
@@ -648,12 +647,12 @@
             ziOut = zi
         endif
 
-! ajout TPS : noeuds des deces
-        if(intcens.eq.0) then
+! ajout : noeuds des deces
+        if(equidistant.eq.0) then ! percentile
             i=0
             j=0
 !----------> taille - nb de deces
-            do i=1,nsujet
+            do i=1,ngtemp !nsujet
                 if(t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
                     j=j+1
                 endif
@@ -665,7 +664,7 @@
         
 !----------> remplissage du vecteur de temps
             j=0
-            do i=1,nsujet
+            do i=1,ngtemp !nsujet
                 if (t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
                     j=j+1
                     t3(j)=t1dc(i)
@@ -688,7 +687,7 @@
             zidc(nzdc+2) = maxtdc
             zidc(nzdc+3) = maxtdc
             deallocate(t3)
-        else
+        else ! equidistant
             allocate(zidc(-2:(nzdc+3)))
 
             zidc(-2) = datedc(1)
@@ -705,7 +704,7 @@
             zidc(nzdc+3)=zidc(nzdc)
         endif
 
-! fin ajout TPS
+! fin ajout
 
     end if
 !---------- affectation nt0dc,nt1dc DECES ----------------------------
@@ -799,8 +798,11 @@
     ! savoir si l'utilisateur entre des parametres initiaux
     if (sum(b).eq.0.d0) then
         b = 5.d-1
+        if (typeof == 0) then
+            b(np-nva-indic_alpha) = 1.d0 ! theta
+        end if
         if (indic_alpha.eq.1) then 
-            b(np-nva) = 1.d0
+            b(np-nva) = 1.d0 ! alpha
         endif
     else
         b(1:np-nva-1-indic_alpha) = 5.d-1 ! hazard coef
@@ -839,7 +841,6 @@
 !     end if
 
 !     b(np-nva)=1.d0
-
 
 
     if (typeof == 1) then
@@ -1097,7 +1098,9 @@
         if(typeof==1)deallocate(betacoef)
 
     end if
-
+! 	nst=2
+    indic_joint = 1
+    indic_alpha = intcens0(2) !!
     allocate(I_hess(np,np),H_hess(np,np),v((np*(np+3)/2)))
 
     if (typeof==1)allocate(betacoef(nbintervR+nbintervDC))
@@ -2413,19 +2416,19 @@
     integer::j
 
     ss = 0.d0
-    !if (typeof.eq.0) then
-    !    do j=1,20
-    !        if (choix.eq.1) then
-    !            auxfunca=func4J(x(j))
-    !            ss = ss+w(j)*(auxfunca)
-    !        else
-    !            if (choix.eq.2) then
-    !                auxfunca=func5J(x(j))
-    !                ss = ss+w(j)*(auxfunca)
-    !            endif
-    !        endif
-    !    end do
-    !else
+    if (typeof.eq.0) then
+       do j=1,20
+           if (choix.eq.1) then
+               auxfunca=func4J(x(j))
+               ss = ss+w(j)*(auxfunca)
+           else
+               if (choix.eq.2) then
+                   auxfunca=func5J(x(j))
+                   ss = ss+w(j)*(auxfunca)
+               endif
+           endif
+       end do
+    else
         do j=1,32
             if (choix.eq.1) then
                 auxfunca=func4J(x1(j))
@@ -2437,7 +2440,7 @@
                 endif
             endif
         end do
-    !endif
+    endif
 
     return
 
@@ -2500,7 +2503,10 @@
 
     func5J = dexp((1.d0/theta-1.d0)*dlog(frail) &
     -frail/theta-frail*res3(auxig)-(frail**alpha)*aux2(auxig))
-
+! 	if (auxig.eq.31) then
+! 	print*,func5J,(1.d0/theta-1.d0)*dlog(frail),frail/theta
+! 	print*,frail*res3(auxig),(frail**alpha),aux2(auxig)
+! 	endif
 !    func5J = frail**(1.d0/theta-1.d0)* &
 !    dexp(-frail/theta-frail*res3(auxig)-(frail**alpha)*aux2(auxig))
 

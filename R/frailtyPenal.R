@@ -2,7 +2,7 @@
 "frailtyPenal" <-
 function (formula, formula.terminalEvent, data, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1 , kappa2,
              maxit=350, hazard="Splines", nb.int1, nb.int2, RandDist="Gamma", betaknots=1, betaorder=3, 
-             init.B, init.Theta, init.Alpha, Alpha, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-4, print.times=TRUE)
+             init.B, init.Theta, init.Alpha, Alpha, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE)
 {
 
 # al suppression de l'argument joint
@@ -31,50 +31,67 @@ if(!(length(hazard) %in% c(1,2))){stop("Please check and revise the hazard argum
 
 ### longueur hazard = 1
 if((all.equal(length(hazard),1)==T)==T){
-   if(!(hazard %in% c("Weibull","Piecewise","Splines"))){
-	stop("Only 'Weibull', 'Splines' or 'Piecewise' hazard can be specified in hazard argument.")
-   }else{
-	typeof <- switch(hazard,"Splines"=0,"Piecewise"=1,"Weibull"=2)
-	if(typeof %in% c(0,2)){
-### Splines
-		if (!(missing(nb.int1)) || !(missing(nb.int2))){
-			stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int1' and 'nb.int2' arguments must be deleted.")
-		}
-		if (typeof == 0){
-			size1 <- 100
-			size2 <- 100
-			equidistant <- 2
-			nbintervR <- 0
-			nbintervDC <- 0
-		}
-### Weibull
-		if (typeof == 2){
-			equidistant <- 2
-			nbintervR <- 0
-			nbintervDC <- 0
-			size1 <- 100
-			size2 <- 100
-		}
+	if(!(hazard %in% c("Weibull","Piecewise","Splines"))){
+		stop("Only 'Weibull', 'Splines' or 'Piecewise' hazard can be specified in hazard argument.")
 	}else{
-		stop ("The hazard argument is incorrectly specified. Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
-	}
-   }
-}else{
-### Picewise
-      typeof <- 1
-#### longueur hazard > 1
-      if(!("Piecewise" %in% hazard)){
-	stop("Only 'Piecewise' hazard can be specified in hazard argument in this case")
-      }
-      if(!(all(hazard %in% c("Piecewise","per","equi")))){
-		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
-      }else{
-		if (!(haztemp %in% c("Piecewise-per","Piecewise-equi"))){
-			stop ("The hazard argument is incorrectly specified. Please refer to the help file of frailtypack.")
+		typeof <- switch(hazard,"Splines"=0,"Piecewise"=1,"Weibull"=2)
+		### Splines (equidistant par defaut)
+		if (typeof == 0){
+			if (!(missing(nb.int1)) || !(missing(nb.int2))){
+				stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int1' and 'nb.int2' arguments must be deleted.")
+			}
+			size1 <- 100
+			size2 <- 100
+			equidistant <- 1
+			nbintervR <- 0
+			nbintervDC <- 0
 		}
-		equidistant <- switch(haztemp,"Piecewise-per"=0,"Piecewise-equi"=1)
-      }
- }
+		### Weibull
+		if (typeof == 2){
+			if (!(missing(nb.int1)) || !(missing(nb.int2))){
+				stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int1' and 'nb.int2' arguments must be deleted.")
+			}
+			size1 <- 100
+			size2 <- 100
+			equidistant <- 2
+			nbintervR <- 0
+			nbintervDC <- 0
+		}
+		if (typeof == 1){
+			stop ("The hazard argument is incorrectly specified. Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
+		}
+	}
+}else{
+	#### longueur hazard > 1
+	if(all(!(c("Splines","Piecewise") %in% hazard))){
+		stop("Only 'Splines' and 'Piecewise' hazard can be specified in hazard argument in this case")
+	}
+	### Splines percentile
+	if ("Splines" %in% hazard){
+		typeof <- 0
+		if(!(all(hazard %in% c("Splines","per")))){
+			stop ("The hazard argument is incorrectly specified. Only 'per' is allowed with 'Splines'. Please refer to the help file of frailtypack.")
+		}else{
+			size1 <- 100
+			size2 <- 100
+			equidistant <- 0
+			nbintervR <- 0
+			nbintervDC <- 0
+		}
+	}
+	### Piecewise (per or equi)
+	if ("Piecewise" %in% hazard){
+		typeof <- 1
+		if(!(all(hazard %in% c("Piecewise","per","equi")))){
+			stop ("The hazard argument is incorrectly specified. Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
+		}else{
+			if (!(haztemp %in% c("Piecewise-per","Piecewise-equi"))){
+				stop ("The hazard argument is incorrectly specified. Please refer to the help file of frailtypack.")
+			}
+			equidistant <- switch(haztemp,"Piecewise-per"=0,"Piecewise-equi"=1)
+		}
+	}
+}
 
 #AD:
 	if (missing(formula))stop("The argument formula must be specified in any model")
@@ -216,6 +233,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	}
 
 	ll <- attr(Terms, "term.labels")#liste des variables explicatives
+
 #cluster(id) as.factor(dukes) as.factor(charlson) sex chemo terminal(death)
 
 #=========================================================>
@@ -223,6 +241,11 @@ if((all.equal(length(hazard),1)==T)==T){
 	mt <- attr(m, "terms") #m devient de class "formula" et "terms"
 
 	X <- if (!is.empty.model(mt))model.matrix(mt, m, contrasts) #idem que mt sauf que ici les factor sont divise en plusieurs variables
+
+	ind.place <- attr(X,"assign")[duplicated(attr(X,"assign"))]
+
+	vec.factor <- NULL
+	vec.factor <- c(vec.factor,ll[ind.place])
 
 #=========================================================>
 # On determine le nombre de categorie pour chaque var categorielle
@@ -235,6 +258,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	if (is.null(vartimedep)) timedep <- 0
 	else timedep <- 1
 
+	if (intcens & (equidistant == 0)) stop("You can not fit a model with a baseline hazard function estimated using percentiles and interval censoring")
 	if (intcens & timedep) stop("You can not use time-varying effect covariates with interval censoring")
 	if (intcens & cross.validation) stop("You can not do cross validation with interval censoring")
 	if (intcens & logNormal) stop("It is currently impossible to fit a model with interval censoring and a log normal distribution of the frailties")
@@ -264,38 +288,40 @@ if((all.equal(length(hazard),1)==T)==T){
 		ll <- ll[-grep("strata",ll)]
 	}
 
-	ind.place <- grep("factor",ll)
-
-	vecteur <- NULL
-	vecteur <- c(vecteur,ll[ind.place])
-
-	mat.factor <- matrix(vecteur,ncol=1,nrow=length(vecteur))
-
- # Fonction servant a prendre les termes entre "as.factor"
+#   plus besoin de as.factor() pour afficher le test de Wald global
+	mat.factor <- matrix(vec.factor,ncol=1,nrow=length(vec.factor))
+	# Fonction servant a prendre les termes entre "as.factor"
 	vec.factor <-apply(mat.factor,MARGIN=1,FUN=function(x){
-	pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-	pos2 <- length(unlist(strsplit(x,split="")))-1
-	return(substr(x,start=pos1,stop=pos2))})
-	
+	if (length(grep("factor",x))>0){
+		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+		pos2 <- length(unlist(strsplit(x,split="")))-1
+		return(substr(x,start=pos1,stop=pos2))
+	}else{
+		return(x)
+	}})
+
+	ind.place <- grep(paste(vec.factor,collapse="|"),ll)
+
 	if(length(vec.factor) > 0){
 		vect.fact <- attr(X,"dimnames")[[2]]
-		vect.fact <- vect.fact[grep("factor",vect.fact)]
 
-		vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
-		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-		pos2 <- grep(")",unlist(strsplit(x,split="")))[1]-1
-		return(substr(x,start=pos1,stop=pos2))})
+		#vect.fact <- vect.fact[grep("factor",vect.fact)]
+		vect.fact <- vect.fact[grep(paste(vec.factor,collapse="|"),vect.fact)]
+
+# 		vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
+# 		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+# 		pos2 <- grep(")",unlist(strsplit(x,split="")))[1]-1
+# 		return(substr(x,start=pos1,stop=pos2))})
+
 		occur <- rep(0,length(vec.factor))
 	
 		for(i in 1:length(vec.factor)){
-			occur[i] = sum(vec.factor[i] == vect.fact)
+			#occur[i] <- sum(vec.factor[i] == vect.fact)
+			occur[i] <- length(grep(vec.factor[i],vect.fact))
 		}
 	}
 
 #=========================================================>
-	
-	
-	
 
 	terminalEvent <- attr(Terms, "specials")$terminal #nbre de var qui sont en fonction de terminal()
 	
@@ -317,8 +343,8 @@ if((all.equal(length(hazard),1)==T)==T){
 		stop("cluster not necessary for proportional hazard model")
 	}
 	else if (!length(cluster) & Frailty == FALSE){
-		cluster <- 1:nrow(data) # valeurs inutiles pour un modele de Cox
-		uni.cluster <- 1:nrow(data)
+		cluster <- 1:nrow(m) #nrow(data) # valeurs inutiles pour un modele de Cox
+		uni.cluster <- 1:nrow(m) #nrow(data)
 	}
 	
 	if (!missing(RandDist) & (Frailty == FALSE)){
@@ -451,7 +477,7 @@ if((all.equal(length(hazard),1)==T)==T){
 # on enleve ensuite la premiere colonne correspondant a id
 
 
-	nvar<-ncol(X) #nvar==1 correspond a 2 situaions:
+	nvar<-ncol(X) #nvar==1 correspond a 2 situations:
 
 # au cas ou on a aucune var explicative dans la partie rec, mais X=0
 # cas ou on a 1seul var explicative, ici X est en general different de 0
@@ -519,7 +545,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		k <- 0
 		for(i in 1:length(vec.factor)){
 			ind.place[i] <- ind.place[i]+k
-				k <- k + occur[i]-1
+			k <- k + occur[i]-1
 		}
 	}
 #==================================
@@ -529,7 +555,7 @@ if((all.equal(length(hazard),1)==T)==T){
  if (!joint & !length(subcluster))
   {
 
-        if(equidistant %in% c(0,1)){
+	if((equidistant %in% c(0,1)) & (typeof == 1)){
 		if (missing(nb.int1)) stop("Time interval 'nb.int1' is required")
 		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")	
 		if ((nb.int1 < 1)) stop("Number of Time 'nb.int1' interval must be between 1 and 20")
@@ -679,7 +705,7 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$n.events <- ans[[39]]
 #Al:
     fit$n.eventsbygrp <- table(cens,cluster)[2,]
-    
+
     if(as.character(typeof)=="0"){
         fit$logLikPenal <- ans[[24]]
     }else{
@@ -817,26 +843,23 @@ if((all.equal(length(hazard),1)==T)==T){
 #========================= Test de Wald pour shared
 
     if(ans$istop==1){
-	if(length(vec.factor) > 0){
-		Beta <- ans[[21]][(np - nvar + 1):np]
-		VarBeta <- fit$varH#[2:(nvar+1),2:(nvar+1)]
-		nfactor <- length(vec.factor)
-		p.wald <- rep(0,nfactor)
-
-		fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
-		fit$dof_chisq <- occur
-		fit$global_chisq.test <- 1
+		if ((length(vec.factor) > 0) & (timedep == 0)){
+			Beta <- ans[[21]][(np - nvar + 1):np]
+			VarBeta <- fit$varH#[2:(nvar+1),2:(nvar+1)]
+			nfactor <- length(vec.factor)
+			p.wald <- rep(0,nfactor)
+			fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+			fit$dof_chisq <- occur
+			fit$global_chisq.test <- 1
 # Calcul de pvalue globale
-		for(i in 1:length(vec.factor)){
-			p.wald[i] <- signif(1 - pchisq(fit$global_chisq[i], occur[i]), 3)
+			for(i in 1:length(vec.factor)){
+				p.wald[i] <- signif(1 - pchisq(fit$global_chisq[i], occur[i]), 3)
+			}
+			fit$p.global_chisq <- p.wald
+			fit$names.factor <- vec.factor
+		}else{
+			fit$global_chisq.test <- 0
 		}
-		fit$p.global_chisq <- p.wald
-		fit$names.factor <- vec.factor
-
-		
-	}else{
-		fit$global_chisq.test <- 0
-	}
 	}
 
 #===============================================
@@ -1064,30 +1087,34 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
 #=========================================================>
 		if (!missing(formula.terminalEvent)){
-			lldc <- attr(newTerms2,"term.labels")
-			ind.placedc <- grep("factor",lldc)
-			vecteur <- NULL
-			vecteur <- c(vecteur,lldc[ind.placedc])
-			mat.factor <- matrix(vecteur,ncol=1,nrow=length(vecteur))
-
- # Fonction servant a prendre les termes entre "as.factor"
-			vec.factordc <-apply(mat.factor,MARGIN=1,FUN=function(x){
-			pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-			pos2 <- length(unlist(strsplit(x,split="")))-1
-			return(substr(x,start=pos1,stop=pos2))})
-		}
-	 
-#=========================================================>
-		if (!missing(formula.terminalEvent)){
 			X2 <- model.matrix(newTerms2, m2)
-#=========================================================>
-# On determine le nombre de categorie pour chaque var categorielle
+
+			lldc <- attr(newTerms2,"term.labels")
+			#ind.placedc <- grep("factor",lldc)
+			ind.placedc <- attr(X2,"assign")[duplicated(attr(X2,"assign"))]
+
+			vec.factordc <- NULL
+			vec.factordc <- c(vec.factordc,lldc[ind.placedc])
+
+			mat.factordc <- matrix(vec.factordc,ncol=1,nrow=length(vec.factordc))
+			# Fonction servant a prendre les termes entre "as.factor"
+			vec.factordc <-apply(mat.factordc,MARGIN=1,FUN=function(x){
+			if (length(grep("factor",x))>0){
+				pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+				pos2 <- length(unlist(strsplit(x,split="")))-1
+				return(substr(x,start=pos1,stop=pos2))
+			}else{
+				return(x)
+			}})
+
+			# On determine le nombre de categorie pour chaque var categorielle
 			if(length(vec.factordc) > 0){
-				vect.fact <- attr(X2,"dimnames")[[2]]
+				vect.factdc <- attr(X2,"dimnames")[[2]]
+				vect.factdc <- vect.factdc[grep(paste(vec.factordc,collapse="|"),vect.factdc)]
+
 				occurdc <- rep(0,length(vec.factordc))
-	
 				for(i in 1:length(vec.factordc)){
-					occurdc[i] = length(grep(vec.factordc[i],vect.fact))
+					occurdc[i] <- length(grep(vec.factordc[i],vect.factdc))
 				}
 			}
 #=========================================================>
@@ -1231,7 +1258,7 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 	
 	nst <- 2
 	
-        if(equidistant %in% c(0,1)){
+	if((equidistant %in% c(0,1)) & (typeof == 1)){
 		if (missing(nb.int1)) stop("Recurrent Time interval 'nb.int1' is required")
 		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")
 		if (nb.int1 < 1) stop("Number of Time interval 'nb.int1' must be between 1 and 20")
@@ -1479,7 +1506,9 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     temp1 <- matrix(ans$H, nrow = np, ncol = np)
     temp2 <- matrix(ans$HIH, nrow = np, ncol = np)
     
-#Al:
+#Al:  
+ 
+    fit$varHtotal <- temp1
     fit$varHIHtotal <- temp2
     
     fit$varH <- temp1[(np - nvar - npbetatps - indic_alpha):np, (np - nvar - npbetatps - indic_alpha):np]
@@ -1584,10 +1613,10 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
 
 #================================> For the reccurrent
-#========================= Test de Wald pour shared
+#========================= Test de Wald
 
 
-	if(length(vec.factor) > 0){
+	if ((length(vec.factor) > 0) & (timedep == 0)){
 		Beta <- ans$b[(np - nvar + 1):np]
 		VarBeta <- diag(diag(fit$varH)[-c(1,2)])
 		nfactor <- length(vec.factor)
@@ -1609,9 +1638,9 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 	}
 
 #================================> For the death
-#========================= Test de Wald pour shared
+#========================= Test de Wald
 	if (!missing(formula.terminalEvent)){
-		if(length(vec.factordc) > 0){
+		if ((length(vec.factordc) > 0) & (timedep == 0)){
 			Beta <- ans$b[(np - nvar + 1):np]
 			VarBeta <- diag(diag(fit$varH)[-c(1,2)])
 			nfactor <- length(vec.factordc)
@@ -1647,11 +1676,11 @@ if (length(Xlevels2) >0) fit$Xlevels2 <- Xlevels2
 #
 
 effet <- 1
-if (length(subcluster))
- {
-        if (logNormal == 1) stop("Nested model not implemented yet for log normal distribution of frailties")
+if (length(subcluster)){
 
-        if(equidistant %in% c(0,1)){
+	if (logNormal == 1) stop("Nested model not implemented yet for log normal distribution of frailties")
+
+	if((equidistant %in% c(0,1)) & (typeof == 1)){
 		if (missing(nb.int1)) stop("Time interval 'nb.int1' is required")
 		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")
 		if (nb.int1 < 1) stop("Number of Time 'nb.int2' interval must be between 1 and 20")
@@ -1948,13 +1977,7 @@ if (length(subcluster))
           either the number of knots or the seed for kappa parameter")
 
 
-
-
-#================================> For the reccurrent
-
-#========================= Test de Wald pour shared
-
-
+#========================= Test de Wald pour nested
 
 	if(length(vec.factor) > 0){
 		Beta <- ans$b[(np - nvar + 1):np]

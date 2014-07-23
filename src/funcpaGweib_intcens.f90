@@ -295,14 +295,7 @@
                     gammaJ(1.d0/theta)-dlog(theta)/theta + &
                     dlog(integrale1(k))
                 endif
-!*******************************************************
-!     developpement de taylor d ordre 3
-!*******************************************************
-!        write(*,*)'******* TAYLOR *************'
-                !    res= res + res2(k)+ res2dc(k) &
-                !    - gammaJ(1.d0/theta)-dlog(theta)/theta  &
-                !    + dlog(integrale3(k))
-                !endif
+
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
                     !print*,b
                     !print*,"here8",res,integrale1(k),k,dlog(integrale1(k)),res2dc(k)

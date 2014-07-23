@@ -119,8 +119,8 @@ frailtyPenal(formula, formula.terminalEvent, data,
              n.knots, kappa1, kappa2, maxit = 350, hazard =
              "Splines", nb.int1, nb.int2, RandDist = "Gamma",
              betaknots = 1, betaorder = 3, init.B, init.Theta,
-             init.Alpha, Alpha, LIMparam = 1e-4, LIMlogl = 1e-4,
-             LIMderiv = 1e-4, print.times = TRUE)
+             init.Alpha, Alpha, LIMparam = 1e-3, LIMlogl = 1e-3,
+             LIMderiv = 1e-3, print.times = TRUE)
 }
 
 \arguments{
@@ -160,7 +160,7 @@ frailtyPenal(formula, formula.terminalEvent, data,
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
 
-  \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions with the penalized likelihood estimation, 
+  \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions using equidistant intervals or "Splines-per" using percentile with the penalized likelihood estimation,
             "Piecewise-per" for piecewise constant hazard function using percentile (not available for interval-censored data), "Piecewise-equi" for piecewise constant hazard 
             function using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
 
@@ -182,11 +182,11 @@ frailtyPenal(formula, formula.terminalEvent, data,
 
   \item{Alpha}{Only for joint model : input "none" so as to fit a joint model without the parameter alpha.}
 
-  \item{LIMparam}{Convergence threshold of the Marquard algorithm for the parameters (see Details), \eqn{10^{-4}} by default.}
+  \item{LIMparam}{Convergence threshold of the Marquard algorithm for the parameters (see Details), \eqn{10^{-3}} by default.}
   
-  \item{LIMlogl}{Convergence threshold of the Marquard algorithm for the log-likelihood (see Details), \eqn{10^{-4}} by default.}
+  \item{LIMlogl}{Convergence threshold of the Marquard algorithm for the log-likelihood (see Details), \eqn{10^{-3}} by default.}
   
-  \item{LIMderiv}{Convergence threshold of the Marquard algorithm for the gradient (see Details), \eqn{10^{-4}} by default.}
+  \item{LIMderiv}{Convergence threshold of the Marquard algorithm for the gradient (see Details), \eqn{10^{-3}} by default.}
 
   \item{print.times}{a logical parameter to print iteration process. Default is TRUE.}
 }
@@ -216,8 +216,8 @@ for a nested model
 
 The estimated parameter are obtained using the robust Marquardt algorithm (Marquardt, 1963) which is a combination
 between a Newton-Raphson algorithm and a steepest descent algorithm. The iterations are stopped when the difference
-between two consecutive loglikelihoods was small \eqn{(<10^{-4})}, the estimated coefficients were stable
-(consecutive values \eqn{(<10^{-4})}, and the gradient small enough \eqn{(<10^{-4})}. When frailty parameter
+between two consecutive loglikelihoods was small \eqn{(<10^{-3})}, the estimated coefficients were stable
+(consecutive values \eqn{(<10^{-3})}, and the gradient small enough \eqn{(<10^{-3})}. When frailty parameter
 is small, numerical problems may arise. To solve this problem, an alternative formula of the penalized
 log-likelihood is used (see Rondeau, 2003 for further details). Cubic M-splines of order 4 are used for
 the hazard function, and I-splines (integrated M-splines) are used for the cumulative hazard function.
@@ -272,7 +272,7 @@ The following components are included in a 'frailtyPenal' object for each model.
 \item{n.knots}{number of knots for estimating the baseline functions in the penalized likelihood estimation.}
 \item{n.strat}{ number of stratum.}
 \item{surv}{matrix of baseline survival estimates and confidence bands.}
-\item{surv2}{the same value as surv for the second stratum.}
+\item{surv2}{the same value as surv for the second stratum or the terminal event for joint model.}
 \item{varH}{the variance matrix of all parameters before positivity constraint transformation. Thenafter, the delta method is needed to obtain the estimated variance parameters. That is why some variances don't match with the printed values at the end of the model.}
 \item{varHIH}{the robust estimation of the variance matrix of all parameters.}
 \item{x1}{vector of times where both survival and hazard function are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
@@ -449,27 +449,27 @@ data(readmission)
 #-- Gap-time
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+charlson+
 terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=10,kappa1=100,kappa2=100,
+data=readmission,n.knots=14,kappa1=9.55e+9,kappa2=1.41e+12,
 recurrentAG=FALSE)
 
 #-- Calendar time
 modJoint.calendar <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
 +dukes+charlson+terminal(death),formula.terminalEvent=~sex
-+dukes+charlson,data=readmission,n.knots=10,kappa1=100,
-kappa2=100,recurrentAG=TRUE)
++dukes+charlson,data=readmission,n.knots=10,kappa1=9.55e9,
+kappa2=1.41e12,recurrentAG=TRUE)
 
 #-- without alpha parameter
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+charlson+
 terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=10,kappa1=100,kappa2=100,
+data=readmission,n.knots=10,kappa1=9.55e9,kappa2=1.41e12,
 recurrentAG=FALSE,Alpha="none")
 
 #-- log-normal distribution
 
 modJoint.log <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
 +dukes+charlson+terminal(death),formula.terminalEvent=~sex
-+dukes+charlson,data=readmission,n.knots=10,kappa1=100,
-kappa2=100,recurrentAG=TRUE,RandDist="LogN")
++dukes+charlson,data=readmission,n.knots=10,kappa1=9.55e9,
+kappa2=1.41e12,recurrentAG=TRUE,RandDist="LogN")
 
 ###--- Joint Frailty model for clustered data ---###
 
@@ -480,7 +480,7 @@ joi.clus <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(group)+
 num.id(id)+dukes+charlson+sex+chemo+terminal(death),
 formula.terminalEvent=~dukes+charlson+sex+chemo,
 data=readmission,recurrentAG=TRUE,n.knots=10,
-kappa1=100,kappa2=100)
+kappa1=2.11e+08,kappa2=9.53e+11)
 
 ###--- Nested Frailty model ---###
 

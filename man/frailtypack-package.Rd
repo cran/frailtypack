@@ -1,6 +1,6 @@
 
 \name{frailtypack-package}
-\Rdversion{2.6}
+\Rdversion{2.6.1}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
@@ -22,14 +22,14 @@
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.6\cr
-     Date: \tab 2014-03-24\cr
+     Version: \tab 2.6.1\cr
+     Date: \tab 2014-07-15\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab no\cr
   }
 }
 
-\author{Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen, Amadou Diakite and Alexandre Laurent}
+\author{Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen, Agnieszka Krol-Listwon, Amadou Diakite and Alexandre Laurent}
 
 \references{
 V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.

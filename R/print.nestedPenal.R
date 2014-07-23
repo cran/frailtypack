@@ -102,29 +102,26 @@
 		}
 		
 		cat("  Frailty parameters: \n")
-		if (x$typeof == 0){
-			cat("   alpha  (group effect): ", alpha, " (SE(H):", 
-				seH.alpha, ")", " (SE(HIH):", seHIH.alpha, ")", sep="", "\n")
-		}else{
-			cat("   alpha  (group effect): ", alpha, " (SE(H):", 
-				seH.alpha, ")", sep="", "\n")
-		}
-		
+# 		if (x$typeof == 0){
+# 			cat("   alpha  (group effect): ", alpha, " (SE(H):", seH.alpha, ")", " (SE(HIH):", seHIH.alpha, ")", sep="", "\n")
+# 		}else{
+# 			cat("   alpha  (group effect): ", alpha, " (SE(H):", seH.alpha, ")", sep="", "\n")
+# 		}
+		cat("   alpha  (group effect): ", alpha, " (SE(H):", seH.alpha, ")", "p =", signif(1 - pnorm(alpha/seH.alpha), digits - 1), "\n")
+
 		eta <- x$eta
 		temp <- diag(x$varH)[2]
 		seH.eta <- sqrt(((2 * (eta^0.5))^2) * temp)
 		temp <- diag(x$varHIH)[2]
 		seHIH.eta <- sqrt(((2 * (eta^0.5))^2) * temp)
-		if (x$typeof == 0){
-			cat("   eta (subgroup effect): ", eta, " (SE(H):", 
-				seH.eta, ")", " (SE(HIH):", seHIH.eta, ")", sep="", "\n")
-		}else{
-			cat("   eta (subgroup effect): ", eta, " (SE(H):", 
-				seH.eta, ")", sep="", "\n")
-		}
-		
-		cat(" \n")
+# 		if (x$typeof == 0){
+# 			cat("   eta (subgroup effect): ", eta, " (SE(H):", seH.eta, ")", " (SE(HIH):", seHIH.eta, ")", sep="", "\n")
+# 		}else{
+# 			cat("   eta (subgroup effect): ", eta, " (SE(H):", seH.eta, ")", sep="", "\n")
+# 		}
+		cat("   eta (subgroup effect): ", eta, " (SE(H):", seH.eta, ")", "p =", signif(1 - pnorm(eta/seH.eta), digits - 1), "\n")
 
+		cat(" \n")
 
 		if (x$typeof == 0){
 			cat(paste("    penalized marginal log-likelihood =", round(x$logLikPenal,2)))

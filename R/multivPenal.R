@@ -50,51 +50,69 @@ if((all.equal(length(hazard),1)==T)==T){
 	stop("Only 'Weibull', 'Splines' or 'Piecewise' hazard can be specified in hazard argument.")
    }else{
 	typeof <- switch(hazard,"Splines"=0,"Piecewise"=1,"Weibull"=2)
-	if(typeof %in% c(0,2)){
-### Splines
-		if(!missing(nb.int)){
-			stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int' arguments must be deleted.")
-		}
-	
+	### Splines (equidistant par defaut)
 		if (typeof == 0){
+			if (!missing(nb.int)){
+				stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int' argument must be deleted.")
+			}
 			size1 <- 100
 			size2 <- 100
 			size3 <- 100
-			equidistant <- 2
+			equidistant <- 1
 			nbintervR <- 0
 			nbintervDC <- 0
 			nbintervR2 <- 0
 		}
-### Weibull
+		### Weibull
 		if (typeof == 2){
+			if (!missing(nb.int)){
+				stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int' argument must be deleted.")
+			}
+			size1 <- 100
+			size2 <- 100
+			size3 <- 100
 			equidistant <- 2
 			nbintervR <- 0
 			nbintervDC <- 0
 			nbintervR2 <- 0
+		}
+		if (typeof == 1){
+			stop ("The hazard argument is incorrectly specified. Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
+		}
+	}
+}else{
+	#### longueur hazard > 1
+	if(all(!(c("Splines","Piecewise") %in% hazard))){
+		stop("Only 'Splines' and 'Piecewise' hazard can be specified in hazard argument in this case")
+	}
+	### Splines percentile
+	if ("Splines" %in% hazard){
+		typeof <- 0
+		if(!(all(hazard %in% c("Splines","per")))){
+			stop ("The hazard argument is incorrectly specified. Only 'per' is allowed with 'Splines'. Please refer to the help file of frailtypack.")
+		}else{
 			size1 <- 100
 			size2 <- 100
 			size3 <- 100
+			equidistant <- 0
+			nbintervR <- 0
+			nbintervDC <- 0
+			nbintervR2 <- 0
 		}
-	}else{
-		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")		
 	}
-   } 
-}else{
-### Picewise
-      typeof <- 1
-#### longueur hazard > 1
-      if(!("Piecewise" %in% hazard)){
-	stop("Only 'Piecewise' hazard can be specified in hazard argument in this case")
-      }
-      if(!(all(hazard %in% c("Piecewise","per","equi")))){
-		stop ("The hazard argument is incorrectly specified.Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
-      }else{
-		if (!(haztemp %in% c("Piecewise-per","Piecewise-equi"))){
-			stop ("The hazard argument is incorrectly specified. Please refer to the help file of frailtypack.")
+	### Piecewise (per or equi)
+	if ("Piecewise" %in% hazard){
+		typeof <- 1
+		if(!(all(hazard %in% c("Piecewise","per","equi")))){
+			stop ("The hazard argument is incorrectly specified. Type of hazard are required ('per' or 'equi'). Please refer to the help file of frailtypack.")
+		}else{
+			if (!(haztemp %in% c("Piecewise-per","Piecewise-equi"))){
+				stop ("The hazard argument is incorrectly specified. Please refer to the help file of frailtypack.")
+			}
+			equidistant <- switch(haztemp,"Piecewise-per"=0,"Piecewise-equi"=1)
 		}
-		equidistant <- switch(haztemp,"Piecewise-per"=0,"Piecewise-equi"=1)
-      }
- }
+	}
+}
 
 #AD:
 	if (missing(formula))stop("The argument formula must be specified in any model")
@@ -170,6 +188,11 @@ if((all.equal(length(hazard),1)==T)==T){
 	ll <- attr(Terms, "term.labels")	
 	X <- if (!is.empty.model(attr(m.formula,"terms")))model.matrix(attr(m.formula,"terms"),m.formula,contrasts) 
 
+	ind.place <- attr(X,"assign")[duplicated(attr(X,"assign"))]
+
+	vec.factor <- NULL
+	vec.factor <- c(vec.factor,ll[ind.place])
+
 #=========================================================>
 # On determine le nombre de categorie pour chaque var categorielle
 	strats <- attr(Terms, "specials")$strata #nbre de var qui sont en fonction de strata()
@@ -187,31 +210,36 @@ if((all.equal(length(hazard),1)==T)==T){
 		ll <- ll[-grep("strata",ll)]
 	}
 
-	ind.place <- grep("factor",ll)
-
-
-	vecteur <- NULL
-	vecteur <- c(vecteur,ll[ind.place])
-
-	mat.factor <- matrix(vecteur,ncol=1,nrow=length(vecteur))
- # Fonction servant a prendre les termes entre "as.factor"
+#   plus besoin de as.factor() pour afficher le test de Wald global
+	mat.factor <- matrix(vec.factor,ncol=1,nrow=length(vec.factor))
+	# Fonction servant a prendre les termes entre "as.factor"
 	vec.factor <-apply(mat.factor,MARGIN=1,FUN=function(x){
-	pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-	pos2 <- length(unlist(strsplit(x,split="")))-1
-	return(substr(x,start=pos1,stop=pos2))})
+	if (length(grep("factor",x))>0){
+		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+		pos2 <- length(unlist(strsplit(x,split="")))-1
+		return(substr(x,start=pos1,stop=pos2))
+	}else{
+		return(x)
+	}})
+
+	ind.place <- grep(paste(vec.factor,collapse="|"),ll)
 
 	if(length(vec.factor) > 0){
 		vect.fact <- attr(X,"dimnames")[[2]]
 
-		vect.fact <- vect.fact[grep("factor",vect.fact)]
-		vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
-		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-		pos2 <- length(unlist(strsplit(x,split="")))-2
-		return(substr(x,start=pos1,stop=pos2))})		
+		#vect.fact <- vect.fact[grep("factor",vect.fact)]
+		vect.fact <- vect.fact[grep(paste(vec.factor,collapse="|"),vect.fact)]
+
+# 		vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
+# 		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+# 		pos2 <- length(unlist(strsplit(x,split="")))-2
+# 		return(substr(x,start=pos1,stop=pos2))})
+
 		occur <- rep(0,length(vec.factor))
 
 		for(i in 1:length(vec.factor)){
-			occur[i] = sum(vec.factor[i] == vect.fact)
+			#occur[i] = sum(vec.factor[i] == vect.fact)
+			occur[i] <- length(grep(vec.factor[i],vect.fact))
 		}
 	}
 #==========================================================================================>
@@ -453,33 +481,34 @@ if((all.equal(length(hazard),1)==T)==T){
 		m2<-m2[match.noNA, ,drop=FALSE]#m2 inchanger si pas de NA
 
 		if (!missing(formula.terminalEvent))newTerms2<-Terms2
+		
+		Xdc <- model.matrix(newTerms2, m2)
+		lldc <- attr(newTerms2,"term.labels")
+		#ind.placedc <- grep("factor",lldc)
+		ind.placedc <- attr(Xdc,"assign")[duplicated(attr(Xdc,"assign"))]
+		
+		vec.factordc <- NULL
+		vec.factordc <- c(vec.factordc,lldc[ind.placedc])
 
-#=========================================================>
-		if (!missing(formula.terminalEvent)){
-			lldc <- attr(newTerms2,"term.labels")
-			ind.placedc <- grep("factor",lldc)
-			vecteur <- NULL
-			vecteur <- c(vecteur,lldc[ind.placedc])
-			mat.factor <- matrix(vecteur,ncol=1,nrow=length(vecteur))
-
-# Fonction servant a prendre les termes entre "as.factor"
-			vec.factordc <-apply(mat.factor,MARGIN=1,FUN=function(x){
+		mat.factordc <- matrix(vec.factordc,ncol=1,nrow=length(vec.factordc))
+		# Fonction servant a prendre les termes entre "as.factor"
+		vec.factordc <-apply(mat.factordc,MARGIN=1,FUN=function(x){
+		if (length(grep("factor",x))>0){
 			pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
 			pos2 <- length(unlist(strsplit(x,split="")))-1
-			return(substr(x,start=pos1,stop=pos2))})
-		}
-	
-#=========================================================>
-		Xdc <- model.matrix(newTerms2, m2)
+			return(substr(x,start=pos1,stop=pos2))
+		}else{
+			return(x)
+		}})
 
-#=========================================================>
-# On determine le nombre de categorie pour chaque var categorielle
+		# On determine le nombre de categorie pour chaque var categorielle
 		if(length(vec.factordc) > 0){
-			vect.fact <- attr(Xdc,"dimnames")[[2]]
-			occurdc <- rep(0,length(vec.factordc))
+			vect.factdc <- attr(Xdc,"dimnames")[[2]]
+			vect.factdc <- vect.factdc[grep(paste(vec.factordc,collapse="|"),vect.factdc)]
 
+			occurdc <- rep(0,length(vec.factordc))
 			for(i in 1:length(vec.factordc)){
-				occurdc[i] = length(grep(vec.factordc[i],vect.fact))
+				occurdc[i] <- length(grep(vec.factordc[i],vect.factdc))
 			}
 		}
 #=========================================================>
@@ -634,6 +663,36 @@ if((all.equal(length(hazard),1)==T)==T){
 # 
 	varformula2 <- model.matrix(formula.Event2,data=Tab$dataM)
 	
+	Names.formula2 <- colnames(varformula2)
+
+	ind.placeformula2 <- attr(varformula2,"assign")[duplicated(attr(varformula2,"assign"))]
+	#ind.placeformula2 <- grep("factor",colnames(varformula2))
+	
+	vec.factorevent2 <- NULL
+	vec.factorevent2 <- c(vec.factorevent2,Names.formula2[ind.placeformula2])
+
+	mat.factor.formula2 <- matrix(vec.factorevent2,ncol=1,nrow=length(vec.factorevent2))
+	# Fonction servant a prendre les termes entre "as.factor"
+	vec.factorevent2 <-apply(mat.factor.formula2,MARGIN=1,FUN=function(x){
+		if (length(grep("factor",x))>0){
+			pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+			pos2 <- length(unlist(strsplit(x,split="")))-1
+			return(substr(x,start=pos1,stop=pos2))
+		}else{
+			return(x)
+		}})
+
+	# On determine le nombre de categorie pour chaque var categorielle
+	if(length(vec.factorevent2) > 0){
+		Xformula2 <- model.matrix(formula.Event2, data=Tab$dataM)
+		vect.fact.formula2 <- attr(Xformula2,"dimnames")[[2]]
+
+		occurformula2 <- rep(0,length(vec.factorevent2))
+		for(i in 1:length(vec.factorevent2)){
+			occurformula2[i] <- length(grep(vec.factorevent2[i],vect.fact.formula2))
+		}
+	}
+
 	if (ncol(varformula2) == 1)
 	{
 		varformula2<-varformula2-1
@@ -641,30 +700,8 @@ if((all.equal(length(hazard),1)==T)==T){
 	}else{
 		varformula2 <- varformula2[, -1, drop = FALSE]
 		noVar3 <- 0
-	} 
-	Names.formula2 <- colnames(varformula2)
-
-	ind.placeformula2 <- grep("factor",colnames(varformula2))
-	vecteur <- NULL
-	vecteur <- c(vecteur,colnames(varformula2)[ind.placeformula2])
-
-	mat.factor.formula2 <- matrix(vecteur,ncol=1,nrow=length(vecteur))
-
-# Fonction servant a prendre les termes entre "as.factor"
-	vec.factor.formula2 <-apply(mat.factor.formula2,MARGIN=1,FUN=function(x){
-	pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-	pos2 <- length(unlist(strsplit(x,split="")))-1
-	return(substr(x,start=pos1,stop=pos2))})
-
-	if(length(vec.factor.formula2) > 0){
-		Xformula2 <- model.matrix(formula.Event2, data=Tab$dataM)
-		vect.fact.formula2 <- attr(Xformula2,"dimnames")[[2]]
-		occurformula2 <- rep(0,length(vec.factor.formula2))
-
-		for(i in 1:length(vec.factor.formula2)){
-			occurformula2[i] = length(grep(vec.factor.formula2[i],vect.fact.formula2))
-		}
 	}
+	Names.formula2 <- colnames(varformula2)
 
 	nvarformula2 <-ncol(varformula2)
 
@@ -713,9 +750,9 @@ if((all.equal(length(hazard),1)==T)==T){
 # # 		print(vec.factor.formula2)
 # # 		print(ind.placeformula2)
 # # 		print("----")
-		if(length(vec.factor.formula2) > 0){
+		if(length(vec.factorevent2) > 0){
 			k <- 0
-			for(i in 1:length(vec.factor.formula2)){
+			for(i in 1:length(vec.factorevent2)){
 				ind.placeformula2[i] <- ind.placeformula2[i]+k
 					k <- k + occurformula2[i]-1
 			}
@@ -740,7 +777,7 @@ if((all.equal(length(hazard),1)==T)==T){
 #--------- parametres
 	nst = 3
 	
-        if(equidistant %in% c(0,1)){
+        if ((equidistant %in% c(0,1)) & (typeof == 1)){
 		# permettre à l'utilisateur de rentrer les nb.int dans cet ordre : loco, meta, deces
 		nb.int.temp <- nb.int
 		nb.int[2] <- nb.int.temp[3]
@@ -1175,18 +1212,18 @@ if((all.equal(length(hazard),1)==T)==T){
 #========================= Test de Wald
 	ntmp <- nvarRec+nvarEnd
 
-	if(length(vec.factor.formula2) > 0){
-		nfactor <- length(vec.factor.formula2)
+	if(length(vec.factorevent2) > 0){
+		nfactor <- length(vec.factorevent2)
 		p.wald2 <- rep(0,nfactor)
 		fit$global_chisq2 <- waldtest(N=nvarRec2,nfact=nfactor,place=ind.placeformula2,modality=occurformula2,b=Beta,Varb=VarBeta,Lfirts=ntmp,Ntot=ntot)
 		fit$dof_chisq2 <- occurformula2
 		fit$global_chisq.test2 <- 1
 # Calcul de pvalue globale
-		for(i in 1:length(vec.factor.formula2)){
+		for(i in 1:length(vec.factorevent2)){
 			p.wald2[i] <- signif(1 - pchisq(fit$global_chisq2[i], occurformula2[i]), 3)
 		}
 		fit$p.global_chisq2 <- p.wald2
-		fit$names.factor2 <- vec.factor.formula2
+		fit$names.factor2 <- vec.factorevent2
 
 		
 	}else{

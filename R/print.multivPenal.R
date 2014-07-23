@@ -172,31 +172,28 @@
 		}
 #AD:  
 		cat(" Parameters associated with Frailties: \n")
-		if (x$typeof == 0){
-			cat("   theta1 :", theta1, "(SE (H):",
-				seH.theta1, ")", "(SE (HIH):", seHIH.theta1, ")", "\n")
-			cat("   theta2 :", theta2, "(SE (H):",
-				seH.theta2, ")", "(SE (HIH):", seHIH.theta2, ")", "\n")
-			cat("   alpha1 :", x$alpha1, "(SE (H):",
-				sqrt(diag(x$varH))[3], ")", "(SE (HIH):", sqrt(diag(x$varHIH))[3],")", "\n")
-			cat("   alpha2 :", x$alpha2, "(SE (H):",
-				sqrt(diag(x$varH))[4], ")", "(SE (HIH):", sqrt(diag(x$varHIH))[4],")", "\n")
-			cat("   rho :", x$rho, "(SE (H):",
-				sqrt(diag(x$varH))[5], ")", "(SE (HIH):", sqrt(diag(x$varHIH))[5],")", "\n")
-			cat(" \n")
-		}else{
-			cat("   theta1 :", theta1, "(SE (H):",
-				seH.theta1, ")", "\n")
-			cat("   theta2 :", theta2, "(SE (H):",
-				seH.theta2, ")", "\n")
-			cat("   alpha1 :", x$alpha1, "(SE (H):",
-				sqrt(diag(x$varH))[3], ")", "\n")
-			cat("   alpha2 :", x$alpha2, "(SE (H):",
-				sqrt(diag(x$varH))[4], ")", "\n")
-			cat("   rho :", x$rho, "(SE (H):",
-				sqrt(diag(x$varH))[5], ")", "\n")
-			cat(" \n")
-		}
+# 		if (x$typeof == 0){
+# 			cat("   theta1 :", theta1, "(SE (H):", seH.theta1, ")", "(SE (HIH):", seHIH.theta1, ")", "\n")
+# 			cat("   theta2 :", theta2, "(SE (H):", seH.theta2, ")", "(SE (HIH):", seHIH.theta2, ")", "\n")
+# 			cat("   alpha1 :", x$alpha1, "(SE (H):", sqrt(diag(x$varH))[3], ")", "(SE (HIH):", sqrt(diag(x$varHIH))[3],")", "\n")
+# 			cat("   alpha2 :", x$alpha2, "(SE (H):", sqrt(diag(x$varH))[4], ")", "(SE (HIH):", sqrt(diag(x$varHIH))[4],")", "\n")
+# 			cat("   rho :", x$rho, "(SE (H):", sqrt(diag(x$varH))[5], ")", "(SE (HIH):", sqrt(diag(x$varHIH))[5],")", "\n")
+# 			cat(" \n")
+# 		}else{
+# 			cat("   theta1 :", theta1, "(SE (H):", seH.theta1, ")", "\n")
+# 			cat("   theta2 :", theta2, "(SE (H):", seH.theta2, ")", "\n")
+# 			cat("   alpha1 :", x$alpha1, "(SE (H):", sqrt(diag(x$varH))[3], ")", "\n")
+# 			cat("   alpha2 :", x$alpha2, "(SE (H):", sqrt(diag(x$varH))[4], ")", "\n")
+# 			cat("   rho :", x$rho, "(SE (H):", sqrt(diag(x$varH))[5], ")", "\n")
+# 			cat(" \n")
+# 		}
+		cat("   theta1 :", theta1, "(SE (H):", seH.theta1, ")", "p =", signif(1 - pnorm(theta1/seH.theta1), digits - 1), "\n")
+		cat("   theta2 :", theta2, "(SE (H):", seH.theta2, ")", "p =", signif(1 - pnorm(theta2/seH.theta2), digits - 1), "\n")
+		cat("   alpha1 :", x$alpha1, "(SE (H):", sqrt(diag(x$varH))[3], ")", "p =", signif(1 - pchisq((x$alpha1/sqrt(diag(x$varH))[3])^2,1), digits - 1), "\n")
+		cat("   alpha2 :", x$alpha2, "(SE (H):", sqrt(diag(x$varH))[4], ")", "p =", signif(1 - pchisq((x$alpha2/sqrt(diag(x$varH))[4])^2,1), digits - 1), "\n")
+		cat("   rho :", x$rho, "(SE (H):", sqrt(diag(x$varH))[5], ")", "\n")
+		cat(" \n")
+
 		if (x$typeof == 0){
 			cat(paste("   penalized marginal log-likelihood =", round(x$logLikPenal,2)))
 			cat("\n")

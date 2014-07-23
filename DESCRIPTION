@@ -1,10 +1,10 @@
 Package: frailtypack
-Version: 2.6
-Date: 2014-03-24
+Version: 2.6.1
+Date: 2014-07-15
 Title: General Frailty models: shared, joint and nested frailty models
         with prediction
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
-        Mauguen, Amadou Diakite and Alexandre Laurent
+        Mauguen, Agnieszka Krol-Listwon, Amadou Diakite and Alexandre Laurent
 Maintainer: Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr>
 Depends: R (>= 2.10), survival, boot, MASS, survC1
 LazyLoad: no
@@ -31,6 +31,6 @@ License: GPL (>= 2.0)
 URL:
         http://virginierondeau.com/BiostatisticalConsulting/Liste_of_examples.html
 Repository: CRAN
-Date/Publication: 2014-03-24 17:03:36
-Packaged: 2014-03-24 09:58:03 UTC; al7
+Date/Publication: 2014-07-23 12:12:36
+Packaged: 2014-07-23 09:52:28 UTC; al7
 NeedsCompilation: yes

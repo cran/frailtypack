@@ -324,31 +324,10 @@
         do k=1,ng  
             sum=0.d0
             if(cpt(k).gt.0)then
-                if(theta.gt.(1.d-8)) then
-! ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
-                    res= res + res2(k) &
-!--      pour le deces:
-                    + res2dc(k)-gammaJ(1.d0/theta)-dlog(theta)/theta &
-                    + dlog(integrale3(k))
-!                  if(res.eq.nan)then 
-!      write(*,*)'--func',res2(k),res2dc(k),integrale3(k),theta,res,k
-!                   if(res.gt.0)then 
-!      write(*,*)'--func',res2(k),res2dc(k),integrale3(k),theta,res,k
-!                     if(k.eq.600) stop
-!                   endif    
-!                   if(k0(1).eq.0.d0) then
-!                      write(*,*)'kappa  ',k0(1),k0(2)
-!                      stop
-!               endif
-                else
-!*******************************************************
-!     developpement de taylor d ordre 3
-!*******************************************************
-!        write(*,*)'******* TAYLOR *************'
-                    res= res + res2(k)+ res2dc(k) &
-                    - gammaJ(1.d0/theta)-dlog(theta)/theta  &
-                    + dlog(integrale3(k)) 
-                endif
+                res= res + res2(k)+ res2dc(k) &
+                - gammaJ(1.d0/theta)-dlog(theta)/theta  &
+                + dlog(integrale3(k)) 
+
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
                     !print*,"here",integrale3(k),k
                     funcpaGweib=-1.d9

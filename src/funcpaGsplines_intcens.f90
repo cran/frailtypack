@@ -275,12 +275,12 @@
                 resU(i) = ut1(ntU(i))*vet
             endif
             if ((resL(i).ne.resL(i)).or.(abs(resL(i)).ge.1.d30)) then
-                !print*,"here1"
+!                 print*,"here1"
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
             if ((resU(i).ne.resU(i)).or.(abs(resU(i)).ge.1.d30)) then
-                !print*,"here2"
+!                 print*,"here2"
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
@@ -289,7 +289,7 @@
                 res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet
             endif
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                !print*,"here3",res1(g(i)),ut1(nt1(i)),vet,i
+!                 print*,"here3",res1(g(i)),ut1(nt1(i)),vet,i
                 !print*,bh(np-nva+1:np)
                 funcpaGsplines_intcens=-1.d9
                 goto 123
@@ -298,7 +298,7 @@
 !     modification pour nouvelle vraisemblance / troncature
             res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-                !print*,"here4"
+!                 print*,"here4"
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
@@ -322,7 +322,7 @@
                 res2dc(gsuj(k)) = res2dc(gsuj(k))+dlog(dut2(nt1dc(k))*vet2)
             endif
             if ((res2dc(gsuj(k)).ne.res2dc(gsuj(k))).or.(abs(res2dc(gsuj(k))).ge. 1.d30)) then
-                !print*,"here5",k,res2dc(gsuj(k)),dut2(nt1dc(k)),vet2,nt1dc(k),datedc(nt1dc(k))
+!                 print*,"here5",k,res2dc(gsuj(k)),dut2(nt1dc(k)),vet2,nt1dc(k),datedc(nt1dc(k))
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
@@ -330,14 +330,14 @@
             aux1(gsuj(k))=aux1(gsuj(k))+ut2(nt1dc(k))*vet2
             aux2(gsuj(k))=aux2(gsuj(k))+ut2(nt0dc(k))*vet2 !vraie troncature
             if ((aux1(gsuj(k)).ne.aux1(gsuj(k))).or.(abs(aux1(gsuj(k))).ge. 1.d30)) then
-                !print*,"here6"
+!                 print*,"here6"
                 !print*,"b:",b
                 !print*,"aux:",aux1(gsuj(k)),ut2(nt1dc(k)),vet2
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
             if ((aux2(gsuj(k)).ne.aux2(gsuj(k))).or.(abs(aux2(gsuj(k))).ge. 1.d30)) then
-                !print*,"here7"
+!                 print*,"here7"
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
@@ -350,16 +350,16 @@
             choix = 1
             call gaulagJ_intcens(int,choix)
             integrale1(ig) = int
-            if (integrale1(ig).eq.0.d0) then
-                integrale1(ig) = 1.d-300
-            endif
+!             if (integrale1(ig).eq.0.d0) then
+!                 integrale1(ig) = 1.d-300
+!             endif
             if (indictronq.eq.1) then
                 choix = 2
                 call gaulagJ_intcens(int,choix)
                 integrale2(ig) = int
-                if (integrale2(ig).eq.0.d0) then
-                    integrale2(ig) = 1.d0
-                endif
+!                 if (integrale2(ig).eq.0.d0) then
+!                     integrale2(ig) = 1.d0
+!                 endif
             endif
         end do
 !************* FIN INTEGRALES **************************
@@ -375,16 +375,9 @@
                     gammaJ(1.d0/theta)-dlog(theta)/theta + &
                     dlog(integrale1(k))
                 endif
-!*******************************************************
-!     developpement de taylor d ordre 3
-!*******************************************************
-!        write(*,*)'******* TAYLOR *************'
-                !    res= res + res2(k)+ res2dc(k) &
-                !    - gammaJ(1.d0/theta)-dlog(theta)/theta  &
-                !    + dlog(integrale3(k))
-                !endif
+
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-                    !print*,"here8",res,integrale1(k),integrale2(k),k,dlog(integrale1(k)),dlog(integrale2(k))
+!                     print*,"here8",res,integrale1(k),integrale2(k),k,dlog(integrale1(k)),dlog(integrale2(k))
                     funcpaGsplines_intcens=-1.d9
                     goto 123
                 end if

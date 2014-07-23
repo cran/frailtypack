@@ -115,17 +115,13 @@
 #AD:
 		if (x$rho!=-1)cat("    Corresponding correlation between the two frailty terms :", x$rho, "\n")
 		if (x$typeof == 0){
-			cat("    Variance for random intercept:", x$sigma2, "(SE (H):", 
-			x$varSigma2[1]^.5, ")", "(SE (HIH):", x$varSigma2[2]^.5, ")", "\n")
+			cat("    Variance for random intercept:", x$sigma2, "(SE (H):", x$varSigma2[1]^.5, ")", "\n") # "(SE (HIH):", x$varSigma2[2]^.5, ")", "\n")
 	
-			cat("    Variance for random slope:", x$tau2, "(SE (H):", 
-			x$varTau2[1]^.5, ")", "(SE (HIH):", x$varTau2[2]^.5, ")", "\n")
+			cat("    Variance for random slope:", x$tau2, "(SE (H):", x$varTau2[1]^.5, ")", "\n") #"(SE (HIH):", x$varTau2[2]^.5, ")", "\n")
 		}else{
-			cat("    Variance for random intercept:", x$sigma2, "(SE (H):", 
-			x$varSigma2[1]^.5, ")", "\n")
+			cat("    Variance for random intercept:", x$sigma2, "(SE (H):", x$varSigma2[1]^.5, ")", "\n")
 	
-			cat("    Variance for random slope:", x$tau2, "(SE (H):", 
-			x$varTau2[1]^.5, ")", "\n")
+			cat("    Variance for random slope:", x$tau2, "(SE (H):", x$varTau2[1]^.5, ")", "\n")
 		}
 	
 	

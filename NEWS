@@ -1,6 +1,21 @@
+Changes in Version 2.6.1     July 2014
+
+  o Different way to do Monte-Carlo method to compute confidence intervals in 'prediction' function giving less variability.
+
+  o Back to knots placed using equidistant by default for estimating baseline hazard function with splines. You can now use the option 'hazard="Splines-per"' in frailtyPenal in order to have knots placed using percentiles.
+
+  o Back to value 10-3 by default for the three convergence criteria.
+
+  o No longer need to use as.factor() in command to print Wald tests on covariates.
+
+  o Print p-value of one-sided Wald test for frailty parameter and two-sided Wald test for alpha parameter in joint model.
+
+  o New functions to compute estimators of Expected Prognostic Observed Cross-Entropy (EPOCE) evaluating prediction accuracy in joint model.
+
+
 Changes in Version 2.6       Mar 2014
 
-  o NEW: Fit now a multivariate gaussian frailty model (two types of recurrent events and a terminal event). 
+  o NEW: Fit now a multivariate gaussian frailty model (two types of recurrent events and a terminal event).
 
   o Major evolution of frailtyPenal function. 'Frailty' and 'joint' arguments removed.
 
@@ -16,7 +31,7 @@ Changes in Version 2.6       Mar 2014
 
   o Possibility to initialize the coefficient with argument 'init.Alpha' in joint frailty model.
 
-  o Moreover, with 'Alpha="none"', frailtyPenal can fit a joint model with a fixed alpha (=1). 
+  o Moreover, with 'Alpha="none"', frailtyPenal can fit a joint model with a fixed alpha (=1).
 
   o New argument: 'print.times', added in every model to print iteration process.
 
@@ -29,27 +44,27 @@ Changes in Version 2.5.1       Feb 2014
 Changes in Version 2.5         Nov 2013
 
   o New dynamic tool of prediction added for Cox proportionnal hazard, shared and joint frailty model.
-  
+
   o Add IPCW estimation of concordance measures as Uno (Stat Med 2011). Significant changes in the printing of 'Cmeasures' function.
-  
+
   o Bug fixed about parametrical survival functions plotting with left truncated data.
-  
+
   o Bug fixed which allowed cross validation with interval-censored data.
-  
+
   o Possibility to print and change the three convergence criterions in frailtyPenal and additivePenal.
- 
+
 
 Changes in Version 2.4.1         Apr 2013
 
   o Bug fixed about estimation of frailties in shared models using recurrentAG=TRUE.
-  
+
   o Printing bug about standard deviation of the random effet variance in a model without covariate.
 
   o Possibility to initialize regression coefficients in shared and joint frailty models.
 
-  
+
 Changes in Version 2.4           Apr 2013
-  
+
   o Fit now a model with time-varying effects for covariates (only for Cox, shared gamma and a joint gamma frailty model).
 
 

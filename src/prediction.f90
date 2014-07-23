@@ -34,7 +34,7 @@
     double precision,dimension(npred0,nrec0+2)::survR,hazR,survRalea,hazRalea
     double precision,dimension(nrec0+2)::survRi,hazRi,survRialea,hazRialea
     double precision,dimension(ntimeAll)::timeAll
-    double precision,dimension(np)::balea
+    double precision,dimension(nsample,np)::balea
     double precision,dimension(nsample,npred0)::predProbaalea1,predProbaalea2,predProbaalea3
     double precision,dimension(1,nva1)::coefBetaalea
     double precision,dimension(1,nva2)::coefBetadcalea
@@ -57,6 +57,15 @@
 !     do i=2,ntimeAll
 !         timeAll(i) = timeAll(i-1) + window
 !     end do
+
+    if (icproba.eq.1) then ! generation des parametres
+        do j=1,nsample
+            do i=1,np
+                call rnorm(b(i),sqrt(HIHOut(i,i)),alea)
+                balea(j,i) = alea
+            end do
+        end do
+    end if
 
     do iii=1,ntimeAll
         do i=1,npred0
@@ -241,14 +250,10 @@
                 survRalea = 0.d0
                 hazRalea = 0.d0
                 survDCalea = 0.d0
-                balea = 0.d0
                 survLTalea = 0.d0
-                do i=1,np
-                    call rnorm(b(i),sqrt(HIHOut(i,i)),alea)
-                    balea(i) = alea
-                end do
-                coefBetaalea(1,:) = balea((np-nva1-nva2+1):(np-nva2))
-                coefBetadcalea(1,:) = balea((np-nva2+1):np)
+                
+                coefBetaalea(1,:) = balea(j,(np-nva1-nva2+1):(np-nva2))
+                coefBetadcalea(1,:) = balea(j,(np-nva2+1):np)
 
                 XbetapredRalea = matmul(coefBetaalea,transpose(vaxpred0))
                 XbetapredDCalea = matmul(coefBetadcalea,transpose(vaxdcpred0))
@@ -256,8 +261,8 @@
                 select case (typeof)
                     case(0)
                     
-                    theRalea = balea(1:(nz+2))*balea(1:(nz+2))
-                    theDCalea = balea((nz+3):2*(nz+2))*balea((nz+3):2*(nz+2))
+                    theRalea = balea(j,1:(nz+2))*balea(j,1:(nz+2))
+                    theDCalea = balea(j,(nz+3):2*(nz+2))*balea(j,(nz+3):2*(nz+2))
                     predTime2 = predtimerec2(1,1)
                     call survival(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                     survRalea(:,1) = surv(1)
@@ -290,43 +295,43 @@
                     case(1)
                     
                     predTime2 = predtimerec2(1,1)
-                    call survivalj_cpm(predTime2,balea(1:(nbintervR+nbintervDC)),nbintervR,nbintervDC &
+                    call survivalj_cpm(predTime2,balea(j,1:(nbintervR+nbintervDC)),nbintervR,nbintervDC &
                     ,time,timedc,surv)
                     survRalea(:,1) = surv(1)
                     survDCalea(1) = surv(2)
                     do i=1,npred0
                         if (intcens.eq.1) then
-                            call survivalj_cpm(trunctime(i),balea(1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
+                            call survivalj_cpm(trunctime(i),balea(j,1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
                             ,time,timedc,surv)
                             survLTalea(i) = surv(1)
                             if (trunctime(i).eq.0.d0) survLTalea(i) = 1.d0
-                            call survivalj_cpm(lowertime(i),balea(1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
+                            call survivalj_cpm(lowertime(i),balea(j,1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
                             ,time,timedc,surv)
                             survLalea(i) = surv(1)
-                            call survivalj_cpm(uppertime(i),balea(1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
+                            call survivalj_cpm(uppertime(i),balea(j,1:(nbintervR+nbintervDC)),nbintervR,nbintervDC & !!
                             ,time,timedc,surv)
                             survUalea(i) = surv(1)
                         endif
                         
                         do ii=1,nrec0
                             predTime2 = predtimerec2(i,ii+1)
-                            call survivalj_cpm(predTime2,balea(1:(nbintervR+nbintervDC)),&
+                            call survivalj_cpm(predTime2,balea(j,1:(nbintervR+nbintervDC)),&
                             nbintervR,nbintervDC,time,timedc,surv)
                             survRalea(i,ii+1) = surv(1)
                         end do
                     end do
                     predTime2 = predtimerec2(1,nrec0+2)
-                    call survivalj_cpm(predTime2,balea(1:(nbintervR+nbintervDC)),nbintervR,nbintervDC &
+                    call survivalj_cpm(predTime2,balea(j,1:(nbintervR+nbintervDC)),nbintervR,nbintervDC &
                     ,time,timedc,surv)
                     survRalea(:,nrec0+2) = surv(1)
                     survDCalea(2) = surv(2)
                     
                     case(2)
                     
-                    scRalea = balea(2)**2 !shapeweib(1)
-                    shRalea = balea(1)**2 !scaleweib(1)
-                    scDCalea = balea(4)**2 !shapeweib(2)
-                    shDCalea = balea(3)**2 !scaleweib(2)
+                    scRalea = balea(j,2)**2 !shapeweib(1)
+                    shRalea = balea(j,1)**2 !scaleweib(1)
+                    scDCalea = balea(j,4)**2 !shapeweib(2)
+                    shDCalea = balea(j,3)**2 !scaleweib(2)
             
                     survRalea(:,1) = exp(-(predtimerec2(1,1)/scRalea)**shRalea)
                     hazRalea(:,1) = (shRalea/scRalea)*((predtimerec2(1,1)/scRalea)**(shRalea-1))
@@ -347,8 +352,8 @@
                     survDCalea(2) = exp(-(predtimerec2(1,nrec0+2)/scDCalea)**shDCalea)
                 end select
 
-                alphaalea = balea(np-nva1-nva2)
-                thetaalea = balea(np-nva1-nva2-1)*balea(np-nva1-nva2-1)
+                alphaalea = balea(j,np-nva1-nva2)
+                thetaalea = balea(j,np-nva1-nva2-1)*balea(j,np-nva1-nva2-1)
                 do i=1,npred0
                     if (intcens.eq.0) then
                         survRialea = survRalea(i,:)

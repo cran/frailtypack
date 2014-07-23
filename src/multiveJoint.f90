@@ -73,8 +73,8 @@
     integer::groupe,groupemeta,ij,kk,j,k,n,ii,iii,iii2,cptstr1,cptstr2   &
     ,i,ic,icmeta,icdc,istop,cptni,cptni1,cptni2,nb_echec,nb_echecor,id,cptbiais &
     ,cptauxdc   
-    double precision::tt0,tt0meta,tt0dc,tt1,tt1meta,tt1dc,h,res,min,mindc,max, &
-    maxdc,maxt,maxtmeta,maxtdc,moy_peh0,moy_peh1,lrs,BIAIS_moy
+    double precision::tt0,tt0meta,tt0dc,tt1,tt1meta,tt1dc,h,res,min,mindc,max,pord, &
+    maxdc,maxt,maxtmeta,maxtdc,moy_peh0,moy_peh1,lrs,BIAIS_moy,mint,mintdc,mintmeta
     double precision,dimension(2)::res01
 !AD: add for new marq
     double precision::ca,cb,dd
@@ -107,8 +107,8 @@
     double precision,dimension(nbIntervEvent(2)+1)::timedc
     double precision,dimension(nbIntervEvent(3)+1)::timeM
     double precision,dimension(nz0(1)+6)::ziOut1
-    double precision,dimension(nz0(2)+6)::ziOutdc    
-    double precision,dimension(nz0(3)+6)::ziOutmeta    
+    double precision,dimension(nz0(2)+6)::ziOutdc
+    double precision,dimension(nz0(3)+6)::ziOutmeta
 !-------- Parametres shared
     double precision::ddls
     double precision,dimension(:),allocatable::str00
@@ -206,7 +206,7 @@
     
     allocate(b01(np1),b02(np2),b03(np3))
     
-!================>    
+!================>
 !================> initialisation parametres frailtypack
 !================>
     if (initialize == 1) then
@@ -225,12 +225,12 @@
 !         write(*,*)'========= nombre de sujet ',nsujet0
 !         write(*,*)'========= nombre de groupe ',ng0,nva10,size(vax0),noVar1,ag0
 
-        b01 = 0.25d0        
+        b01 = 0.25d0
         nzsha = nz0(1)
         kappa1 = k0(1)
-        EPS(1) = 1.d-4
-        EPS(2) = 1.d-4
-        EPS(3) = 1.d-4
+        EPS(1) = 1.d-3
+        EPS(2) = 1.d-3
+        EPS(3) = 1.d-3
         allocate(str00(nsujet0))
         str00=1
         allocate(H_hess0(np1,np1),HIH0(np1,np1),zis(nzsha+6))
@@ -240,8 +240,6 @@
         allocate(filtretps0Mul(nva10))
         filtretps0Mul = 0
 
-        !print*,tt10
-!        write(*,*)'ICI 0'
         Call frailpenal(nsujet0,ng0,1,1,1, &
         nzsha,kappa1,kappa1,tt00,tt10,ic0,groupe0,nva10,str00,vax0, &
         ag0,noVar1,maxit00,irep,np1,b01,H_hess0,HIH0,resOut,LCVs, &
@@ -250,13 +248,11 @@
         frailtypreds,frailtyvars,frailtysds,linearpreds,times,0,tt10,0, &
         timedepMul,nbinnerknots0Mul,qorder0Mul,filtretps0Mul,BetaTpsMatMul,EPS)
 
-!        write(*,*)'ICI 1'
-
         deallocate(filtretps0Mul)
         deallocate(H_hess0,HIH0,zis,str00)
         deallocate(x1Outs,x2Outs,lamOuts,lam2Outs)
         deallocate(linearpreds,martingaleCoxs,times)
-!        write(*,*)'ICI 2'
+
         critCV(3) = istop
 !        write(*,*)''
 !        write(*,*)' Critere de convergence istop loco',istop
@@ -272,9 +268,8 @@
  !            write(*,*)'irep',irep    
             
         endif
-!        write(*,*)'ICI 3'
-!==================================> META
 
+!==================================> META
 !         write(*,*)''
 !          write(*,*)'=============== estimation meta ================='
 !         write(*,*)'========= typeof = (0:Splines, 1:Piecewise, 2:Weibull) ',typeof0    
@@ -283,11 +278,11 @@
 !         write(*,*)'========= nombre de groupe ',ng0
 
         b03 = 0.25d0
-        nzsha = nz0(3)    
+        nzsha = nz0(3)
         kappa1 = k0(3)
-        EPS(1) = 1.d-4
-        EPS(2) = 1.d-4
-        EPS(3) = 1.d-4
+        EPS(1) = 1.d-3
+        EPS(2) = 1.d-3
+        EPS(3) = 1.d-3
         allocate(str00(nsujetmeta0))
         str00=1
         allocate(H_hess0(np3,np3),HIH0(np3,np3),zis(nzsha+6))
@@ -313,9 +308,9 @@
 
 !        write(*,*)''
 !        write(*,*)' Critere de convergence istop meta',istop
-!        write(*,*)''    
+!        write(*,*)''
 
-        if(typeof == 0) then        
+        if(typeof == 0) then
             if(irep.eq.0) then
                 kappaCV(3)=k0s(1) ! kappa branche meta
             else
@@ -323,11 +318,10 @@
             end if
  !            write(*,*)'Smoothing parameter Meta ',kappaCV(3)
  !            write(*,*)'K0s ',k0s
- !            write(*,*)'irep',irep            
+ !            write(*,*)'irep',irep
         end if
 
 ! ==================================> DC
-
 !        write(*,*)''
 !        write(*,*)'=============== estimation dc ================='
 !        write(*,*)'========= typeof = (0:Splines, 1:Piecewise, 2:Weibull) ',typeof0    
@@ -336,11 +330,11 @@
 !        write(*,*)'========= nombre de groupe ',ng0
 
         b02 = 0.25d0
-        nzsha = nz0(2)    
+        nzsha = nz0(2)
         kappa1 = k0(2)
-        EPS(1) = 1.d-4
-        EPS(2) = 1.d-4
-        EPS(3) = 1.d-4
+        EPS(1) = 1.d-3
+        EPS(2) = 1.d-3
+        EPS(3) = 1.d-3
         allocate(str00(ng0))
         str00=1
         allocate(H_hess0(np2,np2),HIH0(np2,np2),zis(nzsha+6))
@@ -383,13 +377,13 @@
         b03 = 0.25d0 ! meta
         b02 = 0.25d0 ! loco
     end if
-    !print*,kappaCV
+
     if(typeof.ne.0) kappaCV=1.d0 
 
     !k0 = kappaCV
 
 !!!!!  FIN  INITIALISATION DES B A PARTIR DES SHARED             
-    !print*,"youhou"
+
     Res_martingale=0.d0
     Res_martingaledc=0.d0
     Res_martingale2=0.d0
@@ -422,7 +416,6 @@
         nbintervM = nbintervM0        
     end if
 
-!    print*,"youhou"
     allocate(vectn(3))
     
     epsa = 1.d-3
@@ -445,7 +438,7 @@
     allocate(ResidusRec(ngmax),Residusdc(ngmax),ResidusRec2(ngmax),Rrec(ngmax),Nrec(ngmax),Rdc(ngmax),&
     Ndc(ngmax),Rrec2(ngmax),Nrec2(ngmax),vuu(2),nig(ngmax),nigmeta(ngmax),cdc(ngmax),t0dc(ngmax),t1dc(ngmax),&
     aux1(ngmax),aux2(ngmax),res1(ngmax),res4(ngmax),res3(ngmax),mi(ngmax),res1meta(ngmax),res3meta(ngmax))
-!    print*,"youhou"
+
     shape_weib = 0.d0
     scale_weib = 0.d0
     
@@ -492,7 +485,7 @@
     res01(2)=0.d0
 !------------  entre non fichier et nombre sujet -----        
     nvarmax=ver
-!    print*,"youhou"
+
     allocate(vax(nva10),vaxdc(nva20),vaxmeta(nva30))
             
     nva1=nva10
@@ -538,11 +531,17 @@
 !        write(*,*)'filtre meta active'
         filtre3=1
     end if
-!print*,"youhou"
+
 !------------  lecture fichier -----------------------
     maxt = 0.d0
-    maxtmeta=0.d0
+    mint = 0.d0
+
+    maxtmeta = 0.d0
+    mintmeta = 0.d0
+
     maxtdc = 0.d0
+    mintdc = 0.d0
+
     cpt = 0
     cptmeta =0 
     cptcens = 0
@@ -556,6 +555,11 @@
 ! pour le deces
 !cccccccccccccccccccc
     do k = 1,ng 
+
+        if (k.eq.1) then
+            mintdc = tt0dc0(k) ! affectation du min juste une fois
+        endif
+
         tt0dc=tt0dc0(k)
         tt1dc=tt1dc0(k)
         icdc=icdc0(k)
@@ -566,7 +570,7 @@
         if(tt0dc.gt.0.d0)then
             cptauxdc=cptauxdc+1
         endif                  
-!------------------   deces c=1 pour donnï¿½es de survie
+!------------------   deces c=1 pour donnees de survie
         if(icdc.eq.1)then
             cpt_dc = cpt_dc + 1
             cdc(k)=1
@@ -599,6 +603,9 @@
         if (maxtdc.lt.t1dc(k))then
             maxtdc = t1dc(k)
         endif
+        if (mintdc.gt.t0dc(k)) then
+            mintdc = t0dc(k)
+        endif
     end do
 
 !AD:
@@ -611,31 +618,35 @@
     cptstr2 = 0
 
 !cccccccccccccccccccccccccccccccccc
-! pour les donnï¿½es recurrentes  loco
+! pour les donnees recurrentes  loco
 !cccccccccccccccccccccccccccccccccc
     do i = 1,nsujet     !sur les observations
+
+        if (i.eq.1) then
+            mint = tt00(i) ! affectation du min juste une fois
+        endif
+
         tt0=tt00(i)
         tt1=tt10(i)
         ic=ic0(i)
         groupe=groupe0(i)
-    
-        do j=1,nva10        
+
+        do j=1,nva10
             vax(j)=vax0(i,j)
         enddo
 
         if(tt0.gt.0.d0)then
             cptaux=cptaux+1
-        endif                            
+        endif
 !-----------------------------------------------------
-            
 !    essai sans troncature
 !    tt0=0.
 !------------------   observation c=1 pour donnï¿½es recurrentes
         if(ic.eq.1)then
             cpt = cpt + 1
             c(i)=1
-            t0(i) = tt0 
-            t1(i) = tt1  
+            t0(i) = tt0
+            t1(i) = tt1
             t1(i) = t1(i)
             g(i) = groupe
             nig(groupe) = nig(groupe)+1 ! nb d event recurr dans un groupe
@@ -647,9 +658,9 @@
                     iii = iii + 1
                     ve(i,iii) = dble(vax(ii)) !ici sur les observations
                 endif
-            end do   
+            end do
         else 
-!------------------   censure a droite  c=0 pour donnï¿½es recurrentes
+!------------------   censure a droite  c=0 pour donnees recurrentes
             if(ic.eq.0)then
                 cptcens=cptcens+1
                 c(i) = 0 
@@ -662,39 +673,46 @@
                     ve(i,iii) = dble(vax(ii))
                     endif
                 end do 
-                t0(i) =  tt0 
-                t1(i) = tt1 
-                t1(i) = t1(i) 
+                t0(i) =  tt0
+                t1(i) = tt1
+                t1(i) = t1(i)
                 g(i) = groupe
             endif
         endif
         if (maxt.lt.t1(i))then
             maxt = t1(i)
         endif
+        if (mint.gt.t0(i)) then
+            mint = t0(i)
+        endif
     end do 
-!print*,"youhou"
+
     nsujet=i-1
 !cccccccccccccccccccccccccccccccccc
-! pour les donnï¿½es recurrentes  meta
-!cccccccccccccccccccccccccccccccccc          
+! pour les donnees recurrentes  meta
+!cccccccccccccccccccccccccccccccccc
     do i = 1,nsujetmeta     !sur les observations
+
+        if (i.eq.1) then
+            mintmeta = tt0meta0(i) ! affectation du min juste une fois
+        endif
+
         tt0meta=tt0meta0(i)
         tt1meta=tt1meta0(i)
         icmeta=icmeta0(i)
-        groupemeta=groupe0meta(i)    
+        groupemeta=groupe0meta(i)
 
-        do j=1,nva30        
+        do j=1,nva30
             vaxmeta(j)=vaxmeta0(i,j)
         enddo
 
         if(tt0meta.gt.0.d0)then
             cptauxmeta=cptauxmeta+1
-        endif                            
+        endif
 !-----------------------------------------------------
-            
 !     essai sans troncature
 !     tt0=0.
-!------------------   observation c=1 pour donnï¿½es recurrentes
+!------------------   observation c=1 pour donnees recurrentes
         if(icmeta.eq.1)then
             cptmeta = cptmeta + 1
             cmeta(i)=1
@@ -711,9 +729,9 @@
                     iii = iii + 1
                     vemeta(i,iii) = dble(vaxmeta(ii)) !ici sur les observations
                 endif
-            end do   
+            end do
         else 
-!------------------   censure a droite  c=0 pour donnï¿½es recurrentes
+!------------------   censure a droite  c=0 pour donnees recurrentes
             if(icmeta.eq.0)then
                 cptcens=cptcens+1
                 cmeta(i) = 0 
@@ -725,14 +743,17 @@
                     vemeta(i,iii) = dble(vaxmeta(ii))
                     endif
                 end do 
-                t0meta(i) =  tt0meta 
-                t1meta(i) = tt1meta 
-                t1meta(i) = t1meta(i) 
+                t0meta(i) =  tt0meta
+                t1meta(i) = tt1meta
+                t1meta(i) = t1meta(i)
                 gmeta(i) = groupemeta
             endif
         endif
         if (maxtmeta.lt.t1meta(i))then
             maxtmeta = t1meta(i)
+        endif
+        if (mintmeta.gt.t0meta(i)) then
+            mintmeta = t0meta(i)
         endif
     end do 
 
@@ -889,69 +910,185 @@
     if(typeof==0) then
         ndatemeta = k
     end if
-    
+
 !==========================>
 !==== Construction des Zi pour les splines
-!==========================>    
+!==========================>
     if(typeof == 0) then
-        nzmax=nzloco+3    
-        allocate(zi(-2:nzmax))
-        zi(-2) = date(1) 
-        zi(-1) = date(1)
-        zi(0) = date(1)
-        zi(1) = date(1)
-        h = (date(ndate)-date(1))/dble(nzloco-1)
-        do i=2,nzloco-1
-            zi(i) =zi(i-1) + h
-        end do
-        zi(nzloco) = date(ndate)
-        zi(nzloco+1)=zi(nzloco)
-        zi(nzloco+2)=zi(nzloco)
-        zi(nzloco+3)=zi(nzloco)
-        ziOut1 = zi
+        if (equidistant.eq.0) then ! percentile
 
-        allocate(zidc(-2:(nzdc+3)))
-        zidc(-2) = datedc(1) 
-        zidc(-1)= datedc(1) 
-        zidc(0)= datedc(1) 
-        zidc(1)= datedc(1) 
-        h =(datedc(ndatedc)-datedc(1))/dble(nzdc-1)
-        do i=2,nzdc-1
-            zidc(i) =zidc(i-1)+h
-        end do 
-    
-        zidc(nzdc) = datedc(ndatedc)
-        zidc(nzdc+1)=zidc(nzdc)
-        zidc(nzdc+2)=zidc(nzdc)
-        zidc(nzdc+3)=zidc(nzdc)
-        ziOutdc = zidc
+            ! recurrent
+            i=0
+            j=0
+            do i=1,nsujet
+                if(t1(i).ne.(0.d0).and.c(i).eq.1) then
+                    j=j+1
+                endif
+            end do
+            nbrecu=j
 
-        allocate(zimeta(-2:(nzmeta+3)))
-        zimeta(-2) = datemeta(1)
-        zimeta(-1)= datemeta(1)
-        zimeta(0)= datemeta(1)
-        zimeta(1)= datemeta(1)
-        h =(datemeta(ndatemeta)-datemeta(1))/dble(nzmeta-1)
-        do i=2,nzmeta-1
-            zimeta(i) =zimeta(i-1)+h
-        end do  
-        zimeta(nzmeta) = datemeta(ndatemeta)    
-        zimeta(nzmeta+1)=zimeta(nzmeta)
-        zimeta(nzmeta+2)=zimeta(nzmeta)
-        zimeta(nzmeta+3)=zimeta(nzmeta)
-        ziOutmeta = zimeta
-     end if
+            allocate(t2(nbrecu))
+            j=0
+            do i=1,nsujet
+                if (t1(i).ne.(0.d0).and.c(i).eq.1) then
+                    j=j+1
+                    t2(j)=t1(i)
+                endif
+            end do
+
+            allocate(zi(-2:(nzloco+3)))
+            ndate = k
+            zi(-2) = mint
+            zi(-1) = mint
+            zi(0) = mint
+            zi(1) = mint
+            j=0
+            do j=1,nzloco-2
+                pord = dble(j)/(dble(nzloco)-1.d0)
+                call percentile3(t2,nbrecu,pord,zi(j+1))
+            end do
+            zi(nzloco) = maxt
+            zi(nzloco+1) = maxt
+            zi(nzloco+2) = maxt
+            zi(nzloco+3) = maxt
+            ziOut1 = zi
+            deallocate(t2)
+
+            ! death
+            i=0
+            j=0
+            do i=1,ng
+                if(t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
+                    j=j+1
+                endif
+            end do
+            nbdeces=j
+
+            allocate(t3(nbdeces))
+            j=0
+            do i=1,ng
+                if (t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
+                    j=j+1
+                    t3(j)=t1dc(i)
+                endif
+            end do
+
+            allocate(zidc(-2:(nzdc+3)))
+            zidc(-2) = mintdc
+            zidc(-1) = mintdc
+            zidc(0) = mintdc
+            zidc(1) = mintdc
+            j=0
+            do j=1,nzdc-2
+                pord = dble(j)/(dble(nzdc)-1.d0)
+                call percentile3(t3,nbdeces,pord,zidc(j+1))
+            end do
+            zi(nzdc) = maxtdc
+            zi(nzdc+1) = maxtdc
+            zi(nzdc+2) = maxtdc
+            zi(nzdc+3) = maxtdc
+            ziOutdc = zidc
+            deallocate(t3)
+
+            ! meta
+            i=0
+            j=0
+            do i=1,nsujetmeta
+                if(t1meta(i).ne.(0.d0).and.cmeta(i).eq.1) then
+                    j=j+1
+                endif
+            end do
+            nbrecumeta=j
+
+            allocate(t4(nbrecumeta))
+            j=0
+            do i=1,nsujetmeta
+                if (t1meta(i).ne.(0.d0).and.cmeta(i).eq.1) then
+                    j=j+1
+                    t4(j)=t1meta(i)
+                endif
+            end do
+
+            allocate(zimeta(-2:(nzmeta+3)))
+            zimeta(-2) = mintmeta
+            zimeta(-1) = mintmeta
+            zimeta(0) = mintmeta
+            zimeta(1) = mintmeta
+            j=0
+            do j=1,nzmeta-2
+                pord = dble(j)/(dble(nzmeta)-1.d0)
+                call percentile3(t4,nbrecumeta,pord,zimeta(j+1))
+            end do
+            zimeta(nzmeta) = maxtmeta
+            zimeta(nzmeta+1) = maxtmeta
+            zimeta(nzmeta+2) = maxtmeta
+            zimeta(nzmeta+3) = maxtmeta
+            ziOutmeta = zimeta
+            deallocate(t4)
+
+        else ! equidistant
+
+            ! recurrent
+            nzmax=nzloco+3
+            allocate(zi(-2:nzmax))
+            zi(-2) = date(1)
+            zi(-1) = date(1)
+            zi(0) = date(1)
+            zi(1) = date(1)
+            h = (date(ndate)-date(1))/dble(nzloco-1)
+            do i=2,nzloco-1
+                zi(i) =zi(i-1) + h
+            end do
+            zi(nzloco) = date(ndate)
+            zi(nzloco+1)=zi(nzloco)
+            zi(nzloco+2)=zi(nzloco)
+            zi(nzloco+3)=zi(nzloco)
+            ziOut1 = zi
+
+            ! death
+            allocate(zidc(-2:(nzdc+3)))
+            zidc(-2) = datedc(1)
+            zidc(-1)= datedc(1)
+            zidc(0)= datedc(1)
+            zidc(1)= datedc(1)
+            h =(datedc(ndatedc)-datedc(1))/dble(nzdc-1)
+            do i=2,nzdc-1
+                zidc(i) =zidc(i-1)+h
+            end do
+            zidc(nzdc) = datedc(ndatedc)
+            zidc(nzdc+1)=zidc(nzdc)
+            zidc(nzdc+2)=zidc(nzdc)
+            zidc(nzdc+3)=zidc(nzdc)
+            ziOutdc = zidc
+
+            ! meta
+            allocate(zimeta(-2:(nzmeta+3)))
+            zimeta(-2) = datemeta(1)
+            zimeta(-1)= datemeta(1)
+            zimeta(0)= datemeta(1)
+            zimeta(1)= datemeta(1)
+            h =(datemeta(ndatemeta)-datemeta(1))/dble(nzmeta-1)
+            do i=2,nzmeta-1
+                zimeta(i) =zimeta(i-1)+h
+            end do
+            zimeta(nzmeta) = datemeta(ndatemeta)
+            zimeta(nzmeta+1)=zimeta(nzmeta)
+            zimeta(nzmeta+2)=zimeta(nzmeta)
+            zimeta(nzmeta+3)=zimeta(nzmeta)
+            ziOutmeta = zimeta
+         end if
+    endif
 
 !---------- affectation nt0dc,nt1dc DECES ----------------------------
 
-     indictronqdc=0
-    do k=1,ng 
+    indictronqdc=0
+    do k=1,ng
         if (typeof == 0) then
             if(nig(k).eq.0.d0)then
                 nb0recu = nb0recu + 1 !donne nb sujet sans event recu
             endif
             moyrecu =  moyrecu + dble(nig(k))
-        
+
             if(t0dc(k).eq.0.d0)then
                 nt0dc(k) = 0
             endif
@@ -971,7 +1108,7 @@
                 endif
             end do
         end if
-    end do 
+    end do
 
 !---------- affectation nt0,nt1 RECURRENTS----------------------------
 
@@ -999,7 +1136,7 @@
     end do 
     indictronqmeta=0
     do i=1,nsujetmeta
-    
+
         if (typeof == 0) then
             if(t0meta(i).eq.0.d0)then
                 nt0meta(i) = 0
@@ -1018,31 +1155,31 @@
                 endif
             end do
         end if
-    end do 
+    end do
 
      if (typeof == 0) then
-!---------- affectation des vecteurs de splines -----------------    
-        call vecspli(ndate,ndatedc,ndatemeta) 
+!---------- affectation des vecteurs de splines -----------------
+        call vecspli(ndate,ndatedc,ndatemeta)
         allocate(m3m3(nzmax),m2m2(nzmax),m1m1(nzmax),mmm(nzmax),m3m2(nzmax),m3m1(nzmax),&
         m3m(nzmax),m2m1(nzmax),m2m(nzmax),m1m(nzmax),m3m3b(nzdc),m2m2b(nzdc),m1m1b(nzdc), &
-        mmmb(nzdc),m3m2b(nzdc),m3m1b(nzdc),m3mb(nzdc),m2m1b(nzdc),m2mb(nzdc),m1mb(nzdc), &    
+        mmmb(nzdc),m3m2b(nzdc),m3m1b(nzdc),m3mb(nzdc),m2m1b(nzdc),m2mb(nzdc),m1mb(nzdc), &
         m3m3c(nzmeta),m2m2c(nzmeta),m1m1c(nzmeta),mmmc(nzmeta),m3m2c(nzmeta),m3m1c(nzmeta), &
         m3mc(nzmeta),m2m1c(nzmeta),m2mc(nzmeta),m1mc(nzmeta))    
 
         call vecpenP(nzloco+2,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m)
         call vecpenP(nzdc+2,zidc,m3m3b,m2m2b,m1m1b,mmmb,m3m2b,m3m1b,m3mb,m2m1b,m2mb,m1mb)
-        call vecpenP(nzmeta+2,zimeta,m3m3c,m2m2c,m1m1c,mmmc,m3m2c,m3m1c,m3mc,m2m1c,m2mc,m1mc)                
+        call vecpenP(nzmeta+2,zimeta,m3m3c,m2m2c,m1m1c,mmmc,m3m2c,m3m1c,m3mc,m2m1c,m2mc,m1mc)
     end if
-    
+
     npmax=np
-    
+
     allocate(I_hess(npmax,npmax),H_hess(npmax,npmax),Hspl_hess(npmax,npmax) &
     ,PEN_deri(npmax,1),hess(npmax,npmax),v((npmax*(npmax+3)/2)),I1_hess(npmax,npmax) &
     ,H1_hess(npmax,npmax),I2_hess(npmax,npmax),H2_hess(npmax,npmax),HI2(npmax,npmax) & 
     ,HIH(npmax,npmax),IH(npmax,npmax),HI(npmax,npmax),BIAIS(npmax,1))
 
     if (typeof .ne. 0) then
-        allocate(vvv((npmax*(npmax+1)/2)))    
+        allocate(vvv((npmax*(npmax+1)/2)))
     end if
 
      if (typeof == 1) then
@@ -1057,14 +1194,14 @@
         end do
         nbrecu=j
         allocate(t2(nbrecu))
-        
+
         j=0
         do i=1,nsujet
             if (t1(i).ne.(0.d0).and.c(i).eq.1) then
                 j=j+1
                 t2(j)=t1(i)
             endif
-        end do    
+        end do
         indd=1
         do while (indd.eq.1)
             indd=0
@@ -1073,13 +1210,13 @@
                     temp=t2(i)
                     t2(i)=t2(i+1)
                     t2(i+1)=temp
-                    indd=1        
+                    indd=1
                 end if
             end do
-        end do        
-        ent=int(nbrecu/nbintervR)    
+        end do
+        ent=int(nbrecu/nbintervR)
         allocate(ttt(0:nbintervR))
-        
+
         ttt(0)=0.d0
         ttt(nbintervR)=cens
         j=0
@@ -1094,7 +1231,7 @@
 !============================================================================================>
 !=======================================>   DECES  <==========================================
 !============================================================================================>
-!     
+!
         j=0
         do i=1,ngmax
             if(t1dc(i).ne.(0.d0).and.cdc(i).eq.1)then
@@ -1102,15 +1239,15 @@
             endif
         end do
         nbdeces=j
-        
-        allocate(t3(nbdeces))     
+
+        allocate(t3(nbdeces))
         j=0
         do i=1,ngmax
             if(t1dc(i).ne.(0.d0).and.cdc(i).eq.1)then
                 j=j+1
                 t3(j)=t1dc(i)
             endif
-        end do          
+        end do
 
         indd=1
         do while (indd.eq.1)
@@ -1120,19 +1257,19 @@
                     temp=t3(i)
                     t3(i)=t3(i+1)
                     t3(i+1)=temp
-                    indd=1        
+                    indd=1
                 end if
             end do
-        end do      
-     
+        end do
+
         entdc=int(nbdeces/nbintervDC)
         allocate(tttdc(0:nbintervDC))
         tttdc(0)=0.d0
         tttdc(nbintervDC)=cens
-        
-        j=0 
+
+        j=0
         do j=1,nbintervDC-1
-            if (equidistant.eq.0) then    
+            if (equidistant.eq.0) then
                 tttdc(j)=(t3(entdc*j)+t3(entdc*j+1))/(2.d0)
             else
                 tttdc(j)=(cens/nbintervDC)*j
@@ -1154,7 +1291,7 @@
         end do
         nbrecumeta=j
         allocate(t4(nbrecumeta))
-        
+
         j=0
         do i=1,nsujetmeta
             if (t1meta(i).ne.(0.d0).and.cmeta(i).eq.1) then
@@ -1162,7 +1299,7 @@
                 t4(j)=t1meta(i)
             endif
         end do
-        
+
         indd=1
         do while (indd.eq.1)
             indd=0
@@ -1171,18 +1308,18 @@
                     temp=t4(i)
                     t4(i)=t4(i+1)
                     t4(i+1)=temp
-                    indd=1        
+                    indd=1
                 end if
             end do
-        end do    
-        
+        end do
+
         entmeta=int(nbrecumeta/nbintervM)
-        
+
         allocate(tttmeta(0:nbintervM))
-        
+
         tttmeta(0)=0.d0
         tttmeta(nbintervM)=cens
-        
+
         j=0
         do j=1,nbintervM-1
             if (equidistant.eq.0) then
@@ -1193,14 +1330,14 @@
         end do
         timeM = tttmeta
         deallocate(t2,t3,t4)
-    end if        
+    end if
 
     ca=0.d0
     cb=0.d0
-    dd=0.d0    
+    dd=0.d0
     if (typeof .ne. 0) then
         allocate(kkapa(3))
-    end if    
+    end if
 
 !     write(*,*)''
 !     write(*,*)'=============== Modele final ================='
@@ -1232,27 +1369,18 @@
         k0 = kappaCV    
     end if
 
-! parametres de dependance    
+! parametres de dependance
     b(np-nva-indic_alpha)=1.d0
     b(np-nva-indic_eta)=1.d0
-    b(np-nva-indic_a1)=0.5d0    
+    b(np-nva-indic_a1)=0.5d0
     b(np-nva-indic_a2)=0.5d0
-    b(np-nva-indic_rho)=0.5d0    
-! fin parametres de dependance        
+    b(np-nva-indic_rho)=0.5d0
+! fin parametres de dependance
+
 ! NEW initialisation to compare with frailtypack
 !    b=0.5d0
-! NEW initialisation to compare with frailtypack    
+! NEW initialisation to compare with frailtypack
 !    write(*,*)'param init',b
-
-    !print*,k0
-    !print*,b
-    !print*,np
-    !print*,ni
-    !print*,v
-    !print*,res
-    !print*,ier
-    !print*,istop
-    !print*,effet
 
     res=0.d0
     select case(typeof)
@@ -1268,7 +1396,7 @@
     if (typeof .ne. 0) then
         deallocate(kkapa)
     end if
-    
+
     resOut=res
     critCV(1)=ier
     critCV(2)=istop
@@ -1276,7 +1404,7 @@
     if (istop .ne. 1) then
         goto 1000
     end if
-    
+
     call multi(I_hess,H_hess,np,np,np,IH)
     call multi(H_hess,IH,np,np,np,HIH)
 
@@ -1296,23 +1424,14 @@
             lam2Out,xSu2,su2Out,x3Out,lam3Out,xSu3,su3Out)
         case(2)
             Call distanceJ_weib(b,np,mt1,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,x3Out,lam3Out,xSu3,su3Out)
-!             if (nst == 1) then
-!                 scale_weib(1) = etaR !betaR
-!                 shape_weib(1) = betaR !etaR
-!                 scale_weib(2) = 0.d0
-!                 shape_weib(2) = 0.d0
-!                 scale_weib(3) = 0.d0
-!                 shape_weib(3) = 0.d0        
-!             else
-                scale_weib(1) = etaR
-                shape_weib(1) = betaR
-                scale_weib(2) = etaD
-                shape_weib(2) = betaD
-                scale_weib(3) = etaM
-                shape_weib(3) = betaM
-!             end if
+            scale_weib(1) = etaR
+            shape_weib(1) = betaR
+            scale_weib(2) = etaD
+            shape_weib(2) = betaD
+            scale_weib(3) = etaM
+            shape_weib(3) = betaM
     end select
-        
+
     do ss=1,npmax
         do sss=1,npmax
             HIHOut(ss,sss) = HIH(ss,sss)
@@ -1325,21 +1444,21 @@
 !LCV(2) Akaike information Criterion 
 !     calcul de la trace, pour le LCV (likelihood cross validation)
     LCV=0.d0
-    if (typeof == 0) then    
-!        write(*,*)'The approximate like cross-validation Criterion in the non parametric case'        
+    if (typeof == 0) then
+!        write(*,*)'The approximate like cross-validation Criterion in the non parametric case'
         call multi(H_hess,I_hess,np,np,np,HI)    
         do i =1,np
             LCV(1) = LCV(1) + HI(i,i)
-        end do     
+        end do
         LCV(1) = (LCV(1) - resnonpen) / nsujet
-    else        
+    else
 !        write(*,*)'=========> Akaike information Criterion <========='
         LCV(2) = (1.d0 / nsujet) *(np - resOut)
-!        write(*,*)'======== AIC :',LCV(2)    
+!        write(*,*)'======== AIC :',LCV(2)
     end if
-    
 
-1000 continue    
+
+1000 continue
 
 !    write(*,*)'=========== coefBeta loco =========='
     coefBeta(1,:) = b((np-nva+1):(np-nva+nva1))
@@ -1358,13 +1477,13 @@
             ve1(i,j)=ve(i,j)
         end do
     end do
-    
+
     do i=1,ng
         do j=1,nva2
             ve2(i,j)=vedc(i,j)
         end do
     end do
-    
+
     do i=1,nsujetmeta
         do j=1,nva3
             ve3(i,j)=vemeta(i,j)
@@ -1378,28 +1497,27 @@
     if((istop == 1) .and. (effet == 1)) then
 !        print*,'======== Call Residus Martingale ==========='
         deallocate(I_hess,H_hess)
-        
+
         allocate(vres((2*(2+3)/2)),I_hess(2,2),H_hess(2,2))
-            
-        effetres = effet    
-    
+
+        effetres = effet
+
         Call Residus_Martingale_multive(b,np,funcpamultires,Res_martingale,Res_martingaledc,Res_martingale2,&
         frailtypred,frailtypred2,frailtyvar,frailtyvar2,frailtyCorr)
 
         do i=1,nsujet
             linearpred(i)=Xbeta(1,i)+frailtypred(g(i))
         end do
-        
+
         do i=1,ng
             linearpreddc(i)=Xbetadc(1,i)+alpha1*frailtypred(g(i))+alpha2*frailtypred2(gmeta(i))
         end do
-        
+
         do i=1,nsujetmeta
             linearpredM(i)=XbetaM(1,i)+frailtypred2(gmeta(i))
-        end do        
-        
+        end do
 
-        deallocate(I_hess,H_hess,vres)    
+        deallocate(I_hess,H_hess,vres)
     else
         deallocate(I_hess,H_hess)
     end if
@@ -1411,19 +1529,19 @@
     HI,BIAIS,date,datedc,datemeta,b01,b02,b03,Rrec2,Nrec2)
 
     if (typeof == 0) then
-        deallocate(mm3meta,immeta,mm2meta,mm1meta,mmmeta,im3meta,im2meta,im1meta,&        
+        deallocate(mm3meta,immeta,mm2meta,mm1meta,mmmeta,im3meta,im2meta,im1meta,&
         nt0dc,nt1dc,nt0,nt1,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,mm3,mm2,&
         mm1,mm,im3,im2,im1,im,zi,zidc,zimeta,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,&
         m2m,m1m,nt0meta,nt1meta)
         deallocate(m3m3b,m2m2b,m1m1b,mmmb,m3m2b,m3m1b,m3mb,m2m1b,m2mb,m1mb,m3m3c,&
-        m2m2c,m1m1c,mmmc,m3m2c,m3m1c,m3mc,m2m1c,m2mc,m1mc)            
+        m2m2c,m1m1c,mmmc,m3m2c,m3m1c,m3mc,m2m1c,m2mc,m1mc)
     end if
 
     if (typeof .ne. 0) then
-        deallocate(vvv)    
-    end if    
-    
-    if (typeof == 1) then    
+        deallocate(vvv)
+    end if
+
+    if (typeof == 1) then
         deallocate(ttt,tttdc,tttmeta,betacoef)
     end if
 
@@ -1439,30 +1557,30 @@
     frailtyEstimates(1:nobsEvent(3),2)=frailtypred2(1:nobsEvent(3))
     frailtyEstimates(1:nobsEvent(3),3)=frailtyvar(1:nobsEvent(3))
     frailtyEstimates(1:nobsEvent(3),4)=frailtyvar2(1:nobsEvent(3))
-    frailtyEstimates(1:nobsEvent(3),5)=frailtyCorr(1:nobsEvent(3))    
+    frailtyEstimates(1:nobsEvent(3),5)=frailtyCorr(1:nobsEvent(3))
 
     return
-    
+
     end subroutine jointMultiv
-      
+
 
 !========================== VECSPLI ==============================
 !AD:add argument:ndatedc 
-    subroutine vecspli(ndate,ndatedc,ndatemeta) 
-!AD:end    
+    subroutine vecspli(ndate,ndatedc,ndatemeta)
+!AD:end
     use taillesmultiv
-!AD:    
+!AD:
     use comonmultiv,only:date,datedc,datemeta,zi,zidc,zimeta,mm3,mm2,mm1,mm,im3,im2,im1,im &
     ,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,mm3meta,mm2meta,mm1meta,&
     mmmeta,im3meta,im2meta,im1meta,immeta,vectn
-    
-!AD:end    
+
+!AD:end
     IMPLICIT NONE
-    
+
     integer,intent(in)::ndate,ndatedc,ndatemeta
     integer::i,j,k
     double precision::ht,htm,h2t,ht2,ht3,hht,h,hh,h2,h3,h4,h3m,h2n,hn,hh3,hh2
-      
+
 !----------  calcul de u(ti) :  STRATE1 ---------------------------
 !    attention the(1)  sont en nz=1
 !        donc en ti on a the(i)
@@ -1545,9 +1663,8 @@
         imdc(i)  = ht*mmdc(i)*0.25d0
 
     end do
-    
-    
-!AD:end    
+
+!AD:end
     j=0
     do i=1,ndatemeta-1
         do k = 2,vectn(3)-2
@@ -1583,14 +1700,14 @@
         im1meta(i) = (htm*mm1meta(i)*0.25d0)+(h4*mmmeta(i)*0.25d0)
         immeta(i)  = ht*mmmeta(i)*0.25d0
          end do
-   
-    end subroutine vecspli  
+
+    end subroutine vecspli
 
 
     subroutine vecpenP(n,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m) 
-    
+
     IMPLICIT NONE
-    
+
     integer,intent(in)::n
     integer::i
     double precision::h,hh,h2,h3,h4,h3m,h2n,hn,hh3,hh2,a3,a2,b2 &
@@ -1612,7 +1729,7 @@
     m1m=0.d0
     do i=1,n-3
         h = zi(i+1)-zi(i)
-        
+
         hh= zi(i+1)-zi(i-1)
         h2= zi(i+2)-zi(i)
         h3= zi(i+3)-zi(i)
@@ -1633,7 +1750,7 @@
         x3 = zi(i+1)*zi(i+1)*zi(i+1)-zi(i)*zi(i)*zi(i)
         x2 = zi(i+1)*zi(i+1)-zi(i)*zi(i)
         x  = zi(i+1)-zi(i)
-        
+
         m3m3(i) = (192.d0*h/(hh*hn*hh3*hh*hn*hh3))
         m2m2(i) = 64.d0*(((3.d0*x3-(3.d0*x2*(2.d0*zi(i+1)+zi(i-2) &
         ))+x*(4.d0*zi(i+1)*zi(i+1)+zi(i-2)*zi(i-2)+4.d0*zi(i+1) &
@@ -1645,7 +1762,7 @@
         m2m2(i) = m2m2(i) +64.d0*((3.d0*x3-(3.d0*x2*(2.d0*zi(i+2) &
         +zi(i)))+x*(4.d0*zi(i+2)*zi(i+2)+zi(i)*zi(i)+4.d0*zi(i+2) &
         *zi(i)))/(c2*c2))
-        
+
         m2m2(i) = m2m2(i) +128.d0*((3.d0*x3-(1.5d0*x2*(zi(i+2) &
         +zi(i-1)+3.d0*zi(i+1)+zi(i-2)))+x*(2.d0*zi(i+1)*zi(i+2) &
         +2.d0*zi(i+1)*zi(i-1)+2.d0*zi(i+1)*zi(i+1)+zi(i-2)*zi(i+2) &
@@ -1750,11 +1867,11 @@
 
 !==========================  SUSP  ====================================
     subroutine susp(x,the,n,su,lam,zi)
-    
+
     use taillesmultiv
-    
+
     IMPLICIT NONE 
-    
+
     integer,intent(in)::n
     double precision,intent(out)::lam,su
     double precision,dimension(-2:npmax),intent(in)::zi,the
@@ -1772,8 +1889,8 @@
             if (j.gt.1)then
                 do i=2,j
                     som = som+the(i-4)
-                end do  
-            endif   
+                end do
+            endif
             ht = x-zi(j)
             htm= x-zi(j-1)
             h2t= x-zi(j+2)
@@ -1805,7 +1922,7 @@
             lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         endif
     end do
-   
+
     if(x.ge.zi(n))then
         som = 0.d0
         do i=1,n+1
@@ -1813,23 +1930,23 @@
         end do
         gl = som
     endif
-    
+
     su  = dexp(-gl)
-    
+
     return
-     
+
     end subroutine susp
 
 !==========================  COSP  ====================================
-! calcul les points pour les fonctions 
+! calcul les points pour les fonctions
 ! et leur bandes de confiance
 
     subroutine cosp(x,the,n,y,zi,binf,su,bsup,lbinf,lam,lbsup)
-    
+
     use taillesmultiv
-    
+
     IMPLICIT NONE
-    
+
     integer,intent(in)::n
     double precision,intent(in)::x
     double precision,intent(out)::lam,su
@@ -1883,7 +2000,7 @@
             lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         endif
     end do
-   
+
     if(x.ge.zi(n))then
         som = 0.d0
         do i=1,n
@@ -1912,11 +2029,11 @@
 
 
     subroutine  conf1(x,ni,n,y,pm,zi)
-    
+
     use taillesmultiv
-    
+
     IMPLICIT NONE
-    
+
     integer,intent(in)::ni,n
     double precision,intent(in)::x
     double precision,dimension(-2:npmax),intent(in)::zi
@@ -1941,7 +2058,7 @@
     do i=1,n
         res = res + aux(i)*vecti(i)
     end do
-    
+
     res = -res
     pm = dsqrt(res)
 
@@ -1950,11 +2067,11 @@
 !=====================  CONF  =============================
 
     subroutine  conf(x,ni,n,y,pm,zi)
-    
+
     use taillesmultiv
-    
+
     IMPLICIT NONE
-    
+
     integer,intent(in)::ni,n
     double precision,intent(in)::x
     double precision,dimension(-2:npmax),intent(in)::zi
@@ -1963,7 +2080,7 @@
     integer::i,j
     double precision::res,isp
     double precision,dimension(52)::vecti,aux
-    
+
     do i=1,n
         vecti(i) = isp(x,ni,i,zi)
     end do
@@ -1988,11 +2105,11 @@
 !==========================   ISP   ==================================
 
     double precision function isp(x,ni,ns,zi)
-    
+
     use taillesmultiv
-    
+
     IMPLICIT NONE
-    
+
     integer,intent(in)::ni,ns
     double precision,intent(in)::x
     double precision,dimension(-2:npmax),intent(in)::zi
@@ -2019,19 +2136,19 @@
                                 val = 1.d0
                             endif
                         endif
-                endif   
+                endif
         endif
-    else   
+    else
         if(ni.lt.ns-3)then
             val = 0.d0
         else
             if(ni.eq.ns-3)then
                 val = (x-zi(ni))*mmsp(x,ni,ns,zi)*0.25d0
-            else  
+            else
                 if(ni.eq.ns-2)then
                     val = ((x-zi(ni-1))*mmsp(x,ni,ns,zi)+ &
                     (zi(ni+4)-zi(ni))*mmsp(x,ni,ns+1,zi))*0.25d0
-                else   
+                else
                     if (ni.eq.ns-1)then
                         val =((x-zi(ni-2))*mmsp(x,ni,ns,zi)+ &
                         (zi(ni+3)-zi(ni-1))*mmsp(x,ni,ns+1,zi) &
@@ -2050,21 +2167,21 @@
             endif
         endif 
     endif
-      
+
     isp = val
-    
+
     return
-    
+
     end function isp
-    
+
 !==========================  MMSP   ==================================
 
     double precision function mmsp(x,ni,ns,zi)
-    
+
     use taillesmultiv
-    
+
     IMPLICIT NONE 
-    
+
     integer,intent(in)::ni,ns
     double precision,intent(in)::x
     double precision,dimension(-2:npmax),intent(in)::zi
@@ -2120,7 +2237,7 @@
                         *(x-zi(ni)))/((zi(ni+2)-zi(ni-2)) &
                         *(zi(ni+2)-zi(ni))*(zi(ni+2)-zi(ni-1))* &
                         (zi(ni+1)-zi(ni)))))
-                    endif 
+                    endif
                 else
                     if(ni.eq.ns)then
                             if(x.eq.zi(ni))then
@@ -2142,9 +2259,9 @@
     endif
 
     mmsp = val
-    
+
     return
-    
+
     end function mmsp
 
 
@@ -2155,12 +2272,12 @@
     subroutine multi(A,B,IrowA,JcolA,JcolB,C)
 !     remarque :  jcolA=IrowB
     use taillesmultiv
-    
+
     IMPLICIT NONE
-    
+
     integer,intent(in)::IrowA,JcolA,JcolB
     double precision,dimension(npmax,npmax),intent(in):: A,B
-    double precision,dimension(npmax,npmax),intent(out)::C       
+    double precision,dimension(npmax,npmax),intent(out)::C
     integer::i,j,k
     double precision::sum
 
@@ -2173,26 +2290,24 @@
             C(I,J)=sum
         end do
     end do
-    
+
     return
-    
+
     end subroutine multi
 
 
-    double precision  function func30(frail1,frail2) 
-! calcul de l integrant, pour un effet aleatoire donnï¿½ frail et un groupe donne auxig (cf funcpa)      
-      
+    double precision  function func30(frail1,frail2)
+! calcul de l integrant, pour un effet aleatoire donne frail et un groupe donne auxig (cf funcpa)
+
     use taillesmultiv
     use comonmultiv,only:nigmeta,alpha1,alpha2,res1meta,res3meta,&
     nig,auxig,alpha,theta,eta,aux1,res1,res3,cdc 
-    
 
     implicit none
-    
+
     double precision::frail1,frail2
 
-
-    func30=0.d0          
+    func30=0.d0
     func30 = frail1*(cdc(auxig)*alpha1+nig(auxig)) &
     +frail2*(cdc(auxig)*alpha2+nigmeta(auxig)) &
     -dexp(frail1)*(res1(auxig)-res3(auxig))-dexp(frail2)*(res1meta(auxig)-res3meta(auxig)) &
@@ -2203,8 +2318,7 @@
     /(2.d0*(1.d0-((2.d0*dexp(alpha)/(dexp(alpha)+1.d0))-1.d0)**2.d0))
     func30 = dexp(func30)
 
-    
     return
-    
+
     end function func30
 

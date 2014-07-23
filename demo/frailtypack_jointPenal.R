@@ -15,10 +15,10 @@ cat("frailtypack test for joint model ...\n")
 
 data("readmission")
 
-modJoint.gap <- frailtyPenal(Surv(time,event)~ cluster(id) +
-  dukes + charlson + sex + chemo + terminal(death),
+modJoint.gap <- frailtyPenal(Surv(time,event)~ 
+  dukes + charlson + cluster(id)+sex + chemo + terminal(death),
   formula.terminalEvent = ~ dukes + charlson + sex + chemo,
-  data = readmission, n.knots = 10, kappa1 = 100, kappa2 = 100)
+  data = readmission, n.knots = 8, kappa1 = 2.11e+08, kappa2 = 9.53e+11)
 
 print(modJoint.gap, digits = 4)
 

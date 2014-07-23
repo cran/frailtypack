@@ -21,3 +21,17 @@ modMultiv <- multivPenal(Surv(TIMEGAP,INDICREC)~ cluster(PATIENT) +
   data = dataMultiv, hazard = "Weibull")
 
 print(modMultiv, digits = 4)
+
+########################################################################
+### Figures
+########################################################################
+pdf(file="fig4.pdf", height = 3.6, width = 8.1)
+par(mfrow = c(1, 4))
+plot(modMultiv, type.plot = "survival", event = "recurrent1", main = "Recurrent1",
+  conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
+plot(modMultiv, type.plot = "survival", event = "recurrent2", main = "Recurrent2",
+  conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
+plot(modMultiv, type.plot = "survival", event = "terminal", main = "Terminal",
+  conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
+plot(modMultiv, type.plot = "survival", event = "both", main = "Both",
+  conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1, ylim = c(0, 1.2))

@@ -409,23 +409,13 @@
         res = 0.d0
         do k=1,ng
             if(cpt(k).gt.0)then
-                !if(theta.gt.(1.d-8)) then
 !cccc ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
-                    res= res + res2(k) &
+                res= res + res2(k) &
 !--      pour le deces:
-                    + res2dc(k)  &
-                    - dlog(dsqrt(sig2))-dlog(2.d0*pi)/2.d0  &
-                    + dlog(integrale3(k))
-                !else
-!*************************************************************************
-!     developpement de taylor d ordre 3
-!*************************************************************************
-!                   write(*,*)'************** TAYLOR *************'
-                !    res= res + res2(k) &
-                !    + res2dc(k)  &
-                !    - gammaJ(1./theta)-dlog(theta)/theta  &
-                !    + dlog(integrale3(k))
-                !endif
+                + res2dc(k)  &
+                - dlog(dsqrt(sig2))-dlog(2.d0*pi)/2.d0  &
+                + dlog(integrale3(k))
+
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
                     !print*,"here",res,res2(k),res2dc(k),dlog(integrale3(k)),integrale3(k)
                     funcpaGcpm_log=-1.d9

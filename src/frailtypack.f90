@@ -28,7 +28,7 @@
     integer,dimension(nsujetAux)::stracross
     double precision,dimension(nvaAux)::vax
     double precision::tt0,tt1,ttU ! rajout
-    double precision::h,ax1,ax2,res,min,max,maxt,str,pord
+    double precision::h,ax1,ax2,res,min,max,maxt,str,pord !,scoreT,scoretest
     double precision,dimension(2)::auxkappa,k0,res01
     double precision,dimension(3*nsujetAux)::aux ! rajout dimension
     double precision,dimension(np*(np+3)/2)::v
@@ -54,12 +54,10 @@
     double precision,dimension(np,np)::y
 !AD:add
     double precision,dimension(2),intent(out)::LCV,shapeweib,scaleweib
-    double precision::ca,cb,dd,funcpassplines,funcpascpm,funcpasweib
-    double precision::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
-    double precision::funcpassplines_log,funcpasweib_log,funcpascpm_log
-    external::funcpassplines,funcpascpm,funcpasweib
-    external::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
-    external::funcpassplines_log,funcpasweib_log,funcpascpm_log
+    double precision::ca,cb,dd
+    double precision,external::funcpassplines,funcpascpm,funcpasweib
+    double precision,external::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
+    double precision,external::funcpassplines_log,funcpasweib_log,funcpascpm_log
     double precision,external::funcpas_tps
 !AD:
 !Cpm
@@ -80,6 +78,8 @@
     double precision,dimension(0:100,0:4*sum(filtretps0))::BetaTpsMat ! matrice des effets depedants du temps (4 colonnes par effet dep du tps)
     double precision,dimension(nbinnerknots0+qorder0)::basis
     double precision,dimension(3),intent(inout)::EPS ! seuils de convergence
+    integer::nt
+    double precision,dimension(:),allocatable::valT,rl_cond,epoir
 
 !verification
     !print*,nsujetAux,ngAux,icenAux,nstAux,effetAux,nzAux,ax1,ax2,nvaAux
@@ -434,7 +434,7 @@
     if(typeof == 0) then
 
 ! Al:10/03/2014 emplacement des noeuds splines en percentile (sans censure par intervalle)
-        if(intcens.eq.0) then
+        if(equidistant.eq.0) then ! percentile
             i=0
             j=0
 !----------> taille - nb de recu
@@ -476,7 +476,7 @@
             zi(nz+3) = maxt !zi(nz)
             ziOut = zi
             deallocate(t2)
-        else
+        else ! equidistant
             nzmax=nz+3
             allocate(zi(-2:nzmax))
             ndate = k
@@ -584,7 +584,7 @@
     allocate(innerknots(nbinnerknots))
 
     if (typeof == 1) then
-        
+
         if (intcens.eq.0) then !! enlever le piecewise-per pour la censure par intervalle
 !------- RECHERCHE DES NOEUDS
 !----------> Enlever les zeros dans le vecteur de temps
@@ -638,7 +638,7 @@
         
         j=0
         do j=1,nbintervR-1
-            if ((equidistant.eq.0).and.(intcens.eq.0)) then ! ici se fait la difference entre piecewise-per et equi
+            if (equidistant.eq.0) then ! ici se fait la difference entre piecewise-per et equi
                 ttt(j) = (t2(ent*j)+t2(ent*j+1))/(2.d0)
             else
                 ttt(j) = mint + ((cens-mint)/nbintervR)*j
@@ -1195,6 +1195,26 @@
             martingaleCox=0.d0
         end if
     end if
+
+
+    nt = 3
+    allocate(valT(nt),rl_cond(nt),epoir(nt))
+!     valT(1) = 200.d0
+!     valT(2) = 500.d0
+!     valT(3) = 800.d0
+! print*,"avant"
+!     call cvpl(nsujet,np,b,V,t1,nt,valT,rl_cond,epoir)
+! print*,"apres"
+!     print*,rl_cond
+!     print*,epoir
+    deallocate(valT,rl_cond,epoir)
+
+
+! ! Al : 25/03/2014 Score Test for frailties (Commenges/Andersen)
+!     if (effet.eq.1) then    
+!         scoreT = scoretest(b,frailtypred)
+!         print*,scoreT
+!     endif
 
     deallocate(t0,t1,tU,c,d,stra,g,nig,ve,Hspl_hess,hess, &
     mm3,mm2,mm1,mm,im3,im2,im1,im,date,cumulhaz,Residus,vuu, &
@@ -1998,7 +2018,7 @@
     endif
 
 !AD:
-    if (istop.ne.1) goto 50 !if (istop.eq.4) goto 50
+    if (istop.eq.4) goto 50
 !AD:
 
     if(k0(1).gt.0.d0)then

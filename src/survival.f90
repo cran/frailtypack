@@ -34,7 +34,7 @@
 !AM: add lam
     lam = 0.d0
     
-    do k = 2,nz-1
+    do k = 2,nz ! avant y avait nz-1...
         if ((t.ge.zi(k-1)).and.(t.lt.zi(k)))then
             j = k-1
             if (j.gt.1)then
@@ -123,15 +123,21 @@
 
     do i=1,nbintervR
         if ((t.ge.(ttt(i-1))).and.(t.lt.(ttt(i)))) then
-        
             som1=(b(i)**2)*(t-ttt(i-1))
-            
             if (i.ge.2)then
                 do j=1,i-1
                     som2=som2+(b(j)**2)*(ttt(j)-ttt(j-1))
                 end do
             endif
-            
+            su=dexp(-(som1+som2))
+        endif
+        if ((t.eq.(ttt(nbintervR)))) then
+            som1=(b(nbintervR)**2)*(t-ttt(nbintervR-1))
+            if (nbintervR.ge.2)then
+                do j=1,nbintervR-1
+                    som2=som2+(b(j)**2)*(ttt(j)-ttt(j-1))
+                end do
+            endif
             su=dexp(-(som1+som2))
         endif
     end do
@@ -154,15 +160,21 @@
 !!!
         do i=1,nbintervR
             if ((t.ge.(ttt(i-1))).and.(t.lt.(ttt(i)))) then
-            
                 som1=(b(i+nbintervR)**2)*(t-ttt(i-1))
-                
                 if (i.ge.2)then
                     do j=1,i-1
                         som2=som2+(b(j+nbintervR)**2)*(ttt(j)-ttt(j-1))
                     end do
                 endif
-                
+                su=dexp(-(som1+som2))
+            endif
+            if ((t.eq.(ttt(nbintervR)))) then
+                som1=(b(2*nbintervR)**2)*(t-ttt(nbintervR-1))
+                if (nbintervR.ge.2)then
+                    do j=1,nbintervR-1
+                        som2=som2+(b(j+nbintervR)**2)*(ttt(j)-ttt(j-1))
+                    end do
+                endif
                 su=dexp(-(som1+som2))
             endif
         end do    
@@ -202,18 +214,25 @@
     som2=0.d0
     su=0.d0
     surv=0.d0
+
 !recurrent
     do i=1,nbintervR
         if ((t.ge.(ttt(i-1))).and.(t.lt.(ttt(i)))) then
-        
             som1=(b(i)**2)*(t-ttt(i-1))
-            
             if (i.ge.2)then
                 do j=1,i-1
                     som2=som2+(b(j)**2)*(ttt(j)-ttt(j-1))
                 end do
             endif
-            
+            su=dexp(-(som1+som2))
+        endif
+        if ((t.eq.(ttt(nbintervR)))) then
+            som1=(b(nbintervR)**2)*(t-ttt(nbintervR-1))
+            if (nbintervR.ge.2)then
+                do j=1,nbintervR-1
+                    som2=som2+(b(j)**2)*(ttt(j)-ttt(j-1))
+                end do
+            endif
             su=dexp(-(som1+som2))
         endif
     end do    
@@ -236,15 +255,21 @@
 !!!
     do i=1,nbintervDC
         if ((t.ge.(tttdc(i-1))).and.(t.lt.(tttdc(i)))) then
-        
             som1=(b(i+nbintervR)**2)*(t-tttdc(i-1))
-            
             if (i.ge.2)then
                 do j=1,i-1
                     som2=som2+(b(j+nbintervR)**2)*(tttdc(j)-tttdc(j-1))
                 end do
             endif
-            
+            su=dexp(-(som1+som2))
+        endif
+        if ((t.eq.(tttdc(nbintervDC)))) then
+            som1=(b(nbintervDC+nbintervR)**2)*(t-tttdc(nbintervDC-1))
+            if (nbintervDC.ge.2)then
+                do j=1,nbintervDC-1
+                    som2=som2+(b(j+nbintervR)**2)*(tttdc(j)-tttdc(j-1))
+                end do
+            endif
             su=dexp(-(som1+som2))
         endif
     end do    

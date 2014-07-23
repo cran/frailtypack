@@ -1,7 +1,5 @@
 !!! Donnees pour Joint
 
-
-
 !AD:sortie fortran
     module sortie
     integer,save::cptaux,cptcens,nb0recu
@@ -9,17 +7,15 @@
     end module sortie
 !AD:
 
-
-
     module donnees
     
     implicit none
     double precision,dimension(6)::cof
     double precision::stp,half,one,fpf
-    double precision,dimension(20),save::x,w!The abscissas-weights : w = w(xk)*exp(xk)
-    double precision,dimension(32),save::x1,w1!The abscissas-weights : w1 = w(xk)*exp(xk)
-    double precision,dimension(20),save::x2,w2
-    double precision,dimension(32),save::x3,w3
+    double precision,dimension(20),save::x,w   !The abscissas-weights : w = w(x)*exp(x)
+    double precision,dimension(32),save::x1,w1 !The abscissas-weights : w1 = w(x1)*exp(x1)
+    double precision,dimension(20),save::x2,w2 !The abscissas-weights : w2 = w(x2)*exp(x2*x2)
+    double precision,dimension(32),save::x3,w3 !The abscissas-weights : w3 = w(x3)*exp(x3*x3)
 
     DATA w/0.181080062419,0.422556767879,0.666909546702,0.91535237279, &
     1.1695397071,1.43135498624,1.7029811359,1.98701589585, &
