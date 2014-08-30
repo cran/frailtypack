@@ -1,6 +1,8 @@
 
 "print.frailtyPenal" <- function (x, digits = max(options()$digits - 4, 6), ...) 
 {
+
+  if (x$istop == 1){
 # plot des coefficient dependant du temps
 	if ((x$nvartimedep != 0) & (x$istop == 1)){
 		par(mfrow=c(1,x$nvartimedep))
@@ -8,6 +10,7 @@
 			matplot(x$BetaTpsMat[,1],x$BetaTpsMat[,(2:4)+4*i],col="blue",type="l",lty=c(1,2,2),xlab="t",ylab="beta(t)",main=x$Names.vardep[i+1],ylim=c(min(x$BetaTpsMat[,-1]),max(x$BetaTpsMat[,-1])))
 		}
 	}
+  }
 
 	if (!is.null(cl <- x$call)){
 		cat("Call:\n")
@@ -52,7 +55,7 @@
 			cat("  The maximum number of knots is 20","\n")
 		}
 	}else{
-		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)) cat("  The maximum number of time intervals is 20","\n")
+		if ((x$typeof == 1) & (x$indic.nb.int == 1)) cat("  The maximum number of time intervals is 20","\n")
 	}
 #AD
 
@@ -89,7 +92,7 @@
 					cat("  using a Parametrical approach for the hazard function","\n")
 				}
 				if (x$nvartimedep != 0) cat("  and some time-dependant covariates","\n")
-				if (x$n.strat>1) cat("  (Stratification structure used)", "\n")
+				if (x$n.strat>1) cat("  (Stratification structure used) :",x$n.strat,"strata \n")
 			}else{
 				if (x$typeof == 0){
 					cat("  Cox proportional hazards model parameter estimates ","\n")
@@ -99,7 +102,7 @@
 					cat("  using a Parametrical approach for the hazard function","\n")
 				}
 				if (x$nvartimedep != 0) cat("  and some time-dependant covariates","\n")
-				if (x$n.strat>1) cat("  (Stratification structure used)", "\n")
+				if (x$n.strat>1) cat("  (Stratification structure used) :",x$n.strat,"strata \n")
 			}
 			
 			if (x$typeof == 0){
@@ -231,7 +234,7 @@
 		
 		cat( "\n")
 		cat("      number of iterations: ", x$n.iter,"\n")
-		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)){
+		if ((x$typeof == 1) & (x$indic.nb.int == 1)){
 			cat("      Exact number of time intervals used: 20","\n")
 		 }else{
 		 	if (x$typeof == 1) cat("      Exact number of time intervals used: ",x$nbintervR,"\n")
@@ -241,17 +244,16 @@
 			cat("      Exact number of knots used: ", x$n.knots, "\n")
 	
 			if (!x$cross.Val){
-				cat("      Value of the smoothing parameter: ", x$kappa[1])
-				if (x$n.strat==2) cat(" ", x$kappa[2])
+				cat("      Value of the smoothing parameter: ", x$kappa, sep=" ")
 			}
 		
 			if (x$cross.Val){
 				if (is.null(frail)){
-					cat("      Smoothing parameter estimated by Cross validation: ", x$kappa[1])
+					cat("      Smoothing parameter estimated by Cross validation: ", x$kappa, sep=" ")
 				}else{ 
 					cat("      Best smoothing parameter estimated by")
 					cat("\n")
-					cat("      an approximated Cross validation: ", x$kappa[1])
+					cat("      an approximated Cross validation: ", x$kappa, sep=" ")
 				}
 			}
 			cat(", DoF: ", formatC(-x$DoF, format="f",digits=2))

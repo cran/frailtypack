@@ -17,6 +17,16 @@ data("dataNested")
 
 modNested <- frailtyPenal(Surv(t1, t2, event) ~ cluster(group) +
   subcluster(subgroup) + cov1 + cov2, data = dataNested,
-  n.knots = 8, kappa1 = 50000, cross.validation = TRUE)
+  n.knots = 8, kappa = 50000, cross.validation = TRUE)
 
 print(modNested, digits = 4)
+
+########################################################################
+### Stratified NESTED frailty model
+########################################################################
+
+modNested.str <- frailtyPenal(Surv(t1, t2, event) ~ cluster(group) +
+  subcluster(subgroup) + cov1 + strata(cov2), data = dataNested,
+  n.knots = 8, kappa = c(50000,50000))
+
+print(modNested.str, digits = 4)

@@ -14,7 +14,6 @@
 
     implicit none
 
-
     integer::nb,n,np,id,jd,i,j,k,vj,cptg,l,ig,choix
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,dnb,sum,inv,res,int,gammaJ
@@ -89,11 +88,12 @@
             else
                 vet=1.d0
             endif
+
             if((c(i).eq.1).and.(stra(i).eq.1))then
-                res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(k))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet) !dlog(dut1(nt1(i))*vet)
+                res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(k))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
             endif
             if((c(i).eq.1).and.(stra(i).eq.2))then
-                res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet) !dlog(dut2(nt1(i))*vet)
+                res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
             endif
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 funcpaGweib_intcens=-1.d9
@@ -101,10 +101,10 @@
             endif
 
             if(stra(i).eq.1)then
-                res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet !ut1(nt1(i))*vet
+                res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet
             endif
             if(stra(i).eq.2)then
-                res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet !ut2(nt1(i))*vet
+                res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet
             endif
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 funcpaGweib_intcens=-1.d9
@@ -113,17 +113,17 @@
 
 ! modification pour nouvelle vraisemblance / troncature:
             if(stra(i).eq.1)then
-                res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet !ut1(nt0(i))*vet
+                res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet
             endif
             if(stra(i).eq.2)then
-                res3(g(i)) = res3(g(i)) + ((t0(i)/etaD)**betaD)*vet !ut2(nt0(i))*vet
+                res3(g(i)) = res3(g(i)) + ((t0(i)/etaD)**betaD)*vet
             endif
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                 funcpaGweib_intcens=-1.d9
                 goto 123
             endif
         end do
-        
+
         res = 0.d0
         cptg = 0
 !     gam2 = gammaJ(inv)
@@ -200,8 +200,8 @@
             endif
 
             if (c(i).eq.1) then ! censure par intervalle
-                resL(i) = ((t1(i)/etaR)**betaR)*vet !ut1(nt1(i))*vet
-                resU(i) = ((tU(i)/etaR)**betaR)*vet !ut1(ntU(i))*vet
+                resL(i) = ((t1(i)/etaR)**betaR)*vet
+                resU(i) = ((tU(i)/etaR)**betaR)*vet
             endif
             if ((resL(i).ne.resL(i)).or.(abs(resL(i)).ge.1.d30)) then
                 !print*,"here1"
@@ -215,7 +215,7 @@
             end if
 
             if (c(i).eq.0) then ! censure a droite
-                res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet !ut1(nt1(i))*vet
+                res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet
             endif
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 !print*,"here3"
@@ -224,7 +224,7 @@
             end if
 
 !     modification pour nouvelle vraisemblance / troncature
-            res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet !ut1(nt0(i))*vet
+            res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                 !print*,"here4"
                 funcpaGweib_intcens=-1.d9
@@ -245,16 +245,17 @@
                 vet2=1.d0
             endif
             if(cdc(k).eq.1)then
-                res2dc(gsuj(k)) = res2dc(gsuj(k))+(betaD-1.d0)*dlog(t1dc(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet2) !dlog(dut2(nt1dc(k))*vet2)
+                res2dc(gsuj(k)) = res2dc(gsuj(k))+(betaD-1.d0)*dlog(t1dc(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet2)
             endif
             if ((res2dc(gsuj(k)).ne.res2dc(gsuj(k))).or.(abs(res2dc(gsuj(k))).ge. 1.d30)) then
                 !print*,"here5"
                 funcpaGweib_intcens=-1.d9
                 goto 123
             end if
+
 ! pour le calcul des integrales / pour la survie, pas pour donnees recur:
-            aux1(gsuj(k))=aux1(gsuj(k))+((t1dc(k)/etaD)**betaD)*vet2 !ut2(nt1dc(k))*vet2
-            aux2(gsuj(k))=aux2(gsuj(k))+((t0dc(k)/etaD)**betaD)*vet2 !ut2(nt0dc(k))*vet2 !vraie troncature
+            aux1(gsuj(k))=aux1(gsuj(k))+((t1dc(k)/etaD)**betaD)*vet2
+            aux2(gsuj(k))=aux2(gsuj(k))+((t0dc(k)/etaD)**betaD)*vet2 !vraie troncature
             if ((aux1(gsuj(k)).ne.aux1(gsuj(k))).or.(abs(aux1(gsuj(k))).ge. 1.d30)) then
                 !print*,"here6"
                 funcpaGweib_intcens=-1.d9
@@ -297,8 +298,6 @@
                 endif
 
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-                    !print*,b
-                    !print*,"here8",res,integrale1(k),k,dlog(integrale1(k)),res2dc(k)
                     funcpaGweib_intcens=-1.d9
                     goto 123
                 end if

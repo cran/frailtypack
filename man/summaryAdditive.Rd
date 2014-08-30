@@ -39,9 +39,9 @@
 data(dataAdditive)
 
 modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+var1+slope(var1),
-correlation=TRUE,data=dataAdditive,n.knots=8,kappa1=862,hazard="Splines")
+correlation=TRUE,data=dataAdditive,n.knots=8,kappa=862,hazard="Splines")
 
-#- 'var1' is boolean as a treatment variable. 
+#- 'var1' is boolean as a treatment variable.
 
 summary(modAdd)
 

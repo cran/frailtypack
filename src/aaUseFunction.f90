@@ -651,8 +651,8 @@
 
     implicit none
 
-    integer::p,i,iii,iiii,ptps,jj,jjj,np
-    double precision::tps
+    integer::p,i,iii,ptps,jj,jjj,np
+    double precision::tps,iiii
     integer::nvar
     double precision,dimension(np)::b
     integer,dimension(nvar)::filtre
@@ -719,8 +719,8 @@
 
     implicit none
 
-    integer::p,i,iii,iiii,ptps,jj,jjj,np,p1
-    double precision::tps
+    integer::p,i,iii,ptps,jj,jjj,np,p1
+    double precision::tps,iiii
     integer::nvar
     double precision,dimension(np)::b
     integer,dimension(nvar)::filtre

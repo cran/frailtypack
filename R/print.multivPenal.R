@@ -258,7 +258,7 @@
 		if (x$typeof == 0){ 
 			cat("\n")
 			cat("   Exact number of knots used: ", x$n.knots[1]," ",x$n.knots[2]," ",x$n.knots[3], "\n")
-			cat("   Value of the smoothing parameters: kappa1=", x$kappa[1], " kappa2=", x$kappa[2]," and kappa3=",x$kappa[3], sep="")
+			cat("   Value of the smoothing parameters: ", x$kappa, sep=" ")
 			cat("\n")
 		}
 	}else{

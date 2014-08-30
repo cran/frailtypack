@@ -12,21 +12,21 @@
     
 ! *** NOUVELLLE DECLARATION F90 :
     
-    integer::np,id,jd,i,j,k,cptg,l,r ! rajout du r
-    integer,dimension(ngmax)::cpt,cptC ! rajout
+    integer::np,id,jd,i,j,k,cptg,l,r
+    integer,dimension(ngmax)::cpt,cptC
     double precision::thi,thj,inv,res,vet,num,den
     double precision,dimension(np)::b,bh
     double precision,dimension(ngmax)::res1,res2,res3
     double precision,dimension(2)::k0
     double precision,dimension(1:2**dmax,1:ng)::p,p2 ! matrice
     integer,dimension(1:2**dmax,1:ng)::nbU,nbU2
-    
+
     kkapa=k0
     j=0
     theta=0.d0
-    
+
     bh = b
-    
+
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
 
@@ -41,7 +41,7 @@
         betaD= bh(3)**2
         etaD= bh(4)**2
     end if
-    
+
     if(effet.eq.1) then
         theta = bh(np-nva)*bh(np-nva)
     endif
@@ -68,7 +68,7 @@
     if (effet.eq.0) then
         do i=1,nsujet
             cpt(g(i))=cpt(g(i))+1
-            
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -122,7 +122,7 @@
 
         res = 0.d0
         cptg = 0
-        
+
 ! k indice les groupes
         do k=1,ng
             if(cpt(k).gt.0)then
@@ -220,7 +220,7 @@
 
         res = 0.d0
         cptg = 0
-        
+
 ! k indice les groupes
         do k=1,ng
             if(cpt(k).gt.0)then
@@ -237,7 +237,6 @@
 ! r indice les éléments dans le produit de Kronecker
                 do r=1,2**d(k)
                     num = ((-1)**nbU(r,k))*((1.d0+theta*res3(k))**inv)
-                    !print*,((-1)**nbU(r,k)),((1.d0+theta*res3(k))**inv),nbU(r,k),res3(k),inv
                     den = (1.d0+theta*res1(k)+theta*dlog(p(r,k)))**inv
                     res2(k) = res2(k) + num/den
                 enddo
@@ -252,8 +251,7 @@
 
                 res = res + dlog(res2(k))
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-                    !print*,"here"
-                    !print*,res2(k),dlog(res2(k)),inv*dlog(theta)
+                    !print*,"here",res2(k),dlog(res2(k)),inv*dlog(theta)
                   funcpasweib_intcens=-1.d9
                   goto 123
                 end if
@@ -261,7 +259,7 @@
         end do
 
     endif !fin boucle effet=0
-    
+
 !--------------------------------------------------
 
     if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
@@ -276,7 +274,7 @@
     end do
 
 123     continue
-    
+
     return
 
     end function funcpasweib_intcens

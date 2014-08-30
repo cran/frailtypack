@@ -14,7 +14,6 @@
 
     implicit none
 
-
     integer::n,np,id,jd,i,j,k,vj,ig,choix
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,inv,res,int,gammaJ
@@ -143,8 +142,8 @@
             goto 123
         end if
 ! pour le calcul des integrales / pour la survie, pas pour donnees recur:
-        aux1(k)=((t1dc(k)/etaD)**betaD)*vet2 !ut2(nt1dc(k))*vet2
-        aux2(k)=((t0dc(k)/etaD)**betaD)*vet2 !ut2(nt0dc(k))*vet2 !vraie troncature
+        aux1(k)=((t1dc(k)/etaD)**betaD)*vet2
+        aux2(k)=((t0dc(k)/etaD)**betaD)*vet2 !vraie troncature
         if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge.1.d30)) then
             !print*,"here6"
             funcpajweib_intcens=-1.d9

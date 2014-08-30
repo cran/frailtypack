@@ -15,15 +15,50 @@ cat("frailtypack test for joint model ...\n")
 
 data("readmission")
 
-modJoint.gap <- frailtyPenal(Surv(time,event)~ 
-  dukes + charlson + cluster(id)+sex + chemo + terminal(death),
+modJoint.gap <- frailtyPenal(Surv(time, event) ~ cluster(id) +
+  dukes + charlson + sex + chemo + terminal(death),
   formula.terminalEvent = ~ dukes + charlson + sex + chemo,
-  data = readmission, n.knots = 8, kappa1 = 2.11e+08, kappa2 = 9.53e+11)
+  data = readmission, n.knots = 8, kappa = c(2.11e+08,9.53e+11))
 
 print(modJoint.gap, digits = 4)
 
 ### Print the hazard ratios
 summary(modJoint.gap, level = 0.95)
+
+#########################################################################
+### Stratified JOINT frailty model with gap times
+#########################################################################
+
+modJoint.str <- frailtyPenal(Surv(time, event) ~ cluster(id) +
+  dukes + charlson + strata(sex) + chemo + terminal(death),
+  formula.terminalEvent = ~ dukes + charlson + sex + chemo,
+  data = readmission, n.knots = 8, kappa = c(2.11e+08,2.11e+08,9.53e+11))
+
+print(modJoint.str, digits = 4)
+
+#########################################################################
+### JOINT frailty model without alpha parameter (more flexible)
+#########################################################################
+
+modJoint.wa <- frailtyPenal(Surv(time, event) ~ cluster(id) +
+  dukes + charlson + sex + chemo + terminal(death),
+  formula.terminalEvent = ~ dukes + charlson + sex + chemo,
+  data = readmission, n.knots = 8, kappa = c(2.11e+08,9.53e+11), Alpha = "none")
+
+print(modJoint.wa, digits = 4)
+
+#########################################################################
+### JOINT frailty model for clustered data
+#########################################################################
+
+readmission <- transform(readmission,group=id%%31+1)
+
+modJoint.clus <- frailtyPenal(Surv(t.start, t.stop, event) ~ cluster(group) + num.id(id) +
+  dukes + charlson + sex + chemo + terminal(death),
+  formula.terminalEvent = ~ dukes + charlson + sex + chemo,
+  data = readmission, recurrentAG = TRUE, n.knots = 10, kappa = c(2.11e+08,9.53e+11))
+
+print(modJoint.clus, digits = 4)
 
 ########################################################################
 ### Figures

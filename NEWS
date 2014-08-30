@@ -1,3 +1,14 @@
+Changes in Version 2.7     August 2014
+
+  o In 'frailPenal' and 'additivePenal' functions, no more 'kappa1', 'kappa2', 'nb.int1' and 'nb.int2'. Replaced by two vectors 'kappa' and 'nb.int'.
+
+  o More levels of stratification (up to 6) for shared frailty model.
+
+  o Now possible stratification in a joint frailty model for the recurrent event part (up to 6 levels).
+
+  o New construction of the dataframe when using 'prediction' function on a joint frailty model. Need now the event indicator variable.
+
+
 Changes in Version 2.6.1     July 2014
 
   o Different way to do Monte-Carlo method to compute confidence intervals in 'prediction' function giving less variability.

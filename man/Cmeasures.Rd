@@ -18,12 +18,12 @@ Compute concordance probability estimation for Cox proportional hazard or shared
 
 Cmeasures(fitc, ties = 1, marginal = 0, cindex = 0, Nboot = 0,
           tau = 0, data.val)
-          
+
 }
 
 \arguments{
   \item{fitc}{
-A frailtyPenal object, for a shared frailty model. If the fit is a Cox model (Frailty=FALSE), no clustering membership is taken into account and only marginal concordance probability estimation is provided. Only an overall measure is given, where all patients are compared two by two.
+A frailtyPenal object, for a shared frailty model. If the fit is a Cox model, no clustering membership is taken into account and only marginal concordance probability estimation is provided. Only an overall measure is given, where all patients are compared two by two.
 If a counting process formulation is used to performed the fit, with 't.start' and 't.stop', the gap-times (t.stop-t.start) are used in the concordance estimation.
 
 }
@@ -100,7 +100,7 @@ data(readmission)
 #-- a frailtypenal fit
 fit <- frailtyPenal(Surv(time,event)~cluster(id)+dukes+
 charlson+chemo,data=readmission,cross.validation=FALSE,
-n.knots=10,kappa1=1,hazard="Splines")
+n.knots=10,kappa=1,hazard="Splines")
 
 #-- a Cmeasures call
 fit.Cmeasures <- Cmeasures(fit)

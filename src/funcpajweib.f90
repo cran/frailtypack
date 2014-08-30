@@ -2,33 +2,32 @@
 !!!!_____________________________________________________
 !========================          FUNCPA NEW         ====================
     double precision function funcpajweib(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
-    use comon,only:etaR,etaD,betaR,betaD, &
+    use comon,only:etaR,etaD,betaR,betaD,etaT,betaT,nstRec, &
     t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
     effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
     auxig,aux1,aux2,res1,res3,res4,kkapa
-        use residusM
+    use residusM
     use comongroup,only:vet,vet2
-        
+
     implicit none
 
 ! *** NOUVELLLE DECLARATION F90 :
-    
+
     integer,intent(in)::id,jd,np
     double precision,dimension(np),intent(in)::b
     double precision,dimension(2)::k0
     double precision,intent(in)::thi,thj
-    
-    integer::n,i,j,k,vj,ig,choix
+    integer::n,i,j,k,vj,ig,choix,jj
     integer,dimension(ngmax)::cpt
     double precision::sum,res
-    
+
     double precision,dimension(np)::bh
     double precision,dimension(ngmax)::res2,res1dc,res2dc &
     ,res3dc,integrale1,integrale2,integrale3
     double precision::int,gammaJ
-    
+
     kkapa=k0
     choix=0
     ig=0
@@ -43,13 +42,13 @@
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
 
-    n = (np-nva-effet-indic_ALPHA)/nst
+    do jj=1,nstRec !en plus strates A.Lafourcade 07/2014 
+        betaT(jj)=bh((jj-1)*2+1)**2
+        etaT(jj)= bh((jj-1)*2+2)**2
+    end do
+    betaD= bh(2*nstRec+1)**2
+    etaD= bh(2*nstRec+2)**2
 
-    betaR= bh(1)**2
-    etaR= bh(2)**2
-    betaD= bh(3)**2
-    etaD= bh(4)**2
-    
     if(effet.eq.1) then
         theta = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
         if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
@@ -86,7 +85,6 @@
 !     pour les donnees recurrentes
 !ccccccccccccccccccccccccccccccccccccccccc
 
-
     do i=1,nsujet
         cpt(g(i))=cpt(g(i))+1
         if(nva1.gt.0)then
@@ -100,7 +98,8 @@
         endif
 
         if((c(i).eq.1))then
-            res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
+            res2(g(i)) = res2(g(i))+(betaT(stra(i))-1.d0)*dlog(t1(i))+ &
+            dlog(betaT(stra(i)))-betaT(stra(i))*dlog(etaT(stra(i)))+dlog(vet)
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 funcpajweib=-1.d9
                 !print*,'ok 1'
@@ -108,23 +107,21 @@
             end if
         endif
 !     nouvelle version
-        res1(g(i)) = res1(g(i))+((t1(i)/etaR)**betaR)*vet
+        res1(g(i)) = res1(g(i))+((t1(i)/etaT(stra(i)))**betaT(stra(i)))*vet
         if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
             funcpajweib=-1.d9
             !print*,'ok 2'
             goto 123
         end if
 !     modification pour nouvelle vraisemblance / troncature:
-        res3(g(i)) = res3(g(i))+((t0(i)/etaR)**betaR)*vet
+        res3(g(i)) = res3(g(i))+((t0(i)/etaT(stra(i)))**betaT(stra(i)))*vet
         if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
             funcpajweib=-1.d9
             !print*,'ok 3'
             goto 123
         end if
-    !    write(*,*)'***res3',res3(g(i)),vet,i,g(i) 
     end do
 
-!           stop
 !ccccccccccccccccccccccccccccccccccccccccc
 ! pour le deces
 !ccccccccccccccccccccccccccccccccccccccccc
@@ -148,7 +145,7 @@
             end if
         endif
 
-! pour le calcul des integrales / pour la survie, pas les donn�es recurrentes:
+! pour le calcul des integrales / pour la survie, pas les donnees recurrentes:
         aux1(k)=((t1dc(k)/etaD)**betaD)*vet2
         if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
             funcpajweib=-1.d9
@@ -213,7 +210,7 @@
         goto 123
     else
         funcpajweib = res
-        
+
         do k=1,ng
             Rrec(k)=res1(k)
             Nrec(k)=nig(k)

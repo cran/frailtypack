@@ -15,7 +15,6 @@
 
     implicit none
 
-
     integer::nb,n,np,id,jd,i,j,k,vj,cptg,l,ig,choix
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,pe1,pe2,dnb,sum,inv,som1,som2,res,h1,int,gammaJ
@@ -77,7 +76,6 @@
     ut1(0) = 0.d0
     ut2(0) = 0.d0
 
-
 !--- strate1
     do i=2,ndate-1
         do k = 2,n-2
@@ -104,7 +102,7 @@
                 endif
             endif
         end do
-    
+
         if(nst.eq.2)then
             ut2(i) = som2 +(the2(j-3)*im3dc(i))+(the2(j-2)*im2dc(i))+(the2(j-1)*im1dc(i))+(the2(j)*imdc(i))
             dut2(i) = (the2(j-3)*mm3dc(i))+(the2(j-2)*mm2dc(i))+(the2(j-1)*mm1dc(i))+(the2(j)*mmdc(i))
@@ -194,7 +192,7 @@
                 goto 123
             endif
         end do
-        
+
         res = 0.d0
         cptg = 0
 !     gam2 = gammaJ(inv)
@@ -205,7 +203,7 @@
             if(cpt(k).gt.0)then
                 nb = nig(k)
                 dnb = dble(nig(k))
-!     gam1 = gammaJ(dnb + inv) 
+!     gam1 = gammaJ(dnb + inv)
                 if (dnb.gt.1.d0) then
                     do l=1,nb
                         sum=sum+dlog(1.d0+theta*dble(nb-l))
@@ -213,15 +211,12 @@
                 endif
 
                 if(theta.gt.(1.d-5)) then
-!                print*,'==== ici ===='
 ! ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
                     if(AG.EQ.1)then
                         res= res-(inv+dnb)*dlog(theta*(res1(k)-res3(k))+1.d0) &
                         + res2(k) + sum
 ! nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccc
                     else
-!          write(*,*)'*** funcpaGsplines frailty**',res,dnb,theta,res1(k),
-!     &                  res1(k),res2(k),sum,res3(k)
                         res = res-(inv+dnb)*dlog(theta*res1(k)+1.d0) &
                         +(inv)*dlog(theta*res3(k)+1.d0) + res2(k) + sum
                     endif
@@ -251,7 +246,6 @@
         end do
     else !passage au modele conjoint
 
-
 !*******************************************
 !----- JOINT FRAILTY MODEL
 !*******************************************
@@ -275,12 +269,10 @@
                 resU(i) = ut1(ntU(i))*vet
             endif
             if ((resL(i).ne.resL(i)).or.(abs(resL(i)).ge.1.d30)) then
-!                 print*,"here1"
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
             if ((resU(i).ne.resU(i)).or.(abs(resU(i)).ge.1.d30)) then
-!                 print*,"here2"
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
@@ -289,8 +281,6 @@
                 res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet
             endif
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-!                 print*,"here3",res1(g(i)),ut1(nt1(i)),vet,i
-                !print*,bh(np-nva+1:np)
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
@@ -298,16 +288,12 @@
 !     modification pour nouvelle vraisemblance / troncature
             res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
-!                 print*,"here4"
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
         end do
 
 ! pour le deces
-        !do k=1,lignedc
-        !    if (dut2(k).lt.0.d0) print*,dut2(k),k,nt1dc(740)
-        !enddo
         do k=1,lignedc!ng
             if(nva2.gt.0)then
                 vet2 = 0.d0
@@ -322,7 +308,6 @@
                 res2dc(gsuj(k)) = res2dc(gsuj(k))+dlog(dut2(nt1dc(k))*vet2)
             endif
             if ((res2dc(gsuj(k)).ne.res2dc(gsuj(k))).or.(abs(res2dc(gsuj(k))).ge. 1.d30)) then
-!                 print*,"here5",k,res2dc(gsuj(k)),dut2(nt1dc(k)),vet2,nt1dc(k),datedc(nt1dc(k))
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
@@ -330,14 +315,10 @@
             aux1(gsuj(k))=aux1(gsuj(k))+ut2(nt1dc(k))*vet2
             aux2(gsuj(k))=aux2(gsuj(k))+ut2(nt0dc(k))*vet2 !vraie troncature
             if ((aux1(gsuj(k)).ne.aux1(gsuj(k))).or.(abs(aux1(gsuj(k))).ge. 1.d30)) then
-!                 print*,"here6"
-                !print*,"b:",b
-                !print*,"aux:",aux1(gsuj(k)),ut2(nt1dc(k)),vet2
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if
             if ((aux2(gsuj(k)).ne.aux2(gsuj(k))).or.(abs(aux2(gsuj(k))).ge. 1.d30)) then
-!                 print*,"here7"
                 funcpaGsplines_intcens=-1.d9
                 goto 123
             end if

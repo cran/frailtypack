@@ -15,7 +15,6 @@
 
     implicit none
 
-    
     integer::nb,n,np,id,jd,i,j,k,vj,cptg,l,ig,choix
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,pe1,pe2,dnb,sum,inv,som1,som2,res,h1,int,gammaJ
@@ -55,7 +54,7 @@
 
     if(effet.eq.1) then
         theta = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
-        if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
+        if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1
             alpha = bh(np-nva)
         else
             alpha = 1.d0
@@ -78,7 +77,6 @@
     ut1(0) = 0.d0
     ut2(0) = 0.d0
 
-
 !--- strate1
     do i=2,ndate-1
         do k = 2,n-2
@@ -87,7 +85,7 @@
                 if ((j.gt.1).and.(j.gt.vj))then
                     som1 = som1 + the1(j-4)
                     vj  = j
-                endif   
+                endif
             endif
         end do
         ut1(i) = som1 +(the1(j-3)*im3(i))+(the1(j-2)*im2(i))+(the1(j-1)*im1(i))+(the1(j)*im(i))
@@ -102,10 +100,10 @@
                 if ((j.gt.1).and.(j.gt.vj))then
                     som2 = som2 + the2(j-4)
                     vj  = j
-                endif   
+                endif
             endif
         end do
-    
+
         if(nst.eq.2)then
             ut2(i) = som2 +(the2(j-3)*im3dc(i))+(the2(j-2)*im2dc(i))+(the2(j-1)*im1dc(i))+(the2(j)*imdc(i))
             dut2(i) = (the2(j-3)*mm3dc(i))+(the2(j-2)*mm2dc(i))+(the2(j-1)*mm1dc(i))+(the2(j)*mmdc(i))
@@ -144,34 +142,34 @@
     end do
 
 
-!*******************************************         
-!----- A SIMPLE SHARED FRAILTY  MODEL  
+!*********************************************
+!----- A SIMPLE SHARED FRAILTY  MODEL
 !      write(*,*)'SIMPLE SHARED FRAILTY MODEL'
-!*******************************************
+!*********************************************
     if(indic_joint.eq.0)then
         inv = 1.d0/theta
 !    i indice les sujets
         do i=1,nsujet 
-            cpt(g(i))=cpt(g(i))+1 
-        !write(*,*)'cpt ******',cpt(g(i)),g(i),stra(i),c(i)
+            cpt(g(i))=cpt(g(i))+1
+
             if(nva.gt.0)then
-                vet = 0.d0   
+                vet = 0.d0
                 do j=1,nva
                     vet =vet + bh(np-nva+j)*dble(ve(i,j))
-!                     write(*,*)'funcpaGsplines ve ******',vet,ve(i,j),i,j
                 end do
                 vet = dexp(vet)
             else
                 vet=1.d0
             endif
+
             if((c(i).eq.1).and.(stra(i).eq.1))then
                 res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet)
-!           write(*,*)'***res2',res2(g(i)),dut1(nt1(i)),nt1(i),vet,i,g(i)
-            endif  
+            endif
+
             if((c(i).eq.1).and.(stra(i).eq.2))then
                 res2(g(i)) = res2(g(i))+dlog(dut2(nt1(i))*vet)
-!           write(*,*)'*res2-2',res2(g(i)),dut2(nt1(i)),nt1(i),vet,i,g(i)
             endif
+
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 funcpaGsplines=-1.d9
                 goto 123
@@ -179,11 +177,12 @@
 
             if(stra(i).eq.1)then
                 res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet
-!                write(*,*)'***res1',res1(g(i)),ut1(nt1(i)),nt1(i),i
             endif
+
             if(stra(i).eq.2)then
                 res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet
             endif
+
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 funcpaGsplines=-1.d9
                 goto 123
@@ -193,27 +192,28 @@
             if(stra(i).eq.1)then
                 res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
             endif
+
             if(stra(i).eq.2)then
                 res3(g(i)) = res3(g(i)) + ut2(nt0(i))*vet
             endif
+
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                 funcpaGsplines=-1.d9
                 goto 123
-            end if    
-        end do 
-        
+            end if
+        end do
+
         res = 0.d0
         cptg = 0
 !     gam2 = gammaJ(inv)
 ! k indice les groupes
 
-        do k=1,ng  
+        do k=1,ng
             sum=0.d0
             if(cpt(k).gt.0)then
                 nb = nig(k)
                 dnb = dble(nig(k))
-!                write(*,*)'nb,dnb',nb,dnb,k
-!     gam1 = gammaJ(dnb + inv) 
+!     gam1 = gammaJ(dnb + inv)
                 if (dnb.gt.1.d0) then
                     do l=1,nb
                         sum=sum+dlog(1.d0+theta*dble(nb-l))
@@ -221,20 +221,16 @@
                 endif
 
                 if(theta.gt.(1.d-5)) then
-!                print*,'==== ici ===='
 ! ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
                     if(AG.EQ.1)then
                         res= res-(inv+dnb)*dlog(theta*(res1(k)-res3(k))+1.d0) &
                         + res2(k) + sum  
 ! nouvelle vraisemblance :ccccccccccccccccccccccccccccccccccccccccc
                     else
-!          write(*,*)'*** funcpaGsplines frailty**',res,dnb,theta,res1(k),
-!     &                  res1(k),res2(k),sum,res3(k)
                         res = res-(inv+dnb)*dlog(theta*res1(k)+1.d0) &
-                        +(inv)*dlog(theta*res3(k)+1.d0) + res2(k) + sum  
+                        +(inv)*dlog(theta*res3(k)+1.d0) + res2(k) + sum
                     endif
                 else
-                    
 !     developpement de taylor d ordre 3
 !                   write(*,*)'************** TAYLOR *************'
 ! ancienne vraisemblance :ccccccccccccccccccccccccccccccccccccccccccccccc
@@ -255,14 +251,13 @@
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
                     funcpaGsplines=-1.d9
                     goto 123
-                end if     
-            endif 
+                end if
+            endif
         end do
     else !passage au modele conjoint
 
-
-!*******************************************         
-!----- JOINT FRAILTY MODEL  
+!*******************************************
+!----- JOINT FRAILTY MODEL
 !*******************************************
         nst=2
         inv = 1.d0/theta
@@ -280,18 +275,21 @@
             endif
 
             if((c(i).eq.1))then
-                res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet) 
+                res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet)
             endif
+
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 funcpaGsplines=-1.d9
                 goto 123
-            end if    
+            end if
+
 !     nouvelle version
             res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 funcpaGsplines=-1.d9
                 goto 123
             end if
+
 !     modification pour nouvelle vraisemblance / troncature:
             res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
@@ -300,7 +298,6 @@
             end if
         end do
 
-!
 ! pour le deces
 !
         do k=1,lignedc!ng
@@ -313,13 +310,15 @@
             else
                 vet2=1.d0
             endif
+
             if(cdc(k).eq.1)then
                 res2dc(gsuj(k)) = res2dc(gsuj(k))+dlog(dut2(nt1dc(k))*vet2)
-                if ((res2dc(gsuj(k)).ne.res2dc(gsuj(k))).or.(abs(res2dc(gsuj(k))).ge. 1.d30)) then    
+                if ((res2dc(gsuj(k)).ne.res2dc(gsuj(k))).or.(abs(res2dc(gsuj(k))).ge. 1.d30)) then
                     funcpaGsplines=-1.d9
                     goto 123
                 end if
             endif
+
 ! pour le calcul des integrales / pour la survie, pas pour donnees recur:
             aux1(gsuj(k))=aux1(gsuj(k))+ut2(nt1dc(k))*vet2
             aux2(gsuj(k))=aux2(gsuj(k))+ut2(nt0dc(k))*vet2 !vraie troncature
@@ -345,8 +344,8 @@
             endif
         end do
 !************* FIN INTEGRALES **************************
-        res = 0.d0 
-        do k=1,ng  
+        res = 0.d0
+        do k=1,ng
             sum=0.d0
             if(cpt(k).gt.0)then
                 if(theta.gt.(1.d-8)) then
@@ -368,8 +367,8 @@
                     funcpaGsplines=-1.d9
                     goto 123
                 end if
-            endif 
-        end do   
+            endif
+        end do
     endif !fin boucle indic_joint=0 or 1
 !---------- calcul de la penalisation -------------------
 
@@ -384,7 +383,6 @@
         the1(i-3)*the1(i)*m3m(i))+(2.d0*the1(i-2)*the1(i-1)* &
         m2m1(i))+(2.d0*the1(i-2)*the1(i)*m2m(i))+(2.d0*the1(i-1) &
         *the1(i)*m1m(i))
-
         if(nst.eq.1)then
             pe2=0.d0
         else

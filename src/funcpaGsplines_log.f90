@@ -3,29 +3,26 @@
 
 !========================          FUNCPAG_SPLINES         ====================
     double precision function funcpaGsplines_log(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m,mm3,mm2,mm1,mm,&
     im3,im2,im1,im,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,date,datedc,zi,&
     t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst, &
     effet,stra,ve,vedc,pe,ng,g,nig,AG,indic_ALPHA,ALPHA,sig2, &
     auxig,aux1,aux2,res1,res3,res5,kkapa,resnonpen,indictronq
-        use residusM
+    use residusM
     use comongroup
 
     IMPLICIT NONE
 
 ! *** NOUVELLLE DECLARATION F90 :
-    
     integer,intent(in)::id,jd,np
     double precision,dimension(np),intent(in)::b
     double precision,dimension(2),intent(in)::k0
     double precision,intent(in)::thi,thj
-    
     integer::n,i,j,k,vj,ig,choix
     integer,dimension(ngmax)::cpt
     double precision::pe1,pe2,som1,som2,res,h1
-    
     double precision,dimension(np)::bh
     double precision,dimension(ngmax)::res2,res1dc,res2dc &
     ,res3dc,integrale1,integrale2,integrale3
@@ -37,7 +34,6 @@
     double precision,dimension(0:ndatemaxdc)::ut2
     double precision::int
     double precision,parameter::pi=3.141592653589793d0
-
 
     choix=0
     ig=0
@@ -55,7 +51,6 @@
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
 
-
     n = (np-nva-effet-indic_ALPHA)/nst
 
     do i=1,n
@@ -66,7 +61,6 @@
         endif
     end do
 
-    
     if(effet.eq.1) then
         sig2 = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
         if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
@@ -83,13 +77,13 @@
 !AD:modify
     dut1(1) = (the1(-2)*4.d0/(zi(2)-zi(1)))
     dut2(1) = (the2(-2)*4.d0/(zi(2)-zi(1)))
-    
+
     ut1(1) = the1(-2)*dut1(1)*0.25d0*(zi(1)-zi(-2))
     ut2(1) = the2(-2)*dut2(1)*0.25d0*(zi(1)-zi(-2))
-    
+
     ut1(0) = 0.d0
     ut2(0) = 0.d0
-     
+
 !//// NEW AMADOU vvv :
 !--- strate1
     som1 = 0.d0
@@ -104,10 +98,10 @@
                 endif
             endif
         end do
-    
+
         ut1(i) = som1 +(the1(j-3)*im3(i))+(the1(j-2)*im2(i)) &
         +(the1(j-1)*im1(i))+(the1(j)*im(i))
-        
+
         dut1(i) = (the1(j-3)*mm3(i))+(the1(j-2)*mm2(i)) &
         +(the1(j-1)*mm1(i))+(the1(j)*mm(i))
 
@@ -140,7 +134,7 @@
 !-------------fin strate2
     i = n-2
     h1 = (zi(i)-zi(i-1))
-    
+
     ut1(ndate)=som1+the1(i-4)+the1(i-3)+the1(i-2)+the1(i-1)
     dut1(ndate) = (4.d0*the1(i-1)/h1)
 
@@ -199,8 +193,8 @@
             endif
 
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge.1.d30)) then
-                          funcpaGsplines_log=-1.d9
-                          goto 123
+                funcpaGsplines_log=-1.d9
+                goto 123
             end if
 
 ! modification pour nouvelle vraisemblance / troncature:
@@ -209,7 +203,7 @@
                 res5(i) = ut1(nt1(i))*vet
                 res1(g(i)) = res1(g(i)) + res5(i) ! pour les residus
             endif
-            
+
             if(stra(i).eq.2)then
                 res3(g(i)) = res3(g(i)) + ut2(nt0(i))*vet
                 res5(i) = ut2(nt1(i))*vet
@@ -217,13 +211,13 @@
             endif
 
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge.1.d30)) then
-                          funcpaGsplines_log=-1.d9
-                          goto 123
+                funcpaGsplines_log=-1.d9
+                goto 123
             end if
 
             if ((res5(i).ne.res5(i)).or.(abs(res5(i)).ge.1.d30)) then
-                          funcpaGsplines_log=-1.d9
-                          goto 123
+                funcpaGsplines_log=-1.d9
+                goto 123
             end if
         end do
 
@@ -338,14 +332,10 @@
             aux2(gsuj(k)) = aux2(gsuj(k)) + ut2(nt0dc(k))*vet2 !vraie troncature
 
             if ((aux1(gsuj(k)).ne.aux1(gsuj(k))).or.(abs(aux1(gsuj(k))).ge. 1.d30)) then
-                !print*,b
-                !print*,"here1",aux1(gsuj(k)),ut2(nt1dc(k)),vet2,bh(np-nva2+1),j,dble(vedc(k,1)),dexp(bh(np-nva2+1)*dble(vedc(k,1))),k
-                !print*,"indice:",np-nva2+1,bh(np-nva2+1)
                 funcpaGsplines_log=-1.d9
                 goto 123
             end if
             if ((aux2(gsuj(k)).ne.aux2(gsuj(k))).or.(abs(aux2(gsuj(k))).ge. 1.d30)) then
-                !print*,"here2"
                 funcpaGsplines_log=-1.d9
                 goto 123
             end if
@@ -441,6 +431,6 @@
 123     continue
 
     return
-    
+
     end function funcpaGsplines_log
 

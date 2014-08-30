@@ -115,10 +115,14 @@
     integer::cpts
     double precision,dimension(:,:),allocatable::H_hess0,HIH0
     double precision,dimension(2)::LCVs,shapeweibs,scaleweibs,k0s
-    double precision,dimension(:),allocatable::x1Outs,x2Outs
-    double precision,dimension(:,:),allocatable::lamOuts,lam2Outs
-    double precision,dimension(100,3)::suOuts,su2Outs
-    double precision,dimension(100)::xSu1s,xSu2s
+!     double precision,dimension(:),allocatable::x1Outs,x2Outs
+    double precision,dimension(:,:),allocatable::xTOuts !en plus
+!     double precision,dimension(:,:),allocatable::lamOuts,lam2Outs
+    double precision,dimension(:,:,:),allocatable::lamTOuts !en plus
+!     double precision,dimension(100,3)::suOuts,su2Outs
+    double precision,dimension(100,3,1)::suTOuts !en plus
+!     double precision,dimension(100)::xSu1s,xSu2s
+    double precision,dimension(100,1)::xSuTs !en plus
     double precision,dimension(:),allocatable::zis
     double precision,dimension(nobsEvent(3))::Resmartingales,frailtypreds,frailtysds,frailtyvars
     double precision,dimension(:),allocatable::linearpreds,martingaleCoxs,times
@@ -234,23 +238,25 @@
         allocate(str00(nsujet0))
         str00=1
         allocate(H_hess0(np1,np1),HIH0(np1,np1),zis(nzsha+6))
-        allocate(x1Outs(mt1),x2Outs(mt1),lamOuts(mt1,3),lam2Outs(mt1,3))
+!         allocate(x1Outs(mt1),x2Outs(mt1),lamOuts(mt1,3),lam2Outs(mt1,3))
+        allocate(xTOuts(mt1,1),lamTOuts(mt1,3,1))!en plus
         allocate(linearpreds(nsujet0),martingaleCoxs(nsujet0),times(nbintervR0+1))
 
         allocate(filtretps0Mul(nva10))
         filtretps0Mul = 0
 
         Call frailpenal(nsujet0,ng0,1,1,1, &
-        nzsha,kappa1,kappa1,tt00,tt10,ic0,groupe0,nva10,str00,vax0, &
+        nzsha,kappa1,tt00,tt10,ic0,groupe0,nva10,str00,vax0, &
         ag0,noVar1,maxit00,irep,np1,b01,H_hess0,HIH0,resOut,LCVs, &
-        x1Outs,lamOuts,xSu1s,suOuts,x2Outs,lam2Outs,xSu2s,su2Outs,typeof0,equidistant0,nbintervR0,mt1, &    
+        xTOuts,lamTOuts,xSuTs,suTOuts,typeof0,equidistant0,nbintervR0,mt1, &    
         ni,cpts,ier,k0s,ddls,istop,shapeweibs,scaleweibs,100,zis,Resmartingales,martingaleCoxs,&
         frailtypreds,frailtyvars,frailtysds,linearpreds,times,0,tt10,0, &
         timedepMul,nbinnerknots0Mul,qorder0Mul,filtretps0Mul,BetaTpsMatMul,EPS)
 
         deallocate(filtretps0Mul)
         deallocate(H_hess0,HIH0,zis,str00)
-        deallocate(x1Outs,x2Outs,lamOuts,lam2Outs)
+!         deallocate(x1Outs,x2Outs,lamOuts,lam2Outs)
+        deallocate(xTOuts,lamTOuts)!en plus
         deallocate(linearpreds,martingaleCoxs,times)
 
         critCV(3) = istop
@@ -286,22 +292,24 @@
         allocate(str00(nsujetmeta0))
         str00=1
         allocate(H_hess0(np3,np3),HIH0(np3,np3),zis(nzsha+6))
-        allocate(x1Outs(mt3),x2Outs(mt3),lamOuts(mt3,3),lam2Outs(mt3,3))
+!         allocate(x1Outs(mt3),x2Outs(mt3),lamOuts(mt3,3),lam2Outs(mt3,3))
+        allocate(xTOuts(mt1,1),lamTOuts(mt1,3,1))!en plus
         allocate(linearpreds(nsujetmeta0),martingaleCoxs(nsujetmeta0),times(nbintervM0+1))
         allocate(filtretps0Mul(nva30))
         filtretps0Mul = 0
 
         Call frailpenal(nsujetmeta0,ng0,1,1,1, &
-        nzsha,kappa1,kappa1,tt0meta0,tt1meta0,icmeta0,groupe0meta,nva30,str00,vaxmeta0, &
+        nzsha,kappa1,tt0meta0,tt1meta0,icmeta0,groupe0meta,nva30,str00,vaxmeta0, &
         ag0,noVar3,maxit00,irep,np3,b03,H_hess0,HIH0,resOut,LCVs, &
-        x1Outs,lamOuts,xSu1s,suOuts,x2Outs,lam2Outs,xSu2s,su2Outs,typeof0,equidistant0,nbintervM0,mt3, &    
+        xTOuts,lamTOuts,xSuTs,suTOuts,typeof0,equidistant0,nbintervM0,mt3, &    
         ni,cpts,ier,k0s,ddls,istop,shapeweibs,scaleweibs,100,zis,Resmartingales,martingaleCoxs,&
         frailtypreds,frailtyvars,frailtysds,linearpreds,times,0,tt10,0, &
         timedepMul,nbinnerknots0Mul,qorder0Mul,filtretps0Mul,BetaTpsMatMul,EPS)
 
         deallocate(filtretps0Mul)
         deallocate(H_hess0,HIH0,zis,str00)
-        deallocate(x1Outs,x2Outs,lamOuts,lam2Outs)
+!         deallocate(x1Outs,x2Outs,lamOuts,lam2Outs)
+        deallocate(xTOuts,lamTOuts)!en plus
         deallocate(linearpreds,martingaleCoxs,times)
 
          critCV(5) = istop
@@ -338,22 +346,24 @@
         allocate(str00(ng0))
         str00=1
         allocate(H_hess0(np2,np2),HIH0(np2,np2),zis(nzsha+6))
-        allocate(x1Outs(mt2),x2Outs(mt2),lamOuts(mt2,3),lam2Outs(mt2,3))
+!         allocate(x1Outs(mt2),x2Outs(mt2),lamOuts(mt2,3),lam2Outs(mt2,3))
+        allocate(xTOuts(mt1,1),lamTOuts(mt1,3,1))!en plus
         allocate(linearpreds(ng0),martingaleCoxs(ng0),times(nbintervDC0+1))
         allocate(filtretps0Mul(nva20))
         filtretps0Mul = 0
 
         Call frailpenal(ng0,ng0,1,1,1, & ! 0 Cox proportional hazards model
-        nzsha,kappa1,kappa1,tt0dc0,tt1dc0,icdc0,groupe0dc,nva20,str00,vaxdc0, &
+        nzsha,kappa1,tt0dc0,tt1dc0,icdc0,groupe0dc,nva20,str00,vaxdc0, &
         ag0,noVar2,maxit00,irep,np2,b02,H_hess0,HIH0,resOut,LCVs, &
-        x1Outs,lamOuts,xSu1s,suOuts,x2Outs,lam2Outs,xSu2s,su2Outs,typeof0,equidistant0,nbintervDC0,mt2, &    
+        xTOuts,lamTOuts,xSuTs,suTOuts,typeof0,equidistant0,nbintervDC0,mt2, &    
         ni,cpts,ier,k0s,ddls,istop,shapeweibs,scaleweibs,mt12,zis,Resmartingales,martingaleCoxs,&
         frailtypreds,frailtyvars,frailtysds,linearpreds,times,0,tt10,0, &
         timedepMul,nbinnerknots0Mul,qorder0Mul,filtretps0Mul,BetaTpsMatMul,EPS)
 
         deallocate(filtretps0Mul)
         deallocate(H_hess0,HIH0,zis,str00)
-        deallocate(x1Outs,x2Outs,lamOuts,lam2Outs)
+!         deallocate(x1Outs,x2Outs,lamOuts,lam2Outs)
+        deallocate(xTOuts,lamTOuts)!en plus
         deallocate(linearpreds,martingaleCoxs,times)
 
          critCV(4) = istop
@@ -361,7 +371,7 @@
 !        write(*,*)''
 !        write(*,*)' Critere de convergence istop dc',istop
 !        write(*,*)''
-        if(typeof == 0) then    
+        if(typeof == 0) then
             if(irep.eq.0) then
                 kappaCV(2)=k0s(1) ! kappa branche dc
             else

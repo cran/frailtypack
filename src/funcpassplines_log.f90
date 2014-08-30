@@ -4,99 +4,90 @@
     double precision function funcpassplines_log(b,np,id,thi,jd,thj,k0)
     use tailles
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,sig2,indictronq,auxig,res3,res5,res1
-        use residusM
-    
-    
+    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate,kkapa, &
+    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,sig2,indictronq,auxig,res3,res5,res1,k0T
+    use residusM
+
+
     implicit none
-    
+
 ! *** NOUVELLLE DECLARATION F90 :
-    
-    integer::nb,n,np,id,jd,i,j,k,vj,cptg,ig,choix
+
+    integer::nb,n,np,id,jd,i,j,k,vj,cptg,ig,choix,jj
     integer,dimension(ngmax)::cpt
-    double precision::thi,thj,pe1,pe2,dnb,som1,som2,res,vet,h1,int
-    double precision,dimension(-2:npmax)::the1,the2
+    double precision::thi,thj,dnb,res,vet,h1,int
+    double precision,dimension(nst)::peT,somT
+    double precision,dimension(-2:npmax,nst)::theT
     double precision,dimension(np)::b,bh
     double precision,dimension(ngmax)::res2
-    double precision,dimension(2)::k0
-    double precision,dimension(ndatemax)::dut1,dut2
-    double precision,dimension(0:ndatemax)::ut1,ut2
+!     double precision,dimension(2)::k0
+    double precision,dimension(nst)::k0 !en plus
+    double precision,dimension(ndatemax,nst)::dutT
+    double precision,dimension(0:ndatemax,nst)::utT
     double precision,dimension(ngmax)::integrale1,integrale2,integrale3
     double precision,parameter::pi=3.141592653589793d0
 
-
+    kkapa=k0
     j=0
     sig2=0.d0
     do i=1,np
         bh(i)=b(i)
     end do
-    dut1=0.d0
-    dut2=0.d0
-    ut1=0.d0
-    ut2=0.d0
+
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
-    
+
     n = (np-nva-effet)/nst
 
-    do i=1,n
-        the1(i-3)=(bh(i))*(bh(i))
-        j = n+i 
-        if (nst.eq.2) then
-            the2(i-3)=(bh(j))*(bh(j))
-        endif
+    do jj=1,nst !en plus strates A.Lafourcade 05/2014
+        do i=1,n
+            theT(i-3,jj)=(bh((jj-1)*n+i))*(bh((jj-1)*n+i))
+        end do
     end do
-
 
     if(effet.eq.1) then
         sig2 = bh(np-nva)*bh(np-nva)
     endif
+
 !---------  calcul de ut1(ti) et ut2(ti) ---------------------------
 !    attention the(1)  sont en nz=1
 !        donc en ti on a the(i)
 
     vj = 0
-    som1 = 0.d0
-    som2 = 0.d0
-    dut1(1) = (the1(-2)*4.d0/(zi(2)-zi(1)))
 
-    dut2(1) = (the2(-2)*4.d0/(zi(2)-zi(1)))
-    ut1(1) = the1(-2)*dut1(1)*0.25d0*(zi(1)-zi(-2))
-    ut2(1) = the2(-2)*dut2(1)*0.25d0*(zi(1)-zi(-2))
-    ut1(0) = 0.d0
-    ut2(0) = 0.d0
+    somT=0.d0 !en plus
+    do jj=1,nst !en plus strates A.Lafourcade 05/2014
+        dutT(1,jj) = (theT(-2,jj)*4.d0/(zi(2)-zi(1)))
+        utT(0,jj) = 0.d0
+        utT(1,jj) = theT(-2,jj)*dutT(1,jj)*0.25d0*(zi(1)-zi(-2))
+    end do
+
     do i=2,ndate-1
         do k = 2,n-2
             if (((date(i)).ge.(zi(k-1))).and.(date(i).lt.zi(k)))then
                 j = k-1
                 if ((j.gt.1).and.(j.gt.vj))then
-                    som1 = som1+the1(j-4)
-                    som2 = som2+the2(j-4)
+                    do jj=1,nst !en plus strates A.Lafourcade 05/2014
+                        somT(jj) = somT(jj)+theT(j-4,jj)
+                    end do
                     vj  = j
                 endif
             endif
-        end do 
-        
-        ut1(i) = som1 +(the1(j-3)*im3(i))+(the1(j-2)*im2(i)) &
-        +(the1(j-1)*im1(i))+(the1(j)*im(i))
-        dut1(i) = (the1(j-3)*mm3(i))+(the1(j-2)*mm2(i)) &
-        +(the1(j-1)*mm1(i))+(the1(j)*mm(i))
-    
-        if(nst.eq.2)then
-            ut2(i) = som2 +(the2(j-3)*im3(i))+(the2(j-2)*im2(i)) &
-            +(the2(j-1)*im1(i))+(the2(j)*im(i))
-            dut2(i) = (the2(j-3)*mm3(i))+(the2(j-2)*mm2(i)) &
-            +(the2(j-1)*mm1(i))+(the2(j)*mm(i))
-        endif
+        end do
+        do jj=1,nst !en plus strates A.Lafourcade 05/2014
+            utT(i,jj) = somT(jj) +(theT(j-3,jj)*im3(i))+(theT(j-2,jj)*im2(i)) &
+            +(theT(j-1,jj)*im1(i))+(theT(j,jj)*im(i))
+            dutT(i,jj) = (theT(j-3,jj)*mm3(i))+(theT(j-2,jj)*mm2(i)) &
+            +(theT(j-1,jj)*mm1(i))+(theT(j,jj)*mm(i))
+        end do
     end do
 
     i = n-2
     h1 = (zi(i)-zi(i-1))
-    ut1(ndate)=som1+the1(i-4)+the1(i-3)+the1(i-2)+the1(i-1)
-    ut2(ndate)=som2+the2(i-4)+the2(i-3)+the2(i-2)+the2(i-1)
-    dut1(ndate) = (4.d0*the1(i-1)/h1)
-    dut2(ndate) = (4.d0*the2(i-1)/h1)
+    do jj=1,nst !en plus strates A.Lafourcade 05/2014
+        utT(ndate,jj)=somT(jj)+theT(i-4,jj)+theT(i-3,jj)+theT(i-2,jj)+theT(i-1,jj)
+        dutT(ndate,jj) = (4.d0*theT(i-1,jj)/h1)
+    end do
 
 !-------------------------------------------------------
 !--------- calcul de la vraisemblance ------------------
@@ -120,7 +111,7 @@
     if (effet.eq.0) then
         do i=1,nsujet
             cpt(g(i))=cpt(g(i))+1
-            
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -130,32 +121,26 @@
             else
                 vet=1.d0
             endif
-            
-            if((c(i).eq.1).and.(stra(i).eq.1))then
-                res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet)
+
+            if(c(i).eq.1)then !en plus strates A.Lafourcade 05/2014
+                res2(g(i)) = res2(g(i))+dlog(dutT(nt1(i),stra(i))*vet)!log(a*b)=log(a)+log(b)
             endif
-    
-            if((c(i).eq.1).and.(stra(i).eq.2))then
-                res2(g(i)) = res2(g(i))+dlog(dut2(nt1(i))*vet)
-            endif
-                   if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpassplines_log=-1.d9
-                          goto 123
-                       end if    
-            if(stra(i).eq.1)then
-                res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet-ut1(nt0(i))*vet
-                RisqCumul(i) = ut1(nt1(i))*vet
-            endif
-    
-            if(stra(i).eq.2)then
-                res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet-ut2(nt0(i))*vet
-                RisqCumul(i) = ut2(nt1(i))*vet
-            endif
-                   if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpassplines_log=-1.d9
-                          goto 123
-                       end if
+
+            if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
+                funcpassplines_log=-1.d9
+                goto 123
+            end if
+
+            !en plus strates A.Lafourcade 05/2014
+            res1(g(i)) = res1(g(i)) + utT(nt1(i),stra(i))*vet-utT(nt0(i),stra(i))*vet !en plus
+            RisqCumul(i) = utT(nt1(i),stra(i))*vet
+
+            if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
+                funcpassplines_log=-1.d9
+                goto 123
+            end if
         end do
+
         res = 0.d0
         cptg = 0
 
@@ -167,8 +152,8 @@
                 res = res-res1(k)+res2(k)
                 cptg = cptg + 1
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-                          funcpassplines_log=-1.d9
-                          goto 123
+                    funcpassplines_log=-1.d9
+                    goto 123
                 end if
             endif
         end do
@@ -183,7 +168,7 @@
         do i=1,nsujet
 
             cpt(g(i))=cpt(g(i))+1
-        
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -194,40 +179,29 @@
                 vet=1.d0
             endif
 
-            if((c(i).eq.1).and.(stra(i).eq.1))then
-                res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet)
-            endif
-
-            if((c(i).eq.1).and.(stra(i).eq.2))then
-                res2(g(i)) = res2(g(i))+dlog(dut2(nt1(i))*vet)
+            !en plus strates A.Lafourcade 05/2014
+            if(c(i).eq.1)then !en plus
+                res2(g(i)) = res2(g(i))+dlog(dutT(nt1(i),stra(i))*vet)
             endif
 
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge.1.d30)) then
-                          funcpassplines_log=-1.d9
-                          goto 123
+                funcpassplines_log=-1.d9
+                goto 123
             end if
 
 ! modification pour nouvelle vraisemblance / troncature:
-            if(stra(i).eq.1)then
-                res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
-                res5(i) = ut1(nt1(i))*vet
-                res1(g(i)) = res1(g(i)) + res5(i) ! pour les residus
-            endif
-            
-            if(stra(i).eq.2)then
-                res3(g(i)) = res3(g(i)) + ut2(nt0(i))*vet
-                res5(i) = ut2(nt1(i))*vet
-                res1(g(i)) = res1(g(i)) + res5(i) ! pour les residus
-            endif
+            res3(g(i)) = res3(g(i)) + utT(nt0(i),stra(i))*vet !en plus
+            res5(i) = utT(nt1(i),stra(i))*vet
+            res1(g(i)) = res1(g(i)) + res5(i) ! pour les residus
 
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge.1.d30)) then
-                          funcpassplines_log=-1.d9
-                          goto 123
+                funcpassplines_log=-1.d9
+                goto 123
             end if
 
             if ((res5(i).ne.res5(i)).or.(abs(res5(i)).ge.1.d30)) then
-                          funcpassplines_log=-1.d9
-                          goto 123
+                funcpassplines_log=-1.d9
+                goto 123
             end if
         end do
 
@@ -255,16 +229,6 @@
 !     gam2 = gamma(inv)
 ! k indice les groupes
         do k=1,ng
-            !sum=0.d0
-            !if(cpt(k).gt.0)then
-            !    nb = nig(k)
-            !    dnb = dble(nig(k))
-                
-                !if (dnb.gt.1.d0) then
-                !    do l=1,nb
-                !        sum=sum+dlog(1.d0+theta*dble(nb-l))
-                !    end do
-                !endif
                 !if(theta.gt.(1.d-5)) then
 !ccccc ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
                     if(AG.EQ.1)then
@@ -307,36 +271,25 @@
 
 !--------- calcul de la penalisation -------------------
 
-    pe1 = 0.d0
-    pe2 = 0.d0
+    peT=0.d0    !en plus strates A.Lafourcade 05/2014
     pe=0.d0
-    do i=1,n-3
-    
-        pe1 = pe1+(the1(i-3)*the1(i-3)*m3m3(i))+(the1(i-2) &
-        *the1(i-2)*m2m2(i))+(the1(i-1)*the1(i-1)*m1m1(i))+( &
-        the1(i)*the1(i)*mmm(i))+(2.d0*the1(i-3)*the1(i-2)* &
-        m3m2(i))+(2.d0*the1(i-3)*the1(i-1)*m3m1(i))+(2.d0* &
-        the1(i-3)*the1(i)*m3m(i))+(2.d0*the1(i-2)*the1(i-1)* &
-        m2m1(i))+(2.d0*the1(i-2)*the1(i)*m2m(i))+(2.d0*the1(i-1) &
-        *the1(i)*m1m(i))
-        pe2 = pe2+(the2(i-3)*the2(i-3)*m3m3(i))+(the2(i-2) &
-        *the2(i-2)*m2m2(i))+(the2(i-1)*the2(i-1)*m1m1(i))+( &
-        the2(i)*the2(i)*mmm(i))+(2.d0*the2(i-3)*the2(i-2)* &
-        m3m2(i))+(2.d0*the2(i-3)*the2(i-1)*m3m1(i))+(2.d0* &
-        the2(i-3)*the2(i)*m3m(i))+(2.d0*the2(i-2)*the2(i-1)* &
-        m2m1(i))+(2.d0*the2(i-2)*the2(i)*m2m(i))+(2.d0*the2(i-1) &
-        *the2(i)*m1m(i))
-    
+    do jj=1,nst !en plus strates A.Lafourcade 05/2014
+        do i=1,n-3
+
+            peT(jj) = peT(jj)+(theT(i-3,jj)*theT(i-3,jj)*m3m3(i))+(theT(i-2,jj) &
+            *theT(i-2,jj)*m2m2(i))+(theT(i-1,jj)*theT(i-1,jj)*m1m1(i))+( &
+            theT(i,jj)*theT(i,jj)*mmm(i))+(2.d0*theT(i-3,jj)*theT(i-2,jj)* &
+            m3m2(i))+(2.d0*theT(i-3,jj)*theT(i-1,jj)*m3m1(i))+(2.d0* &
+            theT(i-3,jj)*theT(i,jj)*m3m(i))+(2.d0*theT(i-2,jj)*theT(i-1,jj)* &
+            m2m1(i))+(2.d0*theT(i-2,jj)*theT(i,jj)*m2m(i))+(2.d0*theT(i-1,jj) &
+            *theT(i,jj)*m1m(i))  
+        end do
     end do
-    
 
-!    Changed JRG 25 May 05
-    if (nst.eq.1) then
-        pe2=0.d0
-    end if
+    do jj=1,nst !en plus strates A.Lafourcade 05/2014
+        pe=pe+pet(jj)*k0T(jj)
+    end do
 
-    pe = k0(1)*pe1 + k0(2)*pe2 
-    
     resnonpen = res
 
     res = res - pe
@@ -346,7 +299,7 @@
       goto 123
     end if
 
-    funcpassplines_log = res 
+    funcpassplines_log = res
 
     do k=1,ng
         cumulhaz(k)=res1(k)

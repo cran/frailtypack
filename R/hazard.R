@@ -7,65 +7,79 @@
 		zi <- ObjFrailty$zi
 
 		res <- NULL
-		if((ObjFrailty$x1 > t) || ((max(ObjFrailty$x1)+0.00001) <= t)) stop(" Time exceeds the range allowed ") # rajout du 0.00001
 		if(class(ObjFrailty) == "jointPenal"){
-			nb1 <- nz+3
-			nb2 <- 2*(nz+2)
-			b <- ObjFrailty$b[nb1:nb2]
-			the1 <- b * b	
-			nst <- 2
-			if((ObjFrailty$x2 > t) || (max(ObjFrailty$x2) < t)) stop(" Time exceeds the range allowed ")
+			nst <- ObjFrailty$n.strat + 1 # deces
+			if((ObjFrailty$xR[,1] > t) || ((max(ObjFrailty$xR[,1])+0.00001) <= t)) stop(" Time exceeds the range allowed ")
+			if(ObjFrailty$n.strat > 1){
+				for (i in 2:ObjFrailty$n.strat){
+					if((ObjFrailty$xR[,i] > t) || (max(ObjFrailty$xR[,i]+0.00001) < t)) stop(" Time exceeds the range allowed ")
+					b <- ObjFrailty$b[((i-1)*(nz+2)+1):(i*(nz+2))]
+					the <- cbind(the,b*b)
+				}
+			}
+			if((ObjFrailty$xD > t) || (max(ObjFrailty$xD) < t)) stop(" Time exceeds the range allowed ")
+			b <- ObjFrailty$b[((nst-1)*(nz+2)+1):(nst*(nz+2))]
+			the <- cbind(the,b*b)
 		}else{
-			if(ObjFrailty$n.strat == 2){
-				nb1 <- nz+3
-				nb2 <- 2*(nz+2)
-				b <- ObjFrailty$b[nb1:nb2]
-				the1 <- b * b
-				nst <- 2
-				if((ObjFrailty$x2 > t) || (max(ObjFrailty$x2) < t)) stop(" Time exceeds the range allowed ")
-			}else{
-				the1 <- rep(0,(nz+6))
-				nst <- 1
+			nst <- ObjFrailty$n.strat
+			if((ObjFrailty$x[,1] > t) || ((max(ObjFrailty$x[,1])+0.00001) <= t)) stop(" Time exceeds the range allowed ")
+			if(ObjFrailty$n.strat > 1){
+				for (i in 2:ObjFrailty$n.strat){
+					if((ObjFrailty$x[,i] > t) || (max(ObjFrailty$x[,i]) < t)) stop(" Time exceeds the range allowed ")
+					b <- ObjFrailty$b[((i-1)*(nz+2)+1):(i*(nz+2))]
+					the <- cbind(the,b*b)
+				}
 			}
 		}
 		
-		out <- .Fortran("risque",as.double(t),as.double(the),as.double(the1),as.integer(nz+2),
-		as.double(zi),risque=as.double(c(0,0)),as.integer(nst),PACKAGE = "frailtypack")
+		out <- .Fortran("risque2",as.double(t),as.double(the),as.integer(nz+2),
+		as.double(zi),risque=as.double(rep(0,nst)),as.integer(nst),PACKAGE = "frailtypack")
 		
 		if(class(ObjFrailty) == "jointPenal"){
 			res <- c(res,out$risque)
 		}else{
-			if(ObjFrailty$n.strat == 2){
-				res <- c(res,out$risque)
-			}else{
-				res <- c(res,out$risque[1])
-			}
+			res <- out$risque
 		}
-		return(res)	
+		return(res)
 	}
 
 	if (ObjFrailty$typeof == 1){
 		res <- NULL
-		if((ObjFrailty$x1 > t) || (max(ObjFrailty$x1) < t)) stop(" Time exceeds the range allowed ")
-		x1 <- matrix(ObjFrailty$x1,nrow=3,ncol=ObjFrailty$nbintervR)
-		x1 <- rbind(x1,rep(t,ObjFrailty$nbintervR))
-		ind <- apply(x1,MARGIN=2, FUN=function(x){which((x[1] <= x[4]) & (x[4] < x[3]))})
-		res <- c(res,ObjFrailty$lam[(which(ind==1)*3-1),1])
-
 		if(class(ObjFrailty) == "jointPenal"){
-			if((ObjFrailty$x2 > t) || (max(ObjFrailty$x2) < t)) stop(" Time exceeds the range allowed ")
-			x2 <- matrix(ObjFrailty$x2,nrow=3,ncol=ObjFrailty$nbintervDC)
+			if((ObjFrailty$xR[,1] > t) || (max(ObjFrailty$xR[,1]) < t)) stop(" Time exceeds the range allowed ")
+			x1 <- matrix(ObjFrailty$xR[,1],nrow=3,ncol=ObjFrailty$nbintervR)
+			x1 <- rbind(x1,rep(t,ObjFrailty$nbintervR))
+			ind <- apply(x1,MARGIN=2, FUN=function(x){which((x[1] <= x[4]) & (x[4] < x[3]))})
+			res <- c(res,ObjFrailty$lamR[(which(ind==1)*3-1),1,1])
+			if(ObjFrailty$n.strat > 1){
+				for (i in 2:ObjFrailty$n.strat){
+					if((ObjFrailty$xR[,i] > t) || (max(ObjFrailty$xR[,i]) < t)) stop(" Time exceeds the range allowed ")
+					x1 <- matrix(ObjFrailty$xR[,i],nrow=3,ncol=ObjFrailty$nbintervR)
+					x1 <- rbind(x1,rep(t,ObjFrailty$nbintervR))
+					ind <- apply(x1,MARGIN=2, FUN=function(x){which((x[1] <= x[4]) & (x[4] < x[3]))})
+					res <- c(res,ObjFrailty$lamR[(which(ind==1)*3-1),1,i])
+				}
+			}
+			if((ObjFrailty$xD > t) || (max(ObjFrailty$xD) < t)) stop(" Time exceeds the range allowed ")
+			x2 <- matrix(ObjFrailty$xD,nrow=3,ncol=ObjFrailty$nbintervDC)
 			x2 <- rbind(x2,rep(t,ObjFrailty$nbintervDC))
 			ind <- apply(x2,MARGIN=2, FUN=function(x){which((x[1] <= x[4]) & (x[4] < x[3]))})
-			res <- c(res,ObjFrailty$lam2[(which(ind==1)*3-1),1])
+			res <- c(res,ObjFrailty$lamD[(which(ind==1)*3-1),1])
 		}else{
 # shared additive nested
-			if(ObjFrailty$n.strat == 2){
-				if((ObjFrailty$x2 > t) || (max(ObjFrailty$x2) < t)) stop(" Time exceeds the range allowed ")
-				x2 <- matrix(ObjFrailty$x2,nrow=3,ncol=ObjFrailty$nbintervR)
-				x2 <- rbind(x2,rep(t,ObjFrailty$nbintervR))
-				ind <- apply(x2,MARGIN=2, FUN=function(x){which((x[1] <= x[4]) & (x[4] < x[3]))})
-				res <- c(res,ObjFrailty$lam2[(which(ind==1)*3-1),1])
+			if((ObjFrailty$x[,1] > t) || (max(ObjFrailty$x[,1]) < t)) stop(" Time exceeds the range allowed ")
+			x1 <- matrix(ObjFrailty$x[,1],nrow=3,ncol=ObjFrailty$nbintervR)
+			x1 <- rbind(x1,rep(t,ObjFrailty$nbintervR))
+			ind <- apply(x1,MARGIN=2, FUN=function(x){which((x[1] <= x[4]) & (x[4] < x[3]))})
+			res <- c(res,ObjFrailty$lam[(which(ind==1)*3-1),1,1])
+			if(ObjFrailty$n.strat > 1){
+				for (i in 2:ObjFrailty$n.strat){
+					if((ObjFrailty$x[,i] > t) || (max(ObjFrailty$x[,i]) < t)) stop(" Time exceeds the range allowed ")
+					x1 <- matrix(ObjFrailty$x[,i],nrow=3,ncol=ObjFrailty$nbintervR)
+					x1 <- rbind(x1,rep(t,ObjFrailty$nbintervR))
+					ind <- apply(x1,MARGIN=2, FUN=function(x){which((x[1] <= x[4]) & (x[4] < x[3]))})
+					res <- c(res,ObjFrailty$lam[(which(ind==1)*3-1),1,i])
+				}
 			}
 		}
 		return(res)
@@ -75,27 +89,40 @@
 	if (ObjFrailty$typeof == 2){
 		if(!t)stop(" Use only for time greater than 0")
 		res <- NULL
-		if((ObjFrailty$x1 > t) || (max(ObjFrailty$x1) < t)) stop(" Time exceeds the range allowed ")
-		sc1 <- ObjFrailty$shape.weib[1]
-		sh1 <- ObjFrailty$scale.weib[1]		
-		res <- c(res,(sh1*(t^(sh1-1)))/(sc1^sh1))
-
 		if(class(ObjFrailty) == "jointPenal"){
-			if((ObjFrailty$x2 > t) || (max(ObjFrailty$x2) < t)) stop(" Time exceeds the range allowed ")
-			sc1 <- ObjFrailty$shape.weib[2]
-			sh1 <- ObjFrailty$scale.weib[2]	
+			nst <- ObjFrailty$n.strat + 1 # deces
+			if((ObjFrailty$xR[,1] > t) || (max(ObjFrailty$xR[,1]) < t)) stop(" Time exceeds the range allowed ")
+			sc1 <- ObjFrailty$scale.weib[1]
+			sh1 <- ObjFrailty$shape.weib[1]
 			res <- c(res,(sh1*(t^(sh1-1)))/(sc1^sh1))
-
+			if(ObjFrailty$n.strat > 1){
+				for (i in 2:ObjFrailty$n.strat){
+					if((ObjFrailty$xR[,i] > t) || (max(ObjFrailty$xR[,i]) < t)) stop(" Time exceeds the range allowed ")
+					sc1 <- ObjFrailty$scale.weib[i]
+					sh1 <- ObjFrailty$shape.weib[i]
+					res <- c(res,(sh1*(t^(sh1-1)))/(sc1^sh1))
+				}
+			}
+			if((ObjFrailty$xD > t) || (max(ObjFrailty$xD) < t)) stop(" Time exceeds the range allowed ")
+			sc1 <- ObjFrailty$scale.weib[nst]
+			sh1 <- ObjFrailty$shape.weib[nst]
+			res <- c(res,(sh1*(t^(sh1-1)))/(sc1^sh1))
 		}else{
-			if(ObjFrailty$n.strat == 2){
-				if((ObjFrailty$x2 > t) || (max(ObjFrailty$x2) < t)) stop(" Time exceeds the range allowed ")
-				sc1 <- ObjFrailty$shape.weib[2]
-				sh1 <- ObjFrailty$scale.weib[2]	
-				res <- c(res,(sh1*(t^(sh1-1)))/(sc1^sh1))
+			if((ObjFrailty$x[,1] > t) || (max(ObjFrailty$x[,1]) < t)) stop(" Time exceeds the range allowed ")
+			sc1 <- ObjFrailty$scale.weib[1]
+			sh1 <- ObjFrailty$shape.weib[1]
+			res <- c(res,(sh1*(t^(sh1-1)))/(sc1^sh1))
+			if(ObjFrailty$n.strat > 1){
+				for (i in 2:ObjFrailty$n.strat){
+					if((ObjFrailty$x[,i] > t) || (max(ObjFrailty$x[,i]) < t)) stop(" Time exceeds the range allowed ")
+					sc1 <- ObjFrailty$scale.weib[i]
+					sh1 <- ObjFrailty$shape.weib[i]
+					res <- c(res,(sh1*(t^(sh1-1)))/(sc1^sh1))
+				}
 			}
 		}
 		return(res)
-	}	
+	}
 }
 
 

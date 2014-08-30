@@ -13,7 +13,7 @@
     double precision,dimension(:,:),allocatable,save:: y
     end module perso
 
-    subroutine nested(ns0,ng0,nssgbyg0,nst0,nz0,ax1,ax2,tt00,tt10,ic0,groupe0, &
+    subroutine nested(ns0,ng0,nssgbyg0,nst0,nz0,axT,tt00,tt10,ic0,groupe0, &
     ssgroupe0,nva0,str0,vax0,AG0,noVar,maxiter0,irep1,np,maxngg,b,H_hessOut,HIHOut,resOut, &
     LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt,ni, &
     cpt,ier,k0,ddl,istop,shapeweib,scaleweib,mt1,ziOut,time, &
@@ -34,7 +34,8 @@
 
     integer::ns0,ng0,nssgbyg0,nst0,np,nz0,nva0,AG0,noVar,maxiter0,mt,mt1,maxngg
     double precision,dimension(nz0+6),intent(out)::ziOut
-    double precision,intent(in)::ax1,ax2
+!     double precision,intent(in)::ax1,ax2
+    double precision,dimension(2),intent(in)::axT
     double precision,dimension(ns0)::tt00,tt10
     integer,dimension(ns0)::ic0,groupe0,ssgroupe0
     double precision,dimension(ns0)::str0
@@ -114,7 +115,7 @@
 
     if (typeof == 1) then
         nbintervR = nbintervR0
-    end if    
+    end if
     shapeweib = 0.d0
     scaleweib = 0.d0
 
@@ -126,8 +127,9 @@
     nssgbyg=nssgbyg0
     ngexact=nssgbyg0
 
-    xmin1=ax1
-    xmin2=ax2
+    xmin1 = axT(1) !ax1
+    xmin2 = axT(2) !ax2
+
     ver=nva0
     nvarmax=nva0
 
@@ -135,7 +137,7 @@
 
     allocate(filtre(ver),date(ndatemax),aux(2*ns0))
 
-    if (noVar.eq.1) then 
+    if (noVar.eq.1) then
 
         do i=1,nva0
             filtre(i)=0
@@ -656,8 +658,10 @@
 !          write(*,*)' '
 !          write(*,*)'                Searching smoothing parameter'
 !          write(*,*)' '
+
             xmin1 = dsqrt(xmin1)
             auxi = estimvN(xmin1,n,b,y,ddl,ni,res)
+
             if(ddl.gt.-2.5d0)then
                 xmin1 = dsqrt(xmin1)
                 auxi = estimvN(xmin1,n,b,y,ddl,ni,res)
@@ -676,7 +680,8 @@
                         endif
                     endif
                 endif
-            endif 
+            endif
+
             if (ni.ge.250) then
                 do i=1,nz+2
                     b(i)=1.d-1

@@ -7,10 +7,10 @@
     ,ttt,tttdc,kkapa,betaR,etaR,betaD,etaD
     use tailles
     use comongroup
-        use residusM
+    use residusM
 
     implicit none
-    
+
     integer::nb,np,id,jd,i,j,k,cptg,l,ig,choix
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,dnb,sum,inv,res,int,gammaJ
@@ -74,49 +74,45 @@
     end do
 
 
-!*******************************************         
+!*******************************************
 !----- A SIMPLE SHARED FRAILTY  MODEL  
 !      write(*,*)'SIMPLE SHARED FRAILTY MODEL'
-!***********************
+!*******************************************
     if(indic_joint.eq.0)then
         inv = 1.d0/theta
 !    i indice les sujets
-        do i=1,nsujet 
-            cpt(g(i))=cpt(g(i))+1 
-        !write(*,*)'cpt ******',cpt(g(i)),g(i),stra(i),c(i)
+        do i=1,nsujet
+            cpt(g(i))=cpt(g(i))+1
+
             if(nva.gt.0)then
-                vet = 0.d0   
+                vet = 0.d0
                 do j=1,nva
                     vet =vet + bh(np-nva+j)*dble(ve(i,j))
-!                     write(*,*)'funcpaGweib ve ******',vet,ve(i,j),i,j
                 end do
                 vet = dexp(vet)
             else
                 vet=1.d0
             endif
+
             if((c(i).eq.1).and.(stra(i).eq.1))then
                 res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
-            endif  
-
+            endif
             if((c(i).eq.1).and.(stra(i).eq.2))then
                 res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
-            endif  
+            endif
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 funcpaGweib=-1.d9
                 goto 123
             end if
 
             if(stra(i).eq.1)then
-                !res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet
-                res1(g(i)) = res1(g(i))+((t1(i)/etaR)**betaR)*vet 
+                res1(g(i)) = res1(g(i))+((t1(i)/etaR)**betaR)*vet
             endif
-
-
 
             if(stra(i).eq.2)then
-                !res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet
-                res1(g(i)) = res1(g(i))+((t1(i)/etaD)**betaD)*vet 
+                res1(g(i)) = res1(g(i))+((t1(i)/etaD)**betaD)*vet
             endif
+
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 funcpaGweib=-1.d9
                 goto 123
@@ -124,20 +120,19 @@
 
 ! modification pour nouvelle vraisemblance / troncature:
             if(stra(i).eq.1)then
-            !    res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
-                res3(g(i)) = res3(g(i))+((t0(i)/etaR)**betaR)*vet     
+                res3(g(i)) = res3(g(i))+((t0(i)/etaR)**betaR)*vet
             endif
 
             if(stra(i).eq.2)then
-            !    res3(g(i)) = res3(g(i)) + ut2(nt0(i))*vet
-                res3(g(i)) = res3(g(i))+((t0(i)/etaD)**betaD)*vet 
+                res3(g(i)) = res3(g(i))+((t0(i)/etaD)**betaD)*vet
             endif
+
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                 funcpaGweib=-1.d9
                 goto 123
-            end if    
-        end do 
-        
+            end if
+        end do
+
         res = 0.d0
         cptg = 0
 
@@ -199,8 +194,8 @@
         nst=2
         inv = 1.d0/theta
 !     pour les donnees recurrentes
-!
-        do i=1,nsujet 
+
+        do i=1,nsujet
             cpt(g(i))=cpt(g(i))+1  !nb obser dans groupe
             if(nva1.gt.0)then
                 vet = 0.d0
@@ -213,34 +208,35 @@
             endif
 
             if((c(i).eq.1))then
-            !    res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet) 
                 res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
             endif
+
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 funcpaGweib=-1.d9
                 goto 123
-            end if    
+            end if
+
 !     nouvelle version
             res1(g(i)) = res1(g(i))+((t1(i)/etaR)**betaR)*vet
-            !res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet
 
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 funcpaGweib=-1.d9
                 goto 123
             end if
+
 !     modification pour nouvelle vraisemblance / troncature:
-        !    res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet 
             res3(g(i)) = res3(g(i))+((t0(i)/etaR)**betaR)*vet
+
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                 funcpaGweib=-1.d9
                 goto 123
-            end if    
+            end if
+
         end do
 
-!
-! pour le deces 
-! 
-        do k=1,lignedc!ng  
+! pour le deces
+
+        do k=1,lignedc!ng
             if(nva2.gt.0)then
                 vet2 = 0.d0
                 do j=1,nva2
@@ -251,18 +247,16 @@
                 vet2=1.d0
             endif
             if(cdc(k).eq.1)then
-                !res2dc(gsuj(k)) = res2dc(gsuj(k))+dlog(dut2(nt1dc(k))*vet2)
                 res2dc(gsuj(k)) = res2dc(gsuj(k))+(betaD-1.d0)*dlog(t1dc(k))+&
                 dlog(betaD)-betaD*dlog(etaD)+dlog(vet2) 
 
                 if ((res2dc(gsuj(k)).ne.res2dc(gsuj(k))).or.(abs(res2dc(gsuj(k))).ge. 1.d30)) then
                     funcpaGweib=-1.d9
                     goto 123
-                end if    
-!                  write(*,*)'*** res2dc',res2dc(k),dut2(nt1dc(k)),nt1dc(k),vet2,k,ng
-            endif 
-! pour le calcul des integrales / pour la survie, pas pour donn�es recur:
-            !aux1(gsuj(k))=aux1(gsuj(k))+ut2(nt1dc(k))*vet2
+                end if
+            endif
+
+! pour le calcul des integrales / pour la survie, pas pour donnees recur:
             aux1(gsuj(k))=aux1(gsuj(k))+((t1dc(k)/etaD)**betaD)*vet2
 
             !aux2(gsuj(k))=aux2(gsuj(k))+ut2(nt0dc(k))*vet2 !vraie troncature
@@ -271,7 +265,8 @@
             if ((aux1(gsuj(k)).ne.aux1(gsuj(k))).or.(abs(aux1(gsuj(k))).ge. 1.d30)) then
                 funcpaGweib=-1.d9
                 goto 123
-            end if    
+            end if
+
             if ((aux2(gsuj(k)).ne.aux2(gsuj(k))).or.(abs(aux2(gsuj(k))).ge. 1.d30)) then
                 funcpaGweib=-1.d9
                 goto 123
@@ -279,62 +274,34 @@
         end do
 
 !**************INTEGRALES ****************************
-        do ig=1,ng 
-            auxig=ig 
-!              choix=1
-!              call gaulagJ(int,choix)
-!              integrale1(ig) = int
-!        write(*,*)'integrale1',integrale1(ig),frail,theta,&
-!                  alpha,aux1(auxig),ig
-!              if(indictronq.eq.1.and.AG.eq.0)then
-!                 choix = 2
-!                 call gaulagJ(int,choix)
-!                 integrale2(ig) = int
-!                 write(*,*)'integrale2',integrale2(ig),ig
-!              else 
-!                 integrale2(ig) = 1.d0
-!              endif
-
-!              if(AG.eq.1)then
-            choix = 3  
-!                 write(*,*)')))))))))ig avant gaulag',auxig,ig
+        do ig=1,ng
+            auxig=ig
+            choix = 3
             call gaulagJ(int,choix)
-!                 write(*,*)'))apres gaulag',int,ig
-
-!                 integrale3(ig) = dexp(gammaJ(1.d0/theta +nig(ig)))*&
-!                     (1.d0/theta + res1(ig)- res3(ig))** &
-!                     (-nig(ig) - 1.d0 / theta)
-
-            integrale3(ig) = int !moins bon 
-! parfois , quand bcp de deces par groupe integrale3=0**/
+            integrale3(ig) = int !moins bon
+! parfois quand bcp de deces par groupe integrale3=0
 !            if(integrale3(ig).lt.1.d-300)then
 !                print*,"fixe"
 !                integrale3(ig) = 1.d-300
 !            endif
-!                write(*,*)'integrale3',integrale3(ig),ig
-!                 stop
-!                 write(*,*)'i'
-!             endif
-!                 if(ig.eq.37)stop
         end do
-!                 write(*,*)'integrale3',integrale3(ng)
-!      stop
+
 !************* FIN INTEGRALES **************************
-        res = 0.d0 
-        do k=1,ng  
+        res = 0.d0
+        do k=1,ng
             sum=0.d0
             if(cpt(k).gt.0)then
                 res= res + res2(k)+ res2dc(k) &
                 - gammaJ(1.d0/theta)-dlog(theta)/theta  &
-                + dlog(integrale3(k)) 
+                + dlog(integrale3(k))
 
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
                     !print*,"here",integrale3(k),k
                     funcpaGweib=-1.d9
                     goto 123
                 end if
-            endif 
-        end do   
+            endif
+        end do
     endif !fin boucle indic_joint=0 or 1
 
     if ((res.ne.res).or.(abs(res).ge. 1.d30)) then

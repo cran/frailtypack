@@ -15,7 +15,7 @@
 \usage{
 
 \method{plot}{jointPenal}(x, event = "both", type.plot = "hazard", conf.bands = FALSE,
- pos.legend="topright", cex.legend=0.7, ylim, main, color1, color2, ...)
+ pos.legend="topright", cex.legend = 0.7, ylim, main, color = 2, ...)
 
 
 }
@@ -36,8 +36,7 @@
           'par("cex")'. Default is 0.7}
   \item{ylim}{y-axis limits}
   \item{main}{plot title}
-  \item{color1}{curve color for recurrent event (integer or color name in quotation marks)}
-  \item{color2}{curve color for terminal event (integer or color name in quotation marks)}
+  \item{color}{curve color (integer)}
   \item{...}{other unused arguments}
 }
 
@@ -59,17 +58,18 @@ data(readmission)
 #-- Gap-time
 modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
 charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=14,kappa1=100,kappa2=100)
+data=readmission,n.knots=14,kappa=c(100,100))
 
 #-- It takes around 1 minute to converge --#
 
 plot(modJoint.gap,type.plot="haz",event="recurrent",conf.bands=TRUE)
 plot(modJoint.gap,type.plot="haz",event="terminal",conf.bands=TRUE)
 plot(modJoint.gap,type.plot="haz",event="both",conf.bands=TRUE)
+
 plot(modJoint.gap,type.plot="su",event="recurrent",conf.bands=TRUE)
 plot(modJoint.gap,type.plot="su",event="terminal",conf.bands=TRUE)
-plot(modJoint.gap, event="terminal",type.plot="su",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="su","terminal",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="su",event="both",conf.bands=TRUE)
+
 
 }
 

@@ -3,32 +3,29 @@
 
 !========================          FUNCPAG_WEIB         ====================
     double precision function funcpaGweib_log(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
     use comon,only:etaR,etaD,betaR,betaD, &
     t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
     effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,sig2, &
     auxig,aux1,aux2,res1,res3,kkapa,res5,indictronq
-        use residusM
+    use residusM
     use comongroup
 
     IMPLICIT NONE
 
 ! *** NOUVELLLE DECLARATION F90 :
-    
+
     integer,intent(in)::id,jd,np
     double precision,dimension(np),intent(in)::b
     double precision,dimension(2),intent(in)::k0
     double precision,intent(in)::thi,thj
-    
     integer::n,i,j,k,vj,ig,choix
     integer,dimension(ngmax)::cpt
     double precision::res
-    
     double precision,dimension(np)::bh
     double precision,dimension(ngmax)::res2,res1dc,res2dc &
     ,res3dc,integrale1,integrale2,integrale3
-
     double precision::int
     double precision,parameter::pi=3.141592653589793d0
 
@@ -62,7 +59,6 @@
         etaD= bh(4)**2
     end if
 
-    
     if(effet.eq.1) then
         sig2 = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
         if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
@@ -114,39 +110,39 @@
             endif
 
             if((c(i).eq.1).and.(stra(i).eq.1))then
-                res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet) !dlog(dut1(nt1(i))*vet)
+                res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
             endif
 
             if((c(i).eq.1).and.(stra(i).eq.2))then
-                res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet) !dlog(dut2(nt1(i))*vet)
+                res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
             endif
 
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge.1.d30)) then
-                          funcpaGweib_log=-1.d9
-                          goto 123
+                funcpaGweib_log=-1.d9
+                goto 123
             end if
 
 ! modification pour nouvelle vraisemblance / troncature:
             if(stra(i).eq.1)then
-                res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet !ut1(nt0(i))*vet
-                res5(i) = ((t1(i)/etaR)**betaR)*vet !ut1(nt1(i))*vet
+                res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet
+                res5(i) = ((t1(i)/etaR)**betaR)*vet
                 res1(g(i)) = res1(g(i)) + res5(i) ! pour les residus
             endif
-            
+
             if(stra(i).eq.2)then
-                res3(g(i)) = res3(g(i)) + ((t0(i)/etaD)**betaD)*vet !ut2(nt0(i))*vet
-                res5(i) = ((t1(i)/etaD)**betaD)*vet !ut2(nt1(i))*vet
+                res3(g(i)) = res3(g(i)) + ((t0(i)/etaD)**betaD)*vet
+                res5(i) = ((t1(i)/etaD)**betaD)*vet
                 res1(g(i)) = res1(g(i)) + res5(i) ! pour les residus
             endif
 
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge.1.d30)) then
-                          funcpaGweib_log=-1.d9
-                          goto 123
+                funcpaGweib_log=-1.d9
+                goto 123
             end if
 
             if ((res5(i).ne.res5(i)).or.(abs(res5(i)).ge.1.d30)) then
-                          funcpaGweib_log=-1.d9
-                          goto 123
+                funcpaGweib_log=-1.d9
+                goto 123
             end if
         end do
 
@@ -180,14 +176,13 @@
                 -dlog(integrale2(k))
             endif
             if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-                     funcpaGweib_log=-1.d9
-                     goto 123
+                funcpaGweib_log=-1.d9
+                goto 123
             end if
         enddo
     else ! passage au modele conjoint
 
-!********************************************
-!*******************************************
+!*********************************************
 !----- JOINT FRAILTY MODEL
 !*********************************************
 
@@ -208,8 +203,9 @@
             endif
 
             if (c(i).eq.1) then
-                res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet) !dlog(dut1(nt1(i))*vet)
+                res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
             endif
+
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 !print*,"here7"
                 funcpaGweib_log=-1.d9
@@ -217,7 +213,7 @@
             end if
 
 !     nouvelle version
-            res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet !ut1(nt1(i))*vet
+            res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 !print*,"here6"
                 funcpaGweib_log=-1.d9
@@ -225,7 +221,7 @@
             end if
 
 !     modification pour nouvelle vraisemblance / troncature:
-            res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet !ut1(nt0(i))*vet
+            res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                 !print*,"here5"
                 funcpaGweib_log=-1.d9
@@ -258,8 +254,8 @@
             endif
 
 ! pour le calcul des integrales / pour la survie, pas les donnees recurrentes:
-            aux1(gsuj(k)) = aux1(gsuj(k)) + ((t1dc(k)/etaD)**betaD)*vet2 !ut2(nt1dc(k))*vet2
-            aux2(gsuj(k)) = aux2(gsuj(k)) + ((t0dc(k)/etaD)**betaD)*vet2 ! ut2(nt0dc(k))*vet2 !vraie troncature
+            aux1(gsuj(k)) = aux1(gsuj(k)) + ((t1dc(k)/etaD)**betaD)*vet2
+            aux2(gsuj(k)) = aux2(gsuj(k)) + ((t0dc(k)/etaD)**betaD)*vet2 !vraie troncature
 
             if ((aux1(gsuj(k)).ne.aux1(gsuj(k))).or.(abs(aux1(gsuj(k))).ge. 1.d30)) then
                 !print*,"here1",aux1(gsuj(k)),vet2,k
@@ -280,7 +276,7 @@
             call gauherJ(int,choix)
             integrale3(ig) = int
         end do
-!************* FIN INTEGRALES **************************
+!************* FIN INTEGRALES ************************
 
         res = 0.d0
         do k=1,ng
@@ -332,6 +328,6 @@
 123     continue
 
     return
-    
+
     end function funcpaGweib_log
 

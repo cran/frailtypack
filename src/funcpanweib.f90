@@ -3,33 +3,31 @@
 
 
     double precision function funcpanweib(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
     use comon,only:t0,t1,c,nsujet,nva,ndate,nst,stra,effet,ve &
     ,g,nig,AG,auxig,alpha,eta,kkapa,etaR,etaD,betaR,betaD,indictronq
     use commun,only:ngexact,mij,mid,ssg,aux1,aux2
-        use residusM
-        
+    use residusM
+
     Implicit none
 
-    
     integer::nb,np,id,jd,i,j,k,cptg,l,ig,ip,issg,choix
     integer,dimension(ngexact)::cpt
     double precision::thi,thj,dnb,sum,theta,inv,res,vet,int,gammlnN
     double precision,dimension(np)::b,bh
     double precision,dimension(ngexact)::res1,res2,res3 &
-    ,integrale1,integrale2,integrale3,sum1      
+    ,integrale1,integrale2,integrale3,sum1
     double precision,dimension(2)::k0
 
-    
-    kkapa=k0    
+    kkapa=k0
     bh=b
     j=0
     theta=0.d0
     res=0.d0
-    if (id.ne.0) bh(id)=bh(id)+thi 
-    if (jd.ne.0) bh(jd)=bh(jd)+thj    
-      
+    if (id.ne.0) bh(id)=bh(id)+thi
+    if (jd.ne.0) bh(jd)=bh(jd)+thj
+
     if (nst == 1) then
         betaR= bh(1)**2
         etaR= bh(2)**2
@@ -37,17 +35,15 @@
         etaD=  0.d0
     else
         betaR= bh(1)**2
-        etaR= bh(2)**2    
+        etaR= bh(2)**2
         betaD= bh(3)**2
-        etaD= bh(4)**2        
+        etaD= bh(4)**2
     end if
-
-
 
     if(effet.eq.1) then
         theta = (bh(np-nva)*bh(np-nva)) ! variance effet groupe
     endif
-    
+
     if(effet.eq.2) then
         alpha = (bh(np-nva-1)*bh(np-nva-1)) ! variance effet groupe
         eta = (bh(np-nva)*bh(np-nva))  ! variance effet sous groupe
@@ -57,22 +53,21 @@
 !--------------------------------------------------------
 !----------calcul de la vraisemblance ------------------
 !---------------------------------------------------------
-        
+
     res1 = 0.d0
     res2 = 0.d0
-    cpt = 0!!!!!!!!!!!!!!!!!!!!!
-    
-  
-!*******************************************     
+    cpt = 0
+
+!*******************************************
 !----- sans effet aleatoire dans le modele
-!*******************************************  
-   
+!*******************************************
+
     if (effet.eq.0) then
         do i=1,nsujetmax
             cpt(g(i))=cpt(g(i))+1
-            
+
             if(nva.gt.0)then
-                vet = 0.d0   
+                vet = 0.d0
                 do j=1,nva
                     vet =vet + bh(np-nva+j)*ve(i,j)
                 end do
@@ -80,11 +75,11 @@
             else
                 vet=1.d0
             endif
-            
+
             if((c(i).eq.1).and.(stra(i).eq.1))then
                 res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
-            endif  
-    
+            endif
+
             if((c(i).eq.1).and.(stra(i).eq.2))then
                 res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
             endif
@@ -92,44 +87,44 @@
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 funcpanweib=-1.d9
                 goto 123
-            end if    
-                
+            end if
+
             if(stra(i).eq.1)then
-                res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet - ((t0(i)/etaR)**betaR)*vet  
+                res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet - ((t0(i)/etaR)**betaR)*vet
             endif
-    
+
             if(stra(i).eq.2)then
-                res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet - ((t0(i)/etaD)**betaD)*vet  
+                res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet - ((t0(i)/etaD)**betaD)*vet
             endif
-        
+
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 funcpanweib=-1.d9
                 goto 123
-            end if    
-        end do     
-        res = 0.d0          
-        cptg = 0         
+            end if
+        end do
+
+        res = 0.d0
+        cptg = 0
 ! k indice les groupes
         do k=1,ngexact
-            if(cpt(k).gt.0)then !nb de sujets dans un gpe=nig()                             
+            if(cpt(k).gt.0)then !nb de sujets dans un gpe=nig()
                 res = res-res1(k)+ res2(k) 
                 cptg = cptg + 1
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
                     funcpanweib=-1.d9
                     goto 123
-                end if 
-            endif 
+                end if
+            endif
         end do
     endif !fin boucle effet=0
-        
 
-!*******************************************
+!**************************************************
 !-----avec un seul  effet aleatoire dans le modele
-!*********************************************
-       
+!**************************************************
+
     if (effet.eq.1) then
 !      write(*,*)'AVEC 1 EFFET ALEATOIRE'
-        
+
         inv = 1.d0/theta
         cpt=0
         res1=0.d0
@@ -177,6 +172,7 @@
                 funcpanweib=-1.d9
                 goto 123
             end if
+
 ! modification pour nouvelle vraisemblance / troncature:
             if(stra(i).eq.1)then
                 res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet
@@ -262,9 +258,9 @@
         end if
     endif !fin boucle effet=1
 
-!*******************************************
+!************************************************
 !-----avec deux effets aleatoires dans le modele
-!*********************************************
+!************************************************
 
     if (effet.eq.2) then
 
@@ -300,16 +296,16 @@
 
             if((c(k).eq.1).and.(stra(k).eq.1))then
                 res2(g(k)) = res2(g(k))+(betaR-1.d0)*dlog(t1(k))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
-            endif  
+            endif
             if((c(k).eq.1).and.(stra(k).eq.2))then
                 res2(g(k)) = res2(g(k))+(betaD-1.d0)*dlog(t1(k))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
-            endif 
- 
+            endif
+
             if ((res2(g(k)).ne.res2(g(k))).or.(abs(res2(g(k))).ge. 1.d30)) then
                 funcpanweib=-1.d9
                 goto 123
             end if
-            
+
             if(stra(k).eq.1)then
                 aux1(g(k),ssg(k,g(k)))=aux1(g(k),ssg(k,g(k)))+((t1(k)/etaR)**betaR)*vet
                 aux2(g(k),ssg(k,g(k)))=aux2(g(k),ssg(k,g(k)))+((t0(k)/etaR)**betaR)*vet
@@ -318,18 +314,19 @@
                 aux1(g(k),ssg(k,g(k)))=aux1(g(k),ssg(k,g(k)))+((t1(k)/etaD)**betaD)*vet
                 aux2(g(k),ssg(k,g(k)))=aux2(g(k),ssg(k,g(k)))+((t0(k)/etaD)**betaD)*vet
             endif
-            
+
              if ((aux1(g(k),ssg(k,g(k))).ne.aux1(g(k),ssg(k,g(k)))).or.(abs(aux1(g(k),ssg(k,g(k)))).ge. 1.d30)) then
                 funcpanweib=-1.d9
                 goto 123
             end if
+
             if ((aux2(g(k),ssg(k,g(k))).ne.aux2(g(k),ssg(k,g(k)))).or.(abs(aux2(g(k),ssg(k,g(k)))).ge. 1.d30)) then
                 funcpanweib=-1.d9
                 goto 123
             end if
         end do
 
-!================== calcul des int�grales par Gauss LAGUERRE
+!================== calcul des integrales par Gauss LAGUERRE
 !     memes points et poids dans chq groupe
 
         do ig=1,ngexact
@@ -382,7 +379,7 @@
                         -dlog(alpha)/(alpha)-gammlnN(1.d0/alpha) &
                         +dlog(integrale3(k))
                     else
-! vraisemblance pr donnees censur�es dte et tronqu�es a gauche
+! vraisemblance pr donnees censurees dte et tronquees a gauche
                         res = res+res2(k)+sum1(k)+dlog(integrale1(k)) &
                         -dlog(integrale2(k)) 
                     endif
@@ -396,7 +393,6 @@
 
     endif !fin boucle effet=2
 
-!----------calcul de la penalisation -------------------
     if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
         funcpanweib=-1.d9
         goto 123
@@ -407,5 +403,5 @@
 123     continue
 
     return
-    
+
     end function funcpanweib

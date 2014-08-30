@@ -3,32 +3,29 @@
 
 !========================          FUNCPAJ_WEIB         ====================
     double precision function funcpajweib_log(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
-    use comon,only:etaR,etaD,betaR,betaD, &
+    use comon,only:etaR,etaD,betaR,betaD,etaT,betaT,nstRec, &
     t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
     effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,sig2, &
     auxig,aux1,aux2,res1,res3,kkapa
-        use residusM
+    use residusM
     use comongroup,only:vet,vet2
 
     IMPLICIT NONE
 
 ! *** NOUVELLLE DECLARATION F90 :
-    
+
     integer,intent(in)::id,jd,np
     double precision,dimension(np),intent(in)::b
     double precision,dimension(2),intent(in)::k0
     double precision,intent(in)::thi,thj
-    
-    integer::n,i,j,k,vj,ig,choix
+    integer::n,i,j,k,vj,ig,choix,jj
     integer,dimension(ngmax)::cpt
     double precision::res
-    
     double precision,dimension(np)::bh
     double precision,dimension(ngmax)::res2,res1dc,res2dc &
     ,res3dc,integrale1,integrale2,integrale3
-
     double precision::int
     double precision,parameter::pi=3.141592653589793d0
 
@@ -41,26 +38,18 @@
     j=0
 
     do i=1,np
-    bh(i)=b(i)
+        bh(i)=b(i)
     end do
-
 
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
 
-    n = (np-nva-effet-indic_ALPHA)/nst
-
-    if (nst.eq.1) then
-        betaR = bh(1)**2
-        etaR = bh(2)**2
-        etaD = 0.d0
-        betaD = 0.d0
-    else
-        betaR = bh(1)**2
-        etaR = bh(2)**2
-        betaD = bh(3)**2
-        etaD = bh(4)**2
-    end if
+    do jj=1,nstRec !en plus strates A.Lafourcade 07/2014 
+        betaT(jj)=bh((jj-1)*2+1)**2
+        etaT(jj)= bh((jj-1)*2+2)**2
+    end do
+    betaD= bh(2*nstRec+1)**2
+    etaD= bh(2*nstRec+2)**2
 
     if(effet.eq.1) then
         sig2 = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
@@ -115,7 +104,8 @@
         endif
 
         if (c(i).eq.1) then
-            res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet) !dlog(dut1(nt1(i))*vet)
+            res2(g(i)) = res2(g(i))+(betaT(stra(i))-1.d0)*dlog(t1(i))+ &
+            dlog(betaT(stra(i)))-betaT(stra(i))*dlog(etaT(stra(i)))+dlog(vet)
         endif
         if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
             !print*,"here6"
@@ -124,7 +114,7 @@
         end if
 
 !     nouvelle version
-        res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet !ut1(nt1(i))*vet
+        res1(g(i)) = res1(g(i)) + ((t1(i)/etaT(stra(i)))**betaT(stra(i)))*vet
         if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
             !print*,"here5"
             funcpajweib_log=-1.d9
@@ -132,7 +122,7 @@
         end if
 
 !     modification pour nouvelle vraisemblance / troncature:
-        res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet !ut1(nt0(i))*vet
+        res3(g(i)) = res3(g(i)) + ((t0(i)/etaT(stra(i)))**betaT(stra(i)))*vet
         if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
             !print*,"here4"
             funcpajweib_log=-1.d9
@@ -237,6 +227,6 @@
 123     continue
 
     return
-    
+
     end function funcpajweib_log
 

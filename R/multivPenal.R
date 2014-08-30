@@ -784,7 +784,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		nb.int[3] <- nb.int.temp[2]
 		if (missing(nb.int)) stop("Time interval 'nb.int' is required")
 		if (class(nb.int) != "numeric") stop("The argument 'nb.int' must be a numeric")
-		if (length(nb.int) != 3) stop("The argument 'nb.int' numeric vector of length 3")
+		if (length(nb.int) != 3) stop("The argument 'nb.int' must be a numeric vector of length 3")
 		if (nb.int[1] < 1) stop("Number of Time interval 'nb.int[1]' must be between 1 and 20")
 		if (nb.int[2] < 1) stop("Number of Time interval 'nb.int[2]' must be between 1 and 20")
 		if (nb.int[3] < 1) stop("Number of Time interval 'nb.int[3]' must be between 1 and 20")

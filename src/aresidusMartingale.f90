@@ -370,7 +370,8 @@
     cares=0.d0
     cbres=0.d0
     ddres=0.d0
-    Resmartingale = mid
+
+    Resmartingale = mid(1:ngexact) !mid
 
     do indg=1,ngexact
 

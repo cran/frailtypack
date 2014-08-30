@@ -1,6 +1,6 @@
 
 \name{frailtypack-package}
-\Rdversion{2.6.1}
+\Rdversion{2.7}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
@@ -14,7 +14,7 @@
  3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects.
  4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. Prediction
  values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard
- and shared frailty model) and strata (max=2) are allowed. In each model, the random effects have a gamma distribution, but you can switch
+ and shared frailty model) and strata are allowed. In each model, the random effects have a gamma distribution, but you can switch
  to a log-normal in shared and joint. Now, you can also consider time-varying effect covariates in Cox, shared and joint models. The
  package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 }
@@ -22,7 +22,7 @@
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.6.1\cr
+     Version: \tab 2.7\cr
      Date: \tab 2014-07-15\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab no\cr
@@ -59,7 +59,7 @@ data(dataAdditive)
 modAdd <- additivePenal(Surv(t1,t2,event)~
 cluster(group)+var1+slope(var1),
 correlation=TRUE,data=dataAdditive,
-n.knots=8,kappa1=10000,hazard="Splines")
+n.knots=8,kappa=10000,hazard="Splines")
 
 ###--- Joint model (recurrent and terminal events) with 2 covariates ---###
 
@@ -67,22 +67,22 @@ data(readmission)
 modJoint.gap <- frailtyPenal(Surv(time,event)~
 cluster(id)+sex+dukes+charlson+terminal(death),
 formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=10,kappa1=100,
-kappa2=100,recurrentAG=FALSE,hazard="Splines")
+data=readmission,n.knots=10,kappa=c(100,100),
+recurrentAG=FALSE,hazard="Splines")
 
 ###--- Nested model (or hierarchical model) with 2 covariates ---###
 
 data(dataNested)
 modClu <- frailtyPenal(Surv(t1,t2,event)~
 cluster(group)+subcluster(subgroup)+cov1+cov2,
-data=dataNested,n.knots=8,kappa1=50000,hazard="Splines")
+data=dataNested,n.knots=8,kappa=50000,hazard="Splines")
 
 ###--- Semiparametric Shared model ---###
 
 data(readmission)
 sha.sp <- frailtyPenal(Surv(t.start,t.stop,event)~
 sex+dukes+charlson+cluster(id),data=readmission,
-n.knots=6,kappa1=5000,recurrentAG=TRUE,
+n.knots=6,kappa=5000,recurrentAG=TRUE,
 cross.validation=TRUE,hazard="Splines")
 
 ###--- Parametric Shared model ---###
@@ -91,7 +91,7 @@ data(readmission)
 sha.p <- frailtyPenal(Surv(t.start,t.stop,event)~
 cluster(id)+sex+dukes+charlson,
 data=readmission,recurrentAG=TRUE,
-hazard="Piecewise-per",nb.int1=6)
+hazard="Piecewise-per",nb.int=6)
 
 }
 

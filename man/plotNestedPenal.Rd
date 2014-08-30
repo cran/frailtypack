@@ -13,13 +13,24 @@
 
 \usage{
 
-\method{plot}{nestedPenal}(x, ...)
+\method{plot}{nestedPenal}(x, type.plot="hazard", conf.bands=TRUE,
+ pos.legend="topright", cex.legend=0.7, main, color=2, ...)
 
 }
 
 \arguments{
   \item{x}{ A nested model, more generaly an object of class \code{frailtyPenal for Nested frailty models} (output from calling \code{frailtyPenal}
     function).}
+  \item{type.plot}{ a character string specifying the type of curve. Possible
+                   value are "hazard", or "survival". The default
+                   is "hazard". Only the first words are required, e.g "haz", "su"}
+  \item{conf.bands}{ logical value. Determines whether confidence bands will be plotted. The default is to do so.}
+  \item{pos.legend}{The location of the legend can be specified by setting this argument to a single keyword from the list '"bottomright"', '"bottom"', '"bottomleft"', '"left"', '"topleft"', '"top"', '"topright"', '"right"' and
+     '"center"'. The default is '"topright"'}
+  \item{cex.legend}{character expansion factor *relative* to current
+          'par("cex")'. Default is 0.7}
+  \item{main}{plot title}
+  \item{color}{curve color (integer)}
   \item{\dots}{ Other graphical parameters like those in \code{\link{plot.frailtyPenal}}}
 }
 
@@ -39,7 +50,7 @@
 data(dataNested)
 modNested <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
 subcluster(subgroup)+cov1+cov2,data=dataNested,n.knots=8,
-kappa1=50000,hazard="Splines")
+kappa=50000,hazard="Splines")
 
 plot(modNested,conf.bands=FALSE)
 

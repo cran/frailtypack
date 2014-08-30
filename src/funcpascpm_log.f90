@@ -8,13 +8,12 @@
     nst,stra,ve,effet,ng,g,nig,AG,nbintervR, &
     ttt,betacoef,kkapa,sig2, &
     indictronq,auxig,res3,res5
-        use residusM
-    
-    
+    use residusM
+
     implicit none
-    
+
 ! *** NOUVELLLE DECLARATION F90 :
-    
+
     integer::nb,np,id,jd,i,j,k,cptg,ig,choix
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,dnb,res,vet,int,som1,som2,somm1,somm2
@@ -66,7 +65,7 @@
     if (effet.eq.0) then
         do i=1,nsujet
             cpt(g(i))=cpt(g(i))+1
-            
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -76,97 +75,54 @@
             else
                 vet=1.d0
             endif
-            
-            if((c(i).eq.1).and.(stra(i).eq.1))then
+
+            if(c(i).eq.1) then !en plus strates A.Lafourcade 05/2014
                 do gg=1,nbintervR
                     if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                         res2(g(i)) = res2(g(i))+dlog(betacoef(gg)*vet)
+                          res2(g(i)) = res2(g(i))+dlog(betacoef(nbintervR*(stra(i)-1)+gg)*vet)
                     end if
                 end do
             endif
-    
-            if((c(i).eq.1).and.(stra(i).eq.2))then
-                do gg=1,nbintervR
-                    if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                          res2(g(i)) = res2(g(i))+dlog(betacoef(nbintervR+gg)*vet)
-                    end if
-                end do
-            endif
-                   if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpascpm_log=-1.d9
-                          goto 123
-                       end if
 
-            if(stra(i).eq.1)then
-                som1=0.d0
-                som2=0.d0
-                somm1=0.d0
-                somm2=0.d0
-                do gg=1,nbintervR
-                    if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
-                        som1=betacoef(gg)*(t1(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
-                        RisqCumul(i) = (som1+som2)*vet
-                    end if
+            if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
+                funcpascpm_log=-1.d9
+                goto 123
+            end if
 
-                    if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
-                        somm1=betacoef(gg)*(t0(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                somm2=somm2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res1(g(i)) = res1(g(i)) - (somm1+somm2)*vet
-                    end if
-                end do
-                   if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpascpm_log=-1.d9
-                          goto 123
-                       end if
-            endif
+            som1=0.d0
+            som2=0.d0
+            somm1=0.d0
+            somm2=0.d0
 
-            if(stra(i).eq.2)then
-                som1=0.d0
-                som2=0.d0
-                somm1=0.d0
-                somm2=0.d0
-                
-                do gg=1,nbintervR
-                    if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
-                        som1=betacoef(nbintervR+gg)*(t1(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
+            do gg=1,nbintervR !en plus strates A.Lafourcade 05/2014
+                if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
+                    som1=betacoef(nbintervR*(stra(i)-1)+gg)*(t1(i)-ttt(gg-1))
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som2=som2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do
+                    endif
+                    res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
+                    RisqCumul(i) = (som1+som2)*vet
+                end if!!
 
-                        res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
-                        RisqCumul(i) = (som1+som2)*vet
-                    end if!!
+                if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
+                    somm1=betacoef(nbintervR*(stra(i)-1)+gg)*(t0(i)-ttt(gg-1))
 
-                    if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
-                        somm1=betacoef(nbintervR+gg)*(t0(i)-ttt(gg-1))
-                        
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                somm2=somm2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res1(g(i)) = res1(g(i)) - (somm1+somm2)*vet
-                    end if
-                end do
-                   if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpascpm_log=-1.d9
-                          goto 123
-                       end if    
-            endif
-
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            somm2=somm2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do
+                    endif
+                    res1(g(i)) = res1(g(i)) - (somm1+somm2)*vet
+                end if
+            end do
+            if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
+                funcpascpm_log=-1.d9
+                goto 123
+            end if
         end do
+
         res = 0.d0
         cptg = 0
 
@@ -190,7 +146,7 @@
         do i=1,nsujet
 
             cpt(g(i))=cpt(g(i))+1
-        
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -201,18 +157,10 @@
                 vet=1.d0
             endif
 
-            if((c(i).eq.1).and.(stra(i).eq.1))then
+            if(c(i).eq.1) then !en plus strates A.Lafourcade 05/2014
                 do gg=1,nbintervR
                     if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                         res2(g(i)) = res2(g(i))+dlog(betacoef(gg)*vet)
-                    end if
-                end do
-            endif
-
-            if((c(i).eq.1).and.(stra(i).eq.2))then
-                do gg=1,nbintervR
-                    if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                         res2(g(i)) = res2(g(i))+dlog(betacoef(nbintervR+gg)*vet)
+                         res2(g(i)) = res2(g(i))+dlog(betacoef(nbintervR*(stra(i)-1)+gg)*vet)
                     end if
                 end do
             endif
@@ -223,38 +171,19 @@
                 goto 123
             end if
 
-! modification pour nouvelle vraisemblance / troncature:
-            if(stra(i).eq.1)then
-                som1=0.d0
-                som2=0.d0
-                do gg=1,nbintervR
-                    if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
-                        som1=betacoef(gg)*(t0(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res3(g(i)) = res3(g(i)) + (som1+som2)*vet
-                    end if
-                end do
-            endif
-
-            if(stra(i).eq.2)then
-                som1=0.d0
-                som2=0.d0
-                do gg=1,nbintervR
-                    if ((t0(i)).ge.(ttt(gg-1)).and.(t0(i).lt.(ttt(gg)))) then
-                        som1=betacoef(nbintervR+gg)*(t0(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res3(g(i)) = res3(g(i)) + (som1+som2)*vet
-                    end if
-                end do
-            endif
+            som1=0.d0
+            som2=0.d0
+            do gg=1,nbintervR !en plus strates A.Lafourcade 05/2014
+               if ((t0(i)).ge.(ttt(gg-1)).and.(t0(i).lt.(ttt(gg)))) then
+                   som1=betacoef(nbintervR*(stra(i)-1)+gg)*(t0(i)-ttt(gg-1))
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som2=som2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do
+                    endif
+                    res3(g(i)) = res3(g(i)) + (som1+som2)*vet
+                end if
+            end do
 
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge.1.d30)) then
                 !print*,"here2",b
@@ -262,40 +191,21 @@
                 goto 123
             end if
 
-            if(stra(i).eq.1)then
-                som1=0.d0
-                som2=0.d0
-                do gg=1,nbintervR
-                    if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
-                        som1=betacoef(gg)*(t1(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res5(i) = (som1+som2)*vet
-                        res1(g(i)) = res1(g(i)) + res5(i) ! pour les residus
-                    end if
-                end do
-            endif
+            som1=0.d0
+            som2=0.d0
+            do gg=1,nbintervR !en plus strates A.Lafourcade 05/2014
+                if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
+                    som1=betacoef(nbintervR*(stra(i)-1)+gg)*(t1(i)-ttt(gg-1))
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som2=som2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do
+                    endif
+                    res5(i) = (som1+som2)*vet
+                    res1(g(i)) = res1(g(i)) + res5(i) ! pour les residus
+                end if
+            end do
 
-            if(stra(i).eq.2)then
-                som1=0.d0
-                som2=0.d0
-                do gg=1,nbintervR
-                    if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
-                        som1=betacoef(nbintervR+gg)*(t1(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res5(i) = (som1+som2)*vet
-                        res1(g(i)) = res1(g(i)) + res5(i) ! pour les residus
-                    end if
-                end do
-            endif
-            
             if ((res5(i).ne.res5(i)).or.(abs(res5(i)).ge.1.d30)) then
                 !print*,"here3"
                 funcpascpm_log=-1.d9
@@ -332,16 +242,6 @@
 !     gam2 = gamma(inv)
 ! k indice les groupes
         do k=1,ng
-            !sum=0.d0
-            !if(cpt(k).gt.0)then
-            !    nb = nig(k)
-            !    dnb = dble(nig(k))
-                
-                !if (dnb.gt.1.d0) then
-                !    do l=1,nb
-                !        sum=sum+dlog(1.d0+theta*dble(nb-l))
-                !    end do
-                !endif
                 !if(theta.gt.(1.d-5)) then
 !ccccc ancienne vraisemblance : ANDERSEN-GILL ccccccccccccccccccccccccc
                     if(AG.EQ.1)then
@@ -390,7 +290,7 @@
         goto 123
     end if
 
-    funcpascpm_log = res 
+    funcpascpm_log = res
 
     do k=1,ng
         cumulhaz(k)=res1(k)

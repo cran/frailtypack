@@ -26,23 +26,23 @@
 		x$varHIH<-matrix(x$varHIH)
 	}
  #AD:     
-	if (x$typeof == 0){	 	 
+	if (x$typeof == 0){
 		if (x$n.knots.temp < 4){
 			cat("\n")
-			cat("  The minimum number of knots is 4","\n")	
+			cat("  The minimum number of knots is 4","\n")
 		}
 		if (x$n.knots.temp > 20){
 			cat("\n")
-			cat("  The maximum number of knots is 20","\n")	
-		}  
-		
-		if ((x$indic.Kappa2 == 0) & (x$nst == 1)){
-			cat(" Kappa2 is not used  \n")
+			cat("  The maximum number of knots is 20","\n")
 		}
+		
+# 		if ((x$indic.Kappa2 == 0) & (x$nst == 1)){
+# 			cat(" Kappa2 is not used  \n")
+# 		}
 	}else{
-		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)) cat("  The maximum number of time intervals is 20","\n")
-	} 
-#AD    
+		if ((x$typeof == 1) & (x$indic.nb.int == 1)) cat("  The maximum number of time intervals is 20","\n")
+	}
+#AD
 	if (x$istop == 1){
 		if (!is.null(coef)){ 
 			seH <- sqrt(diag(x$varH))[-c(1,2)]
@@ -62,7 +62,7 @@
 			}else{
 				cat(" using a Parametrical approach for the hazard functions",  "\n")	
 			}
-			if (x$n.strat>1) cat(" (Stratification structure used)", "\n") 
+			if (x$n.strat>1) cat(" (Stratification structure used) :",x$n.strat,"strata \n")
 			
 			if (x$typeof == 0){	
 				if(x$global_chisq.test==1){
@@ -138,7 +138,7 @@
 			cat("    parameters =",signif(x$EPS[1],3),"likelihood =",signif(x$EPS[2],3),"gradient =",signif(x$EPS[3],3),"\n")
 			cat("\n")
 #			cat("    LCV = the approximate likelihood cross-validation criterion\n")
-#			cat("          in the parametrical case     =",x$LCV,"\n")	
+#			cat("          in the parametrical case     =",x$LCV,"\n")
 			cat("    AIC = Aikaike information Criterion     =",x$AIC,"\n")
 			cat("\n")
 			cat("The expression of the Aikaike Criterion is:","\n")
@@ -171,18 +171,14 @@
 		cat("    n events=", x$n.events, " n groups=", x$groups)
 		cat( "\n")
 		cat("    number of iterations: ", x$n.iter,"\n")
-		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)){
+		if ((x$typeof == 1) & (x$indic.nb.int == 1)){
 			cat("      Exact number of time intervals used: 20","\n")
 		 }else{
 		 	if (x$typeof == 1) cat("    Exact number of time intervals used: ",x$nbintervR,"\n")
 		 }
-		if (x$typeof == 0){     
+		if (x$typeof == 0){
 			cat("    Exact number of knots used: ", x$n.knots, "\n")
-			if (x$nst == 1){
-				cat("    Value of the smoothing parameter: ", x$kappa[1])
-			}else{
-				cat("    Value of the smoothing parameter: ", x$kappa[1], " and kappa2=", x$kappa[2], sep="")
-			}
+			cat("    Value of the smoothing parameter: ", x$kappa, sep=" ")
 			cat(", DoF: ", formatC(-x$DoF, format="f",digits=2))
 		}
 	}else{

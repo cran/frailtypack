@@ -5,15 +5,15 @@
     use tailles
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
     mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,tU,ntU,d,dmax ! rajouts
+    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,tU,ntU,d,dmax
         use residusM
     
     
     implicit none
     
 ! *** NOUVELLLE DECLARATION F90 :
-    integer::n,np,id,jd,i,j,k,vj,cptg,l,r ! rajout du r
-    integer,dimension(ngmax)::cpt,cptC ! rajout
+    integer::n,np,id,jd,i,j,k,vj,cptg,l,r
+    integer,dimension(ngmax)::cpt,cptC
     double precision::thi,thj,pe1,pe2,inv,som1,som2,res,vet,h1,num,den
     double precision,dimension(-2:npmax)::the1,the2
     double precision,dimension(np)::b,bh
@@ -35,7 +35,7 @@
     ut2=0.d0
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
-    
+
     n = (np-nva-effet)/nst ! nombre de eta (coef des splines)
 
     do i=1,n
@@ -75,13 +75,13 @@
                     vj  = j
                 endif
             endif
-        end do 
-        
+        end do
+
         ut1(i) = som1 +(the1(j-3)*im3(i))+(the1(j-2)*im2(i)) &
         +(the1(j-1)*im1(i))+(the1(j)*im(i))
         dut1(i) = (the1(j-3)*mm3(i))+(the1(j-2)*mm2(i)) &
         +(the1(j-1)*mm1(i))+(the1(j)*mm(i))
-    
+
         if(nst.eq.2)then
             ut2(i) = som2 +(the2(j-3)*im3(i))+(the2(j-2)*im2(i)) &
             +(the2(j-1)*im1(i))+(the2(j)*im(i))
@@ -120,7 +120,7 @@
     if (effet.eq.0) then
         do i=1,nsujet
             cpt(g(i))=cpt(g(i))+1
-            
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -138,8 +138,8 @@
                 res1(g(i)) = res1(g(i)) + ut2(nt1(i))*vet
             endif
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge.1.d30)) then
-                          funcpassplines_intcens=-1.d9
-                          goto 123
+                funcpassplines_intcens=-1.d9
+                goto 123
             end if
 
             if(stra(i).eq.1)then
@@ -151,8 +151,8 @@
                 RisqCumul(i) = ut2(nt1(i))*vet
             endif
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge.1.d30)) then
-                          funcpassplines_intcens=-1.d9
-                          goto 123
+                funcpassplines_intcens=-1.d9
+                goto 123
             end if
 
             if (c(i).eq.1) then ! c = censure par intervalle
@@ -176,7 +176,7 @@
 
         res = 0.d0
         cptg = 0
-        
+
 ! k indice les groupes
         do k=1,ng
             if(cpt(k).gt.0)then
@@ -197,8 +197,8 @@
                 res = res + dlog(res2(k)) + res3(k)
                 cptg = cptg + 1
                 if ((res.ne.res).or.(abs(res).ge.1.d30)) then
-                          funcpassplines_intcens=-1.d9
-                          goto 123
+                    funcpassplines_intcens=-1.d9
+                    goto 123
                 endif
             endif
         end do
@@ -274,7 +274,7 @@
 
         res = 0.d0
         cptg = 0
-        
+
 ! k indice les groupes
         do k=1,ng
             if(cpt(k).gt.0)then
@@ -306,16 +306,16 @@
                 end if
             endif
         end do
-    
-           endif !fin boucle effet=0
-    
+
+    endif !fin boucle effet=0
+
 !--------- calcul de la penalisation -------------------
 
     pe1 = 0.d0
     pe2 = 0.d0
     pe=0.d0
     do i=1,n-3
-    
+
         pe1 = pe1+(the1(i-3)*the1(i-3)*m3m3(i))+(the1(i-2) &
         *the1(i-2)*m2m2(i))+(the1(i-1)*the1(i-1)*m1m1(i))+( &
         the1(i)*the1(i)*mmm(i))+(2.d0*the1(i-3)*the1(i-2)* &
@@ -330,9 +330,9 @@
         the2(i-3)*the2(i)*m3m(i))+(2.d0*the2(i-2)*the2(i-1)* &
         m2m1(i))+(2.d0*the2(i-2)*the2(i)*m2m(i))+(2.d0*the2(i-1) &
         *the2(i)*m1m(i))
-    
+
     end do
-    
+
 
 !    Changed JRG 25 May 05
     if (nst.eq.1) then
@@ -340,7 +340,7 @@
     end if
 
     pe = k0(1)*pe1 + k0(2)*pe2 
-    
+
     resnonpen = res
 
     res = res - pe
@@ -357,7 +357,7 @@
     end do
 
 123     continue
-    
+
     return
 
     end function funcpassplines_intcens

@@ -1,3 +1,4 @@
+
 \name{additivePenal}
 \alias{additivePenal}
 \Rdversion{1.1}
@@ -11,7 +12,7 @@ the heterogeneity between trials and between the treatment effects across
  trials. Additive models are proportional hazard model with two correlated
  random trial effects that act either multiplicatively on the hazard function
  or in interaction with the treatment, which allows studying for instance meta-analysis or multicentric datasets.
- Right-censored data are allowed, but not the left-truncated data. A stratified analysis is possible (maximum number of strata: 2).
+ Right-censored data are allowed, but not the left-truncated data. A stratified analysis is possible (maximum number of strata = 2).
 This approach is different from the shared frailty models.
 
 
@@ -33,8 +34,8 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{\beta_k} the fixe
 
 \usage{
 additivePenal(formula, data, correlation = FALSE, recurrentAG =
-             FALSE, cross.validation = FALSE, n.knots, kappa1,
-             kappa2, maxit = 350, hazard = "Splines", nb.int1,
+             FALSE, cross.validation = FALSE, n.knots, kappa,
+             maxit = 350, hazard = "Splines", nb.int,
              LIMparam = 1e-4, LIMlogl = 1e-4, LIMderiv = 1e-3,
              print.times = TRUE)
 }
@@ -57,7 +58,7 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
   \item{cross.validation}{Logical value. Is cross validation procedure used
  for estimating smoothing parameter in the penalized likelihood estimation?
                  If so a search of the smoothing parameter using cross
- validation is done, with kappa1 as the seed.
+ validation is done, with kappa as the seed.
                  The cross validation is not implemented for two strata. The default is FALSE.}
 
   \item{n.knots}{ integer giving the number of knots to use. Value required in the penalized likelihood estimation.
@@ -65,26 +66,24 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
  of the hazard or the survival functions. 
   Number of knots must be between 4 and 20. (See Note)}
 
-  \item{kappa1}{ positive smoothing parameter in the penalized likelihood estimation. The coefficient kappa of the
- integral of the squared second derivative of hazard function in the fit. To obtain an initial value for \code{kappa1} (or \code{kappa2}), a solution is to fit the corresponding shared frailty model using cross validation (See cross.validation).We advise the user 
-          to identify several possible tuning parameters, note their
- defaults and look at the sensitivity 
-          of the results to varying them. Value required. (See Note)}
+  \item{kappa}{ positive smoothing parameter in the penalized likelihood estimation. In a stratified additive model,
+   this argument must be a vector with kappas for both strata. The coefficient kappa of the integral of the squared
+   second derivative of hazard function in the fit. To obtain an initial value for \code{kappa}, a solution is to
+   fit the corresponding shared frailty model using cross validation (see cross.validation). We advise the user to
+   identify several possible tuning parameters, note their defaults and look at the sensitivity of the results to
+   varying them. Value required. (See Note)}
 
-  \item{kappa2}{Positive smoothing parameter in the penalized likelihood estimation for the second stratum when data are stratified. See kappa1.}
- 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm.
  Default is 350}
- 
- 
+
   \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazards functions using percentile, "Piecewise-equi" for piecewise constant hazard functions using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
- 
-  \item{nb.int1}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
- 
+
+  \item{nb.int}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
+
   \item{LIMparam}{Convergence threshold of the Marquard algorithm for the parameters (see Details), \eqn{10^{-4}} by default.}
-  
+
   \item{LIMlogl}{Convergence threshold of the Marquard algorithm for the log-likelihood (see Details), \eqn{10^{-4}} by default.}
- 
+
   \item{LIMderiv}{Convergence threshold of the Marquard algorithm for the gradient (see Details), \eqn{10^{-3}} by default.}
 
   \item{print.times}{a logical parameter to print iteration process. Default is TRUE.}
@@ -92,7 +91,7 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
 
 
 \details{
- 
+
 The estimated parameter are obtained by maximizing the penalized
  log-likelihood or by a simple log-likelihood (in the parametric case) using
   the robust Marquardt algorithm (Marquardt,1963).
@@ -136,8 +135,6 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 \item{formula}{the formula part of the code used for the model.}
 \item{groups}{the maximum number of groups used in the fit.}
 \item{kappa}{ A vector with the smoothing parameters  in the penalized likelihood estimation corresponding to each baseline function as components.}
-\item{lam}{matrix of hazard estimates and confidence bands.}
-\item{lam2}{the same value as lam for  the second stratum.}
 \item{loglikPenal}{the complete marginal penalized log-likelihood in the semiparametric case.}
 \item{loglik}{the marginal log-likelihood in the parametric case.}
 \item{n}{the number of observations used in the fit.}
@@ -147,16 +144,15 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 \item{n.strat}{number of stratum.}
 \item{rho}{the corresponding correlation coefficient for the two frailty terms.}
 \item{sigma2}{Variance for the random intercept (the random effect associated to the baseline hazard functions).}
-\item{surv}{matrix of baseline survival estimates and confidence bands.}
-\item{surv2}{the same value as surv for the  the second stratum.}
 \item{tau2}{Variance for the random slope (the random effect associated to the treatment effect across trials).}
  \item{varH}{the variance matrix of all parameters before positivity constraint transformation (Sigma2, Tau2, the regression coefficients and the spline coefficients). Then after, the delta method is needed to obtain the estimated variance parameters.}
  \item{varHIH}{the robust estimation of the variance matrix of all parameters (Sigma2, Tau2, the regression coefficients and the spline coefficients).}
  \item{varSigma2}{ The variance of the estimates of "sigma2".}
  \item{varTau2}{ The variance of the estimates of "tau2".}
  \item{varcov}{ Variance of the estimates of "cov".}
- \item{x1}{vector of times where both survival and hazard functions for the recurrent events are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
-\item{x2}{vector of times for the second stratum (see x1 value).}
+ \item{x}{matrix of times where both survival and hazard functions are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
+\item{lam}{array (dim=3) of hazard estimates and confidence bands.}
+\item{surv}{array (dim=3) of baseline survival estimates and confidence bands.}
 \item{type.of.hazard}{Type of hazard functions (0:"Splines", "1:Piecewise", "2:Weibull").}
 \item{type.of.Piecewise}{Type of Piecewise hazard functions (1:"percentile", 0:"equidistant").}
 \item{nbintervR}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
@@ -183,9 +179,9 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 
 \note{
 
-"Kappa" (kappa1 and kappa2) and "n.knots" are the arguments that the user have to change if the fitted model does not converge. 
+"kappa" and "n.knots" are the arguments that the user have to change if the fitted model does not converge. 
 "n.knots" takes integer values between 4 and 20. But with n.knots=20, the model would take a long time to converge. So, usually, begin first with n.knots=7, and increase it step by step until it converges.
-"Kappa" only takes positive values. So, choose a value for Kappa (for instance 10000), and if it does not converge, multiply or devide this value by 10 or 5 until it converges.
+"kappa" only takes positive values. So, choose a value for kappa (for instance 10000), and if it does not converge, multiply or devide this value by 10 or 5 until it converges.
 
 }
 
@@ -218,7 +214,7 @@ data(dataAdditive)
 
 modAdd <- additivePenal(Surv(t1,t2,event)~cluster(group)+
 var1+slope(var1),correlation=TRUE,data=dataAdditive,
-n.knots=8,kappa1=10000)
+n.knots=8,kappa=10000)
 
 #-- Var1 is boolean as a treatment variable
 

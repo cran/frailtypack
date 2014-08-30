@@ -4,29 +4,24 @@
 
     use tailles
     use comon,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
-    effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
+    effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,theta,nstRec, &
     auxig,aux1,aux2,res1,res3,res4,ttt,tttdc,betacoef,kkapa
-        use residusM
+    use residusM
     use comongroup,only:vet,vet2
 
     implicit none
 
     integer::np,id,jd,i,j,k,ig,choix
     integer,dimension(ngmax)::cpt
-!yasyas
     double precision::som11,som21
     integer::jj,gg,gg2
-!yasyas
     double precision::thi,thj,sum,res
     double precision,dimension(np)::b,bh
     double precision,dimension(ngmax)::res2,res1dc,res2dc
-    double precision,dimension(ngmax)::integrale1,integrale2,integrale3, &
-    integrale3gap
-! yas
+    double precision,dimension(ngmax)::integrale1,integrale2,integrale3,integrale3gap
     double precision,dimension(ngmax)::integrale4
     double precision::gammaJ,int
     double precision,dimension(2)::k0
-
 
     kkapa=k0
     bh=b
@@ -37,7 +32,7 @@
 ! Allocation des parametre des fcts de risque cte par morceaux
 !cpm
     betacoef = 0.d0
-    do i = 1,(nbintervR+nbintervDC)
+    do i = 1,(nbintervR*nstRec+nbintervDC)
         betacoef(i)=bh(i)**2
     end do
 !cpm
@@ -61,16 +56,13 @@
         res1(k) = 0.d0
         res2(k) = 0.d0
         res3(k) = 0.d0
-! yas
         res4(k) = 0.d0
         res1dc(k) = 0.d0
         res2dc(k) = 0.d0
-! yas
         cpt(k) = 0
         integrale1(k) = 0.d0
         integrale2(k) = 0.d0
         integrale3(k) = 0.d0
-! yas
         integrale4(k) = 0.d0
         integrale3gap(k) = 0.d0
         aux1(k)=0.d0
@@ -80,7 +72,6 @@
 !**********************************************
 !-----avec un effet aleatoire dans le modele
 !**********************************************
-
 
 !ccccccccccccccccccccccccccccccccccccccccc
 !     pour les donnees recurrentes
@@ -99,7 +90,7 @@
         if((c(i).eq.1))then
             do gg=1,nbintervR
                 if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                    res2(g(i)) =  res2(g(i))+ dlog(betacoef(gg)*vet)
+                    res2(g(i)) =  res2(g(i))+ dlog(betacoef(nbintervR*(stra(i)-1)+gg)*vet)
                 endif
             end do
         endif
@@ -107,6 +98,7 @@
             funcpajcpm=-1.d9
             goto 123
         end if
+
 !cccccccccccccccccccccc
 ! Fonction de risque cumulée de recidive au tepms T_ij
 !cccccccccccccccccccccc
@@ -116,11 +108,11 @@
         gg2=0
         do gg=1,nbintervR
             if((t1(i).gt.(ttt(gg-1))).and.(t1(i).le.(ttt(gg))))then
-                som11=betacoef(gg)*(t1(i)-ttt(gg-1))
+                som11=betacoef(nbintervR*(stra(i)-1)+gg)*(t1(i)-ttt(gg-1))
                 gg2=gg
                 if (gg2.ge.2)then
                     do jj=1,gg2-1
-                        som21=som21+betacoef(jj)*(ttt(jj)-ttt(jj-1))
+                        som21=som21+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
                     end do
                 endif
                 res1(g(i)) = res1(g(i))+vet*(som11+som21)
@@ -131,7 +123,6 @@
             goto 123
         end if
 
-
 !cccccccccccccccccc
 ! Fonction de risque de recidive au tepms T_i(j-1)
 !cccccccccccccccccc
@@ -141,11 +132,11 @@
         gg2=0
         do gg=1,nbintervR
             if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
-                som11=betacoef(gg)*(t0(i)-ttt(gg-1))
+                som11=betacoef(nbintervR*(stra(i)-1)+gg)*(t0(i)-ttt(gg-1))
                 gg2=gg
                 if (gg2.ge.2)then
                     do jj=1,gg2-1
-                        som21=som21+betacoef(jj)*(ttt(jj)-ttt(jj-1))
+                        som21=som21+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
                     end do
                 endif
                 res3(g(i)) = res3(g(i))+vet*(som11+som21)
@@ -160,7 +151,7 @@
 !ccccccccccccccccccccccccccccccccccccccccc
 ! pour le deces
 !ccccccccccccccccccccccccccccccccccccccccc
-    do k=1,ng  
+    do k=1,ng
         if(nva2.gt.0)then
             vet2 = 0.d0
             do j=1,nva2
@@ -178,7 +169,7 @@
         if(cdc(k).eq.1)then
             do gg=1,nbintervDC
                 if ((t1dc(k).gt.(tttdc(gg-1))).and.(t1dc(k).le.(tttdc(gg)))) then
-                    res2dc(k) = dlog(betacoef(nbintervR+gg)*vet2)
+                    res2dc(k) = dlog(betacoef(nbintervR*nstRec+gg)*vet2)
                 endif
             end do
             if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
@@ -186,6 +177,7 @@
                 goto 123
             end if
         endif
+
 !cccccccccccccccccc
 ! Fonction de risque cumulée de dcd au tepms T_i*
 !cccccccccccccccccc
@@ -195,11 +187,11 @@
         gg2=0
         do gg=1,nbintervDC
             if((t1dc(k).gt.(tttdc(gg-1))).and.(t1dc(k).le.(tttdc(gg))))then
-                som11=betacoef(gg+nbintervR)*(t1dc(k)-tttdc(gg-1))
+                som11=betacoef(gg+nbintervR*nstRec)*(t1dc(k)-tttdc(gg-1))
                 gg2=gg
                 if (gg2.ge.2)then
                     do jj=1,gg2-1
-                        som21=som21+betacoef(jj+nbintervR)*(tttdc(jj)-tttdc(jj-1))
+                        som21=som21+betacoef(jj+nbintervR*nstRec)*(tttdc(jj)-tttdc(jj-1))
                     end do
                 endif
             endif
@@ -221,8 +213,6 @@
     end do
 
 !************** FIN INTEGRALES **************************
-
-!!!!!! new
 
     res = 0.d0
     do k=1,ng
@@ -256,7 +246,6 @@
         endif
     end do
 
-!!!
     if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
         funcpajcpm =-1.d9
         Rrec = 0.d0

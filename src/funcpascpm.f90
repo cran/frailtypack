@@ -2,15 +2,15 @@
 
 !========================          FUNCPA_CPM          ====================
     double precision function funcpascpm(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
     use comon,only:t0,t1,c,nsujet,nva, &
     nst,stra,ve,effet,ng,g,nig,AG,nbintervR, &
-        ttt,betacoef,kkapa,theta
-        use residusM
-    
+    ttt,betacoef,kkapa,theta
+    use residusM
+
     implicit none
-    
+
 ! *** NOUVELLLE DECLARATION F90 :
 
     integer::nb,np,id,jd,i,j,k,cptg,l
@@ -30,9 +30,8 @@
 
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
-    
+
     betacoef = 0.d0
-    
 
     do i=1,nst*nbintervR
         betacoef(i)=bh(i)**2
@@ -63,7 +62,7 @@
     if (effet.eq.0) then
         do i=1,nsujet
             cpt(g(i))=cpt(g(i))+1
-            
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -73,126 +72,69 @@
             else
                 vet=1.d0
             endif
-            
-            if((c(i).eq.1).and.(stra(i).eq.1))then
-                do gg=1,nbintervR !!
-                    if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                         res2(g(i)) = res2(g(i))+dlog(betacoef(gg)*vet)
-                    end if!!
-                end do !!
-            endif  
 
-            if((c(i).eq.1).and.(stra(i).eq.2))then
+            if(c(i).eq.1) then !en plus strates A.Lafourcade 05/2014 betacoef(nbintervR*(stra(i)-1)
                 do gg=1,nbintervR !!
                     if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                          res2(g(i)) = res2(g(i))+dlog(betacoef(nbintervR+gg)*vet)
+                          res2(g(i)) = res2(g(i))+dlog(betacoef(nbintervR*(stra(i)-1)+gg)*vet)
                     end if!!
                 end do !!
             endif
-                   if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
-                          funcpascpm=-1.d9
-                          goto 123
-                       end if
+
+            if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
+                funcpascpm=-1.d9
+                goto 123
+            end if
+
 !!cccccccccccccccccccccc
-!! Fonction de risque cumulÃ©e de recidive au tepms T_ij
-!!cccccccccccccccccccccc    
-            if(stra(i).eq.1)then
-                som1=0.d0
-                som2=0.d0
-                somm1=0.d0
-                somm2=0.d0
-                do gg=1,nbintervR
-                    if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
-                        som1=betacoef(gg)*(t1(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
-                        RisqCumul(i) = (som1+som2)*vet
-                    end if!!
+!! Fonction de risque cumulee de recidive au tepms T_ij
+!!cccccccccccccccccccccc
+
+            som1=0.d0
+            som2=0.d0
+            somm1=0.d0
+            somm2=0.d0
+            do gg=1,nbintervR !en plus strates A.Lafourcade 05/2014 betacoef(nbintervR*(stra(i)-1)
+                if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
+                    som1=betacoef(nbintervR*(stra(i)-1)+gg)*(t1(i)-ttt(gg-1))
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som2=som2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do
+                    endif
+                    res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
+                    RisqCumul(i) = (som1+som2)*vet
+                end if!!
 !====================================== ajout yassin May 2012====================================================!
-                    if ((t1(i).eq.(ttt(nbintervR)))) then
-                        som1=betacoef(nbintervR)*(t1(i)-ttt(nbintervR-1))
-                        if (nbintervR.ge.2)then
-                            do jj=1,nbintervR-1
-                                som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do!!
-                        endif!!
+                if ((t1(i).eq.(ttt(nbintervR)))) then
+                    som1=betacoef(nbintervR*stra(i))*(t1(i)-ttt(nbintervR-1))
+                    if (nbintervR.ge.2)then
+                        do jj=1,nbintervR-1
+                            som2=som2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do!!
+                    endif!!
 
-                        res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
-                    end if!!
+                    res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
+                end if!!
 !====================================== ajout yassin May 2012====================================================!
 
-
-
-
-                    if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
-                        somm1=betacoef(gg)*(t0(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                somm2=somm2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res1(g(i)) = res1(g(i)) - (somm1+somm2)*vet
-                    end if
-!====================================== ajout yassin May 2012====================================================!
-                    if ((t0(i).eq.(ttt(nbintervR)))) then
-                        somm1=betacoef(gg)*(t0(i)-ttt(nbintervR-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                somm2=somm2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do!!
-                        endif!!
-
-                        res3(g(i)) = res3(g(i)) + (somm1+somm2)*vet 
-                    end if!!
-!======================================= fin ajout yassin May 2012====================================================!
-
-
-
-                end do!!
-
-                   if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                          funcpascpm=-1.d9
-                          goto 123
-                       end if
-            endif
-
-            if(stra(i).eq.2)then
-                som1=0.d0
-                som2=0.d0
-                somm1=0.d0
-                somm2=0.d0
-                do gg=1,nbintervR
-                    if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
-                        som1=betacoef(nbintervR+gg)*(t1(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
-                        RisqCumul(i) = (som1+som2)*vet
-                    end if
-
-                    if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
-                        somm1=betacoef(nbintervR+gg)*(t0(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                somm2=somm2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res1(g(i)) = res1(g(i)) - (somm1+somm2)*vet
-                    end if
-                end do
-                if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
-                    funcpascpm=-1.d9
-                    goto 123
+                if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
+                    somm1=betacoef(nbintervR*(stra(i)-1)+gg)*(t0(i)-ttt(gg-1))
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            somm2=somm2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do
+                    endif
+                    res1(g(i)) = res1(g(i)) - (somm1+somm2)*vet
                 end if
-            endif
+            end do!!
+
+            if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
+                funcpascpm=-1.d9
+                goto 123
+            end if
         end do
+
         res = 0.d0
         cptg = 0
 
@@ -229,141 +171,81 @@
                 vet=1.d0
             endif
 
-            if((c(i).eq.1).and.(stra(i).eq.1))then
+            if(c(i).eq.1) then !en plus strates A.Lafourcade 05/2014 betacoef(nbintervR*(stra(i)-1)
                 do gg=1,nbintervR
                     if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                         res2(g(i)) = res2(g(i))+dlog(betacoef(gg)*vet)
+                         res2(g(i)) = res2(g(i))+dlog(betacoef(nbintervR*(stra(i)-1)+gg)*vet)
                     end if
                 end do
             endif
 
-            if((c(i).eq.1).and.(stra(i).eq.2))then
-                do gg=1,nbintervR
-                    if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                         res2(g(i)) = res2(g(i))+dlog(betacoef(nbintervR+gg)*vet)
-                    end if
-                end do
-            endif
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 funcpascpm=-1.d9
                 goto 123
             end if
-            
-            if(stra(i).eq.1)then
-                som1=0.d0
-                som2=0.d0
-                do gg=1,nbintervR
-                    if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
-                        som1=betacoef(gg)*(t1(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do!!
-                        endif!!
 
-                        res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
-                    end if!!
+            som1=0.d0
+            som2=0.d0
+            do gg=1,nbintervR !en plus strates A.Lafourcade 05/2014 betacoef(nbintervR*(stra(i)-1)
+                if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
+                    som1=betacoef(nbintervR*(stra(i)-1)+gg)*(t1(i)-ttt(gg-1))
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som2=som2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do!!
+                    endif!!
+
+                    res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
+                end if!!
 !====================================== ajout yassin May 2012====================================================!
-                    if ((t1(i).eq.(ttt(nbintervR)))) then
-                        som1=betacoef(nbintervR)*(t1(i)-ttt(nbintervR-1))
-                        if (nbintervR.ge.2)then
-                            do jj=1,nbintervR-1
-                                som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do!!
-                        endif!!
+                if ((t1(i).eq.(ttt(nbintervR)))) then
+                    som1=betacoef(nbintervR*stra(i))*(t1(i)-ttt(nbintervR-1))
 
-                        res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
-                    end if!!
-!====================================== ajout yassin May 2012====================================================!
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som2=som2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do!!
+                    endif!!
 
-
-
-
-                end do!!
-            endif
-
-            if(stra(i).eq.2)then
-                som1=0.d0
-                som2=0.d0
-                do gg=1,nbintervR
-                    if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
-                        som1=betacoef(nbintervR+gg)*(t1(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
-                            end do!!
-                        endif!!
-
-                        res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
-                    end if!!
-!====================================== ajout yassin May 2012====================================================!
-                    if ((t1(i).eq.(ttt(nbintervR)))) then
-                        som1=betacoef(nbintervR+gg)*(t1(i)-ttt(nbintervR-1))
-                        
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
-                            end do!!
-                        endif!!
-
-                        res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
-                    end if!!
+                    res1(g(i)) = res1(g(i)) + (som1+som2)*vet 
+                end if!!
 !======================================= fin ajout yassin May 2012====================================================!
+            end do
 
-
-                end do
-            endif
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 funcpascpm=-1.d9
                 goto 123
             end if
+
 ! modification pour nouvelle vraisemblance / troncature:
-            if(stra(i).eq.1)then
-                som1=0.d0
-                som2=0.d0
-                do gg=1,nbintervR
-                    if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
-                        som1=betacoef(gg)*(t0(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do!!
-                        endif!!
+            som1=0.d0
+            som2=0.d0
+            do gg=1,nbintervR !en plus strates A.Lafourcade 05/2014 betacoef(nbintervR*(stra(i)-1)
+                if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
+                    som1=betacoef(nbintervR*(stra(i)-1)+gg)*(t0(i)-ttt(gg-1))
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som2=som2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do!!
+                    endif!!
 
-                        res3(g(i)) = res3(g(i)) + (som1+som2)*vet 
-                    end if!!
+                    res3(g(i)) = res3(g(i)) + (som1+som2)*vet 
+                end if!!
 !====================================== ajout yassin May 2012====================================================!
-                    if ((t0(i).eq.(ttt(nbintervR)))) then
-                        som1=betacoef(gg)*(t0(i)-ttt(nbintervR-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(jj)*(ttt(jj)-ttt(jj-1))
-                            end do!!
-                        endif!!
+                if ((t0(i).eq.(ttt(nbintervR)))) then
+                    som1=betacoef(nbintervR*stra(i))*(t0(i)-ttt(nbintervR-1))
+                    if (gg.ge.2)then
+                        do jj=1,gg-1
+                            som2=som2+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
+                        end do!!
+                    endif!!
 
-                        res3(g(i)) = res3(g(i)) + (som1+som2)*vet 
-                    end if!!
+                    res3(g(i)) = res3(g(i)) + (som1+som2)*vet 
+                end if!!
 !======================================= fin ajout yassin May 2012====================================================!
 
-                end do!!
+            end do!!
 
-            endif
-
-            if(stra(i).eq.2)then
-                som1=0.d0
-                som2=0.d0
-                do gg=1,nbintervR
-                    if ((t0(i)).ge.(ttt(gg-1)).and.(t0(i).lt.(ttt(gg)))) then
-                        som1=betacoef(nbintervR+gg)*(t0(i)-ttt(gg-1))
-                        if (gg.ge.2)then
-                            do jj=1,gg-1
-                                som2=som2+betacoef(nbintervR+jj)*(ttt(jj)-ttt(jj-1))
-                            end do
-                        endif
-                        res3(g(i)) = res3(g(i)) + (som1+som2)*vet
-                    end if
-                end do
-            endif
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                 funcpascpm=-1.d9
                 goto 123
@@ -374,15 +256,13 @@
         cptg = 0
 !     gam2 = gamma(inv)
 ! k indice les groupes
-!    write(*,*)' ng :',ng
-!    stop
 
         do k=1,ng
             sum=0.d0
             if(cpt(k).gt.0)then
                 nb = nig(k)
                 dnb = dble(nig(k))
-                
+
                 if (dnb.gt.1.d0) then
                     do l=1,nb
                         sum=sum+dlog(1.d0+theta*dble(nb-l))

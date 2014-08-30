@@ -30,7 +30,7 @@
   \item{cex.legend}{character expansion factor *relative* to current
           'par("cex")'. Default is 0.7}
   \item{main}{title of plot}
-  \item{color}{color of the curve (integer or color name in quotation marks)}
+  \item{color}{color of the curve (integer)}
   \item{...}{other unused arguments}
 }
 
@@ -44,25 +44,29 @@
 
 \examples{
 
+\dontrun{
+
 data(readmission)
 
 ###--- Shared frailty model ---###
 
 modSha <- frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
-n.knots=10,kappa1=10000,data=readmission,hazard="Splines")
+n.knots=10,kappa=10000,data=readmission,hazard="Splines")
 
 plot(modSha,type="surv",conf=FALSE)
 
 ###--- Cox proportional hazard model ---###
 
 modCox <- frailtyPenal(Surv(time,event)~as.factor(dukes),n.knots=10,
-kappa1=10000,data=readmission,hazard="Splines")
+kappa=10000,data=readmission,hazard="Splines")
 
 plot(modCox)
 
 #-- no confidence bands
 plot(modSha,conf.bands=FALSE)
 plot(modCox,conf.bands=FALSE)
+
+}
 
 }
 

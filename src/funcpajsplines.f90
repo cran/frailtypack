@@ -3,71 +3,72 @@
 
 !========================          FUNCPAJ_SPLINES         ====================
     double precision function funcpajsplines(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m,mm3,mm2,mm1,mm,&
     im3,im2,im1,im,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,date,datedc,zi,&
     t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst, &
-    effet,stra,ve,vedc,pe,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
+    effet,stra,ve,vedc,pe,ng,g,nig,AG,indic_ALPHA,ALPHA,theta,nstRec,k0T, &
     auxig,aux1,aux2,res1,res3,res4,kkapa,resnonpen
-        use residusM
+    use residusM
     use comongroup,only:vet,vet2,the1,the2
-        
+
     IMPLICIT NONE
 
 ! *** NOUVELLLE DECLARATION F90 :
-    
+
     integer,intent(in)::id,jd,np
     double precision,dimension(np),intent(in)::b
     double precision,dimension(2),intent(in)::k0
     double precision,intent(in)::thi,thj
-    
-    integer::n,i,j,k,vj,ig,choix
+    double precision,dimension(-2:npmax,nstRec)::the1T
+    integer::n,i,j,k,vj,ig,choix,jj
     integer,dimension(ngmax)::cpt
-    double precision::pe1,pe2,sum,inv,som1,som2,res,h1
-    
+    double precision::pe2,sum,inv,som2,res,h1
+    double precision,dimension(nstRec)::pe1T,som1T
     double precision,dimension(np)::bh
     double precision,dimension(ngmax)::res2,res1dc,res2dc &
     ,res3dc,integrale1,integrale2,integrale3
 !AD: for death,change dimension 
-    double precision,dimension(ndatemax)::dut1
+    double precision,dimension(ndatemax,nstRec)::dut1T
     double precision,dimension(ndatemaxdc)::dut2
 !AD:end
-    double precision,dimension(0:ndatemax)::ut1
+    double precision,dimension(0:ndatemax,nstRec)::ut1T
     double precision,dimension(0:ndatemaxdc)::ut2
     double precision::int,gammaJ
 
-!    print*,'debut funcpa'
+    kkapa=k0
     choix=0
     ig=0
     k=0
     vj=0
     n=0
     j=0
-    ut1=0.d0
+    ut1T=0.d0
     ut2=0.d0
     dut2=0.d0
-    dut1=0.d0
+    dut1T=0.d0
     do i=1,np
-    bh(i)=b(i)
-    end do 
-
-    if (id.ne.0) bh(id)=bh(id)+thi
-    if (jd.ne.0) bh(jd)=bh(jd)+thj    
-
-
-
-    n = (np-nva-effet-indic_ALPHA)/nst
-
-    do i=1,n
-        the1(i-3)=(bh(i))*(bh(i))
-        j = n+i 
-        if (nst.eq.2) then
-            the2(i-3)=(bh(j))*(bh(j))
-        endif
+        bh(i)=b(i)
     end do
 
-    
+    if (id.ne.0) bh(id)=bh(id)+thi
+    if (jd.ne.0) bh(jd)=bh(jd)+thj
+
+    n = (np-nva-effet-indic_ALPHA)/(nstRec+1)
+
+    do jj=1,nstRec+1 !en plus strates A.Lafourcade 07/2014
+        if (jj .ne. nstRec+1) then
+            do i=1,n
+                the1T(i-3,jj)=(bh((jj-1)*n+i))*(bh((jj-1)*n+i))
+            end do
+        else
+            do i=1,n
+                the2(i-3)=(bh(nstRec*n+i))*(bh(nstRec*n+i))
+            end do
+        end if
+    end do
+
     if(effet.eq.1) then
         theta = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
         if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
@@ -82,38 +83,43 @@
 !        donc en ti on a the(i)
 
 !AD:modify
-    dut1(1) = (the1(-2)*4.d0/(zi(2)-zi(1)))
+    do jj=1,nstRec !en plus strates A.Lafourcade 07/2014
+        dut1T(1,jj) = (the1T(-2,jj)*4.d0/(zi(2)-zi(1)))
+        ut1T(1,jj) = the1T(-2,jj)*dut1T(1,jj)*0.25d0*(zi(1)-zi(-2))
+        ut1T(0,jj) = 0.d0
+    end do
+
     dut2(1) = (the2(-2)*4.d0/(zi(2)-zi(1)))
-    
-    ut1(1) = the1(-2)*dut1(1)*0.25d0*(zi(1)-zi(-2))
     ut2(1) = the2(-2)*dut2(1)*0.25d0*(zi(1)-zi(-2))
-    
-    ut1(0) = 0.d0
     ut2(0) = 0.d0
-     
+
 !//// NEW AMADOU vvv :
 !--- strate1
-    som1 = 0.d0
+    som1T = 0.d0
     vj = 0
     do i=2,ndate-1
         do k = 2,n-2
             if (((date(i)).ge.(zi(k-1))).and.(date(i).lt.zi(k)))then
                 j = k-1
                 if ((j.gt.1).and.(j.gt.vj))then
-                som1 = som1 + the1(j-4)
-                vj  = j
-                endif   
+                    do jj=1,nstRec !en plus strates A.Lafourcade 07/2014
+                        som1T(jj) = som1T(jj)+the1T(j-4,jj)
+                    end do
+                    vj  = j
+                endif
             endif
-        end do 
-    
-        ut1(i) = som1 +(the1(j-3)*im3(i))+(the1(j-2)*im2(i)) &
-        +(the1(j-1)*im1(i))+(the1(j)*im(i))
-        
-        dut1(i) = (the1(j-3)*mm3(i))+(the1(j-2)*mm2(i)) &
-        +(the1(j-1)*mm1(i))+(the1(j)*mm(i))
+        end do
+
+        do jj=1,nstRec !en plus strates A.Lafourcade 07/2014
+            ut1T(i,jj) = som1T(jj) +(the1T(j-3,jj)*im3(i))+(the1T(j-2,jj)*im2(i)) &
+            +(the1T(j-1,jj)*im1(i))+(the1T(j,jj)*im(i))
+
+            dut1T(i,jj) = (the1T(j-3,jj)*mm3(i))+(the1T(j-2,jj)*mm2(i)) &
+            +(the1T(j-1,jj)*mm1(i))+(the1T(j,jj)*mm(i))
+        end do
 
     end do
-                   
+
 !--- strate2
     vj = 0
     som2 = 0.d0
@@ -125,7 +131,7 @@
                 if ((j.gt.1).and.(j.gt.vj))then
                 som2 = som2 + the2(j-4)
                 vj  = j
-                endif   
+                endif
             endif
         end do
 
@@ -135,24 +141,21 @@
             dut2(i) = (the2(j-3)*mm3dc(i))+(the2(j-2)*mm2dc(i)) &
             +(the2(j-1)*mm1dc(i))+(the2(j)*mmdc(i))
         endif
-            
+
     end do
 
-!-------------fin strate2  
+!-------------fin strate2
     i = n-2
     h1 = (zi(i)-zi(i-1))
-    
-    ut1(ndate)=som1+the1(i-4)+the1(i-3)+the1(i-2)+the1(i-1)
-    dut1(ndate) = (4.d0*the1(i-1)/h1)
 
-        
+    do jj=1,nstRec !en plus strates A.Lafourcade 07/2014
+        ut1T(ndate,jj)=som1T(jj)+the1T(i-4,jj)+the1T(i-3,jj)+the1T(i-2,jj)+the1T(i-1,jj)
+        dut1T(ndate,jj) = (4.d0*the1T(i-1,jj)/h1)
+    end do
+
     ut2(ndatedc)=som2+the2(i-4)+the2(i-3)+the2(i-2)+the2(i-1)!am the1(i-4)
     dut2(ndatedc) = (4.d0*the2(i-1)/h1)
-         
-!    print*,ndatemaxdc
-!    print*,'ut2',ut2
-    
-    
+
 !//// fin NEW AMADOU-vvv
 !AD:end
 !-------------------------------------------------------
@@ -186,37 +189,39 @@
 !     pour les donnees recurrentes
 !ccccccccccccccccccccccccccccccccccccccccc
 
-    
-    do i=1,nsujet 
-        cpt(g(i))=cpt(g(i))+1  
+
+    do i=1,nsujet
+        cpt(g(i))=cpt(g(i))+1
         if(nva1.gt.0)then
-            vet = 0.d0   
+            vet = 0.d0
             do j=1,nva1
                 vet =vet + bh(np-nva+j)*dble(ve(i,j))
-!      write(*,*)'*** funcpaj_splines vet',vet,ve(i,j),i,j
             end do
             vet = dexp(vet)
         else
             vet=1.d0
         endif
-            
+
         if((c(i).eq.1))then
-            res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet) 
-        endif  
+            res2(g(i)) = res2(g(i))+dlog(dut1T(nt1(i),stra(i))*vet)
+        endif
         if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
 !             print*,"here1"
             funcpajsplines=-1.d9
             goto 123
-        end if    
+        end if
+
 !     nouvelle version
-        res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet  
+        res1(g(i)) = res1(g(i)) + ut1T(nt1(i),stra(i))*vet
+
         if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
 !             print*,"here2"
             funcpajsplines=-1.d9
             goto 123
-        end if              
+        end if
+
 !     modification pour nouvelle vraisemblance / troncature:
-        res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet 
+        res3(g(i)) = res3(g(i)) + ut1T(nt0(i),stra(i))*vet
         if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
 !             print*,"here3"
             funcpajsplines=-1.d9
@@ -230,7 +235,7 @@
 
     do k=1,ng ! dans Joint ng=nb individus
         if(nva2.gt.0)then
-            vet2 = 0.d0   
+            vet2 = 0.d0
             do j=1,nva2
                 vet2 =vet2 + bh(np-nva2+j)*dble(vedc(k,j))
             end do
@@ -250,21 +255,21 @@
 ! pour le calcul des integrales / pour la survie, pas les donnees recurrentes:
         aux1(k)=ut2(nt1dc(k))*vet2
         aux2(k)=aux2(k)+ut2(nt0(k))*vet2 !vraie troncature
-        
+
         if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
             funcpajsplines=-1.d9
 !             print*,'gt 2'
             goto 123
-        end if    
+        end if
         if ((aux2(k).ne.aux2(k)).or.(abs(aux2(k)).ge. 1.d30)) then
             funcpajsplines=-1.d9
             goto 123
-        end if    
+        end if
     end do
 
 !**************INTEGRALES ****************************
-    do ig=1,ng 
-        auxig=ig 
+    do ig=1,ng
+        auxig=ig
         choix = 3
         call gaulagJ(int,choix)
         integrale3(ig) = int !moins bon
@@ -291,31 +296,34 @@
                 res= res + res2(k) &
                 + res2dc(k)  &
                 - gammaJ(1./theta)-dlog(theta)/theta  &
-                + dlog(integrale3(k)) 
+                + dlog(integrale3(k))
             endif
             if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
 !                 print*,"here",k,res2(k),res2dc(k),gammaJ(1./theta),dlog(theta),dlog(integrale3(k))
                 funcpajsplines=-1.d9
                 goto 123
-            end if    
+            end if
         endif
-!        print*,'k',k
-!        print*,'res',res,'dlog(integrale3(k))', dlog(integrale3(k))     
     end do
-         
+
 !---------- calcul de la penalisation -------------------
 
-    pe1 = 0.d0
+    pe1T=0.d0
     pe2 = 0.d0
-    
+
+    do jj=1,nstRec !en plus strates A.Lafourcade 07/2014
+        do i=1,n-3
+            pe1T(jj) = pe1T(jj)+(the1T(i-3,jj)*the1T(i-3,jj)*m3m3(i))+(the1T(i-2,jj) &
+            *the1T(i-2,jj)*m2m2(i))+(the1T(i-1,jj)*the1T(i-1,jj)*m1m1(i))+( &
+            the1T(i,jj)*the1T(i,jj)*mmm(i))+(2.d0*the1T(i-3,jj)*the1T(i-2,jj)* &
+            m3m2(i))+(2.d0*the1T(i-3,jj)*the1T(i-1,jj)*m3m1(i))+(2.d0* &
+            the1T(i-3,jj)*the1T(i,jj)*m3m(i))+(2.d0*the1T(i-2,jj)*the1T(i-1,jj)* &
+            m2m1(i))+(2.d0*the1T(i-2,jj)*the1T(i,jj)*m2m(i))+(2.d0*the1T(i-1,jj) &
+            *the1T(i,jj)*m1m(i))
+        end do
+    end do
+
     do i=1,n-3
-        pe1 = pe1+(the1(i-3)*the1(i-3)*m3m3(i))+(the1(i-2) &
-        *the1(i-2)*m2m2(i))+(the1(i-1)*the1(i-1)*m1m1(i))+( &
-        the1(i)*the1(i)*mmm(i))+(2.d0*the1(i-3)*the1(i-2)* &
-        m3m2(i))+(2.d0*the1(i-3)*the1(i-1)*m3m1(i))+(2.d0* &
-        the1(i-3)*the1(i)*m3m(i))+(2.d0*the1(i-2)*the1(i-1)* &
-        m2m1(i))+(2.d0*the1(i-2)*the1(i)*m2m(i))+(2.d0*the1(i-1) &
-        *the1(i)*m1m(i))
         if(nst.eq.1)then
             pe2=0.d0
         else
@@ -328,13 +336,17 @@
             *the2(i)*m1m(i))
         endif
     end do
-  
-    pe = k0(1)*pe1 + k0(2)*pe2 
-    
+
+    pe=0.d0
+    do jj=1,nstRec !en plus strates A.Lafourcade 05/2014
+        pe=pe+pe1T(jj)*k0T(jj)
+    end do
+    pe=pe+pe2*k0T(nstRec+1)
+
     resnonpen = res
-    
+
     res = res - pe
-    
+
     if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
         funcpajsplines=-1.d9
         Rrec = 0.d0
@@ -344,7 +356,7 @@
         goto 123
 
     else
-        funcpajsplines = res 
+        funcpajsplines = res
         do k=1,ng
             Rrec(k)=res1(k)
             Nrec(k)=nig(k)
@@ -356,7 +368,7 @@
 123     continue
 
     return
-    
+
     end function funcpajsplines
 
 

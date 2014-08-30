@@ -168,7 +168,7 @@
         goto 110
     end if
 
-!     write(*,*)'iteration***',ni,'vrais',rl
+!      write(*,*)'iteration***',ni,'vrais',rl
 
         dd = 0.d0
 
@@ -447,7 +447,7 @@
 !------------------------------------------------------------
 
     subroutine derivaj(b,m,v,rl,k0,fctnames)
-    use comon,only:model
+    use comon,only:model,k0T,nst,nstRec
     implicit none
     
     integer,intent(in)::m
@@ -459,6 +459,23 @@
     integer ::i0,m1,ll,i,k,j,iun
     double precision::fctnames,thn,th,z,vl,th2,vaux
     external::fctnames
+
+    !en plus strates A.Lafourcade 05/2014
+!     if ((model.eq.1).or.(model.eq.4)) then
+!         if (nst==1) then
+!             k0T(1)=0.d0
+!             k0T(1)=k0(1)
+!         end if
+!         if (nst.ge.2) then
+!             if (nstRec==0) then !en plus que pour le modèle shared
+!                 k0T(1)=0.d0
+!                 k0T(1)=k0(1)
+!                 k0T(2)=0.d0
+!                 k0T(2)=k0(2)
+!             end if
+!         end if
+!     endif
+    !!!fin modif strates
 
     select case(model)
     case(1)
@@ -495,14 +512,14 @@
     k=0
     m1=m*(m+1)/2
     ll=m1
-    
+
     do i=1,m
         ll=ll+1
         vaux=fctnames(b,m,i,thn,i0,z,k0)
-                if(vaux.eq.-1.d9) then
-                    rl=-1.d9
-                    goto 123
-                end if    
+        if(vaux.eq.-1.d9) then
+            rl=-1.d9
+            goto 123
+        end if
         vl=(fcith(i)-vaux)/(2.d0*th)
         v(ll)=vl
         do j=1,i

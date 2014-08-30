@@ -12,6 +12,9 @@ SurvIC(t0, lower, upper, event)
 }
 
 \arguments{
+  \item{t0}{
+Truncation time for left truncated data only. To be ignored otherwise.
+}
   \item{lower}{
 Starting time of the interval for interval-censored data. Time of right-censoring instead.
 }
@@ -20,9 +23,6 @@ Ending time of the interval for interval-censored data. For right-censored data,
 }
   \item{event}{
 Status indicator 0=right-censored, 1=interval-censored
-}
-  \item{t0}{
-Truncation time for left truncated data only. To be ignored otherwise.
 }
 }
 
@@ -41,14 +41,14 @@ bcos$event <- ifelse(bcos$left!=bcos$right,1,0)
 ###---  Cox proportional hazard model with interval censoring ---###
 
 cox.ic <- frailtyPenal(SurvIC(left,right,event)~treatment,
-data=bcos,n.knots=8,kappa1=10000)
+data=bcos,n.knots=8,kappa=10000)
 
 ###---  Shared model with interval censoring ---###
 
 bcos$group <- c(rep(1:20,4),1:14)
 
 sha.ic <- frailtyPenal(SurvIC(left,right,event)~cluster(group)+
-treatment,data=bcos,n.knots=8,kappa1=10000)
+treatment,data=bcos,n.knots=8,kappa=10000)
 
 }
 

@@ -5,14 +5,15 @@
 
     use tailles
     use comon,only:t0,t1,c,nsujet,nva, &
-    nst,stra,ve,effet,ng,g,nig,AG,etaR,etaD,betaR,betaD,kkapa,theta
-        use residusM
+    nst,stra,ve,effet,ng,g,nig,AG,etaR,etaD,betaR,betaD,kkapa,theta, &
+    etaT,betaT
+    use residusM
 
     implicit none
-    
+
 ! *** NOUVELLLE DECLARATION F90 :
-    
-    integer::nb,np,id,jd,i,j,k,cptg,l
+
+    integer::nb,np,id,jd,i,j,k,cptg,l,ii,jj
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,dnb,sum,inv,res,vet
     double precision,dimension(np)::b,bh
@@ -27,18 +28,13 @@
 
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
-    
-    if (nst == 1) then
-        betaR= bh(1)**2
-        etaR= bh(2)**2
-        etaD= 0.d0
-        betaD= 0.d0
-    else
-        betaR= bh(1)**2
-        etaR= bh(2)**2
-        betaD= bh(3)**2
-        etaD= bh(4)**2
-    end if
+
+    ii=1
+    do jj=1,nst !en plus strates A.Lafourcade 05/2014
+        betaT(jj)=bh(ii)**2
+        etaT(jj)=bh(ii+1)**2
+        ii=ii+2
+    end do
 
     if(effet.eq.1) then
         theta = bh(np-nva)*bh(np-nva)
@@ -50,12 +46,10 @@
 
 !--- avec ou sans variable explicative  ------cc
 
-
     res1= 0.d0
     res2= 0.d0
     res3= 0.d0
     cpt = 0
-
 
 !*******************************************
 !---- sans effet aleatoire dans le modele
@@ -64,7 +58,7 @@
     if (effet.eq.0) then
         do i=1,nsujet
             cpt(g(i))=cpt(g(i))+1
-            
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -74,13 +68,10 @@
             else
                 vet=1.d0
             endif
-            
-            if((c(i).eq.1).and.(stra(i).eq.1))then
-                res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
-            endif
-    
-            if((c(i).eq.1).and.(stra(i).eq.2))then
-                res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
+
+            if((c(i).eq.1))then !en plus strates A.Lafourcade 05/2014
+                res2(g(i)) = res2(g(i)) + &
+                (betaT(stra(i))-1.d0)*dlog(t1(i))+dlog(betaT(stra(i)))-betaT(stra(i))*dlog(etaT(stra(i)))+dlog(vet)
             endif
 
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
@@ -88,15 +79,9 @@
                 goto 123
             end if
 
-            if(stra(i).eq.1)then
-                res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet - ((t0(i)/etaR)**betaR)*vet
-                RisqCumul(i) = ((t1(i)/etaR)**betaR)*vet
-            endif
-    
-            if(stra(i).eq.2)then
-                res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet - ((t0(i)/etaD)**betaD)*vet
-                RisqCumul(i) = ((t1(i)/etaD)**betaD)*vet
-            endif
+            res1(g(i)) = res1(g(i)) + &
+            ((t1(i)/etaT(stra(i)))**betaT(stra(i)))*vet-((t0(i)/etaT(stra(i)))**betaT(stra(i)))*vet
+            RisqCumul(i) = ((t1(i)/etaT(stra(i)))**betaT(stra(i)))*vet
 
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 funcpasweib=-1.d9
@@ -128,10 +113,10 @@
 !      write(*,*)'AVEC EFFET ALEATOIRE'
         inv = 1.d0/theta
 !     i indice les sujets
-        do i=1,nsujet 
-            
+        do i=1,nsujet
+
             cpt(g(i))=cpt(g(i))+1
-        
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -142,12 +127,9 @@
                 vet=1.d0
             endif
 
-            if((c(i).eq.1).and.(stra(i).eq.1))then
-                res2(g(i)) = res2(g(i))+(betaR-1.d0)*dlog(t1(i))+dlog(betaR)-betaR*dlog(etaR)+dlog(vet)
-            endif
-
-            if((c(i).eq.1).and.(stra(i).eq.2))then
-                res2(g(i)) = res2(g(i))+(betaD-1.d0)*dlog(t1(i))+dlog(betaD)-betaD*dlog(etaD)+dlog(vet)
+            if((c(i).eq.1))then !en plus strates A.Lafourcade 05/2014
+                res2(g(i)) = res2(g(i))+(betaT(stra(i))-1.d0)*dlog(t1(i))+ &
+                dlog(betaT(stra(i)))-betaT(stra(i))*dlog(etaT(stra(i)))+dlog(vet)
             endif
 
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
@@ -155,13 +137,8 @@
                 goto 123
             end if
 
-            if(stra(i).eq.1)then
-                res1(g(i)) = res1(g(i)) + ((t1(i)/etaR)**betaR)*vet
-            endif
-
-            if(stra(i).eq.2)then
-                res1(g(i)) = res1(g(i)) + ((t1(i)/etaD)**betaD)*vet
-            endif
+            !en plus strates A.Lafourcade 05/2014
+            res1(g(i)) = res1(g(i))+((t1(i)/etaT(stra(i)))**betaT(stra(i)))*vet
 
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 funcpasweib=-1.d9
@@ -169,13 +146,8 @@
             end if
 
 ! modification pour nouvelle vraisemblance / troncature:
-            if(stra(i).eq.1)then
-                res3(g(i)) = res3(g(i)) + ((t0(i)/etaR)**betaR)*vet
-            endif
-            
-            if(stra(i).eq.2)then
-                res3(g(i)) = res3(g(i)) + ((t0(i)/etaD)**betaD)*vet
-            endif
+            !en plus strates A.Lafourcade 05/2014
+            res3(g(i)) = res3(g(i)) + ((t0(i)/etaT(stra(i)))**betaT(stra(i)))*vet
 
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                 funcpasweib=-1.d9
@@ -193,7 +165,7 @@
             if(cpt(k).gt.0)then
                 nb = nig(k)
                 dnb = dble(nig(k))
-                
+
                 if (dnb.gt.1.d0) then
                     do l=1,nb
                         sum=sum+dlog(1.d0+theta*dble(nb-l))

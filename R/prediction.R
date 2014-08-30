@@ -14,7 +14,7 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 	if ((MC.sample < 0) | (MC.sample > 1000))  stop("MC.sample needs to be positive integer up to 1000")
 	
 	if ((class(fit)=="jointPenal") & (!missing(group))) stop("No need for 'group' argument for predictions on a joint model")
-	if (max(t+window) > max(fit$x1)) stop("Prediction times cannot exceed maximum time of observation")
+	if (max(t+window) > max(fit$xR)) stop("Prediction times cannot exceed maximum time of observation")
 
 	# seulement dans le cas du shared
 	if (missing(group)) type <- "marginal"
@@ -73,21 +73,21 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 	m <- fit$call
 	m2 <- match.call()
 	
-	m$formula.terminalEvent <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$Alpha <- m$... <- NULL
+	m$formula.terminalEvent <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$Alpha <- m$... <- NULL
 	
 	m[[1]] <- as.name("model.frame")
 	m3 <- m # pour recuperer les donnees du dataset initial en plus
 	m[[3]] <- as.name(m2$data)
-	
+
 	if (class(fit) == "jointPenal"){
 		temp <- as.character(m$formula[[2]])
 		if (temp[1]=="Surv"){
-			if (length(temp) == 4) m$formula[[2]] <- as.name(temp[3])
-			else if (length(temp) == 3) m$formula[[2]] <- as.name(temp[2])
+			if (length(temp) == 4) m$formula[[2]] <- paste(c("cbind(",temp[3],",",temp[4],")"),collapse=" ")
+			else if (length(temp) == 3) m$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],")"),collapse=" ")
 			else stop("Wrong Surv function")
 		}else{ # SurvIC
-			if (length(temp) == 4) m$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],")"),collapse=" ")
-			else if (length(temp) == 5) m$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],",",temp[4],")"),collapse=" ")
+			if (length(temp) == 4) m$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],",",temp[4],")"),collapse=" ")
+			else if (length(temp) == 5) m$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],",",temp[4],",",temp[5],")"),collapse=" ")
 			else stop("Wrong SurvIC function")
 		}
 		m$formula <- unlist(strsplit(deparse(m$formula)," "))
@@ -136,13 +136,15 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 			cluster <- strata(dataset[, tempc$vars], shortlabel = TRUE)
 			uni.cluster <- unique(cluster)
 			
+			ic <- model.extract(dataset, "response")[,2]
 			npred <- length(uni.cluster)
-			nrec <- max(table(cluster))
+			nrec <- max(table(cluster[ic==1]))
 			
 			if (temp[1]=="Surv"){
 				Y <- NULL
 				for (i in uni.cluster) {
-					temp <- model.extract(dataset, "response")[cluster==i]
+					temp <- model.extract(dataset, "response")[,1]
+					temp <- temp[cluster==i & ic==1]
 					Y <- c(Y,c(temp,rep(0,nrec-length(temp))))
 				}
 				predtimerec <- matrix(Y,nrow=npred,byrow=TRUE)
@@ -171,13 +173,15 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 			num.id <- strata(dataset[, tempnum$vars], shortlabel = TRUE)
 			uni.num.id <- unique(num.id)
 			
+			ic <- model.extract(dataset, "response")[,2]
 			npred <- length(uni.num.id)
-			nrec <- max(table(num.id))
+			nrec <- max(table(num.id[ic==1]))
 			
 			if (temp[1]=="Surv"){
 				Y <- NULL
 				for (i in uni.num.id) {
-					temp <- model.extract(dataset, "response")[num.id==i]
+					temp <- model.extract(dataset, "response")[,1]
+					temp <- temp[num.id==i & ic==1]
 					Y <- c(Y,c(temp,rep(0,nrec-length(temp))))
 				}
 				predtimerec <- matrix(Y,nrow=npred,byrow=TRUE)
@@ -229,7 +233,7 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 		m3 <- fit$call
 		m2 <- match.call()
 		
-		m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa1 <- m3$kappa2 <- m3$maxit <- m3$hazard <- m3$nb.int1 <-m3$nb.int2 <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$... <- NULL
+		m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$... <- NULL
 		
 		m3$formula[[3]] <- m3$formula.terminalEvent[[2]]
 		m3$formula.terminalEvent <- NULL

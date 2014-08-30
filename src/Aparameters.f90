@@ -45,7 +45,7 @@
     integer,dimension(:),allocatable,save:: c, cdc
     integer,dimension(:),allocatable,save:: nt0,nt1,ntU
     integer,dimension(:),allocatable,save:: nt0dc,nt1dc
-    integer,save::nsujet,nva,nva1,nva2,ndate,ndatedc,nst
+    integer,save::nsujet,nva,nva1,nva2,ndate,ndatedc,nst,nstRec
 !*****dace4
     integer,dimension(:),allocatable,save::stra
 !*****ve1
@@ -86,13 +86,14 @@
 !****  theta/alpha
     double precision,save::theta,alpha,eta !en exposant pour la frailty deces
 !****** indicateur de troncature
-    integer,save:: indictronq,indictronqdc ! =0 si donnees non tronquÃ©es reellement
+    integer,save:: indictronq,indictronqdc ! =0 si donnees non tronquees reellement
 !*****auxig
     integer,save :: auxig
 !******  aux1 aux2
     double precision,dimension(:),allocatable,save::res1,res3,aux1,aux2
     double precision,save::resnonpen
     double precision,dimension(2)::kkapa
+    double precision,dimension(:),allocatable,save::k0T
 !****** Type du modele
     integer,save::model
     double precision,dimension(:),allocatable::vvv
@@ -108,6 +109,7 @@
 !Weib
     double precision,save::etaR,etaD,betaR,betaD
     integer,save::indic_tronc,typeJoint
+    double precision,dimension(:),allocatable,save::etaT,betaT
 !censure par intervalle
     integer,dimension(:),allocatable,save::d
     integer,save::dmax
@@ -122,7 +124,7 @@
     module comongroup
 !=== add:18/04/2012
     integer,save::lignedc
-    double precision,save::vet,vet2    
+    double precision,save::vet,vet2
     double precision,dimension(:),allocatable,save::the1,the2
     integer,dimension(:),allocatable,save::gsuj!attention gpe pour un sujet
     integer,dimension(:),allocatable,save::nigdc  ! nb de recurr ou dc par gpe
@@ -133,33 +135,33 @@
     double precision,dimension(:,:),allocatable,save::variable
     double precision,dimension(:),allocatable,save::Binit
     double precision,dimension(:,:),allocatable,save::ve1,ve2
-    end module comongroup    
+    end module comongroup
 
-    module additiv    
-    implicit none    
-        integer,save::correlini,correl        
+    module additiv
+    implicit none
+        integer,save::correlini,correl
 !*****contrib
-        integer,save::ngexact       !nb EXACT de gpes       
+        integer,save::ngexact       !nb EXACT de gpes
 !*****mij
-        integer,dimension(:),allocatable,save::mid ! nb de dc dans gpe i  
+        integer,dimension(:),allocatable,save::mid ! nb de dc dans gpe i
 !******indicateur du nb de parametres
-        integer,save::nbpara    
-        double precision,dimension(:,:),allocatable,save::ve2    
+        integer,save::nbpara
+        double precision,dimension(:,:),allocatable,save::ve2
 !*****inversion
-        integer,save::indic_sousv,sousm    
+        integer,save::indic_sousv,sousm
 !*******sigma2tau2rho
-        double precision,save::sigma2,tau2,rho,cov  
+        double precision,save::sigma2,tau2,rho,cov
 !*****ut1ut2
         double precision,dimension(:),allocatable,save::dut1,dut2
-        double precision,dimension(:),allocatable,save::ut1,ut2    
+        double precision,dimension(:),allocatable,save::ut1,ut2
 !**** betaaux
         double precision,dimension(:),allocatable,save::betaaux
 !*****invD
-        double precision,dimension(:,:),allocatable,save::invD    
+        double precision,dimension(:,:),allocatable,save::invD
         double precision,dimension(:),allocatable,save::aux1,aux2
         double precision,dimension(:,:),allocatable,save::Xbeta
-        
-    end module additiv    
+
+    end module additiv
 
 
     module residusM

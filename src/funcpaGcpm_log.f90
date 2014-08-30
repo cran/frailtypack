@@ -3,33 +3,30 @@
 
 !========================          FUNCPAG_CPM_LOG         ====================
     double precision function funcpaGcpm_log(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
     use comon,only:nbintervR,nbintervDC,ttt,tttdc,betacoef, &
     t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
     effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,sig2, &
     auxig,aux1,aux2,res1,res3,res5,kkapa,resnonpen,indictronq
-        use residusM
+    use residusM
     use comongroup
 
     IMPLICIT NONE
 
 ! *** NOUVELLLE DECLARATION F90 :
-    
+
     integer,intent(in)::id,jd,np
     double precision,dimension(np),intent(in)::b
     double precision,dimension(2),intent(in)::k0
     double precision,intent(in)::thi,thj
-    
     integer::n,i,j,k,vj,ig,choix,jj,gg,gg2
     double precision::som11,som21
     integer,dimension(ngmax)::cpt
     double precision::res
-    
     double precision,dimension(np)::bh
     double precision,dimension(ngmax)::res2,res1dc,res2dc &
     ,res3dc,integrale1,integrale2,integrale3
-
     double precision::int
     double precision,parameter::pi=3.141592653589793d0
 
@@ -269,10 +266,6 @@
                 end do
             endif
 
-!            if (c(i).eq.1) then
-!                res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet)
-!            endif
-
             if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
                 !print*,"here7"
                 funcpaGcpm_log=-1.d9
@@ -296,8 +289,6 @@
                 endif
             end do
 
-!            res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet
-
             if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
                 !print*,"here6"
                 funcpaGcpm_log=-1.d9
@@ -320,8 +311,6 @@
                     res3(g(i)) = res3(g(i))+vet*(som11+som21)
                 endif
             end do
-
-!            res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
 
             if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
                 !print*,"here5"
@@ -357,15 +346,6 @@
                 end if
             endif
 
-!            if(cdc(k).eq.1)then
-!                res2dc(gsuj(k)) = res2dc(gsuj(k)) + dlog(dut2(nt1dc(k))*vet2)
-!                if ((res2dc(gsuj(k)).ne.res2dc(gsuj(k))).or.(abs(res2dc(gsuj(k))).ge. 1.d30)) then
-!                    print*,"here3",res2dc(gsuj(k))
-!                    funcpaGcpm_log=-1.d9
-!                    goto 123
-!                end if
-!            endif
-
 ! pour le calcul des integrales / pour la survie, pas les donnees recurrentes:
             som11=0.d0
             som21=0.d0
@@ -383,15 +363,12 @@
                 aux1(gsuj(k)) = aux1(gsuj(k)) + (som11+som21)*vet2
             end do
 
-!            aux1(gsuj(k)) = aux1(gsuj(k)) + ut2(nt1dc(k))*vet2
-
             if ((aux1(gsuj(k)).ne.aux1(gsuj(k))).or.(abs(aux1(gsuj(k))).ge. 1.d30)) then
                 !print*,"here1"
                 funcpaGcpm_log=-1.d9
                 goto 123
             end if
 
-!            aux2(gsuj(k)) = aux2(gsuj(k)) + ut2(nt0dc(k))*vet2 !vraie troncature
         end do
 
 !**************INTEGRALES ****************************
@@ -445,6 +422,6 @@
 123     continue
 
     return
-    
+
     end function funcpaGcpm_log
 

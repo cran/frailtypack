@@ -1,6 +1,6 @@
 "additivePenal" <-
-function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa1, kappa2,
-             maxit=350, hazard="Splines", nb.int1, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-3, print.times=TRUE)
+function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa,
+             maxit=350, hazard="Splines", nb.int, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-3, print.times=TRUE)
 {
 
 ##### hazard specification ######
@@ -19,8 +19,8 @@ if((all.equal(length(hazard),1)==T)==T){
 	typeof <- switch(hazard,"Splines"=0,"Piecewise"=1,"Weibull"=2)
 	if(typeof %in% c(0,2)){
 ### Splines
-		if (!(missing(nb.int1))){
-			stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int1' and 'nb.int2' arguments must be deleted.")
+		if (!(missing(nb.int))){
+			stop("When the hazard function equals 'Splines' or 'Weibull', 'nb.int' arguments must be deleted.")
 		}
 		if (typeof == 0){
 			size1 <- 100
@@ -61,31 +61,28 @@ if((all.equal(length(hazard),1)==T)==T){
 	if(class(formula)!="formula")stop("The argument formula must be a formula")
 #AD:  
 	if(typeof == 0){ 
-		if (missing(n.knots)) stop("number of knots are required")       
+		if (missing(n.knots)) stop("number of knots are required")
 #AD:	 
 		n.knots.temp <- n.knots	
 #AD
 		if (n.knots<4) n.knots<-4
 		if (n.knots>20) n.knots<-20
 		
-		if (missing(kappa1))stop("smoothing parameter (kappa1) is required")       
+		if (missing(kappa))stop("smoothing parameter (kappa) is required")
 		
-		if (!missing(kappa2) & cross.validation)stop("The cross validation is not implemented for two strata")
 	}else{
-		if (!(missing(n.knots)) || !(missing(kappa1)) || !(missing(kappa2)) || !(missing(cross.validation))){
-			stop("When parametric hazard function is specified, 'Kappa1', 'n.knots' and 'cross.validations' arguments must be deleted.")	
+		if (!(missing(n.knots)) || !(missing(kappa)) || !(missing(cross.validation))){
+			stop("When parametric hazard function is specified, 'kappa', 'n.knots' and 'cross.validation' arguments must be deleted.")	
 		}
 		n.knots <- 0
-		kappa1 <- 0
-		kappa2 <- 0
+		kappa <- 0
 		crossVal <- 0
 	}
-    
-    
-    
+
+
     call <- match.call()
     m <- match.call(expand.dots = FALSE)
-    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa1 <- m$kappa2 <- m$maxit <- m$hazard <- m$nb.int1 <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$... <- NULL
+    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$... <- NULL
     special <- c("strata", "cluster", "slope")
     Terms <- if (missing(data)) 
         terms(formula, special)
@@ -205,21 +202,19 @@ if((all.equal(length(hazard),1)==T)==T){
         else strata.keep <- strata(m[, temp$vars], shortlabel = TRUE)
         strats <- as.numeric(strata.keep)
         uni.strat<-length(unique(strats))
-      
-        if (missing(kappa1))
-         stop("smoothing parameter (kappa1) is required") 
-    
-        if (uni.strat!=2) 
-          {
-             stop("maximum number of strata is 2")
-          }
+
+        if (missing(kappa)) stop("smoothing parameter (kappa) is required")
+        if ((typeof==0) & (length(kappa)!=uni.strat)) stop("wrong length of argument 'kappa' for the current stratification")
+
+        if (uni.strat!=2) stop("maximum number of strata is 2")
 
     }
     else
       {
-        uni.strat<-1
+        uni.strat <- 1
+        if ((typeof==0) & (length(kappa)!=uni.strat)) stop("wrong length of argument 'kappa' for the current stratification")
         strats <- rep(1,nrow(data))
-        kappa2<-0 
+        kappa <- c(kappa,0)
       }
 
 
@@ -324,19 +319,19 @@ if((all.equal(length(hazard),1)==T)==T){
 #==================================
 
         if(equidistant %in% c(0,1)){
-		if (missing(nb.int1)) stop("Time interval 'nb.int1' is required")
-		if (class(nb.int1) != "numeric") stop("The argument 'nb.int1' must be a numeric")	
-		if (nb.int1 < 1) stop("Number of Time 'nb.int2' interval must be between 1 and 20")
-		if (nb.int1 > 20){
-			 nb.int1 <-20
-			indic.nb.int1 <- 1 # equals 1 for nb.int1 > 20	 
+		if (missing(nb.int)) stop("Time interval 'nb.int' is required")
+		if (class(nb.int) != "numeric") stop("The argument 'nb.int' must be a numeric")	
+		if (nb.int < 1) stop("Number of time interval 'nb.int' must be between 1 and 20")
+		if (nb.int > 20){
+			 nb.int <-20
+			indic.nb.int <- 1 # equals 1 for nb.int > 20
 		}else{
-			indic.nb.int1 <- 0 # equals 1 for nb.int1 < 20
+			indic.nb.int <- 0 # equals 1 for nb.int < 20
 		}
-		nbintervR <- nb.int1
+		nbintervR <- nb.int
 		size1 <- 3*nbintervR
 	}
-	if ((typeof == 0) | (typeof == 2)) indic.nb.int1 <- 0
+	if ((typeof == 0) | (typeof == 2)) indic.nb.int <- 0
 	np <- switch(as.character(typeof),
 		"0"=(as.integer(uni.strat) * (as.integer(n.knots) + 2) + as.integer(nvar) + as.integer(correlation) + 2 * 1),
 		"1"=(as.integer(uni.strat) * nbintervR + as.integer(nvar) + as.integer(correlation) + 2 * 1),
@@ -363,8 +358,8 @@ if((all.equal(length(hazard),1)==T)==T){
 				as.integer(length(uni.cluster)),
 				as.integer(uni.strat),
 				as.integer(n.knots),
-				as.double(kappa1),
-				as.double(kappa2),
+				as.double(kappa[1]),
+				as.double(kappa[2]),
 				as.double(tt0),
 				as.double(tt1),
 				as.integer(cens),
@@ -372,15 +367,15 @@ if((all.equal(length(hazard),1)==T)==T){
 				as.integer(nvar),
 				as.integer(strats),
 				as.double(var),
-				as.integer(varInt), 
+				as.integer(varInt),
 				as.integer(AG),
-				as.integer(noVar), 
+				as.integer(noVar),
 				as.integer(maxit),
-				as.integer(crossVal),  
+				as.integer(crossVal),
 				as.integer(correlation),
 				as.integer(np),
 				b=as.double(rep(0,np)),
-				coef=as.double(rep(0,nvar)),   
+				coef=as.double(rep(0,nvar)),
 				varcoef=as.double(rep(0,nvar)),
 				varcoef2=as.double(rep(0,nvar)),
 				rho=as.double(0),
@@ -391,7 +386,7 @@ if((all.equal(length(hazard),1)==T)==T){
 				ni=as.integer(0),
 				loglikpen=as.double(0),
 				LCV=as.double(rep(0,2)),
-				k0=as.double(c(0,0)),  
+				k0=as.double(c(0,0)),
 				x1=as.double(rep(0,size1)),
 				lam1=as.double(matrix(0,nrow=size1,ncol=3)),
                                 xSu1=as.double(xSu1),
@@ -405,7 +400,7 @@ if((all.equal(length(hazard),1)==T)==T){
 				as.integer(nbintervR),
 				as.integer(size1),
 				ier=as.integer(0),
-				ddl=as.double(0),  
+				ddl=as.double(0),
 				istop=as.integer(0),
 				shape.weib=as.double(rep(0,2)),
 				scale.weib=as.double(rep(0,2)),
@@ -429,16 +424,16 @@ if((all.equal(length(hazard),1)==T)==T){
     	stop("'addivePenal' can not deal with left truncation.")
     }
     if (ans$istop == 4){
-	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")    
+	 warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")
      }
-    
+
     if (ans$istop == 2){
          warning("Model did not converge.")
     }
     if (ans$istop == 3){
          warning("Matrix non-positive definite.")
     }
-    
+
     flush.console()
     if (print.times){
         cost<-proc.time()-ptm
@@ -454,22 +449,22 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$groups <- length(uni.cluster)
     fit$n.events <- sum(cens)  #coded 0: censure 1:event
 
-    if(as.character(typeof)=="0"){    
+    if(as.character(typeof)=="0"){
         fit$logLikPenal <- ans$loglikpen
     }else{
         fit$logLik <- ans$loglikpen
-    }  
+    }
 #AD:
     fit$LCV <- ans$LCV[1]
-    fit$AIC <- ans$LCV[2]   
-#AD:     
+    fit$AIC <- ans$LCV[2]
+#AD:
     fit$type <- type
 
-    fit$b <- ans$b 
+    fit$b <- ans$b
 
     if (noVar==1) {
       fit$coef <- NULL
-    } 
+    }
     else
      {
        fit$coef <- ans$coef
@@ -485,32 +480,27 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$sigma2<-ans$b[np-nvar-1]^2
     fit$varSigma2<-ans$varSigma2
     fit$tau2<-ans$b[np-nvar]^2
-    fit$varTau2<-ans$varTau2  
+    fit$varTau2<-ans$varTau2
  
     fit$rho<-ans$rho
     fit$cov<-ans$cov
-    fit$varcov<-ans$varcov    
+    fit$varcov<-ans$varcov
 
     fit$formula <- formula(Terms)
 
     fit$n.strat <- uni.strat
-    fit$n.knots<-n.knots 
-    fit$kappa <- ans$k0
+    fit$n.knots<-n.knots
+    if (uni.strat > 1) fit$kappa <- ans$k0
+    else fit$kappa <- ans$k0[1]
     fit$n.iter <- ans$ni
     fit$cross.Val<-cross.validation
     fit$correlation<-correlation
 
-    fit$x1 <- ans$x1
-    fit$lam <- matrix(ans$lam1, nrow = size1, ncol = 3) 
-    fit$x2 <- ans$x2
-    fit$lam2 <- matrix(ans$lam2, nrow = size1, ncol = 3)
+    fit$x <- cbind(ans$x1,ans$x2)
+    fit$lam <- array(c(ans$lam1,ans$lam2), dim=c(size1,3,2))
+    fit$xSu <- cbind(ans$xSu1,ans$xSu2)
+    fit$surv <- array(c(ans$surv1,ans$surv2), dim=c(size2,3,2))
 
-
-    fit$surv <- matrix(ans$surv1, nrow = size2, ncol = 3)
-    fit$surv2 <- matrix(ans$surv2, nrow = size2, ncol = 3)
-
-    fit$xSu1 <- ans$xSu1
-    fit$xSu2 <- ans$xSu2
     fit$npar <- np
     fit$type <- type
     fit$AG <- recurrentAG
@@ -520,8 +510,8 @@ if((all.equal(length(hazard),1)==T)==T){
     fit$nvar <- nvar
 #AD:
     fit$typeof <- typeof
-    fit$istop <- ans$istop  
-    if (typeof == 0){    
+    fit$istop <- ans$istop
+    if (typeof == 0){
     	fit$DoF <- ans$ddl
     	fit$n.knots.temp <- n.knots.temp
 	fit$zi <- ans$zi
@@ -530,17 +520,17 @@ if((all.equal(length(hazard),1)==T)==T){
 	fit$time <- ans$time
 	fit$nbintervR <- nbintervR
     }
-    fit$indic.nb.int1 <- indic.nb.int1
+    fit$indic.nb.int <- indic.nb.int
     fit$shape.weib <- ans$shape.weib
-    fit$scale.weib <- ans$scale.weib  
+    fit$scale.weib <- ans$scale.weib
 ##
 	fit$martingale.res <- ans$martingale.res
 	fit$frailty.pred <- ans$frailty.pred
 	fit$frailty.pred2 <- ans$frailty.pred2
 # 	fit$frailty.var <- ans$frailty.var
-# 	fit$frailty.var2 <- ans$frailty.var2	
+# 	fit$frailty.var2 <- ans$frailty.var2
 # 	fit$frailty.cov <- ans$frailty.cov
-	fit$linear.pred <- ans$linear.pred  
+	fit$linear.pred <- ans$linear.pred
 ##
     fit$EPS <- ans$EPS
 

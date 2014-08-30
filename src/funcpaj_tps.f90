@@ -1,17 +1,17 @@
 
 !========================          FUNCPAJ_CPM         ====================
     double precision function funcpaj_tps(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
     mm3,mm2,mm1,mm,im3,im2,im1,im,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2, &
     nst,effet,stra,ve,vedc,ng,g,nig,AG,kkapa,indic_alpha,alpha,theta, &
     auxig,aux1,aux2,res1,res3,res4,typeof,pe,resnonpen
-        use residusM
+    use residusM
     use betatttps
 
     implicit none
-    
+
     integer::np,id,jd,i,k,ig,choix,n,j
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,sum,res,pe1,pe2
@@ -28,13 +28,13 @@
     kkapa=k0
 
     bh=b
- 
+
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
 
     if(effet.eq.1) then
         theta = bh(np-(nva+npbetatps)-indic_alpha)**(2.d0)
-        if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
+        if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1
             alpha = bh(np-(nva+npbetatps))
         else
             alpha = 1.d0
@@ -90,13 +90,12 @@
 !cccccccccccccccccccccc
         call integration(risqindivrec,0.d0,t1(i),result,abserr,resabs,resasc,i,bh,np)
         res1(g(i)) = res1(g(i)) + result
-    
+
         if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
             !print*,"here2"
             funcpaj_tps=-1.d9
             goto 123
         end if
-
 
 !cccccccccccccccccc
 ! Fonction de risque de recidive au tepms T_i(j-1)
@@ -175,7 +174,7 @@
                 + res2dc(k) &
                 - gammaJ(1./theta)-dlog(theta)/theta  &
                 + dlog(integrale3(k))
- 
+
             endif
             if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
                 !print*,"here6",k,res,res2(k),res2dc(k),integrale3(k)

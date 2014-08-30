@@ -3,29 +3,29 @@
 
 !========================          FUNCPAJ_SPLINES         ====================
     double precision function funcpajcpm_log(b,np,id,thi,jd,thj,k0)
-    
+
     use tailles
     use comon,only:nbintervR,nbintervDC,ttt,tttdc,betacoef, &
     t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
     effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,sig2, &
-    auxig,aux1,aux2,res1,res3,res4,kkapa
-        use residusM
+    auxig,aux1,aux2,res1,res3,res4,kkapa,nstRec
+    use residusM
     use comongroup,only:vet,vet2,the1,the2
-        
+
     IMPLICIT NONE
 
 ! *** NOUVELLLE DECLARATION F90 :
-    
+
     integer,intent(in)::id,jd,np
     double precision,dimension(np),intent(in)::b
     double precision,dimension(2),intent(in)::k0
     double precision,intent(in)::thi,thj
-    
+
     integer::n,i,j,k,vj,ig,choix,jj,gg,gg2
     double precision::som11,som21
     integer,dimension(ngmax)::cpt
     double precision::res
-    
+
     double precision,dimension(np)::bh
     double precision,dimension(ngmax)::res2,res1dc,res2dc &
     ,res3dc,integrale1,integrale2,integrale3
@@ -47,13 +47,13 @@
     if (jd.ne.0) bh(jd)=bh(jd)+thj
 
     betacoef = 0.d0
-    do i = 1,(nbintervR+nbintervDC)
+    do i = 1,(nbintervR*nstRec+nbintervDC)
         betacoef(i)=bh(i)**2
     end do
 
     if(effet.eq.1) then
         sig2 = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
-        if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
+        if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1
             alpha = bh(np-nva)
         else
             alpha = 1.d0
@@ -106,14 +106,10 @@
         if((c(i).eq.1))then
             do gg=1,nbintervR
                 if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
-                    res2(g(i)) =  res2(g(i))+ dlog(betacoef(gg)*vet)
+                    res2(g(i)) =  res2(g(i))+ dlog(betacoef(nbintervR*(stra(i)-1)+gg)*vet)
                 endif
             end do
         endif
-
-!        if (c(i).eq.1) then
-!            res2(g(i)) = res2(g(i))+dlog(dut1(nt1(i))*vet)
-!        endif
 
         if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
             funcpajcpm_log=-1.d9
@@ -126,19 +122,17 @@
         gg2=0
         do gg=1,nbintervR
             if((t1(i).gt.(ttt(gg-1))).and.(t1(i).le.(ttt(gg))))then
-                som11=betacoef(gg)*(t1(i)-ttt(gg-1))
+                som11=betacoef(nbintervR*(stra(i)-1)+gg)*(t1(i)-ttt(gg-1))
                 gg2=gg
                 if (gg2.ge.2)then
                     do jj=1,gg2-1
-                        som21=som21+betacoef(jj)*(ttt(jj)-ttt(jj-1))
+                        som21=som21+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
                     end do
                 endif
                 res1(g(i)) = res1(g(i))+vet*(som11+som21)
             endif
         end do
 
-        !res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet
-        
         if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
             funcpajcpm_log=-1.d9
             goto 123
@@ -150,18 +144,16 @@
         gg2=0
         do gg=1,nbintervR
             if ((t0(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
-                som11=betacoef(gg)*(t0(i)-ttt(gg-1))
+                som11=betacoef(nbintervR*(stra(i)-1)+gg)*(t0(i)-ttt(gg-1))
                 gg2=gg
                 if (gg2.ge.2)then
                     do jj=1,gg2-1
-                        som21=som21+betacoef(jj)*(ttt(jj)-ttt(jj-1))
+                        som21=som21+betacoef(nbintervR*(stra(i)-1)+jj)*(ttt(jj)-ttt(jj-1))
                     end do
                 endif
                 res3(g(i)) = res3(g(i))+vet*(som11+som21)
             endif
         end do
-
-        !res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
 
         if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
             funcpajcpm_log=-1.d9
@@ -187,7 +179,7 @@
         if(cdc(k).eq.1)then
             do gg=1,nbintervDC
                 if ((t1dc(k).gt.(tttdc(gg-1))).and.(t1dc(k).le.(tttdc(gg)))) then
-                    res2dc(k) = dlog(betacoef(nbintervR+gg)*vet2)
+                    res2dc(k) = dlog(betacoef(nbintervR*nstRec+gg)*vet2)
                 endif
             end do
             if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
@@ -196,32 +188,22 @@
             end if
         endif
 
-!        if(cdc(k).eq.1)then
-!            res2dc(k) = dlog(dut2(nt1dc(k))*vet2)
-!            if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
-!                funcpajcpm_log=-1.d9
-!                goto 123
-!            end if
-!        endif
-
 ! pour le calcul des integrales / pour la survie, pas les donnees recurrentes:
         som11=0.d0
         som21=0.d0
         gg2=0
         do gg=1,nbintervDC
             if((t1dc(k).gt.(tttdc(gg-1))).and.(t1dc(k).le.(tttdc(gg))))then
-                som11=betacoef(gg+nbintervR)*(t1dc(k)-tttdc(gg-1))
+                som11=betacoef(gg+nbintervR*nstRec)*(t1dc(k)-tttdc(gg-1))
                 gg2=gg
                 if (gg2.ge.2)then
                     do jj=1,gg2-1
-                        som21=som21+betacoef(jj+nbintervR)*(tttdc(jj)-tttdc(jj-1))
+                        som21=som21+betacoef(jj+nbintervR*nstRec)*(tttdc(jj)-tttdc(jj-1))
                     end do
                 endif
             endif
             aux1(k)=(som11+som21)*vet2
         end do
-        
-        !aux1(k)=ut2(nt1dc(k))*vet2
 
         if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
             funcpajcpm_log=-1.d9
@@ -285,6 +267,6 @@
 123     continue
 
     return
-    
+
     end function funcpajcpm_log
 

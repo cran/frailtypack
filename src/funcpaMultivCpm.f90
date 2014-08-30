@@ -1,44 +1,37 @@
 
 !========================          funcpaMultivCpm         ====================
     double precision function funcpaMultivCpm(b,np,id,thi,jd,thj,k0)
-    
+
     use taillesmultiv
     use comonmultiv,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
     effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
     auxig,aux1,aux2,res1,res3,res4,ttt,tttdc,betacoef,kkapa, &
-!add meta    
+!add meta
     nbintervM,t0meta,t1meta,cmeta,nva3,vemeta,tttmeta,eta,alpha1,alpha2,nsujetmeta,gmeta,&
     indic_a1,indic_a2,indic_eta,res1meta,res3meta,nigmeta,indic_rho
-    use residusMmultiv     
-      
+    use residusMmultiv
+
     implicit none
-    
+
     integer::np,id,jd,i,j,k,ig
     integer,dimension(ngmax)::cpt,cptmeta
-!yasyas
     double precision::som11,som21,somf
     integer::jj,gg,gg2
-!yasyas
     double precision::thi,thj,res,vet,vet2,vet3
     double precision,dimension(np)::b,bh
     double precision,dimension(ngmax)::res2,res1dc,res2dc,res2meta
-    
-    double precision,dimension(ngmax)::integrale1,integrale2,integrale3, &
-    integrale3gap
-! yas 
+    double precision,dimension(ngmax)::integrale1,integrale2,integrale3,integrale3gap
     double precision,dimension(ngmax)::integrale4
     double precision::int
     double precision,dimension(3)::k0
     double precision,parameter::pi=3.141592653589793d0
-    
-    
-    
+
     kkapa=k0
     bh=b
- 
+
     if (id.ne.0) bh(id)=bh(id)+thi
-    if (jd.ne.0) bh(jd)=bh(jd)+thj    
-    
+    if (jd.ne.0) bh(jd)=bh(jd)+thj
+
 ! Allocation des parametre des fcts de risque cte par morceaux
 !cpm
     betacoef = 0.d0
@@ -47,8 +40,6 @@
     end do
 !cpm
 
-
-    
     if(effet.eq.1) then
         theta = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
 !        alpha = bh(np-nva)
@@ -66,51 +57,46 @@
 
 !---- avec ou sans variable explicative  ------cc
 
-    
     do k=1,ng
         res1(k) = 0.d0
         res2(k) = 0.d0
         res3(k) = 0.d0
-! yas
         res4(k) = 0.d0
         res1dc(k) = 0.d0
         res2dc(k) = 0.d0
-! yas
         cpt(k) = 0
         integrale1(k) = 0.d0
         integrale2(k) = 0.d0
         integrale3(k) = 0.d0
-! yas
         integrale4(k) = 0.d0
         integrale3gap(k) = 0.d0
         aux1(k)=0.d0
         aux2(k)=0.d0
-!add
         res1meta(k) = 0.d0
         res2meta(k) = 0.d0
         res3meta(k) = 0.d0
         cptmeta(k) = 0
     end do
 
-!********************************************         
+!**********************************************
 !-----avec un effet aleatoire dans le modele
 !**********************************************
 
 
-!=====================================================================================================================
+!==========================================================================
 !     pour les donnees loco
-!=====================================================================================================================
+!==========================================================================
     do i=1,nsujet 
-        cpt(g(i))=cpt(g(i))+1  
+        cpt(g(i))=cpt(g(i))+1
         if(nva1.gt.0)then
-            vet = 0.d0   
+            vet = 0.d0
             do j=1,nva1
                 vet =vet + bh(np-nva+j)*dble(ve(i,j))
             end do
             vet = dexp(vet)
         else
             vet=1.d0
-        endif           
+        endif
         if((c(i).eq.1))then
             do gg=1,nbintervR
                 if((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg))))then
@@ -121,7 +107,8 @@
         if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
             funcpaMultivCpm=-1.d9
             goto 123
-        end if    
+        end if
+
 !cccccccccccccccccccccc
 ! Fonction de risque cumulée de recidive au tepms T_ij
 !cccccccccccccccccccccc
@@ -144,8 +131,7 @@
         if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
             funcpaMultivCpm=-1.d9
             goto 123
-        end if    
-
+        end if
 
 !cccccccccccccccccc
 ! Fonction de risque de recidive au tepms T_i(j-1)
@@ -169,21 +155,16 @@
         if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
             funcpaMultivCpm=-1.d9
             goto 123
-        end if    
+        end if
     end do
 
-    
-    
-    
-    
-    
-!=====================================================================================================================
+!==========================================================================
 !     pour les donnees dc
-!=====================================================================================================================    
+!==========================================================================
 
-    do k=1,ng  
+    do k=1,ng
         if(nva2.gt.0)then
-            vet2 = 0.d0   
+            vet2 = 0.d0
             do j=1,nva2
                 vet2 =vet2 + bh(np-nva2-nva3+j)*dble(vedc(k,j))
             end do
@@ -206,12 +187,13 @@
             if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
                 funcpaMultivCpm=-1.d9
                 goto 123
-            end if    
-        endif 
+            end if
+        endif
+
 !cccccccccccccccccc
 ! Fonction de risque cumulée de dcd au tepms T_i*
 !cccccccccccccccccc
-        
+
         som11=0.d0
         som21=0.d0
         somf=0.d0
@@ -232,37 +214,36 @@
         if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
             funcpaMultivCpm=-1.d9
             goto 123
-        end if        
+        end if
     end do
- 
-    
-    
 
-!=====================================================================================================================
+!==========================================================================
 !     pour les donnees Meta
-!=====================================================================================================================
-    do i=1,nsujetmeta 
-        cptmeta(gmeta(i))=cptmeta(gmeta(i))+1  
+!==========================================================================
+
+    do i=1,nsujetmeta
+        cptmeta(gmeta(i))=cptmeta(gmeta(i))+1
         if(nva3.gt.0)then
-            vet3 = 0.d0   
+            vet3 = 0.d0
             do j=1,nva3
                 vet3 =vet3 + bh(np-nva3+j)*dble(vemeta(i,j))
             end do
             vet3 = dexp(vet3)
         else
             vet3=1.d0
-        endif           
+        endif
         if((cmeta(i).eq.1))then
             do gg=1,nbintervM
                 if((t1meta(i).ge.(tttmeta(gg-1))).and.(t1meta(i).lt.(tttmeta(gg))))then
                     res2meta(gmeta(i)) =  res2meta(gmeta(i))+ dlog(betacoef(gg+nbintervR+nbintervDC)*vet3)
                 endif
             end do
-        endif  
+        endif
         if ((res2meta(gmeta(i)).ne.res2meta(gmeta(i))).or.(abs(res2meta(gmeta(i))).ge. 1.d30)) then
             funcpaMultivCpm=-1.d9
             goto 123
-        end if    
+        end if
+
 !cccccccccccccccccccccc
 ! Fonction de risque cumulée de recidive au tepms T_ij
 !cccccccccccccccccccccc
@@ -285,8 +266,7 @@
         if ((res1meta(gmeta(i)).ne.res1meta(gmeta(i))).or.(abs(res1meta(gmeta(i))).ge. 1.d30)) then
             funcpaMultivCpm=-1.d9
             goto 123
-        end if    
-
+        end if
 
 !cccccccccccccccccc
 ! Fonction de risque de recidive au tepms T_i(j-1)
@@ -310,18 +290,17 @@
         if ((res3meta(gmeta(i)).ne.res3meta(gmeta(i))).or.(abs(res3meta(gmeta(i))).ge. 1.d30)) then
             funcpaMultivCpm=-1.d9
             goto 123
-        end if    
+        end if
     end do
-    
-!=====================================================================================================================
+
+!==========================================================================
 !     fin pour les donnees Meta
-!=====================================================================================================================    
-    
-    
+!==========================================================================
+
 !***************INTEGRALES ****************************
-    do ig=1,ng 
-        auxig=ig 
-!        choix = 3  
+    do ig=1,ng
+        auxig=ig
+!        choix = 3
 !        call gaulagj(int,choix)
         call gausshermiteBIS2011(int,30)!!!!! garder 30!!!!
         integrale3(ig) = int !moins bon
@@ -329,16 +308,11 @@
 
 !************** FIN INTEGRALES **************************
 
-!!!!!! new
-
-    res = 0.d0 
-    do k=1,ng  
+    res = 0.d0
+    do k=1,ng
         res= res + res2(k)+res2meta(k)+res2dc(k)+dlog(integrale3(k))-dlog((2.d0)*pi*sqrt(theta*eta* &
              (1.d0-((2.d0*dexp(alpha)/(dexp(alpha)+1.d0))-1.d0)**2)))
     end do
-
-!!!    
-
 
     if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
         funcpaMultivCpm =-1.d9
@@ -359,12 +333,12 @@
             Rrec2(k)=res1meta(k)
             Nrec2(k)=nigmeta(k)
         end do
-    end if    
-    
+    end if
+
 123     continue
 
     return
-    
+
     end function funcpaMultivCpm
 
 

@@ -14,7 +14,7 @@
     implicit none
 
 ! *** NOUVELLLE DECLARATION F90 :
-    
+
     integer::nb,np,id,jd,i,k,cptg,l,n,j
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,dnb,sum,inv,res,pe1,pe2
@@ -342,7 +342,7 @@
         if (stra(i).eq.1) then
 !============ fonction de risque
             call susps(tps,the1,nz1,su,bbb,zi)
-    
+
 ! le risque du temps maximum n'est pas calculé dans la fonction susps
             if (tps.eq.date(ndate)) then
                 bbb = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))

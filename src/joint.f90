@@ -3,6 +3,7 @@
 !tempdc=matrice(tt0dc0,tt1dc0) pour les deces
 !kendall: 1ere colonne ss0, 2eme colonne tau
 !paratps = c(timedep0,nbinnerknots,qorder0)
+!counts = c(ni,cpt,cpt_dc)
 
     module splines
     
@@ -20,16 +21,16 @@
 
     end module splines
 !--entête pour fortran
-    subroutine joint(nsujet0,ng0,lignedc0,nz0,k0,tt00,tt10,ic0,groupe0,groupe00      &
-    ,tt0dc0,tt1dc0,icdc0,tempdc,icdc00,nva10,vax0,nva20,vaxdc0,vaxdc00,noVar1,noVar2,ag0,maxit0   &
+    subroutine joint(nsujet0,ng0,nstRecAux,strAux,lignedc0,nz0,axT,tt00,tt10,ic0,groupe0,groupe00      &
+    ,tt0dc0,tt1dc0,icdc0,tempdc,icdc00,nva10,vax0,nva20,vaxdc0,vaxdc00,noVar1,noVar2,maxit0   & ! ag0
     ,np,b,H_hessOut,HIHOut,resOut,LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out &
     ,typeof0,equidistant,nbintervR0,nbintervDC0,mtaille &
-    ,ni,cpt,cpt_dc,ier,istop,paraweib & !shapeweib,scaleweib &
+    ,counts &
+    ,ier,istop,paraweib &
     ,MartinGales &
-!    ,Resmartingale,Resmartingaledc,frailtypred,frailtyvar
     ,linearpred,linearpreddc,ziOut,time,timedc & !kendall &
 !    ,initialisation,nn,Bshared ! enleve pour le moment
-    ,linearpredG,typeJoint0,intcens0,ttU0,logNormal0,paratps,filtretps0,BetaTpsMat,BetaTpsMatDc,EPS)
+    ,linearpredG,typeJoint0,intcens0,indic_alpha0,ttU0,logNormal0,paratps,filtretps0,BetaTpsMat,BetaTpsMatDc,EPS)
 
 !AD: add for new marq
     use parameters
@@ -46,44 +47,49 @@
 !AD:
     implicit none
     
-    integer::maxit0,npinit,nvatmp,mt1,mt2,mt11,mt12 !nn
+    integer::maxit0,npinit,nvatmp,mt1,mt2,mt11,mt12,nstRecAux,str !nn
     integer,dimension(4),intent(in)::mtaille
-    integer,intent(in)::nsujet0,ng0,nz0,nva10,nva20,lignedc0,ag0
+    integer,intent(in)::nsujet0,ng0,nz0,nva10,nva20,lignedc0 !ag0
     double precision,dimension(nz0+6),intent(out)::ziOut
     integer::np,equidistant
     integer,dimension(nsujet0),intent(in)::groupe0,ic0
     integer,dimension(ng0),intent(in)::icdc0
     integer,dimension(lignedc0),intent(in)::groupe00,icdc00
 
+    integer,dimension(nsujet0),intent(in)::strAux !en plus strates A.Lafourcade 07/2014
     double precision,dimension(ng0)::tt0dc0,tt1dc0
     double precision,dimension(lignedc0,2)::tempdc
-    double precision,dimension(nsujet0)::tt00,tt10,ttU0 !! rajout
+    double precision,dimension(nsujet0)::tt00,tt10,ttU0
     double precision,dimension(2)::k0
     double precision,dimension(nsujet0,nva10),intent(in):: vax0
     double precision,dimension(ng0,nva20),intent(in):: vaxdc0
     double precision,dimension(lignedc0,nva20),intent(in):: vaxdc00
     double precision,dimension(np,np)::H_hessOut,HIHOut
     double precision::resOut
-    double precision,dimension(mtaille(1))::x1Out
+    double precision,dimension(mtaille(1),nstRecAux)::x1Out
     double precision,dimension(mtaille(2))::x2Out
-    double precision,dimension(mtaille(1),3)::lamOut
-    double precision,dimension(mtaille(3),3)::suOut
+    double precision,dimension(mtaille(1),3,nstRecAux)::lamOut
+    double precision,dimension(mtaille(3),3,nstRecAux)::suOut
     double precision,dimension(mtaille(2),3)::lam2Out
     double precision,dimension(mtaille(4),3)::su2Out
     integer::ss,sss
     double precision,dimension(np):: b
     double precision,dimension(2),intent(out)::LCV
-    double precision,dimension(2)::shapeweib,scaleweib
-    double precision,dimension(4),intent(out)::paraweib
-    
+    double precision,dimension(nstRecAux+1)::shapeweib,scaleweib
+    double precision,dimension(nstRecAux+1),intent(in)::axT
+    double precision,dimension(nstRecAux+1)::xminT
+    double precision,dimension(2*(nstRecAux+1)),intent(out)::paraweib
+
     integer,intent(in)::noVar1,noVar2
-    integer,dimension(2),intent(in)::intcens0 !! rajout
-    integer,intent(out)::cpt,cpt_dc,ier,ni
+    integer,intent(in)::intcens0,indic_alpha0
+    integer,intent(out)::ier
+    integer,dimension(3),intent(out)::counts
+    integer::cpt,cpt_dc,ni
     integer::groupe,ij,kk,j,k,nz,n,ii,iii,iii2,cptstr1,cptstr2   &
     ,i,ic,icdc,istop,cptni,cptni1,cptni2,nb_echec,nb_echecor,id,cptbiais &
-    ,cptauxdc,p
+    ,cptauxdc,p,jj
     double precision::tt0,tt0dc,tt1,tt1dc,h,hdc,res,min,mindc,max,pord, &
-    maxdc,maxt,maxtdc,moy_peh0,moy_peh1,lrs,BIAIS_moy,ttU,mintdc !! rajout
+    maxdc,maxt,maxtdc,moy_peh0,moy_peh1,lrs,BIAIS_moy,ttU,mintdc
     double precision,dimension(2)::res01
 !AD: add for new marq
     double precision::ca,cb,dd
@@ -94,10 +100,11 @@
     double precision,external::funcpaGsplines_intcens,funcpaGcpm_intcens,funcpaGweib_intcens
     double precision,external::funcpaGsplines_log,funcpaGcpm_log,funcpaGweib_log
     double precision,external::funcpaj_tps,funcpaG_tps
-    double precision,dimension(100)::xSu1,xSu2
+    double precision,dimension(100)::xSu2
+    double precision,dimension(100,nstRec)::xSu1
 !cpm
     integer::indd,ent,entdc,typeof0,nbintervR0,nbintervDC0
-    double precision::temp    
+    double precision::temp
 !predictor
     double precision,dimension(ng0)::Resmartingale,Resmartingaledc,frailtypred,frailtyvar
     double precision,dimension(ng0,4),intent(out)::MartinGales
@@ -130,21 +137,10 @@
     double precision,dimension(0:100,0:4*sum(filtretps0(1:nva10)))::BetaTpsMat !!! a refaire
     double precision,dimension(0:100,0:4*sum(filtretps0(nva10+1:nva10+nva20)))::BetaTpsMatDc
     double precision,dimension(paratps(2)+paratps(3))::basis
-    double precision,dimension(3),intent(inout)::EPS ! seuils de convergence : on recupere les valeurs obtenues lors de l'algorithme a la fin
+    double precision,dimension(3),intent(inout)::EPS ! seuils de convergence
 
-
-!     do i=1,10
-!         print*,vax0(i,1)
-!     enddo
-! 
-!     do i=1,10
-!         print*,vaxdc0(i,1)
-!     enddo
-! 
-!     do i=1,10
-!         print*,(vaxdc00(i,j),j=1,6)
-!     enddo
 !     print*,typeof0,equidistant,nbintervR0,nbintervDC0,mtaille,ni,cpt,cpt_dc,ier,istop,paraweib
+
     mt1=mtaille(1)
     mt2=mtaille(2)
     mt11=mtaille(3)
@@ -165,13 +161,15 @@
     npbetatps = npbetatps1 + npbetatps2
 
     logNormal = logNormal0
-    intcens = intcens0(1)
+    intcens = intcens0
     typeJoint = typeJoint0
-    ag = ag0
+!     ag = ag0
     typeof = typeof0
     model = 1
+    k0(1) = axT(1) !axT sera tjs au moins de 2 dimensions
+    k0(2) = axT(2) !on a besoin de k0 pour le joint cluster,timedep et intcens
 
-    indic_alpha = intcens0(2)
+    indic_alpha = indic_alpha0
 
     if (typeof .ne. 0) then
         nbintervR = nbintervR0
@@ -226,14 +224,15 @@
     allocate(nig(ngtemp),nigdc(ng))
     shapeweib = 0.d0
     scaleweib = 0.d0
+    allocate(etaT(nstRecAux),betaT(nstRecAux))
     nsujetmax=nsujet0
     nsujet=nsujet0
-
+    nstRec=nstRecAux
 !Al: utile pour le calcul d'integrale avec distribution log normale
     allocate(res5(nsujetmax))
 !Al
 
-    allocate(t0(nsujetmax),t1(nsujetmax),tU(nsujetmax),c(nsujetmax),stra(nsujetmax),g(nsujetmax),aux(3*nsujetmax),gsuj(nsujetmax)) !! chgt dimension aux
+    allocate(t0(nsujetmax),t1(nsujetmax),tU(nsujetmax),c(nsujetmax),stra(nsujetmax),g(nsujetmax),aux(3*nsujetmax),gsuj(nsujetmax))
 
 ! censure par intervalle
     allocate(resL(nsujetmax),resU(nsujetmax))
@@ -245,7 +244,7 @@
     end if
 
     if (typeof == 0) then
-        allocate(nt0dc(ngtemp),nt1dc(ngtemp),nt0(nsujetmax),nt1(nsujetmax),ntU(nsujetmax))!! rajout
+        allocate(nt0dc(ngtemp),nt1dc(ngtemp),nt0(nsujetmax),nt1(nsujetmax),ntU(nsujetmax))
         allocate(mm3dc(ndatemaxdc),mm2dc(ndatemaxdc),mm1dc(ndatemaxdc),mmdc(ndatemaxdc) &
         ,im3dc(ndatemaxdc),im2dc(ndatemaxdc),im1dc(ndatemaxdc),imdc(ndatemaxdc))
     end if
@@ -296,7 +295,7 @@
     else
         filtre2=1
     end if
-    
+
     if ((noVar1.eq.1).or.(noVar2.eq.1)) then
         nva = nva1+nva2
     end if
@@ -307,10 +306,10 @@
 !------------  lecture fichier -----------------------
     maxt = 0.d0
     mint = 0.d0
-    
+
     maxtdc = 0.d0
     mintdc = 0.d0
-    
+
     cpt = 0
     cptcens = 0
     cpt_dc = 0
@@ -323,11 +322,11 @@
 ! pour le deces
 !cccccccccccccccccccc
     do k = 1,ngtemp
-    
+
         if (k.eq.1) then
             mintdc = temps0dc(k) ! affectation du min juste une fois
         endif
-        
+
         tt0dc=temps0dc(k)
         tt1dc=temps1dc(k)
         icdc=ictemp(k)
@@ -378,11 +377,11 @@
                 if(typeJoint.ne.1) gsuj(k) = groupe
             endif
         endif
-        
+
         if (maxtdc.lt.t1dc(k))then
             maxtdc = t1dc(k)
         endif
-        
+
         if (mintdc.gt.t0dc(k)) then
             mintdc = t0dc(k)
         endif
@@ -402,16 +401,17 @@
 ! pour les donnees recurrentes
 !cccccccccccccccccccccccccccccccccc
     do i = 1,nsujet     !sur les observations
-    
+
         if (i.eq.1) then
             mint = tt00(i) ! affectation du min juste une fois
         endif
-        
+
         tt0=tt00(i)
         tt1=tt10(i)
-        ttU=ttU0(i) !! rajout
+        ttU=ttU0(i)
         ic=ic0(i)
         groupe=groupe0(i)
+        str=strAux(i)
 !------------------
         do j=1,nva10
             vax(j)=vax0(i,j)
@@ -433,6 +433,7 @@
             tU(i) = ttU !! rajout
             t1(i) = t1(i)
             g(i) = groupe
+            stra(i)=str
             nig(groupe) = nig(groupe)+1 ! nb d event recurr dans un groupe
             iii = 0
             iii2 = 0
@@ -459,11 +460,13 @@
                 end do
                 t0(i) =  tt0
                 t1(i) = tt1
-                tU(i) = ttU !! rajout
+                tU(i) = ttU
                 t1(i) = t1(i)
                 g(i) = groupe
+                stra(i)=str
             endif
         endif
+
         if (maxt.lt.t1(i))then
             maxt = t1(i)
         endif
@@ -471,7 +474,7 @@
         if ((maxt.lt.tU(i)).and.(tU(i).ne.t1(i))) then
             maxt = tU(i)
         endif
-        
+
         if (mint.gt.t0(i)) then
             mint = t0(i)
         endif
@@ -497,9 +500,9 @@
         endif
     end if
 
-    ndatemax=2*nsujet+sum(ic0) !! rajout
+    ndatemax=2*nsujet+sum(ic0)
     allocate(date(ndatemax),datedc(ndatemax))
-    
+
     if(typeof == 0) then
         allocate(mm3(ndatemax),mm2(ndatemax) &
         ,mm1(ndatemax),mm(ndatemax),im3(ndatemax),im2(ndatemax),im1(ndatemax),im(ndatemax))
@@ -535,7 +538,7 @@
             datedc(k) = aux(i)
         endif
     end do
-    
+
     if(typeof == 0) then
         ndatedc = k
     end if
@@ -549,7 +552,7 @@
     aux = 0.d0
     max = maxt
 
-    do i = 1,(2*nsujet+sum(ic0)) !! rajout
+    do i = 1,(2*nsujet+sum(ic0))
         do k = 1,nsujet
             if (t0(k).ge.min) then
                 if (t0(k).lt.max) then
@@ -563,7 +566,7 @@
             endif
             if (tU(k).ne.t1(k)) then
                 if (tU(k).ge.min) then
-                    if (tU(k).lt.max) then !! rajout
+                    if (tU(k).lt.max) then
                         max = tU(k)
                     endif
                 endif
@@ -582,7 +585,7 @@
             date(k) = aux(i)
         endif
     end do
-    
+
     if(typeof == 0) then
 
 ! Al:10/03/2014 emplacement des noeuds splines en percentile (sans censure par intervalle)
@@ -599,7 +602,7 @@
 
 !----------> allocation des vecteur temps
             allocate(t2(nbrecu))
-        
+
 !----------> remplissage du vecteur de temps
             j=0
             do i=1,nsujet
@@ -608,14 +611,15 @@
                     t2(j)=t1(i)
                 endif
             end do
-            
+
             nzmax=nz+3
             allocate(zi(-2:nzmax))
+            ndate = k
 
             zi(-2) = mint
             zi(-1) = mint !date(1)
             zi(0) = mint !date(1)
-            zi(1) = mint !date(1) 
+            zi(1) = mint !date(1)
             j=0
             do j=1,nz-2
                 pord = dble(j)/(dble(nz)-1.d0)
@@ -661,7 +665,7 @@
 
 !----------> allocation des vecteur temps
             allocate(t3(nbdeces))
-        
+
 !----------> remplissage du vecteur de temps
             j=0
             do i=1,ngtemp !nsujet
@@ -757,7 +761,7 @@
                 if(date(j).eq.t1(i))then
                     nt1(i)=j
                 endif
-                if(date(j).eq.tU(i))then !! rajout
+                if(date(j).eq.tU(i))then
                     ntU(i)=j
                 endif
             end do
@@ -786,7 +790,7 @@
     end if
 
     npmax=np
-
+    allocate(k0T(nstRec+1))
     allocate(the1(-2:npmax),the2(-2:npmax))
     allocate(hess(npmax,npmax),I1_hess(npmax,npmax) &
     ,H1_hess(npmax,npmax),I2_hess(npmax,npmax),H2_hess(npmax,npmax),HI2(npmax,npmax) & 
@@ -810,7 +814,7 @@
         if (sum(b(np-nva+1:np)).eq.0.d0) then ! beta
             b(np-nva+1:np) = 5.d-1
         endif 
-        
+
         if (b(np-nva-indic_alpha).eq.0.d0) then ! theta
             if (typeof == 0) then
                 b(np-nva-indic_alpha) = 1.d0
@@ -825,13 +829,14 @@
     endif
 
     if(typeof ==1) then
-        b(1:nbintervR) = 0.8d0!1.d-2!
-        b((nbintervR+1):(nbintervR+nbintervDC)) = 0.8d0!1.d-2
+        b(1:(nbintervR*nstRec)) = 0.8d0!1.d-2!
+        b((nstRec*nbintervR+1):(nstRec*nbintervR+nbintervDC)) = 0.8d0!1.d-2
 !         b(np-nva-indic_alpha)=5.d-1 ! pour theta
     end if
 
     if (typeof == 2) then
-        b(1:4)=1.d-1!0.8d0
+!         b(1:4)=1.d-1!0.8d0
+       b(1:(nstRec+1)*2)=1.d-1
 !        b(np-nva-indic_alpha)=5.d-1 ! pour theta
 !        b(np-nva-indic_alpha)=1.d0 ! pour theta
     end if
@@ -842,6 +847,9 @@
 
 !     b(np-nva)=1.d0
 
+    do jj=1,nstRec+1
+        xminT(jj)=axT(jj)
+    end do
 
     if (typeof == 1) then
 !------- RECHERCHE DES NOEUDS
@@ -882,7 +890,7 @@
         end do
 
         ent=int(nbrecu/nbintervR)
-        
+
         allocate(ttt(0:nbintervR))
 
         ttt(0)=mint !0.d0
@@ -937,7 +945,7 @@
 
         j=0
         do j=1,nbintervDC-1
-            if (equidistant.eq.0) then    
+            if (equidistant.eq.0) then
                 tttdc(j)=(t3(entdc*j)+t3(entdc*j+1))/(2.d0)
             else
                 tttdc(j)=(cens/nbintervDC)*j
@@ -1092,7 +1100,7 @@
 
         nst=2
         indic_joint = 1
-        indic_alpha = intcens0(2) !!
+        indic_alpha = indic_alpha0
 
         if (typeof.ne.0) deallocate(vvv)
         if(typeof==1)deallocate(betacoef)
@@ -1100,13 +1108,16 @@
     end if
 ! 	nst=2
     indic_joint = 1
-    indic_alpha = intcens0(2) !!
+    indic_alpha = indic_alpha0 !!
     allocate(I_hess(np,np),H_hess(np,np),v((np*(np+3)/2)))
 
-    if (typeof==1)allocate(betacoef(nbintervR+nbintervDC))
+    if (typeof==1)allocate(betacoef(nstRec*nbintervR+nbintervDC))
     if (typeof .ne. 0)allocate(vvv((np*(np+1)/2)))
 
     !if (istop .ne. 1)goto 1000 ! si l'initialisation ne marche pas, ne pas faire le modele
+    do jj=1,nstRec+1
+        k0T(jj)=xminT(jj)
+    end do
 
     if(typeJoint == 1) then
         select case(typeof)
@@ -1219,26 +1230,39 @@
         case(0)
             call distanceJsplines(nz1,nz2,b,mt1,mt2,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
         case(1)
-            Call distanceJcpm(b,nbintervR+nbintervDC,mt1,mt2,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+            Call distanceJcpm(b,nstRec*nbintervR+nbintervDC,mt1,mt2,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
         case(2)
             Call distanceJweib(b,np,mt1,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
     end select
 
-    if (nst == 1) then
-        scaleweib(1) = etaR !betaR
-        shapeweib(1) = betaR !etaR
-        scaleweib(2) = 0.d0
-        shapeweib(2) = 0.d0
-    else
-        scaleweib(1) = etaR !betaR
-        shapeweib(1) = betaR !etaR
-        scaleweib(2) = etaD !betaD
-        shapeweib(2) = betaD !etaD
-    end if
-    paraweib(1) = shapeweib(1)
-    paraweib(2) = shapeweib(2)
-    paraweib(3) = scaleweib(1)
-    paraweib(4) = scaleweib(2)
+    do i=1,nstRec
+        scaleweib(i) = etaT(i)
+        shapeweib(i) = betaT(i)
+    end do
+    scaleweib(nstRec+1) = etaD
+    shapeweib(nstRec+1) = betaD
+
+!     if (nst == 1) then
+!         scaleweib(1) = etaR !betaR
+!         shapeweib(1) = betaR !etaR
+!         scaleweib(2) = 0.d0
+!         shapeweib(2) = 0.d0
+!     else
+!         scaleweib(1) = etaR !betaR
+!         shapeweib(1) = betaR !etaR
+!         scaleweib(2) = etaD !betaD
+!         shapeweib(2) = betaD !etaD
+!     end if
+
+    do i=1,nstRec+1
+        paraweib(i) = shapeweib(i)
+        paraweib(nstRec+1+i) = scaleweib(i)
+    end do
+
+!     paraweib(1) = shapeweib(1)
+!     paraweib(2) = shapeweib(2)
+!     paraweib(3) = scaleweib(1)
+!     paraweib(4) = scaleweib(2)
 
     do ss=1,npmax
         do sss=1,npmax
@@ -1436,6 +1460,9 @@
         linearpredG=0.d0
     end if
 
+    counts(1) = ni
+    counts(2) = cpt
+    counts(3) = cpt_dc
 
 !============================= (Audrey)
 ! Prediction : fait dans prediction.f90 (fonction a part entiere dans le package)
@@ -1500,7 +1527,7 @@
 !             kendall=0.d0
 !         end if
 !     endif
-    
+
     deallocate(nig,cdc,t0dc,t1dc,aux1,aux2,res1,res4,res3,mi,t0,t1,tU,c,stra,g,resL,resU,res5)
     deallocate(aux,vax,vaxdc,ve,vedc)
     deallocate(hess,v,I1_hess,H1_hess,I2_hess,H2_hess,HI2,HIH,IH,HI,BIAIS,date,datedc)
@@ -1517,13 +1544,15 @@
     end if
 
     if (typeof .ne. 0)deallocate(vvv) !,kkapa)
-    
+
     if (typeof == 1) then
         deallocate(ttt,tttdc,betacoef)
     end if
 
+    deallocate(etaT,betaT,k0T)
+
     return
-    
+
     end subroutine joint
 
 

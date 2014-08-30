@@ -15,7 +15,6 @@
 
     implicit none
 
-
     integer::n,np,id,jd,i,j,k,vj,ig,choix
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,pe1,pe2,inv,som1,som2,res,h1,int,gammaJ
@@ -77,7 +76,6 @@
     ut1(0) = 0.d0
     ut2(0) = 0.d0
 
-
 !--- strate1
     do i=2,ndate-1
         do k = 2,n-2
@@ -104,7 +102,7 @@
                 endif
             endif
         end do
-    
+
         if(nst.eq.2)then
             ut2(i) = som2 +(the2(j-3)*im3dc(i))+(the2(j-2)*im2dc(i))+(the2(j-1)*im1dc(i))+(the2(j)*imdc(i))
             dut2(i) = (the2(j-3)*mm3dc(i))+(the2(j-2)*mm2dc(i))+(the2(j-1)*mm1dc(i))+(the2(j)*mmdc(i))

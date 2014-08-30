@@ -7,14 +7,14 @@
     nst,stra,ve,effet,ng,g,nig,AG,nbintervR, &
     ttt,alpha,betacoef,kkapa,theta,tU,d,dmax ! rajouts
         use residusM
-    
-    
+
+
     implicit none
-    
+
 ! *** NOUVELLLE DECLARATION F90 :
-    
-    integer::np,id,jd,i,j,k,cptg,l,r ! rajout du r
-    integer,dimension(ngmax)::cpt,cptC ! rajout
+
+    integer::np,id,jd,i,j,k,cptg,l,r
+    integer,dimension(ngmax)::cpt,cptC
     double precision::thi,thj,inv,res,vet,som1,som2,num,den
     double precision,dimension(np)::b,bh
     double precision,dimension(ngmax)::res1,res2,res3
@@ -23,18 +23,18 @@
     double precision,dimension(1:2**dmax,1:ng)::p,p2 ! matrice
     integer,dimension(1:2**dmax,1:ng)::nbU,nbU2
     double precision,dimension(nsujet)::Lambdat1,Lambdat0,LambdatU ! mieux traiter le cpm
-    
+
     kkapa=k0
     j=0
     theta=0.d0
-    
+
     bh = b
-    
+
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj
 
     betacoef = 0.d0
-    
+
     do i=1,nst*nbintervR
         betacoef(i)=bh(i)*bh(i)
     end do
@@ -72,7 +72,7 @@
                     endif
                     Lambdat0(i) = som1+som2
                 end if
-            
+
                 if ((tU(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
                     som1 = 0.d0
                     som2 = 0.d0
@@ -86,7 +86,7 @@
                 end if
             end do
         endif
-        
+
         if(stra(i).eq.2)then
             do gg=1,nbintervR
                 if ((t1(i).ge.(ttt(gg-1))).and.(t1(i).lt.(ttt(gg)))) then
@@ -112,7 +112,7 @@
                     endif
                     Lambdat0(i) = som1+som2
                 end if
-            
+
                 if ((tU(i).ge.(ttt(gg-1))).and.(t0(i).lt.(ttt(gg)))) then
                     som1 = 0.d0
                     som2 = 0.d0
@@ -150,7 +150,7 @@
     if (effet.eq.0) then
         do i=1,nsujet
             cpt(g(i))=cpt(g(i))+1
-            
+
             if(nva.gt.0)then
                 vet = 0.d0
                 do j=1,nva
@@ -170,7 +170,7 @@
             end if
 
             res3(g(i)) = res3(g(i)) + Lambdat0(i)*vet
-        
+
             if (c(i).eq.1) then ! c = censure par intervalle
                 r = 1
                 do k=1,2**cptC(g(i))
@@ -186,7 +186,7 @@
 
         res = 0.d0
         cptg = 0
-        
+
 ! k indice les groupes
         do k=1,ng
             if(cpt(k).gt.0)then
@@ -271,7 +271,7 @@
 
         res = 0.d0
         cptg = 0
-        
+
 ! k indice les groupes
         do k=1,ng
             if(cpt(k).gt.0)then
@@ -303,9 +303,9 @@
                 end if
             endif 
         end do
-    
+
     endif !fin boucle effet=0
-    
+
 !--------------------------------------------------
 
     if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
@@ -320,7 +320,7 @@
     end do
 
 123     continue
-    
+
     return
 
     end function funcpascpm_intcens

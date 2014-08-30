@@ -2,9 +2,9 @@
 
 
     subroutine frailpenal(nsujetAux,ngAux,icenAux,nstAux,effetAux, &
-    nzAux,ax1,ax2,tt0Aux,tt1Aux,icAux,groupeAux,nvaAux,strAux,vaxAux, &
+    nzAux,axT,tt0Aux,tt1Aux,icAux,groupeAux,nvaAux,strAux,vaxAux, &
     AGAux,noVar,maxitAux,irep1,np,b,H_hessOut,HIHOut,resOut,LCV, &
-    x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,typeof0,equidistant,nbintervR0,mt, &    
+    xTOut,lamTOut,xSuT,suTOut,typeof0,equidistant,nbintervR0,mt, &
     ni,cpt,ier,k0,ddl,istop,shapeweib,scaleweib,mt1,ziOut,Resmartingale,martingaleCox,&
     frailtypred,frailtyvar,frailtysd,linearpred,time,intcensAux,ttUAux,logNormal0, &
     timedep0,nbinnerknots0,qorder0,filtretps0,BetaTpsMat,EPS) ! rajout
@@ -18,7 +18,7 @@
     use optim
     use residusM
     use betatttps
-    
+
     implicit none
 
     integer::groupe,ij,kk,j,k,nz,n,np,cpt,ii,iii,ver,cptstr1,cptstr2, &
@@ -27,33 +27,36 @@
     integer,dimension(nvaAux)::filtre
     integer,dimension(nsujetAux)::stracross
     double precision,dimension(nvaAux)::vax
-    double precision::tt0,tt1,ttU ! rajout
-    double precision::h,ax1,ax2,res,min,max,maxt,str,pord !,scoreT,scoretest
+    double precision::tt0,tt1,ttU
+    double precision::h,res,min,max,maxt,str,pord !,scoreT,scoretest
     double precision,dimension(2)::auxkappa,k0,res01
-    double precision,dimension(3*nsujetAux)::aux ! rajout dimension
+    double precision,dimension(3*nsujetAux)::aux
     double precision,dimension(np*(np+3)/2)::v
     double precision,dimension(np)::b
-    double precision,dimension(np,np)::HIH,IH,HI    
+    double precision,dimension(np,np)::HIH,IH,HI
     !******************************************   Add JRG January 05
     integer::ss,sss,noVar,AGAux,maxitAux,nsujetAux,ngAux,icenAux,nstAux,effetAux, &
-    nzAux,nvaAux,intcensAux                                                       ! rajout de intcens
+    nzAux,nvaAux,intcensAux
     double precision,dimension(nzAux+6),intent(out)::ziOut
     double precision::resOut
-    double precision,dimension(nsujetAux)::tt0Aux,tt1Aux,ttUAux ! rajout
+    double precision,dimension(nsujetAux)::tt0Aux,tt1Aux,ttUAux
     integer,dimension(nsujetAux)::icAux,groupeAux
     double precision,dimension(nsujetAux)::strAux
     double precision,dimension(nsujetAux,nvaAux)::vaxAux
     double precision,dimension(np,np)::H_hessOut,HIHOut
-    double precision,dimension(mt)::x1Out,x2Out
-    double precision,dimension(mt,3)::lamOut,lam2Out
-    double precision,dimension(mt1,3)::suOut,su2Out
-    double precision,dimension(100)::xSu1,xSu2
+    double precision,dimension(nstAux),intent(out)::shapeweib ,scaleweib
+    double precision,dimension(nstAux),intent(in):: axT
+    double precision,dimension(nstAux):: xminT
+    double precision,dimension(mt,nstAux)::xTOut
+    double precision,dimension(mt,3,nstAux)::lamTOut
+    double precision,dimension(mt1,3,nstAux)::suTOut
+    double precision,dimension(100,nstAux)::xSuT
     !*******************************************  Add JRG May 05 (Cross-validation)    
     double precision::auxi,ax,bx,cx,tol,ddl,fa,fb,fc,goldens,estimvs, &
     xmin1,xmin2
     double precision,dimension(np,np)::y
 !AD:add
-    double precision,dimension(2),intent(out)::LCV,shapeweib,scaleweib
+    double precision,dimension(2),intent(out)::LCV
     double precision::ca,cb,dd
     double precision,external::funcpassplines,funcpascpm,funcpasweib
     double precision,external::funcpascpm_intcens,funcpassplines_intcens,funcpasweib_intcens
@@ -78,8 +81,6 @@
     double precision,dimension(0:100,0:4*sum(filtretps0))::BetaTpsMat ! matrice des effets depedants du temps (4 colonnes par effet dep du tps)
     double precision,dimension(nbinnerknots0+qorder0)::basis
     double precision,dimension(3),intent(inout)::EPS ! seuils de convergence
-    integer::nt
-    double precision,dimension(:),allocatable::valT,rl_cond,epoir
 
 !verification
     !print*,nsujetAux,ngAux,icenAux,nstAux,effetAux,nzAux,ax1,ax2,nvaAux
@@ -92,13 +93,9 @@
     !end do
     !STOP
 
-!cpm    
+!cpm
     istopp=0
     time = 0.d0
-    lamOut=0.d0
-    lam2Out=0.d0
-    suOut=0.d0
-    su2Out=0.d0
 
 !AD:add for new marq
     epsa=EPS(1) !1.d-4
@@ -117,26 +114,26 @@
     npmax=np
     if (typeof .ne. 0) then
         nbintervR = nbintervR0
-    end if    
-    shapeweib = 0.d0
-    scaleweib = 0.d0
+    end if
+!     shapeweib = 0.d0
+!     scaleweib = 0.d0
 
     NSUJETMAX=nsujetAux
-    allocate(t0(nsujetmax),t1(nsujetmax),tU(nsujetmax),c(nsujetmax),stra(nsujetmax),g(nsujetmax)) ! rajout
+    allocate(t0(nsujetmax),t1(nsujetmax),tU(nsujetmax),c(nsujetmax),stra(nsujetmax),g(nsujetmax))
 
     allocate(RisqCumul(nsujetmax))
     if (typeof == 0) then
-        allocate(nt0(nsujetmax),nt1(nsujetmax),ntU(nsujetmax)) ! rajout
+        allocate(nt0(nsujetmax),nt1(nsujetmax),ntU(nsujetmax))
         nt0=0
         nt1=0
-        ntU=0 ! rajout
+        ntU=0
     end if
     c=0
-    g=0 
-        
+    g=0
+
     ndatemax=2*nsujetAux+sum(icAux) ! on ajoute le nombre de temps d'entree en plus : les tU
                                     ! c'est a dire le nombre de censures par intervalle
-    
+
     allocate(date(0:ndatemax))
     date=0.d0
 
@@ -192,6 +189,12 @@
     nz=nzAux
 
     nvarmax=nvaAux
+    allocate(etaT(nstAux),betaT(nstAux))
+    nstRec=0 ! dans marq98j de distinguer le modele shared du modele joint
+    shapeweib = 0.d0
+    scaleweib = 0.d0
+    lamTOut=0.d0
+    suTOut=0.d0
 
     allocate(filtretps(nvarmax),betatps(nvarmax),betatps3(nvarmax))
     filtretps = filtretps0
@@ -242,10 +245,10 @@
             mint = tt0Aux(i) ! affectation du min juste une fois
         endif
 
-        if(nst.eq.2)then
+        if(nst.ge.2)then
             tt0=tt0Aux(i)
             tt1=tt1Aux(i)
-            ttU=ttUAux(i) ! rajout
+            ttU=ttUAux(i)
             ic=icAux(i)
             groupe=groupeAux(i)
             str=strAux(i)
@@ -257,7 +260,7 @@
             
             tt0=tt0Aux(i)
             tt1=tt1Aux(i)
-            ttU=ttUAux(i) ! rajout
+            ttU=ttUAux(i)
             ic=icAux(i)
             groupe=groupeAux(i)
             
@@ -273,20 +276,21 @@
         if(ic.eq.1)then
             cpt = cpt + 1
             c(k)=1
-            
-            if(str.eq.1)then
-                stra(k) = 1
-                cptstr1 = cptstr1 + 1
-            else
-                if(str.eq.2)then
-                    stra(k) = 2
-                    cptstr2 = cptstr2 + 1
-                endif
-            endif
-            
+
+!             if(str.eq.1)then
+!                 stra(k) = 1
+!                 cptstr1 = cptstr1 + 1
+!             else
+!                 if(str.eq.2)then
+!                     stra(k) = 2
+!                     cptstr2 = cptstr2 + 1
+!                 endif
+!             endif
+            stra(k)=str ! pas besoin de if et des compteurs
+
             t0(k) = tt0
             t1(k) = tt1
-            tU(k) = ttU ! rajout
+            tU(k) = ttU
             g(k) = groupe
 
 ! nb de dc dans un groupe
@@ -306,41 +310,40 @@
 !------------------   censure a droite  c=0
             if(ic.eq.0)then
                 c(k) = 0 
-                if(str.eq.1)then
-                    stra(k) = 1
-                    cptstr1 = cptstr1 + 1
-                else
-                    if(str.eq.2)then
-                        stra(k) = 2
-                        cptstr2 = cptstr2 + 1
-                    endif
-                endif
+!                 if(str.eq.1)then
+!                     stra(k) = 1
+!                     cptstr1 = cptstr1 + 1
+!                 else
+!                     if(str.eq.2)then
+!                         stra(k) = 2
+!                         cptstr2 = cptstr2 + 1
+!                     endif
+!                 endif
+                stra(k)=str !en plus strates A.Lafourcade 05/2014
                 iii = 0
-                         
-        
+
                 do ii = 1,ver
                     if(filtre(ii).eq.1)then
                         iii = iii + 1
                         ve(i,iii) =vax(ii)
                     endif
                 end do 
-                      
-              
+
                 t0(k) = tt0
                 t1(k) = tt1
-                tU(k) = ttU ! rajout
+                tU(k) = ttU
                 g(k) = groupe
             endif
         endif
-        
+
         if (maxt.lt.t1(k))then
             maxt = t1(k)
         endif
 
-        if ((maxt.lt.tU(k)).and.(tU(k).ne.t1(k))) then ! rajout
+        if ((maxt.lt.tU(k)).and.(tU(k).ne.t1(k))) then
             maxt = tU(k)
         endif
-        
+
         if (mint.gt.t0(k)) then
             mint = t0(k)
         endif
@@ -410,7 +413,7 @@
             
             if (tU(k).ne.t1(k)) then
                 if((tU(k).ge.min))then
-                    if (tU(k).lt.max) then ! rajout
+                    if (tU(k).lt.max) then
                         max = tU(k)
                     endif
                 endif
@@ -512,16 +515,16 @@
             !endif
 !Al:
             do j=1,ndate
-            
+
                 if(date(j).eq.t0(i))then
                     nt0(i)=j
                 endif
-                
+
                 if(date(j).eq.t1(i))then
                     nt1(i)=j
                 endif
 
-                if(date(j).eq.tU(i))then ! rajout
+                if(date(j).eq.tU(i))then
                     ntU(i)=j
                 endif
             end do
@@ -531,13 +534,14 @@
         n = nz+2
 
         call vecsplis(n,ndate)
-        
+
         allocate(m3m3(nzmax),m2m2(nzmax),m1m1(nzmax),mmm(nzmax),m3m2(nzmax),m3m1(nzmax),m3m(nzmax), &
         m2m1(nzmax),m2m(nzmax),m1m(nzmax))
-        
+
         call vecpens(n)
     end if
 
+    allocate(k0T(nst)) !k0T en plus strates A.Lafourcade 05/2014
     allocate(H_hess(npmax,npmax),Hspl_hess(npmax,npmax), &
     hess(npmax,npmax),I_hess(npmax,npmax))
 
@@ -563,18 +567,24 @@
     endif
 
     if (typeof == 1) then
-        if (nst == 2) then
-            b(nbintervR+1:2*nbintervR)=0.2d0
-        end if
+!         if (nst == 2) then
+!             b(nbintervR+1:2*nbintervR)=0.2d0
+!         end if
+        b(nbintervR+1:nst*nbintervR)=0.2d0
     end if
 !    Esto se cambia ya que ahora xmin1 es kappa1
 
-    xmin1=ax1
-    if(nst.eq.2)then
-        xmin2 = ax2
+    xmin1=axT(1)
+    if (nst.ge.2) then
+        xmin2=axT(2)
     else
-        xmin2 = 0.d0
+        xmin2=0.d0
     endif
+    if(nst.ge.2)then
+        do l=2,nst
+            xminT(l)=axT(l)
+        end do
+    end if !fin strates
 
     ent = 0
     entTPS = 0
@@ -602,7 +612,7 @@
             n = nbintervR
 !----------> allocation des vecteur temps
             allocate(t2(nbrecu))
-        
+
 !----------> remplissage du vecteur de temps
             j=0
             do i=1,nsujet
@@ -611,7 +621,7 @@
                     t2(j)=t1(i)
                 endif
             end do
-        
+
 !----------> tri du vecteur de temps
             indd=1
             do while (indd.eq.1)
@@ -625,17 +635,17 @@
                     end if
                 end do
             end do
-        
+
             ent=int(nbrecu/nbintervR)
             entTPS=int(nbrecu/(nbinnerknots+1))! ajout 24/02/2012
         endif
-        
+
         allocate(ttt(0:nbintervR))
-        
+
         ttt(0) = mint !0.d0 pour prendre en compte une eventuelle troncature
-        
+
         ttt(nbintervR)=cens
-        
+
         j=0
         do j=1,nbintervR-1
             if (equidistant.eq.0) then ! ici se fait la difference entre piecewise-per et equi
@@ -654,12 +664,12 @@
 !                    knotsTPS(j)=(cens/(nbinnerknots+1))*j
 !                endif
             end do
-    
+
             knotsTPS(-qorder+1:0)=ttt(0)
             knotsTPS(nbinnerknots+1:nbinnerknots+qorder)=cens
 !            write(*,*),'knotsTPS',knotsTPS
             time = ttt
-        
+
             deallocate(t2)
         endif
 !------- FIN RECHERCHE DES NOEUDS
@@ -914,6 +924,12 @@
         if(nst.eq.2)then
             k0(2) = xmin2
         endif
+        k0T(1) = xmin1*xmin1 !en plus strates A.Lafourcade 05/2014
+        if(nst.ge.2)then
+            do l=2,nst
+                k0T(l) = xminT(l)
+            end do
+        endif
     end if
 !------------  indicateur d'effet aleatoire ou non dans le modele
     !write(*,*)'np',np
@@ -983,10 +999,10 @@
     if (istop.ne.1) then
         istopp(2)=1
         goto 1000
-    end if    
-    
+    end if
 
-!    j=(np-nva)*(np-nva+1)/2       
+
+!    j=(np-nva)*(np-nva+1)/2
 
     call multis(I_hess,H_hess,np,np,np,IH)
     call multis(H_hess,IH,np,np,np,HIH)
@@ -999,47 +1015,54 @@
     !    write(*,*)'variance corrigee HIH pour theta:'
     !    write(*,*)((2.d0*b(np-nva))**2)*HIH(np-nva,np-nva)
 !    endif
-    
+
 !    if(effet.eq.1)then
 !        j=(np-nva)*(np-nva+1)/2
 !    endif
-          
+
     if(effet.eq.1.and.ier.eq.-1)then
         v((np-nva)*(np-nva+1)/2)=10.d10
     endif
-           
+
     res01(effet+1)=res
-    
+
     !write(4,*)'valeur de ni',ni 
     !write(*,*)'valeur de ni',ni
-    
+
 !    j=(np-nva)*(np-nva+1)/2
 
-! --------------  Lambda and survival estimates JRG January 05    
+! --------------  Lambda and survival estimates JRG January 05
 
     select case(typeof)
         case(0)
-            call distancessplines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
+!             call distancessplines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
+            call distancessplines(nz1,b,effet,mt,xTOut,lamTOut,suTOut)!en plus strates A.Laf 05/2014
         case(1)
-            Call distancecpm(b,nbintervR*nst,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+!             Call distancecpm(b,nbintervR*nst,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+            Call distanceScpm(b,nbintervR*nst,mt,xTOut,lamTOut,xSuT,suTOut)!en plus strates A.Laf 05/2014
         case(2)
             typeof2 = 1
-            Call distanceweib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+!             Call distanceweib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
+            Call distanceSweib(b,np,mt,xTOut,lamTOut,xSuT,suTOut)!en plus strates A.Laf 05/2014
     end select
 
     resOut=res
 
-    if (nst == 1) then
-        scaleweib(1) = etaR !betaR
-        shapeweib(1) = betaR !etaR
-        scaleweib(2) = 0.d0
-        shapeweib(2) = 0.d0
-    else
-        scaleweib(1) = etaR !betaR
-        shapeweib(1) = betaR !etaR
-        scaleweib(2) = etaD !betaD
-        shapeweib(2) = betaD !etaD
-    end if
+!     if (nst == 1) then
+!         scaleweib(1) = etaR !betaR
+!         shapeweib(1) = betaR !etaR
+!         scaleweib(2) = 0.d0
+!         shapeweib(2) = 0.d0
+!     else
+!         scaleweib(1) = etaR !betaR
+!         shapeweib(1) = betaR !etaR
+!         scaleweib(2) = etaD !betaD
+!         shapeweib(2) = betaD !etaD
+!     end if
+    do l=1,nst !en plus strates A.Lafourcade 05/2014
+        scaleweib(l) = etaT(l)
+        shapeweib(l) = betaT(l)
+    end do
 
 !AD:add LCV
 !LCV(1) The approximate like cross-validation Criterion
@@ -1125,7 +1148,7 @@
 
         if((istopp(1) == 0).and.(istopp(2) == 0)) then
             !deallocate(I_hess,H_hess)
-            
+
             allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1),post_esp(ng),post_SD(ng))
             effetres = effet
 
@@ -1137,7 +1160,7 @@
                 frailtyvar=0.d0
                 frailtysd=0.d0
             end if
-    
+
             do i=1,nsujet
                 if (effet == 1) then
                     if (logNormal.eq.0) then
@@ -1150,7 +1173,7 @@
                     martingaleCox(i) = c(i) - RisqCumul(i)
                 end if
             end do
-    
+
             deallocate(I_hess,H_hess,vres,vecuiRes,post_esp,post_SD)
         else
             !deallocate(I_hess,H_hess)
@@ -1158,16 +1181,16 @@
             frailtypred=0.d0
             linearpred=0.d0
             martingaleCox=0.d0
-        end if    
-    
+        end if
+
     else
         if((istopp(2) == 0)) then
-    
+
             !deallocate(I_hess,H_hess)
-            
+
             allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1),post_esp(ng),post_SD(ng))    
-            effetres = effet    
-    
+            effetres = effet
+
             if (effet == 1) then
                 Call ResidusMartingale(b,np,funcpasres,Resmartingale,frailtypred,frailtyvar,frailtysd)
             else
@@ -1175,8 +1198,8 @@
                 frailtypred=0.d0
                 frailtyvar=0.d0
                 frailtysd=0.d0
-            end if    
-    
+            end if
+
             do i=1,nsujet
                 if (effet == 1) then
                     linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
@@ -1185,7 +1208,7 @@
                     martingaleCox(i) = c(i) - RisqCumul(i)
                 end if
             end do
-    
+
             deallocate(I_hess,H_hess,vres,vecuiRes,post_esp,post_SD)
         else
             !deallocate(I_hess,H_hess)
@@ -1196,20 +1219,6 @@
         end if
     end if
 
-
-    nt = 3
-    allocate(valT(nt),rl_cond(nt),epoir(nt))
-!     valT(1) = 200.d0
-!     valT(2) = 500.d0
-!     valT(3) = 800.d0
-! print*,"avant"
-!     call cvpl(nsujet,np,b,V,t1,nt,valT,rl_cond,epoir)
-! print*,"apres"
-!     print*,rl_cond
-!     print*,epoir
-    deallocate(valT,rl_cond,epoir)
-
-
 ! ! Al : 25/03/2014 Score Test for frailties (Commenges/Andersen)
 !     if (effet.eq.1) then    
 !         scoreT = scoretest(b,frailtypred)
@@ -1218,24 +1227,24 @@
 
     deallocate(t0,t1,tU,c,d,stra,g,nig,ve,Hspl_hess,hess, &
     mm3,mm2,mm1,mm,im3,im2,im1,im,date,cumulhaz,Residus,vuu, &
-    RisqCumul,res5,res3,res1,filtretps,knotsTPS,innerknots,betatps,betatps3) ! rajouts
+    RisqCumul,res5,res3,res1,filtretps,knotsTPS,innerknots,betatps,betatps3)
 
     if (typeof == 0) then
-        deallocate(nt0,nt1,ntU,zi) ! rajout
+        deallocate(nt0,nt1,ntU,zi)
         deallocate(m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m)
     end if
-    
+
     if (typeof == 1) then
         deallocate(ttt,vvv,betacoef)
     end if
-    
+
     if (typeof == 2) then
         deallocate(vvv)
     end if
-
+    deallocate(etaT,betaT,k0T)!en plus strates A.Lafourcade 05/2014
 
     return
-    
+
     end subroutine frailpenal
 
 
@@ -1983,7 +1992,7 @@
     double precision function estimvs(k00,n,b,y,aux,ni,res)
 
     use tailles,only:npmax,ndatemax,NSUJETMAX
-    use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst, &
+    use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,k0T, &
     date,zi,pe,effet,nz1,nz2,mm3,mm2,mm1,mm,im3,im2,im1,im,typeof,intcens,logNormal
 
     use optim
@@ -2003,7 +2012,7 @@
 
     j=0
     estimvs=0.d0
-
+    k0T(1)= k00*k00 !en plus strates A.Lafourcade 05/2014
     k0(1) = k00*k00
     k0(2) = 0.d0
 
@@ -2442,15 +2451,15 @@
 ! multiplie A par B avec le resultat dans C
 
     subroutine multis(A,B,IrowA,JcolA,JcolB,C)
-    
+
     use tailles,only:npmax
-    
+
     implicit none
-    
+
     integer::IrowA,JcolA,JcolB,i,j,k
     double precision::sum
     double precision,dimension(npmax,npmax) ::A,B,C
-    
+
     do I=1,IrowA
         do J=1,JcolB
             sum=0
@@ -2460,16 +2469,16 @@
             C(I,J)=sum
         end do
     end do
-    
+
     return
-    
+
     end subroutine multis
 
 !======================  LUBKSB  ======================================
     subroutine lubksbs(a,n,indx,b)
-    
+
     use tailles,only:npmax
-    
+
     implicit none
 
     integer::n,i,ii,j,ll
@@ -2505,7 +2514,7 @@
 
     return
 
-    end subroutine lubksbs    
+    end subroutine lubksbs
 
 !======================  LUDCMP  ======================================
        subroutine ludcmps(a,n,indx,d)
@@ -2534,8 +2543,8 @@
         end do
         vv(i) = 1.d0/aamax
     end do
-    
-    
+
+
     do j = 1,n
         do i=1,j-1
             sum = a(i,j)
@@ -2566,12 +2575,12 @@
             d = -d
             vv(imax)=vv(j)
         endif
-        
+
         indx(j)=imax
         if(a(j,j).eq.0.d0)then
             a(j,j)=tiny
         endif
-        
+
         if(j.ne.n)then
             dum = 1.d0/a(j,j)
             do i=j+1,n
@@ -2579,9 +2588,9 @@
             end do
         endif
     end do
- 
+
     return
-    
+
     end subroutine ludcmps
 
 !=============================================================
@@ -2595,10 +2604,10 @@
     use comon,only:auxig,typeof
 
     Implicit none
-    
+
     double precision,intent(out)::ss
     integer,intent(in)::choix
-    
+
     double precision::auxfunca,func1S,func2S,func3S
     external::func1S,func2S,func3S
     integer::j
@@ -2641,7 +2650,7 @@
     endif
 
     return
-    
+
     END SUBROUTINE gauherS
 
 !=====================================================================
@@ -2650,7 +2659,7 @@
 
     use tailles
     use comon,only:auxig,sig2,stra,c,g,res5
-    
+
     IMPLICIT NONE
 
     double precision,intent(in)::frail
@@ -2666,12 +2675,12 @@
             dexp(-dexp(frail)*res5(i))
         endif
     enddo
-!print*,(dexp(frail)**c(i)),dexp(-dexp(frail)*res5(i))
+
     func1S = prod*(1.d0/dsqrt(2.d0*pi*sig2))* &
     dexp(-(frail**2.d0)/(2.d0*sig2))
-!    print*,func1S,prod,dsqrt(2.d0*pi*sig2),dexp(-(frail**2.d0)/(2.d0*sig2))
+
     return
-    
+
     end function func1S
 
 !=====================================================================
@@ -2679,7 +2688,7 @@
     double precision function func2S(frail)
 
     use comon,only:auxig,sig2,res3
-    
+
     IMPLICIT NONE
 
     double precision,intent(in)::frail
@@ -2690,7 +2699,7 @@
     dexp(-(frail**2.d0)/(2.d0*sig2))
 
     return
-    
+
     end function func2S
 
 !=====================================================================
@@ -2708,7 +2717,7 @@
 
     func3S = dexp(frail*nig(auxig) &
     -dexp(frail)*(res1(auxig)-res3(auxig))-(frail**2.d0)/(2.d0*sig2))
-    
+
     return
-    
+
     end function func3S

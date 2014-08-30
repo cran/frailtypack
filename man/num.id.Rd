@@ -46,7 +46,7 @@ joi.clus <- frailtyPenal(Surv(t.start,t.stop,event)~
 cluster(group)+num.id(id)+dukes+charlson+sex+chemo+terminal(death),
 formula.terminalEvent=~dukes+charlson+sex+chemo,
 data=readmission,recurrentAG=TRUE,
-n.knots=10,kappa1=2.11e+08,kappa2=9.53e+11)
+n.knots=10,kappa=c(2.11e+08,9.53e+11))
 
 }
 

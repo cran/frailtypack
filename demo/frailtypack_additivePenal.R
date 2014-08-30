@@ -18,7 +18,7 @@ data("dataAdditive")
 
 modAdd2cov.withoutCorr <- additivePenal(Surv(t1, t2, event) ~ cluster(group) +
   var1 + var2 + slope(var1), cross.validation = TRUE,
-  correlation = FALSE, data = dataAdditive, n.knots = 10, kappa1 = 1)
+  correlation = FALSE, data = dataAdditive, n.knots = 10, kappa = 1)
 
 print(modAdd2cov.withoutCorr, digits = 4)
 plot(modAdd2cov.withoutCorr)
@@ -29,7 +29,7 @@ plot(modAdd2cov.withoutCorr)
 
 modAdd2cov.withCorr <- additivePenal(Surv(t1,t2,event) ~ cluster(group) +
   var1 + var2 + slope(var1), cross.validation = TRUE,
-  data = dataAdditive, correlation = TRUE, n.knots = 10, kappa1 = 1)
+  data = dataAdditive, correlation = TRUE, n.knots = 10, kappa = 1)
 
 print(modAdd2cov.withCorr, digits = 4)
 plot(modAdd2cov.withCorr)

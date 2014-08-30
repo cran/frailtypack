@@ -1,6 +1,8 @@
 
 "print.jointPenal" <- function (x, digits = max(options()$digits - 4, 6), ...) 
 {
+
+  if (x$istop == 1){
 # plot des coefficient dependant du temps
 	if (any(x$nvartimedep != 0)) par(mfrow=c(sum(as.logical(x$nvartimedep)),max(x$nvartimedep)))
 	if ((x$nvartimedep[1] != 0) & (x$istop == 1)){
@@ -13,6 +15,7 @@
 			matplot(x$BetaTpsMatDc[,1],x$BetaTpsMatDc[,(2:4)+4*i],col="blue",type="l",lty=c(1,2,2),xlab="t",ylab="beta(t)",main=paste("Death : ",x$Names.vardepdc[i+1]),ylim=c(min(x$BetaTpsMatDc[,-1]),max(x$BetaTpsMatDc[,-1])))
 		}
 	}
+  }
 
 	if (!is.null(cl <- x$call)){
 		cat("Call:\n")
@@ -53,8 +56,8 @@
 			cat("  The maximum number of knots is 20","\n")
 		}
 	}else{
-		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)) cat("  The maximum number of time intervals nb.int1 is 20","\n")
-		if ((x$typeof == 1) & (x$indic.nb.int2 == 1)) cat("  The maximum number of time intervals nb.int2 is 20","\n")
+		if ((x$typeof == 1) & (x$indic.nb.intR == 1)) cat("  The maximum number of time intervals is 20","\n")
+		if ((x$typeof == 1) & (x$indic.nb.intD == 1)) cat("  The maximum number of time intervals is 20","\n")
 	}
 #AD
 
@@ -101,6 +104,7 @@
 				cat("  using a Parametrical approach for the hazard function","\n")
 			}
 			if (any(x$nvartimedep != 0)) cat("  and some time-dependant covariates","\n")
+			if (x$n.strat>1) cat("  (Stratification structure used for recurrences) :",x$n.strat,"strata \n")
 			if (x$typeof == 0){
 				if(x$global_chisq.test==1){
 					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
@@ -271,21 +275,21 @@
 		cat("\n")
 		cat("   number of iterations: ", x$n.iter,"\n")
 		
-		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)){
-			cat("   Exact number of time intervals nb.int1 used: 20","\n")
+		if ((x$typeof == 1) & (x$indic.nb.intR == 1)){
+			cat("   Exact number of time intervals used: 20","\n")
 		 }else{
-		 	if (x$typeof == 1) cat("   Exact number of time intervals nb.int1 used: ",x$nbintervR,"\n")
+		 	if (x$typeof == 1) cat("   Exact number of time intervals used: ",x$nbintervR,"\n")
 		 }
-		if ((x$typeof == 1) & (x$indic.nb.int2 == 1)){
-			cat("   Exact number of time intervals nb.int2 used: 20","\n")
+		if ((x$typeof == 1) & (x$indic.nb.intD == 1)){
+			cat("   Exact number of time intervals used: 20","\n")
 		 }else{
-		 	if (x$typeof == 1) cat("   Exact number of time intervals nb.int2 used: ",x$nbintervDC,"\n")
+		 	if (x$typeof == 1) cat("   Exact number of time intervals used: ",x$nbintervDC,"\n")
 		 }
 		 
 		if (x$typeof == 0){ 
 			cat("\n")
 			cat("   Exact number of knots used: ", x$n.knots, "\n")
-			cat("   Value of the smoothing parameters: kappa1=", x$kappa[1], " and kappa2=", x$kappa[2], sep="")
+			cat("   Value of the smoothing parameters: ", x$kappa, sep=" ")
 			cat("\n")
 		}
 	}else{

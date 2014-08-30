@@ -48,7 +48,7 @@ It is possible to compute all these predictions in two ways on a scale of times 
 \usage{
 
 prediction(fit, data, t, window, group, MC.sample=0)
-             
+
 }
 
 \arguments{
@@ -113,23 +113,21 @@ datapred[2,] <- c(2,45) # woman, 45 years old
 datapred[3,] <- c(1,60) # man, 60 years old
 }
 
-To use the prediction function on a joint frailty model, the construction will be a little bit different. In this case, the prediction for the terminal event takes into account covariates but also history of relapse times for a patient. You have to create a dataframe with the relapse times, the cluster variable and the covariates. The dataframe will have as many rows as relapses before the prediction time for a specific patient (one row for patients without relapse). Relapses occuring after the prediction time may be included but will be ignored for the prediction. A joint model with calendar-timescale need to be fitted with Surv(start,stop,event) and relapse times correspond to the "stop" variable. For patients without relapses, "stop" variable should be set to 0. Finally, the same cluster variable name needs to be in the joint model and in the dataframe for predictions ("id" in the following example). For instance, we observe relapses of a disease and fit a joint model adjusted for two covariates sex (1:male 2:female) and chemo (treatment by 
-chemotherapy 1:no 2:yes). 
-We describe 3 different profiles of prediction all treated by chemotherapy: 1) a man with four relapses at 
-100, 200, 300 and 400 days, 2) a man with only one relapse at 1000 days, 3) a woman without relapse.
+To use the prediction function on a joint frailty model, the construction will be a little bit different. In this case, the prediction for the terminal event takes into account covariates but also history of relapse times for a patient. You have to create a dataframe with the relapse times, the indicator of event, the cluster variable and the covariates. Relapses occuring after the prediction time may be included but will be ignored for the prediction. A joint model with calendar-timescale need to be fitted with Surv(start,stop,event), relapse times correspond to the "stop" variable and indicators of event correspond to the "event" variable (if event=0, the relapse will not be taken into account). For patients without relapses, all the values of "event" variable should be set to 0. Finally, the same cluster variable name needs to be in the joint model and in the dataframe for predictions ("id" in the following example). For instance, we observe relapses of a disease and fit a joint model adjusted for two covariates sex (1:male 2:female) and chemo (treatment by chemotherapy 1:no 2:yes).
+We describe 3 different profiles of prediction all treated by chemotherapy: 1) a man with four relapses at 100, 200, 300 and 400 days, 2) a man with only one relapse at 1000 days, 3) a woman without relapse.
 
 \preformatted{
-datapred <- data.frame(time=0,id=0,sex=0,chemo=0)
+datapred <- data.frame(time=0,event=0,id=0,sex=0,chemo=0)
 datapred$sex <- as.factor(datapred$sex)
 levels(datapred$sex) <- c(1,2)
 datapred$chemo <- as.factor(datapred$chemo)
 levels(datapred$chemo) <- c(1,2)
-datapred[1,] <- c(100,1,1,2) # first relapse of the patient 1
-datapred[2,] <- c(200,1,1,2) # second relapse of the patient 1
-datapred[3,] <- c(300,1,1,2) # third relapse of the patient 1
-datapred[4,] <- c(400,1,1,2) # fourth relapse of the patient 1
-datapred[5,] <- c(1000,2,1,2) # one relapse at 1000 days for patient 2
-datapred[6,] <- c(0,3,2,2) # patient 3 did not relapse
+datapred[1,] <- c(100,1,1,1,2) # first relapse of the patient 1
+datapred[2,] <- c(200,1,1,1,2) # second relapse of the patient 1
+datapred[3,] <- c(300,1,1,1,2) # third relapse of the patient 1
+datapred[4,] <- c(400,1,1,1,2) # fourth relapse of the patient 1
+datapred[5,] <- c(1000,1,2,1,2) # one relapse at 1000 days for patient 2
+datapred[6,] <- c(100,0,3,2,2) # patient 3 did not relapse
 }
 
 The data can also be the dataset used to fit the joint model. In this case, you will obtain as many prediction rows as patients.
@@ -161,7 +159,7 @@ readmission <- aggregate(readmission,by=list(readmission$id),
 
 ##-- predictions on a Cox proportionnal hazard model --##
 cox <- frailtyPenal(Surv(t.stop,death)~sex+dukes,
-n.knots=10,kappa1=10000,data=readmission)
+n.knots=10,kappa=10000,data=readmission)
 
 #-- construction of the dataframe for predictions
 datapred <- data.frame(sex=0,dukes=0)
@@ -184,7 +182,7 @@ plot(pred.cox2)
 
 ##-- predictions on a shared frailty model for clustered data --##
 sha <- frailtyPenal(Surv(t.stop,death)~cluster(group)+sex+dukes,
-n.knots=10,kappa1=10000,data=readmission)
+n.knots=10,kappa=10000,data=readmission)
 
 #-- marginal prediction
 pred.sha.marg <- prediction(sha,datapred,100,seq(50,1900,50))
@@ -203,20 +201,19 @@ data(readmission)
 ##-- predictions of death on a joint model --##
 joi <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)
 +sex+dukes+terminal(death),formula.terminalEvent=~sex
-+dukes,data=readmission,n.knots=10,kappa1=100,
-kappa2=100,recurrentAG=TRUE)
++dukes,data=readmission,n.knots=10,kappa=c(100,100),recurrentAG=TRUE)
 
 #-- construction of the dataframe for predictions
-datapredj <- data.frame(t.stop=0,id=0,sex=0,dukes=0)
+datapredj <- data.frame(t.stop=0,event=0,id=0,sex=0,dukes=0)
 datapredj$sex <- as.factor(datapredj$sex)
 levels(datapredj$sex) <- c(1,2)
 datapredj$dukes <- as.factor(datapredj$dukes)
 levels(datapredj$dukes) <- c(1,2,3)
-datapredj[1,] <- c(100,1,1,2)
-datapredj[2,] <- c(200,1,1,2)
-datapredj[3,] <- c(300,1,1,2)
-datapredj[4,] <- c(400,1,1,2)
-datapredj[5,] <- c(380,2,1,2)
+datapredj[1,] <- c(100,1,1,1,2)
+datapredj[2,] <- c(200,1,1,1,2)
+datapredj[3,] <- c(300,1,1,1,2)
+datapredj[4,] <- c(400,1,1,1,2)
+datapredj[5,] <- c(380,1,2,1,2)
 
 #-- prediction of death between 100 and 100+500 given relapses 
 pred.joint0 <- prediction(joi,datapredj,100,500)

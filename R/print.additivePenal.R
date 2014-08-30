@@ -25,7 +25,7 @@
 		x$varH<-matrix(x$varH) 
 		x$varHIH<-matrix(x$varHIH)
 	}
- #AD:     
+ #AD:
 	if (x$typeof == 0){	 
 		if (x$n.knots.temp < 4){
 			cat("\n")
@@ -34,12 +34,12 @@
 		}  
 		if (x$n.knots.temp > 20){
 			cat("\n")
-			cat("  The maximum number of knots is 20","\n")	
+			cat("  The maximum number of knots is 20","\n")
 		} 
 	}else{
-		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)) cat("  The maximum number of time intervals is 20","\n")
-	}         
-#AD   
+		if ((x$typeof == 1) & (x$indic.nb.int == 1)) cat("  The maximum number of time intervals is 20","\n")
+	}
+#AD
  	if (x$istop == 1){
 		if (!is.null(coef)){ 
 # JRG sep '09
@@ -68,25 +68,23 @@
 			if (x$typeof == 0){
 				cat("  using a Penalized Likelihood on the hazard function","\n")
 			}else{	
-				cat("  using a Parametrical approach for the hazard function","\n")	
+				cat("  using a Parametrical approach for the hazard function","\n")
 			}
 	
-			if (x$n.strat>1) cat("  (Stratification structure used)", "\n")         
+			if (x$n.strat>1) cat("  (Stratification structure used)", "\n")
 			if (x$typeof == 0){
 				if(x$global_chisq.test==1){
 					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
 					
 				}
-				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
-				"SE coef (H)", "SE coef (HIH)", "z", "p"))
+				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)","SE coef (H)", "SE coef (HIH)", "z", "p"))
 
 			}else{
 				if(x$global_chisq.test==1){
 					dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))
 					
 				}
-				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)", 
-				"SE coef (H)", "z", "p"))
+				dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)","SE coef (H)", "z", "p"))
 
 			}
 			cat("\n")
@@ -176,7 +174,7 @@
 		cat("    n events=", x$n.event, " n groups=", x$groups)
 		cat( "\n")
 		cat("    number of iterations: ", x$n.iter,"\n")
-		if ((x$typeof == 1) & (x$indic.nb.int1 == 1)){
+		if ((x$typeof == 1) & (x$indic.nb.int == 1)){
 			cat("      Exact number of time intervals used: 20","\n")
 		 }else{
 		 	if (x$typeof == 1) cat("      Exact number of time intervals used: ",x$nbintervR,"\n")
@@ -186,20 +184,19 @@
 			cat("    Exact number of knots used: ", x$n.knots, "\n")
 	
 			if (!x$cross.Val){
-				cat("    Value of the smoothing parameter: ", x$kappa[1])
-				if (x$n.strat==2)cat(" ", x$kappa[2])
+				cat("    Value of the smoothing parameter: ", x$kappa, sep=" ")
 			}
 	
 			if (x$cross.Val){
 				if (is.null(x$theta)){
-					cat("    Smoothing parameter estimated by Cross validation: ", x$kappa[1])  
+					cat("    Smoothing parameter estimated by Cross validation: ", x$kappa, sep=" ")
 				}else{
 					cat("    Best smoothing parameter estimated by")
 					cat("\n")
-					cat("       an approximated Cross validation: ", x$kappa[1])
+					cat("       an approximated Cross validation: ", x$kappa, sep=" ")
 				} 
 			}
-		cat(", DoF: ", formatC(-x$DoF, format="f",digits=2))	
+		cat(", DoF: ", formatC(-x$DoF, format="f",digits=2))
 		}
 	}else{
 		if (!is.null(coef)){

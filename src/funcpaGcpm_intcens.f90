@@ -14,7 +14,6 @@
 
     implicit none
 
-
     integer::nb,n,np,id,jd,i,j,k,vj,cptg,l,ig,choix
     integer::jj,gg,gg2
     double precision::som11,som21,som1,som2
@@ -94,7 +93,7 @@
 !     i indice les sujets
 
         do i=1,nsujet 
-            
+
             cpt(g(i))=cpt(g(i))+1
 
             if(nva.gt.0)then
@@ -126,7 +125,7 @@
                 funcpaGcpm_intcens=-1.d9
                 goto 123
             end if
-            
+
             if(stra(i).eq.1)then
                 som1=0.d0
                 som2=0.d0
@@ -204,15 +203,12 @@
         cptg = 0
 !     gam2 = gamma(inv)
 ! k indice les groupes
-!    write(*,*)' ng :',ng
-!    stop
-
         do k=1,ng
             sum=0.d0
             if(cpt(k).gt.0)then
                 nb = nig(k)
                 dnb = dble(nig(k))
-                
+
                 if (dnb.gt.1.d0) then
                     do l=1,nb
                         sum=sum+dlog(1.d0+theta*dble(nb-l))
@@ -307,11 +303,6 @@
                 end do
             endif
 
-!            if (c(i).eq.1) then ! censure par intervalle
-!                resL(i) = ut1(nt1(i))*vet
-!                resU(i) = ut1(ntU(i))*vet
-!            endif
-
             if ((resL(i).ne.resL(i)).or.(abs(resL(i)).ge.1.d30)) then
                 !print*,"here1"
                 funcpaGcpm_intcens=-1.d9
@@ -324,7 +315,6 @@
             end if
 
             if (c(i).eq.0) then ! censure a droite
-                !res1(g(i)) = res1(g(i)) + ut1(nt1(i))*vet
                 som11=0.d0
                 som21=0.d0
                 gg2=0
@@ -348,7 +338,6 @@
             end if
 
 !     modification pour nouvelle vraisemblance / troncature
-            !res3(g(i)) = res3(g(i)) + ut1(nt0(i))*vet
             som11=0.d0
             som21=0.d0
             gg2=0
@@ -384,7 +373,6 @@
                 vet2=1.d0
             endif
             if(cdc(k).eq.1)then
-                !res2dc(gsuj(k)) = res2dc(gsuj(k))+dlog(dut2(nt1dc(k))*vet2)
                 do gg=1,nbintervDC
                     if ((t1dc(k).gt.(tttdc(gg-1))).and.(t1dc(k).le.(tttdc(gg)))) then
                         res2dc(gsuj(k)) = res2dc(gsuj(k))+dlog(betacoef(nbintervR+gg)*vet2)
@@ -396,9 +384,8 @@
                 funcpaGcpm_intcens=-1.d9
                 goto 123
             end if
-! pour le calcul des integrales / pour la survie, pas pour donnees recur:
-            !aux1(gsuj(k))=aux1(gsuj(k))+ut2(nt1dc(k))*vet2
 
+! pour le calcul des integrales / pour la survie, pas pour donnees recur:
             som11=0.d0
             som21=0.d0
             gg2=0
@@ -414,8 +401,6 @@
                 endif
                 aux1(gsuj(k))=aux1(gsuj(k))+(som11+som21)*vet2
             end do
-
-            !aux2(gsuj(k))=aux2(gsuj(k))+ut2(nt0dc(k))*vet2 !vraie troncature
 
             som11=0.d0
             som21=0.d0
