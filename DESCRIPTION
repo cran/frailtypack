@@ -1,5 +1,5 @@
 Package: frailtypack
-Version: 2.7
+Version: 2.7.1
 Date: 2014-07-15
 Title: General Frailty models: shared, joint and nested frailty models
         with prediction
@@ -29,6 +29,6 @@ License: GPL (>= 2.0)
 URL:
         http://virginierondeau.com/BiostatisticalConsulting/Liste_of_examples.html
 Repository: CRAN
-Date/Publication: 2014-08-30 23:10:09
-Packaged: 2014-08-30 11:21:49 UTC; al7
+Date/Publication: 2014-10-08 12:21:01
+Packaged: 2014-10-08 09:48:36 UTC; vr
 NeedsCompilation: yes

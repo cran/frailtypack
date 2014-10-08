@@ -1,4 +1,4 @@
-bcc83f7fa83baf977b79075a6e999e15 *DESCRIPTION
+c5c06f82721e74c24ce40474f23236d6 *DESCRIPTION
 8b8f2ab2f02e4ba8c9ff375509fa234e *NAMESPACE
 a2589de0d4d690557879d83661a1e115 *NEWS
 7d0e5a93868a77976c232932b0a5cf3c *R/Cmeasures.R
@@ -10,11 +10,11 @@ c794257fb19ec7755e9191e04600b46a *R/additivePenal.R
 21f3230d8a6d7348f3adcd33685aae76 *R/cindexes.W.R
 714c85bd3fe67d76da4d0cdf90f742dd *R/cindexes.frailty.R
 967f7da5ddc09bb2c99d04e843a9740c *R/cluster.R
-1f0074186c23f566297c58aebfdd27c3 *R/epoce.R
+6757fa2bd81d6f6b7bd8091df3dfa548 *R/epoce.R
 6787bc9cea9288aa53d85a380eb041d4 *R/event2.R
 1bed19b4eb9e66bbb0bf70c87ce2592e *R/factor.names.R
 7ce5e24b4268a870dcdcf73eee578e04 *R/firstlib.R
-df2efc857b26f016141883d59961756f *R/frailtyPenal.R
+2a96a8a4fa1dd2d62dcbae10f0530f4a *R/frailtyPenal.R
 3ec5e39661a9851b658b754123fc09d2 *R/hazard.R
 12b7eed3f5458f17a8d780b2e8772cd6 *R/lines.frailtyPenal.R
 62ffb216431d3bdbd988555bffd26e59 *R/multivPenal.R

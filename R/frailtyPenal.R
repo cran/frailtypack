@@ -233,7 +233,8 @@ if((all.equal(length(hazard),1)==T)==T){
 
 	X <- if (!is.empty.model(mt))model.matrix(mt, m, contrasts) #idem que mt sauf que ici les factor sont divise en plusieurs variables
 
-	ind.place <- attr(X,"assign")[duplicated(attr(X,"assign"))]
+	ind.place <- unique(attr(X,"assign")[duplicated(attr(X,"assign"))]) ### unique : changement au 25/09/2014
+
 
 	vec.factor <- NULL
 	vec.factor <- c(vec.factor,ll[ind.place])
@@ -1087,7 +1088,8 @@ if (length(Xlevels) >0)fit$Xlevels <- Xlevels
 
 			lldc <- attr(newTerms2,"term.labels")
 			#ind.placedc <- grep("factor",lldc)
-			ind.placedc <- attr(X2,"assign")[duplicated(attr(X2,"assign"))]
+			ind.placedc <- unique(attr(X2,"assign")[duplicated(attr(X2,"assign"))])#changement unique le 26/09/2014
+      
 
 			vec.factordc <- NULL
 			vec.factordc <- c(vec.factordc,lldc[ind.placedc])
