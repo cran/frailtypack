@@ -1,3 +1,9 @@
+Changes in Version 2.7.1 October 2014
+
+ o Bug fixed for the multivariate Wald test for covariates with more than 3 categories.
+
+ o Bug fixed for EPOCE, definition of kappa.
+
 Changes in Version 2.7     August 2014
 
   o In 'frailPenal' and 'additivePenal' functions, no more 'kappa1', 'kappa2', 'nb.int1' and 'nb.int2'. Replaced by two vectors 'kappa' and 'nb.int'.

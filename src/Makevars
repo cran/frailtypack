@@ -4,6 +4,7 @@
 $(SHLIB): $(OBJECTS)
 
 # Setup dependencies for parallel make
+prediction.o: Aparameters.o
 aamarq98o.o: aaOptim.o aaOptimres.o Aparameters.o
 aaOptim.o: Aparameters.o
 afuncpasres.o: aaOptim.o aaOptimres.o Aparameters.o
