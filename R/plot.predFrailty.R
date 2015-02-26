@@ -20,11 +20,11 @@
 	}
 	
 	if (conf.bands){
-		matplot(x$x.time,x$pred,type="l",lty=1,xlab="Time t",ylab=legende,main=title,ylim=ylim,xlim=xlim)
-		matlines(x$x.time,x$predLow,type="l",lty=2)
-		matlines(x$x.time,x$predHigh,type="l",lty=2)
+		matplot(x$x.time,t(x$pred),type="l",lty=1,xlab="Time t",ylab=legende,main=title,ylim=ylim,xlim=xlim)
+		matlines(x$x.time,t(x$predLow),type="l",lty=2)
+		matlines(x$x.time,t(x$predHigh),type="l",lty=2)
 	}else{
-		matplot(x$x.time,x$pred,type="l",lty=1,xlab="Time t",ylab=legende,main=title,ylim=ylim,xlim=xlim)
+		matplot(x$x.time,t(x$pred),type="l",lty=1,xlab="Time t",ylab=legende,main=title,ylim=ylim,xlim=xlim)
 	}
 	
 	legend(pos.legend, paste("profile",(1:x$npred)),lty=1,bty="n",col=(1:x$npred))

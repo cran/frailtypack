@@ -1,3 +1,13 @@
+Changes in Version 2.7.3 February 2015
+
+ o Prediction and Monte Carlo confidence bands added for shared and joint gaussian frailty models.
+
+ o Bug fixed for the prediction function with shared or Cox models (reading of survival times)
+
+ o Bug fixed for plotting the baseline hazard and survival functions in Weibull shared and joint models
+
+o  New functions to compute estimators of Expected Prognostic Observed Cross-Entropy (EPOCE) evaluating prediction accuracy in joint gaussian frailty models.
+
 Changes in Version 2.7.1 October 2014
 
  o Bug fixed for the multivariate Wald test for covariates with more than 3 categories.

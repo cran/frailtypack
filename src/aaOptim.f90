@@ -162,6 +162,7 @@
 
         call derivaj(b,m,v,rl,k0,fctnames)
 
+
     rl1=rl
     if(rl.eq.-1.D9) then
         istop=4
@@ -200,6 +201,7 @@
         end do
         dd=GHG/dble(m)
     end if
+
 
 !     print*,ca,cb,dd
 !     print*,b
@@ -460,6 +462,7 @@
     double precision::fctnames,thn,th,z,vl,th2,vaux
     external::fctnames
 
+
     !en plus strates A.Lafourcade 05/2014
 !     if ((model.eq.1).or.(model.eq.4)) then
 !         if (nst==1) then
@@ -494,7 +497,9 @@
     i0=0
     iun =1
 
+
     rl=fctnames(b,m,iun,z,iun,z,k0)
+
 
     if(rl.eq.-1.d9) then
         rl=-1.d9

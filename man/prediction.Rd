@@ -11,7 +11,7 @@ A predictive probability of event between t and horizon time t+w, with w the win
 
 \deqn{P(t,t+w)=\frac{S_i(t)-S_i(t+w)}{S_i(t)}=1-\left(\frac{S_0(t+w)}{S_0(t)}\right)^{\exp(\beta'Z_i)}}
 
-\bold{For Shared Frailty model for clustered (not recurrent) events}
+\bold{For Gamma Shared Frailty model for clustered (not recurrent) events}
 
 Two kinds of predictive probabilities can be calculated:
 
@@ -22,6 +22,18 @@ Two kinds of predictive probabilities can be calculated:
 - a marginal predictive probability of event between t and horizon time t+w, i.e. averaged over the population
 
 \deqn{P^{marg}(t,t+w)=1-\left(\frac{1+\theta H_0(t)\exp(\beta'Z_{ij})}{1+\theta H_0(t+w)\exp(\beta'Z_{ij})}\right)^{1/ \theta}}
+
+\bold{For Gaussian Shared Frailty model for clustered (not recurrent) events}
+
+Two kinds of predictive probabilities can be calculated:
+
+- a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific group
+    
+\deqn{P^{cond}(t,t+w)=\frac{S_{ij}(t)-S_{ij}(t+w)}{S_{ij}(t)}=1-\left(\frac{S_0(t+w)}{S_0(t)}\right)^{\exp(\eta_i+\beta'Z_{ij})}}
+     
+- a marginal predictive probability of event between t and horizon time t+w, i.e. averaged over the population
+       
+\deqn{P^{marg}(t,t+w)=\frac{\int_{-\infty}^{+\infty}(S_{ij}(t)-S_{ij}(t+w))g(\eta)d\eta}{\int_{-\infty}^{+\infty}S_{ij}(t)g(\eta)d\eta}}
 
 \bold{For Joint Frailty model}
 
@@ -43,6 +55,7 @@ It is possible to compute all these predictions in two ways on a scale of times 
 - either you want a cumulative probability of developping the event between t and t+w (with t fixed, but with a varying window of prediction w);
 - either you want at a specific time the probability to develop the event in the next w (ie, for a varying prediction time t, but for a fixed window of prediction). See Details.
 
+With Gaussian frailties (\eqn{\eta}), the same expressions are used but with \eqn{{u_i}^{J}} replaced by \eqn{\exp(J\eta_i)} and  \eqn{g(\eta)} corresponds to the gaussian distribution.
 }
 
 \usage{

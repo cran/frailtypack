@@ -178,7 +178,8 @@
         integer,dimension(:),allocatable::n_ssgbygrp
         double precision,dimension(:,:),allocatable,save::cumulhaz1,cumulhaz0,invsigma
         double precision,save::detSigma
-        
+           integer,save :: nig_mc,np_mc
+	double precision,save :: sig2_mc,res1_mc
         
     end module residusM 
         

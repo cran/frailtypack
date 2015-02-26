@@ -5,7 +5,7 @@
 Create a survival object for interval censoring and possibly left truncated data
 }
 \description{
-This is a function used in case of interval-censoring as a response variable in a model formula only for Cox proportional hazard or shared frailty model. Sometimes, an unobserved event might occur in a time interval [L,U]. RecurrentAG argument gets invalid with the use of SurvIC. Time dependant variables are not allowed.
+This is a function used in case of interval-censoring as a response variable in a model formula only for Cox proportional hazard or shared frailty model. Sometimes, an unobserved event might occur in a time interval [L,U]. RecurrentAG argument gets invalid with the use of SurvIC. Note that this function used a Kronecker product which can suffer from computation issue when the number of subjects in each cluster is high. Time dependant variables are not allowed.
 }
 \usage{
 SurvIC(t0, lower, upper, event)

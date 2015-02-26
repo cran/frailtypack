@@ -947,12 +947,14 @@
     k=0
     ns=0
     sx=1.d0 ! ecart-type ou variance des réalisations gaussiennes générées
-    ns=m-nva-1
+!    ns=m-nva-1 !non marche pas pour le COX : VR 20 fev 2015
+!    write(*,*)'=====ns dans distance',ns
+    ns=2
 
     do i=1,ns*(ns+1)/2
         vv(i)=vvv(i)
     end do
-
+	
     ep=10.d-10
     call dmfsdj(vv,m,ep,ier)
 
@@ -967,7 +969,9 @@
 !     Pour chaque temps de 0 à la censure du décès par pas cens/100
 
  !     commencer à 0 dans la boucle
-    x=mint !date(1)
+ 
+!    x= mint
+    x= mint + 0.000001 !new 20 fev 2015
 !       shape et scale
     ii=1
     do jj=1,nst!rempli tableaux etaT et betaT
@@ -980,15 +984,15 @@
         lamT=0.d0 ! en plus
 !         n=n+1 ! compteur sur nième temps
         if(t.ne.1) then
-            x=x+(cens-mint)/(mt-1)
+            x=x+(cens-mint)/(mt-1)	
         end if
-! On simule 1000 réalisations gaussienne par paramètres
+! On simule 1000 réalisations gaussienne par paramètre
         do k=1,1000
 !     Pour chaque paramètre estimé
             do i=1,ns
                 som=0.d0
                 do j=1,i         ! cela correspond au produit trp(L)%*%U
-                    som=som+vv(i*(i-1)/2+j)*u(k,j)
+                   som=som+vv(i*(i-1)/2+j)*u(k,j)
                 end do
                 bgen(i)=(b(i)+som)**2
             end do              ! en sortie on récupère le nouveau vecteur b
@@ -1022,7 +1026,7 @@
 
 !----- strate 1
         if(t == 1) then
-            xT(t,1)=mint !en plus
+            xT(t,1)= mint
         else
             xT(t,1)=real(x) !en plus
         end if
@@ -1037,7 +1041,7 @@
 
     end do
 
-    x=mint !date(1)
+    x=mint
 
     do t=1,100
         glT= 0.d0! en plus
@@ -1088,7 +1092,7 @@
 
         if(t==1) then
             !xSu1(t) = mint !date(1)
-            xSuT(t,1)=mint
+            xSuT(t,1)= mint		
         else
             !xSu1(t) = real(x)
             xSuT(t,1)=real(x)
@@ -2027,12 +2031,13 @@
 
     end subroutine distancejcpm
 
+!=========================JOINT WEIBUL
 
     subroutine distanceJweib(b,m,mt1,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC)
 
     use tailles
     use comon,only:cens,vvv,t0,t1,t0dc,t1dc,c,cdc,nsujet &
-    ,nva,nva1,nva2,nst,etaR,etaD,betaR,betaD,date,datedc,betaT,etaT,nstRec
+    ,nva,nva1,nva2,nst,etaR,etaD,betaR,betaD,date,datedc,mint,betaT,etaT,nstRec
     use optim
 
     implicit none
@@ -2055,10 +2060,10 @@
     double precision,dimension(mt1,nstRec)::x1R
     double precision,dimension(mt1,3)::moyLamDC
     double precision,dimension(mt1,3,nstRec)::moyLamR
-    double precision,dimension(100,3)::moysuDC
-    double precision,dimension(100,3,nstRec)::moysuR
-    double precision,dimension(100)::xSu2
-    double precision,dimension(100,nstRec)::xSu1
+    double precision,dimension(mt1,3)::moysuDC
+    double precision,dimension(mt1,3,nstRec)::moysuR
+    double precision,dimension(mt1)::xSu2
+    double precision,dimension(mt1,nstRec)::xSu1
     double precision::ep
 
 
@@ -2076,7 +2081,7 @@
     suDCW=0.d0
     sx=1.d0 ! ecart-type ou variance des réalisations gaussiennes générées
     ns=m-nva-2
-
+   
     do i=1,ns*(ns+1)/2
         vv(i)=vvv(i)
     end do
@@ -2117,14 +2122,16 @@
 !     Pour chaque temps de 0 à la censure du décès par pas cens/100
 !    x=-cens/100 !permet de commencer à 0 dans la boucle
 
-    x=date(1)
-    do t=1,100
+!    x=date(1)
+    x=mint + 0.000001  !new vr 20 fev 2015
+    do t=1,mt1
 
         glR=0.d0
         suR=0.d0
 !         n=n+1 ! compteur sur nième temps
         if (t.ne.1) then
-            x=x+cens/100
+!            x=x+cens/100 
+            x=x+(cens-mint)/(mt1-1)!new 20 fev 2015
         end if
 
 ! On simule 1000 réalisations gaussienne par paramètres

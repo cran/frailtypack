@@ -8,9 +8,8 @@
     nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,tU,ntU,d,dmax
         use residusM
     
-    
-    implicit none
-    
+        implicit none
+
 ! *** NOUVELLLE DECLARATION F90 :
     integer::n,np,id,jd,i,j,k,vj,cptg,l,r
     integer,dimension(ngmax)::cpt,cptC
@@ -24,7 +23,8 @@
     double precision,dimension(1:2**dmax,1:ng)::p,p2 ! matrice
     integer,dimension(1:2**dmax,1:ng)::nbU,nbU2
 
-    j=0
+    j=0  
+    
     theta=0.d0
     do i=1,np
         bh(i)=b(i)
@@ -208,6 +208,7 @@
 !*********************************************
 
     else
+! write(*,*)'debut funcpa interval censoring'
 !      write(*,*)'AVEC EFFET ALEATOIRE'
         inv = 1.d0/theta
 
@@ -289,6 +290,7 @@
                     enddo
                 endif
 ! r indice les éléments dans le produit de Kronecker
+! res3 null if no left truncation
                 do r=1,2**d(k)
                     num = ((-1)**nbU(r,k))*((1.d0+theta*res3(k))**inv)
                     den = (1.d0+theta*res1(k)+theta*dlog(p(r,k)))**inv

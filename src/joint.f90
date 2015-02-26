@@ -20,6 +20,7 @@
     integer,save::ver
 
     end module splines
+
 !--entête pour fortran
     subroutine joint(nsujet0,ng0,nstRecAux,strAux,lignedc0,nz0,axT,tt00,tt10,ic0,groupe0,groupe00      &
     ,tt0dc0,tt1dc0,icdc0,tempdc,icdc00,nva10,vax0,nva20,vaxdc0,vaxdc00,noVar1,noVar2,maxit0   & ! ag0

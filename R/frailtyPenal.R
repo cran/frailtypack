@@ -730,7 +730,7 @@ if((all.equal(length(hazard),1)==T)==T){
      {
 	fit$coef <- ans[[20]][(np - nvar - npbetatps + 1):np]
 	noms <- factor.names(colnames(X))
-	if (timedep == 1){ # on enleve les parametres des B-splines qui ne serviront pas Ã  l'utilisateur
+	if (timedep == 1){ # on enleve les parametres des B-splines qui ne serviront pas a l'utilisateur
 		while (length(grep("timedep",noms))!=0){
 			pos <- grep("timedep",noms)[1]
 			noms <- noms[-pos]
@@ -768,6 +768,8 @@ if((all.equal(length(hazard),1)==T)==T){
 
 
     fit$formula <- formula(Terms)
+
+
 
     fit$x <- matrix(ans[[25]], nrow = size1, ncol = uni.strat)
     fit$lam <- array(ans[[26]], dim = c(size1,3,uni.strat))

@@ -20,7 +20,7 @@
 	if (!is.null(cl <- x$call)){
 		cat("Call:\n")
 		dput(cl)
-		#if (x$type == "counting" & x$AG == FALSE){ # pour l'instant joint n'accepte pas la vraie troncature à gauche
+		#if (x$type == "counting" & x$AG == FALSE){ # pour l'instant joint n'accepte pas la vraie troncature a gauche
 		#	cat("\n      left truncated structure used")
 		#}
 		if (x$AG == TRUE){

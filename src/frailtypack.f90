@@ -1,6 +1,4 @@
 
-
-
     subroutine frailpenal(nsujetAux,ngAux,icenAux,nstAux,effetAux, &
     nzAux,axT,tt0Aux,tt1Aux,icAux,groupeAux,nvaAux,strAux,vaxAux, &
     AGAux,noVar,maxitAux,irep1,np,b,H_hessOut,HIHOut,resOut,LCV, &
@@ -93,6 +91,8 @@
     !end do
     !STOP
 
+
+
 !cpm
     istopp=0
     time = 0.d0
@@ -145,7 +145,7 @@
     mm1=0.d0
     mm2=0.d0
     mm3=0.d0
-        
+
     ngmax=ngAux
 
 !Al: utile pour le calcul d'integrale avec distribution log normale
@@ -270,7 +270,6 @@
         endif
         k = k +1
 
-
 !     essai sans troncature
 !------------------   observation c=1
         if(ic.eq.1)then
@@ -369,10 +368,11 @@
     dmax = 0
     do i=1,ng
         if (dmax.lt.d(i)) then
-            dmax = d(i)
+            dmax = d(i) ! max number of subject avec event=1( interval censored) by group
         endif
     enddo
-
+!    write(*,*)'dmax dans frailtypack.f90',dmax
+    
 
 ! %%%%%%%%%%%%% SANS EFFET ALEATOIRE %%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -396,7 +396,7 @@
     
     min = 1.d-10
     max = maxt
-    
+
     do i = 1,(2*nsujet+sum(icAux)) ! changement comme indique plus haut
         do k = 1,nsujet
             if (t0(k).ge.min) then
@@ -426,6 +426,7 @@
     end do
     
     date(1) = aux(1)
+
     k = 1
     do i=2,(2*nsujet+sum(icAux))
         if(aux(i).gt.aux(i-1))then
@@ -484,21 +485,22 @@
             allocate(zi(-2:nzmax))
             ndate = k
 
-            zi(-2) = date(1)
-            zi(-1) = date(1)
-            zi(0) = date(1)
-            zi(1) = date(1)
-            h = (date(ndate)-date(1))/dble(nz-1)
+            zi(-2) = mint! VR 20-fev-15 date(1)
+            zi(-1) =  mint!date(1)
+            zi(0) =  mint!date(1)
+            zi(1) =  mint!date(1)
+            h = (date(ndate)- mint)/dble(nz-1)
             do i=2,nz-1
                 zi(i) =zi(i-1) + h
             end do  
-            zi(nz) = date(ndate)
-            zi(nz+1)=zi(nz)
-            zi(nz+2)=zi(nz)
-            zi(nz+3)=zi(nz)
+
+
+            zi(nz) = maxt !date(ndate)
+            zi(nz+1) = maxt !zi(nz)
+            zi(nz+2) = maxt !zi(nz)
+            zi(nz+3) = maxt !zi(nz)
             ziOut = zi
         endif
-
 !--------- affectation nt0,nt1,ntU----------------------------
         indictronq=0
         do i=1,nsujet
@@ -645,7 +647,6 @@
         ttt(0) = mint !0.d0 pour prendre en compte une eventuelle troncature
 
         ttt(nbintervR)=cens
-
         j=0
         do j=1,nbintervR-1
             if (equidistant.eq.0) then ! ici se fait la difference entre piecewise-per et equi
@@ -746,6 +747,7 @@
 !************** NEW : cross validation  ***********************
 !       sur une seule strate, sans var expli , sans frailties ****
 !***********************************************************
+   
 
     nvacross=nva !pour la recherche du parametre de lissage sans var expli
     nva=0
@@ -762,7 +764,6 @@
         stra(l)=1
     end do
 
-!    print*,"debut"
     if(typeof == 0) then
         if(irep1.eq.1)then   !pas recherche du parametre de lissage
             xmin1 = dsqrt(xmin1)
@@ -774,7 +775,6 @@
                 do i=1,nz+2
                     b(i)=1.d-1
                 end do
-                
                 xmin1 = sqrt(10.d0)*xmin1
                 auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
                 if (ni.lt.maxiter) then
@@ -810,7 +810,6 @@
     !            write(*,*)' '
     !            write(*,*)'Log-vraisemblance :',res
             endif
-            
 !---------------------------------------------------
         else                   !recherche du parametre de lissage
         
@@ -821,7 +820,6 @@
     !        write(*,*)'                Searching smoothing parameter'
     !        write(*,*)' '
             xmin1 = dsqrt(xmin1)
-        
             auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
     
             if(ddl.gt.-2.5d0)then
@@ -829,7 +827,6 @@
                 xmin1 = dsqrt(xmin1)
             
                 auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
-            
                 if(ddl.gt.-2.5d0)then
                     xmin1 = dsqrt(xmin1)
                     auxi = estimvs(xmin1,n,b,y,ddl,ni,res)
@@ -867,7 +864,6 @@
             
             ax = xmin1
             bx = xmin1*dsqrt(1.5d0)
-    
             call mnbraks(ax,bx,cx,fa,fb,fc,b,n)
         
             tol = 0.001d0
@@ -880,7 +876,6 @@
             
             auxkappa(1)=xmin1*xmin1
             auxkappa(2)=0.d0
-
             if (logNormal.eq.0) then
                 if (intcens.eq.1) then
                     call marq98j(auxkappa,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
@@ -2018,6 +2013,7 @@
 
     if (logNormal.eq.0) then
         if (intcens.eq.1) then
+                      
             call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines_intcens)
         else
             call marq98j(k0,b,n,ni,v,res,ier,istop,effet,ca,cb,dd,funcpassplines)

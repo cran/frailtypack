@@ -147,7 +147,7 @@ epoce <- function(fit, pred.times, newdata = NULL){
 
 	cat("\n")
 	cat("Calculating ... \n")
-	
+	if(fit$logNormal==0){
 	ans <- .Fortran("cvpl",
 			as.integer(nobs),
 			as.integer(nsujet),
@@ -179,7 +179,40 @@ epoce <- function(fit, pred.times, newdata = NULL){
 			contribt=as.double(rep(0,nt*nsujet)),
 			atrisk=as.double(rep(0,nt)),
 			PACKAGE="frailtypack")
-
+}else{
+#  cat('logn...')
+  ans <- .Fortran("cvpl_logN",
+                  as.integer(nobs),
+                  as.integer(nsujet),
+                  as.integer(cluster),
+                  as.integer(c),
+                  as.integer(cdc),
+                  as.integer(nva1),
+                  as.integer(nva2),
+                  as.double(X),
+                  as.double(Xdc),
+                  as.integer(typeof),
+                  as.integer(nz),
+                  as.double(zi),
+                  as.double(ttt),
+                  as.double(tttdc),
+                  as.integer(nbintervR),
+                  as.integer(nbintervDC),
+                  as.integer(np),
+                  as.double(b),
+                  as.double(vopt),
+                  as.double(tt0),
+                  as.double(tt1),
+                  as.double(tt0dc),
+                  as.double(tt1dc),
+                  as.integer(nt),
+                  as.double(pred.times),
+                  rl_cond=as.double(rep(0,nt)),
+                  epoir=as.double(rep(0,nt)),
+                  contribt=as.double(rep(0,nt*nsujet)),
+                  atrisk=as.double(rep(0,nt)),
+                  PACKAGE="frailtypack")
+}
 	out <- NULL
 	if (!missing(newdata)) out$data <- m0$newdata
 	else out$data <- fit$data

@@ -123,7 +123,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		if (missing(n.knots))stop("number of knots are required")   
 		if (length(n.knots)!= 3)stop("length of knots must be 3")
 #AD:	 
-		# permettre à l'utilisateur de rentrer les n.knots dans cet ordre : loco, meta, deces
+		# permettre al'utilisateur de rentrer les n.knots dans cet ordre : loco, meta, deces
 		n.knots.temp <- n.knots
 		n.knots[2] <- n.knots.temp[3]
 		n.knots[3] <- n.knots.temp[2]
@@ -137,7 +137,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		if(class(kappa)!="numeric")stop("The argument kappa must be a numeric")
 		if(length(kappa)==1)stop("length of smoothing parameter (kappa) must greater than 2")
 
-		# permettre à l'utilisateur de rentrer les kappa dans cet ordre : loco, meta, deces
+		# permettre a l'utilisateur de rentrer les kappa dans cet ordre : loco, meta, deces
 		kappa.temp <- kappa
 		kappa[2] <- kappa.temp[3]
 		kappa[3] <- kappa.temp[2]
@@ -778,7 +778,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	nst = 3
 	
         if ((equidistant %in% c(0,1)) & (typeof == 1)){
-		# permettre à l'utilisateur de rentrer les nb.int dans cet ordre : loco, meta, deces
+		# permettre a l'utilisateur de rentrer les nb.int dans cet ordre : loco, meta, deces
 		nb.int.temp <- nb.int
 		nb.int[2] <- nb.int.temp[3]
 		nb.int[3] <- nb.int.temp[2]

@@ -14,7 +14,14 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 	if ((MC.sample < 0) | (MC.sample > 1000))  stop("MC.sample needs to be positive integer up to 1000")
 	
 	if ((class(fit)=="jointPenal") & (!missing(group))) stop("No need for 'group' argument for predictions on a joint model")
+  
+  if(class(fit)=='jointPenal'){
 	if (max(t+window) > max(fit$xR)) stop("Prediction times cannot exceed maximum time of observation")
+	if (max(t+window) > max(fit$xD)) stop("Prediction times cannot exceed maximum time of observation")}
+  
+  if(class(fit)=='frailtyPenal'){
+    if (max(t+window) > max(fit$x)) stop("Prediction times cannot exceed maximum time of observation") 
+  }
 
 	# seulement dans le cas du shared
 	if (missing(group)) type <- "marginal"
@@ -233,8 +240,9 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 		m3 <- fit$call
 		m2 <- match.call()
 		
-		m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$... <- NULL
-		
+   
+      m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$... <- NULL
+    
 		m3$formula[[3]] <- m3$formula.terminalEvent[[2]]
 		m3$formula.terminalEvent <- NULL
 		m3[[1]] <- as.name("model.frame")
@@ -265,7 +273,7 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 		
 		cat("\n")
 		cat("Calculating the probabilities ... \n")
-		
+		if(fit$logNormal==0){
 		ans <- .Fortran("predict",
 				as.integer(np),
 				as.double(b),
@@ -306,6 +314,50 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 				as.integer(moving.window),
 				as.double(timeAll),
 				PACKAGE = "frailtypack")
+		}else{
+     #AK: joint log-normal 
+   
+      ans <- .Fortran("predict_LogN",
+                      as.integer(np),
+                      as.double(b),
+                      as.integer(nz),
+                      as.integer(nbintervR),
+                      as.integer(nbintervDC),
+                      as.integer(nva1),
+                      as.integer(nva2),
+                      as.integer(nst),
+                      as.integer(typeof),
+                      as.double(zi),
+                      as.double(HIH),
+                      as.double(time),
+                      as.double(timedc),
+                      as.integer(ntimeAll),
+                      as.integer(npred),
+                      as.double(predTime),
+                      as.double(window),
+                      as.double(predtimerec),
+                      as.integer(nrec),
+                      as.double(as.matrix(vaxpred)),
+                      as.double(as.matrix(vaxdcpred)),
+                      pred1=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+                      pred2=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+                      pred3=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+                      predlow1=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+                      predhigh1=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+                      predlow2=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+                      predhigh2=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+                      predlow3=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+                      predhigh3=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+                      icproba=as.integer(ICproba),
+                      as.integer(MC.sample),
+                      as.integer(fit$intcens),
+                      as.double(trunctime),
+                      as.double(lowertime),
+                      as.double(uppertime),
+                      as.integer(moving.window),
+                      as.double(timeAll),
+                      PACKAGE = "frailtypack")
+		}
 
 		out <- NULL
 		out$call <- match.call()
@@ -378,23 +430,58 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 		}
 
 		predMat <- NULL
-		
+	
 		if (fit$Frailty){
 			if (type=="marginal"){ ## marginal ##
-				for (k in 1:nrow(data)){
-					vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
-					vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]
-					pred <- 1-((1+fit$theta*(-log(vect.survival.X)))/(1+fit$theta*(-log(vect.survival.X.horizon))))**(1/fit$theta)
-					predMat <- cbind(predMat,pred)
-				}
+			  if(fit$logNormal==0){ ## Gamma distribution
+			    for (k in 1:nrow(data)){
+					  vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
+					  vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]
+        		pred <- 1-((1+fit$theta*(-log(vect.survival.X)))/(1+fit$theta*(-log(vect.survival.X.horizon))))**(1/fit$theta)
+					  predMat <- rbind(predMat,pred)
+				  }
+        }else{ #AK: Normal distribution
+          mat.survival.X <- NULL
+          mat.survival.X.horizon <- NULL
+          for (k in 1:nrow(data)){
+            vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
+            vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]
+           
+            mat.survival.X <- rbind( mat.survival.X,vect.survival.X)
+            mat.survival.X.horizon <- rbind( mat.survival.X.horizon,vect.survival.X.horizon)
+          }
+          ans <- .Fortran("predict_LogN_sha",
+                            as.integer(nrow(data)),
+                            as.double(mat.survival.X),
+                            as.double(mat.survival.X.horizon),
+                            as.double(fit$sigma2),
+                            pred=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
+                            as.integer(0),
+                            as.integer(ntimeAll),
+                            as.integer(MC.sample),
+                            as.double(rep(0,MC.sample)),
+                            as.double(matrix(0,nrow=nrow(data)*MC.sample,ncol=ntimeAll)),
+                            as.double(matrix(0,nrow=nrow(data)*MC.sample,ncol=ntimeAll)),
+                            predlow1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
+                            predhigh1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
+                            PACKAGE = "frailtypack")
+            predMat <- matrix(ans$pred,nrow=nrow(data),ncol=ntimeAll)
+          
+        
+          }
+				
 			}else{ ## conditional ##
 				if (!(group %in% uni.cluster)) stop("Are you sure that the group is present in your cluster variable ?")
 				
 				for (k in 1:nrow(data)){
 					vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
 					vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]
-					pred <- 1-(vect.survival.X.horizon/vect.survival.X)**fit$frailty.pred[uni.cluster==group]
-					predMat <- cbind(predMat,pred)
+          if (fit$logNormal==0){ # Gamma distribution
+            pred <- 1-(vect.survival.X.horizon/vect.survival.X)**fit$frailty.pred[uni.cluster==group]}
+          else{ #AK: Normal distribution
+            pred <- 1-(vect.survival.X.horizon/vect.survival.X)**exp(fit$frailty.pred[uni.cluster==group])}
+          
+					predMat <- rbind(predMat,pred)
 				}
 			}
 		}else{ ## for Cox model
@@ -404,7 +491,7 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 				vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
 				vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]
 				pred <- 1-(vect.survival.X.horizon/vect.survival.X)
-				predMat <- cbind(predMat,pred)
+				predMat <- rbind(predMat,pred)
 			}
 		}
 		
@@ -418,7 +505,10 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 			#print(apply(balea,2,mean))
 			#print(fit$b-apply(balea,2,mean))
 			
-			if (fit$Frailty) theta.mc <- balea[,fit$np-fit$nvar]^2
+			if (fit$Frailty) { #AK: For Gamma we have variance theta and for Normal we have variance sigma2
+        if(fit$logNormal==0)theta.mc <- balea[,fit$np-fit$nvar]^2
+        if(fit$logNormal==1)sigma2.mc <- balea[,fit$np-fit$nvar]^2
+			}
 			
 			aleaCoef <- balea[,(fit$np-fit$nvar+1):(fit$np)]
 			expBX.mc <- exp(X %*% t(aleaCoef))
@@ -429,7 +519,7 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 				if(fit$n.strat == 2) para.mc2 <- balea[,(fit$n.knots+3):(2*(fit$n.knots+2))]^2
 				else para.mc2 <- matrix(0,nrow=MC.sample,ncol=fit$n.knots+2)
 			}else if (fit$typeof == 1){
-				para.mc <- balea[,1:(fit$nbintervR)] # attention de ne pas élever au carré
+				para.mc <- balea[,1:(fit$nbintervR)] # attention de ne pas elever au carre
 				if(fit$n.strat == 2) para.mc2 <- balea[,(fit$nbintervR+1):(2*fit$nbintervR)]
 				else para.mc2 <- matrix(0,nrow=MC.sample,ncol=fit$nbintervR)
 			}else{
@@ -491,35 +581,93 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 			
 			predMatLow <- NULL
 			predMatHigh <- NULL
+     
 			frailty.mc <- NULL
 
 			if (fit$Frailty){
 				if (type=="marginal"){ ## marginal ##
-					for (k in 1:nrow(data)){
-						realisations <- NULL
-						for (i in 1:MC.sample){
-							vect.survival.X <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
-							vect.survival.X.horizon <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
-							pred <- 1-((1+theta.mc[i]*(-log(vect.survival.X)))/(1+theta.mc[i]*(-log(vect.survival.X.horizon))))**(1/theta.mc[i])
-							realisations <- cbind(realisations,pred)
-						}
-						predMatLow <- cbind(predMatLow,apply(realisations,1,quantile,probs=0.025))
-						predMatHigh <- cbind(predMatHigh,apply(realisations,1,quantile,probs=0.975))
-					}
+				  if(fit$logNormal==0){ ## Gamma distribution
+					  for (k in 1:nrow(data)){
+						  realisations <- NULL
+           	  for (i in 1:MC.sample){
+						  	vect.survival.X <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+						  	vect.survival.X.horizon <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+						    pred <- 1-((1+theta.mc[i]*(-log(vect.survival.X)))/(1+theta.mc[i]*(-log(vect.survival.X.horizon))))**(1/theta.mc[i])
+               	realisations <- cbind(realisations,pred)
+					  	}
+              predMatLow <- rbind(predMatLow,apply(realisations,1,quantile,probs=0.025))
+					  	predMatHigh <- rbind(predMatHigh,apply(realisations,1,quantile,probs=0.975))
+				  	}
+				  }else{ #AK: Normal distribution
+				  
+				    mat.survival.X.mc <- NULL
+				    mat.survival.X.horizon.mc <- NULL
+				 
+              for(i in 1:MC.sample){
+                mat.survival.X.samp <- NULL
+                  mat.survival.X.horizon.samp <- NULL
+                for(k in 1:nrow(data)){
+                   vect.survival.X.samp <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+                   vect.survival.X.horizon.samp <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+                   mat.survival.X.samp <- rbind(mat.survival.X.samp,vect.survival.X.samp)
+                   mat.survival.X.horizon.samp <- rbind(mat.survival.X.horizon.samp,vect.survival.X.horizon.samp)
+            
+                }
+                mat.survival.X.mc <- rbind(mat.survival.X.mc,mat.survival.X.samp)
+                mat.survival.X.horizon.mc <- rbind(mat.survival.X.horizon.mc,mat.survival.X.horizon.samp)
+               
+              }
+              ans <- .Fortran("predict_LogN_sha",
+				                    as.integer(nrow(data)),
+				                    as.double(mat.survival.X),
+				                    as.double(mat.survival.X.horizon),
+				                    as.double(fit$sigma2),
+				                    pred=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
+				                    as.integer(1),
+				                    as.integer(ntimeAll),
+				                    as.integer(MC.sample),
+                            as.double(sigma2.mc),
+				                    as.double(mat.survival.X.mc),
+                            as.double(mat.survival.X.horizon.mc),
+				                    predlow1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
+				                    predhigh1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
+				                    PACKAGE = "frailtypack")
+            
+            predMatLow <- matrix(ans$predlow1,nrow=nrow(data),ncol=ntimeAll)
+            predMatHigh <- matrix(ans$predhigh1,nrow=nrow(data),ncol=ntimeAll)
+       
+				  }
 				}else{ ## conditional ##
+				  mi <- fit$n.eventsbygrp[uni.cluster==group]
 					for (k in 1:nrow(data)){
 						realisations <- NULL
 						for (i in 1:MC.sample){
 						
-							if (k == 1) frailty.mc <- c(frailty.mc,rgamma(1,shape=fit$n.eventsbygrp[uni.cluster==group]+1/theta.mc[i],scale=1/(res1+1/theta.mc[i])))
-							
 							vect.survival.X <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
 							vect.survival.X.horizon <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
-							pred <- 1-(vect.survival.X.horizon/vect.survival.X)**frailty.mc[i]
+						
+              if(fit$logNormal==0){## Gamma distribution
+                
+                if (k == 1) frailty.mc <- c(frailty.mc,rgamma(1,shape=fit$n.eventsbygrp[uni.cluster==group]+1/theta.mc[i],scale=1/(res1+1/theta.mc[i])))
+                   pred <- 1-(vect.survival.X.horizon/vect.survival.X)**frailty.mc[i]
+              }else{ ## AK: Normal distribution
+                if (k==1){
+                res<-.Fortran("frailpred_sha_nor_mc",
+                            as.integer(fit$npar),
+                             frail.out=as.double(0),
+                             as.double(sigma2.mc[i]),
+                             as.double(res1),
+                             as.integer(mi),                                       
+                             PACKAGE = "frailtypack" )
+                frailty.mc[i] <- res$frail.out
+                }
+                pred <- 1-(vect.survival.X.horizon/vect.survival.X)**exp(frailty.mc[i])
+              }
+                            
 							realisations <- cbind(realisations,pred)
 						}
-						predMatLow <- cbind(predMatLow,apply(realisations,1,quantile,probs=0.025))
-						predMatHigh <- cbind(predMatHigh,apply(realisations,1,quantile,probs=0.975))
+						predMatLow <- rbind(predMatLow,apply(realisations,1,quantile,probs=0.025))
+						predMatHigh <- rbind(predMatHigh,apply(realisations,1,quantile,probs=0.975))
 					}
 				}
 			}else{ ## for a Cox model
@@ -529,10 +677,10 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 						vect.survival.X <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
 						vect.survival.X.horizon <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
 						pred <- 1-(vect.survival.X.horizon/vect.survival.X)
-						realisations <- cbind(realisations,pred)
+						realisations <- rbind(realisations,pred)
 					}
-					predMatLow <- cbind(predMatLow,apply(realisations,1,quantile,probs=0.025))
-					predMatHigh <- cbind(predMatHigh,apply(realisations,1,quantile,probs=0.975))
+					predMatLow <- rbind(predMatLow,apply(realisations,1,quantile,probs=0.025))
+					predMatHigh <- rbind(predMatHigh,apply(realisations,1,quantile,probs=0.975))
 				}
 			}
 		}
@@ -547,17 +695,20 @@ prediction <- function(fit, data, t, window, group, MC.sample=0){
 		}else{
 			out$x.time <- sequence
 		}
+ 
 		out$pred <- predMat
-		rownames(out$pred) <- c("times",rep(" ",dim(out$pred)[1]-1))
-		colnames(out$pred) <- paste("ind",1:out$npred)
+		
+    colnames(out$pred) <- c("times",rep(" ",dim(out$pred)[2]-1))
+ 		rownames(out$pred) <- paste("ind",1:out$npred)
+
 		out$icproba <- ICproba
 		if (ICproba){
 			out$predLow <- predMatLow
 			out$predHigh <- predMatHigh
-			rownames(out$predLow) <- c("times",rep(" ",dim(out$predLow)[1]-1))
-			colnames(out$predLow) <- paste("ind",1:out$npred)
-			rownames(out$predHigh) <- c("times",rep(" ",dim(out$predHigh)[1]-1))
-			colnames(out$predHigh) <- paste("ind",1:out$npred)
+			colnames(out$predLow) <- c("times",rep(" ",dim(out$predLow)[2]-1))
+			rownames(out$predLow) <- paste("ind",1:out$npred)
+			colnames(out$predHigh) <- c("times",rep(" ",dim(out$predHigh)[2]-1))
+			rownames(out$predHigh) <- paste("ind",1:out$npred)
 		}
 		if (fit$Frailty) out$type <- type
 		out$window <- window
