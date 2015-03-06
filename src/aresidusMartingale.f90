@@ -256,7 +256,7 @@
     ddres=0.d0
 
 ! la prediction des effets aleatoires n'est pas la meme pour gamma ou log-normal
-    if (logNormal.eq.0) then
+    if (logNormal.eq.0) then !gamma frailty
         do indg=1,ng
             post_esp(indg)=(nig(indg)+1/(b(np-nva)*b(np-nva)))/(cumulhaz(indg)+1/(b(np-nva)*b(np-nva)))
             post_SD(indg)=dsqrt((nig(indg)+1/(b(np-nva)*b(np-nva)))/((cumulhaz(indg)+1/(b(np-nva)*b(np-nva)))**2))
@@ -267,13 +267,13 @@
             frailtysd(indg) = post_SD(indg)
             frailtyvar(indg) = frailtysd(indg)**2
         end do
-    else
+    else !log normal frailty
         do indg=1,ng
             vuu=0.9d0
             call marq98res(vuu,1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
 
             if (istopres.eq.1) then
-                Resmartingale(indg)=nig(indg)-((vuu(1)*vuu(1)))*cumulhaz(indg)
+                Resmartingale(indg)=nig(indg)-(dexp(vuu(1)*vuu(1)))*cumulhaz(indg)
                 frailtypred(indg) = vuu(1)*vuu(1)
                 frailtyvar(indg) = ((2.d0*vuu(1))**2)*vres(1)
                 frailtysd(indg) = dsqrt(frailtyvar(indg))
@@ -322,13 +322,19 @@
 
         call marq98res(vuu,1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
 
-        if (istopres.eq.1) then
-            ResidusRec(indg)=Nrec(indg)-((vuu(1)*vuu(1)))*Rrec(indg)
-            Residusdc(indg)=Ndc(indg)-((vuu(1)*vuu(1))**alpha)*Rdc(indg)
-            vecuiRes(indg) = vuu(1)*vuu(1)
+        if (istopres.eq.1) then 
+           if (logNormal.eq.0) then !gamma frailty
+              ResidusRec(indg)=Nrec(indg)-((vuu(1)*vuu(1)))*Rrec(indg)
+              Residusdc(indg)=Ndc(indg)-((vuu(1)*vuu(1))**alpha)*Rdc(indg)
+           else!log normal frailty
+              ResidusRec(indg)=Nrec(indg)-(dexp(vuu(1)*vuu(1)))*Rrec(indg)
+              Residusdc(indg)=Ndc(indg)-(dexp(vuu(1)*vuu(1)*alpha))*Rdc(indg)
+           endif
 
-            Resmartingale(indg) = ResidusRec(indg)
-            Resmartingaledc(indg) = Residusdc(indg)
+           vecuiRes(indg) = vuu(1)*vuu(1)
+
+           Resmartingale(indg) = ResidusRec(indg)
+           Resmartingaledc(indg) = Residusdc(indg)
 
             frailtypred(indg) = vecuiRes(indg)
 

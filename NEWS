@@ -1,3 +1,7 @@
+Changes in Version 2.7.5 March  2015
+
+ o Bug fixed for Martingale residuals (in shared and joint models with log normal frailties)
+
 Changes in Version 2.7.3 February 2015
 
  o Prediction and Monte Carlo confidence bands added for shared and joint gaussian frailty models.

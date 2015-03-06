@@ -1,6 +1,6 @@
 Package: frailtypack
-Version: 2.7.4
-Date: 2015-02-25
+Version: 2.7.5
+Date: 2015-03-5
 Title: General Frailty Models: Shared, Joint and Nested Frailty Models
         with Prediction
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
@@ -29,6 +29,6 @@ License: GPL (>= 2.0)
 URL:
         http://virginierondeau.com/BiostatisticalConsulting/Liste_of_examples.html
 Repository: CRAN
-Date/Publication: 2015-02-26 02:09:46
-Packaged: 2015-02-25 16:43:15 UTC; rondeau
+Date/Publication: 2015-03-06 17:41:58
+Packaged: 2015-03-06 10:26:47 UTC; rondeau
 NeedsCompilation: yes

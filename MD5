@@ -1,6 +1,6 @@
-a0b82f43547d7f198493725bdb02cf2b *DESCRIPTION
+86a2019615929ed84f44446601abb4b8 *DESCRIPTION
 8b8f2ab2f02e4ba8c9ff375509fa234e *NAMESPACE
-7d1eb1f2338a856f0a8af015920e1c19 *NEWS
+465c9abeb6c8b30944d7c70a23793c1e *NEWS
 7d0e5a93868a77976c232932b0a5cf3c *R/Cmeasures.R
 ed840852602406a06cdfa5d74b7c8051 *R/Diffepoce.R
 568ccb7a37705e70ed4b5259016fd74c *R/SurvIC.R
@@ -120,7 +120,7 @@ d5838b85b2be515b7e3da162a599257d *src/aaOptim.f90
 e1bd57aaa33e750bcf55f55eaf858106 *src/aamarq98o.f90
 7580ecb529b1456ffba08c5380fa1b51 *src/additive.f90
 56b17a70f2529df695f86f462ae21efe *src/afuncpasres.f90
-fd52962cfdb684ccf46d4906c78f6de9 *src/aresidusMartingale.f90
+90b56f7aa2db24cc6b65f5cbfb3dea77 *src/aresidusMartingale.f90
 747725f5443afc0b9a6ce3782466d9e8 *src/atestWald.f90
 16c96d5fff411f88d9c51682bff8e1dd *src/distance.f90
 ccf384382e16d274e98511e4b7e0bd32 *src/epoce.f90
