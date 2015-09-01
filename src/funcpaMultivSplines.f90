@@ -23,6 +23,7 @@
     double precision,dimension(-2:(nzdc+2)):: the2
     double precision,dimension(-2:(nzmeta+2)):: the3
     double precision,dimension(np)::bh
+	!double precision,dimension(0:ndatemax)::imdc
     double precision,dimension(ngmax)::res2,res1dc,res2dc &
     ,res3dc,integrale1,integrale2,integrale3,res2meta
 !AD: for death,change dimension

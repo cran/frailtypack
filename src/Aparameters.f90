@@ -1,24 +1,45 @@
     module tailles
-    integer,save:: npmax,NSUJETMAX,nvarmax
-    integer,save:: ngmax                    !AD:,maxiter
-    integer,save:: ndatemax,ndatemaxdc,nzmax
-    integer,save::nssgbyg,nssgmax
+    integer :: npmax,NSUJETMAX,nvarmax
+    integer :: ngmax                    !AD:,maxiter
+    integer :: ndatemax,ndatemaxdc,nzmax
+    integer :: nssgbyg,nssgmax
+    integer :: nboumax,NSIMAX,NOBSMAX
+	save
     end module tailles
+
+    !module genparamsShort
+    !integer , parameter :: nboumax=1000
+    !integer , parameter :: NSIMAX=5000
+    !integer , parameter :: NOBSMAX=15000
+    !save
+    !end module genparamsShort
+
+	!module genparams
+	!integer , parameter :: npmax=70
+	!integer , parameter :: NSUJETMAX=15000
+	!integer , parameter :: nvarmax=45
+	!integer , parameter :: ngmax=5000
+	!integer , parameter :: nboumax=1000
+	!integer , parameter :: NSIMAX=5000
+	!integer , parameter :: ndatemax=30000
+	!integer , parameter :: NOBSMAX=15000
+	!save
+	!end module genparams
 
     module parameters
         double precision,save::epsa,epsb,epsd
         integer,save::maxiter
     end module parameters
-    
+
     module commun
     implicit none
     integer,save::ngexact,nssgexact
     integer,dimension(:,:),allocatable,save::ssg
-    integer,dimension(:),allocatable,save:: mid 
-    integer,dimension(:,:),allocatable,save::mij 
+    integer,dimension(:),allocatable,save:: mid
+    integer,dimension(:,:),allocatable,save::mij
     integer,save::nbpara
     double precision,dimension(:,:),allocatable,save::aux1,aux2
-    end module commun 
+    end module commun
 
 ! time dependant janvier 2013
     module betatttps
@@ -30,12 +51,12 @@
     ,innerknots,innerknotsdc,innerknotsmeta,BasisSinhaTPS
     double precision,save::censtps,boundaryknots(2)
     end module betatttps
-!
 
+!=====================================================================================
     module comon
     implicit none
 !*****************************************************************
-!*****dace1 
+!*****dace1
     double precision,dimension(:),allocatable,save::date,datedc
     double precision,dimension(:),allocatable,save::zi,zidc
 
@@ -73,10 +94,10 @@
     double precision,dimension(:),allocatable,save::m3m3,m2m2,m1m1,mmm,m3m2
 !*****pen2
     double precision,dimension(:),allocatable,save:: m3m1,m3m,m2m1,m2m,m1m,mi
-     
+
 !************************************************************
 !AD: add for death
-    double precision, dimension(:),allocatable,save::mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc  
+    double precision, dimension(:),allocatable,save::mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc
 !AD:end
 !************************************************************
 ! %%%%%%%%%%%%% ANDERSEN-GILL %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -90,7 +111,10 @@
 !*****auxig
     integer,save :: auxig
 !******  aux1 aux2
-    double precision,dimension(:),allocatable,save::res1,res3,aux1,aux2
+    double precision,dimension(:),allocatable,save::res1,res3,res4,res5
+    !double precision,dimension(:),allocatable,save::res1dc,res2dc,res3dc,res4dc,res5dc
+    double precision,dimension(:),allocatable,save::aux1,aux2
+    !double precision,dimension(:),allocatable,save::integrale4,integrale3gap
     double precision,save::resnonpen
     double precision,dimension(2)::kkapa
     double precision,dimension(:),allocatable,save::k0T
@@ -98,11 +122,11 @@
     integer,save::model
     double precision,dimension(:),allocatable::vvv
 !cpm
-    double precision ::cens,mint ! rajout de mint
+    double precision :: cens,mint ! rajout de mint
     integer,save:: nbrecu,nbdeces,nbintervR,nbintervDC
     integer,save::indic_eta
 !double precision,save::eta !en exposant pour la frailty deces
-    double precision,dimension(:),allocatable,save::res4
+
     integer,save::typeof,typeof2
         double precision,dimension(:),allocatable,save::ttt,tttdc
         double precision,dimension(:),allocatable,save::betacoef
@@ -118,8 +142,8 @@
 ! distribution des frailty par une log-normale
     integer::logNormal,timedep
     double precision,save::sig2
-    double precision,dimension(:),allocatable,save::res5
     end module comon
+!=====================================================================================
 
     module comongroup
 !=== add:18/04/2012
@@ -136,6 +160,16 @@
     double precision,dimension(:),allocatable,save::Binit
     double precision,dimension(:,:),allocatable,save::ve1,ve2
     end module comongroup
+
+    module jointmods
+    !double precision,dimension(:),allocatable,save:: ut1,ut2,dut1,dut2
+    !double precision,dimension(:),allocatable,save::b,bh
+    double precision,dimension(:),allocatable,save::dut1,dut2
+    double precision,dimension(:),allocatable,save::ut1,ut2
+    double precision,dimension(:),allocatable,save::res1dc,res2dc,res3dc,res4dc,res5dc
+    double precision,dimension(:),allocatable,save::res2,integrale4
+    double precision,dimension(:),allocatable,save::integrale1,integrale2,integrale3,integrale3gap
+    end module jointmods
 
     module additiv
     implicit none
@@ -180,6 +214,20 @@
         double precision,save::detSigma
            integer,save :: nig_mc,np_mc
 	double precision,save :: sig2_mc,res1_mc
-        
-    end module residusM 
-        
+
+    end module residusM
+
+    module splines
+    double precision,dimension(:),allocatable,save::aux,auxmeta
+    double precision,dimension(:),allocatable,save:: v
+    double precision,dimension(:,:),allocatable,save::I1_hess,H1_hess
+    double precision,dimension(:,:),allocatable,save::I2_hess,H2_hess
+    double precision,dimension(:,:),allocatable,save::HI2
+    double precision,dimension(:,:),allocatable,save::HIH,IH,HI
+    double precision,dimension(:,:),allocatable,save::BIAIS
+    double precision,dimension(:),allocatable,save:: vax,vaxdc,vaxmeta
+    integer,dimension(:),allocatable,save::filtre,filtre2,filtre3
+    integer,save::ver
+
+    end module splines
+

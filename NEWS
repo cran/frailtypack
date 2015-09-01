@@ -1,3 +1,7 @@
+Changes in version 2.7.6 August 2015
+
+ o New model added: Joint General frailty model for recurrent and terminal events with 2 covariates
+
 Changes in Version 2.7.5 March  2015
 
  o Bug fixed for Martingale residuals (in shared and joint models with log normal frailties)

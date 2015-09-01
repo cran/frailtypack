@@ -7,7 +7,7 @@ if(!require("boot"))stop("this test requires boot.")
 if(!require("MASS"))stop("this test requires MASS.")
 if(!require("survC1"))stop("this test requires survC1.")
 
-cat("frailtypack test for shared model ...\n")
+cat("frailtypack test for shared model ...")
 
 
 ########################################################################
@@ -16,7 +16,7 @@ cat("frailtypack test for shared model ...\n")
 
 data("readmission")
 
-mod.cox.gap <- frailtyPenal(Surv(time, event) ~ dukes + 
+mod.cox.gap <- frailtyPenal(Surv(time, event) ~ dukes +
   charlson + sex + chemo, n.knots = 10, kappa = 1,
   data = readmission, cross.validation = TRUE)
 

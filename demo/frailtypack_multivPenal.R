@@ -7,7 +7,7 @@ if(!require("boot"))stop("this test requires boot.")
 if(!require("MASS"))stop("this test requires MASS.")
 if(!require("survC1"))stop("this test requires survC1.")
 
-cat("frailtypack test for multivariate model ...\n")
+cat("frailtypack test for multivariate model ...")
 
 ########################################################################
 ### MULTIVARIATE frailty model with gap times
@@ -15,7 +15,7 @@ cat("frailtypack test for multivariate model ...\n")
 
 data("dataMultiv")
 
-modMultiv <- multivPenal(Surv(TIMEGAP,INDICREC)~ cluster(PATIENT) + 
+modMultiv <- multivPenal(Surv(TIMEGAP,INDICREC)~ cluster(PATIENT) +
   v1 + v2 + event2(INDICMETA) + terminal(INDICDEATH),
   formula.Event2 =~ v1 + v2 + v3, formula.terminalEvent =~ v1,
   data = dataMultiv, hazard = "Weibull")

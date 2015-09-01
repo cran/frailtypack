@@ -1,7 +1,7 @@
 \name{prediction}
 \alias{prediction}
 
-\title{ Prediction probabilities for Cox proportionnal hazard, Shared and Joint frailty models }
+\title{ Prediction probabilities for Cox proportionnal hazard, Shared and Joint frailty models (Not available for General Joint)}
 
 \description{
 

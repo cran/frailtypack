@@ -7,7 +7,7 @@ if(!require("boot"))stop("this test requires boot.")
 if(!require("MASS"))stop("this test requires MASS.")
 if(!require("survC1"))stop("this test requires survC1.")
 
-cat("frailtypack test for joint model ...\n")
+cat("frailtypack test for joint model ...")
 
 #########################################################################
 ### JOINT frailty model with gap times
@@ -16,9 +16,10 @@ cat("frailtypack test for joint model ...\n")
 data("readmission")
 
 modJoint.gap <- frailtyPenal(Surv(time, event) ~ cluster(id) +
-  dukes + charlson + sex + chemo + terminal(death),
-  formula.terminalEvent = ~ dukes + charlson + sex + chemo,
-  data = readmission, n.knots = 8, kappa = c(2.11e+08,9.53e+11))
+                               dukes + charlson + sex + chemo + terminal(death),
+                             formula.terminalEvent = ~ dukes + charlson + sex + chemo,
+                             data = readmission , n.knots = 8 , kappa = c(2.11e+08,9.53e+11))
+
 
 print(modJoint.gap, digits = 4)
 
@@ -30,9 +31,9 @@ summary(modJoint.gap, level = 0.95)
 #########################################################################
 
 modJoint.str <- frailtyPenal(Surv(time, event) ~ cluster(id) +
-  dukes + charlson + strata(sex) + chemo + terminal(death),
-  formula.terminalEvent = ~ dukes + charlson + sex + chemo,
-  data = readmission, n.knots = 8, kappa = c(2.11e+08,2.11e+08,9.53e+11))
+                               dukes + charlson + strata(sex) + chemo + terminal(death),
+                             formula.terminalEvent = ~ dukes + charlson + sex + chemo,
+                             data = readmission, n.knots = 8, kappa = c(2.11e+08,2.11e+08,9.53e+11))
 
 print(modJoint.str, digits = 4)
 
@@ -41,9 +42,9 @@ print(modJoint.str, digits = 4)
 #########################################################################
 
 modJoint.wa <- frailtyPenal(Surv(time, event) ~ cluster(id) +
-  dukes + charlson + sex + chemo + terminal(death),
-  formula.terminalEvent = ~ dukes + charlson + sex + chemo,
-  data = readmission, n.knots = 8, kappa = c(2.11e+08,9.53e+11), Alpha = "none")
+                              dukes + charlson + sex + chemo + terminal(death),
+                            formula.terminalEvent = ~ dukes + charlson + sex + chemo,
+                            data = readmission, n.knots = 8, kappa = c(2.11e+08,9.53e+11), Alpha = "none")
 
 print(modJoint.wa, digits = 4)
 
@@ -54,9 +55,9 @@ print(modJoint.wa, digits = 4)
 readmission <- transform(readmission,group=id%%31+1)
 
 modJoint.clus <- frailtyPenal(Surv(t.start, t.stop, event) ~ cluster(group) + num.id(id) +
-  dukes + charlson + sex + chemo + terminal(death),
-  formula.terminalEvent = ~ dukes + charlson + sex + chemo,
-  data = readmission, recurrentAG = TRUE, n.knots = 10, kappa = c(2.11e+08,9.53e+11))
+                                dukes + charlson + sex + chemo + terminal(death),
+                              formula.terminalEvent = ~ dukes + charlson + sex + chemo,
+                              data = readmission, recurrentAG = TRUE,  n.knots = 10, kappa = c(2.11e+08,9.53e+11))
 
 print(modJoint.clus, digits = 4)
 
@@ -66,8 +67,27 @@ print(modJoint.clus, digits = 4)
 pdf(file="fig3.pdf", height = 3.6, width = 8.1)
 par(mfrow = c(1, 3))
 plot(modJoint.gap, type.plot = "survival", event = "recurrent", main = "Recurrent",
-  conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
+     conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
 plot(modJoint.gap, type.plot = "survival", event = "terminal", main = "Terminal",
-  conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
+     conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
 plot(modJoint.gap, type.plot = "survival", event = "both", main = "Both",
-  conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1, ylim = c(0, 1.2))
+     conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1, ylim = c(0, 1.2))
+
+
+
+################################################################################################################
+###  General Joint model (recurrent and terminal events) with 2 covariates
+################################################################################################################
+
+library("frailtypack")
+data(readmission)
+modJoint.general <- frailtyPenal(Surv(time,event) ~ cluster(id) + dukes +
+                             charlson + sex  + chemo + terminal(death),formula.terminalEvent = ~ dukes +
+                             charlson + sex + chemo, data = readmission, jointGeneral = TRUE,  n.knots = 8,
+                             kappa = c(2.11e+08, 9.53e+11))
+
+# Start writing to frailtyPack_Jgeneral_Results.txt file
+sink("frailtyPack_Jgeneral_Results.txt")
+print(modJoint.general, digits = 4)
+# Stop writing to the file
+sink()

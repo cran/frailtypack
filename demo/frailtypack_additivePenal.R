@@ -7,7 +7,7 @@ if(!require("boot"))stop("this test requires boot.")
 if(!require("MASS"))stop("this test requires MASS.")
 if(!require("survC1"))stop("this test requires survC1.")
 
-cat("frailtypack test for additive model ...\n")
+cat("frailtypack test for additive model ...")
 
 
 ########################################################################

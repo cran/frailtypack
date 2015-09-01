@@ -7,7 +7,7 @@
 #modality vector of ddl
 
 waldtest <- function(N,nfact,place,modality,b,Varb,Lfirts=NULL,Llast=NULL,Ntot=NULL){
-	wald <- rep(0,nfact)
+	waldValue <- rep(0,nfact)
 	for(i in 1:nfact){
 		if(place[i] == 1){
 			taillecol <- N-modality[i]
@@ -26,7 +26,7 @@ waldtest <- function(N,nfact,place,modality,b,Varb,Lfirts=NULL,Llast=NULL,Ntot=N
 			if(!is.null(Llast)) L <- cbind(L,matrix(0,nrow=modality[i],ncol=Llast))
 		}
 		if(place[i] > 2){
-			taillecol <- place[i]-1
+			taillecol <- place[i]-1 
 			Lavant <- matrix(0,nrow=modality[i],ncol=taillecol)	
 			taillecol <- N-modality[i]-taillecol
 			Lapres <- matrix(0,nrow=modality[i],ncol=taillecol)
@@ -36,7 +36,7 @@ waldtest <- function(N,nfact,place,modality,b,Varb,Lfirts=NULL,Llast=NULL,Ntot=N
 			if(!is.null(Llast)) L <- cbind(L,matrix(0,nrow=modality[i],ncol=Llast))
 		}
 		if(is.null(Ntot))Ntot <- N
-		out<-.Fortran("waldmultiv",
+		out <- .Fortran("waldmultiv",
 				as.double(b),
 				as.integer(Ntot),
 				as.integer(L),
@@ -44,8 +44,7 @@ waldtest <- function(N,nfact,place,modality,b,Varb,Lfirts=NULL,Llast=NULL,Ntot=N
 				as.integer(modality[i]),
 				Wald=as.double(0),
 				PACKAGE = "frailtypack")
-		wald[i] <- out$Wald
+		waldValue[i] <- out$Wald
 	}
-	return(wald)
-}
-# # end Wald
+	return(waldValue)
+}# end Wald

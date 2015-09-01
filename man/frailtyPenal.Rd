@@ -91,6 +91,24 @@ This joint frailty model can also be applied to clustered recurrent events and a
 
 From now on, you can also consider time-varying effects covariates in your model, see \code{timedep} function for more details.
 
+
+General Joint Frailty model
+Fit a general joint frailty model for reccurent and terminal events considering two independent
+frailty terms. The frailty term \eqn{u_i} represents the unobserved association between reccurences and
+death. The frailty term \eqn{v_i} is specific to the reccurent event rate. Thus, the general joint frailty model
+is:
+
+
+\eqn{\left\{
+\begin{array}{ll}
+r_{ij}(t|u_i,v_i)=\textcolor{red}{u_iv_i}r_0(t)\exp(\bold{\beta_1^{'}Z_{ij}(t)}) =\textcolor{red}{u_iv_i}r_{ij}(t) & \mbox{(Reccurent)} \\
+\lambda_{i}(t|u_i)=\textcolor{red}{u_i}\lambda_0(t)\exp(\bold{\beta_1^{'}Z_{i}(t)}) = \textcolor{red}{u_i}\lambda_{i}(t) & \mbox{(Death)} \\
+ \end{array}
+ \right.
+}
+
+where the \eqn{iid} random effects \eqn{\bold{u_i}\sim\Gamma(\frac{1}{\theta},\frac{1}{\theta})} and the \eqn{iid} random effects \eqn{\bold{v_i}\sim\Gamma(\frac{1}{\eta},\frac{1}{\eta})}  are independent from each other.  The joint model is fitted using a penalized  likelihood estimation on the hazard. Right-censored data and time-varying covariates \eqn{\bold{Z}_i(t)} are allowed.
+
 \bold{Nested Frailty model}
 
 Fit a nested frailty model using a Penalized Likelihood on the hazard function or using a parametric estimation. Nested frailty models allow survival studies for hierarchically clustered data by including two iid gamma random effects.
@@ -115,12 +133,12 @@ where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{X_{ijk}}
 \usage{
 
 frailtyPenal(formula, formula.terminalEvent, data,
-             recurrentAG = FALSE, cross.validation = FALSE,
-             n.knots, kappa, maxit = 350, hazard = "Splines",
-             nb.int, RandDist = "Gamma", betaknots = 1,
-             betaorder = 3, init.B, init.Theta, init.Alpha,
-             Alpha, LIMparam = 1e-3, LIMlogl = 1e-3,
-             LIMderiv = 1e-3, print.times = TRUE)
+      recurrentAG = FALSE, cross.validation = FALSE,
+      jointGeneral,n.knots, kappa, maxit = 350,
+      hazard = "Splines", nb.int, RandDist = "Gamma",
+      betaknots = 1, betaorder = 3, init.B, init.Theta,
+      init.Alpha, Alpha, init.eta, LIMparam = 1e-3, LIMlogl = 1e-3,
+      LIMderiv = 1e-3, print.times = TRUE, ...)
 }
 
 \arguments{
@@ -145,6 +163,12 @@ frailtyPenal(formula, formula.terminalEvent, data,
                  The cross validation is not implemented for several strata, neither for interval-censored data. The cross validation has been implemented 
                  for a Cox proportional hazard model, with no covariates. The default is FALSE.}
 
+  \item{jointGeneral}{ Logical value. Does the model include two independent random effects? If
+so, this will fit a general joint frailty model with an asssociation between the
+recurent events and a terminal event (explained by the variance \eqn{\theta}) and an association
+amongst the recurrent events (explained by the variance \eqn{\eta}).}
+
+
   \item{n.knots}{ integer giving the number of knots to use. Value required in the penalized likelihood estimation.
                 It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions.
                 We estimate I or M-splines of order 4. When the user set a number of knots equals to k (n.knots=k) then the number of interior knots is (k-2) and the number of splines is (k-2)+order.  
@@ -160,13 +184,14 @@ frailtyPenal(formula, formula.terminalEvent, data,
 
   \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
 
-  \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions using equidistant intervals or "Splines-per" using percentile with the penalized likelihood estimation,
+ \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions using equidistant intervals or "Splines-per" using percentile with the penalized likelihood estimation,
             "Piecewise-per" for piecewise constant hazard function using percentile (not available for interval-censored data), "Piecewise-equi" for piecewise constant hazard 
-            function using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
+            function using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".
+            In case of \eqn{jointGeneral = TRUE} only \eqn{hazard = "Splines"} can be chosen.}
 
   \item{nb.int}{Number of time intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi"). In a joint model, you need to specify a number of time interval for both recurrent hazard function and the death hazard function (vector of length 2).}
 
-  \item{RandDist}{Type of random effect distribution: "Gamma" for a gamma distribution, "LogN" for a log-normal distribution. Default is "Gamma". Not implemented for nested model.}
+  \item{RandDist}{Type of random effect distribution: "Gamma" for a gamma distribution, "LogN" for a log-normal distribution. Default is "Gamma". Not implemented for nested model. If \eqn{jointGeneral = TRUE} , the log-normal distribution cannot be chosen.}
 
   \item{betaknots}{Number of inner knots used for the estimation of B-splines. Default is 1. See 'timedep' function for more details. Not implemented for nested model.}
 
@@ -177,6 +202,8 @@ frailtyPenal(formula, formula.terminalEvent, data,
   \item{init.Theta}{Inital value for variance of the frailties.}
 
   \item{init.Alpha}{Only for joint model : initial value for parameter alpha.}
+  
+  \item{init.eta}{Only for General joint model : initial value for the variance of the frailties \eqn{v_i}.}
 
   \item{Alpha}{Only for joint model : input "none" so as to fit a joint model without the parameter alpha.}
 
@@ -187,6 +214,9 @@ frailtyPenal(formula, formula.terminalEvent, data,
   \item{LIMderiv}{Convergence threshold of the Marquard algorithm for the gradient (see Details), \eqn{10^{-3}} by default.}
 
   \item{print.times}{a logical parameter to print iteration process. Default is TRUE.}
+  
+  \item{...}{other arguments to be added}
+
 }
 
 \details{
@@ -237,6 +267,8 @@ In case of a joint frailty model, the splines and the regression coefficients ar
 program fits an adjusted Cox model to have new initial values for the regression and the splines coefficients.
 The variance of the frailty term \eqn{\theta} and the coefficient \eqn{\alpha} associated in the death hazard
 function are initialized to 1. Then, it fits a joint frailty model.
+
+In case of a general joint frailty model we need to initialize the \eqn{jointGeneral} logical value to \eqn{TRUE}.
 
 In case of a nested model, the program fits an adjusted Cox model to provide new initial values for the
 regression and the splines coefficients. The variances of the frailties are initialized to 0.1. Then,
@@ -367,6 +399,9 @@ not converge, multiply or divide this value by 10 or 5 until it converges.
 V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.
 \emph{Journal of Statistical Software} \bold{47}, 1-28.
 
+Y. Mazroui, S. Mathoulin-Pelissier,P. Soubeyranb and Virginie Rondeau (2012) General joint frailty model for recurrent event data with a dependent terminalevent: Application to follicular lymphoma data.
+\emph{Statistics in Medecine}, \bold{31}, 11-12, 1162-1176.
+
 V. Rondeau, J.P. Pignon, S. Michiels (2011). A joint model for the dependance between clustered times to tumour progression and deaths: A meta-analysis of chemotherapy in head and neck cancer.
 \emph{Statistical methods in medical research} \bold{897}, 1-19.
 
@@ -482,6 +517,20 @@ num.id(id)+dukes+charlson+sex+chemo+terminal(death),
 formula.terminalEvent=~dukes+charlson+sex+chemo,
 data=readmission,recurrentAG=TRUE,n.knots=10,
 kappa=c(2.11e+08,9.53e+11))
+
+
+
+
+
+###--- General Joint model (recurrent and terminal events) with 2 covariates ---###
+
+data(readmission)
+modJoint.general <- frailtyPenal(Surv(time,event) ~ cluster(id) + dukes +
+charlson + sex  + chemo + terminal(death), 
+formula.terminalEvent = ~ dukes + charlson + sex + chemo,
+data = readmission, jointGeneral = TRUE,  n.knots = 8, 
+kappa = c(2.11e+08, 9.53e+11))
+
 
 ###--- Nested Frailty model ---###
 

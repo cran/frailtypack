@@ -34,7 +34,8 @@ funcpascpm_log.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpasweib_log.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpas_tps.o: aaOptim.o aaOptimres.o Aparameters.o
 
-joint.o: aaOptim.o aaOptimres.o
+joint.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpajgeneral.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajsplines.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajcpm.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajweib.o: aaOptim.o aaOptimres.o Aparameters.o
@@ -60,7 +61,7 @@ funcpancpm.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpanweib.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpansplines.o: aaOptim.o aaOptimres.o Aparameters.o
 
-multiveJoint.o: aaOptim.o aaOptimres.o
+multiveJoint.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpaMultivSplines.o: aaOptim.o aaOptimres.o AparamMultive.o
 funcpaMultivCpm.o: aaOptim.o aaOptimres.o AparamMultive.o
 funcpaMultivWeib.o: aaOptim.o aaOptimres.o AparamMultive.o

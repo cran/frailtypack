@@ -12,8 +12,9 @@
  1) A shared frailty model and Cox proportional hazard model. Clustered and recurrent survival times can be studied.
  2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope).
  3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects.
- 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. Prediction
- values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard
+ 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not.
+ 5) Joint General frailty models in the context of a joint modelling for recurrent events with terminal event data with two independent frailty terms.
+ Prediction values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard
  and shared frailty model) and strata are allowed. In each model, the random effects have a gamma distribution, but you can switch
  to a log-normal in shared and joint. Now, you can also consider time-varying effect covariates in Cox, shared and joint models. The
  package includes concordance measures for Cox proportional hazards models and for shared frailty models.
@@ -34,6 +35,9 @@
 \references{
 V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.
 \emph{Journal of Statistical Software} \bold{47}, 1-28.
+
+Y. Mazroui, S. Mathoulin-Pelissier,P. Soubeyranb and Virginie Rondeau (2012) General joint frailty model for recurrent event data with a dependent terminalevent: Application to follicular lymphoma data.
+\emph{Statistics in Medecine}, \bold{31}, 11-12, 1162-1176.
 
 V. Rondeau and J. R. Gonzalez (2005). Frailtypack: A computer program for the analysis of correlated failure time data using penalized likelihood estimation. \emph{Computer Methods and Programs in Biomedicine} \bold{80}, 2, 154-164.
 
@@ -69,6 +73,14 @@ cluster(id)+sex+dukes+charlson+terminal(death),
 formula.terminalEvent=~sex+dukes+charlson,
 data=readmission,n.knots=10,kappa=c(100,100),
 recurrentAG=FALSE,hazard="Splines")
+
+###--- General Joint model (recurrent and terminal events) with 2 covariates ---###
+data(readmission)
+modJoint.general <- frailtyPenal(Surv(time,event) ~ cluster(id) + dukes +
+charlson + sex + chemo + terminal(death),
+formula.terminalEvent = ~ dukes + charlson + sex + chemo,
+data = readmission, jointGeneral = TRUE, n.knots = 8,
+kappa = c(2.11e+08, 9.53e+11))
 
 ###--- Nested model (or hierarchical model) with 2 covariates ---###
 

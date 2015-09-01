@@ -1,6 +1,6 @@
 Package: frailtypack
-Version: 2.7.5
-Date: 2015-03-5
+Version: 2.7.6.1
+Date: 2015-09-1
 Title: General Frailty Models: Shared, Joint and Nested Frailty Models
         with Prediction
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
@@ -8,8 +8,8 @@ Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
 Maintainer: Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr>
 Depends: R (>= 2.10), survival, boot, MASS, survC1
 LazyLoad: no
-Description: Frailtypack fits several classes of frailty models using a penalized likelihood
-        estimation on the hazard function but also a parametric estimation.
+Description: The following several classes of frailty models using a penalized likelihood
+        estimation on the hazard function but also a parametric estimation can be fit using this R package:
         1) A shared frailty model (with gamma or log-normal frailty distribution) and Cox
         proportional hazard model. Clustered and recurrent survival times can be studied.
         2) Additive frailty models for proportional hazard models with two correlated
@@ -18,6 +18,8 @@ Description: Frailtypack fits several classes of frailty models using a penalize
         clustering) by including two iid gamma random effects.
         4) Joint frailty models in the context of joint modelling for recurrent events
         with terminal event for clustered data or not.
+		5) Joint General frailty models in the context of a joint modelling for recurrent
+		events with terminal event data with two independent frailty terms.
         Prediction values are available. Left-truncated (not for Joint model),
         right-censored data, interval-censored data (only for Cox proportional hazard
         and shared frailty model) and strata are allowed. In each model,
@@ -29,6 +31,6 @@ License: GPL (>= 2.0)
 URL:
         http://virginierondeau.com/BiostatisticalConsulting/Liste_of_examples.html
 Repository: CRAN
-Date/Publication: 2015-03-06 17:41:58
-Packaged: 2015-03-06 10:26:47 UTC; rondeau
+Date/Publication: 2015-09-01 17:44:41
+Packaged: 2015-09-01 08:56:41 UTC; rondeau
 NeedsCompilation: yes
