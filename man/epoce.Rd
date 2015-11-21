@@ -2,30 +2,32 @@
 \name{epoce}
 \alias{epoce}
 
-\title{ Estimators of the Expected Prognostic Observed Cross-Entropy (EPOCE) for evaluating predictive accuracy of joint frailty models. }
+\title{ Estimators of the Expected Prognostic Observed Cross-Entropy (EPOCE) for evaluating predictive accuracy of joint models. }
 
 \description{
 
-This function computes estimators of the Expected Prognostic Observed Cross-Entropy (EPOCE) for evaluating the predictive accuracy of joint frailty models using \code{frailtyPenal}. On the same data as used for estimation of the joint frailty model, this function computes both the Mean Prognosis Observed Log-Likelihood (MPOL) and the Cross-Validated Prognosis Observed Log-Likelihood (CVPOL), two estimators of EPOCE. The latter corrects the MPOL estimate for over-optimism by approximated cross-validation. On external, this function only computes the Mean Prognostic Observed Log-Likelihood (MPOL).
+This function computes estimators of the Expected Prognostic Observed Cross-Entropy (EPOCE) for evaluating the predictive accuracy of joint models using \code{frailtyPenal}, \code{longiPenal} or \code{trivPenal}. On the same data as used for estimation of the joint model, this function computes both the Mean Prognosis Observed Loss (MPOL) and the Cross-Validated Prognosis Observed Loss (CVPOL), two estimators of EPOCE. The latter corrects the MPOL estimate for over-optimism by approximated cross-validation. On external, this function only computes MPOL.
 
 }
 
 \usage{
-epoce(fit, pred.times, newdata)
+epoce(fit, pred.times, newdata = NULL, newdata.Longi = NULL)
 }
 
 \arguments{
   \item{fit}{A jointPenal object.}
   \item{pred.times}{Time or vector of times to compute epoce.}
-  \item{newdata}{optional. When missing, the data used for estimating the fit are used, and CVPOL and MPOL are computed (internal validation). When newdata is specified, only MPOL is computed on this new dataset (external validation. The two datasets must have the same covariates with the same coding without missing data.}
-}
+  \item{newdata}{Optional. In case of joint models obtained with \code{frailtyPenal} or \code{trivPenal}. For models inheriting from \code{trivPenal} class, if \code{newdata} is given,  \code{newdata.Longi} must be given as well.  When missing, the data used for estimating the fit are used, and CVPOL and MPOL are computed (internal validation). When \code{newdata} is specified, only MPOL is computed on this new dataset (external validation). The new dataset and the dataset used in the estimation must have the same covariates with the same coding without missing data.}
+        \item{newdata.Longi}{Optional. In case of joint models obtained with \code{longiPenal} or \code{trivPenal}. For models inheriting from \code{longiPenal}, if the \code{newdata.Longi} is given, \code{newdata} must be \code{NULL}, but for models from \code{trivPenal} class, if \code{newdata.Longi} is given, \code{newdata} must be provided as well. The two datasets newdata and newdata.Longi must include the information concerning the same patients with the same characteristics and the appropriate data on follow up (recurrences for \code{newdata} and longitudinal measurements for \code{newdata.Longi}).}
+
+  }
 
 \value{
   \item{data}{name of the data used to compute epoce}
   \item{new.data}{a boolean which is FALSE if computation is done on the same data as for estimation, and TRUE otherwise}
   \item{pred.times}{time or vector of times used in the function}
-  \item{mpl}{values of MPOL for each pred.times}
-  \item{cvpl}{values of CVPOL for each pred.times}
+  \item{mpol}{values of MPOL for each pred.times}
+  \item{cvpol}{values of CVPOL for each pred.times}
   \item{IndivContrib}{all the contributions to the log-likelihood for each pred.times}
   \item{AtRisk}{number of subject still at risk for each pred.times}
 }
@@ -39,10 +41,10 @@ D. Commenges, B. Liquet, C. Proust-Lima (2012). Choice of prognostic estimators 
 \dontrun{
 
 ########################################
-#### epoce on a joint frailty model ####
+#### EPOCE on a joint frailty model ####
 ########################################
 
-data("readmission")
+data(readmission)
 
 modJoint.gap <- frailtyPenal(Surv(t.start,t.stop,event)~ cluster(id) +
   dukes + charlson + sex + chemo + terminal(death),
@@ -57,21 +59,89 @@ epoce <- epoce(modJoint.gap,temps)
 print(epoce)
 plot(epoce)
 
-# computation on a new dataset, here a sample of readmission with the first 50 subjects
+# computation on a new dataset
+# here a sample of readmission with the first 50 subjects
 s <- readmission[1:100,]
 epoce <- epoce(modJoint.gap,temps,newdata=s)
 
 print(epoce)
 plot(epoce)
 
+#################################################
+#### EPOCE on a joint  model for a biomarker ####
+#########   and a terminal event  ###############
+#################################################
+
+data(colorectal)
+data(colorectalLongi)
+
+# Survival data preparation - only terminal events 
+colorectalSurv <- subset(colorectal, new.lesions == 0)
+
+modLongi <- longiPenal(Surv(time0, time1, state) ~ age +
+treatment + who.PS, tumor.size ~  year*treatment + age +
+who.PS, colorectalSurv, data.Longi =colorectalLongi,
+random = c("1", "year"),  id = "id", link = "Random-effects", 
+left.censoring = -3.33, hazard = "Weibull", 
+method.GH = "Pseudo-adaptive")
+
+# computation on the same dataset
+time <- c(1, 1.5, 2, 2.5)
+epoce <- epoce(modLongi,time)
+
+print(epoce)
+plot(epoce)
+
+# computation on a new dataset
+# here a sample of colorectal data with the first 50 subjects
+s <-  subset(colorectal, new.lesions == 0 & id%in%1:50)
+s.Longi <- subset(colorectalLongi, id%in%1:50)
+epoce <- epoce(modLongi, time, newdata = s, newdata.Longi = s.Longi)
+
+print(epoce)
+plot(epoce)
+
+
+###################################################
+#### EPOCE on a joint model for a biomarker, ######
+#### recurrent events and a terminal event   ######
+###################################################
+
+data(colorectal)
+data(colorectalLongi)
+
+# (computation takes around 30 minutes)
+modTriv <- model.weib.RE.gap <-trivPenal(Surv(gap.time, new.lesions) ~ cluster(id)
++ age + treatment + who.PS + prev.resection + terminal(state),
+formula.terminalEvent =~ age + treatment + who.PS + prev.resection, 
+tumor.size ~ year * treatment + age + who.PS, data = colorectal,
+data.Longi = colorectalLongi, random = c("1", "year"), id = "id", 
+link = "Random-effects", left.censoring = -3.33, recurrentAG = FALSE,
+hazard = "Weibull", method.GH="Pseudo-adaptive", n.nodes=7)
+
+# computation on the same dataset
+time <- c(1, 1.5, 2, 2.5)
+
+# (computation takes around 10 minutes)
+epoce <- epoce(modTriv,time)
+print(epoce)
+plot(epoce)
+
+# computation on a new dataset
+# here a sample of colorectal data with the first 100 subjects
+s <-  subset(colorectal,  id%in%1:100)
+s.Longi <- subset(colorectalLongi, id%in%1:100)
+# (computation takes around 10 minutes)
+epoce <- epoce(modTriv, time, newdata = s, newdata.Longi = s.Longi)
+
+print(epoce)
+plot(epoce)
+
+
+dev.off()
 }
 
 }
 
 \keyword{misc}
-
-
-
-
-
 

@@ -5,15 +5,16 @@
 \title{Plot values of estimators of the Expected Prognostic Observed Cross-Entropy (EPOCE).}
 
 \description{
-  Plots values of estimators MPL and CVPL for evaluating EPOCE. No confidence interval.
+  Plots values of estimators MPOL and CVPOL for evaluating EPOCE. No confidence interval.
 }
 
 \usage{
-  \method{plot}{epoce}(x, pos.legend="topright", cex.legend=0.7, ...)
+\method{plot}{epoce}(x, type, pos.legend="topright", cex.legend=0.7, ...)
 }
 
 \arguments{
-  \item{x}{An object from the 'prediction' function, more generaly a \code{predFrailty} class object.}
+  \item{x}{An object inheriting from \code{epoce} class}
+  \item{type}{Type of estimator to plot. If new dataset was used only mpol can be plotted (\code{"mpol"}), otherwise mpol and cvpol can be plotted (\code{"mpol"} and \code{"cvpol"}, default is \code{"cvpol"}).}
   \item{pos.legend}{The location of the legend can be specified by setting this argument to a single keyword from the list
                     '"bottomright"', '"bottom"', '"bottomleft"', '"left"', '"topleft"', '"top"', '"topright"', '"right"' and '"center"'. The default is '"topright"'.}
   \item{cex.legend}{size of the legend. Default is 0.7.}
@@ -21,7 +22,10 @@
 }
 
 \value{
-  Print one plot with two curves. One for the Mean Prognosis Loss (MPL) and an other for the Cross-Validated Prognosis Loss (CVPL).
+  Print a curve of the estimator of EPOCE using time points defined in \code{epoce}.
+}
+\seealso{
+ \code{\link{epoce}}
 }
 
 \keyword{file}

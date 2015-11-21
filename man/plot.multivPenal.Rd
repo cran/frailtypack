@@ -10,17 +10,17 @@ Plot Method for a multivariate frailty model.
 }
 
 \usage{
-\method{plot}{multivPenal}(x, event = "both", type.plot = "hazard", conf.bands = FALSE,
- pos.legend = "topright", cex.legend = 0.7, ylim, main, color1="red", color2="blue", 
- colorEnd="green", ...)
+\method{plot}{multivPenal}(x, event = "Both", type.plot = "Hazard", conf.bands = FALSE,
+ pos.legend = "topright", cex.legend = 0.7, ylim, main, color1="red",
+ color2="blue", colorEnd="green", ...)
 }
 
 \arguments{
-  \item{x}{A joint multivariate model, or more generaly an object of class \code{multivPenal} (output from calling \code{multivPenal} function).}
+  \item{x}{A joint multivariate model, i.e. an object of class \code{multivPenal} (output from calling \code{multivPenal} function).}
 
- \item{event}{a character string specifying the type of outcome. Possible value are "terminal", "recurrent", "recurrent2", or "both". The default is "both".}
+ \item{event}{a character string specifying the type of outcome. Possible value are "Terminal", "Recurrent", "Recurrent2", or "Both". The default is "Both".}
 
-  \item{type.plot}{a character string specifying the type of curve. Possible value are "hazard", or "survival". The default is "hazard". Only the first words are required, e.g "haz", "su"}
+  \item{type.plot}{a character string specifying the type of curve. Possible value are "Hazard", or "Survival". The default is "Hazard". Only the first words are required, e.g "Haz", "Su"}
 
   \item{conf.bands}{logical value. Determines whether confidence intervals will be plotted. The default is to do so.}
 

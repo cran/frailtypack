@@ -1,5 +1,5 @@
     module tailles
-    integer :: npmax,NSUJETMAX,nvarmax
+    integer :: npmax,NSUJETMAX,nvarmax,nsujetymax  
     integer :: ngmax                    !AD:,maxiter
     integer :: ndatemax,ndatemaxdc,nzmax
     integer :: nssgbyg,nssgmax
@@ -43,35 +43,96 @@
 
 ! time dependant janvier 2013
     module betatttps
-    integer,save::npbetatps,npbetatps1,npbetatps2,nbrecuTPS,nbrecumetaTPS,nbdecesTPS &
+    integer,save::npbetatps,npbetatps1,npbetatps2,npbetatps3,nbrecuTPS,nbrecumetaTPS,nbdecesTPS &
     ,entTPS,entmetaTPS,entdcTPS,npbetatpscross,nbinnerknots,qorder,equidistantTPS
-        integer,dimension(:),allocatable,save::filtretps,filtre2tps
+        integer,dimension(:),allocatable,save::filtretps,filtre2tps,filtre3tps
     double precision,dimension(:),allocatable,save::knotsTPS,knotsdcTPS,knotsmetaTPS,the1TPS,the2TPS &
     ,betatps,betatps2,betatps3,betatpsX,theTPS,betatpsminX,betatpsmaxX,varBetatps,varBetatpsHIH &
     ,innerknots,innerknotsdc,innerknotsmeta,BasisSinhaTPS
     double precision,save::censtps,boundaryknots(2)
     end module betatttps
 
+!=================================================
+! pour le modele avec des donnees longitudinales
+
+!AK
+    module donnees_indiv
+      implicit none
+      double precision,dimension(:,:),allocatable,save::bb1,bb2,grandb
+          double precision,save :: sigmav,range
+      double precision,dimension(:),allocatable,save::mu,mu1
+      double precision,dimension(:,:),allocatable,save::Z1,Z2
+      integer,save::numpat,nmescur,nmescur2,nmescurr,nmescurr1,nmes,it_cur
+      integer,parameter ::nf=1
+      double precision,dimension(:),allocatable,save::b1
+                double precision,dimension(:),allocatable,save :: ycurrent,ycurrent2,current_mean
+                double precision,dimension(:),allocatable,save :: xeacurrent,part
+                double precision,dimension(:,:),allocatable,save:: x2,x22,z22,z11,x2cur,z1cur
+                integer,dimension(:),allocatable,save:: nii,nii2,nmes_o,nmes_o2
+                integer,save:: it_rec
+                double precision:: ut2cur,frailpol,frailpol2
+                double precision,dimension(:),allocatable,save :: res1cur,res3cur,res2cur
+    end module donnees_indiv
+
+
+        module random_effect
+                double precision,dimension(:),allocatable,save::re
+
+        end module random_effect
+
+                module prediction
+        double precision,dimension(2)::survDC,predtime_cm
+        double precision::XbetapredDCi,XbetapredRi
+        double precision,dimension(:),allocatable :: survRi, hazRi
+        end module prediction
+
+        module choix_epoce
+                integer:: choix_e
+        end module choix_epoce	
+	
 !=====================================================================================
     module comon
     implicit none
 !*****************************************************************
+	  integer,dimension(2),save::genz
+      integer,save::npp,ni_cur
+        double precision,save::vals
+        integer ,save:: all
+        double precision,dimension(:),allocatable,save ::range
+        !double precision,parameter::pi = 3.141592653589793238462643d0
+        double precision,dimension(:),allocatable,save:: vi
+        integer,dimension(:),allocatable,save:: nmesrec,nmesy,nmesrec1
+        integer,save :: maxmesy, maxmesrec
+        integer,dimension(:),allocatable,save:: groupee,groupeey
 !*****dace1
     double precision,dimension(:),allocatable,save::date,datedc
     double precision,dimension(:),allocatable,save::zi,zidc
 
 !*****dace2
     double precision,dimension(:),allocatable,save::t0dc,t1dc
-    double precision,dimension(:),allocatable,save::t0,t1,t2,t3,tU
+    double precision,dimension(:),allocatable,save::t0,t1,t2,t3,yy,tU
     integer,dimension(:),allocatable,save:: c, cdc
     integer,dimension(:),allocatable,save:: nt0,nt1,ntU
     integer,dimension(:),allocatable,save:: nt0dc,nt1dc
-    integer,save::nsujet,nva,nva1,nva2,ndate,ndatedc,nst,nstRec
+    integer,save::nsujet,nva,nva1,nva2,nva3,ndate,ndatedc,nst,nstRec,nsujety,nobs,np_e
 !*****dace4
     integer,dimension(:),allocatable,save::stra
 !*****ve1
     double precision,dimension(:,:),allocatable,save::ve
     double precision,dimension(:,:),allocatable,save::vedc
+	double precision,dimension(:,:),allocatable,save::vey
+!*** donnees longitudinales
+	double precision,save::vet3
+!***** random effects
+        double precision,dimension(:,:),allocatable,save :: ziy,ziyd,ziyr!random effects for y
+         double precision,save :: sigmae                         !sigma of epsilon
+        double precision,save :: etaydc1, etaydc2,etayr1,etayr2                 !reg coef for link functions
+        integer,save :: nb_re,netar,netadc
+        integer,save :: linkidyr,linkidyd,link
+        double precision,dimension(:,:),allocatable,save::Ut,Utt,varcov_marg,sum_mat
+         !****** censure à gauche
+        double precision,save :: s_cag
+        integer,save :: s_cag_id
 !*****dace3
     double precision,save::pe
     integer,save::effet,nz1,nz2,nzloco,nzdc
@@ -142,6 +203,16 @@
 ! distribution des frailty par une log-normale
     integer::logNormal,timedep
     double precision,save::sig2
+	
+	 double precision,dimension(:),allocatable,save::b_e
+        integer,save::nea,nb1
+        double precision,dimension(:),allocatable,save::timecur,timecur2
+        double precision,dimension(:),allocatable,save::the1_e
+        !parametres pour GH pseudo-adaptative
+        double precision,dimension(:),allocatable,save::invBi_cholDet
+        double precision,dimension(:,:),allocatable,save:: invBi_chol,b_lme
+        integer :: methodGH,nodes_number
+        integer :: res_ind
     end module comon
 !=====================================================================================
 
@@ -158,7 +229,7 @@
     double precision,dimension(:),allocatable,save::temps0dc,temps1dc
     double precision,dimension(:,:),allocatable,save::variable
     double precision,dimension(:),allocatable,save::Binit
-    double precision,dimension(:,:),allocatable,save::ve1,ve2
+    double precision,dimension(:,:),allocatable,save::ve1,ve2,ve3
     end module comongroup
 
     module jointmods
@@ -202,18 +273,21 @@
         double precision,dimension(:),allocatable,save::Residus &
         ,varResidus,cumulhaz,vecuiRes,post_esp,post_SD,som_Xbeta
         double precision,dimension(:),allocatable,save::ResidusRec,&
-        Residusdc,Rrec,Nrec,Rdc,Ndc,vecviRes,RisqCumul
+        Residusdc,Rrec,Nrec,Rdc,Ndc,vecviRes,RisqCumul,ResidusLongi,Rdc_res
         double precision,save::cares,cbres,ddres
         double precision,dimension(:),allocatable,save:: vres
-        integer , save :: ierres,nires,istopres,effetres,indg
+        integer , save :: ierres,nires,istopres,effetres,indg,it_res,it_res_rec
         double precision,save::rlres,varuiR,moyuiR,varviR,moyviR,corruiviR
         double precision,dimension(:),allocatable::vuu,b_temp
         integer,save::indic_cumul
         integer,dimension(:),allocatable::n_ssgbygrp
-        double precision,dimension(:,:),allocatable,save::cumulhaz1,cumulhaz0,invsigma
+        double precision,dimension(:,:),allocatable,save::vecuiRes2,cumulhaz1,cumulhaz0&
+				,invsigma,zet,zetd,zetr,XbetaY_res,Pred_y
         double precision,save::detSigma
            integer,save :: nig_mc,np_mc
 	double precision,save :: sig2_mc,res1_mc
+	  double precision,dimension(:),allocatable,save::mu1_res
+              
 
     end module residusM
 
@@ -225,7 +299,7 @@
     double precision,dimension(:,:),allocatable,save::HI2
     double precision,dimension(:,:),allocatable,save::HIH,IH,HI
     double precision,dimension(:,:),allocatable,save::BIAIS
-    double precision,dimension(:),allocatable,save:: vax,vaxdc,vaxmeta
+    double precision,dimension(:),allocatable,save:: vax,vaxdc,vaxmeta,vaxy
     integer,dimension(:),allocatable,save::filtre,filtre2,filtre3
     integer,save::ver
 

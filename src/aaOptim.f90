@@ -169,7 +169,7 @@
         goto 110
     end if
 
-!      write(*,*)'iteration***',ni,'vrais',rl
+  !   write(*,*)'iteration***',ni,'vrais',rl
 
         dd = 0.d0
 
@@ -202,6 +202,8 @@
         dd=GHG/dble(m)
     end if
 
+  !write(*,*)'epsa',ca,'epsb',cb,'epsd',dd
+    !write(*,*)'b',b
 
 !     print*,ca,cb,dd
 !     print*,b

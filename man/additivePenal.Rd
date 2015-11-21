@@ -45,7 +45,7 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
 
   \item{formula}{ a formula object, with the response on the left of a \eqn{\texttildelow} operator, and the terms on the right. 
  The response must be a survival object as returned by the 'Surv' function like in survival
- package. The \code{slope()} function is required.}
+ package. The \code{slope()} function is required.  Interactions are possible using * or :.}
 
   \item{data}{a 'data.frame' with the variables used in 'formula'.}
 
@@ -73,18 +73,18 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
    identify several possible tuning parameters, note their defaults and look at the sensitivity of the results to
    varying them. Value required. (See Note)}
 
-  \item{maxit}{maximum number of iterations for the Marquardt algorithm.
+  \item{maxit}{maximum number of iterations for the Marquardtt algorithm.
  Default is 350}
 
-  \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazards functions using percentile, "Piecewise-equi" for piecewise constant hazard functions using equidistant intervals, "Weibull" for parametric weibull functions. Default is "Splines".}
+  \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazards functions using percentile, "Piecewise-equi" for piecewise constant hazard functions using equidistant intervals, "Weibull" for parametric Weibull functions. Default is "Splines".}
 
   \item{nb.int}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 
-  \item{LIMparam}{Convergence threshold of the Marquard algorithm for the parameters (see Details), \eqn{10^{-4}} by default.}
+  \item{LIMparam}{Convergence threshold of the Marquardt algorithm for the parameters (see Details), \eqn{10^{-4}} by default.}
 
-  \item{LIMlogl}{Convergence threshold of the Marquard algorithm for the log-likelihood (see Details), \eqn{10^{-4}} by default.}
+  \item{LIMlogl}{Convergence threshold of the Marquardt algorithm for the log-likelihood (see Details), \eqn{10^{-4}} by default.}
 
-  \item{LIMderiv}{Convergence threshold of the Marquard algorithm for the gradient (see Details), \eqn{10^{-3}} by default.}
+  \item{LIMderiv}{Convergence threshold of the Marquardt algorithm for the gradient (see Details), \eqn{10^{-3}} by default.}
 
   \item{print.times}{a logical parameter to print iteration process. Default is TRUE.}
 }
@@ -94,7 +94,7 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
 
 The estimated parameter are obtained by maximizing the penalized
  log-likelihood or by a simple log-likelihood (in the parametric case) using
-  the robust Marquardt algorithm (Marquardt,1963).
+  the robust Marquardtt algorithm (Marquardtt,1963).
  The parameters are initialized with values obtained with Cox proportional
  hazard model. The iterations are stopped when the difference between two
  consecutive loglikelhoods was small \eqn{(<10^{-4})}, the estimated coefficients
@@ -159,11 +159,11 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 \item{npar}{number of parameters.}
 \item{nvar}{number of explanatory variables.}
 \item{noVar}{indicator of explanatory variable.}
-\item{LCV}{the approximated likelihood cross-validation criterion in the semiparametric case (with H minus the converged hessien matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semiparametric case (with H minus the converged Hessian matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
 \item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{n.knots.temp}{initial value for the number of knots.}
-\item{shape.weib}{shape parameter for the weibull hazard function.}
-\item{scale.weib}{scale parameter for the weibull hazard function.}
+\item{shape.weib}{shape parameter for the Weibull hazard function.}
+\item{scale.weib}{scale parameter for the Weibull hazard function.}
 \item{martingale.res}{martingale residuals for each cluster.}
 \item{frailty.pred}{empirical Bayes prediction of the first frailty term.}
 \item{frailty.pred2}{empirical Bayes prediction of the second frailty term.}
@@ -181,7 +181,7 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 
 "kappa" and "n.knots" are the arguments that the user have to change if the fitted model does not converge. 
 "n.knots" takes integer values between 4 and 20. But with n.knots=20, the model would take a long time to converge. So, usually, begin first with n.knots=7, and increase it step by step until it converges.
-"kappa" only takes positive values. So, choose a value for kappa (for instance 10000), and if it does not converge, multiply or devide this value by 10 or 5 until it converges.
+"kappa" only takes positive values. So, choose a value for kappa (for instance 10000), and if it does not converge, multiply or divide this value by 10 or 5 until it converges.
 
 }
 
@@ -191,10 +191,7 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.
 \emph{Journal of Statistical Software} \bold{47}, 1-28.
 
-V. Rondeau, S. Michiels, B. Liquet, and J. P. Pignon (2008).
-
- Investigating trial and treatment heterogeneity in an individual patient data meta-analysis of survival data
- by mean of the maximum penalized likelihood approach.
+V. Rondeau, S. Michiels, B. Liquet, and J. P. Pignon (2008). Investigating trial and treatment heterogeneity in an individual patient data meta-analysis of survival data by mean of the maximum penalized likelihood approach.
 \emph{Statistics in Medecine}, \bold{27}, 1894-1910.
 }
 

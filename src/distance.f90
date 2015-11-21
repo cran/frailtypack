@@ -954,7 +954,7 @@
     do i=1,ns*(ns+1)/2
         vv(i)=vvv(i)
     end do
-	
+    
     ep=10.d-10
     call dmfsdj(vv,m,ep,ier)
 
@@ -984,7 +984,7 @@
         lamT=0.d0 ! en plus
 !         n=n+1 ! compteur sur niÃ¨me temps
         if(t.ne.1) then
-            x=x+(cens-mint)/(mt-1)	
+            x=x+(cens-mint)/(mt-1)    
         end if
 ! On simule 1000 rÃ©alisations gaussienne par paramÃ¨tre
         do k=1,1000
@@ -1092,7 +1092,7 @@
 
         if(t==1) then
             !xSu1(t) = mint !date(1)
-            xSuT(t,1)= mint		
+            xSuT(t,1)= mint        
         else
             !xSu1(t) = real(x)
             xSuT(t,1)=real(x)
@@ -1129,7 +1129,7 @@
 !=========================================================================================================
 !=========================================================================================================
 !=========================================================================================================
-!=========================================================================================================	
+!=========================================================================================================    
 !nouvelle fonction remplaÃ§ant distancecpm pour le modÃ¨le Cox et shared
 !en plus strates A.Lafourcade 05/2014 on remplace les diffÃ©rents tableaux de chaque strate par un unique tableau
 !ayant une dimention de plus pour les strates et on fait des boucles sur les strates
@@ -1616,6 +1616,7 @@
     end do
 
     do i=1,nbintervDC
+
         tempsDC(i)=(tttdc(i-1)+tttdc(i))/(2.d0)
     end do
 
@@ -3160,4 +3161,293 @@
     end subroutine distanceJ_weib
     
 
+    
+!===========================================================
+!=========== Joint model for longitudinal data and a terminal event =========
+!===========================================================
+
+        subroutine distanceLongisplines(nz1,b,mt,xTOut,lamTOut,suTOut)
+    
+        use tailles,only:ndatemaxdc,npmax
+        use comon,only:date,zi,t0dc,t1dc,cdc,nt0dc,nt1dc,ng,nva,ndatedc, &
+        I_hess,H_hess,Hspl_hess,hess
+    
+        implicit none
+    
+        integer::nz1,i,j,n,np,mt,nzT
+        double precision::h,su,bsup,binf,lam,lbinf, &
+        lbsup,x
+        double precision,dimension(npmax,npmax)::hesT !en plus
+    !     double precision,dimension(npmax,npmax)::hes1,hes2
+    !     double precision,dimension(-2:npmax)::the1,the2
+        double precision,dimension(-2:npmax)::theT
+        double precision,dimension(npmax)::b
+    !     double precision,dimension(mt,3)::lamOut,suOut,lam2Out,su2Out
+        double precision,dimension(mt,3)::lamTOut,suTOut
+        !double precision,dimension(mt)::x1Out,x2Out
+        double precision,dimension(mt)::xTOut
+    
+    
+    
+        n  = nz1+2
+        np=npmax
+        nzT=nz1
+    
+        do i=1,nz1+2
+            do j=1,nz1+2
+                hesT(i,j)=hess(i,j)
+            end do
+        end do
+    
+        do i=1,nz1+2
+            theT(i-3)=(b(i))*(b(i))
+        end do
+    
+    
+            h = (zi(n)-zi(1))/(mt-1) ! Al modif : *0.01d0 ! attention depend de mt
+            x = zi(1) !en plus
+    
+        do i=1,mt
+    
+                if(i.ne.1)then
+                    x = x + h!en plus
+                endif
+                call cosps(x,theT,nzT+2,hesT,zi,binf,su,bsup,lbinf,lam,lbsup)!en plus
+    
+    
+                if(bsup.lt.0.d0)then
+                    bsup = 0.d0
+                endif
+    
+                if(bsup.gt.1.d0)then
+                    bsup = 1.d0
+                endif
+    
+                if(binf.gt.1.d0)then
+                    binf = 1.d0
+                endif
+                if(lbinf.lt.0.d0)then
+                    lbinf = 0.d0
+                endif
+    
+                xTOut(i)=x
+                lamTOut(i,1)=lam
+                lamTOut(i,2)=lbinf
+                lamTOut(i,3)=lbsup
+                suTOut(i,1)=su
+                suTOut(i,2)=binf
+                suTOut(i,3)=bsup
+    
+            end do
+    
+        return
+    
+    
+        end subroutine distanceLongisplines
+    
+    
+    
+    !=========================================================================================================
+    !=========================================================================================================
+    !=========================================================================================================
+    !=========================================================================================================
+    
+        subroutine distanceLongiweib(b,m,mt,xR2,moyLamR2,xSu2,moysuR2)
+    
+        use tailles
+        use comon,only:cens,vvv,t0dc,t1dc,cdc,ng &
+        ,nva,nva1,nva2,nva3,nst,typeof2,etaD,betaD,datedc,mint
+        use optim
+    
+        implicit none
+    
+        integer,intent(in)::m,mt
+        integer::i,j,ier,t,k,ns
+        double precision::lamDC25,suDC25,lamDC975,suDC975, &
+        LamDCW,suDCW
+            double precision,dimension(m*(m+1)/2)::vv
+        double precision,dimension(m)::b,bgen
+        double precision,dimension(1000,m)::u
+        double precision::sx,som,x,zz,zy
+        double precision,dimension(1000):: lamDC,suDC,glDC
+    ! theorique - estimés après Max de Vrais
+        double precision::glDCW
+    
+        double precision,dimension(mt)::xR2
+        double precision,dimension(mt,3)::moyLamR2
+        double precision,dimension(100,3)::moysuR2
+        double precision,dimension(100)::xSu2
+        double precision::ep
+    
+    
+    
+    
+        lamDC25=0.d0
+        suDC25=0.d0
+        lamDC975=0.d0
+        suDC975=0.d0
+        LamDCW=0.d0
+        suDCW=0.d0
+        ier=0
+        t=0
+        k=0
+        ns=0
+        sx=1.d0 ! ecart-type ou variance des réalisations gaussiennes générées
+        !typeof2 = 1 shared weib
+    
+            ns=2
+    
+        do i=1,ns*(ns+1)/2
+            vv(i)=vvv(i)
+        end do
+    
+        ep=10.d-10
+        call dmfsdj(vv,m,ep,ier)
+    
+        do k=1,1000!0
+            do j=1,ns
+                call bgos(SX,0,zz,zy,0.d0)
+                u(k,j)=zz
+            end do
+        end do
+    
+    
+    !     Pour chaque temps de 0 à la censure du décès par pas cens/100
+    
+    !     commencer à 0 dans la boucle
+            if(datedc(1).eq.0) then
+            x=datedc(2)
+            mint = datedc(2)
+            else
+                    x=datedc(1)
+                    mint=datedc(1)
+            end if
+    !       shape et scale
+    
+    
+            betaD = b(1)**2
+            etaD =  b(2)**2
+    
+    
+        do t=1,mt
+    
+            lamDC=0.d0
+    !         n=n+1 ! compteur sur nième temps
+            if(t.ne.1) then
+                x=x+(cens-mint)/(mt-1)
+            end if
+    
+    ! On simule 1000 réalisations gaussienne par paramètres
+            do k=1,1000
+    !     Pour chaque paramètre estimé
+                do i=1,ns
+                    som=0.d0
+                    do j=1,i         ! cela correspond au produit trp(L)%*%U
+                        som=som+vv(i*(i-1)/2+j)*u(k,j)
+                    end do
+                    bgen(i)=(b(i)+som)**2
+                end do              ! en sortie on récupère le nouveau vecteur b
+    
+    
+    
+                    lamDC(k)=(bgen(1)*(x**(bgen(1)-1.d0)))/(bgen(2)**bgen(1))
+                    lamDCW=((b(1)**2)*(x**((b(1)**2)-1.d0)))/((b(2)**2)**(b(1)**2))
+            end do
+    
+    ! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+    
+        call percentile(lamDC,lamDC25,lamDC975)
+    
+    !----- strate 1
+            if(t == 1) then
+                            if(datedc(1).eq.0) then
+                                    xR2(t)=datedc(2)
+                            else
+                                    xR2(t)=datedc(1)
+                            end if
+    
+            else
+                xR2(t) = real(x)
+            end if
+    
+    
+                moyLamR2(t,1) = real(lamDCW)
+                moyLamR2(t,2) = real(lamDC25)
+                moyLamR2(t,3) = real(lamDC975)
+    
+        end do
+    
+        if(datedc(1).eq.0) then
+            x=datedc(2)
+            else
+                    x=datedc(1)
+            end if
+    
+        do t=1,100
+    
+            glDC=0.d0
+            suDC=0.d0
+    !         n=n+1 ! compteur sur nième temps
+            if(t.ne.1) then
+            x=x+(cens-mint)/(mt-1) !x+(cens-mint)/99 !100
+            end if
+    ! On simule 1000 réalisations gaussienne par paramètres
+            do k=1,1000
+    !     Pour chaque paramètre estimé
+                do i=1,ns
+                    som=0.d0
+                    do j=1,i         ! cela correspond au produit trp(L)%*%U
+                        som=som+vv(i*(i-1)/2+j)*u(k,j)
+                    end do
+                    bgen(i)=(b(i)+som)**2
+                end do              ! en sortie on récupère le nouveau vecteur b
+    
+    
+                    glDC(k)  =  (x/bgen(2))**bgen(1)
+                    suDC(k)  = dexp(-glDC(k))
+                    glDCW  =  (x/(b(2)**2))**(b(1)**2)
+                    suDCW  = dexp(-glDCW)
+    
+            end do
+    
+    ! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+    
+    
+                call percentile(suDC,suDC25,suDC975)
+    
+            if(t==1) then
+                xSu2(t) = mint !date(1)
+            else
+                xSu2(t) = real(x)
+            end if
+    
+    
+    
+                moysuR2(t,1) = real(suDCW)
+                moysuR2(t,2) = real(suDC25)
+                moysuR2(t,3) = real(suDC975)
+                if(moysuR2(t,1).lt.0.d0)then
+                    moysuR2(t,1) = 0.d0
+                endif
+                if(moysuR2(t,1).gt.1.d0)then
+                    moysuR2(t,1) = 1.d0
+                endif
+    
+                if(moysuR2(t,2).lt.0.d0)then
+                    moysuR2(t,2) = 0.d0
+                endif
+                if(moysuR2(t,2).gt.1.d0)then
+                    moysuR2(t,2) = 1.d0
+                endif
+                if(moysuR2(t,3).lt.0.d0)then
+                    moysuR2(t,3) = 0.d0
+                endif
+                if(moysuR2(t,3).gt.1.d0)then
+                    moysuR2(t,3) = 1.d0
+                endif
+    
+        end do
+    
+    
+        end subroutine distanceLongiweib
 

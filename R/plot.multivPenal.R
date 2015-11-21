@@ -1,17 +1,17 @@
 "plot.multivPenal" <-
-function (x, event="both", type.plot="hazard", conf.bands=FALSE, pos.legend="topright", cex.legend=0.7, ylim, main, color1="red", color2="blue", colorEnd="green", ...) 
+function (x, event="Both", type.plot="Hazard", conf.bands=FALSE, pos.legend="topright", cex.legend=0.7, ylim, main, color1="red", color2="blue", colorEnd="green", ...) 
 {
   
-   event.type <- charmatch(event, c("both", "recurrent1", "recurrent2", "terminal"), nomatch = 0)
+   event.type <- charmatch(event, c("Both", "Recurrent1", "Recurrent2", "Terminal"), nomatch = 0)
     if (event.type == 0) {
-        stop("event must be 'both', 'recurrent1', 'recurrent2' or 'terminal'")
+        stop("event must be 'Both', 'Recurrent1', 'Recurrent2' or 'Terminal'")
     }
 
 
-   plot.type <- charmatch(type.plot, c("hazard", "survival"), 
+   plot.type <- charmatch(type.plot, c("Hazard", "Survival"), 
         nomatch = 0)
     if (plot.type == 0) {
-        stop("estimator must be 'hazard' or 'survival'")
+        stop("estimator must be 'Hazard' or 'Survival'")
     }
 
 

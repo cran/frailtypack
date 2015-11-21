@@ -62,7 +62,7 @@ data(readmission)
 
 sha.time <- frailtyPenal(Surv(time,event)~cluster(id)+dukes+charlson+
 timedep(sex)+chemo,data=readmission,n.knots=8,kappa=1,
-betaknots=3,betaorder=1)
+betaknots=3,betaorder=3)
 
 #-- print results of the fit and the associated curves for the
 #-- time-dependant effects
@@ -72,7 +72,7 @@ print(sha.time)
 
 joi.time <- frailtyPenal(Surv(time,event)~cluster(id)+timedep(sex)+
 chemo+terminal(death),formula.terminalEvent=~timedep(sex)+chemo,
-data=readmission,n.knots=8,kappa=c(1,1),betaknots=3,betaorder=1)
+data=readmission,n.knots=8,kappa=c(1,1),betaknots=3,betaorder=3)
 
 print(joi.time)
 

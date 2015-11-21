@@ -13,17 +13,17 @@
 
 \usage{
 
-\method{plot}{nestedPenal}(x, type.plot="hazard", conf.bands=TRUE,
+\method{plot}{nestedPenal}(x, type.plot="Hazard", conf.bands=TRUE,
  pos.legend="topright", cex.legend=0.7, main, color=2, ...)
 
 }
 
 \arguments{
-  \item{x}{ A nested model, more generaly an object of class \code{frailtyPenal for Nested frailty models} (output from calling \code{frailtyPenal}
+  \item{x}{ A nested model, i.e. an object of class \code{frailtyPenal} for Nested frailty models (output from calling \code{frailtyPenal}
     function).}
   \item{type.plot}{ a character string specifying the type of curve. Possible
-                   value are "hazard", or "survival". The default
-                   is "hazard". Only the first words are required, e.g "haz", "su"}
+                   value are "Hazard", or "Survival". The default
+                   is "Hazard". Only the first words are required, e.g "Haz", "Su"}
   \item{conf.bands}{ logical value. Determines whether confidence bands will be plotted. The default is to do so.}
   \item{pos.legend}{The location of the legend can be specified by setting this argument to a single keyword from the list '"bottomright"', '"bottom"', '"bottomleft"', '"left"', '"topleft"', '"top"', '"topright"', '"right"' and
      '"center"'. The default is '"topright"'}

@@ -1,10 +1,10 @@
 "frailtyPenal" <-
   function (formula, formula.terminalEvent, data, recurrentAG=FALSE, cross.validation=FALSE, jointGeneral, n.knots, kappa,
             maxit=350, hazard="Splines", nb.int, RandDist="Gamma", betaknots=1, betaorder=3, init.B,
-            init.Theta, init.Alpha, Alpha, init.eta, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE, ...)
+            init.Theta, init.Alpha, Alpha, init.Eta, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE, ...)
   {
     if (missing(jointGeneral)) jointGeneral<-FALSE
-    if (!missing(init.eta) & jointGeneral)  init.Alpha <- init.eta
+    if (!missing(init.Eta) & jointGeneral)  init.Alpha <- init.Eta
     
     # al suppression de l'argument joint
     if (!missing(formula.terminalEvent)) joint <- TRUE
@@ -145,9 +145,11 @@
     }
     
     ord <- attr(Terms, "order") # longueur de ord=nbre de var.expli
-    
-    if (length(ord) & any(ord != 1))stop("Interaction terms are not valid for this function")
+   
+    #if (length(ord) & any(ord != 1))stop("Interaction terms are not valid for this function")
     #si pas vide tous si il ya au moins un qui vaut 1 on arrete
+    
+   
     
     m$formula <- Terms
     
@@ -228,7 +230,7 @@
     }
     
     ll <- attr(Terms, "term.labels")#liste des variables explicatives
-    
+ 
     #cluster(id) as.factor(dukes) as.factor(charlson) sex chemo terminal(death)
     
     #=========================================================>
@@ -238,7 +240,7 @@
     X <- if (!is.empty.model(mt))model.matrix(mt, m, contrasts) #idem que mt sauf que ici les factor sont divise en plusieurs variables
     
     ind.place <- unique(attr(X,"assign")[duplicated(attr(X,"assign"))]) ### unique : changement au 25/09/2014
-    
+
     
     vec.factor <- NULL
     vec.factor <- c(vec.factor,ll[ind.place])
@@ -272,6 +274,7 @@
     
     if (length(subcluster)){
       ll <- ll[-grep("subcluster",ll)]
+      
     }
     if (length(cluster)){
       ll_tmp <- ll[grep("cluster",ll)]
@@ -282,7 +285,7 @@
       Names.cluster <- substr(ll_tmp,start=pos1,stop=pos2) # nom du cluster
     }
     if (length(strats)){
-      ll <- ll[-grep("strata",ll)]
+       ll <- ll[-grep("strata",ll)]
     }
     
     #   plus besoin de as.factor() pour afficher le test de Wald global
@@ -290,23 +293,48 @@
     if (length(grep("cluster",vec.factor))) vec.factor <- vec.factor[-grep("cluster",vec.factor)]
     if (length(grep("subcluster",vec.factor))) vec.factor <- vec.factor[-grep("subcluster",vec.factor)]
     if (length(grep("num.id",vec.factor))) vec.factor <- vec.factor[-grep("num.id",vec.factor)]
-    
+
+ 
+
     mat.factor <- matrix(vec.factor,ncol=1,nrow=length(vec.factor))
-    # Fonction servant a prendre les termes entre "as.factor"
+    # Fonction servant a prendre les termes entre "as.factor" et (AK 04/11/2015) interactions
     vec.factor <-apply(mat.factor,MARGIN=1,FUN=function(x){
       if (length(grep("factor",x))>0){
+        if(length(grep(":",x))>0){
+         if(grep('\\(',unlist(strsplit(x,split="")))[1]<grep(":",unlist(strsplit(x,split="")))[1] && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+          
+           pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+           pos2 <- grep(":",unlist(strsplit(x,split="")))[1]-2
+           pos3 <- grep(":",unlist(strsplit(x,split="")))[1]
+           pos4 <- length(unlist(strsplit(x,split="")))
+           return(paste(substr(x,start=pos1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+         }else if(grep("\\(",unlist(strsplit(x,split="")))[1]>grep(":",unlist(strsplit(x,split="")))[1] && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+           pos2 <- grep(":",unlist(strsplit(x,split="")))[1]
+           pos3 <- grep("\\(",unlist(strsplit(x,split="")))[1]+1
+           pos4 <- length(unlist(strsplit(x,split="")))-1
+           return(paste(substr(x,start=1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+         }else{#both factors
+           pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+           pos2 <- grep(":",unlist(strsplit(x,split="")))[1]-2
+           pos3 <- grep("\\(",unlist(strsplit(x,split="")))[2]+1
+           pos4 <- length(unlist(strsplit(x,split="")))-1
+           return(paste(substr(x,start=pos1,stop=pos2),":",substr(x,start=pos3,stop=pos4),sep=""))
+         }
+        }else{
         pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
         pos2 <- length(unlist(strsplit(x,split="")))-1
-        return(substr(x,start=pos1,stop=pos2))
+        return(substr(x,start=pos1,stop=pos2))}
       }else{
         return(x)
       }})
-    
-    ind.place <- grep(paste(vec.factor,collapse="|"),ll)
-    
+ 
+
+  if(length(grep("terminal",ll))>0){ind.place <- grep(paste(vec.factor,collapse="|"),ll[-grep("terminal",ll)])
+  }else{ind.place <- grep(paste(vec.factor,collapse="|"),ll)}
+  
     if(length(vec.factor) > 0){
       vect.fact <- attr(X,"dimnames")[[2]]
-      
+     
       #vect.fact <- vect.fact[grep("factor",vect.fact)]
       vect.fact <- vect.fact[grep(paste(vec.factor,collapse="|"),vect.fact)]
       
@@ -314,15 +342,37 @@
       # 		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
       # 		pos2 <- grep(")",unlist(strsplit(x,split="")))[1]-1
       # 		return(substr(x,start=pos1,stop=pos2))})
+       occur <- rep(0,length(vec.factor))
+   
+   interaction<-as.vector(apply(matrix(vect.fact,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){length(grep(":",unlist(strsplit(x,split=""))))}))
+    which.interaction <- which(interaction==1)
+ 
+   for(i in 1:length(vec.factor)){
+       
+       if(length(grep(":",unlist(strsplit(vec.factor[i],split=""))))>0){
+  
       
-      occur <- rep(0,length(vec.factor))
-      
-      for(i in 1:length(vec.factor)){
-        #occur[i] <- sum(vec.factor[i] == vect.fact)
-        occur[i] <- length(grep(vec.factor[i],vect.fact))
+         pos <- grep(":",unlist(strsplit(vec.factor[i],split="")))
+         length.grep <- 0
+         for(j in 1:length(vect.fact)){
+           if(j%in%which.interaction){
+            
+               if(length(grep(substr(vec.factor[i],start=1,stop=pos-1),vect.fact[j]))>0 && length(grep(substr(vec.factor[i],start=pos+1,stop=length(unlist(strsplit(vec.factor[i],split="")))),vect.fact[j]))>0){
+             length.grep <- length.grep + 1
+              which <- i}
+           }}
+           occur[i] <- length.grep
+         
+       }else{
+         
+         
+         if(length(vect.fact[-which.interaction])>0){occur[i] <- length(grep(vec.factor[i],vect.fact[-which.interaction]))
+         }else{occur[i] <- length(grep(vec.factor[i],vect.fact))}
+       }
       }
     }
-    
+
+
     #=========================================================>
     
     terminalEvent <- attr(Terms, "specials")$terminal #nbre de var qui sont en fonction de terminal()
@@ -335,6 +385,7 @@
       if (any(ord > 1))stop("Cluster can not be used in an interaction")
       
       cluster <- strata(m[, tempc$vars], shortlabel = TRUE)
+    
       dropx <- tempc$terms
       uni.cluster<-unique(cluster)
     }else if (!length(cluster) & Frailty == TRUE){
@@ -431,7 +482,7 @@
     
     #type <- attr(Y, "type")
     type <- typeofY
-    
+ 
     if (type != "right" && type != "counting" && type != "interval" && type != "intervaltronc") { # Cox supporte desormais la censure par intervalle
       stop(paste("Cox model doesn't support \"", type, "\" survival data", sep = ""))
     }
@@ -482,8 +533,8 @@
       noVar1 <- 0
     }
     # on enleve ensuite la premiere colonne correspondant a id
-    
-    
+ 
+
     nvar<-ncol(X) #nvar==1 correspond a 2 situations:
     
     # au cas ou on a aucune var explicative dans la partie rec, mais X=0
@@ -544,9 +595,10 @@
       crossVal<-ifelse(cross.validation,0,1)
     }
     
-    
+
     #=======================================>
     #======= Construction du vecteur des indicatrice
+
     if(length(vec.factor) > 0){
       #		ind.place <- ind.place -1
       k <- 0
@@ -555,6 +607,7 @@
         k <- k + occur[i]-1
       }
     }
+
     #==================================
     # Begin SHARED MODEL
     #
@@ -618,7 +671,7 @@
         cat("\n")
         cat("Be patient. The program is computing ... \n")
       }
-      
+  
       ans <- .Fortran("frailpenal",
                       
                       as.integer(n),
@@ -735,6 +788,8 @@
       {
         fit$coef <- ans[[20]][(np - nvar - npbetatps + 1):np]
         noms <- factor.names(colnames(X))
+        if(length(grep(":",noms))>0)noms <- factor.names(noms)
+   
         if (timedep == 1){ # on enleve les parametres des B-splines qui ne serviront pas a l'utilisateur
           while (length(grep("timedep",noms))!=0){
             pos <- grep("timedep",noms)[1]
@@ -758,6 +813,7 @@
         fit$varH <- temp1[(np - nvar - npbetatps + 1):np, (np - nvar - npbetatps + 1):np]
         fit$varHIH <- temp2[(np - nvar - npbetatps + 1):np, (np - nvar - npbetatps + 1):np]
         noms <- factor.names(colnames(X))
+        if(length(grep(":",noms))>0)noms <- factor.names(noms)
         if (timedep == 1){ # on enleve les variances des parametres des B-splines
           while (length(grep("timedep",noms))!=0){
             pos <- grep("timedep",noms)[1]
@@ -852,6 +908,7 @@
           VarBeta <- fit$varH#[2:(nvar+1),2:(nvar+1)]
           nfactor <- length(vec.factor)
           p.wald <- rep(0,nfactor)
+         # print(nvar);print(nfactor);print(ind.place);print(occur);print(Beta)
           fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
           fit$dof_chisq <- occur
           fit$global_chisq.test <- 1
@@ -899,6 +956,20 @@
             clusterdc <- aggregate(cluster,by=list(num.id),FUN=function(x) x[length(x)])[,2]
             tt1.death <- 0
             tt0.death <- 0
+            
+            tt1 <- aggregate(tt1,by=list(num.id), FUN=function(x) x[1])[,2]
+            tt0 <- aggregate(tt0,by=list(num.id), FUN=function(x) x[1])[,2]
+            cluster <- aggregate(cluster,by=list(num.id), FUN=function(x) x[1])[,2]
+            table <- as.data.frame(cbind(tt0,tt1,cluster))
+            table <- table[order(table$cluster),]
+            
+            cluster <- table$cluster
+            tt1 <- table$tt1
+            tt0 <- table$tt0            
+            
+            n <- length(tt0)
+            uni.cluster<-unique(num.id)#unique(cluster)
+          
           }else{
             tt1.death<-aggregate(tt1,by=list(cluster),FUN=sum)[,2]
             tt0.death<-rep(0,length(tt1.death))
@@ -916,6 +987,21 @@
             tt1.death <- 0
             tt0.death <- 0
             
+            tt1 <- aggregate(tt1,by=list(num.id), FUN=function(x) x[1])[,2]
+            tt0 <- aggregate(tt0,by=list(num.id), FUN=function(x) x[1])[,2]
+            cluster <- aggregate(cluster,by=list(num.id), FUN=function(x) x[1])[,2]
+            table <- as.data.frame(cbind(tt0,tt1,cluster))
+            table <- table[order(table$cluster),]
+            
+            cluster <- table$cluster
+            tt1 <- table$tt1
+            tt0 <- table$tt0            
+           
+            n <- length(tt0)
+            uni.cluster<-unique(num.id)#unique(cluster)
+            
+           
+           # print(length(uni.cluster))
             # 				tt0 <- aggregate(tt0,by=list(num.id),FUN=function(x) x[1])[,2]
             # 				tt1 <- aggregate(tt1,by=list(num.id),FUN=function(x) x[1])[,2]
             # 				cens <- aggregate(cens,by=list(num.id),FUN=function(x) x[1])[,2]
@@ -968,6 +1054,7 @@
         if(joint.clust==0){
           tempdc0 <- aggregate(tt0,by=list(num.id),FUN=function(x) x[length(x)])[,2]
           tempdc <- aggregate(tt1,by=list(num.id),FUN=function(x) x[length(x)])[,2]
+      
           lignedc0 <- length(tempdc)
           #tempdc <- cbind(rep(0,lignedc0),tempdc)
           tempdc <- cbind(tempdc0,tempdc)
@@ -1035,7 +1122,7 @@
         ord2 <- attr(Terms2, "order")
         
         if (length(ord2) & any(ord2 != 1)){
-          stop("Interaction terms are not valid for terminal event formula")
+   #       stop("Interaction terms are not valid for terminal event formula")
         }
       }
       #AD:
@@ -1101,9 +1188,30 @@
         # Fonction servant a prendre les termes entre "as.factor"
         vec.factordc <-apply(mat.factordc,MARGIN=1,FUN=function(x){
           if (length(grep("factor",x))>0){
-            pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-            pos2 <- length(unlist(strsplit(x,split="")))-1
-            return(substr(x,start=pos1,stop=pos2))
+            if(length(grep(":",x))>0){
+              if(grep('\\(',unlist(strsplit(x,split="")))[1]<grep(":",unlist(strsplit(x,split="")))[1]  && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+                
+                pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+                pos2 <- grep(":",unlist(strsplit(x,split="")))[1]-2
+                pos3 <- grep(":",unlist(strsplit(x,split="")))[1]
+                pos4 <- length(unlist(strsplit(x,split="")))
+                return(paste(substr(x,start=pos1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+              }else if(grep("\\(",unlist(strsplit(x,split="")))[1]>grep(":",unlist(strsplit(x,split="")))[1] && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+                pos2 <- grep(":",unlist(strsplit(x,split="")))[1]
+                pos3 <- grep("\\(",unlist(strsplit(x,split="")))[1]+1
+                pos4 <- length(unlist(strsplit(x,split="")))-1
+                return(paste(substr(x,start=1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+              }else{#both factors
+                pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+                pos2 <- grep(":",unlist(strsplit(x,split="")))[1]-2
+                pos3 <- grep("\\(",unlist(strsplit(x,split="")))[2]+1
+                pos4 <- length(unlist(strsplit(x,split="")))-1
+                return(paste(substr(x,start=pos1,stop=pos2),":",substr(x,start=pos3,stop=pos4),sep=""))
+              }
+            }else{
+              pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+              pos2 <- length(unlist(strsplit(x,split="")))-1
+              return(substr(x,start=pos1,stop=pos2))}
           }else{
             return(x)
           }})
@@ -1114,10 +1222,37 @@
           vect.factdc <- vect.factdc[grep(paste(vec.factordc,collapse="|"),vect.factdc)]
           
           occurdc <- rep(0,length(vec.factordc))
-          for(i in 1:length(vec.factordc)){
-            occurdc[i] <- length(grep(vec.factordc[i],vect.factdc))
+      #    for(i in 1:length(vec.factordc)){
+      #      occurdc[i] <- length(grep(vec.factordc[i],vect.factdc))
+      #    }
+      #  }
+        interactiondc<-as.vector(apply(matrix(vect.factdc,nrow=length(vect.factdc)),MARGIN=1,FUN=function(x){length(grep(":",unlist(strsplit(x,split=""))))}))
+        which.interactiondc <- which(interactiondc==1)
+        
+        for(i in 1:length(vec.factordc)){
+          
+          if(length(grep(":",unlist(strsplit(vec.factordc[i],split=""))))>0){
+            
+            
+            pos <- grep(":",unlist(strsplit(vec.factordc[i],split="")))
+            length.grep <- 0
+            for(j in 1:length(vect.factdc)){
+              if(j%in%which.interactiondc){
+                if(length(grep(substr(vec.factordc[i],start=1,stop=pos-1),vect.factdc[j]))>0 && length(grep(substr(vec.factordc[i],start=pos+1,stop=length(unlist(strsplit(vec.factordc[i],split="")))),vect.factdc[j]))>0){
+                  length.grep <- length.grep + 1
+                  which <- i}
+              }}
+            occurdc[i] <- length.grep
+            
+          }else{
+            
+            
+            if(length(vect.factdc[-which.interactiondc])>0){occurdc[i] <- length(grep(vec.factordc[i],vect.factdc[-which.interactiondc]))
+            }else{occurdc[i] <- length(grep(vec.factordc[i],vect.factdc))}
           }
         }
+      }
+   
         #=========================================================>
         assign <- lapply(attrassign(X2, newTerms2)[-1], function(x) x - 1)
         Xlevels2 <- .getXlevels(newTerms2, m2)
@@ -1138,6 +1273,25 @@
         
         nvar2 <- ncol(X2)
         
+ #       if(sum(ord)>length(ord)){
+#          for(i in 1:length(ord)){
+#            if(ord[i]>1){
+#              name_v1 <- strsplit(as.character(lldc[i]),":")[[1]][1]
+#              name_v2 <- strsplit(as.character(lldc[i]),":")[[1]][2]
+#              if(length(grep("as.factor",name_v1))>0){name_v1<-substring(name_v1,11,nchar(name_v1)-1)
+#                                                      v1 <- as.factor(data[,names(data)==name_v1])}
+#              else{v1 <- data[,names(data)==name_v1]}
+#              if(length(grep("as.factor",name_v2))>0){name_v2<-substring(name_v2,11,nchar(name_v2)-1)
+#                                                      v2 <- as.factor(data[,names(data)==name_v2])}
+#              else{v2 <- data[,names(data)==name_v2]}
+#              
+#              if(is.factor(v1) && length(levels(v1))>2)stop("Interactions not allowed for factors with 3 or more levels (yet)")
+#              if(is.factor(v2) && length(levels(v2))>2)stop("Interactions not allowed for factors with 3 or more levels (yet)")
+#              
+#              
+#            }
+#          }
+#        }
         vartimedep2 <- attr(Terms2, "specials")$timedep #nbre de var en fonction de timedep()
 
         # verifier qu'il y ait du timedep dans la deuxieme formule
@@ -1254,8 +1408,8 @@
       effet <- 1
       indic_alpha <- 1
       if (!missing(Alpha)) { # new : joint more flexible alpha = 0
-        if (Alpha=="none") indic_alpha <- 0
-        else stop("Alpha can only take 'none' as a value in this version of frailtypack package")
+        if (Alpha=="None") indic_alpha <- 0
+        else stop("Alpha can only take 'None' as a value in this version of frailtypack package")
       }
       
       nst <- uni.strat #2
@@ -1345,7 +1499,7 @@
       
       if ((uni.strat > 1 || joint.clust==2) & (joint.clust==0)) stop("stratification for clustered joint model is not yet allowed")
       if ((uni.strat > 1 || joint.clust==2) & (intcens)) stop("stratification for joint model with interval censored data is not yet allowed")
-      if ((uni.strat > 1 || joint.clust==2) & (timedep)) stop("stratification for joint model with time-varying effect of covariates is not yet allowed")
+      if ((uni.strat > 1 || joint.clust==2) & (timedep)) stop("stratification for joint model and time-varying effect of covariates are not yet allowed")
       
       if ((typeof==0) & (length(kappa)!=(uni.strat+1))) stop("wrong length of argument kappa")
       
@@ -1356,8 +1510,7 @@
         cat("Be patient. The program is computing ... \n")
       }
       
-      
-      
+  
       ans <- .Fortran("joint",
                       
                       as.integer(n),
@@ -1439,7 +1592,7 @@
                       BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep2)),
                       EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
                       PACKAGE = "frailtypack") # 65
-      cat("rendue des resultats fortran\n")
+      
       
       MartinGale <- matrix(ans$MartinGale,nrow=as.integer(length(uni.cluster)),ncol=4)
       
@@ -1495,7 +1648,7 @@
       
       
       if (indic_alpha == 1) fit$alpha <- ans$b[np - nvar - npbetatps]
-      if (indic_alpha == 1 && joint.clust==2) fit$alpha <- ans$b[np - nvar]^2
+      if (joint.clust==2) fit$eta <- ans$b[np - nvar]^2
       fit$npar <- np
       
       #AD:
@@ -1505,7 +1658,11 @@
       else
       {
         fit$coef <- ans$b[(np - nvar - npbetatps + 1):np]
+      
         noms <- c(factor.names(colnames(X)),factor.names(colnames(X2)))
+  
+        if(length(grep(":",noms))>0)noms <- factor.names(noms)
+      
         if (timedep == 1){
           while (length(grep("timedep",noms))!=0){
             pos <- grep("timedep",noms)[1]
@@ -1534,6 +1691,7 @@
       fit$varHIH <- temp2[(np - nvar - npbetatps - indic_alpha):np, (np - nvar - npbetatps - indic_alpha):np]
       if (indic_alpha == 1) noms <- c("theta","alpha",factor.names(colnames(X)),factor.names(colnames(X2)))
       else noms <- c("theta",factor.names(colnames(X)),factor.names(colnames(X2)))
+      if(length(grep(":",noms))>0)noms <- factor.names(noms)
       if (timedep == 1){ # on enleve les variances des parametres des B-splines
         while (length(grep("timedep",noms))!=0){
           pos <- grep("timedep",noms)[1]
@@ -1617,7 +1775,9 @@
       fit$joint.clust <- ans$joint.clust
       fit$AG <- recurrentAG
       fit$intcens <- intcens # rajout
+    
       fit$indic_alpha <- indic_alpha
+      if(joint.clust==2)fit$indic_alpha <- 0
       fit$logNormal <- ans$logNormal
       fit$BetaTpsMat <- matrix(ans$BetaTpsMat,nrow=101,ncol=1+4*nvartimedep)
       fit$BetaTpsMatDc <- matrix(ans$BetaTpsMatDc,nrow=101,ncol=1+4*nvartimedep2)
@@ -1632,7 +1792,7 @@
       
       #================================> For the reccurrent
       #========================= Test de Wald
-      
+   
       if ((length(vec.factor) > 0) & (timedep == 0)){
         Beta <- ans$b[(np - nvar + 1):np]
         if (indic_alpha == 1) VarBeta <- diag(diag(fit$varH)[-c(1,2)])
@@ -1640,7 +1800,8 @@
         nfactor <- length(vec.factor)
         p.wald <- rep(0,nfactor)
         ntot <- nvarEnd + nvarRec
-        fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)
+       fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)
+     
         fit$dof_chisq <- occur
         fit$global_chisq.test <- 1
         # Calcul de pvalue globale
@@ -1888,7 +2049,7 @@
         fit$coef <- ans$b[(np - nvar + 1):np]
         names(fit$coef) <- factor.names(colnames(X))
       }
-      
+
       
       temp1 <- matrix(ans$H, nrow = np, ncol = np)
       temp2 <- matrix(ans$HIH, nrow = np, ncol = np)

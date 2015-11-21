@@ -16,7 +16,7 @@
 \arguments{
   \item{x}{the result of a call to the frailtyPenal function.}
   \item{digits}{number of digits to print.}
-  \item{\dots}{other unusued arguments.}
+  \item{\dots}{other unused arguments.}
 }
 
 \value{

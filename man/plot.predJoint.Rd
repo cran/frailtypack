@@ -9,8 +9,8 @@
 }
 
 \usage{
-  \method{plot}{predJoint}(x, conf.bands=FALSE, relapses=TRUE, pos.legend="topright", 
-   cex.legend=0.7, ylim=c(0,1), ...)
+\method{plot}{predJoint}(x, conf.bands=FALSE, relapses=TRUE, pos.legend="topright", 
+cex.legend=0.7, ylim=c(0,1), ...)
 }
 
 \arguments{

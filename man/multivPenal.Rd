@@ -47,10 +47,10 @@ multivPenal(formula, formula.Event2, formula.terminalEvent, data,
 
 \arguments{
   \item{formula}{
- a formula object, with the response for the first recurrent event on the left of a \eqn{\texttildelow} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.
+ a formula object, with the response for the first recurrent event on the left of a \eqn{\texttildelow} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.  Interactions are possible using * or :.
 }
   \item{formula.Event2}{
-a formula object, with the response for the second recurrent event on the left of a \eqn{\texttildelow} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.
+a formula object, with the response for the second recurrent event on the left of a \eqn{\texttildelow} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.  Interactions are possible using * or :.
 }
   \item{formula.terminalEvent}{
 a formula object, with the response for the terminal event on the left of a \eqn{\texttildelow} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.
@@ -74,10 +74,10 @@ vector of length 3 (for the three outcomes) for positive smoothing parameters in
 maximum number of iterations for the Marquardt algorithm. Default is 350.
 }
   \item{hazard}{
-Type of hazard functions: "Splines" for semi-parametrical hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametrical weibull function. Default is "Splines".
+Type of hazard functions: "Splines" for semi-parametric hazard functions with the penalized likelihood estimation, "Piecewise-per" for piecewise constant hazard function using percentile, "Piecewise-equi" for piecewise constant hazard function using equidistant intervals, "Weibull" for parametric Weibull function. Default is "Splines".
 }
   \item{nb.int}{
-An integer vector of length 3 (for the three outcomes). First is the Number of intervals (between 1 and 20) for the recurrent of type 1 parametrical hazard functions ("Piecewise-per", "Piecewise-equi"). Second is the Number of intervals (between 1 and 20) for the recurrent of type 2 parametrical hazard functions ("Piecewise-per", "Piecewise-equi"). Third is Number of intervals (between 1 and 20) for the death parametrical hazard functions ("Piecewise-per", "Piecewise-equi")
+An integer vector of length 3 (for the three outcomes). First is the Number of intervals (between 1 and 20) for the recurrent of type 1 parametric hazard functions ("Piecewise-per", "Piecewise-equi"). Second is the Number of intervals (between 1 and 20) for the recurrent of type 2 parametric hazard functions ("Piecewise-per", "Piecewise-equi"). Third is Number of intervals (between 1 and 20) for the death parametric hazard functions ("Piecewise-per", "Piecewise-equi")
 }
   \item{print.times}{
 a logical parameter to print iteration process. Default is TRUE.
@@ -94,10 +94,10 @@ Parameters estimates of a multivariate joint frailty model, more generally a 'fr
 \item{n.events}{the number of recurrent events of type 1 observed in the fit.}
 \item{n.events2}{the number of the recurrent events of type 2 observed in the fit.}
 \item{n.deaths}{the number of deaths observed in the fit.}
-\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametrical case.}
-\item{loglik}{the marginal log-likelihood in the parametrical case.}
-\item{LCV}{the approximated likelihood cross-validation criterion in the semi parametrical case (with H minus the converged hessien matrix, and l(.) the full log-likelihood.\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))})}
-\item{AIC}{the Akaike information Criterion for the parametrical case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
+\item{loglikPenal}{the complete marginal penalized log-likelihood in the semi-parametric case.}
+\item{loglik}{the marginal log-likelihood in the parametric case.}
+\item{LCV}{the approximated likelihood cross-validation criterion in the semi parametric case (with H minus the converged Hessian matrix, and l(.) the full log-likelihood.\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))})}
+\item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{theta1}{variance of the frailty parameter for recurrences of type 1 \eqn{(\bold{Var}(u_i))}}
 \item{theta2}{variance of the frailty parameter for recurrences of type 2 \eqn{(\bold{Var}(v_i))}}
 \item{alpha1}{the coefficient associated with the frailty parameter \eqn{u_i} in the terminal hazard function.}
@@ -106,7 +106,7 @@ Parameters estimates of a multivariate joint frailty model, more generally a 'fr
 \item{npar}{number of parameters.}
 \item{coef}{the regression coefficients.}
 \item{nvar}{A vector with the number of covariates of each type of hazard function as components.}
-\item{varH}{the variance matrix of all parameters before positivity constraint transformation (theta, the regression coefficients and the spline coefficients). Thenafter, the delta method is needed to obtain the estimated variance parameters.}
+\item{varH}{the variance matrix of all parameters before positivity constraint transformation (theta, the regression coefficients and the spline coefficients). Then, the delta method is needed to obtain the estimated variance parameters.}
 \item{varHIH}{the robust estimation of the variance matrix of all parameters (theta, the regression coefficients and the spline coefficients).}
 \item{formula}{the formula part of the code used for the model for the recurrent event.}
 \item{formula.Event2}{the formula part of the code used for the model for the second recurrent event.}
@@ -133,13 +133,13 @@ Parameters estimates of a multivariate joint frailty model, more generally a 'fr
 \item{time}{knots for Piecewise hazard function for the recurrent event of type 1.}
 \item{timedc}{knots for Piecewise hazard function for the terminal event.}
 \item{time2}{knots for Piecewise hazard function for the recurrent event of type 2.}
-\item{noVar}{indicator vector for reccurrent, death and recurrent 2 explanatory variables.}
+\item{noVar}{indicator vector for recurrent, death and recurrent 2 explanatory variables.}
 \item{nvarRec}{number of the recurrent of type 1 explanatory variables.}
 \item{nvarEnd}{number of death explanatory variables.}
 \item{nvarRec2}{number of the recurrent of type 2 explanatory variables.}
-\item{nbintervR}{Number of intervals (between 1 and 20) for the the recurrent of type 1 parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
-\item{nbintervDC}{Number of intervals (between 1 and 20) for the death parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
-\item{nbintervR2}{Number of intervals (between 1 and 20) for the the recurrent of type 2 parametrical hazard functions ("Piecewise-per", "Piecewise-equi").}
+\item{nbintervR}{Number of intervals (between 1 and 20) for the the recurrent of type 1 parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
+\item{nbintervDC}{Number of intervals (between 1 and 20) for the death parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
+\item{nbintervR2}{Number of intervals (between 1 and 20) for the the recurrent of type 2 parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 \item{istop}{Vector of the convergence criteria.}
 \item{shape.weib}{shape parameters for the Weibull hazard function.}
 \item{scale.weib}{scale parameters for the Weibull hazard function.}
@@ -180,7 +180,7 @@ Parameters estimates of a multivariate joint frailty model, more generally a 'fr
 \note{
 "kappa" (kappa[1], kappa[2] and kappa[3]) and "n.knots" (n.knots[1], n.knots[2] and n.knots[3]) are the arguments that the user has to change if the fitted model does not converge. 
 "n.knots" takes integer values between 4 and 20. But with n.knots=20, the model will take a long time to converge. So, usually, begin first with n.knots=7, and increase it step by step until it converges.
-"kappa" only takes positive values. So, choose a value for kappa (for instance 10000), and if it does not converge, multiply or devide this value by 10 or 5 until it converges. 
+"kappa" only takes positive values. So, choose a value for kappa (for instance 10000), and if it does not converge, multiply or divide this value by 10 or 5 until it converges. 
 Moreover, it may be useful to change the value of the initialize argument.
 
 }
@@ -205,6 +205,7 @@ Mazroui Y., Mathoulin-Pellissier S., MacGrogan G., Brouste V., Rondeau V. (2013)
 
 data(dataMultiv)
 
+# (computation takes around 60 minutes)
 modMultiv.spli <- multivPenal(Surv(TIMEGAP,INDICREC)~cluster(PATIENT)+v1+v2+
              event2(INDICMETA)+terminal(INDICDEATH),formula.Event2=~v1+v2+v3,
              formula.terminalEvent=~v1,data=dataMultiv,n.knots=c(8,8,8),

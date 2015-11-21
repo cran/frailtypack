@@ -4,7 +4,7 @@
   
   if (x$istop == 1){
     # plot des coefficient dependant du temps
-    if (any(x$nvartimedep != 0)) par(mfrow=c(sum(as.logical(x$nvartimedep)),max(x$nvartimedep)))
+    if (any(x$nvartimedep != 0)) par(mfrow=c(1,2))#sum(as.logical(x$nvartimedep)),max(x$nvartimedep)))
     if ((x$nvartimedep[1] != 0) & (x$istop == 1)){
       for (i in 0:(x$nvartimedep[1]-1)){
         matplot(x$BetaTpsMat[,1],x$BetaTpsMat[,(2:4)+4*i],col="blue",type="l",lty=c(1,2,2),xlab="t",ylab="beta(t)",main=paste("Recurrent : ",x$Names.vardep[i+1]),ylim=c(min(x$BetaTpsMat[,-1]),max(x$BetaTpsMat[,-1])))
@@ -67,7 +67,7 @@
   
   if (x$istop == 1){
     if (!is.null(coef)){
-      if (indic_alpha == 1) {
+      if (indic_alpha == 1 || x$joint.clust==2) {
         seH <- sqrt(diag(x$varH))[-c(1,2)]
         seHIH <- sqrt(diag(x$varHIH))[-c(1,2)]
       }else{
@@ -217,7 +217,7 @@
     if (x$logNormal == 0){
       cat("   theta (variance of Frailties, w):", frail, "(SE (H):",seH.frail, ")", "p =", signif(1 - pnorm(frail/seH.frail), digits - 1), "\n")
       if (indic_alpha == 1 & x$joint.clust<=1) cat("   alpha (w^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "p =", signif(1 - pchisq((x$alpha/sqrt(diag(x$varH))[2])^2,1), digits - 1), "\n")
-      else if (indic_alpha == 1 & x$joint.clust ==2) cat("   eta   (variance of Frailties, v):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "p =", signif(1 - pnorm ((x$alpha/sqrt(diag(x$varH))[2])^2,1), digits - 1), "\n")
+      else if (x$joint.clust ==2) cat("   eta   (variance of Frailties, v):", x$eta, "(SE (H):",sqrt(((2 * (x$eta^0.5))^2) * diag(x$varH)[2]), ")", "p =", signif(1 - pnorm (x$eta/sqrt(((2 * (x$eta^0.5))^2) * diag(x$varH)[2]),1), digits - 1), "\n")
       else cat("   alpha is fixed (=1) \n")
     }else{
       cat("   sigma square (variance of Frailties, eta):", frail, "(SE (H):",seH.frail, ")", "p =", signif(1 - pnorm(frail/seH.frail), digits - 1), "\n")

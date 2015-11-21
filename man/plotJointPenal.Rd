@@ -14,21 +14,21 @@
 
 \usage{
 
-\method{plot}{jointPenal}(x, event = "both", type.plot = "hazard", conf.bands = FALSE,
+\method{plot}{jointPenal}(x, event = "Both", type.plot = "Hazard", conf.bands = FALSE,
  pos.legend="topright", cex.legend = 0.7, ylim, main, color = 2, ...)
 
 
 }
 
 \arguments{
-  \item{x}{ A joint model, or more generaly an object of class \code{frailyPenal for Joint frailty model} (output from calling \code{frailtyPenal}
+  \item{x}{ A joint model, i.e. an object of class \code{frailtyPenal} for Joint frailty model (output from calling \code{frailtyPenal}
     function).}
  \item{event}{ a character string specifying the type of curve. Possible
-                   value are "terminal", "recurrent", or "both". The default
-                   is "both".}
+                   value are "Terminal", "Recurrent", or "Both". The default
+                   is "Both".}
   \item{type.plot}{ a character string specifying the type of curve. Possible
-                   value are "hazard", or "survival". The default
-                   is "hazard". Only the first words are required, e.g "haz", "su"}
+                   value are "Hazard", or "Survival". The default
+                   is "Hazard". Only the first letters are required, e.g "Haz", "Su"}
   \item{conf.bands}{ logical value. Determines whether confidence bands will be plotted. The default is to do so.}
  \item{pos.legend}{The location of the legend can be specified by setting this argument to a single keyword from the list '"bottomright"', '"bottom"', '"bottomleft"', '"left"', '"topleft"', '"top"', '"topright"', '"right"' and
      '"center"'. The default is '"topright"'}
@@ -62,13 +62,13 @@ data=readmission,n.knots=14,kappa=c(100,100))
 
 #-- It takes around 1 minute to converge --#
 
-plot(modJoint.gap,type.plot="haz",event="recurrent",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="haz",event="terminal",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="haz",event="both",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="Haz",event="recurrent",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="Haz",event="terminal",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="Haz",event="both",conf.bands=TRUE)
 
-plot(modJoint.gap,type.plot="su",event="recurrent",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="su",event="terminal",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="su",event="both",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="Su",event="recurrent",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="Su",event="terminal",conf.bands=TRUE)
+plot(modJoint.gap,type.plot="Su",event="both",conf.bands=TRUE)
 
 
 }

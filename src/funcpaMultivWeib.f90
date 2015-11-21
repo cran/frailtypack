@@ -215,6 +215,7 @@
              (1.d0-((2.d0*dexp(alpha)/(dexp(alpha)+1.d0))-1.d0)**2)))
     end do
 
+
     if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
         funcpaMultivWeib =-1.d9
         do k=1,ng

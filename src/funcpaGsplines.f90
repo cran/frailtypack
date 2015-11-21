@@ -146,6 +146,7 @@
 !----- A SIMPLE SHARED FRAILTY  MODEL
 !      write(*,*)'SIMPLE SHARED FRAILTY MODEL'
 !*********************************************
+
     if(indic_joint.eq.0)then
         inv = 1.d0/theta
 !    i indice les sujets

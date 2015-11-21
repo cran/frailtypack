@@ -8,7 +8,7 @@
 \title{summary of parameter estimates of a joint frailty model}
 
 \description{
-  This function returns hazard rations (HR) and its confidence intervals
+  This function returns hazard rations (HR) and its confidence intervals.
 }
 \usage{
 \method{summary}{jointPenal}(object, level = 0.95, len = 6, d = 2, lab="hr", ...)
@@ -20,12 +20,12 @@
   \item{d}{the desired number of digits after the decimal point. Default of 6 digits is used.}
   \item{len}{the total field width. Default is 6.}
   \item{lab}{label of printed results.}
-  \item{\dots}{ other unusued arguments.}
+  \item{\dots}{ other unused arguments.}
 }
 
 
 \value{
-  Prints HR and its confidence intervals for each covariate. Confidence level is allowed (level argument)
+  Prints HR and its confidence intervals for each covariate. Confidence level is allowed (level argument).
 }
 
 

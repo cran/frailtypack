@@ -1,6 +1,6 @@
 
 \name{frailtypack-package}
-\Rdversion{2.7}
+\Rdversion{2.7.7}
 \alias{frailtypack-package}
 \alias{frailtypack}
 \docType{package}
@@ -12,25 +12,27 @@
  1) A shared frailty model and Cox proportional hazard model. Clustered and recurrent survival times can be studied.
  2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope).
  3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects.
- 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not.
+ 4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. A joint frailty model for two semi-competing risks for clustered data is also proposed.
  5) Joint General frailty models in the context of a joint modelling for recurrent events with terminal event data with two independent frailty terms.
- Prediction values are available. Left truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard
- and shared frailty model) and strata are allowed. In each model, the random effects have a gamma distribution, but you can switch
- to a log-normal in shared and joint. Now, you can also consider time-varying effect covariates in Cox, shared and joint models. The
+ 6) Multivariate joint frailty models for two types of recurrent events and a terminal event.
+ 7) Joint models for longitudinal data and a terminal event.
+ 8) Trivariate joint models for longitudinal data, recurrent events and a terminal event. 
+ Prediction values are available. Left truncated (not for the joint models), right-censored data, interval-censored data (only for Cox proportional hazard
+ and shared frailty model) and strata are allowed. In each model, the random effects have the gamma or normal distribution. Now, you can also consider time-varying effect covariates in Cox, shared and joint frailty models. The
  package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 }
 \details{
   \tabular{ll}{
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
-     Version: \tab 2.7\cr
-     Date: \tab 2014-07-15\cr
+     Version: \tab 2.8\cr
+     Date: \tab 2015-11-2\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab no\cr
   }
 }
 
-\author{Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen, Agnieszka Krol-Listwon, Amadou Diakite and Alexandre Laurent}
+\author{Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen, Agnieszka Krol, Amadou Diakite and Alexandre Laurent}
 
 \references{
 V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.
@@ -104,6 +106,40 @@ sha.p <- frailtyPenal(Surv(t.start,t.stop,event)~
 cluster(id)+sex+dukes+charlson,
 data=readmission,recurrentAG=TRUE,
 hazard="Piecewise-per",nb.int=6)
+
+###--- Joint model for longitudinal ---###
+###--- data and a terminal event ---###
+
+data(colorectal)
+data(colorectalLongi)
+
+# Survival data preparation - only terminal events 
+colorectalSurv <- subset(colorectal, new.lesions == 0)
+
+model.weib.RE <- longiPenal(Surv(time1, state) ~ age + treatment + who.PS 
++ prev.resection, tumor.size ~  year * treatment + age + who.PS ,
+colorectalSurv,	data.Longi = colorectalLongi, 
+random = c("1", "year"), id = "id", link = "Random-effects", 
+left.censoring = -3.33, hazard = "Weibull")
+
+###--- Trivariate joint model for longitudinal ---###
+###--- data, recurrent and terminal events ---###
+
+data(colorectal)
+data(colorectalLongi)
+
+# (computation takes around 40 minutes)
+
+model.spli.RE.cal <-trivPenal(Surv(time0, time1, new.lesions) ~ cluster(id)
++ age + treatment + who.PS +  terminal(state),
+formula.terminalEvent =~ age + treatment + who.PS + prev.resection, 
+tumor.size ~ year * treatment + age + who.PS, data = colorectal, 
+data.Longi = colorectalLongi, random = c("1", "year"), id = "id", 
+link = "Random-effects", left.censoring = -3.33, recurrentAG = TRUE,
+n.knots = 6, kappa=c(0.01, 2), method.GH="Pseudo-adaptive",
+n.nodes=7, init.B = c(-0.07, -0.13, -0.16, -0.17, 0.42, #recurrent events covariates
+-0.23, -0.1, -0.09, -0.12, 0.8, -0.23, #terminal event covariates
+3.02, -0.30, 0.05, -0.63, -0.02, -0.29, 0.11, 0.74)) #biomarker covariates
 
 }
 

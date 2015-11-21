@@ -1,10 +1,10 @@
 "plot.jointPenal" <-
-function (x, event="both", type.plot="hazard", conf.bands=FALSE, pos.legend="topright", cex.legend=0.7, ylim, main, color=2, ...)
+function (x, event="Both", type.plot="Hazard", conf.bands=FALSE, pos.legend="topright", cex.legend=0.7, ylim, main, color=2, ...)
 {
 
-   event.type <- charmatch(event, c("both", "recurrent", "terminal"), nomatch = 0)
+   event.type <- charmatch(event, c("Both", "Recurrent", "Terminal"), nomatch = 0)
     if (event.type == 0) {
-        stop("event must be 'both', 'recurrent' or 'terminal'")
+        stop("event must be 'Both', 'Recurrent' or 'Terminal'")
     }
 
 

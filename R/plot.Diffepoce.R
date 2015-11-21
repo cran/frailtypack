@@ -1,5 +1,5 @@
 
-"plot.Diffepoce" <- function (x, conf.bands=TRUE, pos.legend="topright", cex.legend=0.7, ...)
+"plot.Diffepoce" <- function (x, conf.bands=TRUE,  ...)
 {
 
 	if (conf.bands){

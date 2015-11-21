@@ -1,10 +1,25 @@
+Changes in version 2.8 November 2015
+
+ o New models added: joint model for longitudinal data and a terminal event (longiPenal function) and trivariate joint model for longitudinal data, recurrent events and a terminal event (trivPenal function)
+
+ o For these models summary, print and plot methods are available as well as functions epoce, Diffepoce and predictions were adapted 
+
+ o Functions form altered: all the character options start with a capital letter, eg. was: plot(x, type.plot = "hazard") is now plot(x, type.plot = "Hazard")
+ 
+ o Joint frailty models for clustered data now are modelled in a framework of semi-competing risks (the parameter alpha is not recommended in these semi-competing models)
+ 
+ o Interactions are now available for all the models (using "*" or ":")
+
+
 Changes in version 2.7.6 August 2015
 
  o New model added: Joint General frailty model for recurrent and terminal events with 2 covariates
 
+
 Changes in Version 2.7.5 March  2015
 
  o Bug fixed for Martingale residuals (in shared and joint models with log normal frailties)
+
 
 Changes in Version 2.7.3 February 2015
 
@@ -16,11 +31,13 @@ Changes in Version 2.7.3 February 2015
 
 o  New functions to compute estimators of Expected Prognostic Observed Cross-Entropy (EPOCE) evaluating prediction accuracy in joint gaussian frailty models.
 
+
 Changes in Version 2.7.1 October 2014
 
  o Bug fixed for the multivariate Wald test for covariates with more than 3 categories.
 
  o Bug fixed for EPOCE, definition of kappa.
+
 
 Changes in Version 2.7     August 2014
 

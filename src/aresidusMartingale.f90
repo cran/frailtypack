@@ -592,4 +592,530 @@
     end subroutine Residus_Martingale_multive    
 
 
+    
 
+    !=============================================================================
+!                       CALCUL DES RESIDUS  Joint bivarie : longitudinal et deces
+!=============================================================================
+    
+    subroutine Residusj_biv(b,np,namesfuncres,Resmartingaledc,ResLongi_cond,ResLongi_cond_st,&
+                        ResLongi_marg,ResLongi_chol,Pred_yy,    re_pred)!
+    
+    use residusM
+    use optimres
+    use comon,only:ng,nsujety,etaydc1,etaydc2,yy,nmesy,netadc,nb1,vey,ut,utt,varcov_marg,&
+                                                        nva3,sum_mat,link,t1dc,vey,npp,res_ind
+        use donnees_indiv,only:X2cur,Z1cur
+    use optim
+    
+    implicit none
+    
+    integer::np,j,i,ij,ier,k,jj
+    double precision,external::namesfuncres
+    double precision,dimension(np),intent(in)::b
+    double precision,dimension(np)::bint
+    double precision,dimension(ng),intent(out)::Resmartingaledc
+    double precision,dimension(nsujety),intent(out)::ResLongi_marg,ResLongi_chol,&
+			ResLongi_cond,ResLongi_cond_st
+        double precision,dimension(nsujety,2),intent(out)::Pred_yy
+    double precision,dimension(ng,3),intent(out)::re_pred
+    double precision,dimension(nb1) ::zet_vec
+    double precision,dimension(nb1) :: b_pred
+    double precision,dimension(3) :: vres_inv
+    double precision :: ep,eps
+    double precision,dimension(nb1,nb1)::mat_vres_inv,mat_vres
+    double precision,dimension(:,:),allocatable::v_rim,v_rim_chol,Varcov_inv,&
+			varcov_chol,V_rim_inv
+    double precision,dimension(:),allocatable:: matv,matv2
+     double precision,dimension(nva3,nva3):: sum_mat_inv
+        double precision,dimension(1)::current_meanres
+     !   double precision,dimension(1)::residus_sd
+    
+    res_ind = 1
+    bint=b
+        ResLongi_cond_st=0.d0
+        ResLongi_cond=0.d0
+    ResLongi_marg=0.d0
+        ResLongi_chol = 0.d0
+    Pred_yy= 0.d0
+    Residusdc=0.d0
+    it_res = 1
+    
+    do indg=1,ng
+    
+            cares=0.d0
+        cbres=0.d0
+        ddres=0.d0
+                ierres = 0
+        nires=0
+        vuu=0.1d0
+        
+        call marq98res(vuu,nb1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
+    
+        if (istopres.eq.1) then
+                if(link.eq.1) then
+                        if(nb1.eq.1)Residusdc(indg)=Ndc(indg)-(exp(etaydc1*vuu(1)))*Rdc(indg)
+                        if(nb1.eq.2)Residusdc(indg)=Ndc(indg)-(exp(etaydc1*vuu(1)&
+                                        +etaydc2*vuu(2)))*Rdc(indg)
+                else
+                    X2cur(1,1) = 1.d0
+        X2cur(1,2) =t1dc(indg)
+        if((nva3-2).gt.0) then
+            do k=3,nva3
+                    X2cur(1,k) = dble(vey(it_res,k))
+                end do
+        end if
+                    Z1cur(1,1) = 1.d0
+                        if(nb1.eq.2)     Z1cur(1,2) =t1dc(indg)
+                            current_meanres = 0.d0
+    
+        current_meanres(1) =dot_product(X2cur(1,1:nva3),b((npp-nva3+1):npp))+&
+        dot_product(Z1cur(1,1:nb1),vuu(1:nb1))
+    
+                        Residusdc(indg)=Ndc(indg)-(exp(etaydc1*current_meanres(1)))*Rdc(indg)
+                end if
+                b_pred(1)  = vuu(1)
+            if(nb1.eq.2)b_pred(2)  = vuu(2)
+    
+            vres_inv = 0.d0
+            do i=1,nb1
+                do j=i,nb1
+                    ij=(j-1)*j/2+i
+                    vres_inv(ij)=vres(ij)
+                end do
+            end do
+            ier = 0
+            ep = 1.d-10
+            call dsinvj(vres_inv,nb1,ep,ier)
+    
+            mat_vres_inv=0.d0
+            mat_vres = 0.d0
+            do j=1,nb1
+                do k=1,nb1
+                    if (k.ge.j) then
+                        mat_vres_inv(j,k)=vres_inv(j+k*(k-1)/2)
+                        mat_vres(j,k) = vres(j+k*(k-1)/2)
+                    else
+                        mat_vres_inv(j,k)=vres_inv(k+j*(j-1)/2)
+                        mat_vres(j,k)=vres(k+j*(j-1)/2)
+                    end if
+                end do
+            end do
+    
+    
+    
+    
+            allocate(v_rim(nmesy(indg),nmesy(indg)),V_rim_chol(nmesy(indg),nmesy(indg)),Varcov_inv(nmesy(indg),nmesy(indg)),&
+                            varcov_chol(nmesy(indg),nmesy(indg)),V_rim_inv(nmesy(indg),nmesy(indg)))
+    
+                        allocate(matv(nva3*(nva3+1)/2),matv2(nmesy(indg)*(nmesy(indg)+1)/2))
+                        matv = 0.d0
+                        do j=1,nva3
+    do k=j,nva3
+        jj=j+k*(k-1)/2
+        matv(jj)=sum_mat(j,k)
+    
+        end do
+    end do
+    ier = 0
+    eps = 1.d-10
+    
+    
+        call dsinvj(matv,nva3,eps,ier)
+    
+        sum_mat_inv=0.d0
+        do j=1,nva3
+                do k=1,nva3
+                            if (k.ge.j) then
+                sum_mat_inv(j,k)=matv(j+k*(k-1)/2)
+            else
+                sum_mat_inv(j,k)=matv(k+j*(j-1)/2)
+            end if
+            end do
+                end do
+    
+                        V_rim =Varcov_marg(it_res:it_res+nmesy(indg)-1,1:nmesy(indg))&
+                                                - MATMUL(Matmul(vey(it_res:it_res+nmesy(indg)-1,1:nva3),sum_mat_inv),&
+                                                        Transpose(vey(it_res:it_res+nmesy(indg)-1,1:nva3))) !varcov_marg
+    
+                                matv2 = 0.d0
+                        do j=1,nmesy(indg)
+    do k=j,nmesy(indg)
+        jj=j+k*(k-1)/2
+        matv2(jj)=V_rim(j,k)
+    
+        end do
+    end do
+    ier = 0
+    eps = 1.d-10
+    
+    
+        call dsinvj(matv2,nmesy(indg),eps,ier)
+    
+        V_rim_inv=0.d0
+        do j=1,nmesy(indg)
+                do k=1,nmesy(indg)
+                            if (k.ge.j) then
+                V_rim_inv(j,k)=matv2(j+k*(k-1)/2)
+            else
+                V_rim_inv(j,k)=matv2(k+j*(j-1)/2)
+            end if
+            end do
+                end do
+    
+    
+        !       call choldc(nmesy(indg),V_rim,V_rim_chol)
+                        call cholesky_sub( V_rim_inv,nmesy(indg))
+    
+                        v_rim_chol = V_rim_inv! transpose( V_rim_inv)
+    
+    
+            do j= it_res,(it_res+nmesy(indg)-1)
+            zet_vec(1:nb1) = Zet(j,1:nb1)
+    
+            
+            ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
+                        if(nb1.eq.2)ResLongi_cond(j) = ResLongi_cond(j)-zet_vec(2)*b_pred(2)
+    
+                        ResLongi_marg(j) = yy(j) - XbetaY_res(1,j)
+                Pred_yy(j,1) =  XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
+                        if(nb1.eq.2.and.zet_vec(2)*b_pred(2).ne.0.d0)Pred_yy(j,1) = Pred_y(j,1)+zet_vec(2)*b_pred(2)
+                        Pred_yy(j,2) =  XbetaY_res(1,j)
+                        
+            end do
+    
+                                matv2 = 0.d0
+                        do j=1,nmesy(indg)
+    do k=j,nmesy(indg)
+        jj=j+k*(k-1)/2
+        matv2(jj)=Varcov_marg((it_res+j-1),k)
+        end do
+    end do
+    ier = 0
+    eps = 1.d-10
+    
+    
+        call dsinvj(matv2,nmesy(indg),eps,ier)
+    
+        Varcov_inv=0.d0
+        do j=1,nmesy(indg)
+                do k=1,nmesy(indg)
+                            if (k.ge.j) then
+                Varcov_inv(j,k)=matv2(j+k*(k-1)/2)
+            else
+                Varcov_inv(j,k)=matv2(k+j*(j-1)/2)
+            end if
+            end do
+                end do
+                
+                        call cholesky_sub(Varcov_inv,nmesy(indg))
+                varcov_chol = transpose(Varcov_inv)!Varcov_inv!
+    
+    ResLongi_cond_st( it_res:it_res+nmesy(indg)-1) = Matmul(V_rim_chol,&
+        ResLongi_cond( it_res:it_res+nmesy(indg)-1))
+    
+    
+            ResLongi_chol(it_res:(it_res+nmesy(indg)-1)) = Matmul(varcov_chol(1:nmesy(indg),1:nmesy(indg)),&
+                                                        ResLongi_marg(it_res:(it_res+nmesy(indg)-1)))
+                        vecuiRes2(indg,1) = vuu(1)
+            if(nb1.eq.2)vecuiRes2(indg,2) = vuu(2)
+            if(nb1.eq.1)vecuiRes2(indg,2)  = 0.d0
+                        vecuiRes2(indg,3) = 0.d0
+            Resmartingaledc(indg) = Residusdc(indg)
+                re_pred(indg,:) = vecuiRes2(indg,:)
+        
+        deallocate(matv,matv2,v_rim,v_rim_chol,varcov_inv,varcov_chol,V_rim_inv)
+        else
+            ! non convergence ou erreur de calcul de la fonction a maximiser
+            do j= it_res,(it_res+nmesy(indg)-1)
+                        Reslongi_cond_st(j) = 0.d0
+                        Reslongi_cond(j) = 0.d0
+            Reslongi_marg(j) = 0.d0
+                        ResLongi_chol(j) = 0.d0
+            pred_yy(j,1:2) = 0.d0
+            end do
+    
+            Resmartingaledc(indg) = 0.d0
+            re_pred(indg,:) = 0.d0
+    
+        endif
+    it_res = it_res + nmesy(indg)
+    
+    
+    end do
+    
+    end subroutine Residusj_biv
+    
+    
+    
+    
+    
+    !=============================================================================
+     !                   CALCUL DES RESIDUS  Joint trivarie : longitudinal, recurrences et deces
+    !=============================================================================
+    
+    subroutine Residusj_tri(b,np,namesfuncres,Resmartingale,Resmartingaledc,ResLongi_cond,ResLongi_cond_st,&
+                                        ResLongi_marg,ResLongi_chol,Pred_yy, re_pred)!
+    
+    use residusM
+    use optimres
+    use comon,only:ng,nsujet,nsujety,etayr1,etayr2,etaydc1,etaydc2,yy,nmesy,nmesrec,netar,netadc,&
+         nb1,vey,ut,utt,varcov_marg,nva3,sum_mat,link,t1dc,vey,nea,alpha,npp,res_ind
+    use donnees_indiv,only:X2cur,Z1cur
+        use optim
+    
+    implicit none
+    
+    integer::np,j,i,ij,ier,k,jj
+    double precision,external::namesfuncres
+    double precision,dimension(np),intent(in)::b
+    double precision,dimension(np)::bint
+    double precision,dimension(ng),intent(out)::Resmartingaledc,Resmartingale
+        double precision,dimension(nsujety),intent(out)::ResLongi_marg,ResLongi_cond,&
+		ResLongi_chol,ResLongi_cond_st
+        double precision,dimension(nsujety,2),intent(out)::Pred_yy
+    double precision,dimension(ng,3),intent(out)::re_pred
+    double precision,dimension(nb1) ::zet_vec
+    double precision,dimension(nea) :: b_pred
+    double precision,dimension(3) :: vres_inv
+    double precision :: ep,eps
+    double precision,dimension(nb1,nb1)::mat_vres_inv,mat_vres
+        double precision,dimension(:,:),allocatable::v_rim,v_rim_chol,Varcov_inv,varcov_chol,V_rim_inv
+        double precision,dimension(:),allocatable:: matv,matv2
+        double precision,dimension(nva3,nva3):: sum_mat_inv
+        double precision,dimension(1)::current_meanres
+    
+       ! double precision,dimension(1)::residus_sd
+    
+    res_ind=1
+    bint=b
+        ResidusRec=0.d0
+        ResLongi_cond_st=0.d0
+        ResLongi_cond=0.d0
+    ResLongi_marg=0.d0
+        ResLongi_chol = 0.d0
+    Pred_yy = 0.d0
+    Residusdc=0.d0
+    it_res = 1
+        it_res_rec = 1
+    do indg=1,ng
+    
+            cares=0.d0
+        cbres=0.d0
+        ddres=0.d0
+        nires=0
+        vuu=0.1d0
+        vuu=0.1d0
+    
+    
+    
+    call marq98res(vuu,nea,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
+    
+    
+        !print*,"6:",vres
+        !print*,"----------",indg
+        if (istopres.eq.1) then
+                        if(link.eq.1) then
+                                if(nb1.eq.1)Residusdc(indg)=Ndc(indg)-(exp(vuu(2)*alpha+etaydc1*vuu(1)))*Rdc(indg)
+                                if(nb1.eq.1)ResidusRec(indg)=Nrec(indg)-(exp(vuu(2)+etayr1*vuu(1)))*Rrec(indg)
+                                if(nb1.eq.2)Residusdc(indg)=Ndc(indg)-(exp(vuu(3)*alpha+etaydc1*vuu(1)&
+                                        +etaydc2*vuu(2)*vuu(2)))*Rdc(indg)
+                                if(nb1.eq.2)ResidusRec(indg)=Nrec(indg)-(exp(vuu(3)+etayr1*vuu(1)&
+                                                                                +etayr2*vuu(2)))*Rrec(indg)
+                        else if(link.eq.2) then
+                                X2cur(1,1) = 1.d0
+                                X2cur(1,2) =t1dc(indg)
+                                if((nva3-2).gt.0) then
+                                        do k=3,nva3
+                                                X2cur(1,k) = dble(vey(it_res,k))
+                                        end do
+                                end if
+                                Z1cur(1,1) = 1.d0
+                                if(nb1.eq.2)     Z1cur(1,2) =t1dc(indg)
+                                current_meanres = 0.d0
+                                current_meanres(1) =dot_product(X2cur(1,1:nva3),b((npp-nva3+1):npp))+&
+                        dot_product(Z1cur(1,1:nb1),vuu(1:nb1))
+                        Residusdc(indg)=Ndc(indg)-(exp(vuu(3)*alpha+etaydc1*current_meanres(1)))*Rdc(indg)
+                                ResidusRec(indg)=Nrec(indg)-(exp(vuu(3)+etayr1**current_meanres(1)))*Rrec(indg)
+    
+                        end if
+    
+                b_pred(1)  = vuu(1)
+            if(nb1.eq.2)b_pred(2)  = vuu(2)
+                        b_pred(nb1+1) = vuu(nb1+1)
+    
+            vres_inv = 0.d0
+            do i=1,nb1
+                do j=i,nb1
+                    ij=(j-1)*j/2+i
+                    vres_inv(ij)=vres(ij)
+                end do
+            end do
+            ier = 0
+            ep = 1.d-10
+            call dsinvj(vres_inv,nb1,ep,ier)
+    
+            mat_vres_inv=0.d0
+            mat_vres = 0.d0
+            do j=1,nb1
+                do k=1,nb1
+                    if (k.ge.j) then
+                        mat_vres_inv(j,k)=vres_inv(j+k*(k-1)/2)
+                        mat_vres(j,k) = vres(j+k*(k-1)/2)
+                    else
+                        mat_vres_inv(j,k)=vres_inv(k+j*(j-1)/2)
+                        mat_vres(j,k)=vres(k+j*(j-1)/2)
+                    end if
+                end do
+            end do
+    
+    
+                allocate(v_rim(nmesy(indg),nmesy(indg)),V_rim_chol(nmesy(indg),nmesy(indg)),&
+				Varcov_inv(nmesy(indg),nmesy(indg)),&
+                 varcov_chol(nmesy(indg),nmesy(indg)),V_rim_inv(nmesy(indg),nmesy(indg)))
+    
+    
+                        allocate(matv(nva3*(nva3+1)/2),matv2(nmesy(indg)*(nmesy(indg)+1)/2))
+                        matv = 0.d0
+                        do j=1,nva3
+    do k=j,nva3
+        jj=j+k*(k-1)/2
+        matv(jj)=sum_mat(j,k)
+    
+        end do
+    end do
+    ier = 0
+    eps = 1.d-10
+    
+    
+        call dsinvj(matv,nva3,eps,ier)
+    
+        sum_mat_inv=0.d0
+        do j=1,nva3
+                do k=1,nva3
+                            if (k.ge.j) then
+                sum_mat_inv(j,k)=matv(j+k*(k-1)/2)
+            else
+                sum_mat_inv(j,k)=matv(k+j*(j-1)/2)
+            end if
+            end do
+                end do
+    
+               V_rim =Varcov_marg(it_res:it_res+nmesy(indg)-1,1:nmesy(indg)) - &
+                       MATMUL(Matmul(vey(it_res:it_res+nmesy(indg)-1,1:nva3),sum_mat_inv),&
+                     Transpose(vey(it_res:it_res+nmesy(indg)-1,1:nva3))) !varcov_marg
+    
+    
+    
+                                matv2 = 0.d0
+                        do j=1,nmesy(indg)
+    do k=j,nmesy(indg)
+        jj=j+k*(k-1)/2
+        matv2(jj)=V_rim(j,k)
+    
+        end do
+    end do
+    ier = 0
+    eps = 1.d-10
+    
+    
+        call dsinvj(matv2,nmesy(indg),eps,ier)
+    
+        V_rim_inv=0.d0
+        do j=1,nmesy(indg)
+                do k=1,nmesy(indg)
+                            if (k.ge.j) then
+                V_rim_inv(j,k)=matv2(j+k*(k-1)/2)
+            else
+                V_rim_inv(j,k)=matv2(k+j*(j-1)/2)
+            end if
+            end do
+                end do
+    
+    
+        !       call choldc(nmesy(indg),V_rim,V_rim_chol)
+                        call cholesky_sub( V_rim_inv,nmesy(indg))
+    
+                        v_rim_chol = V_rim_inv! transpose( V_rim_inv)
+    
+            do j= it_res,(it_res+nmesy(indg)-1)
+            zet_vec(1:nb1) = Zet(j,1:netadc)
+    
+        ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
+                        if(nb1.eq.2)ResLongi_cond(j) = ResLongi_cond(j)-zet_vec(2)*b_pred(2)
+                        ResLongi_marg(j) = yy(2) - XbetaY_res(1,j)
+                Pred_yy(j,1) =  XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
+                        if(nb1.eq.2)Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
+                        Pred_yy(j,2) =  XbetaY_res(1,j)
+    
+    
+            end do
+                                                matv2 = 0.d0
+                        do j=1,nmesy(indg)
+    do k=j,nmesy(indg)
+        jj=j+k*(k-1)/2
+        matv2(jj)=Varcov_marg(j,k)
+    
+        end do
+    end do
+    ier = 0
+    eps = 1.d-10
+    
+    
+        call dsinvj(matv2,nmesy(indg),eps,ier)
+    
+        Varcov_inv=0.d0
+        do j=1,nmesy(indg)
+                do k=1,nmesy(indg)
+                            if (k.ge.j) then
+                Varcov_inv(j,k)=matv2(j+k*(k-1)/2)
+            else
+                Varcov_inv(j,k)=matv2(k+j*(j-1)/2)
+            end if
+            end do
+                end do
+    
+    
+                        call cholesky_sub(Varcov_inv,nmesy(indg))
+                        varcov_chol = transpose(Varcov_inv)
+    
+                            ResLongi_cond_st( it_res:it_res+nmesy(indg)-1) = Matmul(Varcov_inv,&
+                ResLongi_cond( it_res:it_res+nmesy(indg)-1))
+    
+    
+            ResLongi_chol(it_res:(it_res+nmesy(indg)-1)) = Matmul(v_rim_chol(1:nmesy(indg),1:nmesy(indg)),&
+                                                        ResLongi_marg(it_res:(it_res+nmesy(indg)-1)))
+    
+            vecuiRes2(indg,1) = vuu(1)
+            if(nb1.eq.2)vecuiRes2(indg,2) = vuu(2)
+            if(nb1.eq.1)vecuiRes2(indg,2)  = 0.d0
+                        vecuiRes2(indg,3) = 0.d0
+            Resmartingaledc(indg) = Residusdc(indg)
+                        Resmartingale(indg) = ResidusRec(indg)
+            ! ResLongi_marg(it_res:(it_res+nmesy(indg)-1))= ResidusLongi(it_res:(it_res+nmesy(indg)-1))
+            re_pred(indg,:) = vecuiRes2(indg,:)
+            !Pred_ymarg(it_res:(it_res+nmesy(indg)-1))= Pred_y(it_res:(it_res+nmesy(indg)-1))
+    
+    
+            deallocate(matv,matv2,v_rim,v_rim_chol,varcov_inv,varcov_chol,V_rim_inv)
+        else
+            ! non convergence ou erreur de calcul de la fonction a maximiser
+            do j= it_res,(it_res+nmesy(indg)-1)
+                        Reslongi_cond_st(j) = 0.d0
+                        Reslongi_cond(j) = 0.d0
+            Reslongi_marg(j) = 0.d0
+                        ResLongi_chol(j) = 0.d0
+            pred_yy(j,1:2) = 0.d0
+            end do
+            Resmartingale(indg) = 0.d0
+            Resmartingaledc(indg) = 0.d0
+            re_pred(indg,:) = 0.d0
+    
+        endif
+    it_res = it_res + nmesy(indg)
+        it_res_rec = it_res_rec + nmesrec(indg)
+    
+    end do
+    
+    end subroutine Residusj_tri 
+    

@@ -7,6 +7,8 @@ $(SHLIB): $(OBJECTS)
 prediction.o: Aparameters.o
 prediction_log.o: Aparameters.o
 prediction_sha_logn.o: aaOptim.o aaOptimres.o Aparameters.o
+prediction_biv.o: aaOptim.o aaOptimres.o Aparameters.o
+prediction_tri.o: aaOptim.o aaOptimres.o Aparameters.o
 aamarq98o.o: aaOptim.o aaOptimres.o Aparameters.o
 aaOptim.o: Aparameters.o
 afuncpasres.o: aaOptim.o aaOptimres.o Aparameters.o
@@ -66,6 +68,11 @@ funcpaMultivSplines.o: aaOptim.o aaOptimres.o AparamMultive.o
 funcpaMultivCpm.o: aaOptim.o aaOptimres.o AparamMultive.o
 funcpaMultivWeib.o: aaOptim.o aaOptimres.o AparamMultive.o
 
+joint_longi.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpajlongisplines.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o
+funcpajlongiweib.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o
+
 epoce_log.o: aaOptim.o aaOptimres.o Aparameters.o
 epoce.o: aaOptim.o aaOptimres.o Aparameters.o
+epoce_long.o: aaOptim.o aaOptimres.o Aparameters.o
 survival.o: aaOptim.o aaOptimres.o Aparameters.o

@@ -197,7 +197,6 @@
 !Prise en compte des temps dc
     allocate(temps0dc(ngtemp),temps1dc(ngtemp),ictemp(ngtemp),variable(ngtemp,nva20))
 
-
     if((typeJoint==1).or.(typeJoint==2)) then
         temps0dc=tt0dc0
         temps1dc=tt1dc0
@@ -390,10 +389,11 @@
     end do
 
     deallocate(temps0dc,temps1dc,ictemp,variable)
+
 !AD:
-    if (typeof .ne. 0) then
+!    if (typeof .ne. 0) then !non, parce que cens est indispensable pour le timedep option (AK, 03/11/2015)
         cens = maxtdc
-    end if
+ !   end if
 !Ad
     k = 0
     cptstr1 = 0
@@ -402,6 +402,7 @@
 !cccccccccccccccccccccccccccccccccc
 ! pour les donnees recurrentes
 !cccccccccccccccccccccccccccccccccc
+
     do i = 1,nsujet     !sur les observations
 
         if (i.eq.1) then
@@ -809,11 +810,11 @@
         b = 5.d-1
 
         if (typeof == 0) then
-            b(np-nva-indic_alpha) = 1.d0 ! theta
+            if(timedep.eq.0)b(np-nva-indic_alpha) = 1.d0 ! theta
             !if (typeJoint==2)  b(np-nva)=1.d0 ! pour eta
         end if
         if (indic_alpha.eq.1) then
-            b(np-nva) = 1.d0 ! alpha ou eta
+            if(timedep.eq.0)b(np-nva) = 1.d0 ! alpha ou eta
         endif
     else
         b(1:np-nva-1-indic_alpha) = 5.d-1 ! hazard coef
@@ -822,7 +823,7 @@
             b(np-nva+1:np) = 5.d-1
         endif
 
-        if (b(np-nva-indic_alpha).eq.0.d0) then ! theta
+        if (b(np-nva-indic_alpha).eq.0.d0.and.(timedep.eq.0)) then ! theta
             if (typeof == 0) then
                 b(np-nva-indic_alpha) = 1.d0
             else
@@ -830,7 +831,7 @@
             endif
         endif
 
-        if ((indic_alpha.eq.1).and.(b(np-nva).eq.0.d0)) then ! alpha
+        if ((indic_alpha.eq.1).and.(b(np-nva).eq.0.d0).and.(timedep.eq.0)) then ! alpha
             b(np-nva) = 1.d0
         endif
     endif
@@ -2475,9 +2476,9 @@
                   auxfunca=func2J(x(j))
               case(3)             !choix=3, AG model
                   if(typeJoint==1)then
-                      auxfunca=func3J(x(j))
+			            auxfunca=func3J(x(j))
                   else
-                      auxfunca=func3bis(x(j))
+		               auxfunca=func3bis(x(j))
                   endif
           end select
 

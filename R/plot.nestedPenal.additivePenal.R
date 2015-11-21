@@ -1,9 +1,9 @@
-"plot.nestedPenal" <- "plot.additivePenal" <- function (x, type.plot="hazard", conf.bands=TRUE, pos.legend="topright", cex.legend=0.7, main, color=2, ...)
+"plot.nestedPenal" <- "plot.additivePenal" <- function (x, type.plot="Hazard", conf.bands=TRUE, pos.legend="topright", cex.legend=0.7, main, color=2, ...)
 {
   
-	plot.type <- charmatch(type.plot, c("hazard", "survival"),nomatch = 0)
+	plot.type <- charmatch(type.plot, c("Hazard", "Survival"),nomatch = 0)
 	if (plot.type == 0) {
-		stop("estimator must be hazard or survival")
+		stop("estimator must be Hazard or Survival")
 	}
 
   if(missing(main))

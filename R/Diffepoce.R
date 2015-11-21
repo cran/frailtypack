@@ -6,9 +6,9 @@ Diffepoce <- function(epoce1, epoce2){
 	if (!(all.equal(epoce1$pred.times,epoce2$pred.times))) stop("The two epoce objects should have the same prediction times")
 	if (!(all.equal(epoce1$data,epoce2$data))) stop("The two epoce objects should be derived from the same dataset")
 
-	DEPOCE <- as.double(epoce1$cvpl)-as.double(epoce2$cvpl)
+	DEPOCE <- as.double(epoce1$cvpol)-as.double(epoce2$cvpol)
 	if (epoce1$new.data==TRUE){
-		DEPOCE <- as.double(epoce1$mpl)-as.double(epoce2$mpl)
+		DEPOCE <- as.double(epoce1$mpol)-as.double(epoce2$mpol)
 	}
 	
 	diff <- epoce1$IndivContrib-epoce2$IndivContrib

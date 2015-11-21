@@ -176,7 +176,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	Terms <- terms(formula, special)
 	Terms.formula <- Terms	
 	ord <- attr(Terms, "order") ## longueur de ord=nbre de var.expli	
-	if (length(ord) & any(ord != 1))stop("Interaction terms are not valid for this function")
+#	if (length(ord) & any(ord != 1))stop("Interaction terms are not valid for this function")
 	m$formula <- Terms	
 	m[[1]] <- as.name("model.frame") 
 		
@@ -212,36 +212,81 @@ if((all.equal(length(hazard),1)==T)==T){
 
 #   plus besoin de as.factor() pour afficher le test de Wald global
 	mat.factor <- matrix(vec.factor,ncol=1,nrow=length(vec.factor))
-	# Fonction servant a prendre les termes entre "as.factor"
-	vec.factor <-apply(mat.factor,MARGIN=1,FUN=function(x){
-	if (length(grep("factor",x))>0){
-		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-		pos2 <- length(unlist(strsplit(x,split="")))-1
-		return(substr(x,start=pos1,stop=pos2))
-	}else{
-		return(x)
-	}})
+# Fonction servant a prendre les termes entre "as.factor" et (AK 04/11/2015) interactions
+vec.factor <-apply(mat.factor,MARGIN=1,FUN=function(x){
+  if (length(grep("factor",x))>0){
+    if(length(grep(":",x))>0){
+      if(grep('\\(',unlist(strsplit(x,split="")))[1]<grep(":",unlist(strsplit(x,split="")))[1] && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+        
+        pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+        pos2 <- grep(":",unlist(strsplit(x,split="")))[1]-2
+        pos3 <- grep(":",unlist(strsplit(x,split="")))[1]
+        pos4 <- length(unlist(strsplit(x,split="")))
+        return(paste(substr(x,start=pos1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+      }else if(grep("\\(",unlist(strsplit(x,split="")))[1]>grep(":",unlist(strsplit(x,split="")))[1] && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+        pos2 <- grep(":",unlist(strsplit(x,split="")))[1]
+        pos3 <- grep("\\(",unlist(strsplit(x,split="")))[1]+1
+        pos4 <- length(unlist(strsplit(x,split="")))-1
+        return(paste(substr(x,start=1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+      }else{#both factors
+        pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+        pos2 <- grep(":",unlist(strsplit(x,split="")))[1]-2
+        pos3 <- grep("\\(",unlist(strsplit(x,split="")))[2]+1
+        pos4 <- length(unlist(strsplit(x,split="")))-1
+        return(paste(substr(x,start=pos1,stop=pos2),":",substr(x,start=pos3,stop=pos4),sep=""))
+      }
+    }else{
+      pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+      pos2 <- length(unlist(strsplit(x,split="")))-1
+      return(substr(x,start=pos1,stop=pos2))}
+  }else{
+    return(x)
+  }})
 
-	ind.place <- grep(paste(vec.factor,collapse="|"),ll)
 
-	if(length(vec.factor) > 0){
-		vect.fact <- attr(X,"dimnames")[[2]]
+ ind.place <- grep(paste(vec.factor,collapse="|"),ll[-c(grep("terminal",ll),grep("event2",ll))])
 
-		#vect.fact <- vect.fact[grep("factor",vect.fact)]
-		vect.fact <- vect.fact[grep(paste(vec.factor,collapse="|"),vect.fact)]
 
-# 		vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
-# 		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-# 		pos2 <- length(unlist(strsplit(x,split="")))-2
-# 		return(substr(x,start=pos1,stop=pos2))})
+if(length(vec.factor) > 0){
+  vect.fact <- attr(X,"dimnames")[[2]]
+  
+  #vect.fact <- vect.fact[grep("factor",vect.fact)]
+  vect.fact <- vect.fact[grep(paste(vec.factor,collapse="|"),vect.fact)]
+  
+  #   	vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
+  # 		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+  # 		pos2 <- grep(")",unlist(strsplit(x,split="")))[1]-1
+  # 		return(substr(x,start=pos1,stop=pos2))})
+  occur <- rep(0,length(vec.factor))
+  
+  interaction<-as.vector(apply(matrix(vect.fact,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){length(grep(":",unlist(strsplit(x,split=""))))}))
+  which.interaction <- which(interaction==1)
+  
+  for(i in 1:length(vec.factor)){
+    
+    if(length(grep(":",unlist(strsplit(vec.factor[i],split=""))))>0){
+      
+      
+      pos <- grep(":",unlist(strsplit(vec.factor[i],split="")))
+      length.grep <- 0
+      for(j in 1:length(vect.fact)){
+        if(j%in%which.interaction){
+          
+          if(length(grep(substr(vec.factor[i],start=1,stop=pos-1),vect.fact[j]))>0 && length(grep(substr(vec.factor[i],start=pos+1,stop=length(unlist(strsplit(vec.factor[i],split="")))),vect.fact[j]))>0){
+            length.grep <- length.grep + 1
+            which <- i}
+        }}
+      occur[i] <- length.grep
+      
+    }else{
+      
+      
+      if(length(vect.fact[-which.interaction])>0){occur[i] <- length(grep(vec.factor[i],vect.fact[-which.interaction]))
+      }else{occur[i] <- length(grep(vec.factor[i],vect.fact))}
+    }
+  }
+}
 
-		occur <- rep(0,length(vec.factor))
-
-		for(i in 1:length(vec.factor)){
-			#occur[i] = sum(vec.factor[i] == vect.fact)
-			occur[i] <- length(grep(vec.factor[i],vect.fact))
-		}
-	}
 #==========================================================================================>
 #=============================>         end  formula         <==============================
 #==========================================================================================>
@@ -257,7 +302,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	if (length(cluster)){
 		tempc <- untangle.specials(Terms.formula, "cluster", 1:10)
 		ord <- attr(Terms.formula, "order")[tempc$terms]
-		if (any(ord > 1))stop("Cluster can not be used in an interaction")
+	#	if (any(ord > 1))stop("Cluster can not be used in an interaction")
 		
 		
 		cluster <- strata(m.formula[, tempc$vars], shortlabel = TRUE)
@@ -299,7 +344,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	
 		ord <- attr(Terms.formula, "order")[tempterm$terms] # ord[6]=1 ici dans notre exemple
 		
-		if (any(ord > 1))stop("Terminal can not be used in an interaction")
+	#	if (any(ord > 1))stop("Terminal can not be used in an interaction")
 		dropx <- c(dropx,tempterm$terms) # vecteur de position
 		terminal <- strata(m.formula[, tempterm$vars], shortlabel = TRUE)
 		terminal <- as.numeric(as.character(terminal))
@@ -406,6 +451,7 @@ if((all.equal(length(hazard),1)==T)==T){
 		cat("Be patient. The program is computing ... \n")
 	}
 
+
 #======= Construction du vecteur des indicatrice
 	if(length(vec.factor) > 0){
 #		ind.place <- ind.place -1
@@ -435,9 +481,9 @@ if((all.equal(length(hazard),1)==T)==T){
 		Terms2 <- terms(formula.terminalEvent, special)
 		ord2 <- attr(Terms2, "order")
 	
-		if (length(ord2) & any(ord2 != 1)){ 
-			stop("Interaction terms are not valid for terminal event formula")
-		}
+#		if (length(ord2) & any(ord2 != 1)){ 
+#			stop("Interaction terms are not valid for terminal event formula")
+#		}
 	}
 
 	if (!missing(formula.Event2)){
@@ -446,9 +492,9 @@ if((all.equal(length(hazard),1)==T)==T){
 		
 		ord.formula2 <- attr(Terms.formula, "order")
 	
-		if (length(ord.formula2) & any(ord.formula2 != 1)){ 
-			stop("Interaction terms are not valid for event formula.Event2")
-		}
+#		if (length(ord.formula2) & any(ord.formula2 != 1)){ 
+#			stop("Interaction terms are not valid for event formula.Event2")
+#		}
 	}
 
 #AD:Joint model needs "terminal()"
@@ -492,25 +538,81 @@ if((all.equal(length(hazard),1)==T)==T){
 
 		mat.factordc <- matrix(vec.factordc,ncol=1,nrow=length(vec.factordc))
 		# Fonction servant a prendre les termes entre "as.factor"
+		# Fonction servant a prendre les termes entre "as.factor" et (AK 04/11/2015) interactions
 		vec.factordc <-apply(mat.factordc,MARGIN=1,FUN=function(x){
-		if (length(grep("factor",x))>0){
-			pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-			pos2 <- length(unlist(strsplit(x,split="")))-1
-			return(substr(x,start=pos1,stop=pos2))
-		}else{
-			return(x)
-		}})
+		  if (length(grep("factor",x))>0){
+		    if(length(grep(":",x))>0){
+		      if(grep('\\(',unlist(strsplit(x,split="")))[1]<grep(":",unlist(strsplit(x,split="")))[1] && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+		        
+		        pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+		        pos2 <- grep(":",unlist(strsplit(x,split="")))[1]-2
+		        pos3 <- grep(":",unlist(strsplit(x,split="")))[1]
+		        pos4 <- length(unlist(strsplit(x,split="")))
+		        return(paste(substr(x,start=pos1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+		      }else if(grep("\\(",unlist(strsplit(x,split="")))[1]>grep(":",unlist(strsplit(x,split="")))[1] && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+		        pos2 <- grep(":",unlist(strsplit(x,split="")))[1]
+		        pos3 <- grep("\\(",unlist(strsplit(x,split="")))[1]+1
+		        pos4 <- length(unlist(strsplit(x,split="")))-1
+		        return(paste(substr(x,start=1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+		      }else{#both factors
+		        pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+		        pos2 <- grep(":",unlist(strsplit(x,split="")))[1]-2
+		        pos3 <- grep("\\(",unlist(strsplit(x,split="")))[2]+1
+		        pos4 <- length(unlist(strsplit(x,split="")))-1
+		        return(paste(substr(x,start=pos1,stop=pos2),":",substr(x,start=pos3,stop=pos4),sep=""))
+		      }
+		    }else{
+		      pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+		      pos2 <- length(unlist(strsplit(x,split="")))-1
+		      return(substr(x,start=pos1,stop=pos2))}
+		  }else{
+		    return(x)
+		  }})
+		
 
-		# On determine le nombre de categorie pour chaque var categorielle
 		if(length(vec.factordc) > 0){
-			vect.factdc <- attr(Xdc,"dimnames")[[2]]
-			vect.factdc <- vect.factdc[grep(paste(vec.factordc,collapse="|"),vect.factdc)]
-
-			occurdc <- rep(0,length(vec.factordc))
-			for(i in 1:length(vec.factordc)){
-				occurdc[i] <- length(grep(vec.factordc[i],vect.factdc))
-			}
+		  vect.factdc <- attr(Xdc,"dimnames")[[2]]
+		  
+		  #vect.fact <- vect.fact[grep("factor",vect.fact)]
+		  vect.factdc <- vect.factdc[grep(paste(vec.factordc,collapse="|"),vect.factdc)]
+		 
+		  #   	vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
+		  # 		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+		  # 		pos2 <- grep(")",unlist(strsplit(x,split="")))[1]-1
+		  # 		return(substr(x,start=pos1,stop=pos2))})
+		  occurdc <- rep(0,length(vec.factordc))
+		  
+		  interactiondc<-as.vector(apply(matrix(vect.factdc,nrow=length(vect.factdc)),MARGIN=1,FUN=function(x){length(grep(":",unlist(strsplit(x,split=""))))}))
+		  which.interactiondc <- which(interactiondc==1)
+		
+      for(i in 1:length(vec.factordc)){
+		  
+		    if(length(grep(":",unlist(strsplit(vec.factordc[i],split=""))))>0){
+		      
+		      
+		      pos <- grep(":",unlist(strsplit(vec.factordc[i],split="")))
+		      length.grep <- 0
+		      for(j in 1:length(vect.factdc)){
+		        if(j%in%which.interactiondc){
+		        
+		          if(length(grep(substr(vec.factordc[i],start=1,stop=pos-1),vect.factdc[j]))>0 && length(grep(substr(vec.factordc[i],start=pos+1,stop=length(unlist(strsplit(vec.factordc[i],split="")))),vect.factdc[j]))>0){
+		            length.grep <- length.grep + 1
+		            which <- i}
+		        }}
+		      occurdc[i] <- length.grep
+		      
+		    }else{
+		      
+		      
+		      if(length(vect.factdc[-which.interactiondc])>0){
+            occurdc[i] <- length(grep(vec.factordc[i],vect.factdc[-which.interactiondc]))
+		      }else{
+            occurdc[i] <- length(grep(vec.factordc[i],vect.factdc))}
+		    }
+		  }
 		}
+
+   
 #=========================================================>
 		assign <- lapply(attrassign(Xdc, newTerms2)[-1], function(x) x - 1)
 #========================================>
@@ -667,32 +769,95 @@ if((all.equal(length(hazard),1)==T)==T){
 
 	ind.placeformula2 <- attr(varformula2,"assign")[duplicated(attr(varformula2,"assign"))]
 	#ind.placeformula2 <- grep("factor",colnames(varformula2))
-	
+  ind.placeformula2.temp <- ind.placeformula2
+  for(i in 1:length(ind.placeformula2.temp)){
+    ind.placeformula2[i] <- which(attr(varformula2,"assign")==ind.placeformula2.temp[i])[1]-1
+    
+  }
+
+
 	vec.factorevent2 <- NULL
-	vec.factorevent2 <- c(vec.factorevent2,Names.formula2[ind.placeformula2])
+
+	vec.factorevent2 <- c(vec.factorevent2,Names.formula2[ind.placeformula2+1])
+
 
 	mat.factor.formula2 <- matrix(vec.factorevent2,ncol=1,nrow=length(vec.factorevent2))
-	# Fonction servant a prendre les termes entre "as.factor"
-	vec.factorevent2 <-apply(mat.factor.formula2,MARGIN=1,FUN=function(x){
-		if (length(grep("factor",x))>0){
-			pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
-			pos2 <- length(unlist(strsplit(x,split="")))-1
-			return(substr(x,start=pos1,stop=pos2))
-		}else{
-			return(x)
-		}})
+# Fonction servant a prendre les termes entre "as.factor" et (AK 04/11/2015) interactions
 
-	# On determine le nombre de categorie pour chaque var categorielle
-	if(length(vec.factorevent2) > 0){
-		Xformula2 <- model.matrix(formula.Event2, data=Tab$dataM)
-		vect.fact.formula2 <- attr(Xformula2,"dimnames")[[2]]
+  vec.factorevent2 <-apply(mat.factor.formula2,MARGIN=1,FUN=function(x){
+  if (length(grep("factor",x))>0){
+    if(length(grep(":",x))>0){
+      if(grep('\\(',unlist(strsplit(x,split="")))[1]<grep(":",unlist(strsplit(x,split="")))[1] && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+        
+        pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+        pos2 <- grep("\\)",unlist(strsplit(x,split="")))[1]-1
+        pos3 <- grep(":",unlist(strsplit(x,split="")))[1]
+        pos4 <- length(unlist(strsplit(x,split="")))
+        return(paste(substr(x,start=pos1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+      }else if(grep("\\(",unlist(strsplit(x,split="")))[1]>grep(":",unlist(strsplit(x,split="")))[1] && length(grep('\\(',unlist(strsplit(x,split=""))))==1){
+       pos2 <- grep(":",unlist(strsplit(x,split="")))[1]
+        pos3 <- grep("\\(",unlist(strsplit(x,split="")))[1]+1
+        pos4 <- grep("\\)",unlist(strsplit(x,split="")))[1]-1
+        return(paste(substr(x,start=1,stop=pos2),substr(x,start=pos3,stop=pos4),sep=""))
+      }else{#both factors
+        pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+        pos2 <- grep("\\)",unlist(strsplit(x,split="")))[1]-1
+        pos3 <- grep("\\(",unlist(strsplit(x,split="")))[2]+1
+        pos4 <- grep("\\)",unlist(strsplit(x,split="")))[2]-1
+        return(paste(substr(x,start=pos1,stop=pos2),":",substr(x,start=pos3,stop=pos4),sep=""))
+      }
+    }else{
+      pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+      pos2 <- grep("\\)",unlist(strsplit(x,split="")))[1]-1
+      return(substr(x,start=pos1,stop=pos2))}
+  }else{
+    return(x)
+  }})
 
-		occurformula2 <- rep(0,length(vec.factorevent2))
-		for(i in 1:length(vec.factorevent2)){
-			occurformula2[i] <- length(grep(vec.factorevent2[i],vect.fact.formula2))
-		}
-	}
 
+  if(length(vec.factorevent2) > 0){
+  vect.fact.formula2 <- attr(varformula2,"dimnames")[[2]]
+  
+  #vect.fact <- vect.fact[grep("factor",vect.fact)]
+  vect.fact.formula2 <- vect.fact.formula2[grep(paste(vec.factorevent2,collapse="|"),vect.fact.formula2)]
+  
+  #   	vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
+  # 		pos1 <- grep("r",unlist(strsplit(x,split="")))[1]+2
+  # 		pos2 <- grep(")",unlist(strsplit(x,split="")))[1]-1
+  # 		return(substr(x,start=pos1,stop=pos2))})
+  occurformula2 <- rep(0,length(vec.factorevent2))
+  
+  if(length(vect.fact.formula2)>0){
+
+  interaction.formula2<-as.vector(apply(matrix(vect.fact.formula2,nrow=length(vect.fact.formula2)),MARGIN=1,FUN=function(x){length(grep(":",unlist(strsplit(x,split=""))))}))
+  which.interaction.formula2 <- which(interaction.formula2==1)
+  
+  for(i in 1:length(vec.factorevent2)){
+    
+    if(length(grep(":",unlist(strsplit(vec.factorevent2[i],split=""))))>0){
+      
+      
+      pos <- grep(":",unlist(strsplit(vec.factorevent2[i],split="")))
+      length.grep <- 0
+      for(j in 1:length(vect.fact.formula2)){
+        if(j%in%which.interaction.formula2){
+          
+          if(length(grep(substr(vec.factorevent2[i],start=1,stop=pos-1),vect.fact.formula2[j]))>0 && length(grep(substr(vec.factorevent2[i],start=pos+1,stop=length(unlist(strsplit(vec.factorevent2[i],split="")))),vect.fact.formula2[j]))>0){
+            length.grep <- length.grep + 1
+            which <- i}
+        }}
+      occurformula2[i] <- length.grep
+      
+    }else{
+      
+      
+      if(length(vect.fact.formula2[-which.interaction.formula2])>0){occurformula2[i] <- length(grep(vec.factorevent2[i],vect.fact.formula2[-which.interaction.formula2]))
+      }else{occurformula2[i] <- length(grep(vec.factorevent2[i],vect.fact.formula2))}
+    }
+  }
+}
+}
+  if(is.na(vec.factorevent2))vec.factorevent2 <- NULL
 	if (ncol(varformula2) == 1)
 	{
 		varformula2<-varformula2-1
@@ -745,19 +910,20 @@ if((all.equal(length(hazard),1)==T)==T){
 		}
 	}
 
-	if (!missing(formula.Event2)){	
+#	if (!missing(formula.Event2)){	
 # # 		print("---- formula.Event2 -----")
 # # 		print(vec.factor.formula2)
 # # 		print(ind.placeformula2)
 # # 		print("----")
-		if(length(vec.factorevent2) > 0){
-			k <- 0
-			for(i in 1:length(vec.factorevent2)){
-				ind.placeformula2[i] <- ind.placeformula2[i]+k
-					k <- k + occurformula2[i]-1
-			}
-		}
-	}
+
+ #   if(length(vec.factorevent2) > 0){
+#			k <- 0
+#			for(i in 1:length(vec.factorevent2)){
+#				ind.placeformula2[i] <- ind.placeformula2[i]+k
+#					k <- k + occurformula2[i]-1
+#			}
+#		}
+#	}
 
 # nombre total de variable
 	if (sum(as.double(var.formula))==0) nvarRec <- 0
@@ -883,8 +1049,8 @@ if((all.equal(length(hazard),1)==T)==T){
 		zi <- rep(0,(n.knots[1] + 6))
 		zidc <- rep(0,(n.knots[2] + 6))
 		zi2 <- rep(0,(n.knots[3] + 6))
-	}
-
+	}else{n.knots[1:3] <- 0} #AK 04/11/2015
+  
 	time <- 0
 	timedc <- 0
 	time2 <- 0
@@ -1047,9 +1213,9 @@ if((all.equal(length(hazard),1)==T)==T){
 
 #AD:
 	Names <- NULL 
-	if(noVar[1]!=1) Names <- c(Names,Names.formula)
-	if(noVar[2]!=1) Names <- c(Names,Names.terminal)
-	if(noVar[3]!=1) Names <- c(Names,Names.formula2)
+	if(noVar[1]!=1) Names <- c(Names,factor.names(Names.formula))
+	if(noVar[2]!=1) Names <- c(Names,factor.names(Names.terminal))
+	if(noVar[3]!=1) Names <- c(Names,factor.names(Names.formula2))
 
 	coef <- NULL
 	if (all(noVar==1)){
@@ -1166,11 +1332,12 @@ if((all.equal(length(hazard),1)==T)==T){
 	ntot <- nvarEnd + nvarRec + nvarRec2
 	Beta <- ans$b[(np - nvar + 1):np]
 	VarBeta <- diag(diag(fit$varH)[-c(1,2)])
-
 	if(length(vec.factor) > 0){
 		nfactor <- length(vec.factor)
 		p.wald <- rep(0,nfactor)
+		
 		fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)
+
 		fit$dof_chisq <- occur
 		fit$global_chisq.test <- 1
 # Calcul de pvalue globale
@@ -1192,7 +1359,7 @@ if((all.equal(length(hazard),1)==T)==T){
 			nfactor <- length(vec.factordc)
 			p.walddc <- rep(0,nfactor)
 			fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
-			fit$dof_chisq_d <- occurdc
+		 fit$dof_chisq_d <- occurdc
 			fit$global_chisq.test_d <- 1
 	# Calcul de pvalue globale
 			for(i in 1:length(vec.factordc)){
@@ -1215,8 +1382,8 @@ if((all.equal(length(hazard),1)==T)==T){
 	if(length(vec.factorevent2) > 0){
 		nfactor <- length(vec.factorevent2)
 		p.wald2 <- rep(0,nfactor)
-		fit$global_chisq2 <- waldtest(N=nvarRec2,nfact=nfactor,place=ind.placeformula2,modality=occurformula2,b=Beta,Varb=VarBeta,Lfirts=ntmp,Ntot=ntot)
-		fit$dof_chisq2 <- occurformula2
+			fit$global_chisq2 <- waldtest(N=nvarRec2,nfact=nfactor,place=ind.placeformula2,modality=occurformula2,b=Beta,Varb=VarBeta,Lfirts=ntmp,Ntot=ntot)
+	 fit$dof_chisq2 <- occurformula2
 		fit$global_chisq.test2 <- 1
 # Calcul de pvalue globale
 		for(i in 1:length(vec.factorevent2)){

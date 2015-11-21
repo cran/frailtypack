@@ -316,4 +316,397 @@
 
 
     
-      
+     
+
+
+!!!!
+!!!! =============================== Calcul Residus joint bivariate - longitudinales et deces ==============================
+    
+    
+    
+        double precision function funcpajres_biv(uu,np,id,thi,jd,thj)
+    
+            use optim
+        use comon
+            use donnees_indiv,only:z1cur,x2cur,current_mean,b1
+            use residusM
+    
+        implicit none
+    
+        integer,intent(in)::id,jd,np
+        double precision,intent(in)::thi,thj
+        double precision,dimension(np)::uu,bh
+        double precision::frail1,frail2,res,yscalar,prod_cag,eps,det
+            double precision::finddet,alnorm
+            double precision,dimension(nb1)::b_vec,uii
+            double precision,dimension(nb1*(nb1+1)/2)::matv
+            double precision,dimension(nb1,1)::b_vecT
+            double precision,dimension(nb1,nb1)::mat_B
+            double precision,dimension(1)::uiiui
+            integer::jj,j,k,ier
+            logical :: upper
+        double precision,parameter::pi=3.141592653589793d0
+            double precision :: resultdc
+    double precision,external::survdcCM
+        double precision :: abserr,resabs,resasc
+            upper=.false.
+        bh=uu
+    
+        if (id.ne.0) bh(id)=bh(id)+thi
+        if (jd.ne.0) bh(jd)=bh(jd)+thj
+    
+        frail1=bh(1)!*bh(1)
+        frail2 = 0.d0
+            if(nb1.eq.2)frail2 = bh(2)!*bh(2)
+            b_vec(1) = frail1
+            if(nb1.eq.2)b_vec(2) = frail2
+            b_vecT(1,1) = frail1
+            if(nb1.eq.2)b_vecT(2,1) = frail2
+            !!!Nrec(indg) - zastapic f_Y(O_i|u_i)
+        !res = dexp((Ndc(indg))*frail1- &
+        !dexp(frail1)*Rrec(indg) - dexp(alpha*frail1)*Rdc(indg)- &
+        !(frail1**2.d0)/(2.d0*sig2))
+            matv = 0.d0
+            mu1_res = 0.d0
+    
+            if(nmesy(indg).gt.0) then
+            !if(nb1.eq.1)mu1_res(1:nmesy(indg)) = XbetaY_res(1,indg) +Zet(1:nmesy(indg),1:netadc)*b_vec
+            mu1_res(1:nmesy(indg)) = XbetaY_res(1,it_res:(it_res+nmesy(indg)-1)) &
+					+MATMUL(Zet(it_res:(it_res+nmesy(indg)-1),1:nb1),b_vec)
+            end if
+    
+            !********* Left-censoring ***********
+            yscalar = 0.d0
+                    prod_cag = 1.d0
+            if(s_cag_id.eq.1)then
+                    do k = 0,nmesy(indg)-1
+                            if(yy(k+it_res).le.s_cag) then
+                                    prod_cag = prod_cag*(1.d0-alnorm((mu1_res(k+1)-s_cag)/sqrt(sigmae),upper))
+                            else
+                                    yscalar = yscalar + (yy(k+it_res)-mu1_res(k+1))**2
+                            end if
+                    end do
+            else
+                    do k=0,nmesy(indg)-1
+                            yscalar = yscalar + (yy(k+it_res)-mu1_res(k+1))**2.d0
+                    end do
+            end if
+    
+            yscalar = dsqrt(yscalar)
+    
+    
+            mat_B = matmul(ut,utt)
+            det = finddet(matmul(ut,utt),nb1)
+    
+        if(nb1.ge.2) then
+                    jj=0
+                    do j=1,nb1
+                            do k=j,nb1
+                                    jj=j+k*(k-1)/2
+                                    matv(jj)=mat_B(j,k)
+                            end do
+                    end do
+                    ier = 0
+                    eps = 1.d-10
+                    call dsinvj(matv,nb1,eps,ier)
+                    mat_b=0.d0
+                    do j=1,nb1
+                            do k=1,nb1
+                                    if (k.ge.j) then
+                                            mat_b(j,k)=matv(j+k*(k-1)/2)
+                                    else
+                                            mat_b(j,k)=matv(k+j*(j-1)/2)
+                                    end if
+                            end do
+                    end do
+            else
+    
+                    matv(1) = 1.d0/mat_B(1,1)
+    
+                    Mat_B(1,1) = matv(1)
+            end if
+    
+            if(link.eq.2) then
+    
+            call integrationdc(survdcCM,t0dc(indg),t1dc(indg),resultdc,abserr,resabs,resasc,indg,b1,npp,b_vec)
+    
+            X2cur = 0.d0
+    
+                    X2cur(1,1) = 1.d0
+            X2cur(1,2) =t1dc(indg)
+            if((nva3-2).gt.0) then
+                do k=3,nva3
+                        X2cur(1,k) = dble(vey(it_res,k))
+                    end do
+            end if
+    
+            Z1cur(1,1) = 1.d0
+                    if(nb1.eq.2)  Z1cur(1,2) = t1dc(indg)
+            current_mean = 0.d0
+    
+            current_mean(1) =dot_product(X2cur(1,1:nva3),b1((npp-nva3+1):npp))&
+                                    +dot_product(Z1cur(1,1:nb1),b_vec(1:nb1))
+            end if
+    
+            uii = matmul(b_vec,mat_b)
+            uiiui=matmul(uii,b_vecT)
+    
+            if(prod_cag.lt.0.1d-321)prod_cag= 0.1d-321
+    
+            res = 0.d0
+            if(link.eq.1) then
+                    if(nb1.eq.1) then
+                            res =  dlog(prod_cag) &
+                                            -(yscalar**2.d0)/(2.d0*sigmae)&
+                                            -(frail1**2.d0)/(2.d0*ut(1,1)**2) &
+                                            +Ndc(indg)*(etaydc1*frail1) - &
+                                            Rdc(indg)*dexp(etaydc1*frail1)
+    
+                    else if(nb1.eq.2) then
+                                    res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
+                                    Ndc(indg)*(etaydc1*frail1+etaydc2*frail2) - &
+                                    Rdc(indg)*dexp(etaydc1*frail1+etaydc2*frail2)-uiiui(1)/2.d0
+                    end if
+            else
+                    if(nb1.eq.1) then
+    
+                            res =  dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)&
+                                    +Ndc(indg)*(etaydc1*current_mean(1)) &
+                                    -(frail1**2.d0)/(2.d0*ut(1,1)**2)  - resultdc   !        -Rdc(indg)*dexp(etaydc1*current_mean(1))
+    
+                    else if(nb1.eq.2) then
+                            res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)&
+                                    +Ndc(indg)*(etaydc1*current_mean(1))  &
+                                    -uiiui(1)/2.d0 - resultdc!      -       Rdc(indg)*dexp(etaydc1*current_mean(1))
+                    end if
+            end if
+    
+        if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+            funcpajres_biv=-1.d9
+            goto 222
+        end if
+            funcpajres_biv = res
+    
+    222    continue
+    
+        return
+    
+        end function funcpajres_biv
+    
+    
+    
+    
+    !!!!
+    !!!! =============================== Calcul Residus joint bivariate - longitudinales et deces ==========
+    
+    
+    
+        double precision function funcpajres_tri(uu,np,id,thi,jd,thj)
+    
+            use optim
+        use comon
+            use donnees_indiv,only:z1cur,x2cur,current_mean,b1
+            use residusM
+    
+        implicit none
+    
+        integer,intent(in)::id,jd,np
+        double precision,intent(in)::thi,thj
+        double precision,dimension(np)::uu,bh
+        double precision::frail1,frail2,frail3,res,yscalar,prod_cag,eps,det
+            double precision::finddet,alnorm
+            double precision,dimension(nea)::b_vec,uii
+            double precision,dimension(nea*(nea+1)/2)::matv
+            double precision,dimension(nea,1)::b_vecT
+            double precision,dimension(nea,nea)::mat_B
+            double precision,dimension(1)::uiiui
+            integer::jj,j,k,ier,ii
+            logical :: upper
+        double precision,parameter::pi=3.141592653589793d0
+            double precision :: resultdc,resultr
+            double precision,external::survdcCM,survRCM
+        double precision :: abserr,resabs,resasc,ress
+            double precision,dimension(1)::current_meanR
+            upper=.false.
+            
+        bh=uu
+        if (id.ne.0) bh(id)=bh(id)+thi
+        if (jd.ne.0) bh(jd)=bh(jd)+thj
+    
+        frail1=bh(1)!*bh(1)
+        frail2 = 0.d0
+            if(nb1.eq.2)frail2 = bh(2)!*bh(2)
+            frail3 = bh(nb1+1)!*bh(nb1+1)
+            b_vec(1) = frail1
+            if(nb1.eq.2) then
+                    b_vec(2) = frail2
+                    b_vec(3) = frail3
+                    b_vecT(2,1) = frail2
+                    b_vecT(3,1) = frail3
+            else
+                    b_vec(2) = frail3
+                    b_vecT(2,1) = frail3
+            end if
+            b_vecT(1,1) = frail1
+    
+            !!!Nrec(indg) - zastapic f_Y(O_i|u_i)
+        !res = dexp((Ndc(indg))*frail1- &
+        !dexp(frail1)*Rrec(indg) - dexp(alpha*frail1)*Rdc(indg)- &
+        !(frail1**2.d0)/(2.d0*sig2))
+            matv = 0.d0
+            mu1_res = 0.d0
+    
+            if(nmesy(indg).gt.0) then
+            !if(nb1.eq.1)mu1_res(1:nmesy(indg)) = XbetaY_res(1,indg) +Zet(1:nmesy(indg),1:netadc)*b_vec
+            if(nb1.eq.2)mu1_res(1:nmesy(indg)) = XbetaY_res(1,indg) +MATMUL(Zet(1:nmesy(indg),1:nb1),b_vec(1:nb1))
+            end if
+    
+            !********* Left-censoring ***********
+            yscalar = 0.d0
+                    prod_cag = 1.d0
+            if(s_cag_id.eq.1)then
+                    do k = 0,nmesy(indg)-1
+                            if(yy(k+it_res).le.s_cag) then
+                                    prod_cag = prod_cag*(1.d0-alnorm((mu1_res(k+1)-s_cag)/sqrt(sigmae),upper))
+                                    !0.5d0*(1.d0-erf((mu1_res(k+1)-s_cag)/(sigmae*dsqrt(2.d0))))        
+                            else
+                                    yscalar = yscalar + (yy(k+it_res)-mu1_res(k+1))**2
+                            end if
+                    end do
+            else
+                    do k=0,nmesy(indg)-1
+                            yscalar = yscalar + (yy(k+it_res)-mu1_res(k+1))**2
+                    end do
+            end if
+    
+            yscalar = dsqrt(yscalar)
+    
+    
+            mat_B = matmul(ut,utt)
+            det = finddet(matmul(ut,utt),nea)
+    
+    
+                    jj=0
+                    do j=1,nea
+                            do k=j,nea
+                                    jj=j+k*(k-1)/2
+                                    matv(jj)=mat_B(j,k)
+                            end do
+                    end do
+                    ier = 0
+                    eps = 1.d-10
+                    call dsinvj(matv,nea,eps,ier)
+                    mat_b=0.d0
+                    do j=1,nea
+                            do k=1,nea
+                                    if (k.ge.j) then
+                                            mat_b(j,k)=matv(j+k*(k-1)/2)
+                                    else
+                                            mat_b(j,k)=matv(k+j*(j-1)/2)
+                                    end if
+                            end do
+                    end do
+    
+        ress = 0.d0
+        current_mean = 0.d0
+        current_meanR = 0.d0
+            if(link.eq.2) then
+                    
+                
+                    do ii=it_res_rec,it_res_rec+nmesrec(indg)-1
+                            resultR = 0.d0
+    
+                            call integrationdc(survRCM,t0(ii),t1(ii),resultR,abserr,resabs,resasc,ii,b1,npp,b_vec)
+                            ress = ress + resultR   !c'est deja res1-res3
+    
+    
+                            if((c(ii).eq.1))then
+                                    X2cur(1,1) = 1.d0
+                                    X2cur(1,2) = t1(ii)
+                                    if(nva3.gt.0) then
+                                            do k=3,nva3
+                                                    X2cur(1,k) = dble(vey(it_res,k))
+                                            end do
+                                    end if
+    
+                                    Z1cur(1,1) = 1.d0
+                                    if(nb1.eq.2)Z1cur(1,2) = t1(ii)
+                                    current_meanR = current_meanR + MATMUL(X2cur,b1((npp-nva3+1):npp))&
+                                            +MATMUL(Z1cur,b_vec(1:nb1))
+                            end if
+                    end do
+    
+    
+            call integrationdc(survdcCM,t0dc(indg),t1dc(indg),resultdc,abserr,resabs,resasc,indg,b1,npp,b_vec)
+    
+            X2cur = 0.d0
+    
+                    X2cur(1,1) = 1.d0
+            X2cur(1,2) =t1dc(indg)
+            if((nva3-2).gt.0) then
+                do k=3,nva3
+                        X2cur(1,k) = dble(vey(it_res,k))
+                    end do
+            end if
+    
+            Z1cur(1,1) = 1.d0
+                    if(nb1.eq.2)  Z1cur(1,2) = t1dc(indg)
+            
+    
+            current_mean(1) =dot_product(X2cur(1,1:nva3),b1((npp-nva3+1):npp))&
+                                    +dot_product(Z1cur(1,1:nb1),b_vec(1:nb1))
+            end if
+    
+    
+            uii = matmul(b_vec,mat_b)
+            uiiui=matmul(uii,b_vecT)
+    
+            if(prod_cag.lt.0.1d-321)prod_cag= 0.1d-321
+            
+            res = 0.d0
+            if(link.eq.1) then
+                    if(nb1.eq.1) then
+                            res =  dlog(prod_cag) &
+                                            -(yscalar**2.d0)/(2.d0*sigmae)&
+                                            -(frail1**2.d0)/(2.d0*ut(1,1)**2) &
+                                            +Ndc(indg)*(etaydc1*frail1+frail3*alpha) - &
+                                            Rdc(indg)*dexp(etaydc1*frail1+frail3*alpha) &
+                                            +Nrec(indg)*(frail3+etayr1*frail1)-Rrec(indg)*dexp(frail3+etayr1*frail1)
+    
+                    else if(nb1.eq.2) then
+                            res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
+                                    Ndc(indg)*(etaydc1*frail1+etaydc2*frail2+frail3*alpha) - &
+                                    Rdc(indg)*dexp(etaydc1*frail1+etaydc2*frail2+frail3*alpha)-uiiui(1)/2.d0 &
+                                    +Nrec(indg)*(frail3+etayr1*frail1+etayr2*frail2)-&
+									Rrec(indg)*dexp(frail3+etayr1*frail1+etayr2*frail2)
+                    end if
+            else
+                    if(nb1.eq.1) then
+                            res =  dlog(prod_cag) &
+                                            -(yscalar**2.d0)/(2.d0*sigmae)&
+                                            -(frail1**2.d0)/(2.d0*ut(1,1)**2) &
+                                            +Ndc(indg)*(etaydc1*current_mean(1)+frail3*alpha) - &
+                                            Rdc(indg)*dexp(etaydc1*current_mean(1)+frail3*alpha) &
+                                            +Nrec(indg)*(frail3+etayr1*current_meanR(1))&
+											-ress*dexp(frail3+etayr1*current_meanR(1))
+                    else if(nb1.eq.2) then
+                            res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
+                                    Ndc(indg)*(etaydc1*current_mean(1)+frail3*alpha) - &
+                                    Rdc(indg)*dexp(etaydc1*current_mean(1)+frail3*alpha)-uiiui(1)/2.d0 &
+                                    +Nrec(indg)*(frail3+etayr1*current_meanR(1))-ress*dexp(frail3+etayr1*current_meanR(1))
+                    end if
+            end if
+    
+        if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+            funcpajres_tri=-1.d9
+            goto 222
+        end if
+    
+        funcpajres_tri = res
+    
+    222    continue
+    
+        return
+    
+        end function funcpajres_tri
+ 

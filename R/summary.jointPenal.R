@@ -35,7 +35,7 @@
         cat("Recurrences:\n")
         cat("------------- \n")
         cat(paste(rep(" ",mx),collapse=""),paste("   ",dimnames(n)[[2]]),"\n")
-        for(i in 1:x$nvar[1]) 
+        for(i in 1:x$nvarnotdep[1]) 
          {
           lab[i] <- paste(c(rep(" ", mx - nchar(lab[i])), lab[i]),collapse = "")
           cat(lab[i], a[i, 1], "(", a[i, 2], "-", a[i, 3], ") \n")
@@ -46,7 +46,7 @@
         cat("Terminal event:\n")
         cat("--------------- \n")
         cat(paste(rep(" ",mx),collapse=""),paste("   ",dimnames(n)[[2]]),"\n")
-        for(i in (x$nvar[1]+1):dd[1]) 
+        for(i in (x$nvarnotdep[1]+1):dd[1]) 
          {
           lab[i] <- paste(c(rep(" ", mx - nchar(lab[i])), lab[i]),collapse = "")
           cat(lab[i], a[i, 1], "(", a[i, 2], "-", a[i, 3], ") \n")

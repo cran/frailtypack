@@ -9,12 +9,12 @@
 }
 
 \usage{
-  \method{plot}{predFrailty}(x, conf.bands=FALSE, pos.legend="topright", cex.legend=0.7, 
-   ylim=c(0,1), ...)
+\method{plot}{predFrailty}(x, conf.bands=FALSE, pos.legend="topright", cex.legend=0.7, 
+ylim=c(0,1), ...)
 }
 
 \arguments{
-  \item{x}{An object from the 'prediction' function, more generaly a \code{predFrailty} class object.}
+  \item{x}{An object from the 'prediction' function, i.e. a \code{predFrailty} class object.}
   \item{conf.bands}{Logical value. Determines whether confidence intervals will be plotted. The default is FALSE.}
   \item{pos.legend}{The location of the legend can be specified by setting this argument to a single keyword from the list
                     '"bottomright"', '"bottom"', '"bottomleft"', '"left"', '"topleft"', '"top"', '"topright"', '"right"' and '"center"'. The default is '"topright"'.}

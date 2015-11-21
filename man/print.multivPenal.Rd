@@ -15,7 +15,7 @@ Print a Short Summary of parameter estimates of a multivariate frailty model
 \arguments{
   \item{x}{the result of a call to the multivPenal function}
   \item{digits}{number of digits to print}
-  \item{\dots}{ other unusued arguments }
+  \item{\dots}{ other unused arguments }
 }
 
 \value{

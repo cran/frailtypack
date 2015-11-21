@@ -56,9 +56,9 @@
             res1(i,j)=res1(j,i)
         end do
     end do    
-    
+!   write(*,*)'L',L,'bb',bb,'res1,matmul(L,bb)',res1,matmul(L,bb)
     resultat = matmul(transpose(matmul(L,bb)),matmul(res1,matmul(L,bb)))
-
+!write(*,*)"wald",resultat,ddl,m
     wald = resultat(1,1)
 
     end subroutine waldmultiv

@@ -11,7 +11,7 @@
 \format{
   This data frame contains the following columns:
   \describe{
-    \item{id}{identificator of each subject. Repeated for each recurrence}
+    \item{id}{identification of each subject. Repeated for each recurrence}
     \item{enum}{which readmission}
     \item{t.start}{start of interval (0 or previous recurrence time)}
     \item{t.stop}{recurrence or censoring time}

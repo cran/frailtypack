@@ -26,7 +26,7 @@ the variable identifying individuals}
 }
 
 \references{
-V. Rondeau, J.P. Pignon, S. Michiels (2011). A joint model for the dependance between clustered times to tumour progression and deaths: A meta-analysis of chemotherapy in head and neck cancer.
+V. Rondeau, J.P. Pignon, S. Michiels (2011). A joint model for the dependence between clustered times to tumour progression and deaths: A meta-analysis of chemotherapy in head and neck cancer.
 \emph{Statistical methods in medical research} \bold{897}, 1-19.
 
 }
