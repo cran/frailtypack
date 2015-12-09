@@ -291,7 +291,7 @@ formula.terminalEvent =~ age + treatment + who.PS + prev.resection,
 tumor.size ~ year * treatment + age + who.PS, data = colorectal, 
 data.Longi = colorectalLongi, random = c("1", "year"), id = "id", 
 link = "Random-effects", left.censoring = -3.33, recurrentAG = TRUE,
-n.knots = 6, kappa=c(0.01, 2), method.GH="Standard", n.nodes = 7
+n.knots = 6, kappa=c(0.01, 2), method.GH="Standard", n.nodes = 7,
 init.B = c(-0.07, -0.13, -0.16, -0.17, 0.42, #recurrent events covariates
 -0.16, -0.14, -0.14, 0.08, 0.86, -0.24, #terminal event covariates
 2.93, -0.28, -0.13, 0.17, -0.41, 0.23, 0.97, -0.61)) #biomarker covariates

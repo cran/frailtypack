@@ -166,7 +166,7 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
                         ic <- model.extract(dataset, "response")[,2]
                         npred <- length(uni.cluster)
                         nrec <- max(table(cluster[ic==1]))
-
+                       
                         if (temp[1]=="Surv"){
                                 Y <- NULL
                                
@@ -700,6 +700,7 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
          out$window <- window
          out$trivariate <- FALSE
    }else if(class(fit)=="trivPenal"){
+  
      ans <- .Fortran("predict_tri",
                      as.integer(np),
                      as.double(b),
@@ -728,7 +729,7 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
                      as.double(as.matrix(varY)),
                      as.integer(clusterY),
                      as.integer(length(clusterY)),
-                     as.integer(length(num.id)),
+                     as.integer(npred),
                      pred=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
                      predlow=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
                      predhigh=as.double(matrix(0,nrow=npred,ncol=ntimeAll)),

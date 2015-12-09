@@ -1,11 +1,9 @@
----
-title: "Summary of frailtypack"
-date: \today
-output: rmarkdown::html_vignette
-classoption: landscape
-geometry: margin=0.5in
 
----
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{Package summary}
+-->
+
 
 
 

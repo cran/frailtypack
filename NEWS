@@ -1,3 +1,9 @@
+
+Changes in version 2.8.2 December 2015
+
+ o Description of the different models and options in Frailtypack using a vignette ("Package_summary")
+
+
 Changes in version 2.8 November 2015
 
  o New models added: joint model for longitudinal data and a terminal event (longiPenal function) and trivariate joint model for longitudinal data, recurrent events and a terminal event (trivPenal function)

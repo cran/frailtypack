@@ -26,7 +26,7 @@
      Package: \tab frailtypack\cr
      Type: \tab Package\cr
      Version: \tab 2.8\cr
-     Date: \tab 2015-11-2\cr
+     Date: \tab 2015-12-8\cr
      License: \tab GPL (>= 2.0)\cr
      LazyLoad: \tab no\cr
   }

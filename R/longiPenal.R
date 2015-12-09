@@ -468,7 +468,8 @@ Intercept <- rep(1,dim(X_L)[1])
 		
 		  factor.spot <- which(names(X_L)==vec.factorY[i])
 		
-      X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), data.Longi)[,-1],X_L[(factor.spot+1):ncol(X_L)])
+		  	if(factor.spot<ncol(X_L))  X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), data.Longi)[,-1],X_L[(factor.spot+1):ncol(X_L)])
+     else X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), data.Longi)[,-1])
      
          } }
 

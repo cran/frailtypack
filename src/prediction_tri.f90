@@ -113,7 +113,7 @@
             XbetapredY = matmul(coefBetay,transpose(vaxypred0))
             !  XbetapredDC = matmul(coefBetadc,transpose(vaxdcpred0))
     
-    
+
             allocate(survRi(nrec0+2),hazRi(nrec0+2))
     
         ! Determine when to calculate Survival function (gap time)
@@ -314,9 +314,7 @@
                 Utt(nea,nea) =  b(np-nva-nb_re-1-netadc - netar-1)
     
     
-    
-    
-    
+  
             !theta = b(np-nva1-nva2-1)*b(np-nva1-nva2-1)
             !alpha = b(np-nva1-nva2)
             it = 1
@@ -351,18 +349,19 @@
                                     end if
     
                                     end if
-    
+   ! if(i.eq.82)then
     
             if(nb1.eq.1) call gauherPred_tri2(ss11,1)
             if(nb1.eq.2)call gauherPred_tri3(ss11,1)
     
             if(nb1.eq.1)   call gauherPred_tri2(ss12,2)
         if(nb1.eq.2)      call gauherPred_tri3(ss12,2)
-    
+  !  end if
             predProba1(i) = ss11/ss12
             it = it +nreci_all(i)
-    
+  ! write(*,*)i,ss11/ss12
             end do
+	!		stop
     ! if(iii.eq.2)stop
             predAll1(:,iii) = predProba1
     
@@ -995,7 +994,7 @@
             double precision :: resultdc,resultR,abserr,resabs,resasc
     
     
-    
+
             upper = .false.
     
             Xea2(1,1) = frail
@@ -1101,9 +1100,10 @@
                     *dexp(-uiiui(1)/2.d0)/dsqrt(det)*dsqrt(2.d0*pi)**(-3.d0/2.d0)
     
             end if
-    
-    
-    
+  !!  if(xea22(1).eq.-5.38748073577881.and.Xea22(2).eq.-5.38748073577881.and.Xea22(3).eq.-5.38748073577881) then
+   ! write(*,*)XbetapredRi
+         !   stop
+  !end if
     
             return
     

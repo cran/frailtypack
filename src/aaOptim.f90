@@ -160,6 +160,7 @@
     ep=1.d-20
     Main:Do
         !print*,"dans aaOptim, appel de derivaJ avec funcpa... "
+	
         call derivaJ(b,m,v,rl,k0,fctnames)
     rl1=rl
     !print *,"rl1 = ", rl1
@@ -169,7 +170,7 @@
         goto 110
     end if
 
-  !   write(*,*)'iteration***',ni,'vrais',rl
+   !  write(*,*)'iteration***',ni,'vrais',rl
 
         dd = 0.d0
 
@@ -202,8 +203,8 @@
         dd=GHG/dble(m)
     end if
 
-  !write(*,*)'epsa',ca,'epsb',cb,'epsd',dd
-    !write(*,*)'b',b
+!  write(*,*)'epsa',ca,'epsb',cb,'epsd',dd
+ !   write(*,*)'b',b
 
 !     print*,ca,cb,dd
 !     print*,b
@@ -229,7 +230,7 @@
 
  400    do i=1,nfmax+m
            fu(i)=v(i)
-        end do
+		end do
 
         do i=1,m
             ii=i*(i+1)/2
@@ -254,7 +255,9 @@
             goto 400
 
         else
+		
             do i=1,m
+			
                 delta(i)=fu(nfmax+i)
                 b1(i)=b(i)+delta(i)
             end do
@@ -535,15 +538,17 @@
                 if (endDeriva.eqv..false.) then
                     vl=(fcith(i)-vaux)/(2.d0*th)
                     v(ll)=vl
-                    !print*,"vl(",ll,") =",v(ll)
+                  !  print*,"vl(",ll,") =",v(ll)
                     do j=1,i
                         k=k+1
                         v(k)=-(fctnames(b,m,i,th,j,th,k0)-fcith(j)-fcith(i)+rl)/th2
+				!		write(*,*)k,fctnames(b,m,i,th,j,th,k0),b,m,i,th,j,k0
                     end do
                 end if
             end do
         end if
     end if
+	!stop
     return
 
     end subroutine derivaJ
