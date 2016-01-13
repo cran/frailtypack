@@ -5,7 +5,7 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
         if ((class(fit)!="frailtyPenal") & (class(fit)!="jointPenal") & class(fit)!='longiPenal' & class(fit)!='trivPenal') stop("The argument fit must be a frailtyPenal or jointPenal object")
         if (fit$istop != 1) stop("Attempting to do predictions with a wrong model")
         if (missing(data)) stop("Need data to do some predictions")
-        if (missing(data.Longi) & (class(fit)=="frailtyPenal") & (class(fit)!="jointPenal")) stop("Need data.Longi to do some predictions")
+        if (missing(data.Longi) & (class(fit)=="longiPenal") & (class(fit)=="trivPenal")) stop("Need data.Longi to do predictions")
         if (missing(t) | missing(window)) stop("Need times and a window to do predictions")
 
         if (length(t)!=1 & length(window)!=1) stop("t and window can not be vector both at the same time")

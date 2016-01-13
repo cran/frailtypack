@@ -36,17 +36,18 @@ V. Rondeau, J.P. Pignon, S. Michiels (2011). A joint model for the dependence be
 \dontrun{
 
 data(readmission)
-#-- here is a generated cluster (31 clusters of 13 subjects)
-readmission <- transform(readmission,group=id\%\%31+1)
+#-- here is generated cluster (5 clusters)
+readmission <- transform(readmission,group=id\%\%5+1)
 
-###--- Joint Frailty model for clustered data ---###
+#-- exclusion all recurrent events --#
+#--  to obtain framework of semi-competing risks --#
+readmission2 <- subset(readmission, (t.start == 0 & event == 1) | event == 0)
 
-#-- splines
-joi.clus <- frailtyPenal(Surv(t.start,t.stop,event)~
-cluster(group)+num.id(id)+dukes+charlson+sex+chemo+terminal(death),
+joi.clus.gap <- frailtyPenal(Surv(time,event)~cluster(group)+
+num.id(id)+dukes+charlson+sex+chemo+terminal(death),
 formula.terminalEvent=~dukes+charlson+sex+chemo,
-data=readmission,recurrentAG=TRUE,
-n.knots=10,kappa=c(2.11e+08,9.53e+11))
+data=readmission2,recurrentAG=FALSE, n.knots=8,
+kappa=c(1.e+10,1.e+10) ,Alpha="None")
 
 }
 

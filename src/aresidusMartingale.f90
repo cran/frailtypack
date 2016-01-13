@@ -770,19 +770,21 @@
                         v_rim_chol = V_rim_inv! transpose( V_rim_inv)
     
     
-            do j= it_res,(it_res+nmesy(indg)-1)
-            zet_vec(1:nb1) = Zet(j,1:nb1)
-    
-            
-            ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
-                        if(nb1.eq.2)ResLongi_cond(j) = ResLongi_cond(j)-zet_vec(2)*b_pred(2)
-    
-                        ResLongi_marg(j) = yy(j) - XbetaY_res(1,j)
-                Pred_yy(j,1) =  XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
-                        if(nb1.eq.2.and.zet_vec(2)*b_pred(2).ne.0.d0)Pred_yy(j,1) = Pred_y(j,1)+zet_vec(2)*b_pred(2)
-                        Pred_yy(j,2) =  XbetaY_res(1,j)
+    do j= it_res,(it_res+nmesy(indg)-1)
+        zet_vec(1:nb1) = Zet(j,1:nb1)
+		ResLongi_marg(j) = yy(j) - XbetaY_res(1,j)
+           
+		if(nb1.eq.1) then 
+			ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
+			Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
+		else if(nb1.eq.2) then
+			ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)-zet_vec(2)*b_pred(2)
+			Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
+		end if
+						
+		Pred_yy(j,2) =  XbetaY_res(1,j)
                         
-            end do
+    end do
     
                                 matv2 = 0.d0
                         do j=1,nmesy(indg)
@@ -1038,18 +1040,19 @@
     
                         v_rim_chol = V_rim_inv! transpose( V_rim_inv)
     
-            do j= it_res,(it_res+nmesy(indg)-1)
-            zet_vec(1:nb1) = Zet(j,1:netadc)
-    
-        ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
-                        if(nb1.eq.2)ResLongi_cond(j) = ResLongi_cond(j)-zet_vec(2)*b_pred(2)
-                        ResLongi_marg(j) = yy(2) - XbetaY_res(1,j)
-                Pred_yy(j,1) =  XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
-                        if(nb1.eq.2)Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
-                        Pred_yy(j,2) =  XbetaY_res(1,j)
-    
-    
-            end do
+    do j= it_res,(it_res+nmesy(indg)-1)
+		zet_vec(1:nb1) = Zet(j,1:netadc)
+		
+		ResLongi_marg(j) = yy(2) - XbetaY_res(1,j)
+        if(nb1.eq.1) then 
+			ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
+			Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
+		else if(nb1.eq.2) then
+			ResLongi_cond(j) =  yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)-zet_vec(2)*b_pred(2)
+			Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
+		end if
+		Pred_yy(j,2) =  XbetaY_res(1,j)
+    end do
                                                 matv2 = 0.d0
                         do j=1,nmesy(indg)
     do k=j,nmesy(indg)

@@ -86,7 +86,7 @@
 
       }
       cat("\n")
-      cat("   Trivariate Joint Model for Longitudinal Data, Recurrent Events, and a Terminal Event","\n")
+      cat("   Trivariate Joint Model for Longitudinal Data, Recurrent Events and a Terminal Event","\n")
       if (x$typeof == 0){
         cat("   Parameter estimates using a Penalized Likelihood on the hazard functions","\n")
       }else{

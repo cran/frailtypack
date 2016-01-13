@@ -2297,7 +2297,7 @@
     
                 X2cur(1,1) = 1.d0
             X2cur(1,2) = t1dc(numpat)
-            if(nva3.gt.0) then
+            if(nva3.gt.2) then
                 do k=3,nva3
                     X2cur(1,k) = dble(vey(it_cur+1,k))
                 end do
@@ -2572,7 +2572,7 @@
                             if((c(ii).eq.1))then
                                     X2cur(1,1) = 1.d0
                                     X2cur(1,2) = t1(ii)
-                                    if(nva3.gt.0) then
+                                    if(nva3.gt.2) then
                                             do k=3,nva3
                                                     X2cur(1,k) = dble(vey(it_cur+1,k))
                                             end do
@@ -2618,7 +2618,7 @@
     
                             X2cur(1,1) = 1.d0
                     X2cur(1,2) = t1dc(numpat)
-                    if(nva3.gt.0) then
+                    if(nva3.gt.2) then
                             do k=3,nva3
                                     X2cur(1,k) = dble(vey(it_cur+1,k))
                             end do
@@ -2881,7 +2881,7 @@
                             if((c(ii).eq.1))then
                                     X2cur(1,1) = 1.d0
                                     X2cur(1,2) = t1(ii)
-                                    if(nva3.gt.0) then
+                                    if(nva3.gt.2) then
                                             do k=3,nva3
                                                     X2cur(1,k) = dble(vey(it_cur+1,k))
                                             end do
@@ -2929,7 +2929,7 @@
     
                             X2cur(1,1) = 1.d0
                     X2cur(1,2) = t1dc(numpat)
-                    if(nva3.gt.0) then
+                    if(nva3.gt.2) then
                             do k=3,nva3
                                     X2cur(1,k) = dble(vey(it_cur+1,k))
                             end do
@@ -2978,7 +2978,7 @@
             if(link.eq.1) then
             func9J =  dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)&
                                             -uiiui(1)/2.d0-0.5d0*dlog(det)&
-                                            -2.d0/3.d0*dlog(2.d0*pi)&       !
+                                            -3.d0/2.d0*dlog(2.d0*pi)&       !
                                             -dexp(Xea22(3)*alpha+etaydc1*Xea22(1)+etaydc2*Xea22(2))*aux1(numpat)&
                                             + cdc(numpat)*(etaydc1*Xea22(1)+etaydc2*Xea22(2))&
                                             -dexp(Xea22(3)+etayr1*Xea22(1)+etayr2*Xea22(2))*(res1(i)-res3(i)) &
@@ -2987,7 +2987,7 @@
             else
             func9J =  dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)&
                                             -uiiui(1)/2.d0-0.5d0*dlog(det)&
-                                            -2.d0/3.d0*dlog(2.d0*pi)&
+                                            -3.d0/2.d0*dlog(2.d0*pi)&
                                             -dexp(Xea22(3)*alpha)*aux1(numpat)&
                                             + cdc(numpat)*(etaydc1*current_mean(1))&
                                             -dexp(Xea22(3))*res1(i)+etayr1*current_meanR(1)    &
@@ -3174,7 +3174,7 @@
             endif
     
                             X2cur(1,1) = 1.d0
-                    X2cur(1,2) = tps
+           X2cur(1,2) = tps
             if(nva3.gt.2) then
                     do k=3,nva3
                                     X2cur(1,k) = dble(vey(it_cur+1,k))
@@ -3277,7 +3277,7 @@
     !    if(tps.le.0.4181.and.tps.ge.0.4180.and.frail(1).eq.-5.38748073577881.and.&
     !       frail(2).eq.-5.38748073577881)write(*,*)vet
             X2cur(1,1) = 1.d0
-            X2cur(1,2) = tps
+             X2cur(1,2) = tps
         if(nva3.gt.2) then
             do k=3,nva3
                     X2cur(1,k) = dble(vey(it_cur+1,k))

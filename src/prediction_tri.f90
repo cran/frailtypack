@@ -1090,14 +1090,14 @@
             * exp((frail3+etayr1*frail+etayr2*frail2))**nmescurr &
         * (survRi(1)**( exp(XbetapredRi+frail3+etayr1*frail+etayr2*frail2))) &
         * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
-                    *dexp(-uiiui(1)/2.d0)/dsqrt(det)*dsqrt(2.d0*pi)**(-3.d0/2.d0)
+                    *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)
             else if(link.eq.2) then
                     func1pred2GHtri =  (dexp(-survDC(1)*dexp(frail3*alpha))&
                     -dexp(- survDC(2)*dexp(frail3*alpha))) &
-            * exp((frail3+etayr1*frail+etayr2*frail2))**nmescurr &
+            * exp(frail3)**nmescurr &
         * dexp(-survRi(1)* exp(frail3)) &
         * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
-                    *dexp(-uiiui(1)/2.d0)/dsqrt(det)*dsqrt(2.d0*pi)**(-3.d0/2.d0)
+                    *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)
     
             end if
   !!  if(xea22(1).eq.-5.38748073577881.and.Xea22(2).eq.-5.38748073577881.and.Xea22(3).eq.-5.38748073577881) then
@@ -1233,13 +1233,13 @@
             * exp((frail3+etayr1*frail+etayr2*frail2))**nmescurr &
         * (survRi(1)**( exp(XbetapredRi+frail3+etayr1*frail+etayr2*frail2))) &
         * exp(-(yscalar**2.d0)/(2.d0*sigmae)))*exp(prod_cag) &
-            *dexp(-uiiui(1)/2.d0)/dsqrt(det)*dsqrt(2.d0*pi)**(-3.d0/2.d0)
+            *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)
             else if(link.eq.2) then
                     func2pred2GHtri =  dexp(-survDC(1)*dexp(frail2*alpha)) &
-            * exp((frail3+etayr1*frail+etayr2*frail2))**nmescurr &
+            * exp(frail3)**nmescurr &
         * dexp(-survRi(1)* exp(frail3)) &
         * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
-                    *dexp(-uiiui(1)/2.d0)/dsqrt(det)*dsqrt(2.d0*pi)**(-3.d0/2.d0)
+                    *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)
     
     
             end if

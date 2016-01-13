@@ -512,7 +512,7 @@ recurrentAG=TRUE,RandDist="LogN")
 ###--- Joint Frailty model for clustered data ---###
 
 #-- here is generated cluster (5 clusters)
-readmission <- transform(readmission,group=id%%5+1)
+readmission <- transform(readmission,group=id\%\%5+1)
 
 #-- exclusion all recurrent events --#
 #--  to obtain framework of semi-competing risks --#

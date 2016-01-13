@@ -57,7 +57,7 @@
     
         ! redefinition des variables du module
         nst = 1
-    
+
         nva1 = nva10
             nva2 = nva20
             nva3 = nva30
@@ -373,10 +373,10 @@
             trace3 = 0.d0
     
             do k=1,npp
-            !       write(*,*)k,'mat',J_condt(k,1:npp)
+              !    write(*,*)k,'mat',H_1(k,1:npp)
                 trace3 = trace3 + mat3(k,k)
             end do
-            !       stop
+         !          stop
             epoir(t) = -rl_condt/dble(nsujet_t)+(trace3*dble(ng)/(dble(nsujet_t)*dble(ng-1))) !cvpl
             rl_cond(t) = -rl_condt/dble(nsujet_t) !mpl
     
@@ -1314,7 +1314,7 @@
                     !**************INTEGRALES ****************************
     
     
-    ndim = nb_re
+    ndim = nea
     mintps = 800
     maxtps = 1000
     epsabs = 1.d-100

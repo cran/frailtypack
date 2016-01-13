@@ -22,6 +22,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
 
         nt <- length(pred.times)
         vopt <- fit$varHtotal
+       
         b <- fit$b
         np <- length(fit$b)
         typeof <- fit$typeof
@@ -436,7 +437,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                   PACKAGE="frailtypack")
   }}else if(class(fit) == "longiPenal"){
 
-
+   
     ans <- .Fortran("cvpl_long",
                     as.integer(nsujet),
                     as.integer(1),
