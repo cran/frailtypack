@@ -95,8 +95,8 @@
         double precision,dimension(ng0,3)::re_pred
         double precision,dimension(ng0,5),intent(out)::MartinGales
         double precision,dimension(nsujety0,2),intent(out):: Pred_y0
-            double precision,dimension(nsujety0,4),intent(out):: ResLongi
-            double precision,dimension(nsujety0) :: ResLongi_cond0,ResLongi_marg0,&
+        double precision,dimension(nsujety0,4),intent(out):: ResLongi
+        double precision,dimension(nsujety0) :: ResLongi_cond0,ResLongi_marg0,&
                             ResLongi_chol0,ResLongi_cond_st0
     
         double precision,external::funcpajres,funcpajres_log,funcpajres_biv,funcpajres_tri
@@ -108,8 +108,7 @@
         double precision::coefBeta2
         double precision,dimension(1,nsujet0)::XBeta
         double precision,dimension(1,nsujety0)::XBetaY
-        double precision,dimension(1,ng0)::XBetadc
-    
+        double precision,dimension(1,ng0)::XBetadc    
     
         integer::ngtemp
     
@@ -117,11 +116,13 @@
         integer,dimension(nva10+nva20+nva30),intent(in)::filtretps0
         double precision,dimension(0:100,0:4*sum(filtretps0(1:nva10)))::BetaTpsMat !!! a refaire
         double precision,dimension(0:100,0:4*sum(filtretps0(nva10+1:nva10+nva20)))::BetaTpsMatDc
-            double precision,dimension(0:100,0:4*sum(filtretps0(nva10+nva20+1:nva10+nva20+nva30)))::BetaTpsMatY
+        double precision,dimension(0:100,0:4*sum(filtretps0(nva10+nva20+1:nva10+nva20+nva30)))::BetaTpsMatY
         double precision,dimension(paratps(2)+paratps(3))::basis
         double precision,dimension(3),intent(inout)::EPS ! seuils de convergence : on recupere les valeurs obtenues lors de l'algorithme a la fin
         integer,dimension(2),intent(in):: GH
-            double precision,dimension(ng0,nb0+1+nb0 + (nb0*(nb0-1))/2),intent(in):: paGH
+        double precision,dimension(ng0,nb0+1+nb0 + (nb0*(nb0-1))/2),intent(in):: paGH
+            
+        character(len=100)::bar
     
     
         mt1=mtaille(1)
@@ -163,7 +164,7 @@
     
         ag = ag0
         typeof = typeof0
-        model = 1
+        model = 7
     
     
         s_cag_id = int(cag0(1))
@@ -716,176 +717,164 @@
     !      construire vecteur zi (des noeuds)
     !!! DONNEES RECURRENTES
             if(typeJoint.ne.2) then
-                    min = 0.d0
-                    aux = 0.d0
-                    max = maxt
-    
-                    do i = 1,(2*nsujet+sum(ic0)) !! rajout
-                            do k = 1,nsujet
-                            
-                                    if (t0(k).gt.min) then
-                                            if (t0(k).le.max) then
-                                                    max = t0(k)
-                                            endif
-                                    endif
-                                    if (t1(k).gt.min) then
-                                            if (t1(k).le.max) then
-                                                    max = t1(k)
-                                        endif
-                                    endif
-    
-                            end do
-            
-                    
-                            aux(i) = max
-                            min = max + 1.d-17
-                            max = maxt
-                    end do
-    
-                    date(1) = aux(1)
-                    k = 1
-                    do i=2,(2*nsujet+sum(ic0))
-            
-                            if(aux(i).gt.aux(i-1))then
-                                    k = k+1
-                                    date(k) = aux(i)
+                min = 0.d0
+                aux = 0.d0
+                max = maxt
+
+                do i = 1,(2*nsujet+sum(ic0)) !! rajout
+                    do k = 1,nsujet                        
+                        if (t0(k).gt.min) then
+                            if (t0(k).le.max) then
+                                max = t0(k)
                             endif
-    
-                    end do
-            end if
-    
-    
+                        endif
+                        if (t1(k).gt.min) then
+                            if (t1(k).le.max) then
+                                max = t1(k)
+                            endif
+                        endif
+                    end do              
+                    aux(i) = max
+                    min = max + 1.d-17
+                    max = maxt
+                end do
+                date(1) = aux(1)
+                k = 1
+                do i=2,(2*nsujet+sum(ic0))            
+                    if(aux(i).gt.aux(i-1))then
+                        k = k+1
+                        date(k) = aux(i)
+                    endif
+                end do
+            end if 
     
             if(typeof == 0) then
-                    if(typeJoint.eq.3) then
+                if(typeJoint.eq.3) then
     ! Al:10/03/2014 emplacement des noeuds splines en percentile (sans censure par intervalle)
-                            if(equidistant.eq.0) then ! percentile
-                                    i=0
-                                    j=0
-    !----------> taille - nb de recu
-                                    do i=1,nsujet
-                                            if(t1(i).ne.(0.d0).and.c(i).eq.1) then
-                                                    j=j+1
-                                            endif
-                                    end do
-                                    nbrecu=j
-    
-    !----------> allocation des vecteur temps
-                                    allocate(t2(nbrecu))
-    
-    !----------> remplissage du vecteur de temps
-                                    j=0
-                                    do i=1,nsujet
-                                            if (t1(i).ne.(0.d0).and.c(i).eq.1) then
-                                                    j=j+1
-                                                    t2(j)=t1(i)
-                                            endif
-                                    end do
-    
-                                    nzmax=nz+3
-                                    allocate(zi(-2:nzmax))
-    
-                                    zi(-2) = mint
-                                    zi(-1) = mint !date(1)
-                                    zi(0) = mint !date(1)
-                                    zi(1) = mint !date(1)
-                                    j=0
-                                    do j=1,nz-2
-                                            pord = dble(j)/(dble(nz)-1.d0)
-                            !     call percentile3(t2,nbrecu,pord,zi(j+1))
-                                    end do
-                                    zi(nz) = maxt !date(ndate)
-                                    zi(nz+1) = maxt !zi(nz)
-                                    zi(nz+2) = maxt !zi(nz)
-                                    zi(nz+3) = maxt !zi(nz)
-                                    ziOut = zi
-                                    deallocate(t2)
-                            else ! equidistant
-                                    nzmax=nz+3
-                                    allocate(zi(-2:nzmax))
-                                
-                                    ndate = k
-    
-                                    zi(-2) = date(1)
-                                    zi(-1) = date(1)
-                                    zi(0) = date(1)
-                                    zi(1) = date(1)
-                                    h = (date(ndate)-date(1))/dble(nz-1)
-                                    do i=2,nz-1
-                                            zi(i) =zi(i-1) + h
-                                    end do
-                                    zi(nz) = date(ndate)
-                                    zi(nz+1)=zi(nz)
-                                    zi(nz+2)=zi(nz)
-                                    zi(nz+3)=zi(nz)
-                                    ziOut = zi
+                    if(equidistant.eq.0) then ! percentile
+                        i=0
+                        j=0
+!----------> taille - nb de recu
+                        do i=1,nsujet
+                            if(t1(i).ne.(0.d0).and.c(i).eq.1) then
+                                j=j+1
                             endif
-    
-                    end if
-    
+                        end do
+                        nbrecu=j
+
+!----------> allocation des vecteur temps
+                        allocate(t2(nbrecu))
+
+!----------> remplissage du vecteur de temps
+                        j=0
+                        do i=1,nsujet
+                            if (t1(i).ne.(0.d0).and.c(i).eq.1) then
+                                j=j+1
+                                t2(j)=t1(i)
+                            endif
+                        end do
+
+                        nzmax=nz+3
+                        allocate(zi(-2:nzmax))
+
+                        zi(-2) = mint
+                        zi(-1) = mint !date(1)
+                        zi(0) = mint !date(1)
+                        zi(1) = mint !date(1)
+                        j=0
+                        do j=1,nz-2
+                            pord = dble(j)/(dble(nz)-1.d0)
+                !     call percentile3(t2,nbrecu,pord,zi(j+1))
+                        end do
+                        zi(nz) = maxt !date(ndate)
+                        zi(nz+1) = maxt !zi(nz)
+                        zi(nz+2) = maxt !zi(nz)
+                        zi(nz+3) = maxt !zi(nz)
+                        ziOut = zi
+                        deallocate(t2)
+                    else ! equidistant
+                        nzmax=nz+3
+                        allocate(zi(-2:nzmax))
+                    
+                        ndate = k
+
+                        zi(-2) = date(1)
+                        zi(-1) = date(1)
+                        zi(0) = date(1)
+                        zi(1) = date(1)
+                        h = (date(ndate)-date(1))/dble(nz-1)
+                        do i=2,nz-1
+                                zi(i) =zi(i-1) + h
+                        end do
+                        zi(nz) = date(ndate)
+                        zi(nz+1)=zi(nz)
+                        zi(nz+2)=zi(nz)
+                        zi(nz+3)=zi(nz)
+                        ziOut = zi
+                    endif    
+                end if   
     
     ! ajout : noeuds des deces
-            if(equidistant.eq.0) then ! percentile
-                i=0
-                j=0
-    !----------> taille - nb de deces
-                do i=1,ngtemp !nsujet
-                    if(t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
-                        j=j+1
-                    endif
-                end do
-                nbdeces=j
+                if(equidistant.eq.0) then ! percentile
+                    i=0
+                    j=0
+        !----------> taille - nb de deces
+                    do i=1,ngtemp !nsujet
+                        if(t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
+                            j=j+1
+                        endif
+                    end do
+                    nbdeces=j
+        
+        !----------> allocation des vecteur temps
+                    allocate(t3(nbdeces))
+        
+        !----------> remplissage du vecteur de temps
+                    j=0
+                    do i=1,ngtemp !nsujet
+                        if (t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
+                            j=j+1
+                            t3(j)=t1dc(i)
+                        endif
+                    end do
+        
+                    allocate(zidc(-2:(nzdc+3)))
+        
+                    zidc(-2) = mintdc
+                    zidc(-1) = mintdc
+                    zidc(0) = mintdc
+                    zidc(1) = mintdc
+                    j=0
+                    do j=1,nzdc-2
+                        pord = dble(j)/(dble(nzdc)-1.d0)
+                !        call percentile3(t3,nbdeces,pord,zidc(j+1))
+                    end do
+                    zidc(nzdc) = maxtdc
+                    zidc(nzdc+1) = maxtdc
+                    zidc(nzdc+2) = maxtdc
+                    zidc(nzdc+3) = maxtdc
+                    deallocate(t3)
+                else ! equidistant
     
-    !----------> allocation des vecteur temps
-                allocate(t3(nbdeces))
-    
-    !----------> remplissage du vecteur de temps
-                j=0
-                do i=1,ngtemp !nsujet
-                    if (t1dc(i).ne.(0.d0).and.cdc(i).eq.1) then
-                        j=j+1
-                        t3(j)=t1dc(i)
-                    endif
-                end do
-    
-                allocate(zidc(-2:(nzdc+3)))
-    
-                zidc(-2) = mintdc
-                zidc(-1) = mintdc
-                zidc(0) = mintdc
-                zidc(1) = mintdc
-                j=0
-                do j=1,nzdc-2
-                    pord = dble(j)/(dble(nzdc)-1.d0)
-            !        call percentile3(t3,nbdeces,pord,zidc(j+1))
-                end do
-                zidc(nzdc) = maxtdc
-                zidc(nzdc+1) = maxtdc
-                zidc(nzdc+2) = maxtdc
-                zidc(nzdc+3) = maxtdc
-                deallocate(t3)
-            else ! equidistant
-    
-                allocate(zidc(-2:(nzdc+3)))
-    
-                zidc(-2) = datedc(1)
-                zidc(-1) = datedc(1)
-                zidc(0) = datedc(1)
-                zidc(1) = datedc(1)
-                hdc = (datedc(ndatedc)-datedc(1))/dble(nzdc-1)
-    
-                do i=2,nzdc-1
-                    zidc(i) =zidc(i-1) + hdc
-                end do
-                zidc(nzdc) = datedc(ndatedc)
-                zidc(nzdc+1)=zidc(nzdc)
-                zidc(nzdc+2)=zidc(nzdc)
-                zidc(nzdc+3)=zidc(nzdc)
-            endif
-            if(typeJoint.eq.2) ziOut = zidc
-    ! fin ajout
-    
-        end if
+                    allocate(zidc(-2:(nzdc+3)))
+        
+                    zidc(-2) = datedc(1)
+                    zidc(-1) = datedc(1)
+                    zidc(0) = datedc(1)
+                    zidc(1) = datedc(1)
+                    hdc = (datedc(ndatedc)-datedc(1))/dble(nzdc-1)
+        
+                    do i=2,nzdc-1
+                        zidc(i) =zidc(i-1) + hdc
+                    end do
+                    zidc(nzdc) = datedc(ndatedc)
+                    zidc(nzdc+1)=zidc(nzdc)
+                    zidc(nzdc+2)=zidc(nzdc)
+                    zidc(nzdc+3)=zidc(nzdc)
+                endif
+                if(typeJoint.eq.2) ziOut = zidc
+    ! fin ajout    
+            end if
     
     !---------- affectation nt0dc,nt1dc DECES ----------------------------
     
@@ -1011,24 +1000,20 @@
             indic_alphatmp = indic_alpha
             indic_alpha=0
             nvatmp=nva
-            nva=nva1
-            
-                    npinit = nz+2+nva1+effet
-            
+            nva=nva1            
+            npinit = nz+2+nva1+effet        
     
             allocate(Binit(npinit))
-        allocate(vvv((npinit*(npinit+1)/2)))
-        
+            allocate(vvv((npinit*(npinit+1)/2)))      
     
             nst=1
             stra=1
     !        select case(initialisation)
     !            case(1)
                     !=======> initialisation par shared
-                    Binit=1.d-1 !5.d-1
-                    
-                        Binit((nz+2+1):(nz+2+nva1))=1.d-1
-                        Binit(nz+2+nva1+effet)=1.d0
+            Binit=1.d-1 !5.d-1                    
+            Binit((nz+2+1):(nz+2+nva1))=1.d-1
+            Binit(nz+2+nva1+effet)=1.d0
                 
                 
     !    write(*,*),'===================================',effet,npinit
@@ -1037,15 +1022,13 @@
     !    write(*,*),'==================================='
     !     write(*,*),(Binit(i),i=1,npinit)
     
-            allocate(I_hess(npinit,npinit),H_hess(npinit,npinit),v((npinit*(npinit+3)/2)))
-    
+            allocate(I_hess(npinit,npinit),H_hess(npinit,npinit),v((npinit*(npinit+3)/2))) 
             
                 !    if (timedep.eq.0) then
                 !            call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaGsplines)
                 !    else
-                        call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaG_tps)
-                !    endif
-            !
+                         call marq98J(k0,Binit,npinit,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaG_tps)
+                !    endif          
             
             deallocate(I_hess,H_hess,v)
     
@@ -1127,7 +1110,32 @@
     !                     call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaj_tps)
     !                 endif
             end select
-    
+            if(maxiter < 200) then
+                bar(1:3) = "0%|"    
+                do k=1, maxiter
+                    bar(3+k:3+k)="*"
+                enddo
+                !bar(3+maxiter+1:3+maxiter+5) = "|100%"
+                bar(maxiter+4:maxiter+4) = "|"
+                do k=maxiter+5, 100
+                    bar(k:k+1)=" "
+                enddo
+            else                
+                bar(1:3) = "0%|"    
+                do k=1, 70
+                    bar(3+k:3+k)="*"
+                enddo
+                !bar(3+maxiter+1:3+maxiter+5) = "|100%"                
+                bar(73:100) = "|                          "                
+            endif
+            
+            if (ni > 300) then !Au dela de 300 iteration la bar ne peut pas s'afficher (inpr limite a 255 caracteres), 
+			! on fait le choix de laisser apparaître les iteration malgre tout
+                call intpr('Iteration:', -1, ni, 1)
+            else
+                call intpr(bar, -1, ni, 0)
+                call intpr('Iteration:', -1, ni, 1)
+            endif     
         end if
     
     

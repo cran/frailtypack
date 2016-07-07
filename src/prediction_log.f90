@@ -400,14 +400,14 @@
     double precision,dimension(2)::survDC
     double precision,dimension(nrec0+2)::survRi
     double precision::psig2,palpha
-	 double precision,parameter::pi=3.141592653589793d0
+     double precision,parameter::pi=3.141592653589793d0
 
     func1pred1LogN = ((survDC(1)**((dexp(frail*palpha)) * exp(XbetapredDCi)) &
     - survDC(2)**((dexp(frail*palpha)) * exp(XbetapredDCi))) &
     * (dexp(frail)**recj) &
     * (survRi(1)**(dexp(frail) * exp(XbetapredRi))) &
      *dexp(-(frail**2.d0/(2.d0*psig2)))*(1.d0/dsqrt(2.d0*pi*psig2)))
-	 
+     
     return
     
     end function func1pred1LogN
@@ -422,7 +422,7 @@
     double precision,dimension(2)::survDC
     double precision,dimension(nrec0+2)::survRi
     double precision::psig2,palpha
-	 double precision,parameter::pi=3.141592653589793d0
+     double precision,parameter::pi=3.141592653589793d0
     
     func2pred1LogN = ((survDC(1)**((dexp(frail*palpha)) * exp(XbetapredDCi))) &
     * (dexp(frail)**recj) &
@@ -445,7 +445,7 @@
     double precision,dimension(2)::survDC
     double precision,dimension(nrec0+2)::survRi
     double precision::psig2,palpha
-	double precision,parameter::pi=3.141592653589793d0
+    double precision,parameter::pi=3.141592653589793d0
     
     func1pred2LogN = ((survDC(1)**((dexp(frail*palpha)) * exp(XbetapredDCi)) &
     - survDC(2)**((dexp(frail*palpha)) * exp(XbetapredDCi))) &
@@ -467,7 +467,7 @@
     double precision,dimension(2)::survDC
     double precision,dimension(nrec0+2)::survRi
     double precision::psig2,palpha
-	double precision,parameter::pi=3.141592653589793d0
+    double precision,parameter::pi=3.141592653589793d0
     
     func2pred2LogN = ((survDC(1)**((dexp(frail*palpha)) * exp(XbetapredDCi))) &
     * (dexp(frail)**recj) &
@@ -491,7 +491,7 @@
     double precision,dimension(2)::survDC
     double precision::survLT,survL,survU !!
     double precision::psig2,palpha
-	double precision,parameter::pi=3.141592653589793d0
+    double precision,parameter::pi=3.141592653589793d0
     
     if ((survL.eq.1.d0).or.(survU.eq.1.d0)) then
         func1pred2LogNicLogN = ((survDC(1)**((dexp(frail*palpha)) * exp(XbetapredDCi)) &
@@ -505,7 +505,7 @@
         - survDC(2)**((frail**palpha) * exp(XbetapredDCi))) &
         !* (frail**recj) &
         * ((survL**(dexp(frail) * exp(XbetapredRi))-survU**(dexp(frail) &
-		* exp(XbetapredRi)))/survLT**(dexp(frail) * exp(XbetapredRi))) & !!
+        * exp(XbetapredRi)))/survLT**(dexp(frail) * exp(XbetapredRi))) & !!
          *dexp(-(frail**2.d0/(2.d0*psig2)))*(1.d0/dsqrt(2.d0*pi*psig2)))
     endif
     
@@ -523,7 +523,7 @@
     double precision,dimension(2)::survDC
     double precision::survLT,survL,survU!!
     double precision::psig2,palpha
-	double precision,parameter::pi=3.141592653589793d0
+    double precision,parameter::pi=3.141592653589793d0
     
     if ((survL.eq.1.d0).or.(survU.eq.1.d0)) then
         func2pred2LogNicLogN = ((survDC(1)**((dexp(frail*palpha)) * exp(XbetapredDCi))) &
@@ -535,7 +535,7 @@
         func2pred2LogNicLogN = ((survDC(1)**((dexp(frail*palpha)) * exp(XbetapredDCi))) &
         !* (frail**recj) &
         * ((survL**(dexp(frail) * exp(XbetapredRi))-survU**(dexp(frail)&
-		* exp(XbetapredRi)))/survLT**(dexp(frail) * exp(XbetapredRi))) & !!
+        * exp(XbetapredRi)))/survLT**(dexp(frail) * exp(XbetapredRi))) & !!
         *dexp(-(frail**2.d0/(2.d0*psig2)))*(1.d0/dsqrt(2.d0*pi*psig2)))
     endif
     
@@ -554,7 +554,7 @@
     double precision::XbetapredDCi
     double precision,dimension(2)::survDC
     double precision::psig2,palpha
-	double precision,parameter::pi=3.141592653589793d0
+    double precision,parameter::pi=3.141592653589793d0
     
     func1pred3LogN = ((survDC(1)**((dexp(frail*palpha)) * exp(XbetapredDCi)) &
     - survDC(2)**((dexp(frail*palpha)) * exp(XbetapredDCi))) &
@@ -572,7 +572,7 @@
     double precision::XbetapredDCi
     double precision,dimension(2)::survDC
     double precision::psig2,palpha
-	double precision,parameter::pi=3.141592653589793d0
+    double precision,parameter::pi=3.141592653589793d0
     
     func2pred3LogN = ((survDC(1)**((dexp(frail*palpha)) * exp(XbetapredDCi))) &
    *dexp(-(frail**2.d0/(2.d0*psig2)))*(1.d0/dsqrt(2.d0*pi*psig2)))

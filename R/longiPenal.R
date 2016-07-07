@@ -407,6 +407,7 @@ vec.factorY <- unique(vec.factorY)
 
 
 
+
 mat.factorY <- matrix(vec.factorY,ncol=1,nrow=length(vec.factorY))
 # Fonction servant a prendre les termes entre "as.factor" et (AK 04/11/2015) interactions
 vec.factorY <-apply(mat.factorY,MARGIN=1,FUN=function(x){
@@ -459,7 +460,6 @@ Intercept <- rep(1,dim(X_L)[1])
     ind.placeY <- ind.placeY+1
   }
 
-
   X_Lall<- X_L
   "%+%"<- function(x,y) paste(x,y,sep="")
         if(length(vec.factorY) > 0){
@@ -467,13 +467,13 @@ Intercept <- rep(1,dim(X_L)[1])
           if(length(grep(":",vec.factorY[i]))==0){
 		
 		  factor.spot <- which(names(X_L)==vec.factorY[i])
-		
-		  	if(factor.spot<ncol(X_L))  X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), data.Longi)[,-1],X_L[(factor.spot+1):ncol(X_L)])
-     else X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), data.Longi)[,-1])
-     
+		 
+		  	if(factor.spot<ncol(X_L))  X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1],X_L[(factor.spot+1):ncol(X_L)])
+     else X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1])
+
          } }
 
-    
+	
    
   vect.factY<-names(X_L)[which(!(names(X_L)%in%llY))]
   if(intercept) vect.factY <- vect.factY[-1]
@@ -492,7 +492,8 @@ Intercept <- rep(1,dim(X_L)[1])
         #                #occur[i] <- sum(vec.factor[i] == vect.fact)
          #               occurY[i] <- length(grep(vec.factorY[i],vect.factY))
           #      }
-      
+
+
 
 
   interaction<-as.vector(apply(matrix(vect.factY,nrow=length(vect.factY)),MARGIN=1,FUN=function(x){length(grep(":",unlist(strsplit(x,split=""))))}))
@@ -524,7 +525,6 @@ Intercept <- rep(1,dim(X_L)[1])
 }
 
 
-
   if (ncol(X_L) == 0){
    noVarY <- 1
   }else{
@@ -533,7 +533,8 @@ Intercept <- rep(1,dim(X_L)[1])
 
 #=========================================================>
 
-        clusterY <- data.Longi$id
+        clusterY <- data.Longi[,which(colnames(data.Longi)==id)]
+
 max_rep <- max(table(clusterY))
         uni.cluster<-as.factor(unique(clusterY))
 
@@ -561,7 +562,6 @@ max_rep <- max(table(clusterY))
 
 
 #newTerm vaut Terms - les variables dont les position sont dans drop
-
 
 
 
@@ -712,7 +712,6 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
   #as.factor(charlson) + sex + chemo + terminal(death), data = readmission)
 
   m <- eval(m, sys.parent()) #ici la classe de m est un data.frame donc il recupere ce qu'on lui donne en argument
-
 
   cluster <- id # (indice) nbre de var qui sont en fonction de cluster()
 
@@ -1046,50 +1045,50 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
       matrix(as.double(0),nrow=1,ncol=1),
                 as.integer(nvarT),
                 as.double(varT),
-      nva30 = as.integer(nvarY),
-      vaxy0 = as.double(varY),
-      noVar = as.integer(c(0,noVarT,noVarY)),
-      ag0 = as.integer(1),
+				nva30 = as.integer(nvarY),
+				vaxy0 = as.double(varY),
+				noVar = as.integer(c(0,noVarT,noVarY)),
+				ag0 = as.integer(1),
                 as.integer(maxit),
                 np=as.integer(np),
-      neta0 = as.integer(c(netadc,0)),
+				neta0 = as.integer(c(netadc,0)),
                 b=as.double(Beta),
                 H=as.double(matrix(0,nrow=np,ncol=np)),
-                        HIH=as.double(matrix(0,nrow=np,ncol=np)),
+				HIH=as.double(matrix(0,nrow=np,ncol=np)),
 
-                        loglik=as.double(0),
-                        LCV=as.double(rep(0,2)),
-                        xR=as.double(matrix(0,nrow=1,ncol=1)),
-                        lamR=as.double(matrix(0,nrow=1,ncol=3)),
-                        xSuR=as.double(array(0,dim=100)),
-                        survR=as.double(array(0,dim=1)),
-                        xD=as.double(rep(0,100)),
-                        lamD=as.double(matrix(0,nrow=size1,ncol=3)),
-                        xSuD=as.double(xSuT),
-                        survD=as.double(matrix(0,nrow=size2,ncol=3)),
+				loglik=as.double(0),
+				LCV=as.double(rep(0,2)),
+				xR=as.double(matrix(0,nrow=1,ncol=1)),
+				lamR=as.double(matrix(0,nrow=1,ncol=3)),
+				xSuR=as.double(array(0,dim=100)),
+				survR=as.double(array(0,dim=1)),
+				xD=as.double(rep(0,100)),
+				lamD=as.double(matrix(0,nrow=size1,ncol=3)),
+				xSuD=as.double(xSuT),
+				survD=as.double(matrix(0,nrow=size2,ncol=3)),
                 as.integer(typeof),
-                        as.integer(equidistant),
-                  as.integer(c(1,size1,1,mt1)),###
-                        counts=as.integer(c(0,0,0)),
-                        ier_istop=as.integer(c(0,0)),
-                        paraweib=as.double(rep(0,4)),
-                        MartinGale=as.double(matrix(0,nrow=ng,ncol=5)),###
-      ResLongi = as.double(matrix(0,nrow=nsujety,ncol=4)),
-      Pred_y  = as.double(matrix(0,nrow=nsujety,ncol=2)),
+                as.integer(equidistant),
+				as.integer(c(1,size1,1,mt1)),###
+				counts=as.integer(c(0,0,0)),
+				ier_istop=as.integer(c(0,0)),
+				paraweib=as.double(rep(0,4)),
+				MartinGale=as.double(matrix(0,nrow=ng,ncol=5)),###
+				ResLongi = as.double(matrix(0,nrow=nsujety,ncol=4)),
+				Pred_y  = as.double(matrix(0,nrow=nsujety,ncol=2)),
 
-                        linear.pred=as.double(rep(0,ng)),
-                        lineardc.pred=as.double(rep(0,as.integer(ng))),
-                        zi=as.double(rep(0,(n.knots+6))),
+				linear.pred=as.double(rep(0,ng)),
+				lineardc.pred=as.double(rep(0,as.integer(ng))),
+				zi=as.double(rep(0,(n.knots+6))),
 
-      paratps=as.integer(c(0,0,0)),#for future developments
-                        as.integer(c(0,0,0)),#for future developments
-                        BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*0)), #for future developments
-                        BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
-      BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
-                        EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-      GH = c(as.integer(GH),as.integer(n.nodes)),
-      paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol))),
-                        PACKAGE = "frailtypack")
+				paratps=as.integer(c(0,0,0)),#for future developments
+				as.integer(c(0,0,0)),#for future developments
+				BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*0)), #for future developments
+				BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
+				BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
+				EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
+				GH = c(as.integer(GH),as.integer(n.nodes)),
+				paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol))),
+				PACKAGE = "frailtypack")
 
 
 
@@ -1198,8 +1197,8 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
   #              }
   #      }
     fit$nvar<-c(nvarT,nvarY)
-     fit$formula <- formula(Terms)
-    fit$formula.LongitudinalData <- formula(TermsY)
+     fit$formula <- formula #formula(Terms)
+    fit$formula.LongitudinalData <- formula.LongitudinalData #formula(TermsY)
 
     fit$xD <- matrix(ans$xD, nrow = size1, ncol = 1)
 
@@ -1296,7 +1295,7 @@ fit$pred.y.cond <- matrix(ans$Pred_y,ncol=2)[,1]
 
                 Beta <- ans$b[(np-nvar + 1):np]
 
-                VarBeta <- diag(diag(fit$varH))
+                VarBeta <- fit$varH
 
                 nfactor <- length(vec.factorY)
                 p.wald <- rep(0,nfactor)
@@ -1324,7 +1323,7 @@ fit$pred.y.cond <- matrix(ans$Pred_y,ncol=2)[,1]
 
                        # if(npbetatps>0){VarBeta <- diag(diag(fit$varH)[-c((np-npbetatps):np)])
                        # }else{
-                          VarBeta <- diag(diag(fit$varH))
+                          VarBeta <- fit$varH
                         #}
                         nfactor <- length(vec.factorT)
                         p.waldT <- rep(0,nfactor)

@@ -1,6 +1,3 @@
-
-
-
     module perso
     implicit none
     double precision,dimension(:),allocatable,save::aux

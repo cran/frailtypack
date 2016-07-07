@@ -40,7 +40,7 @@ longiPenal(formula, formula.LongitudinalData, data,  data.Longi,
 
 \arguments{
 
-  \item{formula}{ a formula object, with the response on the left of a \eqn{\texttildelow}
+  \item{formula}{ a formula object, with the response on the left of a \eqn{\sim}
           operator, and the terms on the right. The response must be a
           survival object as returned by the 'Surv' function like in survival package.  Interactions are possible using * or :.}
 

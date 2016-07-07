@@ -1331,7 +1331,7 @@ if(length(vec.factor) > 0){
 #========================= Test de Wald
 	ntot <- nvarEnd + nvarRec + nvarRec2
 	Beta <- ans$b[(np - nvar + 1):np]
-	VarBeta <- diag(diag(fit$varH)[-c(1,2)])
+	VarBeta <- fit$varH
 	if(length(vec.factor) > 0){
 		nfactor <- length(vec.factor)
 		p.wald <- rep(0,nfactor)

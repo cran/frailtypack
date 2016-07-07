@@ -3,24 +3,24 @@
 ! ============================================== prediction Shared - logNormale
     
     subroutine predict_LogN_sha(npred0,surv_s,surv_t,sigma2,predAll,icproba,ntimeAll,nsample,&
-		sig2alea,surv_smc,surv_tmc,predAlllow,predAllhigh)
+        sig2alea,surv_smc,surv_tmc,predAlllow,predAllhigh)
     
     implicit none
     
     integer::i,iii,j
     integer,intent(in)::npred0,icproba,ntimeAll,nsample
-	double precision,dimension(npred0,ntimeall),intent(in)::surv_t,surv_s
+    double precision,dimension(npred0,ntimeall),intent(in)::surv_t,surv_s
     double precision,intent(in)::sigma2
     double precision,dimension(npred0)::predProba
     double precision,dimension(2)::survDC,survDCalea
     double precision,dimension(nsample*npred0,ntimeAll)::surv_tmc,surv_smc
-	double precision,dimension(npred0,ntimeAll) :: predAlllow,predAllhigh
-	double precision,dimension(nsample),intent(in) :: sig2alea 
+    double precision,dimension(npred0,ntimeAll) :: predAlllow,predAllhigh
+    double precision,dimension(nsample),intent(in) :: sig2alea 
     double precision,dimension(npred0,ntimeAll),intent(out):: predAll
     double precision,dimension(nsample,npred0)::predProbaalea
     double precision::ss1,ss2
-	
-	do iii=1,ntimeAll
+    
+    do iii=1,ntimeAll
         do i=1,npred0
             survDC(1) = surv_s(i,iii)
             survDC(2) = surv_t(i,iii)
@@ -34,15 +34,15 @@
         !=============================================
         ! Variabilite des proba predites
         if (icproba.eq.1) then ! calcul de l'intervalle de confiance seulement si demande
-	        do j=1,nsample
-				ss1 = 0.d0
+            do j=1,nsample
+                ss1 = 0.d0
                 ss2 = 0.d0
                 do i=1,npred0 
-			  
-					survDCalea(1) = surv_smc(npred0*(j-1)+i,iii)
-					survDCalea(2) = surv_tmc(npred0*(j-1)+i,iii)
               
-					call gauher_shapred(ss1,ss2,sig2alea(j),survDCalea)
+                    survDCalea(1) = surv_smc(npred0*(j-1)+i,iii)
+                    survDCalea(2) = surv_tmc(npred0*(j-1)+i,iii)
+              
+                    call gauher_shapred(ss1,ss2,sig2alea(j),survDCalea)
                     predProbaalea(j,i) = ss1/ss2
              
                 end do
@@ -68,13 +68,13 @@
     implicit none
     
     double precision,intent(in)::frail
-	double precision,dimension(2)::survDC
+    double precision,dimension(2)::survDC
     double precision::psig2
-	double precision,parameter::pi=3.141592653589793d0
+    double precision,parameter::pi=3.141592653589793d0
 
     func1predLogN = (survDC(1) - survDC(2)) &
      *dexp(-(frail**2.d0/(2.d0*psig2)))*(1.d0/dsqrt(2.d0*pi*psig2))
-	 
+     
     return
     
     end function func1predLogN
@@ -90,12 +90,12 @@
     double precision,intent(in)::frail
     double precision,dimension(2)::survDC
     double precision::psig2
-	double precision,parameter::pi=3.141592653589793d0
+    double precision,parameter::pi=3.141592653589793d0
     
     func2predLogN = survDC(1)*dexp(-(frail**2.d0/(2.d0*psig2)))&
-		*(1.d0/dsqrt(2.d0*pi*psig2))
+        *(1.d0/dsqrt(2.d0*pi*psig2))
     
-	return
+    return
     
     end function func2predLogN
 
@@ -115,7 +115,7 @@
     double precision::auxfunca1,auxfunca2
     double precision,external :: func1predLogN,func2predLogN
     double precision,dimension(2)::survDC
-	double precision::psig2
+    double precision::psig2
     integer:: j
 
 ! gauss hermite
@@ -134,16 +134,16 @@
     
     end subroutine gauher_shapred
     
-	
-	
-	!==========================================
-	!=================== AK frailty.mc ==============
-	!======== pour les predictions conditionnelles - shared model
-	!========= distribution normal ====================
-	
-	
-	subroutine frailpred_sha_nor_mc(np0,frailtypred,sig20,res10,nig0)
-	
+    
+    
+    !==========================================
+    !=================== AK frailty.mc ==============
+    !======== pour les predictions conditionnelles - shared model
+    !========= distribution normal ====================
+    
+    
+    subroutine frailpred_sha_nor_mc(np0,frailtypred,sig20,res10,nig0)
+    
    
     use optimres
     use residusM
@@ -153,31 +153,31 @@
     integer,intent(in)::np0,nig0
     double precision,external::funcpasres_mc
     double precision,intent(out)::frailtypred
-	double precision,intent(in)::res10,sig20
+    double precision,intent(in)::res10,sig20
 
-		sig2_mc = sig20
-		res1_mc = res10
-		nig_mc = nig0
-		np_mc = np0
-	
-	allocate(vuu(2),vecuiRes(1),vres((1*(1+3)/2)))
+        sig2_mc = sig20
+        res1_mc = res10
+        nig_mc = nig0
+        np_mc = np0
+    
+    allocate(vuu(2),vecuiRes(1),vres((1*(1+3)/2)))
  
     vecuiRes=0.d0
     moyuiR=0.d0
     varuiR=0.d0
-	
+    
     cares=0.d0
     cbres=0.d0
     ddres=0.d0
-	frailtypred = 0.d0
+    frailtypred = 0.d0
   
-	
-	
+    
+    
             vuu=0.9d0
-			
+            
             call marq98res(vuu,1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,funcpasres_mc)
 
-			
+            
             if (istopres.eq.1) then
                 frailtypred = vuu(1)*vuu(1)
                        else
@@ -187,10 +187,10 @@
             
             endif
      
-	deallocate(vuu,vecuiRes,vres)
+    deallocate(vuu,vecuiRes,vres)
     end subroutine frailpred_sha_nor_mc
 
-	  
+      
 !========================    FUNCPARES_MC FRAILPRED DENSITE A POSTERIORI       ====================
 
 !!!!
@@ -208,8 +208,8 @@
     double precision,intent(in)::thi,thj
     double precision::frail
 
-	
-	!np = np_mc
+    
+    !np = np_mc
     bh=uu
     if (id.ne.0) bh(id)=bh(id)+thi
     if (jd.ne.0) bh(jd)=bh(jd)+thj

@@ -3,7 +3,7 @@
 "trivPenal" <-
   function (formula, formula.terminalEvent, formula.LongitudinalData, data,  data.Longi, random, id, intercept = TRUE, link="Random-effects",
             left.censoring=FALSE, recurrentAG=FALSE, n.knots, kappa,
-            maxit=350, hazard="Splines", init.B,
+            maxit=300, hazard="Splines", init.B,
             init.Random, init.Eta, init.Alpha, method.GH = "Standard", n.nodes, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE)
   {
 
@@ -782,8 +782,10 @@
       if(length(grep(":",vec.factorY[i]))==0){
         
         factor.spot <- which(names(X_L)==vec.factorY[i])
-       
-        X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), data.Longi)[,-1],X_L[(factor.spot+1):ncol(X_L)])
+        
+        if(factor.spot<ncol(X_L))  X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1],X_L[(factor.spot+1):ncol(X_L)])
+        else X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1])
+        
       } }
     
  
@@ -847,7 +849,7 @@
 
     #=========================================================>
 
-    clusterY <- data.Longi$id
+    clusterY <- data.Longi[,which(colnames(data.Longi)==id)]
     max_rep <- max(table(clusterY))
     uni.clusterY<-as.factor(unique(clusterY))
 
@@ -1516,8 +1518,9 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
     #}
     fit$nvar<-c(nvarR,nvarT,nvarY)
     #fit$nvarnotdep<-c(nvarR-nvartimedep,nvarT-nvartimedepT,nvarY-nvartimedepY)
-    fit$formula <- formula(Terms)
-    fit$formula.LongitudinalData <- formula(TermsY)
+    fit$formula <- formula #formula(Terms)
+    fit$formula.LongitudinalData <- formula.LongitudinalData #formula(TermsY)
+    fit$formula.terminalEvent <- formula.terminalEvent
 
    fit$xR <- matrix(ans$xR, nrow = size1, ncol = 1)
    fit$lamR <- array(ans$lamR, dim = c(size1,3,1))
@@ -1613,7 +1616,7 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
 
    if ((length(vec.factor) > 0) ){
      Beta <- ans$b[(np - nvar + 1):np]
-     VarBeta <- diag(diag(fit$varH))#[-c(1:(1+indic.alpha+netar+netadc+1+ne_re))])
+     VarBeta <- fit$varH#[-c(1:(1+indic.alpha+netar+netadc+1+ne_re))])
 
      nfactor <- length(vec.factor)
      p.wald <- rep(0,nfactor)
@@ -1640,7 +1643,7 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
 
       Beta <- ans$b[(np - nvar + 1):np]
 
-      VarBeta <- diag(diag(fit$varH))#[-c(1:(1+indic.alpha+netar+netadc+1+ne_re))])
+      VarBeta <- fit$varH#[-c(1:(1+indic.alpha+netar+netadc+1+ne_re))])
 
 
       nfactor <- length(vec.factorY)
@@ -1666,7 +1669,7 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
     if ((length(vec.factorT) > 0) ){
       Beta <- ans$b[(np - nvar - nvarY + 1):np]
 
-      VarBeta <- diag(diag(fit$varH))#[-c(1:(1+indic.alpha+netar+netadc+1+ne_re))])
+      VarBeta <- fit$varH#[-c(1:(1+indic.alpha+netar+netadc+1+ne_re))])
 
       nfactor <- length(vec.factorT)
       p.wald <- rep(0,nfactor)

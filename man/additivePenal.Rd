@@ -43,7 +43,7 @@ additivePenal(formula, data, correlation = FALSE, recurrentAG =
 
 \arguments{
 
-  \item{formula}{ a formula object, with the response on the left of a \eqn{\texttildelow} operator, and the terms on the right. 
+  \item{formula}{ a formula object, with the response on the left of a \eqn{\sim} operator, and the terms on the right. 
  The response must be a survival object as returned by the 'Surv' function like in survival
  package. The \code{slope()} function is required.  Interactions are possible using * or :.}
 

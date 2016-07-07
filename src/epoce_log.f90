@@ -373,8 +373,8 @@
             endif
         endif
     end do
-	else 
-		        do j=1,32
+    else 
+                do j=1,32
             if (choix.eq.1) then
             auxfunca = func1E_LogN(x3(j),bh,np,i,nobs,valT,all)
             ss = ss+w3(j)*(auxfunca)
@@ -385,8 +385,8 @@
             endif
         endif
     end do
-	
-	end if
+    
+    end if
     return
 
     end subroutine gauherEpoce
@@ -412,7 +412,7 @@
     double precision,dimension(2)::su,sut1,sut0,sudc
     double precision::lam,lamdc,temp
     double precision,parameter::pi=3.141592653589793d0
-	
+    
     n = 0
     betaR = 0.d0
     etaR = 0.d0
@@ -587,7 +587,7 @@
 
     ! densite de la loi gamma pour les effets aleatoires
     func1E_LogN = func1E_LogN*dexp(-(frail**2.d0/(2.d0*sig2)))&
-				*(1.d0/dsqrt(2.d0*pi*sig2))!* &
+                *(1.d0/dsqrt(2.d0*pi*sig2))!* &
     
 
 1000 continue
@@ -754,7 +754,7 @@
 
     ! densite de la loi gamma pour les effets aleatoires
     func2E_LogN = func2E_LogN *dexp(-(frail**2.d0/(2.d0*sig2)))&
-				*(1.d0/dsqrt(2.d0*pi*sig2))
+                *(1.d0/dsqrt(2.d0*pi*sig2))
 
 1000 continue
 

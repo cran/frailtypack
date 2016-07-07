@@ -47,13 +47,13 @@ multivPenal(formula, formula.Event2, formula.terminalEvent, data,
 
 \arguments{
   \item{formula}{
- a formula object, with the response for the first recurrent event on the left of a \eqn{\texttildelow} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.  Interactions are possible using * or :.
+ a formula object, with the response for the first recurrent event on the left of a \eqn{\sim} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.  Interactions are possible using * or :.
 }
   \item{formula.Event2}{
-a formula object, with the response for the second recurrent event on the left of a \eqn{\texttildelow} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.  Interactions are possible using * or :.
+a formula object, with the response for the second recurrent event on the left of a \eqn{\sim} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.  Interactions are possible using * or :.
 }
   \item{formula.terminalEvent}{
-a formula object, with the response for the terminal event on the left of a \eqn{\texttildelow} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.
+a formula object, with the response for the terminal event on the left of a \eqn{\sim} operator, and the terms on the right. The response must be a survival object as returned by the 'Surv' function like in survival package.
 }
   \item{data}{
  a 'data.frame' with the variables used in 'formula', 'formula.Event2' and 'formula.terminalEvent'.

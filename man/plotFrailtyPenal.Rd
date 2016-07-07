@@ -13,8 +13,9 @@
 
 \usage{
 
-\method{plot}{frailtyPenal}(x, type.plot = "Hazard", conf.bands=TRUE, pos.legend="topright",
- cex.legend=0.7, main, color, ...)
+\method{plot}{frailtyPenal}(x, type.plot = "Hazard", conf.bands=TRUE, pos.legend = "topright",
+	cex.legend=0.7, ylim, main, color=2, Xlab = "Time", 
+	Ylab = "Hazard function", ...)
 
 }
 
@@ -29,8 +30,11 @@
      '"center"'. The default is '"topright"'}
   \item{cex.legend}{character expansion factor *relative* to current
           'par("cex")'. Default is 0.7}
+  \item{ylim}{y-axis limits}
   \item{main}{title of plot}
-  \item{color}{color of the curve (integer)}
+  \item{color}{color of the curve (integer)} 
+  \item{Xlab}{Label of x-axis. Default is '"Time"'}  
+  \item{Ylab}{Label of y-axis. Default is '"Hazard function"'}
   \item{...}{other unused arguments}
 }
 

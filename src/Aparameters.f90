@@ -4,7 +4,7 @@
     integer :: ndatemax,ndatemaxdc,nzmax
     integer :: nssgbyg,nssgmax
     integer :: nboumax,NSIMAX,NOBSMAX
-	save
+    save
     end module tailles
 
     !module genparamsShort
@@ -14,17 +14,17 @@
     !save
     !end module genparamsShort
 
-	!module genparams
-	!integer , parameter :: npmax=70
-	!integer , parameter :: NSUJETMAX=15000
-	!integer , parameter :: nvarmax=45
-	!integer , parameter :: ngmax=5000
-	!integer , parameter :: nboumax=1000
-	!integer , parameter :: NSIMAX=5000
-	!integer , parameter :: ndatemax=30000
-	!integer , parameter :: NOBSMAX=15000
-	!save
-	!end module genparams
+    !module genparams
+    !integer , parameter :: npmax=70
+    !integer , parameter :: NSUJETMAX=15000
+    !integer , parameter :: nvarmax=45
+    !integer , parameter :: ngmax=5000
+    !integer , parameter :: nboumax=1000
+    !integer , parameter :: NSIMAX=5000
+    !integer , parameter :: ndatemax=30000
+    !integer , parameter :: NOBSMAX=15000
+    !save
+    !end module genparams
 
     module parameters
         double precision,save::epsa,epsb,epsd
@@ -88,13 +88,13 @@
 
         module choix_epoce
                 integer:: choix_e
-        end module choix_epoce	
-	
+        end module choix_epoce    
+    
 !=====================================================================================
     module comon
     implicit none
 !*****************************************************************
-	  integer,dimension(2),save::genz
+      integer,dimension(2),save::genz
       integer,save::npp,ni_cur
         double precision,save::vals
         integer ,save:: all
@@ -117,12 +117,15 @@
     integer,save::nsujet,nva,nva1,nva2,nva3,ndate,ndatedc,nst,nstRec,nsujety,nobs,np_e
 !*****dace4
     integer,dimension(:),allocatable,save::stra
+!*****family
+    integer,save::nfam
+       integer,dimension(:),allocatable,save:: fam, fsize
 !*****ve1
     double precision,dimension(:,:),allocatable,save::ve
     double precision,dimension(:,:),allocatable,save::vedc
-	double precision,dimension(:,:),allocatable,save::vey
+    double precision,dimension(:,:),allocatable,save::vey
 !*** donnees longitudinales
-	double precision,save::vet3
+    double precision,save::vet3
 !***** random effects
         double precision,dimension(:,:),allocatable,save :: ziy,ziyd,ziyr!random effects for y
          double precision,save :: sigmae                         !sigma of epsilon
@@ -164,13 +167,13 @@
 ! %%%%%%%%%%%%% ANDERSEN-GILL %%%%%%%%%%%%%%%%%%%%%%%%%
     integer,save::AG
 ! %%%%%%%%%%%%% indic ALPHA %%%%%%%%%%%%%%%%%%%%%%%%%
-    integer,save::indic_ALPHA
+    integer,save::indic_ALPHA, indic_xi
 !****  theta/alpha
-    double precision,save::theta,alpha,eta !en exposant pour la frailty deces
+    double precision,save::theta,alpha,eta,xi !en exposant pour la frailty deces
 !****** indicateur de troncature
     integer,save:: indictronq,indictronqdc ! =0 si donnees non tronquees reellement
 !*****auxig
-    integer,save :: auxig
+    integer,save :: auxig, auxif
 !******  aux1 aux2
     double precision,dimension(:),allocatable,save::res1,res3,res4,res5
     !double precision,dimension(:),allocatable,save::res1dc,res2dc,res3dc,res4dc,res5dc
@@ -203,8 +206,8 @@
 ! distribution des frailty par une log-normale
     integer::logNormal,timedep
     double precision,save::sig2
-	
-	 double precision,dimension(:),allocatable,save::b_e
+    
+     double precision,dimension(:),allocatable,save::b_e
         integer,save::nea,nb1
         double precision,dimension(:),allocatable,save::timecur,timecur2
         double precision,dimension(:),allocatable,save::the1_e
@@ -282,11 +285,11 @@
         integer,save::indic_cumul
         integer,dimension(:),allocatable::n_ssgbygrp
         double precision,dimension(:,:),allocatable,save::vecuiRes2,cumulhaz1,cumulhaz0&
-				,invsigma,zet,zetd,zetr,XbetaY_res,Pred_y
+                ,invsigma,zet,zetd,zetr,XbetaY_res,Pred_y
         double precision,save::detSigma
            integer,save :: nig_mc,np_mc
-	double precision,save :: sig2_mc,res1_mc
-	  double precision,dimension(:),allocatable,save::mu1_res
+    double precision,save :: sig2_mc,res1_mc
+      double precision,dimension(:),allocatable,save::mu1_res
               
 
     end module residusM

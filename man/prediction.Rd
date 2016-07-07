@@ -185,15 +185,16 @@ The data can also be the dataset used to fit the joint model. In this case, you 
 
 Finally, for the predictions using joint models for longitudinal data and a terminal event and trivariate joint models, a dataframe with the history of the biomarker measurements must be provided. It must include data on measurements (values and time points), cluster variable and covariates. Measurements taken after the prediction time may be included but will be ignored for the prediction. The same cluster variable name must be in the dataframe, in the dataframe used for the joint model and in the dataframe with the recurrent event and terminal event times. For instance, we observe two patients and each one had 5 tumor size measurements (patient 1 had an increasing tumor size and patient 2, decreasing). The joint model used for the predictions was adjusted on sex (1: male, 2: female), treatment (1: sequential arm, 2: combined arm), WHO baseline performance status (1: 0 status, 2: 1 status, 3: 2 status) and previous resection of the primate tumor (0: no, 1: yes). The dataframe for the biomarker measurements can be:
 \preformatted{
-datapredj_longi <- data.frame(id = 0, year = 0, tumor.size = 0, treatment = 0,
- age = 0, who.PS = 0, prev.resection = 0)
+datapredj_longi <- data.frame(id = 0, year = 0, tumor.size = 0, 
+treatment = 0, age = 0, who.PS = 0, prev.resection = 0)
 datapredj_longi$treatment <- as.factor(datapredj_longi$treatment)
 levels(datapredj_longi$treatment) <- 1:2
 datapredj_longi$age <- as.factor(datapredj_longi$age)
 levels(datapredj_longi$age) <- 1:3
 datapredj_longi$who.PS <- as.factor(datapredj_longi$who.PS)
 levels(datapredj_longi$who.PS) <- 1:3
-datapredj_longi$prev.resection <- as.factor(datapredj_longi$prev.resection)
+datapredj_longi$prev.resection <- as.factor
+(datapredj_longi$prev.resection)
 levels(datapredj_longi$prev.resection) <- 1:2
 # patient 1: increasing tumor size
 datapredj_longi[1,] <- c(1, 0,1.2 ,2,1,1,1)
@@ -212,9 +213,9 @@ datapredj_longi[10,] <- c(2,0.9,0.1,2,1,1,1)
 }
 
 \references{
-A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2015). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
+A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2016). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
 Event: Predictive Abilities of Tumor Burden for Cancer Evolution with Application to the
-FFCD 2000-05 Trial. \emph{Submitted}.
+FFCD 2000-05 Trial. \emph{Biometrics}.
 
 A. Mauguen, B. Rachet, S. Mathoulin-Pelissier, G. MacGrogan, A. Laurent, V. Rondeau (2013). Dynamic prediction of risk of death using history of cancer recurrences in joint frailty models. \emph{Statistics in Medicine}, \bold{32(30)}, 5366-80.
 
@@ -270,7 +271,8 @@ pred.sha.marg <- prediction(sha,datapred,t=100,window=seq(50,1900,50))
 plot(pred.sha.marg)
 
 #-- conditional prediction, given a specific cluster (group=5)
-pred.sha.cond <- prediction(sha,datapred,t=100,window=seq(50,1900,50),group=5)
+pred.sha.cond <- prediction(sha,datapred,t=100,window=seq(50,1900,50),
+group=5)
 plot(pred.sha.cond)
 
 #####################################################
@@ -300,15 +302,18 @@ datapredj[5,] <- c(380,1,2,1,2)
 pred.joint0 <- prediction(joi,datapredj,t=100,window=500)
 print(pred.joint0)
 
-#-- prediction of death between 100 and 100+w given relapses (with confidence intervals)
-pred.joint <- prediction(joi,datapredj,t=100,window=seq(50,1500,50),MC.sample=100)
+#-- prediction of death between 100 and 100+w given relapses 
+(with confidence intervals)
+pred.joint <- prediction(joi,datapredj,t=100,window=seq(50,1500,50),
+MC.sample=100)
 plot(pred.joint,conf.bands=TRUE)
 # each y-value of the plot corresponds to the prediction between [100,x]
 
 #-- prediction of death between t and t+500 given relapses
 pred.joint2 <- prediction(joi,datapredj,t=seq(100,1000,50),window=500)
 plot(pred.joint2)
-# each y-value of the plot corresponds to the prediction between [x,x+500], or in the next 500
+# each y-value of the plot corresponds to the prediction between [x,x+500], 
+or in the next 500
 
 
 #############################################################################
@@ -342,7 +347,7 @@ datapredj_longi[3,] <- c(1,0.6,1.9,2,1,1,1)
 datapredj_longi[4,] <- c(1,0.9,2.5,2,1,1,1)
 datapredj_longi[5,] <- c(1,1.5,3.9,2,1,1,1)
 
-# patient 1: decreasing tumor size
+# patient 2: decreasing tumor size
 datapredj_longi[6,] <- c(2, 0,1.2 ,2,1,1,1)
 datapredj_longi[7,] <- c(2,0.3,0.7,2,1,1,1)
 datapredj_longi[8,] <- c(2,0.5,0.3,2,1,1,1)
@@ -386,7 +391,8 @@ plot(pred.jointLongi, conf.bands = TRUE)
 pred.jointLongi2 <- prediction(model.spli.CL, datapredj, datapredj_longi,
 t = seq(1, 2.5, 0.5), window = 0.5, MC.sample = 100)
 plot(pred.jointLongi2, conf.bands = TRUE)
-# each y-value of the plot corresponds to the prediction between [x,x+0.5], or in the next 0.5
+# each y-value of the plot corresponds to the prediction between [x,x+0.5], 
+or in the next 0.5
 
 
 ###################################################
@@ -395,8 +401,8 @@ plot(pred.jointLongi2, conf.bands = TRUE)
 
 #-- construction of the dataframe for predictions
 #-- history of recurrences and terminal event
-datapredj <- data.frame(time0 = 0, time1 = 0, new.lesions = 0, id = 0, treatment = 0, age = 0, 
-who.PS = 0, prev.resection =0)
+datapredj <- data.frame(time0 = 0, time1 = 0, new.lesions = 0, id = 0, 
+treatment = 0, age = 0, who.PS = 0, prev.resection =0)
 datapredj$treatment <- as.factor(datapredj$treatment)
 levels(datapredj$treatment) <- 1:2
 datapredj$age <- as.factor(datapredj$age)
@@ -422,22 +428,23 @@ n.nodes=7, init.B = c(-0.07, -0.13, -0.16, -0.17, 0.42, #recurrent events covara
 -0.23, -0.1, -0.09, -0.12, 0.8, -0.23, #terminal event covariates
 3.02, -0.30, 0.05, -0.63, -0.02, -0.29, 0.11, 0.74)) #biomarker covariates
 
-#-- prediction of death between 1 year and 1+2 given history of the biomarker and recurrences
-pred.jointTri0 <- prediction(model.spli.RE.cal, datapredj, datapredj_longi,
-t = 1, window = 2)
+#-- prediction of death between 1 year and 1+2 given history of the biomarker 
+and recurrences pred.jointTri0 <- prediction(model.spli.RE.cal, datapredj, 
+datapredj_longi, t = 1, window = 2)
 print(pred.jointTri0)
 
-#-- prediction of death between 1 year and 1+w given history of the biomarker and recurrences
-pred.jointTri <- prediction(model.spli.RE.cal, datapredj, datapredj_longi,
-t = 1, window = seq(0.5, 2.5, 0.2), MC.sample = 100)
+#-- prediction of death between 1 year and 1+w given history of the biomarker 
+and recurrences pred.jointTri <- prediction(model.spli.RE.cal, datapredj, 
+datapredj_longi, t = 1, window = seq(0.5, 2.5, 0.2), MC.sample = 100)
 plot(pred.jointTri, conf.bands = TRUE)
 # each y-value of the plot corresponds to the prediction between [1,x]
 
-#-- prediction of death between t and t+0.5 given history of the biomarker and recurrences
-pred.jointTri2 <- prediction(model.spli.RE.cal, datapredj, datapredj_longi,
-t = seq(1, 2.5, 0.5), window = 0.5, MC.sample = 100)
+#-- prediction of death between t and t+0.5 given history of the biomarker 
+and recurrences pred.jointTri2 <- prediction(model.spli.RE.cal, datapredj, 
+datapredj_longi, t = seq(1, 2.5, 0.5), window = 0.5, MC.sample = 100)
 plot(pred.jointTri2, conf.bands = TRUE)
-# each y-value of the plot corresponds to the prediction between [x,x+0.5], or in the next 0.5
+# each y-value of the plot corresponds to the prediction between [x,x+0.5], 
+or in the next 0.5
 }
 
 }

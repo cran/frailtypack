@@ -616,7 +616,7 @@
     double precision,dimension(np)::bint
     double precision,dimension(ng),intent(out)::Resmartingaledc
     double precision,dimension(nsujety),intent(out)::ResLongi_marg,ResLongi_chol,&
-			ResLongi_cond,ResLongi_cond_st
+            ResLongi_cond,ResLongi_cond_st
         double precision,dimension(nsujety,2),intent(out)::Pred_yy
     double precision,dimension(ng,3),intent(out)::re_pred
     double precision,dimension(nb1) ::zet_vec
@@ -625,7 +625,7 @@
     double precision :: ep,eps
     double precision,dimension(nb1,nb1)::mat_vres_inv,mat_vres
     double precision,dimension(:,:),allocatable::v_rim,v_rim_chol,Varcov_inv,&
-			varcov_chol,V_rim_inv
+            varcov_chol,V_rim_inv
     double precision,dimension(:),allocatable:: matv,matv2
      double precision,dimension(nva3,nva3):: sum_mat_inv
         double precision,dimension(1)::current_meanres
@@ -772,17 +772,17 @@
     
     do j= it_res,(it_res+nmesy(indg)-1)
         zet_vec(1:nb1) = Zet(j,1:nb1)
-		ResLongi_marg(j) = yy(j) - XbetaY_res(1,j)
+        ResLongi_marg(j) = yy(j) - XbetaY_res(1,j)
            
-		if(nb1.eq.1) then 
-			ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
-			Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
-		else if(nb1.eq.2) then
-			ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)-zet_vec(2)*b_pred(2)
-			Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
-		end if
-						
-		Pred_yy(j,2) =  XbetaY_res(1,j)
+        if(nb1.eq.1) then 
+            ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
+            Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
+        else if(nb1.eq.2) then
+            ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)-zet_vec(2)*b_pred(2)
+            Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
+        end if
+                        
+        Pred_yy(j,2) =  XbetaY_res(1,j)
                         
     end do
     
@@ -874,7 +874,7 @@
     double precision,dimension(np)::bint
     double precision,dimension(ng),intent(out)::Resmartingaledc,Resmartingale
         double precision,dimension(nsujety),intent(out)::ResLongi_marg,ResLongi_cond,&
-		ResLongi_chol,ResLongi_cond_st
+        ResLongi_chol,ResLongi_cond_st
         double precision,dimension(nsujety,2),intent(out)::Pred_yy
     double precision,dimension(ng,3),intent(out)::re_pred
     double precision,dimension(nb1) ::zet_vec
@@ -973,7 +973,7 @@
     
     
                 allocate(v_rim(nmesy(indg),nmesy(indg)),V_rim_chol(nmesy(indg),nmesy(indg)),&
-				Varcov_inv(nmesy(indg),nmesy(indg)),&
+                Varcov_inv(nmesy(indg),nmesy(indg)),&
                  varcov_chol(nmesy(indg),nmesy(indg)),V_rim_inv(nmesy(indg),nmesy(indg)))
     
     
@@ -1041,17 +1041,17 @@
                         v_rim_chol = V_rim_inv! transpose( V_rim_inv)
     
     do j= it_res,(it_res+nmesy(indg)-1)
-		zet_vec(1:nb1) = Zet(j,1:netadc)
-		
-		ResLongi_marg(j) = yy(2) - XbetaY_res(1,j)
+        zet_vec(1:nb1) = Zet(j,1:netadc)
+        
+        ResLongi_marg(j) = yy(2) - XbetaY_res(1,j)
         if(nb1.eq.1) then 
-			ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
-			Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
-		else if(nb1.eq.2) then
-			ResLongi_cond(j) =  yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)-zet_vec(2)*b_pred(2)
-			Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
-		end if
-		Pred_yy(j,2) =  XbetaY_res(1,j)
+            ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
+            Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
+        else if(nb1.eq.2) then
+            ResLongi_cond(j) =  yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)-zet_vec(2)*b_pred(2)
+            Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
+        end if
+        Pred_yy(j,2) =  XbetaY_res(1,j)
     end do
                                                 matv2 = 0.d0
                         do j=1,nmesy(indg)

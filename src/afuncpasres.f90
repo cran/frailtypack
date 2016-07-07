@@ -372,7 +372,7 @@
             if(nmesy(indg).gt.0) then
             !if(nb1.eq.1)mu1_res(1:nmesy(indg)) = XbetaY_res(1,indg) +Zet(1:nmesy(indg),1:netadc)*b_vec
             mu1_res(1:nmesy(indg)) = XbetaY_res(1,it_res:(it_res+nmesy(indg)-1)) &
-					+MATMUL(Zet(it_res:(it_res+nmesy(indg)-1),1:nb1),b_vec)
+                    +MATMUL(Zet(it_res:(it_res+nmesy(indg)-1),1:nb1),b_vec)
             end if
     
             !********* Left-censoring ***********
@@ -678,7 +678,7 @@
                                     Ndc(indg)*(etaydc1*frail1+etaydc2*frail2+frail3*alpha) - &
                                     Rdc(indg)*dexp(etaydc1*frail1+etaydc2*frail2+frail3*alpha)-uiiui(1)/2.d0 &
                                     +Nrec(indg)*(frail3+etayr1*frail1+etayr2*frail2)-&
-									Rrec(indg)*dexp(frail3+etayr1*frail1+etayr2*frail2)
+                                    Rrec(indg)*dexp(frail3+etayr1*frail1+etayr2*frail2)
                     end if
             else
                     if(nb1.eq.1) then
@@ -688,7 +688,7 @@
                                             +Ndc(indg)*(etaydc1*current_mean(1)+frail3*alpha) - &
                                             Rdc(indg)*dexp(etaydc1*current_mean(1)+frail3*alpha) &
                                             +Nrec(indg)*(frail3+etayr1*current_meanR(1))&
-											-ress*dexp(frail3+etayr1*current_meanR(1))
+                                            -ress*dexp(frail3+etayr1*current_meanR(1))
                     else if(nb1.eq.2) then
                             res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
                                     Ndc(indg)*(etaydc1*current_mean(1)+frail3*alpha) - &

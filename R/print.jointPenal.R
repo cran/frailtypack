@@ -15,8 +15,7 @@
         matplot(x$BetaTpsMatDc[,1],x$BetaTpsMatDc[,(2:4)+4*i],col="blue",type="l",lty=c(1,2,2),xlab="t",ylab="beta(t)",main=paste("Death : ",x$Names.vardepdc[i+1]),ylim=c(min(x$BetaTpsMatDc[,-1]),max(x$BetaTpsMatDc[,-1])))
       }
     }
-  }
-  
+  }  
   if (!is.null(cl <- x$call)){
     cat("Call:\n")
     dput(cl)

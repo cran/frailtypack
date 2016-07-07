@@ -14,8 +14,9 @@
 
 \usage{
 
-\method{plot}{trivPenal}(x, event = "both", type.plot = "hazard", conf.bands = FALSE,
-pos.legend="topright", cex.legend = 0.7, ylim, main, color = 2, ...)
+\method{plot}{trivPenal}(x, event = "Both", type.plot = "Hazard", conf.bands = FALSE,
+	pos.legend="topright", cex.legend = 0.7, ylim, main, color = 2, 
+	Xlab = "Time", Ylab = "Hazard function", ...)
 
 
 }
@@ -35,7 +36,9 @@ pos.legend="topright", cex.legend = 0.7, ylim, main, color = 2, ...)
           'par("cex")'. Default is 0.7}
   \item{ylim}{y-axis limits}
   \item{main}{plot title}
-  \item{color}{curve color (integer)}
+  \item{color}{curve color (integer)}  
+  \item{Xlab}{Label of x-axis. Default is '"Time"'}  
+  \item{Ylab}{Label of y-axis. Default is '"Hazard function"'}
   \item{...}{other unused arguments}
 }
 

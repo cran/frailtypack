@@ -1,4 +1,4 @@
-"plot.longiPenal" <- function (x, type.plot="Hazard", conf.bands=TRUE, pos.legend="topright", cex.legend=0.7, main, color=2, ...)
+"plot.longiPenal" <- function (x, type.plot="Hazard", conf.bands=TRUE, pos.legend="topright", cex.legend=0.7, main, color=2, Xlab = "Time", Ylab = "Hazard function", ...)
 {
 
   plot.type <- charmatch(type.plot, c("Hazard", "Survival"),nomatch = 0)
@@ -12,24 +12,24 @@
   if(plot.type==1){ # hazard
 
     if(conf.bands){
-      matplot(x$xD[-1,1], x$lamD[-1,,1], col=color, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", main=main, ...)
+      matplot(x$xD[-1,1], x$lamD[-1,,1], col=color, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, main=main, ...)
     }else{
-      plot(x$xD[-1,1], x$lamD[-1,1,1], col=color, type="l", lty=1, xlab="Time",ylab="Hazard function", main=main, ...)
+      plot(x$xD[-1,1], x$lamD[-1,1,1], col=color, type="l", lty=1, xlab=Xlab,ylab=Ylab, main=main, ...)
     }
 
   }else{ # survival
-
+	if (missing(Ylab)) Ylab <- "Baseline survival function"
     if (x$typeof == 0){
       if (conf.bands){
-        matplot(x$xD[,1], x$survD[,,1], col=color, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", main=main, ...)
+        matplot(x$xD[,1], x$survD[,,1], col=color, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, main=main, ...)
      }else{
-        plot(x$xD[,1], x$survD[,1,1], col=color, type="l", lty=1, xlab="Time",ylab="Baseline survival function", main=main, ...)
+        plot(x$xD[,1], x$survD[,1,1], col=color, type="l", lty=1, xlab=Xlab,ylab=Ylab, main=main, ...)
        }
     }else{
       if (conf.bands){
-        matplot(x$xSuD[,1], x$survD[,,1], col=color, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", main=main, ...)
+        matplot(x$xSuD[,1], x$survD[,,1], col=color, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, main=main, ...)
        }else{
-        plot(x$xSuD[,1], x$survD[,1,1], col=color, type="l", lty=1, xlab="Time",ylab="Baseline survival function", main=main, ...)
+        plot(x$xSuD[,1], x$survD[,1,1], col=color, type="l", lty=1, xlab=Xlab,ylab=Ylab, main=main, ...)
       }
     }
 

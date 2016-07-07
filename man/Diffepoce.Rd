@@ -93,8 +93,8 @@ method.GH = "Pseudo-adaptive")
 
 # second joint model for a biomarker, recurrent events and a terminal event
 # (computation takes around 30 minutes)
-modTriv <- model.weib.RE.gap <-trivPenal(Surv(gap.time, new.lesions) ~ cluster(id)
-+ age + treatment + who.PS + prev.resection + terminal(state),
+modTriv <- model.weib.RE.gap <-trivPenal(Surv(gap.time, new.lesions) 
+~ cluster(id) + age + treatment + who.PS + prev.resection + terminal(state),
 formula.terminalEvent =~ age + treatment + who.PS + prev.resection, 
 tumor.size ~ year * treatment + age + who.PS, data = colorectal,
 data.Longi = colorectalLongi, random = c("1", "year"), id = "id", 

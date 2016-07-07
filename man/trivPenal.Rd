@@ -43,7 +43,7 @@ some observations, below a level of detection \eqn{s} cannot be quantified (left
 trivPenal(formula, formula.terminalEvent, formula.LongitudinalData,
       data,  data.Longi, random, id, intercept = TRUE, 
       link = "Random-effects", left.censoring = FALSE, 
-      recurrentAG = FALSE, n.knots, kappa, maxit = 350, 
+      recurrentAG = FALSE, n.knots, kappa, maxit = 300, 
       hazard = "Splines", init.B, init.Random, init.Eta, init.Alpha, 
       method.GH = "Standard", n.nodes, LIMparam = 1e-3, 
       LIMlogl = 1e-3, LIMderiv = 1e-3, print.times = TRUE)
@@ -51,7 +51,7 @@ trivPenal(formula, formula.terminalEvent, formula.LongitudinalData,
 
 \arguments{
 
-  \item{formula}{ a formula object, with the response on the left of a \eqn{\texttildelow}
+  \item{formula}{ a formula object, with the response on the left of a \eqn{\sim}
           operator, and the terms on the right. The response must be a
           survival object as returned by the 'Surv' function like in survival package.  Interactions are possible using * or :.}
 
@@ -84,7 +84,7 @@ default is FALSE.}
           We advise the user to identify several possible tuning parameters, note their defaults and look at the sensitivity
           of the results to varying them.}
 
-  \item{maxit}{Maximum number of iterations for the Marquardt algorithm. Default is 350}
+  \item{maxit}{Maximum number of iterations for the Marquardt algorithm. Default is 300}
 
    \item{hazard}{Type of hazard functions: \code{"Splines"} for semiparametric hazard functions using equidistant intervals or \code{"Splines-per"} using percentile with the penalized likelihood estimation,
            \code{"Weibull"} for the parametric Weibull functions. The default is \code{"Splines"}.}

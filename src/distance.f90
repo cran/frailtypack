@@ -652,9 +652,8 @@
     double precision,dimension(100)::xSu1,xSu2
     double precision::ep
 
-
-
-
+    
+    
     lamR25=0.d0
     lamDC25=0.d0
     suR25=0.d0
@@ -979,7 +978,7 @@
         etaT(jj)=b(ii+1)**2
         ii=ii+2
     end do
-
+    
     do t=1,mt
         lamT=0.d0 ! en plus
 !         n=n+1 ! compteur sur nième temps
@@ -1009,13 +1008,14 @@
 !     fct de risque cumulée   : gl  =  (x/etaR)**betaR
 !     fct de survie           : su  = dexp(-gl)
 
+            
             ii=1 !en plus
             do jj=1,nst
                 lamT(k,jj)=(bgen(ii)*(x**(bgen(ii)-1.d0)))/(bgen(ii+1)**bgen(ii))
                 lamTW(jj)=((b(ii)**2)*(x**((b(ii)**2)-1.d0)))/((b(ii+1)**2)**(b(ii)**2))
                 ii=ii+2
             end do
-
+            
         end do
 
 ! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
@@ -1037,10 +1037,9 @@
             moyLamT(t,2,jj) = real(lamT25(jj))
             moyLamT(t,3,jj) = real(lamT975(jj))
         end do
-
-
-    end do
-
+        
+    end do    
+        
     x=mint
 
     do t=1,100

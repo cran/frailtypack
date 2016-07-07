@@ -27,6 +27,10 @@
      bb(:,1)=b
     
     res1 = matmul(L,matmul(hess,transpose(L)))
+    
+    !write(*,*), 'L', L
+    !write(*,*), 'hess', hess
+    !write(*,*) 'res1', res1
 
 !stockage de la partie superieure pour utiliser dsinv
 
@@ -36,12 +40,13 @@
             supR((j-1)*j/2+i)=res1(i,j)
         end do
     end do
+    
+    !write(*,*) 'supR', supR
 
 ! inversion de sup_res1
 
     call dsinvj(supR,ddl,ep,ier)
 !    write(*,*)'Critere inversion ',ier
-
 !Reconstruction de la matrice entiere a partir du resultat de dsinv    
 
     do i=1,ddl
@@ -51,11 +56,15 @@
         end do
     end do
     
+    
+    
     do i=2,ddl
         do j=1,i-1
             res1(i,j)=res1(j,i)
         end do
-    end do    
+    end do   
+
+    
 !   write(*,*)'L',L,'bb',bb,'res1,matmul(L,bb)',res1,matmul(L,bb)
     resultat = matmul(transpose(matmul(L,bb)),matmul(res1,matmul(L,bb)))
 !write(*,*)"wald",resultat,ddl,m

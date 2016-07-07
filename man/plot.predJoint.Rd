@@ -10,8 +10,9 @@
 
 \usage{
 \method{plot}{predJoint}(x, conf.bands=FALSE, relapses=TRUE, pos.legend="topright", 
-cex.legend=0.7, ylim=c(0,1), ...)
-}
+	cex.legend=0.7, ylim=c(0,1), Xlab = "Time t", 
+	Ylab = "Prediction probability of event", ...) 
+		}
 
 \arguments{
   \item{x}{An object from the 'prediction' function, more generaly a \code{predJoint} class object.}
@@ -21,6 +22,8 @@ cex.legend=0.7, ylim=c(0,1), ...)
                     '"bottomright"', '"bottom"', '"bottomleft"', '"left"', '"topleft"', '"top"', '"topright"', '"right"' and '"center"'. The default is '"topright"'}
   \item{cex.legend}{size of the legend. Default is 0.7}
   \item{ylim}{range of y-axis. Default is from 0 to 1}
+  \item{Xlab}{Label of x-axis. Default is '"Time t"'}
+  \item{Ylab}{Label of y-axis. Default is '"Prediction probability of event"'}
   \item{\dots}{Other unused arguments}
 }
 

@@ -9,13 +9,16 @@
 }
 
 \usage{
-\method{plot}{Diffepoce}(x, conf.bands=TRUE, ...)
+\method{plot}{Diffepoce}(x, conf.bands=TRUE, Xlab = "Time", Ylab = "EPOCE difference"
+, ...)
 }
 
 \arguments{
   \item{x}{An object inheriting from \code{Diffepoce} class.}
   \item{conf.bands}{Logical value. Determines whether confidence intervals will be plotted. The default is FALSE.}
-   \item{\dots}{Other unused arguments.}
+  \item{Xlab}{Label of x-axis. Default is '"Time"'}
+  \item{Ylab}{Label of y-axis. Default is '"EPOCE difference"'}
+  \item{\dots}{Other unused arguments.}
 }
 
 \value{

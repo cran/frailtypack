@@ -14,9 +14,10 @@
  3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects.
  4) Joint frailty models in the context of joint modelling for recurrent events with terminal event for clustered data or not. A joint frailty model for two semi-competing risks for clustered data is also proposed.
  5) Joint General frailty models in the context of a joint modelling for recurrent events with terminal event data with two independent frailty terms.
- 6) Multivariate joint frailty models for two types of recurrent events and a terminal event.
- 7) Joint models for longitudinal data and a terminal event.
- 8) Trivariate joint models for longitudinal data, recurrent events and a terminal event. 
+ 6) Joint Nested frailty models in the context of joint modelling for recurrent events with terminal event, for hierarchically clustered data (with two levels of clustering) by including two iid gamma random effects.
+ 7) Multivariate joint frailty models for two types of recurrent events and a terminal event.
+ 8) Joint models for longitudinal data and a terminal event.
+ 9) Trivariate joint models for longitudinal data, recurrent events and a terminal event. 
  Prediction values are available. Left truncated (not for the joint models), right-censored data, interval-censored data (only for Cox proportional hazard
  and shared frailty model) and strata are allowed. In each model, the random effects have the gamma or normal distribution. Now, you can also consider time-varying effect covariates in Cox, shared and joint frailty models. The
  package includes concordance measures for Cox proportional hazards models and for shared frailty models.
@@ -90,6 +91,25 @@ data(dataNested)
 modClu <- frailtyPenal(Surv(t1,t2,event)~
 cluster(group)+subcluster(subgroup)+cov1+cov2,
 data=dataNested,n.knots=8,kappa=50000,hazard="Splines")
+
+###--- Joint Nested Frailty model ---###
+
+#-- here is generated cluster (30 clusters)
+readmissionNested <- transform(readmission,group=id\%\%30+1)
+
+modJointNested_Splines <- frailtyPenal(formula = Surv(t.start, t.stop, event) 
+~ subcluster(id) + cluster(group) + dukes + terminal(death), 
+formula.terminalEvent = ~dukes, data = readmissionNested, recurrentAG = TRUE, 
+n.knots = 8, kappa = c(9.55e+9, 1.41e+12), initialize = TRUE)
+
+modJointNested_Weib <- frailtyPenal(Surv(t.start,t.stop,event)~subcluster(id)
++cluster(group)+dukes+ terminal(death),formula.terminalEvent=~dukes, 
+hazard = ('Weibull'), data=readmissionNested,recurrentAG=TRUE, initialize = FALSE)
+
+JoiNes-GapSpline <- frailtyPenal(formula = Surv(time, event) 
+~ subcluster(id) + cluster(group) + dukes + terminal(death), 
+formula.terminalEvent = ~dukes, data = readmissionNested, recurrentAG = FALSE, 
+n.knots = 8, kappa = c(9.55e+9, 1.41e+12), initialize = TRUE, init.Alpha = 1.091, Ksi = "None")
 
 ###--- Semiparametric Shared model ---###
 

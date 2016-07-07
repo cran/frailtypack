@@ -39,8 +39,10 @@ funcpas_tps.o: aaOptim.o aaOptimres.o Aparameters.o
 joint.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajgeneral.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajsplines.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpajsplines_fam.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajcpm.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajweib.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpajweib_fam.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajsplines_intcens.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajweib_intcens.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajsplines_log.o: aaOptim.o aaOptimres.o Aparameters.o

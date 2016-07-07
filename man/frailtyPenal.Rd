@@ -1,11 +1,10 @@
-
 \name{frailtyPenal}
 \alias{frailtyPenal}
 \alias{waldtest}
 \alias{factor.names}
 \alias{timedep.names}
 
-\title{ Fit a Shared, Joint or Nested Frailty model }
+\title{Fit a Shared, Joint or Nested Frailty model}
 
 \description{
 
@@ -65,7 +64,7 @@ r_{ij}(t|\eta_i)=r_0(t)\exp(\eta_i+\bold{\beta_1^{'}Z_i(t)}) & \mbox{(Recurrent)
 
 where \deqn{\eta_i\sim N(0,\sigma^2)}
 
-- The second one (Rondeau et al. 2011) is quite similar but the frailty term is common to the individuals from a same group. This model is useful for joint modelling two clustered survival outcomes. This joint models have been developed for clustered  semi-competing events. The follow-up of each of the two competing outcomes stops when the event occurs. In this case, j is for the subject and i for the cluster.
+- The second one (Rondeau et al. 2011) is quite similar but the frailty term is common to the individuals from a same group. This model is useful for the joint modelling two clustered survival outcomes. This joint models have been developed for clustered  semi-competing events. The follow-up of each of the two competing outcomes stops when the event occurs. In this case, j is for the subject and i for the cluster.
 
 \deqn{\left\{
 \begin{array}{ll}
@@ -103,8 +102,8 @@ is:
 
 \eqn{\left\{
 \begin{array}{ll}
-r_{ij}(t|u_i,v_i)=\textcolor{red}{u_iv_i}r_0(t)\exp(\bold{\beta_1^{'}Z_{ij}(t)}) =\textcolor{red}{u_iv_i}r_{ij}(t) & \mbox{(Reccurent)} \\
-\lambda_{i}(t|u_i)=\textcolor{red}{u_i}\lambda_0(t)\exp(\bold{\beta_1^{'}Z_{i}(t)}) = \textcolor{red}{u_i}\lambda_{i}(t) & \mbox{(Death)} \\
+r_{ij}(t|u_i,v_i)=u_iv_ir_0(t)\exp(\bold{\beta_1^{'}Z_{ij}(t)}) =u_iv_ir_{ij}(t) & \mbox{(Reccurent)} \\
+\lambda_{i}(t|u_i)=u_i\lambda_0(t)\exp(\bold{\beta_1^{'}Z_{i}(t)}) = red{u_i}\lambda_{i}(t) & \mbox{(Death)} \\
  \end{array}
  \right.
 }
@@ -129,29 +128,49 @@ v_i\sim\Gamma\left(\frac{1}{\alpha},\frac{1}{\alpha}\right) \hspace{0.05cm}i.i.d
 
 where \eqn{\lambda_0(t)} is the baseline hazard function, \eqn{X_{ijk}}
  denotes the covariate vector and \eqn{\beta} the corresponding vector of regression parameters.
+ 
+\bold{Joint Nested Frailty Model}
 
+Fit a joint model for recurrent and terminal events using a penalized likelihood on the hazard functions or a parametric estimation. Right-censored data are allowed but left-truncated data and stratified analysis are not allowed.
+
+Joint nested frailty models allow studying, jointly, survival processes of recurrent and terminal events for hierarchically clustered data, by considering the terminal event as an informative censoring and by including two iid gamma random effects. 
+
+The joint nested frailty model includes two shared frailty terms, one for the subgroup (\eqn{u_{fi}}) and one for the group (\eqn{w_f}) into the hazard functions. This random effects account the heterogeneity in the data, associated with unobserved covariates. The frailty terms act differently for the two rates (\eqn{u_{fi}}, \eqn{w_f^\xi} for the recurrent rate and \eqn{u_{fi}^\alpha, {w_i}} for the terminal event rate). The covariates could be different for the recurrent rate and death rate.
+
+For the \eqn{j^{th}} recurrence (j = 1, ..., \eqn{n_i}) of the \eqn{i^{th}} individual (i = 1, ..., \eqn{m_f}) of the \eqn{f^{th}} group (f = 1, ..., n), the joint nested gamma frailty model for recurrent event hazard function \eqn{r_{fij}}(.) and for terminal event hazard function \eqn{\lambda_{fi}} is :
+
+\deqn{\left\{
+\begin{array}{ll}
+r_{fij}(t|\omega_f, u_{fi}, \bold{X_{fij}})= r_0(t) u_{fi} \omega_f^\xi \exp(\bold{\beta'} \bold{X_{fij}}) & \mbox{(Recurrent)} \\
+\lambda_{fi}(t|\omega_f, u_{fi}, \bold{X_{fij}})=\lambda_0(t)u_{fi}^\alpha \omega_f \exp(\bold{\gamma'} \bold{X_{fi}}) & \mbox{(Death)} \\
+ \end{array}
+ \right.
 }
+
+where \eqn{r_0(t)}(resp. \eqn{\lambda_0(t)}) is the recurrent (resp. terminal) event baseline hazard function, \eqn{\beta} (resp. \eqn{\gamma}) the regression coefficient vector, \eqn{\bold{X_{fij}}(t)} the covariates vector. The random effects are \deqn{\omega_f \sim \Gamma \left( \frac{1}{\eta}, \frac{1}{\eta}\right)} and \deqn{ u_{fi} \sim \Gamma \left( \frac{1}{\theta}, \frac{1}{\theta} \right)}
+}
+
+
 
 \usage{
 
-frailtyPenal(formula, formula.terminalEvent, data,
-      recurrentAG = FALSE, cross.validation = FALSE,
-      jointGeneral,n.knots, kappa, maxit = 350,
-      hazard = "Splines", nb.int, RandDist = "Gamma",
-      betaknots = 1, betaorder = 3, init.B, init.Theta,
-      init.Alpha, Alpha, init.Eta, LIMparam = 1e-3, LIMlogl = 1e-3,
-      LIMderiv = 1e-3, print.times = TRUE, ...)
+frailtyPenal(formula, formula.terminalEvent, data, recurrentAG = FALSE, 
+cross.validation = FALSE, jointGeneral,n.knots, kappa, maxit = 300,
+hazard = "Splines", nb.int, RandDist = "Gamma", betaknots = 1, 
+betaorder = 3, initialize = TRUE, init.B, init.Theta, init.Alpha, 
+Alpha, init.Ksi, Ksi, init.Eta, LIMparam = 1e-3, LIMlogl = 1e-3,
+LIMderiv = 1e-3, print.times = TRUE, ...)
 }
 
 \arguments{
 
-  \item{formula}{ a formula object, with the response on the left of a \eqn{\texttildelow}
+  \item{formula}{ a formula object, with the response on the left of a \eqn{\sim}
           operator, and the terms on the right. The response must be a
           survival object as returned by the 'Surv' function like in survival package.
           In case of interval-censored data, the response must be an object as returned by
           the 'SurvIC' function from this package.  Interactions are possible using * or :.}
 
-  \item{formula.terminalEvent}{only for joint model: a formula object, only requires terms on the right to indicate which variables are modelling the terminal event.  Interactions are possible using * or :.}
+  \item{formula.terminalEvent}{only for joint and joint nested frailty models : a formula object, only requires terms on the right to indicate which variables are modelling the terminal event.  Interactions are possible using * or :.}
 
   \item{data}{a 'data.frame' with the variables used in 'formula'.}
 
@@ -184,30 +203,36 @@ amongst the recurrent events (explained by the variance \eqn{\eta}).}
           We advise the user to identify several possible tuning parameters, note their defaults and look at the sensitivity
           of the results to varying them. Value required. (See Note).}
 
-  \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 350}
+  \item{maxit}{maximum number of iterations for the Marquardt algorithm. Default is 300}
 
  \item{hazard}{Type of hazard functions: "Splines" for semiparametric hazard functions using equidistant intervals or "Splines-per" using percentile with the penalized likelihood estimation,
             "Piecewise-per" for piecewise constant hazard function using percentile (not available for interval-censored data), "Piecewise-equi" for piecewise constant hazard 
             function using equidistant intervals, "Weibull" for parametric Weibull functions. Default is "Splines".
-            In case of \code{jointGeneral = TRUE} only \code{hazard = "Splines"} can be chosen.}
+            In case of \code{jointGeneral = TRUE} or if a joint nested frailty model is fitted, only \code{hazard = "Splines"} can be chosen.}
 
   \item{nb.int}{Number of time intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi"). In a joint model, you need to specify a number of time interval for both recurrent hazard function and the death hazard function (vector of length 2).}
 
-  \item{RandDist}{Type of random effect distribution: "Gamma" for a gamma distribution, "LogN" for a log-normal distribution. Default is "Gamma". Not implemented for nested model. If \code{jointGeneral = TRUE} , the log-normal distribution cannot be chosen.}
+  \item{RandDist}{Type of random effect distribution: "Gamma" for a gamma distribution, "LogN" for a log-normal distribution. Default is "Gamma". Not implemented for nested model. If \code{jointGeneral = TRUE} or if a joint nested frailty model is fitted, the log-normal distribution cannot be chosen.}
 
-  \item{betaknots}{Number of inner knots used for the estimation of B-splines. Default is 1. See 'timedep' function for more details. Not implemented for nested model.}
+  \item{betaknots}{Number of inner knots used for the estimation of B-splines. Default is 1. See 'timedep' function for more details. Not implemented for nested and joint nested frailty models.}
 
-  \item{betaorder}{Order of the B-splines. Default is cubic B-splines (order = 3). See 'timedep' function for more details. Not implemented for nested model.}
+  \item{betaorder}{Order of the B-splines. Default is cubic B-splines (order = 3). See 'timedep' function for more details. Not implemented for nested and joint nested frailty models.}
 
-  \item{init.B}{A vector of initial values for regression coefficients. This vector should be of the same size as the whole vector of covariates with the first elements for the covariates related to the recurrent events and then to the terminal event (interactions in the end of each component). Default is 0.1 for each (for Cox and shared model) or 0.5 (for joint model).}
+  \item{initialize}{Logical value, only for joint nested frailty models. Option \code{TRUE} indicates fitting an appropriate standard joint frailty model (without group effect, only the subgroup effect) to provide initial values for the joint nested model. Default is \code{TRUE}.}
+  
+  \item{init.B}{A vector of initial values for regression coefficients. This vector should be of the same size as the whole vector of covariates with the first elements for the covariates related to the recurrent events and then to the terminal event (interactions in the end of each component). Default is 0.1 for each (for Cox and shared model) or 0.5 (for joint and joint nested frailty models).}
 
   \item{init.Theta}{Initial value for variance of the frailties.}
 
-  \item{init.Alpha}{Only for joint model : initial value for parameter alpha.}
+  \item{init.Alpha}{Only for joint and joint nested frailty models : initial value for parameter alpha.}
   
-  \item{init.Eta}{Only for General joint model : initial value for the variance \eqn{\eta} of the frailties \eqn{v_i}.}
+  \item{init.Ksi}{Only for joint nested frailty model : initial value for parameter \eqn{\xi}.}
+  
+  \item{init.Eta}{Only for general joint and joint nested frailty models : initial value for the variance \eqn{\eta} of the frailty \eqn{v_i} (general joint model) and of the frailty \eqn{\omega_i} (joint nested frailty model).}
 
-  \item{Alpha}{Only for joint model : input "None" so as to fit a joint model without the parameter alpha.}
+  \item{Alpha}{Only for joint and joint nested frailty model : input "None" so as to fit a joint model without the parameter alpha.}
+  
+  \item{Ksi}{Only for joint nested frailty model : input \code{"None"} indicates a joint nested frailty model without the parameter \eqn{\xi}.}
 
   \item{LIMparam}{Convergence threshold of the Marquardt algorithm for the parameters (see Details), \eqn{10^{-3}} by default.}
 
@@ -243,6 +268,11 @@ for a joint model for clustered data
 for a nested model
 \preformatted{frailtyPenal(Surv(time,event)~cluster(group)+subcluster(sbgroup)+
              var1+var2, data, \dots)}
+			 
+for a joint nested frailty model
+\preformatted{frailtyPenal(Surv(time,event)~cluster(group)+subcluster(sbgroup)+
+             var1+var2++terminal(death),
+             formula.terminalEvent=~var1+var4, data, \dots)}
 
 The estimated parameter are obtained using the robust Marquardt algorithm (Marquardt, 1963) which is a combination
 between a Newton-Raphson algorithm and a steepest descent algorithm. The iterations are stopped when the difference
@@ -279,6 +309,10 @@ for the variance of the subgroup frailty term. Then, a shared frailty model with
 frailty terms is fitted to give a  new initial value for the variance of the group frailties. In a last step,
 a nested frailty model is fitted.
 
+In case of a joint nested model, the splines and the regression coefficients are initialized to 0.5 and the variances of the frailty terms \eqn{\eta} and \eqn{\xi} are initialized to 1. 
+If the option \code{'initialize'} is \code{TRUE}, the program fits a joint frailty model to provide initial values for the splines, covariates coefficients, variance \eqn{\theta} of the frailty terms and \eqn{\alpha}.
+The variances of the second frailty term (\eqn{\eta}) and the second coefficient \eqn{\xi} are initialized to 1. 
+Then, a joint nested frailty model is fitted.
 }
 
 \value{
@@ -305,12 +339,9 @@ The following components are included in a 'frailtyPenal' object for each model.
 \item{x}{matrix of times where both survival and hazard function are estimated. By default seq(0,max(time),length=99), where time is the vector of survival times.}
 \item{lam}{array (dim=3) of hazard estimates and confidence bands.}
 \item{surv}{array (dim=3) of baseline survival estimates and confidence bands.}
-\item{type.of.hazard}{Type of hazard functions (0:"Splines", "1:Piecewise", "2:Weibull").}
-\item{type.of.Piecewise}{Type of Piecewise hazard functions (1:"percentile", 0:"equidistant").}
 \item{nbintervR}{Number of intervals (between 1 and 20) for the parametric hazard functions ("Piecewise-per", "Piecewise-equi").}
 \item{npar}{number of parameters.}
 \item{nvar}{number of explanatory variables.}
-\item{noVar}{indicator of explanatory variables.}
 \item{LCV}{the approximated likelihood cross-validation criterion in the semiparametric case (with H minus the converged Hessian matrix, and l(.) the full log-likelihood).\deqn{LCV=\frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))}}
 \item{AIC}{the Akaike information Criterion for the parametric case.\deqn{AIC=\frac{1}{n}(np - l(.))}}
 \item{n.knots.temp}{initial value for the number of knots.}
@@ -332,13 +363,15 @@ The following components are included in a 'frailtyPenal' object for each model.
 
 The following components are specific to \bold{shared} models.
 
+\item{equidistant}{Indicator for the intervals used the estimation of baseline hazard functions (for splines or pieceiwse-constaant functions) : 1 for equidistant intervals ;  0 for intervals using percentile (note: \code{equidistant} = 2 in case of parametric estimation using Weibull distribution).}
+\item{intcens}{Logical value. Indicator if a joint frailty model with interval-censored data was fitted)}
 \item{theta}{variance of the gamma frailty parameter \eqn{(\bold{Var}(\omega_i))}}
 \item{sigma2}{variance of the log-normal frailty parameter \eqn{(\bold{Var}(\eta_i))}}
 \item{linear.pred}{linear predictor: uses simply "Beta'X" in the cox proportional hazard model or "Beta'X + log w_i" in the shared gamma frailty models, otherwise uses "Beta'X + w_i" for log-normal frailty distribution.}
 \item{BetaTpsMat}{matrix of time varying-effects and confidence bands (the first column used for abscissa of times)}
 
 The following components are specific to \bold{joint} models.
-
+\item{intcens}{Logical value. Indicator if a joint frailty model with interval-censored data was fitted)}
 \item{theta}{variance of the gamma frailty parameter \eqn{(\bold{Var}(\omega_i))} or \eqn{(\bold{Var}(u_i))}}
 \item{sigma2}{variance of the log-normal frailty parameter \eqn{(\bold{Var}(\eta_i))} or \eqn{(\bold{Var}(v_i))}}
 \item{eta}{variance of the second gamma frailty parameter in general joint frailty models \eqn{(\bold{Var}(v_i))}}
@@ -379,6 +412,13 @@ The following components are specific to \bold{nested} models.
 \item{subgbyg}{subgroup by group.}
 \item{n.strat}{A vector with the number of covariates of each type of hazard function as components.}
 
+The following components are specific to \bold{joint nested frailty} models.
+\item{theta}{variance of the subcluster effect \eqn{(\bold{Var}(u_{fi}))}}
+\item{eta}{variance of the cluster effect \eqn{(\bold{Var}(\omega_f))}}
+\item{alpha}{the power coefficient \eqn{\alpha} associated with the frailty parameter (\eqn{u_{fi}}) in the terminal event hazard function.}
+\item{ksi}{the power coefficient \eqn{\xi} associated with the frailty parameter (\eqn{\omega_f}) in the recurrent event hazard function.}
+\item{indic_alpha}{indicator if a joint frailty model with \eqn{\alpha} parameter was fitted or not.}
+\item{indic_ksi}{indicator if a joint frailty model with \eqn{\xi} parameter was fitted or not.}
 }
 
 \note{
@@ -425,7 +465,7 @@ D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear para
 }
 
 \seealso{
- \code{\link{SurvIC}}, \code{\link{subcluster}}, \code{\link{terminal}}, \code{\link{num.id}}, \code{\link{timedep}}
+ \code{\link{SurvIC}}, \code{\link{cluster}}, \code{\link{subcluster}}, \code{\link{terminal}}, \code{\link{num.id}}, \code{\link{timedep}}
 }
 
 
@@ -525,7 +565,8 @@ data=readmission2,recurrentAG=FALSE, n.knots=8,
 kappa=c(1.e+10,1.e+10) ,Alpha="None")
 
 
-###--- General Joint model (recurrent and terminal events) with 2 covariates ---###
+###--- General Joint model (recurrent and terminal events) 
+with 2 covariates ---###
 
 data(readmission)
 modJoint.general <- frailtyPenal(Surv(time,event) ~ cluster(id) + dukes +
@@ -545,6 +586,25 @@ n.knots=8,kappa=50000)
 modClu.str <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
 subcluster(subgroup)+cov1+strata(cov2),data=dataNested,
 n.knots=8,kappa=c(50000,50000))
+
+###--- Joint Nested Frailty model ---###
+
+#-- here is generated cluster (30 clusters)
+readmissionNested <- transform(readmission,group=id\%\%30+1)
+
+modJointNested_Splines <- frailtyPenal(formula = Surv(t.start, t.stop, event) 
+~ subcluster(id) + cluster(group) + dukes + terminal(death), 
+formula.terminalEvent = ~dukes, data = readmissionNested, recurrentAG = TRUE, 
+n.knots = 8, kappa = c(9.55e+9, 1.41e+12), initialize = TRUE)
+
+modJointNested_Weib <- frailtyPenal(Surv(t.start,t.stop,event)~subcluster(id)
++cluster(group)+dukes+ terminal(death),formula.terminalEvent=~dukes, 
+hazard = ('Weibull'), data=readmissionNested,recurrentAG=TRUE, initialize = FALSE)
+
+JoiNes-GapSpline <- frailtyPenal(formula = Surv(time, event) 
+~ subcluster(id) + cluster(group) + dukes + terminal(death), 
+formula.terminalEvent = ~dukes, data = readmissionNested, recurrentAG = FALSE, 
+n.knots = 8, kappa = c(9.55e+9, 1.41e+12), initialize = TRUE, init.Alpha = 1.091, Ksi = "None")
 
 }
 

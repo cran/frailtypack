@@ -81,6 +81,8 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
         }
         ntimeAll <- length(timeAll)
 
+        formula_fit <- fit$formula
+  
         # recuperation des profils d'individus pour la prediction
         m <- fit$call
         m2 <- match.call()
@@ -88,59 +90,62 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
         m$formula.terminalEvent <- m$formula.LongitudinalData <- m$data.Longi <- m$random <- m$id  <- m$link <- m$left.censoring <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$init.Random <- m$init.Eta <- m$Alpha <- m$method.GH <- m$intercept <- m$n.nodes <- m$...  <- NULL
 
 
-
         m[[1]] <- as.name("model.frame")
         m3 <- m # pour recuperer les donnees du dataset initial en plus
+        m3$formula <- fit$formula
         m[[3]] <- as.name(m2$data)
-
         
         if (class(fit) == "jointPenal" | class(fit)=="trivPenal"){
 
-                temp <- as.character(m$formula[[2]])
+                temp <- as.character(fit$formula[[2]])
                 if (temp[1]=="Surv"){
 
-                        if (length(temp) == 4) m$formula[[2]] <- paste(c("cbind(",temp[3],",",temp[4],")"),collapse=" ")
-                        else if (length(temp) == 3) m$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],")"),collapse=" ")
+                        if (length(temp) == 4) fit$formula[[2]] <- paste(c("cbind(",temp[3],",",temp[4],")"),collapse=" ")
+                        else if (length(temp) == 3) fit$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],")"),collapse=" ")
                         else stop("Wrong Surv function")
 
                 }else{ # SurvIC
-                        if (length(temp) == 4) m$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],",",temp[4],")"),collapse=" ")
-                        else if (length(temp) == 5) m$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],",",temp[4],",",temp[5],")"),collapse=" ")
+                        if (length(temp) == 4) fit$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],",",temp[4],")"),collapse=" ")
+                        else if (length(temp) == 5) fit$formula[[2]] <- paste(c("cbind(",temp[2],",",temp[3],",",temp[4],",",temp[5],")"),collapse=" ")
                         else stop("Wrong SurvIC function")
                 }
-                m$formula <- unlist(strsplit(deparse(m$formula)," "))
-                m$formula <- gsub("\"","",m$formula)
+                fit$formula <- unlist(strsplit(deparse(fit$formula)," "))
+                fit$formula <- gsub("\"","",fit$formula)
 
-                ter <- grep("terminal",m$formula)
-                if (ter==length(m$formula)) m$formula <- as.formula(paste(m$formula[-c(ter,max(which(m$formula=="+")))],collapse=""))
-                else m$formula <- as.formula(paste(m$formula[-ter],collapse=""))
+                ter <- grep("terminal",fit$formula)
+                if (ter==length(fit$formula)) m$formula <- as.formula(paste(fit$formula[-c(ter,max(which(fit$formula=="+")))],collapse=""))
+                else m$formula <- as.formula(paste(fit$formula[-ter],collapse=""))
 
                 if (fit$joint.clust==0){
 
-                        m$formula <- unlist(strsplit(deparse(m$formula)," "))
-                        clus <- grep("cluster",m$formula)
-                        if (clus==length(m$formula)) m$formula <- as.formula(paste(m$formula[-c(clus,max(which(m$formula=="+")))],collapse=""))
-                        else m$formula <- as.formula(paste(m$formula[-clus],collapse=""))
+                        fit$formula <- unlist(strsplit(deparse(fit$formula)," "))
+                        clus <- grep("cluster",fit$formula)
+                        if (clus==length(fit$formula)) m$formula <- as.formula(paste(fit$formula[-c(clus,max(which(fit$formula=="+")))],collapse=""))
+                        else m$formula <- as.formula(paste(fit$formula[-clus],collapse=""))
                 }
         }else{
                 if (fit$Frailty==TRUE ){
-                        m$formula <- unlist(strsplit(deparse(m$formula)," "))
-                        clus <- grep("cluster",m$formula)
-      if (clus==length(m$formula)) m$formula <- as.formula(paste(m$formula[-c(clus,max(which(m$formula=="+")))],collapse=""))
-                        else m$formula <- as.formula(paste(m$formula[-clus],collapse=""))
+               
+                        fit$formula <- unlist(strsplit(deparse(fit$formula)," "))
+                        clus <- grep("cluster",fit$formula)
+      if (clus==length(fit$formula)) m$formula <- as.formula(paste(fit$formula[-c(clus,max(which(fit$formula=="+")))],collapse=""))
+                        else m$formula <- as.formula(paste(fit$formula[-clus],collapse=""))
                 }else if(class(fit)=='longiPenal'){
-                  m$formula <- unlist(strsplit(deparse(m$formula)," "))
-                  m$formula <- as.formula(paste(m$formula,collapse=""))
+                 fit$formula <- unlist(strsplit(deparse(fit$formula)," "))
+                  m$formula <- as.formula(paste(fit$formula,collapse=""))
 
+                }else{
+                  m$formula <- fit$formula
                 }
-
+      
                 m$formula[[2]] <- NULL # pas besoin du Surv dans formula
+      
         }
 
         dataset <- eval(m, sys.parent())
-
+ 
         dataset3 <- eval(m3, sys.parent())
-
+  
         typeofY <- attr(model.extract(dataset3, "response"),"type")
         Y <- model.extract(dataset3, "response")
 
@@ -152,10 +157,10 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
 
         Terms <- terms(m$formula, special, data = data)
 
-        m$formula <- Terms
+        fit$formula <- Terms
 
         dropx <- NULL
-
+  
         if (class(fit) == "jointPenal" | class(fit) == 'trivPenal'){
                 if (fit$joint.clust==1){ # joint classique
                         tempc <- untangle.specials(Terms, "cluster", 1:10)
@@ -238,18 +243,17 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
                 }
         }else{
                 if (fit$Frailty){
-                        class(m3$formula) <- "formula"
+                       class(m3$formula) <- "formula"
                         Terms3 <- terms(m3$formula, special, data = data)
                         m3$formula <- Terms3
-
                         tempc3 <- untangle.specials(Terms3, "cluster", 1:10)
                         # je recupere le cluster du dataframe de depart et non pas des predictions
-
                         cluster <- strata(dataset3[, tempc3$vars], shortlabel = TRUE)
+                        
                         uni.cluster <- unique(cluster)
+                       
                 }
         }
- 
         if (!is.null(dropx)) newTerms <- Terms[-dropx]
         else newTerms <- Terms
 
@@ -269,7 +273,9 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
 
    m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$... <- NULL
 
-                m3$formula[[3]] <- m3$formula.terminalEvent[[2]]
+                m3$formula <- formula_fit
+ 
+                m3$formula[[3]] <- fit$formula.terminalEvent[[2]]
                 m3$formula.terminalEvent <- NULL
                 m3[[1]] <- as.name("model.frame")
                 m3[[3]] <- as.name(m2$data)
@@ -457,8 +463,9 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
 
 
             m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$... <- NULL
-
-            m3$formula[[3]] <- m3$formula.terminalEvent[[2]]
+            
+            m3$formula <- formula_fit
+            m3$formula[[3]] <- fit$formula.terminalEvent[[2]]
             m3$formula.terminalEvent <- NULL
             m3[[1]] <- as.name("model.frame")
             m3[[3]] <- as.name(m2$data)
@@ -501,9 +508,9 @@ prediction <- function(fit, data, data.Longi, t, window, group, MC.sample=0){
           special <- c("strata", "cluster", "subcluster", "terminal","num.id","timedep")
 
           #========= Longitudinal Data preparation =========================
-          class(m2$formula.LongitudinalData) <- "formula"
+          class(fit$formula.LongitudinalData) <- "formula"
 
-          TermsY <- terms(m2$formula.LongitudinalData, special, data = data.Longi)
+          TermsY <- terms(fit$formula.LongitudinalData, special, data = data.Longi)
 
           llY <- attr(TermsY, "term.labels")#liste des variables explicatives
           ord <- attr(TermsY, "order")

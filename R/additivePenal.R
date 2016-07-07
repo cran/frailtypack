@@ -325,7 +325,9 @@ if((all.equal(length(hazard),1)==T)==T){
 #AD
     if(!(nnOK %in% ll)) stop("covariate between 'slope()' missing in the terms formula.")
 
-
+print(c(1:length(nn)))
+print(nn)
+print(nnOK)
 
     varInt<-c(1:length(nn))[nn==nnOK]
 
@@ -595,7 +597,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	
 	if(length(vec.factor) > 0){
 		Beta <- ans$coef
-		VarBeta <- diag(ans$varcoef)
+		VarBeta <- ans$varcoef
 		nfactor <- length(vec.factor)
 		p.wald <- rep(0,nfactor)
 

@@ -13,8 +13,9 @@
 
 \usage{
 
-\method{plot}{longiPenal}(x, type.plot = "Hazard", conf.bands=TRUE, pos.legend="topright",
- cex.legend=0.7, main, color, ...)
+\method{plot}{longiPenal}(x, type.plot = "Hazard", conf.bands=TRUE, pos.legend=
+	"topright", cex.legend=0.7, main, color, Xlab = "Time", 
+	Ylab = "Hazard function", ...)
 
 }
 
@@ -30,7 +31,9 @@
   \item{cex.legend}{character expansion factor *relative* to current
           'par("cex")'. Default is 0.7}
   \item{main}{title of plot}
-  \item{color}{color of the curve (integer)}
+  \item{color}{color of the curve (integer)} 
+  \item{Xlab}{Label of x-axis. Default is '"Time"'}  
+  \item{Ylab}{Label of y-axis. Default is '"Hazard function"'}
   \item{...}{other unused arguments}
 }
 

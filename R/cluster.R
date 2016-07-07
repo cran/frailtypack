@@ -1,6 +1,4 @@
-"cluster" <- function(x, dist="Gamma")
+"cluster" <- function(x)
  {
-	if (!(dist %in% c("Gamma","LogNormal"))) { stop("Only 'Gamma' and 'LogNormal' distributions for frailties are allowed") }
-	attr(x,"type") <- dist
 	x
  }

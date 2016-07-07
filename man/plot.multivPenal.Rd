@@ -11,8 +11,9 @@ Plot Method for a multivariate frailty model.
 
 \usage{
 \method{plot}{multivPenal}(x, event = "Both", type.plot = "Hazard", conf.bands = FALSE,
- pos.legend = "topright", cex.legend = 0.7, ylim, main, color1="red",
- color2="blue", colorEnd="green", ...)
+	pos.legend = "topright", cex.legend = 0.7, ylim, 
+	main, color1="red", color2="blue", colorEnd="green", 
+	Xlab = "Time", Ylab = "Hazard function", ...)
 }
 
 \arguments{
@@ -38,7 +39,11 @@ Plot Method for a multivariate frailty model.
 
   \item{color2}{curve color for recurrent event of type 2 (integer or color name in quotation marks)}
 
-  \item{colorEnd}{curve color for terminal event (integer or color name in quotation marks)}
+  \item{colorEnd}{curve color for terminal event (integer or color name in quotation marks)}  
+  
+  \item{Xlab}{Label of x-axis. Default is '"Time"'}
+  
+  \item{Ylab}{Label of y-axis. Default is '"Hazard function"'}
 
   \item{\dots}{Other graphical parameters}
 }

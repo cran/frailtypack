@@ -1,28 +1,26 @@
 
 % --- Source file: plot.jointPenal.Rd ---
-\name{plot.jointPenal}
+\name{plot.jointNestedPenal}
 \Rdversion{1.1}
-\alias{plot.jointPenal}
-\alias{lines.jointPenal}
+\alias{plot.jointNestedPenal}
+\alias{lines.jointNestedPenal}
 
-
-\title{Plot Method for a Joint frailty model.}
+\title{Plot method for a joint nested frailty model.}
 
 \description{
-  Plots estimated baseline survival and hazard functions of a joint frailty model (output from an object of class 'JointPenal' for joint frailty models ) for each type of event (terminal or recurrent). Confidence bands are allowed. 
+  Plots estimated baseline survival and hazard functions of a joint nested frailty model (output from an object of class 'jointNestedPenal' for joint nested frailty models) for each type of event (terminal or recurrent). Confidence bands are allowed. 
 }
 
 \usage{
 
-\method{plot}{jointPenal}(x, event = "Both", type.plot = "Hazard", conf.bands = FALSE,
+\method{plot}{jointNestedPenal}(x, event = "Both", type.plot = "Hazard", conf.bands = FALSE,
 	pos.legend="topright", cex.legend = 0.7, ylim, main, color = 2, 
 	Xlab = "Time", Ylab = "Hazard function", ...)
-
 
 }
 
 \arguments{
-  \item{x}{ A joint model, i.e. an object of class \code{frailtyPenal} for Joint frailty model (output from calling \code{frailtyPenal}
+  \item{x}{A joint nested model, i.e. an object of class \code{jointNestedPenal} for joint nested frailty model (output from calling \code{frailtyPenal}
     function).}
  \item{event}{ a character string specifying the type of curve. Possible
                    value are "Terminal", "Recurrent", or "Both". The default
@@ -30,7 +28,7 @@
   \item{type.plot}{ a character string specifying the type of curve. Possible
                    value are "Hazard", or "Survival". The default
                    is "Hazard". Only the first letters are required, e.g "Haz", "Su"}
-  \item{conf.bands}{ logical value. Determines whether confidence bands will be plotted. The default is to do so.}
+  \item{conf.bands}{logical value. Determines whether confidence bands will be plotted. The default is to do so.}
  \item{pos.legend}{The location of the legend can be specified by setting this argument to a single keyword from the list '"bottomright"', '"bottom"', '"bottomleft"', '"left"', '"topleft"', '"top"', '"topright"', '"right"' and
      '"center"'. The default is '"topright"'}
   \item{cex.legend}{character expansion factor *relative* to current
@@ -42,7 +40,6 @@
   \item{Ylab}{Label of y-axis. Default is '"Hazard function"'}
   \item{...}{other unused arguments}
 }
-
 \value{
      Print a plot of the baseline survival or hazard functions for each type of event or both with the confidence bands or not (conf.bands argument)
 }
@@ -50,32 +47,27 @@
 \seealso{
  \code{\link{frailtyPenal}}
 }
-
-
 \examples{
 
 \dontrun{
 
-data(readmission)
+#-- here is generated cluster (30 clusters)
+readmissionNested <- transform(readmission,group=id\%\%30+1)
 
-#-- Gap-time
-modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
-charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=14,kappa=c(100,100))
+# Baseline hazard function approximated with splines with calendar-timescale
 
-#-- It takes around 1 minute to converge --#
+model.spli.AG <- frailtyPenal(formula = Surv(t.start, t.stop, event) 
+~ subcluster(id) + cluster(group) + dukes + terminal(death), 
+formula.terminalEvent = ~dukes, data = readmissionNested, recurrentAG = TRUE,
+ n.knots = 8, kappa = c(9.55e+9, 1.41e+12),initialize = TRUE)
 
-plot(modJoint.gap,type.plot="Haz",event="recurrent",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="Haz",event="terminal",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="Haz",event="both",conf.bands=TRUE)
+# Plot the estimated baseline hazard function with the confidence intervals
+plot(model.spli.AG)	
 
-plot(modJoint.gap,type.plot="Su",event="recurrent",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="Su",event="terminal",conf.bands=TRUE)
-plot(modJoint.gap,type.plot="Su",event="both",conf.bands=TRUE)
-
-
+# Plot the estimated baseline hazard function with the confidence intervals
+plot(model.spli.RE, type = "Survival")
+	
 }
-
 }
 
 \keyword{methods}

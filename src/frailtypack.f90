@@ -90,9 +90,8 @@
     !    print*,'--'
     !end do
     !STOP
-
-
-
+    
+    
 !cpm
     istopp=0
     time = 0.d0
@@ -138,8 +137,7 @@
     date=0.d0
 
     allocate(mm3(ndatemax),mm2(ndatemax),mm1(ndatemax),mm(ndatemax),im3(ndatemax), &
-    im2(ndatemax),im1(ndatemax),im(ndatemax))
-    
+    im2(ndatemax),im1(ndatemax),im(ndatemax))    
 
     mm=0.d0
     mm1=0.d0
@@ -295,7 +293,6 @@
 ! nb de dc dans un groupe
 ! attention on a un nombre de groupes, mais le numero de groupe peut depasser la liste
             nig(groupe) = nig(groupe)+1
-
 
             iii = 0
             do ii = 1,ver
@@ -1037,9 +1034,9 @@
 !             Call distancecpm(b,nbintervR*nst,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
             Call distanceScpm(b,nbintervR*nst,mt,xTOut,lamTOut,xSuT,suTOut)!en plus strates A.Laf 05/2014
         case(2)
-            typeof2 = 1
+            typeof2 = 1            
 !             Call distanceweib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
-            Call distanceSweib(b,np,mt,xTOut,lamTOut,xSuT,suTOut)!en plus strates A.Laf 05/2014
+            Call distanceSweib(b,np,mt,xTOut,lamTOut,xSuT,suTOut)!en plus strates A.Laf 05/2014            
     end select
 
     resOut=res
@@ -1059,6 +1056,7 @@
         scaleweib(l) = etaT(l)
         shapeweib(l) = betaT(l)
     end do
+    
 
 !AD:add LCV
 !LCV(1) The approximate like cross-validation Criterion

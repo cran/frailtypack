@@ -8,13 +8,14 @@
 \title{Plot Method for a Nested frailty model.}
 
 \description{
-  Plots estimated baseline survival and hazard functions (output from an object of class `frailtyPenal' for nested frailty models). Confidence bands are allowed. 
+  Plots estimated baseline survival and hazard functions (output from an object of class 'NestedPenal' for nested frailty models). Confidence bands are allowed. 
 }
 
 \usage{
 
 \method{plot}{nestedPenal}(x, type.plot="Hazard", conf.bands=TRUE,
- pos.legend="topright", cex.legend=0.7, main, color=2, ...)
+	pos.legend="topright", cex.legend=0.7, main, 
+	color=2, Xlab = "Time", Ylab = "Hazard function", ...)
 
 }
 
@@ -30,7 +31,9 @@
   \item{cex.legend}{character expansion factor *relative* to current
           'par("cex")'. Default is 0.7}
   \item{main}{plot title}
-  \item{color}{curve color (integer)}
+  \item{color}{curve color (integer)} 
+  \item{Xlab}{Label of x-axis. Default is '"Time"'}  
+  \item{Ylab}{Label of y-axis. Default is '"Hazard function"'}
   \item{\dots}{ Other graphical parameters like those in \code{\link{plot.frailtyPenal}}}
 }
 

@@ -1,5 +1,5 @@
 "plot.multivPenal" <-
-function (x, event="Both", type.plot="Hazard", conf.bands=FALSE, pos.legend="topright", cex.legend=0.7, ylim, main, color1="red", color2="blue", colorEnd="green", ...) 
+function (x, event="Both", type.plot="Hazard", conf.bands=FALSE, pos.legend="topright", cex.legend=0.7, ylim, main, color1="red", color2="blue", colorEnd="green", Xlab = "Time", Ylab = "Hazard function",...) 
 {
   
    event.type <- charmatch(event, c("Both", "Recurrent1", "Recurrent2", "Terminal"), nomatch = 0)
@@ -29,15 +29,16 @@ function (x, event="Both", type.plot="Hazard", conf.bands=FALSE, pos.legend="top
 		}
 
 		if (conf.bands){
-			matplot(x$x1, x$lam1, col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=c(yymin,yymax), main=main, ...)
+			matplot(x$x1, x$lam1, col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=c(yymin,yymax), main=main, ...)
 			matlines(x$x2, x$lam2, col=color2, type="l", lty=c(1,2,2), ...)
 			matlines(x$xEnd, x$lamEnd, col=colorEnd, type="l", lty=c(1,2,2), ...)
 		}else{
-			plot(x$x1, x$lam1[,1], col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=c(yymin,yymax), main=main,...)
-			lines(x$x2, x$lam2[,1], col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ...)
-			lines(x$xEnd, x$lamEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ...)
+			plot(x$x1, x$lam1[,1], col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=c(yymin,yymax), main=main,...)
+			lines(x$x2, x$lam2[,1], col=color2, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ...)
+			lines(x$xEnd, x$lamEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ...)
 		} 
 	}else{
+		if (missing(Ylab)) Ylab <- "Baseline survival function"
 
 		if (missing(ylim)){
 			yymax<-1
@@ -48,21 +49,21 @@ function (x, event="Both", type.plot="Hazard", conf.bands=FALSE, pos.legend="top
 		}
 		if (x$typeof == 0){
 			if (conf.bands){
-				matplot(x$x1, x$surv1, col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=c(yymin,yymax), main=main,...)
+				matplot(x$x1, x$surv1, col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=c(yymin,yymax), main=main,...)
 				matlines(x$x2, x$surv2, col=color2, type="l", lty=c(1,2,2), ...)
 				matlines(x$xEnd, x$survEnd, col=colorEnd, type="l", lty=c(1,2,2), ...)
 			}else{        
-				plot(x$x1, x$surv1[,1], col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=c(yymin,yymax), main=main,...)
+				plot(x$x1, x$surv1[,1], col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=c(yymin,yymax), main=main,...)
 				lines(x$x2, x$surv2[,1], col=color2, type="l", lty=c(1,2,2), ...)
 				lines(x$xEnd, x$survEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), ...)
 			}
 		}else{
 			if (conf.bands){
-				matplot(x$xSu1, x$surv1, col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=c(yymin,yymax), main=main,...)
+				matplot(x$xSu1, x$surv1, col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=c(yymin,yymax), main=main,...)
 				matlines(x$xSu2, x$surv2, col=color2, type="l", lty=c(1,2,2), ...)
 				matlines(x$xSuEnd, x$survEnd, col=colorEnd, type="l", lty=c(1,2,2), ...)
 			}else{        
-				plot(x$xSu1, x$surv1[,1], col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=c(yymin,yymax), main=main,...)
+				plot(x$xSu1, x$surv1[,1], col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=c(yymin,yymax), main=main,...)
 				lines(x$xSu2, x$surv2[,1], col=color2, type="l", lty=c(1,2,2), ...)
 				lines(x$xSuEnd, x$survEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), ...)
 			}
@@ -80,29 +81,28 @@ function (x, event="Both", type.plot="Hazard", conf.bands=FALSE, pos.legend="top
 	if(plot.type==1){
 
 		if (conf.bands){
-			matplot(x$x1, x$lam1, col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
+			matplot(x$x1, x$lam1, col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 		}else{
-			plot(x$x1, x$lam1[,1], col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
+			plot(x$x1, x$lam1[,1], col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 		} 
-	}else{
+	}else{	
+		if (missing(Ylab)) Ylab <- "Baseline survival function"
 		if (x$typeof == 0){
 			if (conf.bands){
-				matplot(x$x1, x$surv1, col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				matplot(x$x1, x$surv1, col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}else{
-				plot(x$x1, x$surv1[,1], col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				plot(x$x1, x$surv1[,1], col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}
 		}else{
 			if (conf.bands){
-				matplot(x$xSu1, x$surv1, col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				matplot(x$xSu1, x$surv1, col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}else{        
-				plot(x$xSu1, x$surv1[,1], col=color1, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				plot(x$xSu1, x$surv1[,1], col=color1, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}
 		}
 	}        
         legend(pos.legend, c("recurrent event of type 1"), lty=c(1),col=c(color1), xjust=1, cex=cex.legend, ...)
    }
-
-
 
   if (event.type==3){
 
@@ -111,22 +111,24 @@ function (x, event="Both", type.plot="Hazard", conf.bands=FALSE, pos.legend="top
 	if(plot.type==1){
 
 		if (conf.bands){
-			matplot(x$x1, x$lam2, col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
+			matplot(x$x1, x$lam2, col=color2, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 		}else{
-			plot(x$x1, x$lam2[,1], col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
+			plot(x$x1, x$lam2[,1], col=color2, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 		} 
 	}else{
+		if (missing(Ylab)) Ylab <- "Baseline survival function"
+		
 		if (x$typeof == 0){
 			if (conf.bands){
-				matplot(x$x1, x$surv2, col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				matplot(x$x1, x$surv2, col=color2, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}else{        
-				plot(x$x1, x$surv2[,1], col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				plot(x$x1, x$surv2[,1], col=color2, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}
 		}else{
 			if (conf.bands){
-				matplot(x$xSu2, x$surv2, col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				matplot(x$xSu2, x$surv2, col=color2, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}else{        
-				plot(x$xSu2, x$surv2[,1], col=color2, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				plot(x$xSu2, x$surv2[,1], col=color2, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}
 		}
 	}        
@@ -135,27 +137,29 @@ function (x, event="Both", type.plot="Hazard", conf.bands=FALSE, pos.legend="top
 
   if (event.type==4){
 
-     if (missing(ylim)) ylim <- c(0,1)
+    if (missing(ylim)) ylim <- c(0,1)
 
 	if(plot.type==1){
 
 		if (conf.bands){
-			matplot(x$xEnd, x$lamEnd, col=colorEnd, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
+			matplot(x$xEnd, x$lamEnd, col=colorEnd, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 		}else{
-			plot(x$xEnd, x$lamEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), xlab="Time",ylab="Hazard function", ylim=ylim, main=main,...)
+			plot(x$xEnd, x$lamEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 		} 
 	}else{
+		if (missing(Ylab)) Ylab <- "Baseline survival function"
+		
 		if (x$typeof == 0){
 			if (conf.bands){
-				matplot(x$xEnd, x$survEnd, col=colorEnd, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				matplot(x$xEnd, x$survEnd, col=colorEnd, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}else{
-				plot(x$xEnd, x$survEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				plot(x$xEnd, x$survEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}
 		}else{
 			if (conf.bands){
-				matplot(x$xSuEnd, x$survEnd, col=colorEnd, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				matplot(x$xSuEnd, x$survEnd, col=colorEnd, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}else{        
-				plot(x$xSuEnd, x$survEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), xlab="Time",ylab="Baseline survival function", ylim=ylim, main=main,...)
+				plot(x$xSuEnd, x$survEnd[,1], col=colorEnd, type="l", lty=c(1,2,2), xlab=Xlab,ylab=Ylab, ylim=ylim, main=main,...)
 			}
 		}
 	}        

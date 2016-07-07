@@ -102,7 +102,6 @@
 
 
     subroutine marq98j(k0,b,m,ni,v,rl,ier,istop,effet,ca,cb,dd,fctnames)
-
 !
 !  fu = matrice des derivees secondes et premieres
 !
@@ -128,9 +127,10 @@
     double precision,dimension(m),intent(inout)::b
     double precision,intent(out)::ca,cb,dd
     double precision,dimension(2)::k0
-        double precision,dimension(2)::zero
+    double precision,dimension(2)::zero
 !   variables locales
-    integer::nql,ii,nfmax,idpos,ncount,id,jd,m1,j,i,ij,k
+    integer::nql,ii,nfmax,idpos,ncount,id,jd,m1,j,i,ij,k 
+    character(len=100)::bar ! Pour la progressBar
     double precision,dimension(m*(m+3)/2)::fu,v1,vnonpen
     double precision,dimension(m)::delta,b1,bh
     double precision::da,dm,ga,tr
@@ -140,7 +140,7 @@
     double precision::fctnames
 !---------- ajout
     integer::kkk
-
+    
     zero=0.d0
     id=0
     jd=0
@@ -158,23 +158,65 @@
     nql=1
     m1=m*(m+1)/2
     ep=1.d-20
-    Main:Do
-        !print*,"dans aaOptim, appel de derivaJ avec funcpa... "
-	
-        call derivaJ(b,m,v,rl,k0,fctnames)
+       
+    Main:Do   
+    
+        call derivaJ(b,m,v,rl,k0,fctnames) 
+        
     rl1=rl
-    !print *,"rl1 = ", rl1
+    
+        !print *,"rl1 = ", rl1
+        if(rl.eq.-1.D9) then
+            istop=4
+            goto 110
+        endif
+        !write(*,*)'iteration***',ni,'vrais',rl
+        
+        !Myriam ! Construction de la progressBar
+        if (((effet == 2).and.(model == 1)).or.(model == 7)) then 
+            if(maxiter < 100) then
+                bar(1:3) = "0%|"    
+                do k=1, maxiter
+                    bar(3+k:3+k)="-"
+                enddo
+                bar(maxiter+5:maxiter+5) = "|"
+                do k=maxiter+6, 100
+                    bar(k:k+1)=" "
+                enddo
+                
+                do k=1, ni
+                    bar(3+k:3+k)="*"
+                enddo
+                call intpr(bar, -1, ni, 0)
+                call intpr('Iteration:', -1, ni, 1)
+            else
+                bar(1:3) = "0%|"    
+                do k=1, 70
+                    bar(3+k:3+k)="-"
+                enddo
+                bar(73:100) = "|                          "
+                
+                if (modulo(ni,3) == 0) then 
+                    do k=1, ni/3
+                        bar(3+k:3+k)="*"
+                    enddo
+                    if (ni < 300) then 
+                        call intpr(bar, -1, ni, 0)
+                        call intpr('Iteration:', -1, ni, 1) 
+                    else 
+                        call intpr('Iteration:', -1, ni, 1)
+                    endif
+                endif
+            endif            
+        endif
+    
+    ! Fin de la progressBar
+    
+    !write(*,*) 'iteration ***', ni, 'vecteur b ', b
+    !write(*,*) 'm', m, 'iun', iun, 'z', z, 'k0', k0
 
-    if(rl.eq.-1.D9) then
-        istop=4
-        goto 110
-    end if
-
-   !  write(*,*)'iteration***',ni,'vrais',rl
-
-        dd = 0.d0
-
-        fu=0.D0
+    dd = 0.d0
+    fu = 0.d0
 
     do i=1,m
         do j=i,m
@@ -203,8 +245,11 @@
         dd=GHG/dble(m)
     end if
 
-!  write(*,*)'epsa',ca,'epsb',cb,'epsd',dd
- !   write(*,*)'b',b
+!write(*,*)'epsa',ca,'epsb',cb,'epsd',dd
+!   write(*,*)'aaOptim: b(knots)',b(1:12)
+! write(*,*) 'aaOptim: m',m, nva, nva1, nva2
+  !! write(*,*)'aaOptim: b(random):', b((m-nva-3):(m-nva))
+   !!write(*,*)'aaOptim: b(covar)',b((m-nva+1):m)
 
 !     print*,ca,cb,dd
 !     print*,b
@@ -230,8 +275,8 @@
 
  400    do i=1,nfmax+m
            fu(i)=v(i)
-		end do
-
+        end do
+        
         do i=1,m
             ii=i*(i+1)/2
             if (v(ii).ne.0) then
@@ -240,7 +285,7 @@
                 fu(ii)=da*ga*tr
             endif
         end do
-
+        
         call dcholej(fu,m,nql,idpos)
 
         if (idpos.ne.0) then
@@ -255,13 +300,13 @@
             goto 400
 
         else
-		
+        
             do i=1,m
-			
+            
                 delta(i)=fu(nfmax+i)
                 b1(i)=b(i)+delta(i)
             end do
-
+            
             rl=fctnames(b1,m,id,z,jd,z,k0)
 
             if(rl.eq.-1.D9) then
@@ -279,7 +324,7 @@
         endif
 !      write(6,*) 'loglikelihood not improved '
         call dmaxt(maxt,delta,m)
-
+                
         if(maxt.eq.0.D0) then
             vw=th
         else
@@ -288,16 +333,13 @@
 
         endif
         step=dlog(1.5d0)
-!      write(*,*) 'searpas'
-        !print*,"dans aaOptim, appel de searpasJ avec funcpa... "
         call searpasj(vw,step,b,bh,m,delta,fi,k0,fctnames)
-
+                
         rl=-fi
         if(rl.eq.-1.D9) then
             istop=4
             goto 110
         end if
-
         do i=1,m
             delta(i)=vw*delta(i)
         end do
@@ -316,7 +358,7 @@
         do i=1,m
             b(i)=b(i)+delta(i)
         end do
-
+        
         ni=ni+1
         if (ni.ge.maxiter) then
             istop=2
@@ -324,7 +366,7 @@
             goto 110
         end if
     End do Main
-
+    
     v=0.D0
 
     v(1:m*(m+1)/2)=fu(1:m*(m+1)/2)
@@ -347,9 +389,10 @@
 !---- Choix du model
 
     select case(model)
-        case(1)
+        case(1,7)
             m1=m-nva-effet-indic_alpha !joint
-
+        case(6)  !Uni 
+            m1 = m - nva - effet*2 - indic_alpha*2
         !cas supplementaire rajouté pour joint general
         case(5)
             m1=m-nva-effet-indic_alpha !joint general (du moment que indic_eta=indic_alpha=1)
@@ -455,7 +498,7 @@
     end if
 
  110   continue
-
+ 
        return
        end subroutine marq98j
 
@@ -479,11 +522,9 @@
     logical::endDeriva
 
     endDeriva=.false.
-
-
-
+    
     select case(model)
-    case(1)
+    case(1,7)
         th=1.d-3 !joint
     case(5)
         th=1.d-5 !joint general !cas supplementaire rajouté
@@ -507,10 +548,9 @@
         !print *,"z = ", z            ! =0.000000000
         !print *,"iun", iun           ! =1
         !print *,"rl = ",rl           ! =0.000000000
-
-
+    
+    
     rl=fctnames(b,m,iun,z,iun,z,k0)
-
     if(rl.ne.-1.d9) then
         do i=1,m
             if((fcith(i).ne.-1.d9).and.(endDeriva.eqv..false.)) then
@@ -520,17 +560,18 @@
                 endDeriva=.true.
             end if
         end do
-
+        
         if (endDeriva.eqv..false.) then
             k=0
             m1= (m*(m+1)/2)
-            !print*,"m1 =",m1
             ll=m1
 
             do i=1,m
                 !print*, "deuxieme boucle DERIVAj, tour",i," :"
                 ll=ll+1
+                !write(*,*) 'b', b
                 vaux=fctnames(b,m,i,thn,i0,z,k0)
+                !write(*,*) 'vaux', vaux
                 if(vaux.eq.-1.d9) then
                     rl=-1.d9
                     endDeriva=.true.
@@ -538,24 +579,24 @@
                 if (endDeriva.eqv..false.) then
                     vl=(fcith(i)-vaux)/(2.d0*th)
                     v(ll)=vl
-                  !  print*,"vl(",ll,") =",v(ll)
                     do j=1,i
                         k=k+1
                         v(k)=-(fctnames(b,m,i,th,j,th,k0)-fcith(j)-fcith(i)+rl)/th2
-				!		write(*,*)k,fctnames(b,m,i,th,j,th,k0),b,m,i,th,j,k0
+                !        write(*,*)k,fctnames(b,m,i,th,j,th,k0),b,m,i,th,j,k0
                     end do
                 end if
             end do
         end if
     end if
-	!stop
+        
+    !stop
+    
     return
 
     end subroutine derivaJ
 !------------------------------------------------------------
 !                        SEARPAS
 !------------------------------------------------------------
-
 
       subroutine searpasj(vw,step,b,bh,m,delta,fim,k0,fctnames)
 !
@@ -1266,7 +1307,7 @@
 !---- Choix du model
 
     select case(model)
-        case(1)
+        case(1,7)
             m1=m-nva-effet-indic_alpha !joint
 
         !cas supplementaire rajouté pour joint general
@@ -1395,7 +1436,7 @@
     external::fctnames
 
     select case(model)
-    case(1)
+    case(1,7)
         th=1.d-3 !joint
     case(5)
         th=1.d-5 !joint general

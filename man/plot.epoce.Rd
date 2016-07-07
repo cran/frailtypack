@@ -9,7 +9,8 @@
 }
 
 \usage{
-\method{plot}{epoce}(x, type, pos.legend="topright", cex.legend=0.7, ...)
+\method{plot}{epoce}(x, type, pos.legend="topright", cex.legend=0.7, 
+	Xlab="Time",Ylab="Epoce", ...)
 }
 
 \arguments{
@@ -18,6 +19,8 @@
   \item{pos.legend}{The location of the legend can be specified by setting this argument to a single keyword from the list
                     '"bottomright"', '"bottom"', '"bottomleft"', '"left"', '"topleft"', '"top"', '"topright"', '"right"' and '"center"'. The default is '"topright"'.}
   \item{cex.legend}{size of the legend. Default is 0.7.}
+  \item{Xlab}{Label of x-axis. Default is '"Time"'}
+  \item{Ylab}{Label of y-axis. Default is '"Epoce"'}
   \item{\dots}{Other unused arguments.}
 }
 

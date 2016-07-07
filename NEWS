@@ -1,3 +1,21 @@
+Changes in Version 2.9.3 July 2016
+
+ o New model added : Joint Nested frailty model for recurrent (with two clustering levels) and terminal events, accounts for two frailty terms.
+ 
+ o For all the plot methods of frailtypack : addition of 'Xlab' and 'Ylab' (labels for the X-axis and Y-axis)
+ 
+ o Warning added if left truncation with joint frailty model
+ 
+ o Warning added for the use of interval-censored data in joint frailty model, the option is not available for the model
+ 
+ o New option "initialize = TRUE" for fitting a joint frailty model to provide new initial values, before fitting the joint nested model. 
+ 
+ o Bug fixed in models prediction with formulas defined separately
+
+ o Bug fixed for trivPenal and longiPenal for definition of individuals identificators
+ 
+ o Bug fixed for global Wald test for qualitative covariates in the nested and the joint frailty model
+
 Changes in version 2.8.3 January 2016
 
  o Bug fixed for predictions for frailty models
@@ -194,4 +212,3 @@ Changes in Version 2.2-10
 
   o NEW VERSION OF FRAILTYPACK including Additive, Nested and Joint Frailty models
   o Paper submitted to Journal of Stat Software
-

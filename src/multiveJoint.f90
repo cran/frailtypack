@@ -244,7 +244,7 @@
 
         allocate(filtretps0Mul(nva10))
         filtretps0Mul = 0
-		
+        
         Call frailpenal(nsujet0,ng0,1,1,1, &
         nzsha,kappa1,tt00,tt10,ic0,groupe0,nva10,str00,vax0, &
         ag0,noVar1,maxit00,irep,np1,b01,H_hess0,HIH0,resOut,LCVs, &
@@ -255,12 +255,12 @@
 
 
         deallocate(filtretps0Mul)
-		
+        
         deallocate(H_hess0,HIH0,zis,str00)
-		
+        
 !         deallocate(x1Outs,x2Outs,lamOuts,lam2Outs)
         deallocate(xTOuts,lamTOuts)!en plus
-		
+        
         deallocate(linearpreds,martingaleCoxs,times)
 
         critCV(3) = istop
@@ -293,13 +293,13 @@
         EPS(1) = 1.d-3
         EPS(2) = 1.d-3
         EPS(3) = 1.d-3
-	  allocate(str00(nsujetmeta0))
+      allocate(str00(nsujetmeta0))
         str00=1
-	   allocate(H_hess0(np3,np3),HIH0(np3,np3),zis(nzsha+6))
-	!         allocate(x1Outs(mt3),x2Outs(mt3),lamOuts(mt3,3),lam2Outs(mt3,3))
+       allocate(H_hess0(np3,np3),HIH0(np3,np3),zis(nzsha+6))
+    !         allocate(x1Outs(mt3),x2Outs(mt3),lamOuts(mt3,3),lam2Outs(mt3,3))
         allocate(xTOuts(mt1,1),lamTOuts(mt1,3,1))!en plus
-	   allocate(linearpreds(nsujetmeta0),martingaleCoxs(nsujetmeta0),times(nbintervM0+1))
-	    allocate(filtretps0Mul(nva30))
+       allocate(linearpreds(nsujetmeta0),martingaleCoxs(nsujetmeta0),times(nbintervM0+1))
+        allocate(filtretps0Mul(nva30))
         filtretps0Mul = 0
 
         Call frailpenal(nsujetmeta0,ng0,1,1,1, &

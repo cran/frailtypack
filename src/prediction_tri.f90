@@ -16,36 +16,36 @@
 
 ! ============================================== pred iction Joint
 
-	
-		subroutine predict_tri(np,b,nz,nva10,nva20,nva30,nb_re0,nzyr,nzyd,link0,nst,typeof0,zi0,HIHOut, &
-		ntimeAll,npred0,predTime,window,predtimerec,nrec0,nrecy0,yy0,vaxpred0,vaxdcpred0,vaxypred0,groupey,nsujety, &
-			nsujet,predAll1,predAlllow1,predAllhigh1, &
-		icproba,nsample,movingwindow,timeAll,s_cag_id0,s_cag0)
-	!model - type of a model 0- recur/survie, 1- longi/survie, 2-longi/recur/survie
-			use donnees_indiv,only:nmescur,mu,ycurrent,z2,b1,it_cur,X2cur,Z1cur,nmescurr
-			use comon,only:etaydc1,etaydc2,sigmae,netadc,s_cag_id,s_cag,ut,utt,nva,link,npp,&
-			nea,vey,nb1,netar,indic_Alpha,nva1,nva2, nva3,effet,zi,nz1,typeof,nb_re,alpha,&
-			etayr1, etayr2,typeJoint
-			use lois_normales
-			use prediction
-		implicit none
-	
-	
-		integer::i,ii,iii,j,k,it,kk,jj
-		integer,intent(in)::np,nz,nva10,nva20,nva30,nb_re0,nzyd,nzyr,nst,typeof0,ntimeAll,&
-									icproba,movingwindow,nsujety,s_cag_id0,nsujet,link0
-			double precision,dimension(nsujety),intent(in)::yy0
-			double precision,dimension(npred0,nsujety)::yy_matrice
-			integer,dimension(nsujety),intent(in)::groupey
-		double precision,dimension(np),intent(in)::b
-		double precision,dimension(nz+6),intent(in)::zi0
-		double precision,dimension(np,np),intent(in)::HIHOut
-			double precision,dimension(nsujet,nva10),intent(in)::vaxpred0
-		double precision,dimension(npred0,nva20),intent(in)::vaxdcpred0
-			double precision,dimension(nsujety,nva30),intent(in)::vaxypred0
-		double precision,dimension(1,npred0)::XbetapredDC,XbetapredDCalea
-			double precision,dimension(1,nsujety) :: XbetapredY,XbetapredYalea
-			double precision,dimension(1,nsujet) :: XbetapredR,XbetapredRalea
+    
+        subroutine predict_tri(np,b,nz,nva10,nva20,nva30,nb_re0,nzyr,nzyd,link0,nst,typeof0,zi0,HIHOut, &
+        ntimeAll,npred0,predTime,window,predtimerec,nrec0,nrecy0,yy0,vaxpred0,vaxdcpred0,vaxypred0,groupey,nsujety, &
+            nsujet,predAll1,predAlllow1,predAllhigh1, &
+        icproba,nsample,movingwindow,timeAll,s_cag_id0,s_cag0)
+    !model - type of a model 0- recur/survie, 1- longi/survie, 2-longi/recur/survie
+            use donnees_indiv,only:nmescur,mu,ycurrent,z2,b1,it_cur,X2cur,Z1cur,nmescurr
+            use comon,only:etaydc1,etaydc2,sigmae,netadc,s_cag_id,s_cag,ut,utt,nva,link,npp,&
+            nea,vey,nb1,netar,indic_Alpha,nva1,nva2, nva3,effet,zi,nz1,typeof,nb_re,alpha,&
+            etayr1, etayr2,typeJoint
+            use lois_normales
+            use prediction
+        implicit none
+    
+    
+        integer::i,ii,iii,j,k,it,kk,jj
+        integer,intent(in)::np,nz,nva10,nva20,nva30,nb_re0,nzyd,nzyr,nst,typeof0,ntimeAll,&
+                                    icproba,movingwindow,nsujety,s_cag_id0,nsujet,link0
+            double precision,dimension(nsujety),intent(in)::yy0
+            double precision,dimension(npred0,nsujety)::yy_matrice
+            integer,dimension(nsujety),intent(in)::groupey
+        double precision,dimension(np),intent(in)::b
+        double precision,dimension(nz+6),intent(in)::zi0
+        double precision,dimension(np,np),intent(in)::HIHOut
+            double precision,dimension(nsujet,nva10),intent(in)::vaxpred0
+        double precision,dimension(npred0,nva20),intent(in)::vaxdcpred0
+            double precision,dimension(nsujety,nva30),intent(in)::vaxypred0
+        double precision,dimension(1,npred0)::XbetapredDC,XbetapredDCalea
+            double precision,dimension(1,nsujety) :: XbetapredY,XbetapredYalea
+            double precision,dimension(1,nsujet) :: XbetapredR,XbetapredRalea
         integer,dimension(npred0)::nreci,nreci_all,nrecyi
         integer::npred0,nrec0,nsample,nrecy0
         double precision::predTime,window,predTime2,scR,shR,scDC,shDC,&
@@ -361,7 +361,7 @@
             it = it +nreci_all(i)
   ! write(*,*)i,ss11/ss12
             end do
-	!		stop
+    !        stop
     ! if(iii.eq.2)stop
             predAll1(:,iii) = predProba1
     
