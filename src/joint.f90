@@ -900,7 +900,7 @@
 
             if (b(np-nva-indic_alpha-indic_xi).eq.0.d0.and.(timedep.eq.0)) then ! theta
                 if (typeof == 0) then
-                    b(np-nva-indic_alpha-indic_xi) = 1.d0        !xi
+                    b(np-nva-indic_alpha-indic_xi) = 1.d0        !xi
                     b(np-nva-indic_alpha-indic_xi-1) = 1.d0 !alpha
                 else
                     b(np-nva-indic_alpha-indic_xi) = 5.d-1

@@ -1,4 +1,4 @@
-828a406084ad499f97f1de6fe3c9d0c3 *DESCRIPTION
+5607b7dd0db3f73f39f2cfc3dc19f404 *DESCRIPTION
 afa42bddd55239894da20d8ffc4636e0 *NAMESPACE
 159c52ab9bbf7e0d0b1afc90e8f5c459 *NEWS
 7d0e5a93868a77976c232932b0a5cf3c *R/Cmeasures.R
@@ -67,7 +67,6 @@ c39ea378ab6d22cd840a88d16b3f9917 *R/timedep.names.R
 c290ceae658593ffeaf442b5af20aa88 *R/waldtest.R
 c4501c422e7df81ab0256289663bd032 *README
 fca5ecd90d6f651c93aeb8149b9ea984 *THANKS
-423e98573dbaddc94b804039e89f231a *build/vignette.rds
 f9b9c4d9d73247b5e38d320cd587b621 *data/bcos.rda
 52d2b2b6fa8d5b2ef44badfdf80b509c *data/colorectal.rda
 01559782d363c615311c70ccda768add *data/colorectalLongi.rda
@@ -205,7 +204,7 @@ fb5ccdebb39d19e51b4094890cdcf0e1 *src/funcpascpm_log.f90
 fcd1c6cfb0f8b0f6ddbb135d8b350eb3 *src/funcpasweib.f90
 6d1b7fe870ef8e09438504f4027b6fb9 *src/funcpasweib_intcens.f90
 50a541f69cbdaf8467fc0a0f379cfd46 *src/funcpasweib_log.f90
-6a3d70052214a7c11587b18aa4e0f104 *src/joint.f90
+4c6464f3a8f14bd3c802ec39f442a736 *src/joint.f90
 a9ab81f7a0a45670ba7842a76f0e8e94 *src/joint_longi.f90
 58e65b5ff7dc1829edd40579d27c1cf3 *src/multiveJoint.f90
 51b620c6fe6bb8672e9a7b5dfd598dff *src/nested.f90
