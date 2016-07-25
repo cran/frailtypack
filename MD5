@@ -1,6 +1,6 @@
-5607b7dd0db3f73f39f2cfc3dc19f404 *DESCRIPTION
+2568d9fb74cbc56368afbac1f7d9284d *DESCRIPTION
 afa42bddd55239894da20d8ffc4636e0 *NAMESPACE
-159c52ab9bbf7e0d0b1afc90e8f5c459 *NEWS
+01b6edf8bda519d121101e9bd18f1b45 *NEWS
 7d0e5a93868a77976c232932b0a5cf3c *R/Cmeasures.R
 ea152fa392691f9b73e52466474ab42d *R/Diffepoce.R
 568ccb7a37705e70ed4b5259016fd74c *R/SurvIC.R
@@ -67,6 +67,7 @@ c39ea378ab6d22cd840a88d16b3f9917 *R/timedep.names.R
 c290ceae658593ffeaf442b5af20aa88 *R/waldtest.R
 c4501c422e7df81ab0256289663bd032 *README
 fca5ecd90d6f651c93aeb8149b9ea984 *THANKS
+423e98573dbaddc94b804039e89f231a *build/vignette.rds
 f9b9c4d9d73247b5e38d320cd587b621 *data/bcos.rda
 52d2b2b6fa8d5b2ef44badfdf80b509c *data/colorectal.rda
 01559782d363c615311c70ccda768add *data/colorectalLongi.rda
@@ -81,8 +82,8 @@ fcb199ccc422257918c4b706ac63362a *demo/frailtypack_jointPenal.R
 4af5fd879b04c8a98172646fefa04111 *demo/frailtypack_multivPenal.R
 ff5bcb421316a8fb4e02f18802c304b1 *demo/frailtypack_nestedPenal.R
 65d5c8f155fd4bce4e6650fd89f9abcf *inst/CITATION
-13b1f71e55c432cf3c5b390e71234619 *inst/doc/Package_summary.Rmd
-940aaa6ad659eafb3650f367fc9a048d *inst/doc/Package_summary.html
+641f6217963947547639e79c094f616a *inst/doc/Package_summary.Rmd
+4868eebe3a74fe077291ba458272d296 *inst/doc/Package_summary.html
 95837cac8328128337bae3b1db128460 *man/Cmeasures.Rd
 3a4757eb26b71766e726c189d5d6ccb2 *man/Diffepoce.Rd
 6e83ee9f009992c9f682edf432779569 *man/SurvIC.Rd
@@ -215,7 +216,6 @@ e0ef7b035628c081983f718111cd448c *src/prediction_sha_logn.f90
 f9723634c0ad81ebb097841e23037504 *src/prediction_tri.f90
 82e04fe7b978347cf23b27a7a2219e74 *src/risque.f90
 941d61ba63616f377c0b2057608dc01b *src/survival.f90
-78552e4a57487a480e2f72d3a1ca79df *vignettes/Package_summary.Rmd
-905c97922a0b23b2df23c5f6ae3f89ba *vignettes/Package_summary.html
+641f6217963947547639e79c094f616a *vignettes/Package_summary.Rmd
 0deda243021ac0cccf8a4ebe9079ff53 *vignettes/blue_x.png
 2b146366e81a7e0f6f9bd3be37ba6b30 *vignettes/orange_x.png
