@@ -1,3 +1,17 @@
+Changes in Version 2.10.3 October 2016
+ o "na.pass" global function defined in the NAMESPACE file
+ o Update of the vignettes 'Package_summary.Rmd' in the 'inst/doc' directory
+ 
+Changes in Version 2.10.2 October 2016
+ o Vignettes modified (legend in the title)
+ o 'event' legend deleted in the plot of a shared model
+ o Compiling warnings fixed
+ o Plot bug fixed in the plot of a shared model
+ 
+Changes in Version 2.10.1 July 2016
+ o New prediction option for a new recurrent event (Joint Model).
+ o Bug fixed for the gfortran compilation
+
 Changes in Version 2.9.4 July 2016
 
  o Bug fixed for the vignettes builder

@@ -37,7 +37,11 @@ Two kinds of predictive probabilities can be calculated:
 
 \bold{For Joint Frailty model}
 
-You can predict risk of death knowing patients' characteristics i.e. predicting the probability of death in a specific time window given the history of patient i before the time of prediction t. The history \eqn{H_i^{J,l}}, (\eqn{l=1,2}) is the information on covariates before time t, but also the number of recurrences and the time of occurences. Three types of marginal probabilities are computed:
+Prediction for two types of event can be calculated : for a terminal event or for a new recurrent event, knowing patient's characteristics.
+
+\bold{ - Prediction of death knowing patients' characteristics : }
+
+It is to predict the probability of death in a specific time window given the history of patient i before the time of prediction t. The history \eqn{H_i^{J,l}}, (\eqn{l=1,2}) is the information on covariates before time t, but also the number of recurrences and the time of occurences. Three types of marginal probabilities are computed:
 
 - a prediction of death between t and t+w given that the patient had exactly J recurrences (\eqn{H_i^{J,1}}) before t
 
@@ -51,12 +55,18 @@ You can predict risk of death knowing patients' characteristics i.e. predicting 
 
 \deqn{P^3(t,t+w)=P(D_i \le t+w|D_i>t)=\frac{\int_0^\infty[S_i^D(t)-S_i^D(t+w)]g(u_i)du_i}{\int_0^\infty S_i^D(t)g(u_i)du_i}}
 
+\bold{ - Prediction of risk of a new recurrent event knowing patients' characteristics : }
+
+It is to predict the probability of a new recurrent event in a specific time window given the history of patient i before the time of prediction t. The history \eqn{H_i^J} is the information on covariates before time t, but also the number of recurrences and the time of occurences. 
+The marginal probability computed is a prediction of a new recurrent event between t and t+w given that the patient had exactly J recurrences (\eqn{H_i^J}) before t:
+
+\deqn{P^R(t,t+w)=P(X_{i(j+1)} \le t+w|X_{i(j+1)}>t, D_i>t, H_i^J)=\frac{\int_0^\infty[S_{i(J+1)}^R(t)-S_{i(J+1)}^R(t+w)]S_i^D(t)(u_i)^JS_{i(J+1)}^R(X_{ij})g(u_i)du_i}{\int_0^\infty S_{i(J+1)}^R(t)S_i^D(t)(u_i)^JS_{i(J+1)}^R(X_{ij})g(u_i)du_i}}
+
 It is possible to compute all these predictions in two ways on a scale of times :
 - either you want a cumulative probability of developping the event between t and t+w (with t fixed, but with a varying window of prediction w);
 - either you want at a specific time the probability to develop the event in the next w (ie, for a varying prediction time t, but for a fixed window of prediction). See Details.
 
 With Gaussian frailties (\eqn{\eta}), the same expressions are used but with \eqn{{u_i}^{J}} replaced by \eqn{\exp(J\eta_i)} and  \eqn{g(\eta)} corresponds to the gaussian distribution.
-
 
 \bold{For Joint models for longitudinal data and a terminal event}
 
@@ -86,14 +96,15 @@ These probabilities can be calculated in several time points with fixed time of 
 
 \usage{
 
-prediction(fit, data, data.Longi, t, window, group, MC.sample=0)
+prediction(fit, data, data.Longi, t, window, event="Both", group, MC.sample=0)
 
 }
 
 \arguments{
   \item{fit}{A frailtyPenal or jointPenal object.}
   \item{data}{Dataframe for the prediction. See Details.}
-\item{data.Longi}{Dataframe for the prediction used for joint models with longitudinal data. See Details.}
+  \item{data.Longi}{Dataframe for the prediction used for joint models with longitudinal data. See Details.}
+  \item{event}{Only for joint model, the type of event you want to predict : "Terminal" for a terminal event, "Recurrent" for a recurrent event or "Both". Default value is "Both"}
   \item{t}{Time or vector of times for prediction.}
   \item{window}{Window or vector of windows for prediction.}
   \item{group}{Only for shared frailty model, the group on which you want to make the conditional prediction (its frailty value will be used). If you specify a group then a conditional prediction will be computed, otherwise it will be a marginal prediction.}
@@ -123,6 +134,7 @@ The following components are included in a 'predJoint' object obtained by using 
 \item{pred1}{Estimation of probability of type 1: exactly j recurrences}
 \item{pred2}{Estimation of probability of type 2: at least j recurrences}
 \item{pred3}{Estimation of probability of type 3}
+\item{pred1_rec}{Estimation of prediction of relapse}
 \item{icproba}{Logical value. Were confidence intervals estimated ?}
 \item{predlow1}{Lower limit of Monte-Carlo confidence interval for probability of type 1}
 \item{predhigh1}{Upper limit of Monte-Carlo confidence interval for probability of type 1}
@@ -130,6 +142,8 @@ The following components are included in a 'predJoint' object obtained by using 
 \item{predhigh2}{Upper limit of Monte-Carlo confidence interval for probability of type 2}
 \item{predlow3}{Lower limit of Monte-Carlo confidence interval for probability of type 3}
 \item{predhigh3}{Upper limit of Monte-Carlo confidence interval for probability of type 3}
+\item{predhigh1_rec}{Upper limit of Monte-Carlo confidence interval for prediction of relapse}
+\item{predlow1_rec}{Lower limit of Monte-Carlo confidence interval for prediction of relapse}
 
 The following components are included in a 'predLongi' object obtained by using prediction function for joint models with longitudinal data.
 
@@ -299,22 +313,35 @@ datapredj[4,] <- c(400,1,1,1,2)
 datapredj[5,] <- c(380,1,2,1,2)
 
 #-- prediction of death between 100 and 100+500 given relapses
-pred.joint0 <- prediction(joi,datapredj,t=100,window=500)
+pred.joint0 <- prediction(joi,datapredj,t=100,window=500,event = "Terminal")
 print(pred.joint0)
 
 #-- prediction of death between 100 and 100+w given relapses 
 (with confidence intervals)
 pred.joint <- prediction(joi,datapredj,t=100,window=seq(50,1500,50),
-MC.sample=100)
+event = "Terminal",MC.sample=100)
 plot(pred.joint,conf.bands=TRUE)
 # each y-value of the plot corresponds to the prediction between [100,x]
 
 #-- prediction of death between t and t+500 given relapses
-pred.joint2 <- prediction(joi,datapredj,t=seq(100,1000,50),window=500)
+pred.joint2 <- prediction(joi,datapredj,t=seq(100,1000,50),window=500,event = "Terminal")
 plot(pred.joint2)
 # each y-value of the plot corresponds to the prediction between [x,x+500], 
 or in the next 500
 
+#-- prediction of relapse between 100 and 100+w given relapses 
+(with confidence intervals)
+pred.joint <- prediction(joi,datapredj,t=100,window=seq(50,1500,50),
+event = "Recurrent",MC.sample=100)
+plot(pred.joint,conf.bands=TRUE)
+# each y-value of the plot corresponds to the prediction between [100,x]
+
+#-- prediction of relapse and death between 100 and 100+w given relapses 
+(with confidence intervals)
+pred.joint <- prediction(joi,datapredj,t=100,window=seq(50,1500,50),
+event = "Both",MC.sample=100)
+plot(pred.joint,conf.bands=TRUE)
+# each y-value of the plot corresponds to the prediction between [100,x]
 
 #############################################################################
 ### prediction on a JOINT model for longitudinal data and a terminal event ####
@@ -368,13 +395,11 @@ levels(datapredj$who.PS) <- 1:3
 datapredj[1,] <- c(1,2,1,1,1)
 datapredj[2,] <- c(2,2,1,1,1)
 
-
 model.spli.CL <- longiPenal(Surv(time1, state) ~ age + treatment + who.PS
 + prev.resection, tumor.size ~  year * treatment + age + who.PS , 
 colorectalSurv, data.Longi = colorectalLongi, random = c("1", "year"),
 id = "id", link = "Current-level", left.censoring = -3.33, n.knots = 6, 
 kappa = 1)
-
 
 #-- prediction of death between 1 year and 1+2 given history of the biomarker
 pred.jointLongi0 <- prediction(model.spli.CL, datapredj, datapredj_longi,

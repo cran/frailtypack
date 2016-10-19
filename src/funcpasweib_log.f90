@@ -3,8 +3,9 @@
 !========================          FUNCPA_WEIB          ====================
     double precision function funcpasweib_log(b,np,id,thi,jd,thj,k0)
     use tailles
+    !use comon,only:etaR,etaD,betaR,betaD
     use comon,only:t0,t1,c,nsujet,nva, &
-    nst,stra,ve,effet,ng,g,nig,AG,etaR,etaD,betaR,betaD,kkapa,sig2, &
+    nst,stra,ve,effet,ng,g,nig,AG,kkapa,sig2, &
     indictronq,auxig,res3,res5, &
     etaT,betaT
     use residusM

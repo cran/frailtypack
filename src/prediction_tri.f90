@@ -22,32 +22,31 @@
             nsujet,predAll1,predAlllow1,predAllhigh1, &
         icproba,nsample,movingwindow,timeAll,s_cag_id0,s_cag0)
     !model - type of a model 0- recur/survie, 1- longi/survie, 2-longi/recur/survie
-            use donnees_indiv,only:nmescur,mu,ycurrent,z2,b1,it_cur,X2cur,Z1cur,nmescurr
+            use donnees_indiv,only:nmescur,mu,ycurrent,z2,b1,X2cur,Z1cur,nmescurr
             use comon,only:etaydc1,etaydc2,sigmae,netadc,s_cag_id,s_cag,ut,utt,nva,link,npp,&
             nea,vey,nb1,netar,indic_Alpha,nva1,nva2, nva3,effet,zi,nz1,typeof,nb_re,alpha,&
-            etayr1, etayr2,typeJoint
+            etayr1, etayr2,typeJoint!it_cur
             use lois_normales
             use prediction
         implicit none
     
     
-        integer::i,ii,iii,j,k,it,kk,jj
+        integer::i,ii,iii,j,k,it,kk,jj,npred0,nrec0,nsample,nrecy0
         integer,intent(in)::np,nz,nva10,nva20,nva30,nb_re0,nzyd,nzyr,nst,typeof0,ntimeAll,&
-                                    icproba,movingwindow,nsujety,s_cag_id0,nsujet,link0
-            double precision,dimension(nsujety),intent(in)::yy0
-            double precision,dimension(npred0,nsujety)::yy_matrice
-            integer,dimension(nsujety),intent(in)::groupey
+            icproba,movingwindow,nsujety,s_cag_id0,nsujet,link0
+        double precision,dimension(nsujety),intent(in)::yy0
+        double precision,dimension(npred0,nsujety)::yy_matrice
+        integer,dimension(nsujety),intent(in)::groupey
         double precision,dimension(np),intent(in)::b
         double precision,dimension(nz+6),intent(in)::zi0
         double precision,dimension(np,np),intent(in)::HIHOut
-            double precision,dimension(nsujet,nva10),intent(in)::vaxpred0
+        double precision,dimension(nsujet,nva10),intent(in)::vaxpred0
         double precision,dimension(npred0,nva20),intent(in)::vaxdcpred0
-            double precision,dimension(nsujety,nva30),intent(in)::vaxypred0
+        double precision,dimension(nsujety,nva30),intent(in)::vaxypred0
         double precision,dimension(1,npred0)::XbetapredDC,XbetapredDCalea
-            double precision,dimension(1,nsujety) :: XbetapredY,XbetapredYalea
-            double precision,dimension(1,nsujet) :: XbetapredR,XbetapredRalea
+        double precision,dimension(1,nsujety) :: XbetapredY,XbetapredYalea
+        double precision,dimension(1,nsujet) :: XbetapredR,XbetapredRalea
         integer,dimension(npred0)::nreci,nreci_all,nrecyi
-        integer::npred0,nrec0,nsample,nrecy0
         double precision::predTime,window,predTime2,scR,shR,scDC,shDC,&
         scRalea,shRalea,scDCalea,shDCalea,alea
         double precision::ss11,ss12,s_cag0
@@ -552,8 +551,8 @@
     
         use tailles
         use donnees,only:x2,w2,x3,w3
-        use comon,only:auxig,typeof,netadc
-            use donnees_indiv,only : frailpol2,numpat
+        use comon,only:typeof!,netadc,auxig
+        use donnees_indiv,only : frailpol2!,numpat
         Implicit none
     
         double precision,intent(out)::ss
@@ -592,8 +591,8 @@
     
         use tailles
         use donnees,only:x2,w2,x3,w3
-        use comon,only:auxig,typeof
-            use donnees_indiv,only : frailpol,numpat
+        use comon,only:typeof!auxig
+        use donnees_indiv,only : frailpol!,numpat
         Implicit none
     
         double precision,intent(out)::ss
@@ -631,8 +630,8 @@
     
         use tailles
         use donnees,only:x2,w2,x3,w3
-        use comon,only:auxig,typeof,nb1
-            use donnees_indiv,only : frailpol,frailpol2
+        use comon,only:typeof,nb1!auxig
+        use donnees_indiv,only : frailpol,frailpol2
         Implicit none
     
         double precision,intent(out)::ss
@@ -696,10 +695,10 @@
     !=========================
         double precision function func1pred1GHtri(frail,frail2)
         ! calcul de l integrant (numerateur de la fonction de prediction)
-            use comon,only:netadc,etaydc1,etaydc2,sigmae,netar,etayr1,etayr2,&
-                    s_cag,s_cag_id,alpha,ut,utt,link,npp,&
-                    nva3,vey
-            use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,x2cur,z1cur,nmescurr
+            use comon,only:etaydc1,sigmae,netar,etayr1,&
+                    s_cag,s_cag_id,alpha,ut,utt,link,npp
+                    !etaydc2,etayr2,netadc,nva3,vey
+            use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur
             use prediction
             use optim
         implicit none
@@ -837,10 +836,9 @@
         double precision  function func2pred1GHtri(frail,frail2)
         ! calcul de l integrant (denominateur de la fonction de prediction)
             use optim
-                    use comon,only:netadc,etaydc1,etaydc2,sigmae,netar,etayr1,etayr2,&
-                    s_cag,s_cag_id,alpha,ut,utt,link,npp,&
-                    nva3,vey
-            use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,x2cur,z1cur,nmescurr
+            use comon,only:etaydc1,sigmae,netar,etayr1,s_cag,s_cag_id,&
+                alpha,ut,utt,link,npp!,nva3,vey,netadc,etaydc2,etayr2
+            use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur,
             use prediction
         implicit none
     
@@ -969,10 +967,9 @@
     !=========================
         double precision function func1pred2GHtri(frail,frail2,frail3)
         ! calcul de l integrant (numerateur de la fonction de prediction)
-            use comon,only:netadc,etaydc1,etaydc2,sigmae,netar,etayr1,etayr2,&
-                    s_cag,s_cag_id,alpha,ut,utt,link,npp,&
-                    nva3,vey
-            use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,x2cur,z1cur,nmescurr
+            use comon,only:etaydc1,etaydc2,sigmae,netar,etayr1,etayr2,&
+                s_cag,s_cag_id,alpha,ut,utt,link,npp!netadc,nva3,vey
+            use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur
             use prediction
             use optim
         implicit none
@@ -1114,10 +1111,9 @@
         double precision  function func2pred2GHtri(frail,frail2,frail3)
         ! calcul de l integrant (denominateur de la fonction de prediction)
             use optim
-                    use comon,only:netadc,etaydc1,etaydc2,sigmae,netar,etayr1,etayr2,&
-                    s_cag,s_cag_id,alpha,ut,utt,link,npp,&
-                    nva3,vey
-            use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,x2cur,z1cur,nmescurr
+            use comon,only:etaydc1,etaydc2,sigmae,netar,etayr1,etayr2,&
+                s_cag,s_cag_id,alpha,ut,utt,link,npp!,nva3,vey,netadc
+            use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur
     
             use prediction
         implicit none

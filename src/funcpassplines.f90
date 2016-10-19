@@ -3,9 +3,10 @@
 !========================          FUNCPA_SPLINES          ====================
     double precision function funcpassplines(b,np,id,thi,jd,thj,k0)
     use tailles
+    !use comon,only:indictronq,nz1,nz2,t0,t1
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,indictronq,k0T,kkapa
+    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,c,nt0,nt1,nsujet,nva,ndate, &
+    nst,stra,ve,pe,effet,ng,g,nig,AG,resnonpen,theta,k0T,kkapa
     use residusM
 
 

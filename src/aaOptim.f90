@@ -109,14 +109,15 @@
 !  1: critere d'arret satisfait (prm=ca, vraisblce=cb, derivee=dd)
 !  2: nb max d'iterations atteints
 !  4: Erreur
-    use residusM,only:indg
+    !use residusM,only:indg
     use parameters
-    use comon,only:t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc, &
-    nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,model, &
-    PEN_deri,I_hess,H_hess,Hspl_hess,hess,indic_ALPHA,typeof,indic_eta,vvv
+    !use comon,only: c,cdc,Hspl_hess,indic_eta,ndate,ndatedc,nst,nsujet,&
+    !nt0,nt0dc,nt1,nt1dc,nva1,nva2,PEN_deri,t0,t0dc,t1,t1dc
+    use comon,only:nva,model,I_hess,H_hess,hess,indic_ALPHA,&
+    typeof,vvv,indic_tronc
 
 !add additive
-    use additiv,only:correl
+    !use additiv,only:correl
 
     IMPLICIT NONE
 !   variables globales
@@ -158,10 +159,11 @@
     nql=1
     m1=m*(m+1)/2
     ep=1.d-20
-       
-    Main:Do   
     
-        call derivaJ(b,m,v,rl,k0,fctnames) 
+    
+    Main:Do       
+        
+        call derivaJ(b,m,v,rl,k0,fctnames)         
         
     rl1=rl
     
@@ -308,7 +310,7 @@
             end do
             
             rl=fctnames(b1,m,id,z,jd,z,k0)
-
+            
             if(rl.eq.-1.D9) then
                 istop=4
                 goto 110
@@ -334,7 +336,7 @@
         endif
         step=dlog(1.5d0)
         call searpasj(vw,step,b,bh,m,delta,fi,k0,fctnames)
-                
+        
         rl=-fi
         if(rl.eq.-1.D9) then
             istop=4
@@ -375,7 +377,7 @@
 
 !================ pour les bandes de confiance
 !==== on ne retient que les para des splines
-
+        
     call derivaJ(b,m,v,rl,k0,fctnames)
      !print*,"dans aaOptim, appel de derivaJ  with GAP vec funcpa... "
     if(rl.eq.-1.D9) then
@@ -414,7 +416,7 @@
         end do
         v1(kkk)=v1(kkk)+(v(kkk)/(4.d0*b(i)*b(i)*b(i)))
     end do
-
+    
     ep=10.d-10
     call dsinvJ(v1,m1,ep,ier)
 
@@ -437,7 +439,6 @@
         end do
     end do
 
-
     ep=10.d-10
     call dsinvJ(v,m,ep,ier)
 
@@ -457,8 +458,7 @@
 !        end if
 ! fin ajout amadou
     endif
-
-
+    
     ep=10.d-10
     call derivaJ(b,m,vnonpen,rl,zero,fctnames)
 
@@ -507,7 +507,8 @@
 !------------------------------------------------------------
 
     subroutine derivaJ(b,m,v,rl,k0,fctnames)
-    use comon,only:model,k0T,nst,nstRec
+    !use comon,only:nst,k0T
+    use comon,only:model,nstRec, indic_tronc
     implicit none
 
     integer,intent(in)::m
@@ -549,8 +550,8 @@
         !print *,"iun", iun           ! =1
         !print *,"rl = ",rl           ! =0.000000000
     
-    
     rl=fctnames(b,m,iun,z,iun,z,k0)
+    
     if(rl.ne.-1.d9) then
         do i=1,m
             if((fcith(i).ne.-1.d9).and.(endDeriva.eqv..false.)) then
@@ -560,7 +561,7 @@
                 endDeriva=.true.
             end if
         end do
-        
+                
         if (endDeriva.eqv..false.) then
             k=0
             m1= (m*(m+1)/2)
@@ -590,7 +591,6 @@
     end if
         
     !stop
-    
     return
 
     end subroutine derivaJ
@@ -1096,14 +1096,16 @@
 !  1: critere d'arret satisfait (prm=ca, vraisblce=cb, derivee=dd)
 !  2: nb max d'iterations atteints
 !  4: Erreur
-    use residusMmultiv,only:indg
+    !use residusMmultiv,only:indg
     use parametersmultiv
-    use comonmultiv,only:t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc, &
-    nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,model, &
-    PEN_deri,I_hess,H_hess,Hspl_hess,hess,indic_ALPHA,typeof,indic_eta,vvv
+    !use comonmultiv,only:c,cdc,Hspl_hess,indic_eta,ndate,&
+    !ndatedc,nst,nsujet,nt0,nt0dc,nt1,nt1dc,nva1,nva2,&
+    !PEN_deri,t0,t0dc,t1,t1dc
+    use comonmultiv,only: nva,model,I_hess,H_hess,hess,indic_ALPHA,&
+    typeof,vvv
 
 !add additive
-    use additiv,only:correl
+    !use additiv,only:correl
 
     IMPLICIT NONE
 !   variables globales
@@ -1147,7 +1149,6 @@
     Main:Do
 
         call deriva(b,m,v,rl,k0,fctnames)
-
         rl1=rl
     if(rl.eq.-1.D9) then
         istop=4

@@ -14,11 +14,12 @@
                             s_cag0,s_cag_id0,typeof0,typeJoint0,nz0,zi0,np0,b0,H_1, &
                             t00,t10,t0dc0,t1dc0,nt,valT,rl_cond,epoir,contribt,atrisk)
     
-            use tailles,only:npmax
-        use comon,only:typeJoint,typeof,nst,nbintervR,nbintervDC,nva,nva1,nva2,nva3,ve,vey,vedc, &
-        nz1,nz2,zi,ttt,tttdc,yy,c,cdc,date,ndate,datedc,ndatedc,t0,t1,t0dc,t1dc,g, &
-            ng,nsujet,nsujety,npp,nea,nb_re,nb1,ziyd,ziyr,g,b_e,vals,netadc,netar,effet,&
-            s_cag,s_cag_id,link,netar,netadc,indic_alpha,ut,utt,res_ind!,groupeey
+        use tailles,only:npmax
+        ! use comon,only:nbintervR,nbintervDC,ttt,tttdc,ut,utt
+        use comon,only:typeJoint,typeof,nst,nva,nva1,nva2,nva3,ve,vey,vedc, &
+        nz1,nz2,zi,yy,c,cdc,date,ndate,datedc,ndatedc,t0,t1,t0dc,t1dc, &
+            ng,nsujet,nsujety,npp,nea,nb_re,nb1,ziyd,ziyr,g,b_e,vals,effet,&
+            s_cag,s_cag_id,link,netar,netadc,indic_alpha,res_ind!,groupeey
             use lois_normales
             use donnees_indiv
     
@@ -428,21 +429,21 @@
     !                        derivc_condt
     !------------------------------------------------------------
         subroutine derivc_condt_long(b,m,V,rlindiv,nobs,nsujet,indT)
-        !use comon,only:g
-            use comon,only  : g,nea,nva3,yy, &
-                    ve,vey,vedc,ziyd,ziyr,all,groupeey,b_e,&
-                    t1,nea,typeJoint,s_cag,s_cag_id,nb1
-                    use lois_normales
-                    use donnees_indiv
-                    use choix_epoce
+        !use comon,only:g,groupeey,nea,t1,ve,vedc,
+            use comon,only  : nva3,yy, vey,ziyd,ziyr,all,b_e,&
+            typeJoint,s_cag,s_cag_id,nb1
+            use lois_normales
+            use donnees_indiv
+            use choix_epoce
         implicit none
-    
+
+        integer::m,i,k,id,nsujet,nobs,it,l
         double precision::funcpi_long,funcpi2_long,thn,th,z,temp1,temp2
         double precision,dimension(m,1)::Uscore,Uscore2
         double precision,dimension(m)::b
         double precision,dimension(m,m)::V
         double precision,dimension(nsujet)::rlindiv
-        integer::m,i,k,id,nsujet,nobs,it,l
+        
         integer,dimension(nsujet)::indT
     
     
@@ -678,13 +679,15 @@
         double precision function funcpi_long(b,npp,id,thi,jd,thj,i)
     
             use lois_normales
-        use comon,only:typeof,nst,nva,vey,nz1, &
-        zidc,stra,date,datedc,ndate,ndatedc,nva1,nva2,vedc,t0,t1,t1dc,tttdc,g,cdc,&
-            nea,nva3,nz2,sigmae,g,the1_e,netar,etaydc1,netadc,netar ,&
-            betacoef,alpha,all,etaydc2,effet,typeJoint,netadc,netar,&
-            etayr1,etayr2,etaydc1,etaydc2,alpha,betaR,etaR,betaD,etaD,ut,utt,nb1,nb_re
-            use donnees_indiv
-            use choix_epoce
+        !use comon,only:t1,g,vedc,betacoef,cdc,date,datedc,ndate,typeof,&
+        !nst,vey,nz1,zidc,stra,ndatedc,nva1,nva2,t0,t1dc,tttdc,nva3,nz2,&
+        !the1_e
+        use comon,only:nva,&
+            nea,sigmae,netar,etaydc1,netadc,&
+            alpha,all,etaydc2,effet,typeJoint,&
+            etayr1,etayr2,betaR,etaR,betaD,etaD,ut,utt,nb1,nb_re
+        use donnees_indiv
+        use choix_epoce
         implicit none
     
         integer::n,npp,id,jd,i,j,k
@@ -870,17 +873,18 @@
     !               VRAISTOT_E
     !------------------------------------------------------------
     subroutine vraistot_e(ndim2,xea,nf2,funvls)
-            use optim
-    
+
+        use optim    
         use tailles
-            use comongroup,only:vet,vet2
-        use comon,only:alpha,res1,res3,aux1,nig,cdc,sigmae,&
-                    nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc1,etayr1,&
-                    t0,t1,betaR,etaR,effet,etaydc2,etayr2,typeof,link,nva,vey,c,s_cag_id,s_cag,&
-                    all,zi,ndatedc,ndate,netadc,netar,nea,nva,nz1,nz2,indic_ALPHA,&
-                    date,datedc,vals,nsujet,g,typeJoint,ut,utt,nea
-            use donnees_indiv
-            use choix_epoce
+        use comongroup,only:vet,vet2
+        !use comon,only:res1,res3,aux1,nig,utt
+        use comon,only:alpha,cdc,sigmae,&
+            nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc1,etayr1,&
+            t0,t1,betaR,etaR,effet,etaydc2,etayr2,typeof,link,nva,vey,c,s_cag_id,s_cag,&
+            all,zi,ndatedc,ndate,nea,nz1,nz2,indic_ALPHA,&
+            date,datedc,vals,nsujet,g,typeJoint,ut
+        use donnees_indiv
+        use choix_epoce
     
     
     implicit none
@@ -1226,11 +1230,11 @@
         double precision function funcpi2_long(b,npp,id,thi,jd,thj,i)
     
             use lois_normales
-    use comon,only:typeof,nst,nva,vey,nz1, &
-        zidc,stra,date,datedc,ndate,ndatedc,nva1,nva2,vedc,t0,t1,t1dc,tttdc,g,cdc,&
-            nea,nva3,nz2,sigmae,g,the1_e,netar,etaydc1,netadc,netar ,&
-            betacoef,alpha,all,etaydc2,effet,typeJoint,netadc,netar,&
-            etayr1,etayr2,etaydc1,etaydc2,alpha,betaR,etaR,betaD,etaD,ut,utt,nb1,nb_re
+    !use comon,only:g,t1,t0,vedc,betacoef,cdc,date,datedc,ndate,typeof,nst,&
+    !vey,nz1,zidc,stra,ndatedc,nva1,nva2,t1dc,tttdc,nva3,nz2,the1_e,
+    use comon,only:nva, nea,sigmae,netar,etaydc1,netadc,&
+            alpha,all,etaydc2,effet,typeJoint,&
+            etayr1,etayr2,betaR,etaR,betaD,etaD,ut,utt,nb1,nb_re
             use donnees_indiv
             use choix_epoce
         implicit none
@@ -1412,12 +1416,13 @@
     subroutine vraistotlong(ndim2,xea,nf2,funvls)
     
     use lois_normales
-    use comon,only:typeof,nst,nbintervDC,nva,vey,nz1, &
-        zidc,stra,date,datedc,ndate,ndatedc,nva1,nva2,vedc,t0,t1,t1dc,tttdc,g,cdc,&
-            nb_re,nva3,nz2,sigmae,g,the1_e,netar,etaydc1,netadc ,&
-            alpha,all,etaydc2,effet,typeJoint,netadc,netar,&
-            etayr1,etayr2,etaydc1,nbintervR,nbintervDC,etaR,etaD,betaR,betaD,nsujet,&
-            vals,ve,vedc,zi,ttt,c,npp,s_cag,s_cag_id,ut,utt,nea
+    !use comon,only:cdc,datedc,vey,zidc,stra,ndatedc,t1dc,tttdc,all,etayr2,utt,
+    use comon,only:typeof,nst,nbintervDC,nva,nz1, &
+        date,ndate,nva1,nva2,vedc,t0,t1,&
+            nb_re,nva3,nz2,sigmae,the1_e,netar,&
+            alpha,etaydc2,effet,typeJoint,netadc,&
+            etayr1,etaydc1,nbintervR,etaR,etaD,betaR,betaD,nsujet,&
+            vals,ve,g,zi,ttt,c,npp,s_cag,s_cag_id,ut,nea
     use donnees_indiv
     
     implicit none
@@ -1700,17 +1705,7 @@
     
     funvls = vraisind
     
-    end subroutine vraistotlong
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    end subroutine vraistotlong    
     
             !=============================================================
     ! gauss hermite
@@ -1718,9 +1713,11 @@
     SUBROUTINE gauherJcvpl(ss,choix)
     
         use tailles
-        use donnees,only:x2,w2,x3,w3,x9,w9
-        use comon,only:auxig,typeof,netadc,effet,netar,typeJoint,nea
-            use donnees_indiv,only : frailpol,frailpol2
+        !use donnees,only:w2,
+        use donnees,only:x2,x3,w3,x9,w9
+        !use comon,only:auxig,netadc,effet,netar,
+        use comon,only:typeof,typeJoint,nea
+        use donnees_indiv,only : frailpol,frailpol2
         Implicit none
     
         double precision,intent(out)::ss
@@ -1786,12 +1783,13 @@
             !********* Gauss-Hermit pour la dimension 2*
             !*************************************
     
-            SUBROUTINE gauherJ2cvpl(ss,choix)
+        SUBROUTINE gauherJ2cvpl(ss,choix)
     
         use tailles
-        use donnees,only:x2,w2,x3,w3,x9,w9
-        use comon,only:auxig,typeof,netadc,netar,effet
-            use donnees_indiv,only : frailpol,numpat
+        !use donnees,only:x2,w2,x3,w3,
+        use donnees,only:x9,w9
+        !use comon,only:typeof,netadc,netar,effet
+        use donnees_indiv,only : frailpol,numpat
         Implicit none
     
         double precision,intent(out)::ss
@@ -1802,19 +1800,18 @@
     
         ss=0.d0
     
-            do j=1,9
+        do j=1,9
     
-                            frailpol = x9(j)
+            frailpol = x9(j)
     
-                                    call gauherJcvpl(auxfunca,choix)
-                                    ss = ss+w9(j)*(auxfunca)
+            call gauherJcvpl(auxfunca,choix)
+            ss = ss+w9(j)*(auxfunca)
     
-    
-            end do
-    
-    
+        end do
+
         return
     
+
         END SUBROUTINE gauherJ2cvpl
     
     
@@ -1822,12 +1819,14 @@
             !********* Gauss-Hermit pour la dimension 2 - modèle trviarie b_10, v*
             !*************************************
     
-            SUBROUTINE gauherJ3cvpl(ss,choix)
+        SUBROUTINE gauherJ3cvpl(ss,choix)
     
         use tailles
-        use donnees,only:x2,w2,x3,w3,x9,w9
-        use comon,only:auxig,typeof,netadc
-            use donnees_indiv,only : frailpol,numpat
+        !use donnees,only:x2,w2,x3,w3
+        use donnees,only:x9,w9
+        !use comon,only:auxig,typeof,netadc
+        !use donnees_indiv,only :numpat
+        use donnees_indiv,only : frailpol
         Implicit none
     
         double precision,intent(out)::ss
@@ -1862,9 +1861,11 @@
             SUBROUTINE gauherJ4cvpl(ss,choix)
     
         use tailles
-        use donnees,only:x2,w2,x3,w3,x9,w9
-        use comon,only:auxig,typeof,netadc
-            use donnees_indiv,only : frailpol2,numpat
+        !use donnees,only:x2,w2,x3,w3
+        use donnees,only:x9,w9
+        !use comon,only:auxig,typeof,netadc
+        !use donnees_indiv,only :numpat
+        use donnees_indiv,only : frailpol2
         Implicit none
     
         double precision,intent(out)::ss
@@ -1891,20 +1892,18 @@
         END SUBROUTINE gauherJ4cvpl
     
     
-    
-    
-    
     !=====================================================================
     ! pour la loi log-normale
         double precision function func6Jcvpl(frail,choix)
     
         use tailles
-            use comongroup,only:vet,vet2
-            use comon,only:auxig,alpha,sig2,res1,res3,aux1,nig,cdc,sigmae,&
-                    nva2,npp,nva3,vedc,netadc,netar,betaD,etaD,t1dc,etaydc1,link,&
-                    vey,typeof,s_cag_id,s_cag,all,zi,ndatedc,netadc,nea,nva,nz2,&
-                    date,datedc,ut,utt,nb_re,t0dc,vals,nzdc
-            use donnees_indiv
+        use comongroup,only:vet,vet2
+        !use comon,only:nea,date,auxig,alpha,sig2,res1,res3,aux1,nig,netar,utt,
+        use comon,only:sigmae,&
+            nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc1,link,&
+            vey,typeof,s_cag_id,s_cag,cdc,all,zi,ndatedc,nva,nz2,&
+            datedc,ut,nb_re,t0dc,vals,nzdc
+        use donnees_indiv
         IMPLICIT NONE
     
         double precision,intent(in)::frail
@@ -2092,14 +2091,17 @@
             !****************** func7J  - bivariate dim 2**********************
             !***********************************************
             double precision function func7Jcvpl(frail,frail2,choix)
-                    use optim
-    
-        use tailles
-            use comongroup,only:vet,vet2
-        use comon,only:auxig,alpha,sig2,res1,res3,aux1,nig,cdc,sigmae,&
-                    nva2,npp,nva3,vedc,netadc,netar,betaD,etaD,t1dc,etaydc1,etaydc2,link,&
-                    vey,typeof,s_cag_id,s_cag,all,zi,ndatedc,netadc,nea,nva,nz2,&
-                    date,datedc,vals,ut,utt,nb_re,t0dc,vals,nb1,res_ind,nzdc
+            
+            use optim    
+            use tailles
+            !use comongroup,only:vet
+            use comongroup,only:vet2
+            !use comon,only:nea,date,auxig,alpha,sig2,res1,res3,aux1,nig,netar,&
+            !res_ind
+            use comon,only:cdc,sigmae,&
+                nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc1,etaydc2,link,&
+                vey,typeof,s_cag_id,s_cag,all,zi,ndatedc,nva,nz2,&
+                datedc,vals,ut,utt,nb_re,t0dc,nb1,nzdc
             use donnees_indiv
         IMPLICIT NONE
     
@@ -2381,13 +2383,14 @@
             use optim
     
         use tailles
-            use comongroup,only:vet,vet2
-        use comon,only:alpha,res1,res3,aux1,nig,cdc,sigmae,&
-                    nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc1,etayr1,&
-                    t0,t1,betaR,etaR,effet,etaydc2,etayr2,typeof,link,nva,vey,c,s_cag_id,s_cag,&
-                    all,zi,ndatedc,ndate,netadc,netar,nb_re,nva,nz1,nz2,indic_ALPHA,&
-                    date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc
-            use donnees_indiv
+        use comongroup,only:vet,vet2
+        !use comon,only:res1,res3,aux1,nig,etaydc2,etayr2,indic_ALPHA,
+        use comon,only:alpha,cdc,sigmae,&
+            nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc1,etayr1,&
+            t0,t1,betaR,etaR,effet,typeof,link,nva,vey,c,s_cag_id,s_cag,&
+            all,zi,ndatedc,ndate,nb_re,nz1,nz2,&
+            date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc
+        use donnees_indiv
     
         IMPLICIT NONE
     
@@ -2751,13 +2754,14 @@
     use optim
     
         use tailles
-            use comongroup,only:vet,vet2
-        use comon,only:alpha,res1,res3,aux1,nig,cdc,sigmae,&
-                    nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc1,etayr1,&
-                    t0,t1,betaR,etaR,effet,etaydc2,etayr2,typeof,link,nva,vey,c,s_cag_id,s_cag,&
-                    all,zi,ndatedc,ndate,netadc,netar,nb_re,nva,nz1,nz2,indic_ALPHA,&
-                    date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc
-            use donnees_indiv
+        use comongroup,only:vet,vet2
+        !use comon,only:res1,res3,aux1,nig,indic_ALPHA
+        use comon,only:alpha,cdc,sigmae,&
+            nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc1,etayr1,&
+            t0,t1,betaR,etaR,effet,etaydc2,etayr2,typeof,link,nva,vey,c,s_cag_id,s_cag,&
+            all,zi,ndatedc,ndate,nb_re,nz1,nz2,&
+            date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc
+        use donnees_indiv
     
         IMPLICIT NONE
     
@@ -3106,9 +3110,5 @@
             return
     
         end function func9Jcvpl
-    
-    
-    
-    
     
     

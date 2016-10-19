@@ -4,11 +4,12 @@
 !========================          funcpajng NEW         ====================
     double precision function funcpaGsplines(b,np,id,thi,jd,thj,k0)
 
+    !use comon,only:indictronq,indictronqdc,t0,t1,t0dc,t1dc,nz1,nz2
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m,mm3,mm2,mm1,mm,&
     im3,im2,im1,im,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,date,datedc,zi,&
-    t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,&
-    stra,ve,vedc,pe,effet,nz1,nz2,ng,g,nig,AG,indic_ALPHA,theta,alpha,&
-    auxig,aux1,aux2,res1,res3,indictronq,indictronqdc,resnonpen
+    c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,&
+    stra,ve,vedc,pe,effet,ng,g,nig,AG,indic_ALPHA,theta,alpha,&
+    auxig,aux1,aux2,res1,res3,resnonpen
     use tailles
     use comongroup
     use residusM

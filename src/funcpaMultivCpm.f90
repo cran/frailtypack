@@ -3,8 +3,9 @@
     double precision function funcpaMultivCpm(b,np,id,thi,jd,thj,k0)
 
     use taillesmultiv
-    use comonmultiv,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
-    effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,theta, &
+    ! use comonmultiv,only:AG,cens,nst,stra,t0dc
+    use comonmultiv,only:nbintervR,nbintervDC,t0,t1,t1dc,c,cdc,nsujet,nva,nva1,nva2, &
+    effet,ve,vedc,ng,g,nig,indic_ALPHA,ALPHA,theta, &
     auxig,aux1,aux2,res1,res3,res4,ttt,tttdc,betacoef,kkapa, &
 !add meta
     nbintervM,t0meta,t1meta,cmeta,nva3,vemeta,tttmeta,eta,alpha1,alpha2,nsujetmeta,gmeta,&

@@ -1,9 +1,10 @@
 double precision function funcpajgeneral(b,np,id,thi,jd,thj,k0)
 
+    !use comon,only:AG,d,dmax,datedc,ndatedc,tU,nt0dc,nt1dc,nt1,ntU,stra
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,eta,tU,ntU,d,dmax, &
-    nva1,nva2,t0dc,t1dc,cdc,nt0dc,nt1dc,ndatedc,datedc,res1,res3,res4,res5,&
+    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nsujet,nva,ndate, &
+    nst,ve,pe,effet,nz1,nz2,ng,g,nig,resnonpen,theta,eta, &
+    nva1,nva2,t0dc,t1dc,cdc,res1,res3,res4,res5,&
     vedc,aux1,aux2, auxig, indic_eta
 
     use tailles

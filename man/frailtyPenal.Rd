@@ -601,10 +601,11 @@ modJointNested_Weib <- frailtyPenal(Surv(t.start,t.stop,event)~subcluster(id)
 +cluster(group)+dukes+ terminal(death),formula.terminalEvent=~dukes, 
 hazard = ('Weibull'), data=readmissionNested,recurrentAG=TRUE, initialize = FALSE)
 
-JoiNes-GapSpline <- frailtyPenal(formula = Surv(time, event) 
+JoiNes_GapSpline <- frailtyPenal(formula = Surv(time, event) 
 ~ subcluster(id) + cluster(group) + dukes + terminal(death), 
-formula.terminalEvent = ~dukes, data = readmissionNested, recurrentAG = FALSE, 
-n.knots = 8, kappa = c(9.55e+9, 1.41e+12), initialize = TRUE, init.Alpha = 1.091, Ksi = "None")
+formula.terminalEvent = ~dukes, data = readmissionNested, 
+recurrentAG = FALSE, n.knots = 8, kappa = c(9.55e+9, 1.41e+12), 
+initialize = TRUE, init.Alpha = 1.091, Ksi = "None")
 
 }
 

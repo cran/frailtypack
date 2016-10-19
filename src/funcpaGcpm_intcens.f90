@@ -4,10 +4,11 @@
 !========================          funcpaGcpm_intcens         ====================
     double precision function funcpaGcpm_intcens(b,np,id,thi,jd,thj,k0)
 
-    use comon,only:cens,nbintervR,nbintervDC,ttt,tttdc,betacoef, &
+    !use comon,only:cens,indictronqdc,ntU,nz1,nz2,resnonpen
+    use comon,only:nbintervR,nbintervDC,ttt,tttdc,betacoef, &
     t0,t1,tU,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst,&
-    stra,ve,vedc,effet,nz1,nz2,ng,g,nig,AG,indic_ALPHA,theta,alpha,&
-    auxig,aux1,aux2,res1,res3,indictronq,indictronqdc,resnonpen,resL,resU,ntU,kkapa
+    stra,ve,vedc,effet,ng,g,nig,AG,indic_ALPHA,theta,alpha,&
+    auxig,aux1,aux2,res1,res3,indictronq,resL,resU,kkapa
     use tailles
     use comongroup
     use residusM

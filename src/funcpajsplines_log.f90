@@ -5,13 +5,15 @@
     double precision function funcpajsplines_log(b,np,id,thi,jd,thj,k0)
 
     use tailles
+    !use comon,only:AG,nt0dc,res4,t0,t0dc,t1,t1dc
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m,mm3,mm2,mm1,mm,&
     im3,im2,im1,im,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,date,datedc,zi,&
-    t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst, &
-    effet,stra,ve,vedc,pe,ng,g,nig,AG,indic_ALPHA,ALPHA,sig2, &
-    auxig,aux1,aux2,res1,res3,res4,kkapa,resnonpen,nstRec,k0T
+    c,cdc,nt0,nt1,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst, &
+    effet,stra,ve,vedc,pe,ng,g,nig,indic_ALPHA,ALPHA,sig2, &
+    auxig,aux1,aux2,res1,res3,kkapa,resnonpen,nstRec,k0T
     use residusM
-    use comongroup,only:vet,vet2,the1,the2
+    !use comongroup,only:the1
+    use comongroup,only:vet,vet2,the2
 
     IMPLICIT NONE
 

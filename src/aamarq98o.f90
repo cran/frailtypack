@@ -9,7 +9,7 @@
     use tailles
     use optim
     use parameters,only:maxiter
-    use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,auxig
+    !use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,auxig
     
     Implicit none
     
@@ -360,9 +360,11 @@
     double precision function funcpao(b,np,id,thi,jd,thj)
     
     use tailles
-    use comon,only:g,nig,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst, &
-    stra,ve,auxig
-    use additiv,only:dut1,dut2,ut1,ut2,betaaux,ve2,sigma2,tau2,rho,cov
+    !use comon,only:t0,t1,nt0,nst,ndate
+    use comon,only:g,c,nt1,nsujet,nva,stra,ve,auxig
+    !use comon,only:nig
+    !use additiv,only:dut1,dut2,ve2,rho
+    use additiv,only:ut1,ut2,betaaux,sigma2,tau2,cov
     implicit none
     
     integer::np,id,jd,i,k,ip

@@ -4,11 +4,13 @@
     double precision function funcpas_tps(b,np,id,thi,jd,thj,k0)
 
     use tailles
+    !use comon,only:im3,im2,im1,im,mm3,mm2,mm1,mm,stra,ve,
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,t0,t1,c,nsujet,nva, &
-    nst,stra,ve,effet,ng,g,nig,AG,kkapa,theta,typeof,pe,resnonpen
-    use betatttps,only:nbinnerknots,filtretps,knotsTPS,npbetatps,betatps,qorder,&
-    betatps3,innerknots,boundaryknots
+    t0,t1,c,nsujet,nva, &
+    nst,effet,ng,g,nig,AG,kkapa,theta,typeof,pe,resnonpen
+    !use betatttps,only:betatps3,betatps,qorder,filtretps,
+    use betatttps,only:nbinnerknots,knotsTPS,npbetatps,&
+    innerknots,boundaryknots
     use residusM
 
     implicit none
@@ -282,8 +284,9 @@
     use tailles
     use comon,only:date,zi,nz1,nz2,nva,ve,ndate,stra,nst,effet,typeof, &
     nbintervR,ttt,betacoef,etaR,etaD,betaR,betaD
-    use betatttps,only:filtretps,nbinnerknots,qorder,knotsTPS,npbetatps,betatps,&
-    betatps3,innerknots,boundaryknots
+    !use betatttps,only:betatps3,knotsTPS
+    use betatttps,only:filtretps,nbinnerknots,qorder,npbetatps,betatps,&
+    innerknots,boundaryknots
 
     integer::p,j,jj,i,np,k,gg,n
     double precision::vet,tps

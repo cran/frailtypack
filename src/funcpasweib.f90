@@ -4,8 +4,9 @@
     double precision function funcpasweib(b,np,id,thi,jd,thj,k0)
 
     use tailles
+    !use comon,only:etaR,etaD,betaR,betaD
     use comon,only:t0,t1,c,nsujet,nva, &
-    nst,stra,ve,effet,ng,g,nig,AG,etaR,etaD,betaR,betaD,kkapa,theta, &
+    nst,stra,ve,effet,ng,g,nig,AG,kkapa,theta, &
     etaT,betaT
     use residusM
 

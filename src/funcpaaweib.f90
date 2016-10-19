@@ -5,7 +5,8 @@
     use tailles
     use comon,only:effet,stra,t0,t1,c,nsujet,nva,nst,auxig,ng,ve,g,nig,indictronq, &
     etaR,etaD,betaR,betaD,kkapa,indic_tronc
-    use additiv,only:correl,ngexact,ve2,sigma2,tau2,rho,cov,mid,betaaux,invD
+    !use additiv,only:invD,rho,
+    use additiv,only:correl,ngexact,ve2,sigma2,tau2,cov,mid,betaaux
     use residusM,only:som_Xbeta,indic_cumul,cumulhaz
 
     implicit none
@@ -469,9 +470,11 @@
     double precision function funcpaoweib(b,np,id,thi,jd,thj)
 
     use tailles
-    use comon,only:g,nig,t0,t1,c,nsujet,nva,ndate,nst, &
+    !use comon,only:ndate,nig,nst,t0
+    use comon,only:g,t1,c,nsujet,nva, &
     stra,ve,auxig,etaR,etaD,betaR,betaD
-    use additiv,only:betaaux,ve2,sigma2,tau2,rho,cov
+    !use additiv,only:rho,ve2
+    use additiv,only:betaaux,sigma2,tau2,cov
 
     implicit none
 

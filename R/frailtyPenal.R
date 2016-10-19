@@ -190,7 +190,7 @@
     if (length(subcluster) && Frailty == TRUE){
 		tempsub <- untangle.specials(Terms, "subcluster", 1:10)
 		ordsub <- attr(Terms, "order")[tempsub$terms] # type ordinal de la variable
-		if (any(ordsub > 1))stop("subcluster can not be used in an interaction")		
+		if (any(ordsub > 1))stop("subcluster can not be used in an interaction")
 		if (any(ifelse(apply(ifelse(table(m[,tempsub$vars],m[,tempc$vars])>0,1,0),1,sum)==1,FALSE,TRUE))){
 			stop("nested structure is necessary to fit a nested model")
 		}
@@ -252,18 +252,21 @@
 			}	
 		}
 	}
-	Timet0 <- data[vart0]	
-	varclust <- gsub('(.*\\()([a-z]*)\\)', '\\2', tempc$vars) # pour recuperer le nom de la variable definie par cluster()	
+	Timet0 <- data[vart0]
+	if(length(cluster)){
+		varclust <- gsub('(.*\\()([a-z]*)\\)', '\\2', tempc$vars) # pour recuperer le nom de la variable definie par cluster()	
+	}
 	#verification pour le modele joint nested
-	if (length(subcluster) & joint){
+	 if (length(subcluster) & joint){
 		varsubclust <- gsub('(.*\\()([a-z]*)\\)', '\\2', tempsub$vars)
 		Timet0 <- Timet0[order(data[,varclust], data[,varsubclust]),]
-		if (typeofY == "counting") troncat(as.numeric(as.vector(subcluster)), Timet0)
+		if (typeofY == "counting") troncat(as.numeric(as.vector(data[order(data[,varclust], data[,varsubclust]),varsubclust])), Timet0)
 		}
 	# verification pour le modele joint
 	if (!length(subcluster) & joint){
 		Timet0 <- list(Timet0)[[1]][order(data[,varclust]),]
-		if (typeofY == "counting") troncat(as.numeric(as.vector(cluster)), Timet0)
+		#data[,varclust] = data[order(data[,varclust]), varclust]
+		if (typeofY == "counting") troncat(as.numeric(as.vector(data[order(data[,varclust]), varclust])), Timet0)
 		}
     
     #=========================================================>
@@ -777,7 +780,7 @@
 		if (Frailty) {
 			fit$coef <- ans[[20]][(np - nvar - npbetatps + 1):np]
 			if (logNormal == 0) fit$theta <- (ans[[20]][np - nvar - npbetatps])^2
-			else fit$sigma2 <- (ans[[20]][np - nvar - npbetatps])^2
+        	else fit$sigma2 <- (ans[[20]][np - nvar - npbetatps])^2
 		}
 		if (!Frailty) {
 			if (logNormal == 0) fit$theta <- NULL
@@ -824,7 +827,7 @@
 		fit$varHtotal <- temp1 # new Al: 20/06/13
 		fit$varHIHtotal <- temp2      
 		fit$formula <- formula(Terms)
-		
+				
 		fit$x <- matrix(ans[[25]], nrow = size1, ncol = uni.strat)
 		fit$lam <- array(ans[[26]], dim = c(size1,3,uni.strat))
 		fit$xSu <- matrix(ans$xSuT, nrow = 100, ncol = uni.strat)
@@ -2510,7 +2513,6 @@
 		###########################################
 		ier <- ans$IerIstop[1]
 		istop <- ans$IerIstop[2]
-		
 		if (istop == 4) warning("Problem in the likelihood computation. The program stopped abnormally. Please verify your dataset.")
 		if (istop == 2) warning("Model did not converge.")
 		if (istop == 3) warning("Matrix non-positive definite.")

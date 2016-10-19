@@ -23,7 +23,7 @@
     double precision,dimension(-2:(nzdc+2)):: the2
     double precision,dimension(-2:(nzmeta+2)):: the3
     double precision,dimension(np)::bh
-	!double precision,dimension(0:ndatemax)::imdc
+    !double precision,dimension(0:ndatemax)::imdc
     double precision,dimension(ngmax)::res2,res1dc,res2dc &
     ,res3dc,integrale1,integrale2,integrale3,res2meta
 !AD: for death,change dimension
@@ -416,9 +416,9 @@
     subroutine distanceJ_splines(nzloco,nzdc,nzmeta,b,mt1,mt2,mt3,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out,x3Out,lam3Out,su3Out)
 
     use taillesmultiv
-    use comonmultiv,only:date,datedc,zi,zidc,zimeta,t0,t1,t0dc,t1dc,c,cdc &
-    ,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc &!,nst &
-    ,PEN_deri,I_hess,H_hess,Hspl_hess,hess
+    !use comonmultiv,only:c,cdc,date,datedc,hess,Hspl_hess,I_hess,ndate,ndatedc,&
+    !nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,t0,t1,t0dc,t1dc,PEN_deri
+    use comonmultiv,only:zi,zidc,zimeta,H_hess !,nst &    
 
     Implicit none
 

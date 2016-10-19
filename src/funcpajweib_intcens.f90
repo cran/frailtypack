@@ -4,10 +4,11 @@
 !========================          funcpajweib_intcens       ====================
     double precision function funcpajweib_intcens(b,np,id,thi,jd,thj,k0)
 
+    !use comon,only:AG,indictronqdc,nz1,nz2,stra
     use comon,only:etaR,etaD,betaR,betaD,&
     t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst,&
-    stra,ve,vedc,effet,nz1,nz2,ng,g,nig,AG,indic_ALPHA,theta,alpha,&
-    auxig,aux1,aux2,res1,res3,indictronq,indictronqdc,resL,resU,tU,kkapa
+    ve,vedc,effet,ng,g,nig,indic_ALPHA,theta,alpha,&
+    auxig,aux1,aux2,res1,res3,indictronq,resL,resU,tU,kkapa
     use tailles
     use comongroup
     use residusM

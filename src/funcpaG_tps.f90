@@ -3,10 +3,11 @@
     double precision function funcpaG_tps(b,np,id,thi,jd,thj,k0)
 
     use tailles
+    !use comon,only:im,im2,im3,im1,mm,mm1,mm2,mm3,nva1,nva2,res4,stra,ve,vedc
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2, &
-    nst,effet,stra,ve,vedc,ng,g,nig,AG,kkapa,indic_alpha,alpha,theta, &
-    auxig,aux1,aux2,res1,res3,res4,typeof,pe,resnonpen
+    t0,t1,t0dc,t1dc,c,cdc,nsujet,nva, &
+    nst,effet,ng,g,nig,AG,kkapa,indic_alpha,alpha,theta, &
+    auxig,aux1,aux2,res1,res3,typeof,pe,resnonpen
     use residusM
     use comongroup
     use betatttps

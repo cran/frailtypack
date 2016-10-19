@@ -9,9 +9,9 @@
 }
 
 \usage{
-\method{plot}{predJoint}(x, conf.bands=FALSE, relapses=TRUE, pos.legend="topright", 
-	cex.legend=0.7, ylim=c(0,1), Xlab = "Time t", 
-	Ylab = "Prediction probability of event", ...) 
+\method{plot}{predJoint}(x, conf.bands=FALSE, relapses=TRUE,pos.legend="topright",
+		cex.legend=0.7, ylim=c(0,1), Xlab = "Time t",
+		Ylab = "Prediction probability of event", ...) 
 		}
 
 \arguments{

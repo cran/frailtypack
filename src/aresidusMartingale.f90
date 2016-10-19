@@ -360,7 +360,7 @@
 
     use residusM
     use optimres
-    use comon,only:alpha,eta
+    !use comon,only:alpha,eta
     use commun
 
     implicit none
@@ -444,7 +444,8 @@
     use parameters
     use residusM,only:indg,cumulhaz
     use optimres
-    use comon,only:alpha,eta,nst,nig,nsujet,g,stra,nt1,nva,ve,typeof!,H_hess
+    !use comon,only:alpha,eta,nst,nig
+    use comon,only:nsujet,g,stra,nt1,nva,ve,typeof!,H_hess
     use additiv,only:ve2,ngexact,ut1,ut2,mid
 
     implicit none
@@ -599,13 +600,14 @@
 !=============================================================================
     
     subroutine Residusj_biv(b,np,namesfuncres,Resmartingaledc,ResLongi_cond,ResLongi_cond_st,&
-                        ResLongi_marg,ResLongi_chol,Pred_yy,    re_pred)!
+                            ResLongi_marg,ResLongi_chol,Pred_yy,    re_pred)!
     
     use residusM
     use optimres
-    use comon,only:ng,nsujety,etaydc1,etaydc2,yy,nmesy,netadc,nb1,vey,ut,utt,varcov_marg,&
-                                                        nva3,sum_mat,link,t1dc,vey,npp,res_ind
-        use donnees_indiv,only:X2cur,Z1cur
+    !use comon,only:ut,utt,netadc
+    use comon,only:ng,nsujety,etaydc1,etaydc2,yy,nmesy,nb1,vey,varcov_marg,&
+    nva3,sum_mat,link,t1dc,vey,npp,res_ind
+    use donnees_indiv,only:X2cur,Z1cur
     use optim
     
     implicit none
@@ -616,8 +618,8 @@
     double precision,dimension(np)::bint
     double precision,dimension(ng),intent(out)::Resmartingaledc
     double precision,dimension(nsujety),intent(out)::ResLongi_marg,ResLongi_chol,&
-            ResLongi_cond,ResLongi_cond_st
-        double precision,dimension(nsujety,2),intent(out)::Pred_yy
+    ResLongi_cond,ResLongi_cond_st
+    double precision,dimension(nsujety,2),intent(out)::Pred_yy
     double precision,dimension(ng,3),intent(out)::re_pred
     double precision,dimension(nb1) ::zet_vec
     double precision,dimension(nb1) :: b_pred
@@ -625,32 +627,31 @@
     double precision :: ep,eps
     double precision,dimension(nb1,nb1)::mat_vres_inv,mat_vres
     double precision,dimension(:,:),allocatable::v_rim,v_rim_chol,Varcov_inv,&
-            varcov_chol,V_rim_inv
+    varcov_chol,V_rim_inv
     double precision,dimension(:),allocatable:: matv,matv2
-     double precision,dimension(nva3,nva3):: sum_mat_inv
-        double precision,dimension(1)::current_meanres
+    double precision,dimension(nva3,nva3):: sum_mat_inv
+    double precision,dimension(1)::current_meanres
      !   double precision,dimension(1)::residus_sd
     
     res_ind = 1
     bint=b
-        ResLongi_cond_st=0.d0
-        ResLongi_cond=0.d0
+    ResLongi_cond_st=0.d0
+    ResLongi_cond=0.d0
     ResLongi_marg=0.d0
-        ResLongi_chol = 0.d0
+    ResLongi_chol = 0.d0
     Pred_yy= 0.d0
     Residusdc=0.d0
     it_res = 1
     
     do indg=1,ng
-    
-            cares=0.d0
-        cbres=0.d0
-        ddres=0.d0
-                ierres = 0
-        nires=0
-        vuu=0.1d0
+    cares=0.d0
+    cbres=0.d0
+    ddres=0.d0
+    ierres = 0
+    nires=0
+    vuu=0.1d0
         
-        call marq98res(vuu,nb1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
+    call marq98res(vuu,nb1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
     
         if (istopres.eq.1) then
                 if(link.eq.1) then
@@ -861,8 +862,9 @@
     
     use residusM
     use optimres
-    use comon,only:ng,nsujet,nsujety,etayr1,etayr2,etaydc1,etaydc2,yy,nmesy,nmesrec,netar,netadc,&
-         nb1,vey,ut,utt,varcov_marg,nva3,sum_mat,link,t1dc,vey,nea,alpha,npp,res_ind
+    !use comon,only:ut,utt,netar,nsujet
+    use comon,only:ng,nsujety,etayr1,etayr2,etaydc1,etaydc2,yy,nmesy,nmesrec,netadc,&
+         nb1,vey,varcov_marg,nva3,sum_mat,link,t1dc,vey,nea,alpha,npp,res_ind
     use donnees_indiv,only:X2cur,Z1cur
         use optim
     

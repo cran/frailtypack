@@ -1585,9 +1585,9 @@
 !AD:end
     use taillesmultiv
 !AD:
-    use comonmultiv,only:date,datedc,datemeta,zi,zidc,zimeta,mm3,mm2,mm1,mm,im3,im2,im1,im &
+    use comonmultiv,only:date,datedc,datemeta,zi,zimeta,mm3,mm2,mm1,mm,im3,im2,im1,im &
     ,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,mm3meta,mm2meta,mm1meta,&
-    mmmeta,im3meta,im2meta,im1meta,immeta,vectn
+    mmmeta,im3meta,im2meta,im1meta,immeta,vectn!zidc,
 
 !AD:end
     IMPLICIT NONE

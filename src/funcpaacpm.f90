@@ -3,9 +3,11 @@
     double precision function funcpaacpm(b,np,id,thi,jd,thj,k0)
 
     use tailles
-    use comon,only:im,effet,stra,t0,t1,c,nsujet,nva,nst,auxig,ng,ve,g,nig,indictronq,&
-    nbintervR,ttt,alpha,betacoef,kkapa,indic_tronc
-    use additiv,only:correl,ngexact,ve2,sigma2,tau2,rho,cov,mid,betaaux,invD
+    !use comon,only:alpha,im,
+    use comon,only:effet,stra,t0,t1,c,nsujet,nva,nst,auxig,ng,ve,g,nig,indictronq,&
+    nbintervR,ttt,betacoef,kkapa,indic_tronc
+    !use additiv,only:invD,rho
+    use additiv,only:correl,ngexact,ve2,sigma2,tau2,cov,mid,betaaux
     use residusM,only:som_Xbeta,indic_cumul,cumulhaz
 
     implicit none
@@ -577,9 +579,11 @@
     double precision function funcpaocpm(b,np,id,thi,jd,thj)
 
     use tailles
-    use comon,only:g,nig,t0,t1,c,nsujet,nva,nst, &
-    stra,ve,auxig,nbintervR,ttt,alpha,betacoef
-    use additiv,only:betaaux,ve2,sigma2,tau2,rho,cov
+    !use comon,only:alpha,nig,nst,t0,
+    use comon,only:g,c,t1,nsujet,nva, &
+    stra,ve,auxig,nbintervR,ttt,betacoef
+    !use additiv,only:rho,ve2,
+    use additiv,only:betaaux,sigma2,tau2,cov
 
     implicit none
 

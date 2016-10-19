@@ -22,6 +22,10 @@
     integer::groupe,ij,kk,j,k,nz,n,np,cpt,ii,iii,ver,cptstr1,cptstr2, &
     i,ic,ni,ier,istop,cptni,cptni1,cptni2,ibou,nbou2,id,cptbiais,l, &
     icen,irep1,nvacross,nstcross,effetcross,mt,mt1,p
+
+    integer::ss,sss,noVar,AGAux,maxitAux,nsujetAux,ngAux,icenAux,nstAux,effetAux, &
+    nzAux,nvaAux,intcensAux
+
     integer,dimension(nvaAux)::filtre
     integer,dimension(nsujetAux)::stracross
     double precision,dimension(nvaAux)::vax
@@ -33,8 +37,7 @@
     double precision,dimension(np)::b
     double precision,dimension(np,np)::HIH,IH,HI
     !******************************************   Add JRG January 05
-    integer::ss,sss,noVar,AGAux,maxitAux,nsujetAux,ngAux,icenAux,nstAux,effetAux, &
-    nzAux,nvaAux,intcensAux
+    
     double precision,dimension(nzAux+6),intent(out)::ziOut
     double precision::resOut
     double precision,dimension(nsujetAux)::tt0Aux,tt1Aux,ttUAux
@@ -1255,8 +1258,9 @@
 !========================== VECSPLI ==============================
     subroutine vecsplis(n,ndate)
 
-    use tailles,only:ndatemax,NSUJETMAX,npmax,nvarmax
-    use comon,only:ve,date,zi,mm3,mm2,mm1,mm,im3,im2,im1,im
+    !use tailles,only:ndatemax,NSUJETMAX,npmax,nvarmax
+    !use comon,only:ve
+    use comon,only:date,zi,mm2,mm3,mm1,mm,im3,im2,im1,im
 
     implicit none
     
@@ -1308,8 +1312,9 @@
 
 !========================== VECPEN ==============================
     subroutine vecpens(n)
-    use tailles,only:ndatemax,npmax
-    use comon,only:date,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    !use tailles,only:ndatemax,npmax
+    !use comon,only:date
+    use comon,only:zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
     
     implicit none
         
@@ -1453,7 +1458,8 @@
 !==========================  SUSP  ====================================
     subroutine susps(x,the,n,su,lam,zi)
 
-    use tailles,only:ndatemax,npmax
+    !use tailles,only:ndatemax
+    use tailles,only:npmax
 
     implicit none
 
@@ -1527,7 +1533,8 @@
 
     subroutine cosps(x,the,n,y,zi,binf,su,bsup,lbinf,lam,lbsup)
 
-    use tailles,only:ndatemax,npmax
+    !use tailles,only:ndatemax
+    use tailles,only:npmax
 
     implicit none
 
@@ -1600,16 +1607,17 @@
     call conf1s(x,j,n,y,pm,zi)
     lbinf = lam - 1.96d0*pm
     lbsup = lam + 1.96d0*pm
-
+    
     return
-
+    
     end subroutine cosps
 
 
 !=====================  CONF1  =============================
     subroutine conf1s(x,ni,n,y,pm,zi)
 
-    use tailles,only:npmax,ndatemax
+    !use tailles,only:ndatemax
+    use tailles,only:npmax
 
     implicit none
 
@@ -1644,7 +1652,8 @@
 !=====================  CONF  =============================
     subroutine confs(x,ni,n,y,pm,zi)
 
-    use tailles,only:npmax,ndatemax
+    !use tailles,only:ndatemax
+    use tailles,only:npmax
 
     implicit none
 
@@ -1671,7 +1680,7 @@
     end do
 
     res=-res
-    pm = dsqrt(res)
+    pm = dsqrt(res)    
 
     end subroutine confs
 
@@ -1679,7 +1688,8 @@
 !==========================   ISP   ==================================
     double precision function isps(x,ni,ns,zi)
 
-    use tailles,only:npmax,ndatemax
+    !use tailles,only:ndatemax
+    use tailles,only:npmax
 
     implicit none
 
@@ -1750,7 +1760,8 @@
 !==========================  MMSP   ==================================
     double precision function mmsps(x,ni,ns,zi)
 
-    use tailles,only:npmax,ndatemax
+    !use tailles,only:ndatemax
+    use tailles,only:npmax
 
     implicit none
 
@@ -1928,7 +1939,8 @@
 !========================      GOLDEN   =========================
     double precision function goldens(ax,bx,cx,tol,xmin,n,b,y,aux)
 
-    use tailles,only:npmax,ndatemax
+    !use tailles,only:ndatemax
+    use tailles,only:npmax
 
     implicit none
     
@@ -1985,9 +1997,11 @@
 
     double precision function estimvs(k00,n,b,y,aux,ni,res)
 
-    use tailles,only:npmax,ndatemax,NSUJETMAX
-    use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,k0T, &
-    date,zi,pe,effet,nz1,nz2,mm3,mm2,mm1,mm,im3,im2,im1,im,typeof,intcens,logNormal
+    !use tailles,only:ndatemax,NSUJETMAX
+    use tailles,only:npmax
+    !use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,nst,nz1,nz2,typeof
+    use comon,only:ndate,k0T,date,zi,pe,effet,mm3,mm2,mm1,mm,im3,&
+    im2,im1,im,intcens,logNormal
 
     use optim
     implicit none
@@ -2071,10 +2085,10 @@
 !=================calcul de la hessienne  et de omega  ==============
     subroutine tests(dut,k0,n,res,y)
 
-    use tailles,only:npmax,ndatemax,NSUJETMAX
-    use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst
-
+    !use tailles,only:ndatemax,NSUJETMAX
+    use tailles,only:npmax
+    !use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,nst
+    use comon,only:ndate
 
     implicit none
 
@@ -2142,8 +2156,10 @@
 !=======================  CALOMEG  ===========================
     subroutine calcomegs(n,omeg)
 
-    use tailles,only:npmax,ndatemax
-    use comon,only:date,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    !use tailles,only:ndatemax
+    use tailles,only:npmax
+    !use comon,only:date,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m2m1,m2m,m1m
+    use comon,only:m3m
       
     implicit none
 
@@ -2205,9 +2221,9 @@
 !====================  MAT  ==================================
     subroutine mats(res,dut,k,l,n)
 
-    use tailles,only:npmax,ndatemax,NSUJETMAX
-    use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst
+    !use tailles,only:npmax,ndatemax,NSUJETMAX
+    !use comon,only:t0,t1,nt0,nva,nst
+    use comon,only:date,zi,c,nt1,nsujet,ndate    
 
     implicit none
 
@@ -2248,7 +2264,7 @@
 !==========================  MSP   ==================================
     double precision function msps(i,ni,ns)
 
-    use tailles,only:npmax,ndatemax
+    !use tailles,only:npmax,ndatemax
     use comon,only:date,zi
 
     implicit none
@@ -2337,8 +2353,9 @@
 !=========================  CALC00  =========================
     double precision function calc00s(j,n)
 
-    use tailles,only:npmax
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    !use tailles,only:npmax
+    !use comon,only:m3m2,m3m1,m3m,m2m1,m2m,m1m
+    use comon,only:m3m3,m2m2,m1m1,mmm
 
     implicit none
 
@@ -2381,8 +2398,9 @@
 !=========================  CALC01  =========================
     double precision function calc01s(j,n)
 
-    use tailles,only:npmax
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    !use tailles,only:npmax
+    !use comon,only:m3m3,m2m2,m1m1,mmm,m3m1,m3m,m2m
+    use comon,only:m3m2,m2m1,m1m
 
     implicit none
 
@@ -2416,8 +2434,9 @@
 !=========================  CALC02  =========================
     double precision function calc02s(j,n)
 
-    use tailles,only:npmax
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    !use tailles,only:npmax
+    !use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m,m2m1,m1m
+    use comon,only:m3m1,m2m
 
     implicit none
 
@@ -2596,7 +2615,8 @@
 
     use tailles
     use donnees,only:x2,w2,x3,w3
-    use comon,only:auxig,typeof
+    !use comon,only:auxig
+    use comon,only:typeof
 
     Implicit none
 
@@ -2653,7 +2673,8 @@
     double precision function func1S(frail)
 
     use tailles
-    use comon,only:auxig,sig2,stra,c,g,res5
+    !use comon,only:stra
+    use comon,only:auxig,sig2,g,res5,c
 
     IMPLICIT NONE
 

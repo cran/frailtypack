@@ -900,7 +900,7 @@
 
             if (b(np-nva-indic_alpha-indic_xi).eq.0.d0.and.(timedep.eq.0)) then ! theta
                 if (typeof == 0) then
-                    b(np-nva-indic_alpha-indic_xi) = 1.d0        !xi
+                    b(np-nva-indic_alpha-indic_xi) = 1.d0 !xi
                     b(np-nva-indic_alpha-indic_xi-1) = 1.d0 !alpha
                 else
                     b(np-nva-indic_alpha-indic_xi) = 5.d-1
@@ -2774,7 +2774,8 @@
     double precision function func3Jf(frail, frail2)
 
     use tailles
-    use comon,only:nig,auxig,auxif,indic_xi, xi, alpha,eta,theta,res1,res3,aux1,cdc
+    use comon,only:nig,auxig,indic_xi, xi, alpha,theta,res1,res3,&
+                   aux1,cdc!,auxif,eta
 
     IMPLICIT NONE
 
@@ -2815,7 +2816,7 @@
         double precision function func3Jf2(term, frail2)
 
         use tailles
-        use comon,only:nig,auxig,auxif,alpha,xi,eta,theta,res1,res3,aux1,cdc
+        use comon,only:eta!nig,auxig,auxif,alpha,xi,theta,res1,res3,aux1,cdc
 
         IMPLICIT NONE
 
@@ -2840,11 +2841,11 @@
       double precision  function func3Jyass(frail)
 ! calcul de l integrant, pour un effet aleatoire donné frail et un groupe donne auxig (cf funcpa)
     use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,eta,tU,ntU,d,dmax, &
-    nva1,nva2,t0dc,t1dc,cdc,nt0dc,nt1dc,ndatedc,datedc,res1,res3,res4,res5,&
-    vedc,aux1,aux2,auxig
+    use comon,only:res1,auxig,aux1,res3,cdc,theta,eta,nig!,m3m3,m2m2,m1m1,&
+    !mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m,mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,&
+    !t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,stra,ve,pe,effet,nz1,nz2,ng,g,AG,&
+    !resnonpen,tU,ntU,d,dmax,nva1,nva2,t0dc,t1dc,nt0dc,nt1dc,ndatedc,datedc,&
+    !res4,res5,vedc,aux2
 
     implicit none
 
@@ -2882,10 +2883,9 @@
     double precision function func3bis(frail)
 
     use tailles
-    use comon,only:g,nig,auxig,aux1,aux2,res1,res3,t0,t1,t0dc,&
-    t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,AG,&
-    alpha,theta
-    use comongroup,only:nigdc,gsuj
+    use comon,only:nig,auxig,alpha,theta,res1,res3,aux1!,g,aux2,t0,t1,t0dc,&
+    !t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,AG
+    use comongroup,only:nigdc!,gsuj
 
     implicit none
 
@@ -2908,7 +2908,7 @@
     subroutine gaulagJ(ss,choix)
 
     use tailles
-    use comon,only:auxig,typeof,typeJoint
+    use comon,only:typeof,typeJoint!auxig
     use donnees,only:w,x,w1,x1        !The abscissas-weights.
 
     implicit none
@@ -2979,7 +2979,7 @@
     subroutine gaulagJf(ss3)
 
     use tailles
-    use comon,only:auxig,auxif, typeof,typeJoint,fam,nfam,ng
+    use comon,only:auxig,typeof,fam,nfam,ng!,auxif,typeJoint
     use donnees,only:w,x, w1, x1     !The abscissas-weights.
 
     implicit none
@@ -3062,7 +3062,7 @@
     subroutine gaulagJ_intcens(ss,choix)
 
     use tailles
-    use comon,only:auxig,typeof
+    use comon,only:typeof!,auxig
     use donnees,only:w,x,w1,x1
 
     implicit none
@@ -3181,7 +3181,7 @@
 
     use tailles
     use donnees,only:x2,w2,x3,w3
-    use comon,only:auxig,typeof
+    use comon,only:typeof!,auxig
 
     Implicit none
 
@@ -3247,11 +3247,11 @@
 double precision  function func3Jgap(frail)
 ! calcul de l integrant, pour un effet aleatoire donné frail et un groupe donne auxig (cf funcpa)
     use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,eta,tU,ntU,d,dmax, &
-    nva1,nva2,t0dc,t1dc,cdc,nt0dc,nt1dc,ndatedc,datedc,res1,res3,res4,res5,&
-    vedc,aux1,aux2
+    use comon,only:res1,cdc,nig,theta,eta,aux1!,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
+    !mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
+    !nst,stra,ve,pe,effet,nz1,nz2,ng,g,AG,resnonpen,tU,ntU,d,dmax, &
+    !nva1,nva2,t0dc,t1dc,nt0dc,nt1dc,ndatedc,datedc,res3,res4,res5,&
+    !vedc,aux2
 
     implicit none
 
@@ -3288,11 +3288,11 @@ double precision  function func3Jgap(frail)
       double precision  function func4Jyass(frail)
 ! calcul de l integrant, pour un effet aleatoire donné frail et un groupe donne auxig (cf funcpa)
     use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,eta,tU,ntU,d,dmax, &
-    nva1,nva2,t0dc,t1dc,cdc,nt0dc,nt1dc,ndatedc,datedc,res1,res3,res4,res5,&
-    vedc,aux1,aux2
+    use comon,only:theta,eta,res4,res5!,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
+    !mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
+    !nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,tU,ntU,d,dmax, &
+    !nva1,nva2,t0dc,t1dc,cdc,nt0dc,nt1dc,ndatedc,datedc,res1,res3,&
+    !vedc,aux1,aux2
 
     implicit none
 
@@ -3326,11 +3326,11 @@ double precision  function func3Jgap(frail)
       double precision  function func4gap(frail)
 ! calcul de l integrant, pour un effet aleatoire donné frail et un groupe donne auxig (cf funcpa)
      use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,eta,tU,ntU,d,dmax, &
-    nva1,nva2,t0dc,t1dc,cdc,nt0dc,nt1dc,ndatedc,datedc,res1,res3,res4,res5,&
-    vedc,aux1,aux2
+    use comon,only:res1,aux1,theta,cdc,nig!m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
+    !mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
+    !nst,stra,ve,pe,effet,nz1,nz2,ng,g,AG,resnonpen,eta,tU,ntU,d,dmax, &
+    !nva1,nva2,t0dc,t1dc,nt0dc,nt1dc,ndatedc,datedc,res3,res4,res5,&
+    !vedc,aux2
     implicit none
 
       double precision  frail
@@ -3367,11 +3367,11 @@ double precision  function func3Jgap(frail)
       double precision  function func5(frail)
 ! calcul de l integrant, pour un effet aleatoire donné frail et un groupe donne auxig (cf funcpa)
      use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,eta,tU,ntU,d,dmax, &
-    nva1,nva2,t0dc,t1dc,cdc,nt0dc,nt1dc,ndatedc,datedc,res1,res3,res4,res5,&
-    vedc,aux1,aux2
+    use comon,only:aux1,res3,nig,theta,cdc,res1!,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
+    !mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
+    !nst,stra,ve,pe,effet,nz1,nz2,ng,g,AG,resnonpen,eta,tU,ntU,d,dmax, &
+    !nva1,nva2,t0dc,t1dc,nt0dc,nt1dc,ndatedc,datedc,res4,res5,&
+    !vedc,aux2
 
     implicit none
 
@@ -3412,11 +3412,11 @@ double precision  function func3Jgap(frail)
       double precision  function func6(frail)
 ! calcul de l integrant, pour un effet aleatoire donné frail et un groupe donne auxig (cf funcpa)
       use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
-    mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,stra,ve,pe,effet,nz1,nz2,ng,g,nig,AG,resnonpen,theta,eta,tU,ntU,d,dmax, &
-    nva1,nva2,t0dc,t1dc,cdc,nt0dc,nt1dc,ndatedc,datedc,res1,res3,res4,res5,&
-    vedc,aux1,aux2
+    use comon,only:res4,res5,nig,theta!,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
+    !mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
+    !nst,stra,ve,pe,effet,nz1,nz2,ng,g,AG,resnonpen,eta,tU,ntU,d,dmax, &
+    !nva1,nva2,t0dc,t1dc,cdc,nt0dc,nt1dc,ndatedc,datedc,res1,res3,&
+    !vedc,aux1,aux2
     implicit none
 
       double precision  frail

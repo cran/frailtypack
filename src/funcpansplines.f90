@@ -5,12 +5,14 @@
     double precision function funcpansplines(b,np,id,thi,jd,thj,k0)
 
     use tailles
+    !use comon,only:nz2,t0,t1,
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m &
     ,m2m1,m2m,m1m,mm3,mm2,mm1,mm,im3,im2,im1,im &
-    ,date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst &
-    ,stra,pe,effet,nz1,nz2,ve &
+    ,date,zi,c,nt0,nt1,nsujet,nva,ndate,nst &
+    ,stra,pe,effet,nz1,ve &
     ,g,nig,indictronq,AG,auxig,alpha,eta,resnonpen
-    use commun,only:ngexact,nssgexact,mij,mid,ssg,aux1,aux2
+    !use commun,only:nssgexact,
+    use commun,only:ngexact,mij,mid,ssg,aux1,aux2
     use residusM
 
     Implicit none
@@ -510,8 +512,8 @@
     subroutine distancensplines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 
     use tailles
-    use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,&
-    nva,ndate,nst,I_hess,H_hess,Hspl_hess
+    !use comon,only:I_hess,Hspl_hess,t0,t1,nsujet,nt0,nt1,date,c,ndate
+    use comon,only:zi,nva,nst,H_hess
 
     implicit none
 

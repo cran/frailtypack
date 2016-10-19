@@ -278,7 +278,10 @@ if((all.equal(length(hazard),1)==T)==T){
         if (any(ord > 1)) 
             stop("'slope' can not be used in an interaction")
         aux<-temps$vars
-        nnOK<-gsub(")","",gsub("slope\\(","",aux))
+		nnOK1<-gsub(")","",gsub("slope\\(","",aux))
+		if(any(!(c("Min.", "Median", "Mean") %in% names(summary(data[,nnOK1]))))){ # Si le programme ne reconnait pas le vecteur carcateristique d une variable continue
+			nnOK <- dimnames(model.matrix(formula(paste("~",nnOK1)), data=data))[[2]][-1]	
+		}
      }
     else
      {
@@ -319,20 +322,16 @@ if((all.equal(length(hazard),1)==T)==T){
          X <- X[, -1, drop = FALSE]
          noVar<-0
       }     
-
-
+	
+		
     nn<-dimnames(X)[[2]]
+	
 #AD
-    if(!(nnOK %in% ll)) stop("covariate between 'slope()' missing in the terms formula.")
-
-print(c(1:length(nn)))
-print(nn)
-print(nnOK)
+	if(!(nnOK1 %in% ll)) stop("covariate between 'slope()' missing in the terms formula.")
 
     varInt<-c(1:length(nn))[nn==nnOK]
-
-
-    nvar<-ncol(X) 
+	
+	nvar<-ncol(X) 
 
     var<-matrix(c(X),nrow=nrow(X),ncol=nvar)
 

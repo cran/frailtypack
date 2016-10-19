@@ -102,9 +102,12 @@
 ! sachant          un temps de progression varx et temps dc vary
 
     use tailles
-    use comon,only:g,nig,auxig,theta,alpha,aux1,aux2,res1,res3,zi,t0,t1,t0dc,&
-    t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,pe,effet,nz1,nz2,AG
-    use comongroup,only:gsuj,nigdc,expb1,expb2,the1,the2
+    !use comon,only:AG,auxig,c,cdc,effet,ndate,ndatedc,nst,nsujet,nt0,nt1,&
+    !nt0dc,nt1dc,nva,nva1,nva2,t0,t1,t0dc,t1dc,pe,aux1,aux2,g,nig,res1,res3
+    use comon,only:theta,alpha,zi,nz1,nz2
+    
+    !use comongroup,only:gsuj,nigdc
+    use comongroup,only:expb1,expb2,the1,the2
 
     implicit none
 
@@ -155,10 +158,13 @@
     double precision function integrant4(frail,varx,vary) 
 ! calcul de l integrant, pour un effet aleatoire donn� frail et un groupe donne auxig (cf funcpa)      
     use tailles
-    use comon,only:g,nig,auxig,theta,alpha,aux1,aux2,res1,res3,date,datedc,zi,t0,t1,t0dc,&
-    t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,pe,effet,nz1,nz2,&
-    AG
-    use comongroup,only:gsuj,nigdc,vet,vet2,expb1,expb2,the1,the2
+    !use comon,only:AG,g,nig,auxig,c,cdc,nt0,nt1,nt0dc,&
+    !nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,pe,effet,&
+    !t0,t1,t0dc,t1dc,aux1,aux2,date,datedc,res1,res3
+    use comon,only:theta,alpha,zi,nz1,nz2
+    
+    !use comongroup,only:vet,vet2,gsuj,nigdc
+    use comongroup,only:expb1,expb2,the1,the2
 
     implicit none
 
@@ -202,7 +208,7 @@
       subroutine gaulagKend34(ss,xx,yy,choix) 
 
     use tailles
-    use comon,only:auxig
+    !use comon,only:auxig
     use donnees,only:w,x
 
     implicit none
@@ -242,7 +248,7 @@
     subroutine gaulagKend2(ss,yy) 
 
     use tailles
-    use comon,only:auxig
+    !use comon,only:auxig
     use donnees,only:w,x
 
     implicit none
@@ -273,7 +279,7 @@
     subroutine gaulagKend1(ss) 
 
     use tailles
-    use comon,only:auxig
+    !use comon,only:auxig
     use donnees,only:w,x
 
     implicit none
@@ -306,9 +312,11 @@
     subroutine gaulagKend2bis(ss,ui) 
 
     use tailles
-    use comon,only:date,datedc,zi,t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,&
-    nva,nva1,nva2,ndate,ndatedc,nst,pe,effet,nz1,nz2,AG,auxig,alpha,theta
-    use comongroup,only:vet,vet2,expb1,expb2,the1,the2
+    !use comon,only:AG,auxig,nva,nva1,nva2,ndate,ndatedc,nst,pe,effet,t0,t1,t0dc,&
+    !t1dc,c,cdc,nt0,nt1,nt0dc,nt1dc,nsujet,date,datedc,
+    use comon,only:zi,nz1,nz2,alpha,theta
+    !use comongroup,only:expb1,expb2,vet,vet2
+    use comongroup,only:the1,the2
     use donnees,only:w,x
 
     implicit none
@@ -351,7 +359,7 @@
     subroutine gaulagKend1bis(ss) 
 
     use tailles
-    use comon,only:auxig
+    !use comon,only:auxig
     use donnees,only:w,x
 
     implicit none

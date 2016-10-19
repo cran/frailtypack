@@ -82,8 +82,7 @@
     double precision,dimension(1,nva0)::Xcoef
     double precision,dimension(2,2)::sigma
     double precision,dimension(3),intent(inout)::EPS ! seuils de convergence
-
-    
+        
 !cpm
     indic_cumul=0
     istopp=0
@@ -97,7 +96,6 @@
     epsb=EPS(2) !1.d-4
     epsd=EPS(3) !1.d-3
     typeof = typeof0
-
     model=2
 !------------------------
     if (typeof .ne. 0) then
@@ -121,7 +119,6 @@
     
     xmin2=xmin20
     xmin1=xmin10
-
 !-----------------------------------------------------------------------------------------
     
     nsujet=ns0
@@ -143,7 +140,6 @@
 
 
     allocate(cumulhaz1(ngmax,2))
-
 !-----------------------------------------------------------------------------------------
     nst=nst0
     correl=correl0  
@@ -162,9 +158,7 @@
         filtre=1
         filtre2(interaction)=1
         nva=nva0  
-    end if  
-    
-            
+    end if        
     ag=ag0
     
 
@@ -180,7 +174,7 @@
     k = 0
     cptstr1 = 0
     cptstr2 = 0
-
+    
     do i = 1,nsujet
 
         if (i.eq.1) then
@@ -315,6 +309,7 @@
             mint = t0(k)
         endif
     end do 
+    
 !AD:
     if (typeof .ne. 0) then 
         cens = maxt
@@ -340,7 +335,7 @@
     
     min = 1.d-10
     max = maxt
-
+    
     do i = 1,2*nsujet
         do k = 1,nsujet
             if((t0(k).ge.min))then
@@ -358,7 +353,7 @@
         min = max + 1.d-12
         max = maxt
     end do
-
+    
     date(1) = aux(1)
     k = 1
     do i=2,2*nsujet
@@ -369,6 +364,7 @@
     end do 
     
     if(typeof == 0) then
+    
 
 ! Al:10/03/2014 emplacement des noeuds splines en percentile (sans censure par intervalle)
         i=0
@@ -412,7 +408,6 @@
         zi(nz+3) = maxt !zi(nz)
         ziOut = zi
         deallocate(t2)
-
 !         nzmax=nz+3
 !         allocate(zi(-2:nzmax))
 !     
@@ -432,6 +427,7 @@
 !         zi(nz+2)=zi(nz)
 !         zi(nz+3)=zi(nz)
 !         ziOut = zi
+
 
     end if
 !---------- affectation nt0,nt1----------------------------
@@ -459,7 +455,7 @@
             end do
         end if
 
-    end do  
+    end do 
 
 !---------- affectation des vecteurs de splines -----------------
     if (typeof == 0) then
@@ -467,7 +463,7 @@
     
         call vecspliadd(n,ndate)
     
-    
+        
         allocate(m3m3(nzmax),m2m2(nzmax),m1m1(nzmax),mmm(nzmax),m3m2(nzmax), &
         m3m1(nzmax),m3m(nzmax),m2m1(nzmax),m2m(nzmax),m1m(nzmax))
         
@@ -485,7 +481,7 @@
 !    end if
     
     npmax=np
-
+    
     allocate(b_temp(np))
     allocate(I_hess(npmax,npmax),H_hess(npmax,npmax),Hspl_hess(npmax,npmax) &
     ,hess(npmax,npmax),PEN_deri(npmax,1))
@@ -700,7 +696,8 @@
             end if    
         end if
     end if
-
+    
+    
     if(typeof == 0) then
         nva=nvacross ! pour la recherche des parametres de regression
         nst=nstcross ! avec stratification si n�cessaire
@@ -724,7 +721,8 @@
 
     if (typeof .ne. 0) then
         allocate(vvv((npmax*(npmax+1)/2))) !,kkapa(2))
-    end if
+    end if    
+    
 !=============================- fin cross validation
     
 !===== initialisation des parametres de regression/pas effets aleatopires
@@ -764,7 +762,6 @@
 !    write(*,*)'== ensemble des parametres ======='
 !    write(*,*)'====================================='
     
-    
     effet=1
     correl=correlini
     do i=1,nva
@@ -787,13 +784,12 @@
     select case(typeof)
         case(0)
             call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaasplines)
-        case(1)
-            call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaacpm)
+        case(1)            
+            call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaacpm)            
         case(2)
             call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaaweib)
     end select
-
-!    write(*,*)'fin marquardt'
+    !    write(*,*)'fin marquardt'
 !Al:
     EPS(1) = ca
     EPS(2) = cb
@@ -809,7 +805,7 @@
     trace=0
     trace1=0
     trace2=0
-
+    
     select case(typeof)
         case(0)    
 ! que lorsque la matrice totale est inversible, ie sans echec inversion
@@ -899,8 +895,7 @@
                 end do
             endif ! pour la deuxieme strate
     end select
-
-
+    
     call multiJ(I_hess,H_hess,np,np,np,IH)
     call multiJ(H_hess,IH,np,np,np,HIH)
 ! Salida Juan Aug'07
@@ -967,6 +962,7 @@
             end if
             Call distanceweib(b,np,mt,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
     end select
+        
 !    write(*,*)'===========> apres distance <==========='
     if (nst == 1) then
         scaleweib(1) = etaR !betaR
@@ -995,6 +991,7 @@
         LCV(2) = (1.d0 / nsujet) * (np - res)
 !        write(*,*)'======== AIC :',LCV(2)
     end if
+    
 !AD:end     
 1000    continue
     trunc = indic_tronc
@@ -1801,21 +1798,20 @@
     double precision function estimvadd(k00,n,b,y,aux,ni,res)
     
     use tailles
-    use comon,only:t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,&
-    date,zi,pe,effet,nz1,nz2,mm3,mm2,mm1,mm,im3,im2,im1,im
-    use additiv,only:correl
+    !use comon,only:c,nst,nsujet,nt0,nt1,nva,nz1,nz2,t0,t1,
+    use comon,only:ndate,date,zi,pe,effet,mm3,mm2,mm1,mm,im3,im2,im1,im
+    !use additiv,only:correl
     use optim
     
     implicit none
-    
+    integer n,ij,i,k,j,vj,ier,istop,ni
     double precision,dimension((n*(n+3)/2))::v
     double precision,dimension(n,n)::y
     double precision,dimension(ndatemax)::ut,dut
     double precision,dimension(n)::bh,b
     double precision,dimension(-2:npmax)::the    
     double precision::res,k00,som,h1,aux
-    double precision,dimension(2)::k0
-    integer n,ij,i,k,j,vj,ier,istop,ni
+    double precision,dimension(2)::k0    
     double precision::ca,cb,dd,funcpaasplines
     external::funcpaasplines
     
@@ -1877,7 +1873,7 @@
     subroutine testadd(dut,k0,n,res,y)
     
     use tailles
-    use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst
+    !use comon,only:c,nst,nsujet,date,nt0,nt1,nva,t0,t1,ndate,zi
     implicit none
     
     integer::n,i,j,np
@@ -1885,16 +1881,13 @@
     double precision,dimension(npmax,npmax)::hessh,hess,omeg,y
     double precision,dimension(ndatemax)::dut
     integer,dimension(npmax)::indx     
-    double precision,dimension(2)::k0
-    
-    
+    double precision,dimension(2)::k0 
     
     do i = 1,n
         do j = 1,n
         hess(i,j) = 0.d0 
         end do
-    end do
-    
+    end do    
     
     do i = 1,n
         do j = i,n
@@ -1905,8 +1898,7 @@
         do j = 1,i-1
             hess(i,j)=hess(j,i)
         end do
-    end do
-    
+    end do    
     
     call calcomegadd(n,omeg)
     
@@ -1981,9 +1973,7 @@
     
     return
     
-    end subroutine lubksbadd
-    
-    
+    end subroutine lubksbadd    
 
 !======================  LUDCMP  ======================================
     subroutine ludcmpadd(a,n,indx,d)
@@ -2061,7 +2051,8 @@
     subroutine calcomegadd(n,omeg)
     
     use tailles
-    use comon,only:date,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    !use comon,only:date,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m2m1,m2m,m1m
+    use comon,only:m3m
     
     implicit none
     
@@ -2123,7 +2114,8 @@
     subroutine matadd(res,dut,k,l,n)
     
     use tailles
-    use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst
+    !use comon,only:nst,t0,t1,nt0,nva,ndate
+    use comon,only:date,zi,c,nt1,nsujet
 
     implicit none
     
@@ -2321,7 +2313,8 @@
     double precision function calc00add(j,n) 
     
     use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    !use comon,only:m3m2,m3m1,m3m,m2m1,m2m,m1m
+    use comon,only:m3m3,m2m2,m1m1,mmm
         
     implicit none
     
@@ -2366,7 +2359,8 @@
     double precision function calc01add(j,n)
     
     use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    !use comon,only:m3m3,m2m2,m1m1,mmm,m3m1,m3m,m2m
+    use comon,only:m3m2,m2m1,m1m
         
     implicit none
     
@@ -2403,7 +2397,8 @@
     double precision function calc02add(j,n)
     
     use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    !use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m,m2m1,m1m
+    use comon,only:m3m1,m2m
         
     implicit none
     
@@ -2432,7 +2427,3 @@
 
 
 !===============================    MARQ98AUX =========================
-!
-
-     
-

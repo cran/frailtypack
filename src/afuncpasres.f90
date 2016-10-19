@@ -186,7 +186,8 @@
     
     use comon
         use residusM
-    use additiv,only:mid,Xbeta,ve2,ut1,ut2    
+    !use additiv,only:mid,Xbeta
+    use additiv,only:ve2,ut1,ut2    
 
     implicit none
 

@@ -1,6 +1,6 @@
 Package: frailtypack
-Version: 2.9.4
-Date: 2016-07-25
+Version: 2.10.3
+Date: 2016-10-19
 Title: General Frailty Models: Shared, Joint and Nested Frailty Models
         with Prediction
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
@@ -18,13 +18,13 @@ Description: The following several classes of frailty models using a penalized l
 		7) Multivariate joint frailty models for two types of recurrent events and a terminal event.
 		8) Joint models for longitudinal data and a terminal event.
 		9) Trivariate joint models for longitudinal data, recurrent events and a terminal event. 
-		Prediction values are available. Left-truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard and shared frailty model) and strata are allowed. In each model, the random effects have the gamma or normal distribution. Now, you can also consider time-varying covariates effects in Cox, shared and joint frailty models (1-5). The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
+		Prediction values are available (for a terminal event or for a new recurrent event). Left-truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard and shared frailty model) and strata are allowed. In each model, the random effects have the gamma or normal distribution. Now, you can also consider time-varying covariates effects in Cox, shared and joint frailty models (1-5). The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 License: GPL (>= 2.0)
 URL:
         http://virginierondeau.com/BiostatisticalConsulting/Liste_of_examples.html
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 Repository: CRAN
-Date/Publication: 2016-07-25 20:36:29
-Packaged: 2016-07-25 13:13:31 UTC; rondeau
+Date/Publication: 2016-10-19 13:07:20
+Packaged: 2016-10-19 07:31:05 UTC; ml12
 NeedsCompilation: yes

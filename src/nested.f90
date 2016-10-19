@@ -20,10 +20,11 @@
     use parameters
     use optim
     use commun
-    use comon,only:date,zi,t0,t1,c,nt0,nt1,ve,stra,pe,effet,nz1,nz2,I_hess,H_hess,&
+    use comon,only:date,zi,t0,t1,c,nt0,nt1,ve,stra,effet,nz1,nz2,I_hess,H_hess,&
     Hspl_hess,g,nig,indictronq,ag,mm3,mm2,mm1,mm,im3,im2,im1,im,m3m3,m2m2,m1m1,mmm,m3m2, &
-    m3m1,m3m,m2m1,m2m,m1m,auxig,alpha,eta,resnonpen,nsujet,nva,ndate,nst,model,hess,typeof, &
-    ttt,betacoef,typeof2,t2,vvv,nbintervR,cens,kkapa,nbrecu,etaR,etaD,betaR,betaD
+    m3m1,m3m,m2m1,m2m,m1m,resnonpen,nsujet,nva,ndate,nst,model,hess,typeof, &
+    ttt,betacoef,typeof2,t2,vvv,nbintervR,cens,nbrecu,etaR,etaD,betaR,betaD
+    !alpha,auxig,pe,eta,kkapa
     use perso
     use residusM
 
@@ -1203,7 +1204,7 @@
     subroutine vecpenN(n) 
 
     use tailles
-    use comon,only:date,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    use comon,only:zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m!date
 
     Implicit none
 
@@ -1814,9 +1815,9 @@
     double precision function estimvN(k00,n,b,y,aux,ni,res)
 
     use tailles
-        use optim
-    use comon,only:t0,t1,c,nt0,nt1,nsujet,nva &
-    ,ndate,nst,date,zi,pe,effet,nz1,nz2,mm3,mm2,mm1,mm,im3,im2,im1,im
+    use optim
+    use comon,only:ndate,date,zi,pe,effet,mm3,mm2,mm1,mm,im3,im2,im1,im
+    !nt0,nt1,nva,t0,t1,c,nsujet,nst,nz1,nz2
 
     Implicit none
 
@@ -1889,7 +1890,7 @@
     subroutine testN(dut,k0,n,res,y)
 
     use tailles
-    use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst
+    !use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst
 
     Implicit none
 
@@ -2070,8 +2071,7 @@
     subroutine calcomegN(n,omeg)
 
     use tailles
-    use comon,only:date,zi,m3m3,m2m2,m1m1,mmm,m3m2 &
-    ,m3m1,m3m,m2m1,m2m,m1m
+    use comon,only:m3m!,m3m1,m3m3,mmm,m3m2,m2m1,m2m,m2m2,m1m,m1m1,date,zi
 
     Implicit none
 
@@ -2135,7 +2135,7 @@
     subroutine matN(res,dut,k,l,n)
 
     use tailles
-    use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst
+    use comon,only:date,zi,c,nt1,nsujet!,nva,ndate,nstnt0,t0,t1
 
     Implicit none
 
@@ -2264,7 +2264,7 @@
     double precision function calc00N(j,n)
 
     use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    use comon,only:m3m3,m2m2,m1m1,mmm!,m3m2,m3m1,m2m1,m3m,m2m,m1m
 
     Implicit none
 
@@ -2308,7 +2308,7 @@
     double precision function calc01N(j,n)
 
     use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    use comon,only:m1m,m2m1,m3m2!,m2m,m3m,m1m1,m2m2,m3m3,m3m1,mmm
 
     Implicit none
 
@@ -2344,7 +2344,7 @@
     double precision function calc02N(j,n)
 
     use tailles
-    use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    use comon,only:m3m1,m2m!,m1m,m3m,m2m1,m3m3,m2m2,m1m1,mmm,m3m2
 
     Implicit none
 
@@ -2403,8 +2403,8 @@
     SUBROUTINE qgauss1N(a,b,ss) ! sans troncature
 
     use tailles
-    use comon,only:auxig
-    use commun,only:mij,mid,ngexact,nssgexact
+    !use comon,only:auxig
+    !use commun,only:mij,mid,ngexact,nssgexact
     Implicit none
 
     double precision :: a,b,ss
@@ -2441,7 +2441,7 @@
     SUBROUTINE gaulagN(ss,choix) 
 
     use tailles
-    use comon,only:auxig
+    !use comon,only:auxig
     Implicit none
 
     double precision::ss,auxfunca,func0N,func1N,func2N,func3N,func4N &
@@ -2494,9 +2494,10 @@
 ! calcul de l integrant, pour un effet aleatoire donne frail et un groupe donne auxig (cf funcpa)
 
     use tailles
-    use comon,only:auxig,g,nig,stra &
-    ,indictronq,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,alpha,eta 
-    use commun,only:ngexact,nssgexact,aux1,aux2,ssg,mij,mid
+    use comon,only:auxig,g,nsujet,alpha,eta
+    !t0,t1,c,nt0,nt1,indictronq,stra,nva,nig,ndate,nst
+    
+    use commun,only:ngexact,aux1,ssg,mij,mid!nssgexact,aux2
     use residusM,only:n_ssgbygrp
     Implicit none
 
@@ -2573,10 +2574,10 @@
 ! calcul de l integrant, pour un effet aleatoire donne frail et un groupe donne auxig (cf funcpa)
 
     use tailles
-    use comon,only:auxig,g,nig &
-    ,stra,alpha,eta,indictronq &
-    ,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst
-    use commun,only:ssg,ngexact,nssgexact,aux1,aux2,mij,mid
+    use comon,only:auxig,g &
+    ,alpha,eta,indictronq, &
+    nsujet!c,ndate,nig,nst,nt0,nt1,nva,t0,t1,stra
+    use commun,only:ssg,ngexact,aux2!aux1,mid,mij,nssgexact
     use residusM,only:n_ssgbygrp
 
     Implicit none
@@ -2620,10 +2621,10 @@
     double precision function func3N(frail)
 
     use tailles
-    use comon,only:auxig,g,nig &
-    ,stra,alpha,eta,indictronq &
-    ,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst
-    use commun,only:ssg,ngexact,nssgexact,aux1,aux2,mij,mid
+    use comon,only:auxig,g,alpha,eta,indictronq,nsujet
+    !t0,t1,c,nt0,nt1,nva,ndate,nst,stra,nig
+    
+    use commun,only:ssg,ngexact,aux1,aux2,mij,mid!nssgexact
     use residusM,only:n_ssgbygrp
 
     Implicit none

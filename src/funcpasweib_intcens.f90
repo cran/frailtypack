@@ -3,8 +3,9 @@
 !========================          FUNCPA_WEIB_INTCENS          ====================
     double precision function funcpasweib_intcens(b,np,id,thi,jd,thj,k0)
     use tailles
+    !use comon,only:AG,nig
     use comon,only:t0,t1,c,nsujet,nva, &
-    nst,stra,ve,effet,ng,g,nig,AG,etaR,etaD,betaR,betaD,kkapa,theta,tU,d,dmax ! rajouts
+    nst,stra,ve,effet,ng,g,etaR,etaD,betaR,betaD,kkapa,theta,tU,d,dmax ! rajouts
         use residusM
     
     

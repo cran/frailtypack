@@ -1130,7 +1130,7 @@
             endif
             
             if (ni > 300) then !Au dela de 300 iteration la bar ne peut pas s'afficher (inpr limite a 255 caracteres), 
-			! on fait le choix de laisser apparaître les iteration malgre tout
+            ! on fait le choix de laisser apparaître les iteration malgre tout
                 call intpr('Iteration:', -1, ni, 1)
             else
                 call intpr(bar, -1, ni, 0)
@@ -1638,8 +1638,9 @@
     !AD:end
         use tailles
     !AD:
-        use comon,only:date,datedc,zidc,mm3,mm2,mm1,mm,im3,im2,im1,im &
-        ,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc
+        use comon,only:datedc,zidc,mm3dc,mm2dc,&
+         mm1dc,mmdc,im3dc,im2dc,im1dc,imdc
+        !,date,im,im1,im3,im2,mm3,mm2,mm1,mm
     !AD:end
         IMPLICIT NONE
     
@@ -1704,7 +1705,7 @@
     
         use tailles
         use donnees
-        use comon,only:auxig,typeof,nb1,typeJoint,nea,methodGH,invBi_cholDet
+        use comon,only:nb1,typeJoint,nea,methodGH,invBi_cholDet!auxig,typeof
         use donnees_indiv,only : frailpol,frailpol2,numpat
         Implicit none
     
@@ -1796,7 +1797,7 @@
     
         use tailles
         use donnees
-        use comon,only:auxig,typeof,nb1,typeJoint,nea,methodGH,invBi_cholDet
+        use comon,only:methodGH,invBi_cholDet!auxig,typeof,nb1,typeJoint,nea
         use donnees_indiv,only : frailpol,numpat
         Implicit none
     
@@ -1868,7 +1869,7 @@
     
         use tailles
         use donnees
-        use comon,only:auxig,typeof,nb1,typeJoint,nea,methodGH,invBi_cholDet
+        use comon,only:methodGH,invBi_cholDet!auxig,typeof,nb1,typeJoint,nea
         use donnees_indiv,only : frailpol,numpat
         Implicit none
     
@@ -1940,7 +1941,7 @@
     
         use tailles
         use donnees
-        use comon,only:auxig,typeof,nb1,typeJoint,nea,methodGH,invBi_cholDet
+        use comon,only:methodGH,invBi_cholDet!auxig,typeof,nb1,typeJoint,nea
         use donnees_indiv,only : frailpol2,numpat
         Implicit none
     
@@ -2009,11 +2010,12 @@
         double precision function func6JL(frail)
     
         use tailles
-        use comongroup,only:vet,vet2
+        use comongroup,only:vet2!vet
         use optim
-    use comon,only:auxig,alpha,sig2,res1,res3,aux1,nig,cdc,sigmae,nmesy,&
-            nva2,npp,nva3,vedc,nea,nb1,betaD,etaD,t1dc,etaydc1,link,t0dc,&
-            vey,typeof,s_cag_id,s_cag,ut,utt,methodGH,b_lme,invBi_chol
+        use comon,only:aux1,cdc,sigmae,nmesy,&
+            nva2,npp,nva3,vedc,betaD,etaD,t1dc,etaydc1,link,t0dc,&
+            vey,typeof,s_cag_id,s_cag,ut,methodGH,b_lme,invBi_chol
+            !auxig,alpha,sig2,res1,res3,nb1,nea,nig,utt,
         use donnees_indiv
         IMPLICIT NONE
     
@@ -2173,10 +2175,11 @@
         use optim
     
         use tailles
-        use comongroup,only:vet,vet2
-        use comon,only:auxig,alpha,sig2,res1,res3,aux1,nig,cdc,sigmae,nmesy,&
-            nva2,npp,nva3,vedc,nea,nb1,betaD,etaD,t0dc,t1dc,etaydc1,etaydc2,link,&
+        use comongroup,only:vet2!vet
+        use comon,only:aux1,cdc,sigmae,nmesy,&
+            nva2,npp,nva3,vedc,nb1,betaD,etaD,t0dc,t1dc,etaydc1,etaydc2,link,&
             vey, typeof,s_cag_id,s_cag,ut,utt,methodGH,b_lme,invBi_chol
+            !auxig,alpha,sig2,res1,res3,nig,nea
         use donnees_indiv
         IMPLICIT NONE
     
@@ -2409,12 +2412,12 @@
     use optim
     
         use tailles
-            use comongroup,only:vet,vet2
+        use comongroup,only:vet,vet2
         use comon,only:alpha,res1,res3,aux1,nig,cdc,sigmae,nmesy,&
-                    nva2,nva1,npp,nva3,vedc,ve,nb1,nea,betaD,etaD,t1dc,etaydc1,etayr1,&
-            t0,t1,betaR,etaR,effet,nb_re,nva,typeof,vey,c,link,s_cag_id,s_cag,ut,utt,&
-                    t0dc,methodGH,b_lme,invBi_chol
-            use donnees_indiv
+            nva2,nva1,npp,nva3,vedc,ve,nb1,nea,betaD,etaD,t1dc,etaydc1,etayr1,&
+            t0,t1,betaR,etaR,typeof,vey,c,link,s_cag_id,s_cag,ut,utt,&
+            t0dc,methodGH,b_lme,invBi_chol!effet,nb_re,nva
+        use donnees_indiv
     
         IMPLICIT NONE
     
@@ -2711,12 +2714,12 @@
     use optim
     
         use tailles
-            use comongroup,only:vet,vet2
+        use comongroup,only:vet,vet2
         use comon,only:alpha,res1,res3,aux1,nig,cdc,sigmae,nmesy,&
-                    nva2,nva1,npp,nva3,vedc,ve,nea,nb1,betaD,etaD,t1dc,etaydc1,etayr1,&
-                    t0,t1,betaR,etaR,effet,etaydc2,etayr2,typeof,link,nva,vey,c,s_cag_id,s_cag,&
-                    ut,utt,t0dc,t1dc,methodGH,b_lme,invBi_chol
-            use donnees_indiv
+            nva2,nva1,npp,nva3,vedc,ve,nea,nb1,betaD,etaD,t1dc,etaydc1,etayr1,&
+            t0,t1,betaR,etaR,etaydc2,etayr2,typeof,link,vey,c,s_cag_id,s_cag,&
+            ut,utt,t0dc,t1dc,methodGH,b_lme,invBi_chol!effet,nva
+        use donnees_indiv
             IMPLICIT NONE
     
         double precision,intent(in)::frail,frail2,frail3

@@ -4,10 +4,11 @@
 !========================          funcpajng NEW         ====================
     double precision function funcpaGweib_intcens(b,np,id,thi,jd,thj,k0)
 
+    !use comon,only:indictronqdc
     use comon,only:etaR,etaD,betaR,betaD, &
     t0,t1,tU,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst,&
     stra,ve,vedc,effet,ng,g,nig,AG,indic_ALPHA,theta,alpha,&
-    auxig,aux1,aux2,res1,res3,indictronq,indictronqdc,resL,resU,kkapa
+    auxig,aux1,aux2,res1,res3,indictronq,resL,resU,kkapa
     use tailles
     use comongroup
     use residusM

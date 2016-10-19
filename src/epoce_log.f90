@@ -239,12 +239,12 @@
 
     implicit none
 
+    integer::m,i,k,id,nsujet,nobs
     double precision::funcpi_logN,thn,th,z,temp1,temp2,valT
     double precision,dimension(m,1)::Uscore,Uscore2
     double precision,dimension(m)::b
     double precision,dimension(m,m)::V
-    double precision,dimension(nsujet)::rlindiv
-    integer::m,i,k,id,nsujet,nobs
+    double precision,dimension(nsujet)::rlindiv    
     integer,dimension(nsujet)::indT
 
     V = 0.d0
@@ -304,8 +304,8 @@
 
     double precision function funcpi_LogN(nobs,b,np,id,thi,jd,thj,i,choix,valT)
 
-    use comon,only:typeof,nst,nbintervR,nbintervDC,nva,ve,effet,nz1,nz2, &
-    zi,ttt,c,stra,date,datedc,ndate,ndatedc,nva1,nva2,vedc,t0,t1,t1dc,tttdc,g,cdc
+    !use comon,only:typeof,nst,nbintervR,nbintervDC,nva,ve,effet,nz1,nz2, &
+    !zi,ttt,c,stra,date,datedc,ndate,ndatedc,nva1,nva2,vedc,t0,t1,t1dc,tttdc,g,cdc
 
     implicit none
 
@@ -349,7 +349,8 @@
 
     use tailles
     use donnees,only:x2,w2,x3,w3
-    use comon,only:auxig,typeof
+    !use comon,only:auxig
+    use comon,only:typeof
     implicit none
 
     integer,intent(in)::np,choix,i,nobs,all
@@ -396,8 +397,9 @@
     double precision function func1E_LogN(frail,bh,np,i,nobs,valT,all) ! integrale 1 au numerateur
     ! recurrences + deces
 
+    !use comon,only:stra
     use comon,only:typeof,nst,nbintervR,nbintervDC,nva,ve,effet,nz1,nz2, &
-    zi,ttt,c,stra,date,datedc,ndate,ndatedc,nva1,nva2,vedc,t0,t1,t1dc,tttdc,g,cdc
+    zi,ttt,c,date,datedc,ndate,ndatedc,nva1,nva2,vedc,t0,t1,t1dc,tttdc,g,cdc
 
     IMPLICIT NONE
 
@@ -601,8 +603,9 @@
     double precision function func2E_LogN(frail,bh,np,i,nobs,valT) ! integrale 2 au denominateur
     ! recurrences
 
+    !use comon,only:stra,datedc,ndatedc,t1dc,cdc
     use comon,only:typeof,nst,nbintervR,nbintervDC,nva,ve,effet,nz1,nz2, &
-    zi,ttt,c,stra,date,datedc,ndate,ndatedc,nva1,nva2,vedc,t0,t1,t1dc,tttdc,g,cdc
+    zi,ttt,c,date,ndate,nva1,nva2,vedc,t0,t1,tttdc,g
 
     IMPLICIT NONE
 

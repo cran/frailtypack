@@ -5,9 +5,10 @@
     double precision function funcpancpm(b,np,id,thi,jd,thj,k0)
 
     use tailles
+    !use comon,only:nssgexact
     use comon,only:t0,t1,c,nsujet,nva,nst,indictronq &
     ,stra,effet,ve,g,nig,AG,auxig,alpha,eta,betacoef,kkapa,nbintervR,ttt
-    use commun,only:ngexact,nssgexact,mij,mid,ssg,aux1,aux2
+    use commun,only:ngexact,mij,mid,ssg,aux1,aux2
     use residusM
 
     Implicit none

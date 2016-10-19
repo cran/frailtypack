@@ -184,7 +184,7 @@
     ! This subroutine calculates i2 th basis of spline of
     ! degree (i3-1).
     IMPLICIT NONE
-    integer*4 i1, i2, i3
+    integer(kind=4) i1, i2, i3
     double precision y, newknots(i1), temp1, temp2, result, result1, result2
     external dumsub
 
@@ -226,11 +226,11 @@
 ! where d is the degree of the splines.
 ! k=number of spline basis=m1+d+1
     IMPLICIT NONE
-    integer*4 d, k, m, m1
+    integer(kind=4) d, k, m, m1
     double precision x, innerknots(m1), boundaryknots(2)
     double precision newknots(m), basis(k), result
     external bb
-    integer*4 i1, j
+    integer(kind=4) i1, j
 
     do i1=1, (d+1)
         newknots(i1)=boundaryknots(1)
@@ -345,11 +345,11 @@
     ! where d is the degree of the splines.
     ! k=number of spline basis=m1+d+1
     IMPLICIT NONE
-    integer*4 d, k, m, m1, n
+    integer(kind=4) d, k, m, m1, n
     double precision x(n), innerknots(m1), boundaryknots(2)
     double precision newknots(m), basis(n, k), result
     external bb
-    integer*4 i1, i, j
+    integer(kind=4) i1, i, j
 
     do i1=1, (d+1)
         newknots(i1)=boundaryknots(1)
@@ -989,10 +989,10 @@
 !
     double precision FUNCTION FindDet(matrix, n)
     IMPLICIT NONE
-    double precision, DIMENSION(n,n) :: matrix
     INTEGER, INTENT(IN) :: n
     double precision :: m, temp
     INTEGER :: i, j, k, l
+    double precision, DIMENSION(n,n) :: matrix
     LOGICAL :: DetExists = .TRUE.
     l = 1
     !Convert to upper triangular form
@@ -1038,7 +1038,7 @@
 !C
 !C
 !C
-!C     Fonctions pour calculer une fonction de répartition issue d'une
+!C     Fonctions pour calculer une fonction de repartition issue d'une
 !C     loi normale
 !C                                   ajout le 28/04/2014
 !C

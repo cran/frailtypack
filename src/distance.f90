@@ -2,10 +2,10 @@
 
 !     subroutine distancessplines(nz1,nz2,b,effet,mt,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
     subroutine distancessplines(nz1,b,effet,mt,xTOut,lamTOut,suTOut)
-
-    use tailles,only:ndatemax,npmax,NSUJETMAX
-    use comon,only:date,zi,t0,t1,c,nt0,nt1,nsujet,nva,ndate, &
-    nst,I_hess,H_hess,Hspl_hess,hess
+    !use tailles,only:ndatemax,NSUJETMAX
+    use tailles,only:npmax
+    !use comon,only:c,Hspl_hess,I_hess,ndate,nsujet,nt0,nt1,t0,t1,H_hess,date
+    use comon,only:zi,nva,nst,hess
 
     implicit none
 
@@ -176,7 +176,6 @@
 
         end do
     end do
-
     return
 
     end subroutine distancessplines
@@ -189,7 +188,8 @@
     subroutine distancecpm(b,m,mt,xR1,moyLamR1,xSu1,moysuR1,xR2,moyLamR2,xSu2,moysuR2)
 
     use tailles
-    use comon,only:cens,vvv,t0,t1,c,nsujet,nva,nva1,nva2,nst,nbrecu,nbintervR,ttt,date
+    !use comon,only:c,nsujet,t0,t1,nbrecu,nva1,nva2,cens,nva
+    use comon,only:vvv,nst,nbintervR,ttt,date
     use optim
 
     implicit none
@@ -628,8 +628,8 @@
     subroutine distanceweib(b,m,mt,xR1,moyLamR1,xSu1,moysuR1,xR2,moyLamR2,xSu2,moysuR2)
     
     use tailles
-    use comon,only:cens,vvv,t0,t1,c,nsujet &
-    ,nva,nva1,nva2,nst,typeof2,etaR,etaD,betaR,betaD,date,mint
+    !use comon,only:c,nsujet,t0,t1,nva1,nva2,date
+    use comon,only:cens,vvv,nva,nst,typeof2,etaR,etaD,betaR,betaD,mint
     use optim
     
     implicit none
@@ -917,8 +917,8 @@
     subroutine distanceSweib(b,m,mt,xT,moyLamT,xSuT,moysuT)
 
     use tailles
-    use comon,only:cens,vvv,t0,t1,c,nsujet &
-    ,nva,nva1,nva2,nst,typeof2,etaR,etaD,betaR,betaD,date,mint,betaT,etaT ! en plus
+    !use comon,only: c,nsujet,t0,t1,nva1,nva2,typeof2,date,nva,betaD,betaR,etaD,etaR
+    use comon,only:cens,vvv,nst,mint,betaT,etaT ! en plus
     use optim
 
     implicit none
@@ -1012,10 +1012,9 @@
             ii=1 !en plus
             do jj=1,nst
                 lamT(k,jj)=(bgen(ii)*(x**(bgen(ii)-1.d0)))/(bgen(ii+1)**bgen(ii))
-                lamTW(jj)=((b(ii)**2)*(x**((b(ii)**2)-1.d0)))/((b(ii+1)**2)**(b(ii)**2))
+                lamTW(jj)=((b(ii)**2)*(x**((b(ii)**2)-1.d0)))/(((b(ii+1)**2))**(b(ii)**2))
                 ii=ii+2
-            end do
-            
+            end do            
         end do
 
 ! Classer les diffÃ©rent vecteur et en sortir les 2.5 et 97.5 percentiles
@@ -1135,7 +1134,8 @@
     subroutine distanceScpm(b,m,mt,xT,moyLamT,xSuT,moysuT) !en plus
 
     use tailles
-    use comon,only:cens,vvv,t0,t1,c,nsujet,nva,nva1,nva2,nst,nbrecu,nbintervR,ttt,date
+    !use comon,only:c,nsujet,t0,t1,nbrecu,nva1,nva2,cens,nva
+    use comon,only:vvv,nst,nbintervR,ttt,date
     use optim
 
     implicit none
@@ -1381,9 +1381,9 @@
     subroutine distanceJsplines(nz1,nz2,b,mt1,mt2,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 
     use tailles
-    use comon,only:date,datedc,zi,t0,t1,t0dc,t1dc,c,cdc &
-    ,nt0,nt1,nt0dc,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst &
-    ,PEN_deri,I_hess,H_hess,Hspl_hess,hess,nstRec
+    !use comon,only:c,Hspl_hess,I_hess,ndate,nsujet,nt0,nt1,t0,t1,nva1,nva2,&
+    !nt0dc,nt1dc,t0dc,t1dc,ndatedc,PEN_deri,cdc,date,nva,hess,datedc
+    use comon,only:zi,nst,H_hess,nstRec
 
     Implicit none
 
@@ -1577,8 +1577,9 @@
     subroutine distancejcpm(b,m,mt1,mt2,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC)
 
     use tailles
-    use comon,only:cens,vvv,t0,t1,t0dc,t1dc,c,cdc,nsujet, &
-    nva,nva1,nva2,nst,nbintervR,nbintervDC,ttt,tttDC,date,nstRec
+    !use comon,only:c,nsujet,t0,t1,nva1,nva2,cdc,t0dc,t1dc,cens,nva
+    use comon,only:vvv,nst,nbintervR,nbintervDC,&
+    ttt,tttDC,date,nstRec
     use optim
 
     implicit none
@@ -2036,8 +2037,9 @@
     subroutine distanceJweib(b,m,mt1,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC)
 
     use tailles
-    use comon,only:cens,vvv,t0,t1,t0dc,t1dc,c,cdc,nsujet &
-    ,nva,nva1,nva2,nst,etaR,etaD,betaR,betaD,date,datedc,mint,betaT,etaT,nstRec
+    !use comon,only:c,nsujet,t0,t1,cdc,t0dc,t1dc,nva1,nva2,betaR,etaR,datedc
+    use comon,only:cens,vvv,nva,nst,etaD,&
+    betaD,date,mint,betaT,etaT,nstRec
     use optim
 
     implicit none
@@ -2271,8 +2273,10 @@
     subroutine distancej_cpm(b,m,mt1,mt2,mt3,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC,x3M,moyLamM,xSu3,moysuM)
     
     use taillesmultiv
-    use comonmultiv,only:cens,vvv,t0,t1,t0dc,t1dc,t0meta,t1meta,cmeta,c,cdc,nsujet,nsujetmeta, &
-    nva,nva1,nva2,nva3,nst,nbintervR,nbintervDC,nbintervM,ttt,tttDC,tttmeta,date
+    !use comonmultiv,only:c,nsujet,t0,t1,nva1,nva2,t0dc,t1dc,t0meta,cens,&
+    !t1meta,cdc,nsujetmeta,cmeta,nva3,nva
+    use comonmultiv,only:vvv,nst,nbintervR,nbintervDC,&
+    nbintervM,ttt,tttDC,tttmeta,date
     use optim
     
     implicit none
@@ -2953,8 +2957,10 @@
     subroutine distanceJ_weib(b,m,mt1,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC,x3M,moyLamM,xSu3,moysuM)
     
     use taillesmultiv
-    use comonmultiv,only:cens,vvv,t0,t1,t0dc,t1dc,t0meta,t1meta,c,cmeta,cdc,nsujet,nsujetmeta &
-    ,nva,nva1,nva2,nva3,nst,etaR,etaD,etaM,betaR,betaD,betaM,date,datedc,datemeta
+    !use comonmultiv,only:c,nsujet,t0,t1,nva1,nva2,nva3,t0dc,t1dc,t0meta,&
+    !t1meta,cmeta,cdc,nsujetmeta,datemeta,datedc
+    use comonmultiv,only:cens,vvv,nva,nst,etaR,etaD,etaM,betaR,&
+    betaD,betaM,date
     use optim
     
     implicit none
@@ -3167,9 +3173,11 @@
 
         subroutine distanceLongisplines(nz1,b,mt,xTOut,lamTOut,suTOut)
     
-        use tailles,only:ndatemaxdc,npmax
-        use comon,only:date,zi,t0dc,t1dc,cdc,nt0dc,nt1dc,ng,nva,ndatedc, &
-        I_hess,H_hess,Hspl_hess,hess
+        !use tailles,only:ndatemaxdc,
+        use tailles,only:npmax
+        !use comon,only:Hspl_hess,I_hess,cdc,t0dc,t1dc,&
+        !nt0dc,nt1dc,ng,ndatedc,H_hess,date,nva
+        use comon,only:zi,hess
     
         implicit none
     
@@ -3240,8 +3248,7 @@
             end do
     
         return
-    
-    
+
         end subroutine distanceLongisplines
     
     
@@ -3254,8 +3261,8 @@
         subroutine distanceLongiweib(b,m,mt,xR2,moyLamR2,xSu2,moysuR2)
     
         use tailles
-        use comon,only:cens,vvv,t0dc,t1dc,cdc,ng &
-        ,nva,nva1,nva2,nva3,nst,typeof2,etaD,betaD,datedc,mint
+        !use comon,only:nva1,nva2,nva3,t0dc,t1dc,cdc,ng,typeof2,nva
+        use comon,only:cens,vvv,nst,etaD,betaD,datedc,mint
         use optim
     
         implicit none
@@ -3269,7 +3276,7 @@
         double precision,dimension(1000,m)::u
         double precision::sx,som,x,zz,zy
         double precision,dimension(1000):: lamDC,suDC,glDC
-    ! theorique - estimés après Max de Vrais
+    ! theorique - estimes apres Max de Vrais
         double precision::glDCW
     
         double precision,dimension(mt)::xR2
@@ -3291,7 +3298,7 @@
         t=0
         k=0
         ns=0
-        sx=1.d0 ! ecart-type ou variance des réalisations gaussiennes générées
+        sx=1.d0 ! ecart-type ou variance des realisations gaussiennes g    n    r    es
         !typeof2 = 1 shared weib
     
             ns=2
@@ -3311,7 +3318,7 @@
         end do
     
     
-    !     Pour chaque temps de 0 à la censure du décès par pas cens/100
+    !     Pour chaque temps de 0 à la censure du d    cès par pas cens/100
     
     !     commencer à 0 dans la boucle
             if(datedc(1).eq.0) then
@@ -3336,16 +3343,16 @@
                 x=x+(cens-mint)/(mt-1)
             end if
     
-    ! On simule 1000 réalisations gaussienne par paramètres
+    ! On simule 1000 r    alisations gaussienne par paramètres
             do k=1,1000
-    !     Pour chaque paramètre estimé
+    !     Pour chaque paramètre estim    
                 do i=1,ns
                     som=0.d0
                     do j=1,i         ! cela correspond au produit trp(L)%*%U
                         som=som+vv(i*(i-1)/2+j)*u(k,j)
                     end do
                     bgen(i)=(b(i)+som)**2
-                end do              ! en sortie on récupère le nouveau vecteur b
+                end do              ! en sortie on r    cupère le nouveau vecteur b
     
     
     
@@ -3353,7 +3360,7 @@
                     lamDCW=((b(1)**2)*(x**((b(1)**2)-1.d0)))/((b(2)**2)**(b(1)**2))
             end do
     
-    ! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+    ! Classer les diff    rent vecteur et en sortir les 2.5 et 97.5 percentiles
     
         call percentile(lamDC,lamDC25,lamDC975)
     
@@ -3390,16 +3397,16 @@
             if(t.ne.1) then
             x=x+(cens-mint)/(mt-1) !x+(cens-mint)/99 !100
             end if
-    ! On simule 1000 réalisations gaussienne par paramètres
+    ! On simule 1000 r    alisations gaussienne par paramètres
             do k=1,1000
-    !     Pour chaque paramètre estimé
+    !     Pour chaque paramètre estim    
                 do i=1,ns
                     som=0.d0
                     do j=1,i         ! cela correspond au produit trp(L)%*%U
                         som=som+vv(i*(i-1)/2+j)*u(k,j)
                     end do
                     bgen(i)=(b(i)+som)**2
-                end do              ! en sortie on récupère le nouveau vecteur b
+                end do              ! en sortie on r    cupère le nouveau vecteur b
     
     
                     glDC(k)  =  (x/bgen(2))**bgen(1)
@@ -3409,7 +3416,7 @@
     
             end do
     
-    ! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+    ! Classer les diff    rent vecteur et en sortir les 2.5 et 97.5 percentiles
     
     
                 call percentile(suDC,suDC25,suDC975)

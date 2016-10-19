@@ -5,9 +5,10 @@
     double precision function funcpajweib_log(b,np,id,thi,jd,thj,k0)
 
     use tailles
-    use comon,only:etaR,etaD,betaR,betaD,etaT,betaT,nstRec, &
-    t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,nst, &
-    effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,ALPHA,sig2, &
+    !use comon,only:AG,betaR,etaR,nst,t0dc
+    use comon,only:etaD,betaD,etaT,betaT,nstRec, &
+    t0,t1,t1dc,c,cdc,nsujet,nva,nva1,nva2, &
+    effet,stra,ve,vedc,ng,g,nig,indic_ALPHA,ALPHA,sig2, &
     auxig,aux1,aux2,res1,res3,kkapa
     use residusM
     use comongroup,only:vet,vet2

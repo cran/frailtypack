@@ -2,9 +2,10 @@
 
     double precision function funcpaGweib(b,np,id,thi,jd,thj,k0)
 
-    use comon,only:cens,nbintervR,nbintervDC,t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,&
+    !use comon,only:cens,nbintervR,nbintervDC,ttt,tttdc
+    use comon,only:t0,t1,t0dc,t1dc,c,cdc,nsujet,nva,nva1,nva2,&
     nst,effet,stra,ve,vedc,ng,g,nig,AG,indic_ALPHA,alpha,theta,auxig,aux1,aux2,res1,res3&
-    ,ttt,tttdc,kkapa,betaR,etaR,betaD,etaD
+    ,kkapa,betaR,etaR,betaD,etaD
     use tailles
     use comongroup
     use residusM

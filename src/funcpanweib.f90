@@ -5,8 +5,8 @@
     double precision function funcpanweib(b,np,id,thi,jd,thj,k0)
 
     use tailles
-    use comon,only:t0,t1,c,nsujet,nva,ndate,nst,stra,effet,ve &
-    ,g,nig,AG,auxig,alpha,eta,kkapa,etaR,etaD,betaR,betaD,indictronq
+    use comon,only:t0,t1,c,nsujet,nva,nst,stra,effet,ve &
+    ,g,nig,AG,auxig,alpha,eta,kkapa,etaR,etaD,betaR,betaD,indictronq!,ndate
     use commun,only:ngexact,mij,mid,ssg,aux1,aux2
     use residusM
 
