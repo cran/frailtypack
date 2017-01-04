@@ -7,13 +7,13 @@ $(SHLIB): $(OBJECTS)
 prediction.o: Aparameters.o
 prediction_log.o: Aparameters.o
 prediction_sha_logn.o: aaOptim.o aaOptimres.o Aparameters.o
+prediction_Recurr_Sha.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_biv.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_tri.o: aaOptim.o aaOptimres.o Aparameters.o
 aamarq98o.o: aaOptim.o aaOptimres.o Aparameters.o
 aaOptim.o: Aparameters.o
 afuncpasres.o: aaOptim.o aaOptimres.o Aparameters.o
 aresidusMartingale.o: aaOptim.o aaOptimres.o Aparameters.o
-atestWald.o: aaOptim.o aaOptimres.o
 aaUseFunction.o: aaOptim.o aaOptimres.o Aparameters.o
 aaUseFunctionG.o: aaOptim.o aaOptimres.o Aparameters.o
 aaOptimres.o: Aparameters.o

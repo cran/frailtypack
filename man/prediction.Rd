@@ -17,7 +17,7 @@ Two kinds of predictive probabilities can be calculated:
 
 - a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific group
 
-\deqn{P^{cond}(t,t+w)=\frac{S_{ij}(t)-S_{ij}(t+w)}{S_{ij}(t)}=1-\left(\frac{S_0(t+w)}{S_0(t)}\right)^{u_i\exp(\beta'Z_{ij})}}
+\deqn{P^{cond}(t,t+w)=\frac{S_{ij}(t|u_i)-S_{ij}(t+w|u_i)}{S_{ij}(t|u_i)}=1-\left(\frac{S_0(t+w)}{S_0(t)}\right)^{u_i\exp(\beta'Z_{ij})}}
 
 - a marginal predictive probability of event between t and horizon time t+w, i.e. averaged over the population
 
@@ -27,13 +27,41 @@ Two kinds of predictive probabilities can be calculated:
 
 Two kinds of predictive probabilities can be calculated:
 
-- a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific group
+- a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific group and given a specific gaussian random effect \eqn{\eta}
 
-\deqn{P^{cond}(t,t+w)=\frac{S_{ij}(t)-S_{ij}(t+w)}{S_{ij}(t)}=1-\left(\frac{S_0(t+w)}{S_0(t)}\right)^{\exp(\eta_i+\beta'Z_{ij})}}
+\deqn{P^{cond}(t,t+w)=\frac{S_{ij}(t|\eta_i)-S_{ij}(t+w|\eta_i)}{S_{ij}(t|\eta_i)}=1-\left(\frac{S_0(t+w)}{S_0(t)}\right)^{\exp(\eta_i+\beta'Z_{ij})}}
 
 - a marginal predictive probability of event between t and horizon time t+w, i.e. averaged over the population
 
-\deqn{P^{marg}(t,t+w)=\frac{\int_{-\infty}^{+\infty}(S_{ij}(t)-S_{ij}(t+w))g(\eta)d\eta}{\int_{-\infty}^{+\infty}S_{ij}(t)g(\eta)d\eta}}
+\deqn{P^{marg}(t,t+w)=\frac{\int_{-\infty}^{+\infty}(S_{ij}(t|\eta_i)-S_{ij}(t+w|\eta_i))g(\eta)d\eta}{\int_{-\infty}^{+\infty}S_{ij}(t)g(\eta)d\eta}}
+
+\bold{For Gamma Shared Frailty model for recurrent events}
+
+Two kinds of predictive probabilities can be calculated:
+
+- A marginal predictive probability of event between t and horizon time t+w, i.e. averaged over the population.
+
+\deqn{P^{marg}(t,t+w)=\frac{\int_{0}^{+\infty}(S_{i(J+1)}(t|u_i) - S_{ij}(t+w|u_i))\cdot(u_i)^J S_{ij}(X_{iJ}|u_i) g(u)du}{\int_{0}^{+\infty}S_{i(J+1)}(t|u_i) (u_i)^J S_{i(J+1)}(X_{iJ}|u_i))g(u)du}}
+
+- a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific individual. 
+
+This prediction method is the same as the conditional gamma prediction method applied for clustered events (see formula \deqn{P^{cond}} before). 
+
+\bold{For Gaussian Shared Frailty model for recurrent events}
+
+Two kinds of predictive probabilities can be calculated:
+
+- A marginal predictive probability of event between t and horizon time t+w, i.e. averaged over the population.
+
+\deqn{P^{marg}(t,t+w)=\frac{\int_{0}^{+\infty}(S_{i(J+1)}(t|\eta_i) - S_{ij}(t+w|\eta_i))\cdot \exp(J\eta_i) S_{ij}(X_{iJ}|\eta_i) g(\eta)d\eta}{\int_{0}^{+\infty}S_{i(J+1)}(t|\eta_i) \exp(J\eta_i) S_{i(J+1)}(X_{iJ}|\eta_i))g(\eta)d\eta}}
+
+- a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific individual. 
+
+This prediction method is the same as the conditional gaussian prediction method applied for clustered events (see formula \deqn{P^{cond}} before). 
+
+It is possible to compute all these predictions in two ways on a scale of times :
+- either you want a cumulative probability of developping the event between t and t+w (with t fixed, but with a varying window of prediction w);
+- either you want at a specific time the probability to develop the event in the next w (ie, for a varying prediction time t, but for a fixed window of prediction). See Details.
 
 \bold{For Joint Frailty model}
 
@@ -45,24 +73,26 @@ It is to predict the probability of death in a specific time window given the hi
 
 - a prediction of death between t and t+w given that the patient had exactly J recurrences (\eqn{H_i^{J,1}}) before t
 
-\deqn{P^1(t,t+w)=P(D_i \le t+w|D_i>t,H_i^{J,1})=\frac{\int_0^\infty[S_i^D(t)-S_i^D(t+w)](u_i)^JS_{i(J+1)}^R(t)g(u_i)du_i}{\int_0^\infty S_i^D(t)(u_i)^JS_{i(J+1)}^R(t)g(u_i)du_i}}
+\deqn{P^1(t,t+w)=P(D_i \le t+w|D_i>t,H_i^{J,1})=\frac{\int_0^\infty[S_i^D(t)-S_i^D(t+w)](u_i)^JS_{i(J+1)}^R(t)g(u)du_i}{\int_0^\infty S_i^D(t)(u_i)^JS_{i(J+1)}^R(t)g(u)du_i}}
 
 - a prediction of death between t and t+w given that the patient had at least J recurrences (\eqn{H_i^{J,2}}) before t
 
-\deqn{P^2(t,t+w)=P(D_i \le t+w|D_i>t,H_i^{J,2})=\frac{\int_0^\infty[S_i^D(t)-S_i^D(t+w)](u_i)^JS_{iJ}^R(X_{iJ})g(u_i)du_i}{\int_0^\infty S_i^D(t)(u_i)^JS_{iJ}^R(X_{iJ})g(u_i)du_i}}
+\deqn{P^2(t,t+w)=P(D_i \le t+w|D_i>t,H_i^{J,2})=\frac{\int_0^\infty[S_i^D(t)-S_i^D(t+w)](u_i)^JS_{iJ}^R(X_{iJ})g(u)du_i}{\int_0^\infty S_i^D(t)(u_i)^JS_{iJ}^R(X_{iJ})g(u)du_i}}
 
 - a prediction of death between t and t+w considering the recurrence history only in the parameters estimation. It corresponds to the average probability of death between t and t+w for a patient with these given characteristics.
 
-\deqn{P^3(t,t+w)=P(D_i \le t+w|D_i>t)=\frac{\int_0^\infty[S_i^D(t)-S_i^D(t+w)]g(u_i)du_i}{\int_0^\infty S_i^D(t)g(u_i)du_i}}
+\deqn{P^3(t,t+w)=P(D_i \le t+w|D_i>t)=\frac{\int_0^\infty[S_i^D(t)-S_i^D(t+w)]g(u)du_i}{\int_0^\infty S_i^D(t)g(u)du_i}}
 
 \bold{ - Prediction of risk of a new recurrent event knowing patients' characteristics : }
 
 It is to predict the probability of a new recurrent event in a specific time window given the history of patient i before the time of prediction t. The history \eqn{H_i^J} is the information on covariates before time t, but also the number of recurrences and the time of occurences. 
 The marginal probability computed is a prediction of a new recurrent event between t and t+w given that the patient had exactly J recurrences (\eqn{H_i^J}) before t:
 
-\deqn{P^R(t,t+w)=P(X_{i(j+1)} \le t+w|X_{i(j+1)}>t, D_i>t, H_i^J)=\frac{\int_0^\infty[S_{i(J+1)}^R(t)-S_{i(J+1)}^R(t+w)]S_i^D(t)(u_i)^JS_{i(J+1)}^R(X_{ij})g(u_i)du_i}{\int_0^\infty S_{i(J+1)}^R(t)S_i^D(t)(u_i)^JS_{i(J+1)}^R(X_{ij})g(u_i)du_i}}
+\deqn{P^R(t,t+w)=P(X_{i(j+1)} \le t+w|X_{i(j+1)}>t, D_i>t, H_i^J)=}
 
-It is possible to compute all these predictions in two ways on a scale of times :
+\deqn{\frac{\int_0^\infty[S_{i(J+1)}^R(t)-S_{i(J+1)}^R(t+w)]S_i^D(t)(u_i)^JS_{i(J+1)}^R(X_{ij})g(u)du_i}{\int_0^\infty S_{i(J+1)}^R(t)S_i^D(t)(u_i)^JS_{i(J+1)}^R(X_{ij})g(u)du_i}}
+
+It is possible to compute all these predictions in two ways :
 - either you want a cumulative probability of developping the event between t and t+w (with t fixed, but with a varying window of prediction w);
 - either you want at a specific time the probability to develop the event in the next w (ie, for a varying prediction time t, but for a fixed window of prediction). See Details.
 
@@ -96,7 +126,8 @@ These probabilities can be calculated in several time points with fixed time of 
 
 \usage{
 
-prediction(fit, data, data.Longi, t, window, event="Both", group, MC.sample=0)
+prediction(fit, data, data.Longi, t, window, event="Both",
+ conditional = FALSE, MC.sample=0)
 
 }
 
@@ -104,10 +135,11 @@ prediction(fit, data, data.Longi, t, window, event="Both", group, MC.sample=0)
   \item{fit}{A frailtyPenal or jointPenal object.}
   \item{data}{Dataframe for the prediction. See Details.}
   \item{data.Longi}{Dataframe for the prediction used for joint models with longitudinal data. See Details.}
-  \item{event}{Only for joint model, the type of event you want to predict : "Terminal" for a terminal event, "Recurrent" for a recurrent event or "Both". Default value is "Both"}
+  \item{event}{Only for joint and shared models. The type of event you want to predict : "Terminal" for a terminal event, "Recurrent" for a recurrent event or "Both". Default value is "Both". 
+  In a shared model, if you want to predict a new recurrent event then the argument "Recurrent" should be use. If you want to predict a new event from clustered data, do not use this option.}
   \item{t}{Time or vector of times for prediction.}
   \item{window}{Window or vector of windows for prediction.}
-  \item{group}{Only for shared frailty model, the group on which you want to make the conditional prediction (its frailty value will be used). If you specify a group then a conditional prediction will be computed, otherwise it will be a marginal prediction.}
+  \item{conditional}{Only for prediction method applied on shared models. Provides distinction between the conditional and marginal prediction methods. Default is FALSE.}
   \item{MC.sample}{Number of samples used to calculate confidence bands with a Monte-Carlo method (with a maximum of 1000 samples). If MC.sample=0 (default value), no confidence intervals are calculated.}
 }
 
@@ -123,7 +155,7 @@ The following components are included in a 'predFrailty' object obtained by usin
 \item{predLow}{Lower limit of Monte-Carlo confidence interval for each prediction}
 \item{predHigh}{Upper limit of Monte-Carlo confidence interval for each prediction}
 \item{type}{Type of prediction probability (marginal or conditional)}
-\item{group}{For conditional probability, the group on which you make predictions}
+\item{group}{For conditional probability, the list of group on which you make predictions}
 
 The following components are included in a 'predJoint' object obtained by using prediction function for joint frailty model.
 
@@ -176,6 +208,21 @@ levels(datapred$sex)<- c(1,2)
 datapred[1,] <- c(1,40) # man, 40 years old
 datapred[2,] <- c(2,45) # woman, 45 years old
 datapred[3,] <- c(1,60) # man, 60 years old
+}
+
+\bold{Time-dependant covariates:}
+In the contexte of time-dependant covariate, the last previous value of the covariate is used before the time t of prediction.
+
+It should be noted, that the dataframe for a conditional prediction on a shared frailty model, you need to specify the group to which the individuals belong to in adding the same cluster covariate as that used for model fitted. 
+Here, the three individual belongs to the group 5.
+
+\preformatted{
+datapred <- data.frame(group=0, sex=0,age=0)
+datapred$sex <- as.factor(datapred$sex)
+levels(datapred$sex)<- c(1,2)
+datapred[1,] <- c(5,1,40) # man, 40 years old (cluster 5)
+datapred[2,] <- c(5,2,45) # woman, 45 years old (cluster 5)
+datapred[3,] <- c(5,1,60) # man, 60 years old (cluster 5)
 }
 
 To use the prediction function on joint frailty models and trivariate joint models, the construction will be a little bit different. In these cases, the prediction for the terminal event takes into account covariates but also history of recurrent event times for a patient. You have to create a dataframe with the relapse times, the indicator of event, the cluster variable and the covariates. Relapses occuring after the prediction time may be included but will be ignored for the prediction. A joint model with calendar-timescale need to be fitted with Surv(start,stop,event), relapse times correspond to the "stop" variable and indicators of event correspond to the "event" variable (if event=0, the relapse will not be taken into account). For patients without relapses, all the values of "event" variable should be set to 0. Finally, the same cluster variable name needs to be in the joint model and in the dataframe for predictions ("id" in the following example). For instance, we observe relapses of a disease and fit a joint model adjusted for two covariates sex (1:male 2:female) and chemo (treatment by chemotherapy 1:no 2:yes).
@@ -285,10 +332,46 @@ pred.sha.marg <- prediction(sha,datapred,t=100,window=seq(50,1900,50))
 plot(pred.sha.marg)
 
 #-- conditional prediction, given a specific cluster (group=5)
+#-- construction of the dataframe for predictions
+datapred <- data.frame(group=0,sex=0,dukes=0)
+datapred$sex <- as.factor(datapred$sex)
+levels(datapred$sex)<- c(1,2)
+datapred$dukes <- as.factor(datapred$dukes)
+levels(datapred$dukes)<- c(1,2,3)
+datapred[1,] <- c(5,1,2) # man, dukes 2
+datapred[2,] <- c(5,2,3) # woman, dukes 3
+
 pred.sha.cond <- prediction(sha,datapred,t=100,window=seq(50,1900,50),
-group=5)
+conditional = TRUE)
 plot(pred.sha.cond)
 
+##-- marginal prediction of a recurrent event, on a shared frailty model
+data(readmission)
+
+datapred <- data.frame(t.stop=0,event=0,id=0,sex=0,dukes=0)
+datapred$sex <- as.factor(datapred$sex)
+levels(datapred$sex)<- c(1,2)
+datapred$dukes <- as.factor(datapred$dukes)
+levels(datapred$dukes)<- c(1,2,3)
+
+datapred[1,] <- c(100,1,1,1,2) #man, dukes 2, 3 recurrent events
+datapred[2,] <- c(200,1,1,1,2) 
+datapred[3,] <- c(300,1,1,1,2) 
+datapred[4,] <- c(350,0,2,1,2) #man, dukes 2  0 recurrent event
+
+#-- Shared frailty model with gamma distribution
+sha <- frailtyPenal(Surv(t.stop,event)~cluster(id)+sex+dukes,n.knots=10,
+kappa=10000,data=readmission)
+pred.sha.rec.marg <- prediction(sha,datapred,t=200,window=seq(50,1900,50),
+event='Recurrent',MC.sample=100)
+
+plot(pred.sha.rec.marg,conf.bands=TRUE)
+
+##-- conditional prediction of a recurrent event, on a shared frailty model
+pred.sha.rec.cond <- prediction(sha,datapred,t=200,window=seq(50,1900,50),
+event='Recurrent',conditional = TRUE,MC.sample=100)
+
+plot(pred.sha.cond,conf.bands=TRUE)
 #####################################################
 ######## prediction on a JOINT frailty model ########
 #####################################################
@@ -324,7 +407,8 @@ plot(pred.joint,conf.bands=TRUE)
 # each y-value of the plot corresponds to the prediction between [100,x]
 
 #-- prediction of death between t and t+500 given relapses
-pred.joint2 <- prediction(joi,datapredj,t=seq(100,1000,50),window=500,event = "Terminal")
+pred.joint2 <- prediction(joi,datapredj,t=seq(100,1000,50),
+window=500,event = "Terminal")
 plot(pred.joint2)
 # each y-value of the plot corresponds to the prediction between [x,x+500], 
 or in the next 500

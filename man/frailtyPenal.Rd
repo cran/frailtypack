@@ -103,7 +103,7 @@ is:
 \eqn{\left\{
 \begin{array}{ll}
 r_{ij}(t|u_i,v_i)=u_iv_ir_0(t)\exp(\bold{\beta_1^{'}Z_{ij}(t)}) =u_iv_ir_{ij}(t) & \mbox{(Reccurent)} \\
-\lambda_{i}(t|u_i)=u_i\lambda_0(t)\exp(\bold{\beta_1^{'}Z_{i}(t)}) = red{u_i}\lambda_{i}(t) & \mbox{(Death)} \\
+\lambda_{i}(t|u_i)=u_i\lambda_0(t)\exp(\bold{\beta_1^{'}Z_{i}(t)}) = u_i \lambda_{i}(t) & \mbox{(Death)} \\
  \end{array}
  \right.
 }
@@ -159,7 +159,7 @@ cross.validation = FALSE, jointGeneral,n.knots, kappa, maxit = 300,
 hazard = "Splines", nb.int, RandDist = "Gamma", betaknots = 1, 
 betaorder = 3, initialize = TRUE, init.B, init.Theta, init.Alpha, 
 Alpha, init.Ksi, Ksi, init.Eta, LIMparam = 1e-3, LIMlogl = 1e-3,
-LIMderiv = 1e-3, print.times = TRUE, ...)
+LIMderiv = 1e-3, print.times = TRUE)
 }
 
 \arguments{
@@ -242,8 +242,6 @@ amongst the recurrent events (explained by the variance \eqn{\eta}).}
 
   \item{print.times}{a logical parameter to print iteration process. Default is TRUE.}
   
-  \item{...}{other arguments to be added}
-
 }
 
 \details{
@@ -419,6 +417,7 @@ The following components are specific to \bold{joint nested frailty} models.
 \item{ksi}{the power coefficient \eqn{\xi} associated with the frailty parameter (\eqn{\omega_f}) in the recurrent event hazard function.}
 \item{indic_alpha}{indicator if a joint frailty model with \eqn{\alpha} parameter was fitted or not.}
 \item{indic_ksi}{indicator if a joint frailty model with \eqn{\xi} parameter was fitted or not.}
+\item{frailty.fam.pred}{empirical Bayes prediction of the frailty term by family.}
 }
 
 \note{

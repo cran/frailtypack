@@ -214,10 +214,16 @@
     # 			cat(" \n")
     # 		}
     if (x$logNormal == 0){
-      cat("   theta (variance of Frailties, w):", frail, "(SE (H):",seH.frail, ")", "p =", signif(1 - pnorm(frail/seH.frail), digits - 1), "\n")
-      if (indic_alpha == 1 & x$joint.clust<=1) cat("   alpha (w^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "p =", signif(1 - pchisq((x$alpha/sqrt(diag(x$varH))[2])^2,1), digits - 1), "\n")
-      else if (x$joint.clust ==2) cat("   eta   (variance of Frailties, v):", x$eta, "(SE (H):",sqrt(((2 * (x$eta^0.5))^2) * diag(x$varH)[2]), ")", "p =", signif(1 - pnorm (x$eta/sqrt(((2 * (x$eta^0.5))^2) * diag(x$varH)[2]),1), digits - 1), "\n")
-      else cat("   alpha is fixed (=1) \n")
+		if (indic_alpha == 1 & x$joint.clust<=1){
+			cat("   theta (variance of Frailties, w):", frail, "(SE (H):",seH.frail, ")", "p =", signif(1 - pnorm(frail/seH.frail), digits - 1), "\n")
+			cat("   alpha (w^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "p =", signif(1 - pchisq((x$alpha/sqrt(diag(x$varH))[2])^2,1), digits - 1), "\n")
+		}else if (x$joint.clust ==2) {
+			cat("   theta (variance of u, association between recurrences and terminal event):", frail, "(SE (H):",seH.frail, ")", "p =", signif(1 - pnorm(frail/seH.frail), digits - 1), "\n")
+			cat("   eta (variance of v, intra-subject correlation):", x$eta, "(SE (H):",sqrt(((2 * (x$eta^0.5))^2) * diag(x$varH)[2]), ")", "p =", signif(1 - pnorm (x$eta/sqrt(((2 * (x$eta^0.5))^2) * diag(x$varH)[2]),1), digits - 1), "\n")
+		} else {
+			cat("   theta (variance of Frailties, w):", frail, "(SE (H):",seH.frail, ")", "p =", signif(1 - pnorm(frail/seH.frail), digits - 1), "\n")
+			cat("   alpha is fixed (=1) \n")
+		}
     }else{
       cat("   sigma square (variance of Frailties, eta):", frail, "(SE (H):",seH.frail, ")", "p =", signif(1 - pnorm(frail/seH.frail), digits - 1), "\n")
       if (indic_alpha == 1) cat("   alpha (exp(alpha.eta) for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "p =", signif(1 - pchisq((x$alpha/sqrt(diag(x$varH))[2])^2,1), digits - 1), "\n")

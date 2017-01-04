@@ -2,30 +2,33 @@
 !AK 19/02/2015 shared log normal predictions and MC confidence bands
 ! ============================================== prediction Shared - logNormale
     
-    subroutine predict_LogN_sha(npred0,surv_s,surv_t,sigma2,predAll,icproba,ntimeAll,nsample,&
-        sig2alea,surv_smc,surv_tmc,predAlllow,predAllhigh)
+    subroutine predict_LogN_sha(npred0,surv_s,surv_t,betapred,sigma2, &
+        predAll,icproba,ntimeAll,nsample,sig2alea,surv_smc,surv_tmc, &
+        betapredmc,predAlllow,predAllhigh)
     
     implicit none
     
     integer::i,iii,j
     integer,intent(in)::npred0,icproba,ntimeAll,nsample
     double precision,dimension(npred0,ntimeall),intent(in)::surv_t,surv_s
+    double precision,dimension(npred0),intent(in)::betapred
     double precision,intent(in)::sigma2
     double precision,dimension(npred0)::predProba
     double precision,dimension(2)::survDC,survDCalea
     double precision,dimension(nsample*npred0,ntimeAll)::surv_tmc,surv_smc
-    double precision,dimension(npred0,ntimeAll) :: predAlllow,predAllhigh
+    double precision,dimension(npred0,ntimeAll) :: predAlllow,predAllhigh,betapredmc
     double precision,dimension(nsample),intent(in) :: sig2alea 
     double precision,dimension(npred0,ntimeAll),intent(out):: predAll
     double precision,dimension(nsample,npred0)::predProbaalea
-    double precision::ss1,ss2
+    double precision::ss1,ss2,Xbeta,Xbetamc
     
     do iii=1,ntimeAll
         do i=1,npred0
             survDC(1) = surv_s(i,iii)
             survDC(2) = surv_t(i,iii)
+            Xbeta = betapred(i) 
     
-            call gauher_shapred(ss1,ss2,sigma2,survDC)
+            call gauher_shapred(ss1,ss2,sigma2,survDC,Xbeta)
             predProba(i) = ss1/ss2
          
         end do
@@ -41,8 +44,9 @@
               
                     survDCalea(1) = surv_smc(npred0*(j-1)+i,iii)
                     survDCalea(2) = surv_tmc(npred0*(j-1)+i,iii)
+                    Xbetamc = betapredmc(i,j)
               
-                    call gauher_shapred(ss1,ss2,sig2alea(j),survDCalea)
+                    call gauher_shapred(ss1,ss2,sig2alea(j),survDCalea,Xbetamc)
                     predProbaalea(j,i) = ss1/ss2
              
                 end do
@@ -63,17 +67,17 @@
 !=========================
 ! Prediction : numerator
 !=========================
-    double precision function func1predLogN(frail,psig2,survDC)
+    double precision function func1predLogN(frail,psig2,survDC,Xbeta)
     ! calcul de l integrant (numerateur de la fonction de prediction)
     implicit none
     
     double precision,intent(in)::frail
     double precision,dimension(2)::survDC
-    double precision::psig2
+    double precision::psig2,Xbeta
     double precision,parameter::pi=3.141592653589793d0
-
-    func1predLogN = (survDC(1) - survDC(2)) &
-     *dexp(-(frail**2.d0/(2.d0*psig2)))*(1.d0/dsqrt(2.d0*pi*psig2))
+    func1predLogN =  &
+      ((survDC(1)**(dexp(frail)*Xbeta))-(survDC(2)**(dexp(frail)*Xbeta))) &
+      *dexp(-(frail**2.d0/(2.d0*psig2)))*(1.d0/dsqrt(2.d0*pi*psig2))
      
     return
     
@@ -83,16 +87,16 @@
 ! Prediction : denominator
 !=========================
 
-    double precision function func2predLogN(frail,psig2,survDC)
+    double precision function func2predLogN(frail,psig2,survDC,Xbeta)
     ! calcul de l integrant (denominateur de la fonction de prediction)
     implicit none
     
     double precision,intent(in)::frail
     double precision,dimension(2)::survDC
-    double precision::psig2
+    double precision::psig2,Xbeta
     double precision,parameter::pi=3.141592653589793d0
     
-    func2predLogN = survDC(1)*dexp(-(frail**2.d0/(2.d0*psig2)))&
+    func2predLogN = (survDC(1)**(dexp(frail)*Xbeta))*dexp(-(frail**2.d0/(2.d0*psig2)))&
         *(1.d0/dsqrt(2.d0*pi*psig2))
     
     return
@@ -103,7 +107,7 @@
 !=========================
 ! Calcul des intégrales
 !=========================
-    subroutine gauher_shapred(ss1,ss2,psig2,survDC) !! 
+    subroutine gauher_shapred(ss1,ss2,psig2,survDC,Xbeta) !! 
     
 !    use tailles  
     use donnees,only:w3,x3
@@ -115,7 +119,7 @@
     double precision::auxfunca1,auxfunca2
     double precision,external :: func1predLogN,func2predLogN
     double precision,dimension(2)::survDC
-    double precision::psig2
+    double precision::psig2,Xbeta
     integer:: j
 
 ! gauss hermite
@@ -125,13 +129,11 @@
     
     do j=1,32
         var1 = x3(j)
-        auxfunca1 = func1predLogN(var1,psig2,survDC)
+        auxfunca1 = func1predLogN(var1,psig2,survDC,Xbeta)
         ss1 = ss1 + w3(j)*(auxfunca1)
-        auxfunca2 = func2predLogN(var1,psig2,survDC)
-        ss2 = ss2 + w3(j)*(auxfunca2)
-           
-    end do
-    
+        auxfunca2 = func2predLogN(var1,psig2,survDC,Xbeta)
+        ss2 = ss2 + w3(j)*(auxfunca2)           
+    end do    
     end subroutine gauher_shapred
     
     

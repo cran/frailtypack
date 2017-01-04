@@ -1,7 +1,7 @@
 "frailtyPenal" <-
   function (formula, formula.terminalEvent, data, recurrentAG=FALSE, cross.validation=FALSE, jointGeneral, n.knots, kappa,maxit=300, 
 	hazard="Splines", nb.int, RandDist="Gamma", betaknots=1,betaorder=3, initialize=TRUE, init.B, init.Theta, init.Alpha, Alpha, init.Ksi, Ksi, init.Eta,
-	LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE, ...){
+	LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE){
 	
 	if (missing(jointGeneral)) jointGeneral<-FALSE
     if (!missing(init.Eta) & jointGeneral)  init.Alpha <- init.Eta
@@ -747,7 +747,7 @@
                       as.integer(filtretps),
                       BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
                       EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-                      PACKAGE = "frailtypack") # 58
+                      PACKAGE = "frailtypack") # 58 arguments
       #AD:      
 		if (ans$istop == 4){
 			warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")
@@ -899,7 +899,10 @@
 				nfactor <- length(vec.factor)
 				p.wald <- rep(0,nfactor)
          # print(nvar);print(nfactor);print(ind.place);print(occur);print(Beta)
-				fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+		 
+		        if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+				else fit$global_chisq <- 0 
+				
 				fit$dof_chisq <- occur
 				fit$global_chisq.test <- 1
           # Calcul de pvalue globale
@@ -1540,7 +1543,7 @@
                       paraweib=as.double(rep(0,4)),
                       #			shape.weib=as.double(rep(0,2)),
                       #			scale.weib=as.double(rep(0,2)),
-                      MartinGale=as.double(matrix(0,nrow=length(uni.cluster),ncol=4)),###
+                      MartinGale=as.double(matrix(0,nrow=length(uni.cluster),ncol=5)),###
                       
                       linear.pred=as.double(rep(0,n)),
                       lineardc.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
@@ -1568,9 +1571,9 @@
                       BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
                       BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep2)),
                       EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-                      PACKAGE = "frailtypack") # 65      
+                      PACKAGE = "frailtypack") # 65 arguments
 					  
-		MartinGale <- matrix(ans$MartinGale,nrow=as.integer(length(uni.cluster)),ncol=4) 
+		MartinGale <- matrix(ans$MartinGale,nrow=as.integer(length(uni.cluster)),ncol=5) 
 		
 		istop <- ans$IerIstop[2]
 			
@@ -1755,10 +1758,9 @@
 			p.wald <- rep(0,nfactor)
 			ntot <- nvarEnd + nvarRec
 			
-			fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)
+			if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)
+			else fit$global_chisq <- 0
 			
-			
-		 
 			fit$dof_chisq <- occur
 			fit$global_chisq.test <- 1
 			# Calcul de pvalue globale
@@ -1785,7 +1787,10 @@
 				nfactor <- length(vec.factordc)
 				p.walddc <- rep(0,nfactor)
 				ntot <- nvarEnd + nvarRec
-				fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
+				
+				if(fit$istop == 1)	fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
+				else fit$global_chisq_d <- 0
+				
 				fit$dof_chisq_d <- occurdc
 				fit$global_chisq.test_d <- 1
 				# Calcul de pvalue globale
@@ -1957,7 +1962,7 @@
                       frailty.sd.subgroup=as.double(matrix(0,nrow=ngg,ncol=maxng)),
                       linear.pred=as.double(rep(0,n)),
                       EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-                      PACKAGE = "frailtypack") # 57
+                      PACKAGE = "frailtypack") # 57 arguments
       
 		if (ans$istop == 4){
 			warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")
@@ -2094,8 +2099,11 @@
 			#VarBeta <- fit$varH[2:(nvar+1),2:(nvar+1)]	
 			VarBeta <- fit$varH[3:dim(fit$varH)[1], 3:dim(fit$varH)[2]]
 			nfactor <- length(vec.factor)
-			p.wald <- rep(0,nfactor)			
-			fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+			p.wald <- rep(0,nfactor)
+			
+			if (fit$istop == 1) fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+			else fit$global_chisq <- 0
+			
 			fit$dof_chisq <- occur
 			fit$global_chisq.test <- 1
 			# Calcul de pvalue globale
@@ -2483,7 +2491,7 @@
 				#ier = as.integer(0),
 				#istop = as.integer(0),
 				paraweib = as.double(rep(0,4)),
-				MartinGales = as.double(matrix(0,nrow=length(uni.subcluster), ncol=4)),
+				MartinGales = as.double(matrix(0,nrow=length(uni.subcluster), ncol=5)),
 				
 				linear.pred = as.double(rep(0,n)),
 				lineardc.pred = as.double(rep(0,as.integer(length(uni.subcluster)))),
@@ -2506,7 +2514,7 @@
 				BetaTpsMat = as.double(matrix(0,nrow=101, ncol=1+4*nvartimedep)),
 				BetaTpsMatDc = as.double(matrix(0,nrow=101, ncol=1+4*nvartimedep2)),
 				EPS = as.double(c(LIMparam, LIMlogl, LIMderiv)),
-				PACKAGE = "frailtypack")
+				PACKAGE = "frailtypack") #65 arguments
 		
 		###########################################
 		### Verification de l'execution du code ###
@@ -2517,7 +2525,7 @@
 		if (istop == 2) warning("Model did not converge.")
 		if (istop == 3) warning("Matrix non-positive definite.")
 		
-		MartinGale <- matrix(ans$MartinGales, nrow=as.integer(length(uni.subcluster)), ncol=4)
+		MartinGale <- matrix(ans$MartinGales, nrow=as.integer(length(uni.subcluster)), ncol=5)
 		
 		fit <- NULL
 		
@@ -2618,10 +2626,9 @@
 			fit$kappa <- ans$axT
 			fit$cross.Val<-cross.validation
 			fit$n.knots.temp <- n.knots.temp
-			fit$zi <- ans$ziout
+			fit$zi <- ans$zi
 			}
-		# if constante par morceaux
-      
+		# if constante par morceaux      
       # verif que les martingales ont ete bien calculees
 		#msg <- "Problem in the estimation of the random effects (perhaps high number of events in some clusters)"
 		#if (Frailty){
@@ -2639,10 +2646,11 @@
 		#		fit$lineardeath.pred <- ans$linearpreddc
 		#	}
 		#}    
-		fit$martingale.res <- MartinGale[,1]
-		fit$martingaledeath.res <- MartinGale[,2]         
-		fit$frailty.pred <- MartinGale[,3]          
-		fit$linear.pred <- ans$linear.pred[order(ordre)]
+		fit$martingale.res <- MartinGale[1:length(uni.cluster),1] # seulement pour les familles
+		fit$martingaledeath.res <- MartinGale[1:length(uni.cluster),2]		
+		fit$frailty.pred <- MartinGale[,3]   
+		fit$frailty.fam.pred <- MartinGale[1:length(uni.cluster),5] ### AK 12/12/2016 (family frailties)
+		fit$linear.pred <- ans$linear.pred[order(ordre)]# a faire
 		fit$lineardeath.pred <- ans$lineardc.pred
       
       #================================> For the Recurrent Event
@@ -2666,7 +2674,10 @@
 			nfactor <- length(vec.factor)
 			p.wald <- rep(0,nfactor)
 			ntot <- nvarEnd + nvarRec
-			fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)		 
+			
+			if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)		 
+			else fit$global_chisq <- 0
+			
 			fit$dof_chisq <- occur
 			fit$global_chisq.test <- 1
 			# Calcul de pvalue globale
@@ -2694,7 +2705,10 @@
 			nfactor <- length(vec.factordc)
 			p.walddc <- rep(0,nfactor)
 			ntot <- nvarEnd + nvarRec
-			fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
+			
+			if(fit$istop == 1) fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
+			else fit$global_chisq_d <- 0 
+			
 			fit$dof_chisq_d <- occurdc
 			fit$global_chisq.test_d <- 1
 			# Calcul de pvalue globale

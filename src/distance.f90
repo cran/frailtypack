@@ -939,7 +939,6 @@
     double precision,dimension(100,nst)::xSuT! en plus
     double precision::ep
 
-
     glTW=0.d0
     ier=0
     t=0
@@ -949,7 +948,7 @@
 !    ns=m-nva-1 !non marche pas pour le COX : VR 20 fev 2015
 !    write(*,*)'=====ns dans distance',ns
     ns=2
-
+    
     do i=1,ns*(ns+1)/2
         vv(i)=vvv(i)
     end do
@@ -963,15 +962,15 @@
             u(k,j)=zz
         end do
     end do
-
-
+     
 !     Pour chaque temps de 0 à la censure du décès par pas cens/100
 
  !     commencer à 0 dans la boucle
- 
+  
 !    x= mint
     x= mint + 0.000001 !new 20 fev 2015
 !       shape et scale
+    
     ii=1
     do jj=1,nst!rempli tableaux etaT et betaT
         betaT(jj)=b(ii)**2
@@ -983,7 +982,7 @@
         lamT=0.d0 ! en plus
 !         n=n+1 ! compteur sur nième temps
         if(t.ne.1) then
-            x=x+(cens-mint)/(mt-1)    
+            x=x+(cens-mint)/(mt-1)         
         end if
 ! On simule 1000 réalisations gaussienne par paramètre
         do k=1,1000
@@ -1008,13 +1007,12 @@
 !     fct de risque cumulée   : gl  =  (x/etaR)**betaR
 !     fct de survie           : su  = dexp(-gl)
 
-            
             ii=1 !en plus
             do jj=1,nst
                 lamT(k,jj)=(bgen(ii)*(x**(bgen(ii)-1.d0)))/(bgen(ii+1)**bgen(ii))
-                lamTW(jj)=((b(ii)**2)*(x**((b(ii)**2)-1.d0)))/(((b(ii+1)**2))**(b(ii)**2))
+                lamTW(jj)=((b(ii)**2)*(x**((b(ii)**2)-1.d0)))/((b(ii+1)**2)**(b(ii)**2))
                 ii=ii+2
-            end do            
+            end do          
         end do
 
 ! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
@@ -1036,7 +1034,7 @@
             moyLamT(t,2,jj) = real(lamT25(jj))
             moyLamT(t,3,jj) = real(lamT975(jj))
         end do
-        
+                
     end do    
         
     x=mint

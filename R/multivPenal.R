@@ -1098,58 +1098,62 @@ if(length(vec.factor) > 0){
 # 	print(dim(varformula2))
 # 	print(dim(vardc))
 
-
 	ans <- .Fortran("jointMultiv",
 		as.integer(nobsEvent),
-                as.integer(n.knots),
-                k0=as.double(kappa),
-                as.double(tt0.formula),
-                as.double(tt1.formula),
-                as.double(tt0.formula2),
-                as.double(tt1.formula2),
-                as.integer(cens.formula),
-                as.integer(event2),
-                as.integer(Tab$dataR[,CLUSTER]),
-                as.integer(Tab$dataM[,CLUSTER]),
-                as.integer(uni.cluster),
-                as.double(tt0.death),
-                as.double(tt1.death),
-                as.integer(terminalEvent),
-                as.integer(nbvar),
-                as.double(var.formula),
-                as.double(varformula2),
-                as.double(vardc),
-                as.integer(noVar),
-                as.integer(maxIteration),
-                as.integer(initialize),
-                np=as.integer(np),
-                b=as.double(rep(0,np)),
-                H=as.double(matrix(0,nrow=np,ncol=np)),
-                HIH=as.double(matrix(0,nrow=np,ncol=np)),
-                loglik=as.double(0),
+		as.integer(n.knots),
+		k0=as.double(kappa),
+		as.double(tt0.formula),
+		as.double(tt1.formula),
+		as.double(tt0.formula2),
+		as.double(tt1.formula2),
+		as.integer(cens.formula),
+		as.integer(event2),
+		as.integer(Tab$dataR[,CLUSTER]),
+		
+		as.integer(Tab$dataM[,CLUSTER]),
+		as.integer(uni.cluster),
+		as.double(tt0.death),
+		as.double(tt1.death),
+		as.integer(terminalEvent),
+		as.integer(nbvar),
+		as.double(var.formula),
+		as.double(varformula2),
+		as.double(vardc),
+		as.integer(noVar),
+		
+		as.integer(maxIteration),
+		as.integer(initialize),
+		np=as.integer(np),
+		b=as.double(rep(0,np)),
+		H=as.double(matrix(0,nrow=np,ncol=np)),
+		HIH=as.double(matrix(0,nrow=np,ncol=np)),
+		loglik=as.double(0),
 		LCV=as.double(rep(0,2)),
 		critCV=as.integer(rep(0,5)),
-                x1=as.double(rep(0,size1)),
-                lam=as.double(matrix(0,nrow=size1,ncol=3)),
-                xSu1=as.double(xSu1),
-                surv=as.double(matrix(0,nrow=mt11,ncol=3)),
-                x2=as.double(rep(0,size2)),
-                lam2=as.double(matrix(0,nrow=size2,ncol=3)),
+		x1=as.double(rep(0,size1)),
+		
+		lam=as.double(matrix(0,nrow=size1,ncol=3)),
+		xSu1=as.double(xSu1),
+		surv=as.double(matrix(0,nrow=mt11,ncol=3)),
+		x2=as.double(rep(0,size2)),
+		lam2=as.double(matrix(0,nrow=size2,ncol=3)),
 		xSu2=as.double(xSu2),
-                surv2=as.double(matrix(0,nrow=mt12,ncol=3)),
-                x3=as.double(rep(0,size3)),
-                lam3=as.double(matrix(0,nrow=size3,ncol=3)),
+		surv2=as.double(matrix(0,nrow=mt12,ncol=3)),
+		x3=as.double(rep(0,size3)),
+		lam3=as.double(matrix(0,nrow=size3,ncol=3)),
 		xSu3=as.double(xSu3),
-                surv3=as.double(matrix(0,nrow=mt13,ncol=3)),
+		
+		surv3=as.double(matrix(0,nrow=mt13,ncol=3)),
 		as.integer(typeof),
 		as.integer(equidistant),
 		as.integer(nbIntervEvent),
 		as.integer(mtEvent),
-                ni=as.integer(0),
-                cptEvent=as.integer(rep(0,3)),
+		ni=as.integer(0),
+		cptEvent=as.integer(rep(0,3)),
 		shape.weib=as.double(rep(0,3)),
 		scale.weib=as.double(rep(0,3)),
 		as.integer(mt1Event),
+		
 		as.integer(!crossVal),
 		as.integer(recurrentAG),
 		ResMartingaleEvent=as.double(ResMartingaleEvent),
@@ -1160,10 +1164,11 @@ if(length(vec.factor) > 0){
 		zi=as.double(zi),
 		zidc=as.double(zidc),
 		zi2=as.double(zi2),
+		
 		time=as.double(time),
 		timedc=as.double(timedc),
 		time2=as.double(time2),
-                PACKAGE = "frailtypack")
+	PACKAGE = "frailtypack")#63 arguments
 
 
 	if (ans$critCV[2] == 4){
@@ -1336,8 +1341,9 @@ if(length(vec.factor) > 0){
 		nfactor <- length(vec.factor)
 		p.wald <- rep(0,nfactor)
 		
-		fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)
-
+		if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)
+		else fit$global_chisq <- 0
+		
 		fit$dof_chisq <- occur
 		fit$global_chisq.test <- 1
 # Calcul de pvalue globale
@@ -1358,8 +1364,11 @@ if(length(vec.factor) > 0){
 		if(length(vec.factordc) > 0){
 			nfactor <- length(vec.factordc)
 			p.walddc <- rep(0,nfactor)
-			fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
-		 fit$dof_chisq_d <- occurdc
+			
+			if(fit$istop == 1)	fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
+		    else fit$global_chisq_d <- 0 
+			
+			fit$dof_chisq_d <- occurdc
 			fit$global_chisq.test_d <- 1
 	# Calcul de pvalue globale
 			for(i in 1:length(vec.factordc)){
@@ -1382,8 +1391,11 @@ if(length(vec.factor) > 0){
 	if(length(vec.factorevent2) > 0){
 		nfactor <- length(vec.factorevent2)
 		p.wald2 <- rep(0,nfactor)
-			fit$global_chisq2 <- waldtest(N=nvarRec2,nfact=nfactor,place=ind.placeformula2,modality=occurformula2,b=Beta,Varb=VarBeta,Lfirts=ntmp,Ntot=ntot)
-	 fit$dof_chisq2 <- occurformula2
+		
+		if(fit$istop == 1) fit$global_chisq2 <- waldtest(N=nvarRec2,nfact=nfactor,place=ind.placeformula2,modality=occurformula2,b=Beta,Varb=VarBeta,Lfirts=ntmp,Ntot=ntot)
+	    else fit$global_chisq2 <- 0 
+		
+		fit$dof_chisq2 <- occurformula2
 		fit$global_chisq.test2 <- 1
 # Calcul de pvalue globale
 		for(i in 1:length(vec.factorevent2)){

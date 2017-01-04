@@ -110,7 +110,7 @@
                 endif
             endif
         end do
-		
+        
         ! Calcul des risques de base
         ! A chaque fois, calculé pour : 
         ! DC au temps de base (predtimerec2(1,1)) et à l'horizon (predtimerec2(1,nrec0+2))
@@ -744,7 +744,7 @@
                 ss32 = ss32 + w(j)*(auxfunca32)
             end do
         endif
-        if ((typevent == 1).or.(typevent == 3)) then
+        if ((typevent == 1).or.(typevent == 3)) then 
             do j=1,20
                 var1 = x(j)
                 auxfunca11_rec = func1pred1_rec(var1,ptheta,palpha,XbetapredRi,XbetapredDCi,survRi,survDC,nrec0,recj)

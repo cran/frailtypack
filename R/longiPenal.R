@@ -1023,77 +1023,75 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
   }
 
         ans <- .Fortran("joint_longi",
-      as.integer(1),
-                        as.integer(nsujety),
-                        as.integer(ng),
-                as.integer(n.knots),
-                k0=as.double(c(0,kappa)), # joint avec generalisation de strate
-                        as.double(0),
-                        as.double(0),
-      as.integer(0),
-      as.integer(0),
-                as.double(tt0dc),
-                        as.double(tt1dc),
-                as.integer(cens),
-      link0 = as.integer(c(link0,0)),
-      yy0 = as.double(Y),
-      groupey0 = as.integer(clusterY),
-      nb0 = as.integer(nRE),
-      matzy0 =as.double(matzy),
-      cag0 = as.double(cag),
-      as.integer(1),
-      matrix(as.double(0),nrow=1,ncol=1),
-                as.integer(nvarT),
-                as.double(varT),
-                nva30 = as.integer(nvarY),
-                vaxy0 = as.double(varY),
-                noVar = as.integer(c(0,noVarT,noVarY)),
-                ag0 = as.integer(1),
-                as.integer(maxit),
-                np=as.integer(np),
-                neta0 = as.integer(c(netadc,0)),
-                b=as.double(Beta),
-                H=as.double(matrix(0,nrow=np,ncol=np)),
-                HIH=as.double(matrix(0,nrow=np,ncol=np)),
+			as.integer(1),
+			as.integer(nsujety),
+			as.integer(ng),
+			as.integer(n.knots),
+			k0=as.double(c(0,kappa)), # joint avec generalisation de strate
+			as.double(0),
+			as.double(0),
+		    as.integer(0),
+		    as.integer(0),
+			as.double(tt0dc),
+			as.double(tt1dc),
+			as.integer(cens),
+		    link0 = as.integer(c(link0,0)),
+		    yy0 = as.double(Y),
+		    groupey0 = as.integer(clusterY),
+		    nb0 = as.integer(nRE),
+		    matzy0 =as.double(matzy),
+		    cag0 = as.double(cag),
+		    as.integer(1),
+            matrix(as.double(0),nrow=1,ncol=1),
+			as.integer(nvarT),
+			as.double(varT),
+			nva30 = as.integer(nvarY),
+			vaxy0 = as.double(varY),
+			noVar = as.integer(c(0,noVarT,noVarY)),
+			ag0 = as.integer(1),
+			as.integer(maxit),
+			np=as.integer(np),
+			neta0 = as.integer(c(netadc,0)),
+			b=as.double(Beta),
+			H=as.double(matrix(0,nrow=np,ncol=np)),
+			HIH=as.double(matrix(0,nrow=np,ncol=np)),
 
-                loglik=as.double(0),
-                LCV=as.double(rep(0,2)),
-                xR=as.double(matrix(0,nrow=1,ncol=1)),
-                lamR=as.double(matrix(0,nrow=1,ncol=3)),
-                xSuR=as.double(array(0,dim=100)),
-                survR=as.double(array(0,dim=1)),
-                xD=as.double(rep(0,100)),
-                lamD=as.double(matrix(0,nrow=size1,ncol=3)),
-                xSuD=as.double(xSuT),
-                survD=as.double(matrix(0,nrow=size2,ncol=3)),
-                as.integer(typeof),
-                as.integer(equidistant),
-                as.integer(c(1,size1,1,mt1)),###
-                counts=as.integer(c(0,0,0)),
-                ier_istop=as.integer(c(0,0)),
-                paraweib=as.double(rep(0,4)),
-                MartinGale=as.double(matrix(0,nrow=ng,ncol=5)),###
-                ResLongi = as.double(matrix(0,nrow=nsujety,ncol=4)),
-                Pred_y  = as.double(matrix(0,nrow=nsujety,ncol=2)),
+			loglik=as.double(0),
+			LCV=as.double(rep(0,2)),
+			xR=as.double(matrix(0,nrow=1,ncol=1)),
+			lamR=as.double(matrix(0,nrow=1,ncol=3)),
+			xSuR=as.double(array(0,dim=100)),
+			survR=as.double(array(0,dim=1)),
+			xD=as.double(rep(0,100)),
+			lamD=as.double(matrix(0,nrow=size1,ncol=3)),
+			xSuD=as.double(xSuT),
+			survD=as.double(matrix(0,nrow=size2,ncol=3)),
+			as.integer(typeof),
+			as.integer(equidistant),
+			as.integer(c(1,size1,1,mt1)),###
+			counts=as.integer(c(0,0,0)),
+			ier_istop=as.integer(c(0,0)),
+			paraweib=as.double(rep(0,4)),
+			MartinGale=as.double(matrix(0,nrow=ng,ncol=5)),###
+			ResLongi = as.double(matrix(0,nrow=nsujety,ncol=4)),
+			Pred_y  = as.double(matrix(0,nrow=nsujety,ncol=2)),
 
-                linear.pred=as.double(rep(0,ng)),
-                lineardc.pred=as.double(rep(0,as.integer(ng))),
-                zi=as.double(rep(0,(n.knots+6))),
+			linear.pred=as.double(rep(0,ng)),
+			lineardc.pred=as.double(rep(0,as.integer(ng))),
+			zi=as.double(rep(0,(n.knots+6))),
 
-                paratps=as.integer(c(0,0,0)),#for future developments
-                as.integer(c(0,0,0)),#for future developments
-                BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*0)), #for future developments
-                BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
-                BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
-                EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-                GH = c(as.integer(GH),as.integer(n.nodes)),
-                paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol))),
-                PACKAGE = "frailtypack")
-
-
+			paratps=as.integer(c(0,0,0)),#for future developments
+			as.integer(c(0,0,0)),#for future developments
+			BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*0)), #for future developments
+			BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
+			BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
+			EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
+			GH = c(as.integer(GH),as.integer(n.nodes)),
+			paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol))),
+		PACKAGE = "frailtypack") #62 arguments
 
         MartinGale <- matrix(ans$MartinGale,nrow=ng,ncol=5)
-  Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
+		Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
 
     if (ans$ier_istop[2] == 4){
          warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")
@@ -1292,8 +1290,10 @@ fit$pred.y.cond <- matrix(ans$Pred_y,ncol=2)[,1]
                 VarBeta <- fit$varH
                 nfactor <- length(vec.factorY)
                 p.wald <- rep(0,nfactor)
-                fit$global_chisq <- waldtest(N=nvarY,nfact=nfactor,place=ind.placeY,modality=occurY,b=Beta,Varb=VarBeta,Lfirts=nvarT,Ntot=nvar)
-
+				
+				if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvarY,nfact=nfactor,place=ind.placeY,modality=occurY,b=Beta,Varb=VarBeta,Lfirts=nvarT,Ntot=nvar)
+				else fit$global_chisq <- 0
+				
                 fit$dof_chisq <- occurY
                 fit$global_chisq.test <- 1
 # Calcul de pvalue globale

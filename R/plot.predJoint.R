@@ -4,7 +4,7 @@
 	
 	if ((conf.bands) & (!x$icproba)) stop("Confidence intervals were not calculated. Use the MC.sample argument in the 'prediction' function")
 	
-	if (event.type == 1)	{
+	if (event.type == 1){
 		if (x$npred >5) {
 			warning("For a better overview only predictions for a maximum of 5 subjects are plotted (the 5 first ones)")
 			x$npred <- 5

@@ -58,7 +58,7 @@ survival <- function(t,ObjFrailty){
 			b <- ObjFrailty$b[1:m]
 			time <- ObjFrailty$time
 			if((ObjFrailty$x[,1] > t) || ((max(ObjFrailty$xSu[,1])+0.00001) < t)) stop(" Time exceeds the range allowed ")
-			if((ObjFrailty$n.strat == 2) & ((ObjFrailty$x[,2] > t) || (max(ObjFrailty$xSu[,2]) < t))) stop(" Time exceeds the range allowed ")
+			if((ObjFrailty$n.strat == 2) && ((ObjFrailty$x[,2] > t) || (max(ObjFrailty$xSu[,2]) < t))) stop(" Time exceeds the range allowed ")
 			out <- .Fortran("survival_cpm2",as.double(t),as.double(b),as.integer(nst),as.integer(ObjFrailty$nbintervR),
 			as.double(time),survival=as.double(rep(0,nst)),PACKAGE = "frailtypack")
 

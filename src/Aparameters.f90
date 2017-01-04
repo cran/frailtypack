@@ -36,7 +36,7 @@
     integer,save::ngexact,nssgexact
     integer,dimension(:,:),allocatable,save::ssg
     integer,dimension(:),allocatable,save:: mid
-    integer,dimension(:,:),allocatable,save::mij
+    integer,dimension(:,:),allocatable,save::mij,mij2
     integer,save::nbpara
     double precision,dimension(:,:),allocatable,save::aux1,aux2
     end module commun
@@ -273,10 +273,11 @@
 
 
     module residusM
-        double precision,dimension(:),allocatable,save::Residus &
-        ,varResidus,cumulhaz,vecuiRes,post_esp,post_SD,som_Xbeta
+        double precision,dimension(:),allocatable,save::Residus, &
+            varResidus,cumulhaz,vecuiRes,post_esp,post_SD,som_Xbeta
         double precision,dimension(:),allocatable,save::ResidusRec,&
-        Residusdc,Rrec,Nrec,Rdc,Ndc,vecviRes,RisqCumul,ResidusLongi,Rdc_res
+            Residusdc,Rrec,Nrec,Rdc,Ndc,vecviRes,RisqCumul,ResidusLongi,&
+            Rdc_res ,Nrec_fam,Ndc_fam,Nrec_ind
         double precision,save::cares,cbres,ddres
         double precision,dimension(:),allocatable,save:: vres
         integer , save :: ierres,nires,istopres,effetres,indg,it_res,it_res_rec
@@ -284,8 +285,8 @@
         double precision,dimension(:),allocatable::vuu,b_temp
         integer,save::indic_cumul
         integer,dimension(:),allocatable::n_ssgbygrp
-        double precision,dimension(:,:),allocatable,save::vecuiRes2,cumulhaz1,cumulhaz0&
-                ,invsigma,zet,zetd,zetr,XbetaY_res,Pred_y
+        double precision,dimension(:,:),allocatable,save::vecuiRes2,cumulhaz1,cumulhaz0,&
+                cumulhazdc,invsigma,zet,zetd,zetr,XbetaY_res,Pred_y
         double precision,save::detSigma
            integer,save :: nig_mc,np_mc
     double precision,save :: sig2_mc,res1_mc

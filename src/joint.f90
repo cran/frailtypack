@@ -97,9 +97,11 @@
     double precision::temp
 !predictor
     double precision,dimension(ngrp(1))::Resmartingale,Resmartingaledc,frailtypred,frailtyvar
-    double precision,dimension(ngrp(1),4),intent(out)::MartinGales
+    double precision,dimension(ngrp(1))::frailtypred_fam,frailtyvar_fam
+    double precision,dimension(ngrp(1),ngrp(1)) :: frailtypred_fam_ind, frailtyvar_fam_ind
+    double precision,dimension(ngrp(1),5),intent(out)::MartinGales
 
-    double precision,external::funcpajres,funcpajres_log
+    double precision,external::funcpajres,funcpajres_log,funcpajres_fam
     double precision,dimension(nsujet0),intent(out)::linearpred
     double precision,dimension(ngrp(1)),intent(out)::linearpreddc
     double precision,dimension(lignedc0),intent(out)::linearpredG
@@ -1311,7 +1313,9 @@
                 endif
         end select
         
-    case(3) ! Joint nested frailty model    
+    case(3) ! Joint nested frailty model 
+        allocate(Nrec_fam(nfam),Ndc_fam(nfam),Nrec_ind(ng))
+        allocate(cumulhaz1(ng,ng),cumulhaz0(ng,ng),cumulhazdc(ng,ng))
         indic_xi = indic_xi0
         indic_alpha = indic_alpha0
         
@@ -1663,7 +1667,7 @@
             Call distanceJcpm(b,nstRec*nbintervR+nbintervDC,mt1,mt2,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
         case(2)
             Call distanceJweib(b,np,mt1,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out)
-    end select
+    end select    
 
     do i=1,nstRec
         scaleweib(i) = etaT(i)
@@ -1803,82 +1807,115 @@
 
 
     !deallocate(I_hess,H_hess)
+    if(typeJoint.ne.3) then
+        if((istop == 1) .and. (effet == 1)) then
+    !        if(typeJoint == 1) then
+                allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1))
+                effetres = effet
 
-    if((istop == 1) .and. (effet == 1)) then
-!        if(typeJoint == 1) then
-            allocate(vecuiRes(ng),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1))
-            effetres = effet
-
-            if (logNormal.eq.0) then
-                Call ResidusMartingalej(b,np,funcpajres,Resmartingale,Resmartingaledc,frailtypred,frailtyvar)
-            else
-                Call ResidusMartingalej(b,np,funcpajres_log,Resmartingale,Resmartingaledc,frailtypred,frailtyvar)
-            endif
-
-            if (istopres.eq.1) then
-                do i=1,nsujet
-                    if (logNormal.eq.0) then
-                        linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
-                    else
-                        linearpred(i)=Xbeta(1,i)+frailtypred(g(i))
-                    endif
-                end do
-
-                if((typeJoint==1).or.(typeJoint==3)) then
-                    do i=1,ng
-                        if (logNormal.eq.0) then
-                            linearpreddc(i)=Xbetadc(1,i)+alpha*dlog(frailtypred(i))
-                        else
-                            linearpreddc(i)=Xbetadc(1,i)+alpha*frailtypred(i)
-                        endif
-                    end do
+                if (logNormal.eq.0) then
+                    Call ResidusMartingalej(b,np,funcpajres,Resmartingale,Resmartingaledc,frailtypred,frailtyvar)
                 else
-                    do i=1,lignedc
+                    Call ResidusMartingalej(b,np,funcpajres_log,Resmartingale,Resmartingaledc,frailtypred,frailtyvar)
+                endif
+
+                if (istopres.eq.1) then
+                    do i=1,nsujet
                         if (logNormal.eq.0) then
-                            linearpredG(i)=XbetaG(1,i)+alpha*dlog(frailtypred(gsuj(i)))
+                            linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
                         else
-                            linearpredG(i)=XbetaG(1,i)+alpha*frailtypred(gsuj(i))
+                            linearpred(i)=Xbeta(1,i)+frailtypred(g(i))
                         endif
                     end do
+
+                    if((typeJoint==1).or.(typeJoint==3)) then
+                        do i=1,ng
+                            if (logNormal.eq.0) then
+                                linearpreddc(i)=Xbetadc(1,i)+alpha*dlog(frailtypred(i))
+                            else
+                                linearpreddc(i)=Xbetadc(1,i)+alpha*frailtypred(i)
+                            endif
+                        end do
+                    else
+                        do i=1,lignedc
+                            if (logNormal.eq.0) then
+                                linearpredG(i)=XbetaG(1,i)+alpha*dlog(frailtypred(gsuj(i)))
+                            else
+                                linearpredG(i)=XbetaG(1,i)+alpha*frailtypred(gsuj(i))
+                            endif
+                        end do
+                    endif
                 endif
-            endif
-!        else
-!            allocate(vecuiRes(lignedc),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1))
-!            effetres = effet
-!
-!            Call ResidusMartingalej(b,np,funcpajres,Resmartingale,Resmartingaledc,frailtypred,frailtyvar)
-!
-!            if (istopres.eq.1) then
-!                do i=1,nsujet
-!                    linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
-!                end do
-!
-!                do i=1,ngtemp
-!                    linearpreddc(i)=Xbetadc(1,i)+alpha*dlog(frailtypred(i))
-!                end do
-!            endif
-!        end if
+    !        else
+    !            allocate(vecuiRes(lignedc),vres((1*(1+3)/2)),I_hess(1,1),H_hess(1,1))
+    !            effetres = effet
+    !
+    !            Call ResidusMartingalej(b,np,funcpajres,Resmartingale,Resmartingaledc,frailtypred,frailtyvar)
+    !
+    !            if (istopres.eq.1) then
+    !                do i=1,nsujet
+    !                    linearpred(i)=Xbeta(1,i)+dlog(frailtypred(g(i)))
+    !                end do
+    !
+    !                do i=1,ngtemp
+    !                    linearpreddc(i)=Xbetadc(1,i)+alpha*dlog(frailtypred(i))
+    !                end do
+    !            endif
+    !        end if
 
-        MartinGales(:,1)=Resmartingale
-        MartinGales(:,2)=Resmartingaledc
-        MartinGales(:,3)=frailtypred
-        MartinGales(:,4)=frailtyvar
+            MartinGales(:,1)=Resmartingale
+            MartinGales(:,2)=Resmartingaledc
+            MartinGales(:,3)=frailtypred
+            MartinGales(:,4)=frailtyvar
 
-        deallocate(I_hess,H_hess,vres,vecuiRes)
+            deallocate(I_hess,H_hess,vres,vecuiRes)
+        else
+            !deallocate(I_hess,H_hess)
 
-    else
-        !deallocate(I_hess,H_hess)
+    ! les 4 variables suivantes sont maintenant dans MartinGales
+    !         Resmartingale=0.d0
+    !         Resmartingaledc=0.d0
+    !         frailtypred=0.d0
+    !         frailtyvar=0.d0
 
-! les 4 variables suivantes sont maintenant dans MartinGales
-!         Resmartingale=0.d0
-!         Resmartingaledc=0.d0
-!         frailtypred=0.d0
-!         frailtyvar=0.d0
+            MartinGales=0.d0
+            linearpred=0.d0
+            linearpreddc=0.d0
+            linearpredG=0.d0
+        end if
 
-        MartinGales=0.d0
-        linearpred=0.d0
-        linearpreddc=0.d0
-        linearpredG=0.d0
+    else ! Joint nested    
+        if(istop == 1) then
+            allocate(vecuiRes(ng),I_hess(1,1),H_hess(1,1))
+            effetres = effet
+            
+            Call ResidusMartingalej_fam(b,np,funcpajres_fam,Resmartingale,Resmartingaledc,frailtypred_fam,&
+                frailtyvar_fam, frailtypred_fam_ind,frailtyvar_fam_ind)         
+
+            MartinGales(1:nfam,1)=Resmartingale
+            MartinGales(1:nfam,2)=Resmartingaledc
+            MartinGales(1:nfam,5)=frailtypred_fam
+            MartinGales(1:nfam,4)=frailtyvar_fam        
+            k = 1
+            
+            do i=1,nfam
+                Martingales(k:k+fsize(i)-1,3) = frailtypred_fam_ind(i,1:fsize(i))
+                k = k+fsize(i)
+            end do
+            
+            deallocate(I_hess,H_hess,vecuiRes)
+        else
+            !deallocate(I_hess,H_hess)
+            ! les 4 variables suivantes sont maintenant dans MartinGales
+            !         Resmartingale=0.d0
+            !         Resmartingaledc=0.d0
+            !         frailtypred=0.d0
+            !         frailtyvar=0.d0
+            MartinGales=0.d0
+            linearpred=0.d0
+            linearpreddc=0.d0
+            linearpredG=0.d0
+        end if
     end if
 
     counts(1) = ni
@@ -1961,6 +1998,9 @@
     deallocate(filtretps,filtre2tps)
     deallocate(betatps,betatps2)
     deallocate(knotsTPS,knotsdcTPS,innerknots,innerknotsdc)
+    
+    if(typeJoint == 3)deallocate(Nrec_fam,Ndc_fam,Nrec_ind, &
+        cumulhaz1,cumulhaz0,cumulhazdc)
 
     if (typeof == 0) then
         deallocate(nt0dc,nt1dc,nt0,nt1,ntU,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc, &

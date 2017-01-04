@@ -417,6 +417,7 @@ if((all.equal(length(hazard),1)==T)==T){
 				as.double(tt1),
 				as.integer(cens),
 				as.integer(cluster),
+				
 				as.integer(nvar),
 				as.integer(strats),
 				as.double(var),
@@ -427,6 +428,7 @@ if((all.equal(length(hazard),1)==T)==T){
 				as.integer(crossVal),
 				as.integer(correlation),
 				as.integer(np),
+				
 				b=as.double(rep(0,np)),
 				coef=as.double(rep(0,nvar)),
 				varcoef=as.double(rep(0,nvar)),
@@ -437,16 +439,18 @@ if((all.equal(length(hazard),1)==T)==T){
 				varSigma2=as.double(c(0,0)),
 				varTau2=as.double(c(0,0)),
 				ni=as.integer(0),
+				
 				loglikpen=as.double(0),
 				LCV=as.double(rep(0,2)),
 				k0=as.double(c(0,0)),
 				x1=as.double(rep(0,size1)),
 				lam1=as.double(matrix(0,nrow=size1,ncol=3)),
-                                xSu1=as.double(xSu1),
+				xSu1=as.double(xSu1),
 				surv1=as.double(matrix(0,nrow=size2,ncol=3)),
 				x2=as.double(rep(0,size1)),
 				lam2=as.double(matrix(0,nrow=size1,ncol=3)),
-                                xSu2=as.double(xSu2),
+				xSu2=as.double(xSu2),
+								
 				surv2=as.double(matrix(0,nrow=size2,ncol=3)),
 				as.integer(typeof),
 				as.integer(equidistant),
@@ -457,21 +461,21 @@ if((all.equal(length(hazard),1)==T)==T){
 				istop=as.integer(0),
 				shape.weib=as.double(rep(0,2)),
 				scale.weib=as.double(rep(0,2)),
+				
 				as.integer(mt1),
 				trunc=as.integer(0),
 				zi=as.double(rep(0,(n.knots+6))),
-				time=as.double(rep(0,(nbintervR+1))),
-				
+				time=as.double(rep(0,(nbintervR+1))),				
 				martingale.res=as.double(rep(0,as.integer(length(uni.cluster)))),
 				frailty.pred=as.double(rep(0,as.integer(length(uni.cluster)))),
 				frailty.pred2=as.double(rep(0,as.integer(length(uni.cluster)))),
 				frailty.var=as.double(rep(0,as.integer(length(uni.cluster)))),
 				frailty.var2=as.double(rep(0,as.integer(length(uni.cluster)))),
 				frailty.cov=as.double(rep(0,as.integer(length(uni.cluster)))),
+				
 				linear.pred=as.double(rep(0,n)),
 				EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-				PACKAGE = "frailtypack")  # 62
-		
+			PACKAGE = "frailtypack")  # 62 arguments		
 
     if (ans$trunc == 1){
     	stop("'addivePenal' can not deal with left truncation.")
@@ -599,8 +603,10 @@ if((all.equal(length(hazard),1)==T)==T){
 		VarBeta <- ans$varcoef
 		nfactor <- length(vec.factor)
 		p.wald <- rep(0,nfactor)
-
-		fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+		
+		if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
+		else fit$global_chisq <- 0
+		
 		fit$dof_chisq <- occur
 		fit$global_chisq.test <- 1
 # Calcul de pvalue globale

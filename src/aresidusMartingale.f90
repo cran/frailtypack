@@ -317,27 +317,20 @@
     moyuiR=0.d0
     
     do indg=1,ng
-
         vuu=0.9d0
-
         call marq98res(vuu,1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
-
         if (istopres.eq.1) then 
-           if (logNormal.eq.0) then !gamma frailty
-              ResidusRec(indg)=Nrec(indg)-((vuu(1)*vuu(1)))*Rrec(indg)
-              Residusdc(indg)=Ndc(indg)-((vuu(1)*vuu(1))**alpha)*Rdc(indg)
-           else!log normal frailty
-              ResidusRec(indg)=Nrec(indg)-(dexp(vuu(1)*vuu(1)))*Rrec(indg)
-              Residusdc(indg)=Ndc(indg)-(dexp(vuu(1)*vuu(1)*alpha))*Rdc(indg)
-           endif
-
-           vecuiRes(indg) = vuu(1)*vuu(1)
-
-           Resmartingale(indg) = ResidusRec(indg)
-           Resmartingaledc(indg) = Residusdc(indg)
-
+            if (logNormal.eq.0) then !gamma frailty
+                ResidusRec(indg)=Nrec(indg)-((vuu(1)*vuu(1)))*Rrec(indg)
+                Residusdc(indg)=Ndc(indg)-((vuu(1)*vuu(1))**alpha)*Rdc(indg)
+            else!log normal frailty
+                ResidusRec(indg)=Nrec(indg)-(dexp(vuu(1)*vuu(1)))*Rrec(indg)
+                Residusdc(indg)=Ndc(indg)-(dexp(vuu(1)*vuu(1)*alpha))*Rdc(indg)
+            endif
+            vecuiRes(indg) = vuu(1)*vuu(1)
+            Resmartingale(indg) = ResidusRec(indg)
+            Resmartingaledc(indg) = Residusdc(indg)
             frailtypred(indg) = vecuiRes(indg)
-
             frailtyvar(indg) = ((2.d0*vuu(1))**2)*vres(1)
         else
             ! non convergence ou erreur de calcul de la fonction a maximiser
@@ -346,10 +339,85 @@
             frailtypred(indg) = 0.d0
             frailtyvar(indg) = 0.d0
         endif
-
-    end do
-    
+    end do    
     end subroutine ResidusMartingalej
+        
+!=============================================================================
+!                       CALCUL DES RESIDUS de MARTINGALES  Joint Nested (AK 12/12/2016)
+!=============================================================================
+    
+    subroutine ResidusMartingalej_fam(b,np,namesfuncres,Resmartingale,Resmartingaledc,&
+                    frailtypred,frailtyvar,frailtypredind,frailtyvarind)
+
+    use residusM
+    use optimres
+    use comon
+    use commun
+
+    implicit none
+    
+    integer::i,j,np
+    double precision,dimension(np),intent(in)::b
+    double precision,external::namesfuncres
+    double precision,dimension(ng),intent(out)::Resmartingale,Resmartingaledc
+    double precision,dimension(ng),intent(out)::frailtypred,frailtyvar
+    double precision,dimension(ng,ng),intent(out)::frailtypredind,frailtyvarind
+    double precision,dimension(:),allocatable::vuuu
+    double precision,dimension(:,:),allocatable::H_hess0
+
+    cares=0.d0
+    cbres=0.d0
+    ddres=0.d0
+    vecuiRes=0.d0
+    moyuiR=0.d0
+    
+    Resmartingale = Nrec_fam(1:nfam) !
+    Resmartingaledc = Ndc_fam(1:nfam) !    
+
+    do indg=1,nfam
+        allocate(H_hess0(fsize(indg)+1,fsize(indg)+1))        
+        allocate(vuuu(fsize(indg)+1),vres((fsize(indg)+1)*((fsize(indg)+1)+3)/2))
+        vuuu=0.9d0
+
+        call marq98res(vuuu,(fsize(indg)+1),nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
+
+        do i=1,fsize(indg)+1
+            do j=i,fsize(indg)+1
+                H_hess0(i,j)=vres((j-1)*j/2+i)
+            end do
+        end do
+        do i=1,(fsize(indg)+1)
+            do j=1,i-1
+                H_hess0(i,j) = H_hess0(j,i)
+            end do
+        end do
+    
+        if (istopres.eq.1) then
+            do i=1,fsize(indg)
+                Resmartingale(indg) = Resmartingale(indg) -(((vuuu(1)*vuuu(1))**xi)*&
+                        (vuuu(1+i)*vuuu(1+i)))*cumulhaz1(indg,i)
+                Resmartingaledc(indg) = Resmartingaledc(indg) - ((vuuu(1)*vuuu(1))*&
+                        ((vuuu(1+i)*vuuu(1+i))**alpha))*cumulhazdc(indg,i)
+                frailtypredind(indg,i) = vuuu(1+i)**2
+            end do
+
+            frailtypred(indg) = vuuu(1)**2
+            frailtyvar(indg) = ((2.d0*vuuu(1))**2)*H_hess0(1,1)
+
+            do i=1,fsize(indg)
+                frailtyvarind(indg,i) = ((2.d0*vuuu(1+i))**2)*H_hess0(1+i,1+i)
+            end do
+        else
+            Resmartingale(indg) = 0.d0
+            frailtypredind(indg,:) = 0.d0
+            frailtyvarind(indg,:) = 0.d0
+            frailtyvar(indg) = 0.d0
+            frailtypred(indg) = 0.d0
+        end if
+        deallocate(vuuu,vres,H_hess0)!,I_hess,H_hess)
+    end do
+    end subroutine ResidusMartingalej_fam
+
 
 !=============================================================================
 !                       CALCUL DES RESIDUS de MARTINGALES Nested

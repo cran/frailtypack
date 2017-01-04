@@ -176,7 +176,69 @@
 
     return
     
-    end function funcpanres    
+    end function funcpanres
+
+
+        
+!!!!
+!!!! Calcul Residus joint nested (AK 12/12/2016)
+!!!!
+    
+    double precision function funcpajres_fam(uu,np,id,thi,jd,thj)
+    
+    use comon,only:alpha,eta,xi,theta,cdc,fsize
+    use residusM
+    use commun
+    
+    implicit none
+
+    integer,intent(in)::id,jd,np
+    double precision,intent(in)::thi,thj    
+    double precision,dimension(np),intent(in)::uu
+    integer::j
+    double precision,dimension(np)::bh
+    double precision::frail1,prod1,prod2,prod3,res,prod4,prod5
+    double precision,dimension(np-1)::frail2
+
+    bh=uu
+   
+    if (id.ne.0) bh(id)=bh(id)+thi
+    if (jd.ne.0) bh(jd)=bh(jd)+thj    
+    
+    frail1=bh(1)*bh(1)
+    
+    do j=1,fsize(indg)
+        frail2(j)=bh(j+1)*bh(j+1)
+    end do
+
+    prod1 = 1.d0
+    prod2 = 1.d0
+    prod3 = 1.d0
+    prod4 = 1.d0
+    prod5 = 1.d0        
+
+    do j=1,fsize(indg)
+        prod1 = prod1 * (frail2(j)**Nrec_ind(sum(fsize(1:(indg-1)))+j)) * dexp(-frail1**xi * frail2(j) * cumulhaz1(indg,j))
+        prod2 = prod2 * frail2(j)**((1.d0/theta) - 1.d0) * dexp(-frail2(j)/theta)
+        prod3 = prod3 * dexp(-frail1**xi * frail2(j) * cumulhaz0(indg,j))
+        prod4 = prod4 * dexp(-frail1 * frail2(j)**alpha * cumulhazdc(indg,j))
+        prod5 = prod5 * frail2(j)**(Nrec_ind(sum(fsize(1:(indg-1)))+j)+alpha*cdc(sum(fsize(1:(indg-1)))+j))
+    end do
+
+    res = frail1**(1.d0/eta - 1.d0) * prod1 * prod3 * dexp(-frail1/eta) * prod2 * &
+            prod4 * prod5 * frail1**(Nrec_fam(indg)*xi+Ndc_fam(indg))
+            
+    if ((res.ne.res).or.(abs(res).ge. 1.d300)) then
+        funcpajres_fam=-1.d9
+        goto 333
+    end if
+   funcpajres_fam = res
+
+333    continue
+ 
+    return    
+    end function funcpajres_fam  
+        
     
 !!!!
 !!!! Calcul Residus additive

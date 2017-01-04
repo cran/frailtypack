@@ -10,7 +10,7 @@
     im3,im2,im1,im,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,date,datedc,zi,&
     c,cdc,nt0,nt1,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,& 
     effet,stra,ve,vedc,pe,ng,g,nig,indic_ALPHA,ALPHA,theta,nstRec,k0T, & 
-    nfam, indic_xi, xi, eta, & !for family 
+    fam,nfam,fsize,indic_xi, xi, eta, & !for family 
     aux1,aux2,res1,res3,kkapa,resnonpen 
     use residusM
     use comongroup,only:vet,vet2,the1,the2
@@ -192,6 +192,10 @@
         aux2(k)=0.d0
     end do
 
+    Nrec_fam = 0.d0 
+    Nrec_ind = 0.d0
+    Ndc_fam = 0.d0
+
     do i=1,nfam
         integrale3f(i) = 0.d0
     end do
@@ -209,6 +213,8 @@
 
     do i=1,nsujet
         cpt(g(i))=cpt(g(i))+1
+        Nrec_fam(fam(g(i))) = Nrec_fam(fam(g(i))) +1
+        Nrec_ind(g(i)) = Nrec_ind(g(i)) +1
         if(nva1.gt.0)then
             vet = 0.d0
             do j=1,nva1
@@ -261,6 +267,7 @@
             vet2=1.d0
         endif
         if(cdc(k).eq.1)then
+            Ndc_fam(fam(k)) = Ndc_fam(fam(k)) + 1
             res2dc(k) = dlog(dut2(nt1dc(k))*vet2)
             if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
                 funcpajsplines_fam=-1.d9
@@ -402,6 +409,19 @@
             Rdc(k)=aux1(k)
             Ndc(k)=cdc(k)
         end do
+        k=0
+        jj = 1
+        do i= 1,ng
+            do j=1,fsize(jj)
+                cumulhaz1(i,j) = res1(k+j)
+                cumulhaz0(i,j) = res3(k+j)
+                cumulhazdc(i,j) = aux1(k+j)
+            end do
+            if(i.lt.ng.and.fam(i).ne.fam(i+1)) then 
+                k = k +fsize(jj)
+                jj = jj+1
+            end if
+        end do    
     end if
 !Ad:
 123     continue
