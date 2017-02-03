@@ -210,8 +210,8 @@ datapred[2,] <- c(2,45) # woman, 45 years old
 datapred[3,] <- c(1,60) # man, 60 years old
 }
 
-\bold{Time-dependant covariates:}
-In the contexte of time-dependant covariate, the last previous value of the covariate is used before the time t of prediction.
+\bold{Time-dependent covariates:}
+In the context of time-dependent covariate, the last previous value of the covariate is used before the time t of prediction.
 
 It should be noted, that the dataframe for a conditional prediction on a shared frailty model, you need to specify the group to which the individuals belong to in adding the same cluster covariate as that used for model fitted. 
 Here, the three individual belongs to the group 5.

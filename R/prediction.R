@@ -5,7 +5,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	# }
 
 	if (missing(fit)) stop("Need a fit")
-	if ((class(fit)!="frailtyPenal") & (class(fit)!="jointPenal") & class(fit)!='longiPenal' & class(fit)!='trivPenal') stop("The argument fit must be a frailtyPenal or jointPenal object")
+	if ((class(fit)!="frailtyPenal")&(class(fit)!="jointPenal")&(class(fit)!='longiPenal')&(class(fit)!='trivPenal')&(class(fit)!='jointNestedPenal')) stop("The argument fit must be one of these objects : frailtyPenal; jointPenal; longiPenal; trivPenal or jointNestedPenal")
 	if (fit$istop != 1) stop("Attempting to do predictions with a wrong model")
 	
 	if ((class(fit) == "jointPenal") && (fit$joint.clust == 0)) stop("Prediction method is not available for joint model for clustered data")
@@ -111,7 +111,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	m3$formula <- fit$formula
 	m[[3]] <- as.name(m2$data)
 			
-	if (class(fit) == "jointPenal" | class(fit)=="trivPenal"){
+	if (class(fit) == "jointPenal" | class(fit)=="trivPenal" | class(fit) == "jointNestedPenal"){
 		temp <- as.character(fit$formula[[2]])
 		if (temp[1]=="Surv"){
 			if (length(temp) == 4) fit$formula[[2]] <- paste(c("cbind(",temp[3],",",temp[4],")"),collapse=" ")
@@ -138,19 +138,26 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	}else{
 		if (fit$Frailty==TRUE ){
 			if(event == 'Recurrent'){
+				if ((ICproba) && (conditional)){
+					fitIC <- fit
+					mIC <- m					
+					fitIC$formula <- unlist(strsplit(deparse(fitIC$formula)," "))				
+				    clus <- grep("cluster",fitIC$formula)			
+					mIC$formula <- as.formula(paste(fitIC$formula,collapse=""))	
+				}
 				temp <- as.character(fit$formula[[2]])
 				if (temp[1]=="Surv"){
 					# if (length(temp) == 4) 
 					fit$formula[[2]] <- paste(c("cbind(",temp[length(temp)-1],",",temp[length(temp)],")"),collapse=" ")
 					# else if (length(temp) == 3) fit$formula[[2]] <- paste(c("cbind(",temp[length(temp)-1],",",temp[length(temp)],")"),collapse=" ")
-					if (all(length(temp) != c(3,4))) stop("Wrong Surv() function")
+					# if (all(length(temp) != c(3,4))) stop("Wrong Surv() function")
 				}
 				fit$formula <- unlist(strsplit(deparse(fit$formula)," "))
 				fit$formula <- gsub("\"","",fit$formula)
 				clus <- grep("cluster",fit$formula)
-				m$formula <- as.formula(paste(fit$formula,collapse=""))
+				m$formula <- as.formula(paste(fit$formula,collapse=""))					
 			}else{
-				fit$formula <- unlist(strsplit(deparse(fit$formula)," "))
+				fit$formula <- unlist(strsplit(deparse(fit$formula)," "))				
 				clus <- grep("cluster",fit$formula)
 				# if (clus==length(fit$formula)) m$formula <- as.formula(paste(fit$formula[-c(clus,max(which(fit$formula=="+")))],collapse=""))
 				# else m$formula <- as.formula(paste(fit$formula[-clus],collapse=""))				
@@ -172,13 +179,15 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	if (typeofY=="right") tt1 <- Y[,1]
 	else tt1 <- Y[,2]
 	class(m$formula) <- "formula"
-	special <- c("strata", "cluster", "subcluster", "terminal", "num.id", "timedep")
+	if ((ICproba) && (conditional) && (event == "Recurrent")) class(mIC$formula) <- "formula"
+	special <- c("strata", "cluster", "subcluster", "terminal", "num.id", "timedep")		
 	Terms <- terms(m$formula, special, data = data)
+	
+	if((event == "Recurrent") && (ICproba) && (conditional)) Terms2 <- terms(mIC$formula, special, data = data)	
 	fit$formula <- Terms
-
 	dropx <- NULL	
 
-	if (class(fit) == 'jointPenal' | class(fit) == 'trivPenal'){	
+	if (class(fit) == 'jointPenal' | class(fit) == 'trivPenal' | class(fit) == "jointNestedPenal"){	
 		if (fit$joint.clust==1){ # joint classique	
 			tempc <- untangle.specials(Terms, "cluster", 1:10)		
 			nameGrup <- substr(tempc$vars,9,nchar(tempc$vars)-1)
@@ -187,7 +196,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 			cluster <- strata(dataset[, tempc$vars], shortlabel = TRUE)
 			uni.cluster <- unique(cluster)
 
-			ic <- model.extract(dataset, "response")[,2]
+			ic <- model.extract(dataset, "response")[,2]		
+
 			npred <- length(uni.cluster)
 			nrec <- max(table(cluster[ic==1]))
 
@@ -221,7 +231,41 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 					uppertime <- temp[,3]
 				}
 			}
-		}else{ # joint cluster
+		}else if (fit$joint.clust==3){ #Joint nested
+			tempc <- untangle.specials(Terms, "cluster", 1:10)
+			tempsbc <- untangle.specials(Terms, "subcluster", 1:10)	
+					
+			nameGrup <- substr(tempc$vars,9,nchar(tempc$vars)-1)
+			nameSbGrup <- substr(tempsbc$vars,12,nchar(tempsbc$vars)-1)
+			
+			dropx1 <- c(dropx,tempc$terms)
+			dropx2 <- c(dropx,tempsbc$terms)
+			cluster <- strata(dataset[, tempc$vars], shortlabel = TRUE)
+			uni.cluster <- unique(cluster)			
+			subcluster <- strata(dataset[, tempsbc$vars], shortlabel = TRUE)
+			uni.subcluster <- unique(subcluster)
+
+			ic <- model.extract(dataset, "response")[,2]	
+			gap <- model.extract(dataset, "response")[,1]
+			
+			npred <- length(uni.subcluster)
+			nrec <- max(table(subcluster[ic==1]))
+			nrecList <- table(subcluster)
+			
+			if (temp[1]!="Surv") stop("Predictions not allowed for interval-censored yet...")
+			Y <- NULL
+			temp0 <- model.extract(dataset, "response")[,1]
+			for (i in uni.subcluster) {	
+				temp <- temp0[subcluster==i & ic==1]
+				Y <- c(Y,c(temp,rep(NA,nrec-length(temp))))
+			}
+			predtimerec <- matrix(Y,nrow=npred,byrow=TRUE)
+						
+			trunctime <- rep(0,npred)
+			lowertime <- rep(0,npred)
+			uppertime <- rep(0,npred)
+			
+		}else{ # Conjoint donnees groupees
 			tempnum <- untangle.specials(Terms, "num.id", 1:10)
 			dropx <- c(dropx,tempnum$terms)
 			num.id <- strata(dataset[, tempnum$vars], shortlabel = TRUE)
@@ -260,7 +304,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 			}
 		}
 	}else{
-		if (fit$Frailty){		
+		if (fit$Frailty){			
 			#--Traitement donnees prediction
 			tempc <- untangle.specials(Terms, "cluster", 1:10)
 			dropx <- c(dropx,tempc$terms)
@@ -285,8 +329,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 				# clusterfit <- strata(dataset3[, tempc3$vars], shortlabel = TRUE)
 				# uni.clusterfit <- unique(clusterfit)
 				# nameGrup <- substr(tempc$vars,9,nchar(tempc$vars)-1)
-				
-				ic <- model.extract(dataset, "response")[,2]
+								
+				ic <- model.extract(dataset, "response")[,2]				
 				npred <- length(uni.cluster)
 				nrec <- max(table(cluster[ic==1]))
 
@@ -313,23 +357,26 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 			# }
 		}
 	}
-	if (!is.null(dropx)) newTerms <- Terms[-dropx]
-	else newTerms <- Terms
-	
+	if (!is.null(dropx)){ 
+		newTerms <- Terms[-dropx]
+		if ((ICproba) && (event == 'Recurrent') && (conditional)) newTerms2 <- Terms2[-dropx]
+	}
+	else {
+		newTerms <- Terms
+		if ((ICproba) && (event == 'Recurrent') && (conditional)) newTerms2 <- Terms2		
+	}
 	
 	X <- model.matrix(newTerms, dataset)
+	
 	if (ncol(X) > 1) X <- X[, -1, drop = FALSE]
+	
 	#####-----------------------------------------------------------------------------#####
 	#####-&-&-&-&-&-&-&-&-&-&-&-Prediction for joint frailty model-&-&-&-&-&-&-&-&-&-&#####
 	#####-----------------------------------------------------------------------------#####	
 	if (class(fit) == "jointPenal"){	
 		#--------ML 30-11-16...
 		predtimerec <- predtimerec[order(unique(cluster)),]
-		
-		save(predtimerec, file = 'predtimerec.RData')
-		save(predTime, file = 'predTime.RData')
-		
-		
+				
 		# listPrec <- NULL	
 		# for (k in 1:nrow(predtimerec)){
 			# tPrec <- which(predtimerec[k,] < predTime)
@@ -370,7 +417,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$... <- NULL
 
 		m3$formula <- formula_fit
-		m3$formula[[3]] <- fit$formula.terminalEvent[[2]]
+		m3$formula[[3]] <- fit$formula.terminalEvent[[2]]		
 		m3$formula.terminalEvent <- NULL
 		m3[[1]] <- as.name("model.frame")
 		m3[[3]] <- as.name(m2$data)
@@ -1116,7 +1163,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		# -------------------------------------------------------- #
 		# calcul des bornes de confiances (methode de Monte Carlo) #
 		# -------------------------------------------------------- #
-		if (ICproba){
+		if (ICproba){			
 			balea <- mvrnorm(MC.sample,fit$b,fit$varHtotal)
 			if (fit$Frailty){ #AK: For Gamma we have variance theta and for Normal we have variance sigma2
 				if(fit$logNormal==0)theta.mc <- balea[,fit$np-fit$nvar]^2
@@ -1124,7 +1171,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 			}
 			aleaCoef <- balea[,(fit$np-fit$nvar+1):(fit$np)]		
 			expBX.mc <- exp(X %*% t(aleaCoef))
-					
+											
 			# recuperation parametres de la fonction de risque/survie (splines,piecewise,weibull)
 			if (fit$typeof == 0){ #Splines
 				para.mc <- balea[,1:(fit$n.knots+2)]^2
@@ -1201,18 +1248,9 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 						res <- c(res,exp(-(t/sc1)^sh1))
 					}
 					return(res)
-				}
-				
+				}				
 			}# end of survival.mc function
 			
-			# calcul de la somme des risques cumules juste pour le groupe defini
-			X3 <- model.matrix(newTerms, dataset3)
-			if (ncol(X3) > 1) X3 <- X3[, -1, drop = FALSE]
-
-			expBX3 <- exp(X3 %*% fit$coef)
-			
-			res1 <- sum((-log(sapply(tt1[which(clusterfit==5)],survival,ObjFrailty=fit))) %*% expBX3[which(clusterfit==5)])		
-		
 			predMatLow <- NULL
 			predMatHigh <- NULL
 			frailty.mc <- NULL			
@@ -1243,7 +1281,6 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 								vect.survival.X.horizon.samp <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])
 								mat.survival.X.samp <- rbind(mat.survival.X.samp,vect.survival.X.samp)
 								mat.survival.X.horizon.samp <- rbind(mat.survival.X.horizon.samp,vect.survival.X.horizon.samp)								
-								
 								recurr <- which(!is.na(predtimerec[k,which(predtimerec[k,] <= predTime)]))
 								nbrec[k] <- length(recurr)
 																
@@ -1252,7 +1289,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 								else LastRec <- predtimerec[k,recurr]	
 								# vect.survival.LastRec.samp <- sapply(LastRec,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
 								vect.survival.LastRec.samp <- sapply(LastRec,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])
-								mat.survival.LastRec.samp <- cbind(mat.survival.LastRec.samp,vect.survival.LastRec.samp)									
+								mat.survival.LastRec.samp <- cbind(mat.survival.LastRec.samp,vect.survival.LastRec.samp)							
 							}									
 							mat.survival.X.mc <- rbind(mat.survival.X.mc,mat.survival.X.samp)
 							mat.survival.X.horizon.mc <- rbind(mat.survival.X.horizon.mc,mat.survival.X.horizon.samp)
@@ -1360,17 +1397,31 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 				###############################
 				###Prediction conditionnelle###
 				###############################
-				}else{					
+				}else{
+					if (event == 'Recurrent') X3 <- model.matrix(newTerms2, dataset3)	
+					else  X3 <- model.matrix(newTerms, dataset3)
+								
+					if (ncol(X3) > 1) X3 <- X3[, -1, drop = FALSE]
+					expBX3 <- exp(X3 %*% fit$coef)
+				
+					cluster <- as.integer(cluster)
 					# cluster <- as.integer(as.vector(cluster))
-					for (k in 1:nrow(data)){								
+					
+					if (event == "Recurrent") nbInd <- length(unique(cluster))
+					else nbInd <- nrow(data)
+					
+					for (k in 1:nbInd){								
 						realisations <- NULL
 						frailty.mc <- NULL						
-						mi <- fit$n.eventsbygrp[cluster[k]]	
+						mi <- fit$n.eventsbygrp[cluster[k]]
 						
+						# calcul de la somme des risques cumules juste pour le groupe defini			
 						res1 <- sum((-log(sapply(tt1[which(clusterfit==cluster[k])],survival,ObjFrailty=fit))) %*% expBX3[which(clusterfit==cluster[k])])
+						
 						for (i in 1:MC.sample){
 							vect.survival.X <- sapply(sequence,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
 							vect.survival.X.horizon <- sapply(sequence2,FUN=survival.mc,ObjFrailty=fit,para1=para.mc[i,],para2=para.mc2[i,])**expBX.mc[k,i]
+							
 							######### Distribution gamma #########
 							if(fit$logNormal==0){
 								# if (k == 1) 
@@ -1444,14 +1495,14 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		else{
 			if (conditional) rownames(out$pred) <- paste("ind",unique(cluster))
 			else rownames(out$pred) <- paste(nameGrup,unique(cluster)[order(unique(cluster))])
-		}
-		
+		}		
 		out$icproba <- ICproba
 		if (ICproba){
 			out$predLow <- predMatLow
 			out$predHigh <- predMatHigh
 			# colnames(out$predLow) <- c("times",rep(" ",dim(out$predLow)[2]-1))
 			colnames(out$predLow) <- paste("time=", out$x.time)
+			
 			rownames(out$predLow) <- paste("ind",1:out$npred)
 			# colnames(out$predHigh) <- c("times",rep(" ",dim(out$predHigh)[2]-1))
 			colnames(out$predHigh) <- paste("time=", out$x.time)
@@ -1465,6 +1516,170 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		if (conditional) out$group <- unique(cluster)
 		cat("Predictions done for",out$npred,"subjects \n")
 		class(out) <- "predFrailty"
+		
+		
+	####*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*####
+	####-*-*-*-*-Prediction pour un Joint Nested Model-*-*-*-*-*-####
+	####*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*####
+		
+	# # # # # }else if (class(fit) == "jointNestedPenal"){	
+		# # # # # nst <- 2
+		# # # # # indID <- 2
+		# # # # # famID <- 5
+		
+		# # # # # # predtimerec <- predtimerec[order(unique(cluster)),]
+		# # # # # taille = 0
+		# # # # # listPrec <- NULL  
+		# # # # # for (k in 1:npred){
+			# # # # # tPrec <- which(predtimerec[k,] < predTime)   
+			# # # # # if (length(tPrec) == 0) tPrec <- taille + 1 
+			# # # # # tPrec <- taille + length(tPrec)  
+			
+			# # # # # rowTimes <- predtimerec[k,][which(!is.na(predtimerec[k,]))]
+			# # # # # if (length(rowTimes)==0) rowTimes <- 1
+			# # # # # taille = length(rowTimes)+taille
+			# # # # # listPrec <- c(listPrec,tPrec)                				
+		# # # # # }		
+		# # # # # predtimerec <- replace(predtimerec, is.na(predtimerec),0)
+		
+		# # # # # # X <- X[order(cluster),]
+		
+		# # # # # vaxpred <- X[,-c(1,2), drop=FALSE]		
+		
+		# # # # # m3 <- fit$call
+		# # # # # m2 <- match.call() # formule appelee pour prediction()
+		
+		# # # # # m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$... <- NULL
+		
+		# # # # # mPred <- m3
+		# # # # # m3$formula <- formula_fit
+		# # # # # # mPred$formula <- fit$call[[2]][[3]][[3]]
+		# # # # # m3$formula[[3]][[2]] <- fit$formula.terminalEvent[[2]]				
+		# # # # # m3$formula.terminalEvent <- NULL
+		# # # # # m3[[1]] <- as.name("model.frame")
+		# # # # # m3[[3]] <- as.name(m2$data)
+
+		# # # # # temp <- as.character(m3$formula[[2]])
+		
+		# # # # # if (temp[1]=="Surv"){
+			# # # # # if (length(temp) == 4) m3$formula[[2]] <- as.name(temp[3])
+			# # # # # else if (length(temp) == 3) m3$formula[[2]] <- as.name(temp[2])
+			# # # # # else stop("Wrong Surv function")
+		# # # # # }else{ # SurvIC
+			# # # # # if (length(temp) == 4) m3$formula[[2]] <- as.name(temp[2])
+			# # # # # else if (length(temp) == 5) m3$formula[[2]] <- as.name(temp[3])
+			# # # # # else stop("Wrong SurvIC function")
+		# # # # # }
+		# # # # # datasetdc <- eval(m3, sys.parent())		
+		
+		# # # # # class(m3$formula) <- "formula"
+		# # # # # special2 <- c("strata", "timedep")				
+		# # # # # Terms2 <- terms(m3$formula, special2, data = data)		
+		# # # # # X2 <- model.matrix(Terms2, datasetdc)			
+		
+		# # # # # icdc <- X2[,ncol(X2)]		
+		# # # # # tt1dc <- aggregate(gap, by = list(subcluster), sum)[-1][,1]
+		
+		# # # # # icdcT <- aggregate(icdc, by = list(subcluster), FUN = function(x){x[length(x)]})[-1]
+			
+		# # # # # for (i in 1:length(icdcT)){if (tt1dc[i] > t) icdcT[i] <- 0}
+		
+		# # # # # tt1dc <- sapply(tt1dc, FUN = function(x,tpred=t){
+                                    # # # # # if(x > tpred){tpred} 
+                                    # # # # # else{x}
+                                    # # # # # }, simplify=TRUE)
+									
+		# # # # # if (ncol(X2) > 1) X2 <- X2[, -1, drop = FALSE]	
+		# # # # # X2 <- X2[, -(ncol(X2)), drop = FALSE]		
+		
+		# # # # # vaxdcpred <- aggregate(X2, by = list(subcluster), FUN = function(x){x[1]})[-1] 
+		# # # # # # X2 <- X2[order(cluster),]
+		# # # # # # vaxdcpred <- X2[listPrec,]	
+		# # # # # icT <- ic		
+		# # # # # for (i in 1:length(icT)){
+			# # # # # if (gap[i] > t) icT[i] <- 0
+			# # # # # }
+		
+		# # # # # tt1gap <- gap		
+		# # # # # indiv <- subcluster[1]
+		
+		# # # # # for (i in 2:length(tt1gap)){
+            # # # # # if (subcluster[i] == indiv){
+                # # # # # tt1gap[i] <- tt1gap[i-1]+tt1gap[i]					
+            # # # # # }else{
+                # # # # # indiv = subcluster[i]
+            # # # # # }
+        # # # # # }	
+		
+		# # # # # tt1T <- gap 
+		# # # # # indiv <- subcluster[1]
+		# # # # # cpt <- 1
+		# # # # # for (i in 1: length(tt1T)){
+			# # # # # if (indiv == subcluster[i]){
+				# # # # # if(i == 1){
+					# # # # # if(tt1T[i] > t) tt1T[i] <- t 
+				# # # # # }else{
+					# # # # # if(tt1gap[i] > t){
+						# # # # # if ((icT[i-1] == 1)&&(icT[i] == 0)) tt1T[i] <- t-tt1gap[i]
+						# # # # # else tt1T[i] <- 0
+					# # # # # } 
+				# # # # # }
+				# # # # # cpt <- cpt+1
+			# # # # # }else{
+				# # # # # if(tt1T[i] > t) tt1T[i] <- t
+				# # # # # indiv <- subcluster[i]
+			# # # # # }
+		# # # # # }
+		# # # # # nrecT <- unlist(aggregate(icT, by = list(subcluster), FUN = sum)[,-1])
+		
+		# # # # # ans <- .Fortran("predictfam",
+			# # # # # as.integer(fit$npar),
+			# # # # # as.double(fit$b),
+			# # # # # as.integer(fit$n.knots.temp),
+			# # # # # as.integer(fit$nbintervR),
+			# # # # # as.integer(fit$nbintervDC),
+			# # # # # as.integer(fit$nvarRec),
+			# # # # # as.integer(fit$nvarEnd),
+			# # # # # as.integer(nst),
+			# # # # # as.integer(fit$typeof),
+			# # # # # as.double(fit$zi),
+			# # # # # as.double(fit$varHIHtotal),
+			# # # # # as.integer(indID), 
+			# # # # # as.double(tt1T), 
+			# # # # # as.double(tt1dc), 
+			# # # # # as.integer(unlist(icdcT)), 
+			# # # # # as.integer(nrow(data)), 
+			# # # # # as.integer(npred), 
+			# # # # # as.integer(window), 
+			# # # # # as.integer(5), 
+			# # # # # as.integer(nrecList), 
+			# # # # # as.integer(nrecT), 
+			# # # # # as.double(as.matrix(vaxpred)),
+			# # # # # as.double(as.matrix(vaxdcpred)), 
+			# # # # # as.integer(ICproba), 
+			# # # # # as.integer(MC.sample),
+			# # # # # predAll=as.double(0), 
+			# # # # # predAlllow=as.double(0), 
+			# # # # # predAllhigh=as.double(0), 
+			# # # # # as.double(0), 
+			# # # # # as.double(0),
+			# # # # # pred = as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
+			# # # # # PACKAGE = "frailtypack" ) #31 arguments
+
+		# # # # # out <- NULL
+		# # # # # out$pred <- ans$predAll			
+		# colnames(out$pred) <- paste("time=", t)
+		
+		# if (ICproba){
+			# out$predLow <- ans$predAlllow
+			# out$predHigh <- ans$predAllhigh
+			# colnames(out$predLow) <- paste("time=", t)
+			# rownames(out$predLow) <- paste("ind",1:npred)
+			# colnames(out$predHigh) <- paste("time=", t)
+			# rownames(out$predHigh) <- paste("ind",1:npred)
+		# }		
 	}
+	
+	
 	out
 } 

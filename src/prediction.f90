@@ -1232,7 +1232,7 @@
 !======================================================================
 !======================================================================
 
-! Pour tirer au sort aléatoirement dans une loi normale de moyenne m et d'écart-type s
+ !Pour tirer au sort aléatoirement dans une loi normale de moyenne m et d'écart-type s
     subroutine rnorm(m,s,res)
     
     double precision,intent(in)::m,s

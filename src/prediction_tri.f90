@@ -943,7 +943,7 @@
         ! write(*,*)XbetapredRi
         !   stop
         !end if
-		
+        
         return
     
         end function func1pred2GHtri    
@@ -1007,7 +1007,7 @@
         uii = matmul(Xea22,mat)
         det = finddet(matmul(ut,utt),(netar+1))    
         uiiui=matmul(uii,Xea2)   
-		
+        
         if(link.eq.2) then
             call integrationdc(survdcCM_pred,0.d0,predtime_cm(1),resultdc,abserr,resabs,resasc,1,b1,npp,Xea22)
             survDC(1) = resultdc   
@@ -1036,7 +1036,7 @@
                     yscalar = yscalar + (ycurrent(k)-mu1(k))**2
                 end if
             end do
-        else		
+        else        
             do k=1,nmescur
                 yscalar = yscalar + (ycurrent(k)-mu1(k))**2
             end do

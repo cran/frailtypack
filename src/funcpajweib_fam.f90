@@ -9,7 +9,7 @@
     use comon,only: etaD,betaD, etaT, betaT, nstRec, &
     t0,t1,t1dc,c,cdc,nsujet,nva,nva1,nva2,& 
     effet,stra,ve,vedc,ng,g,nig,indic_ALPHA,ALPHA,theta,& 
-    nfam,  indic_xi, xi, eta, & !for family 
+    nfam,fam,fsize,indic_xi,xi,eta, & !for family 
     aux1,aux2,res1,res3,kkapa
     use residusM
     !use comongroup,only:the1,the2
@@ -198,6 +198,18 @@
             Nrec(k)=nig(k)
             Rdc(k)=aux1(k)
             Ndc(k)=cdc(k)
+        end do
+        
+        k=0
+        do i= 1,ng
+            do j=1,fsize(fam(i))
+                cumulhaz1(i,j) = res1(k+j)
+                cumulhaz0(i,j) = res3(k+j)
+                cumulhazdc(i,j) = aux1(k+j)
+            end do
+            if(i.lt.ng.and.fam(i).ne.fam(i+1)) then 
+                k = k +fsize(fam(i))
+            end if
         end do
     end if
 !Ad:

@@ -170,7 +170,7 @@
     typeofY <- attr(model.extract(m, "response"),"type") # type de reponse : interval etc..
 		
 	vart0 <- dimnames(m)[[2]][1]	
-	vart0 <- gsub('(.*\\()([a-z]*)', '\\2', strsplit(vart0,",")[[1]][1])	
+	vart0 <- gsub('(.*\\()(.*)', '\\2', strsplit(vart0,",")[[1]][1])	
 		
     #Al : tri du jeu de donnees par cluster croissant
     if (length(cluster)){
@@ -253,12 +253,12 @@
 		}
 	}
 	Timet0 <- data[vart0]
-	if(length(cluster)){
-		varclust <- gsub('(.*\\()([a-z]*)\\)', '\\2', tempc$vars) # pour recuperer le nom de la variable definie par cluster()	
+	if(length(cluster)){		
+		varclust <- gsub('(.*\\()(.*)\\)', '\\2', tempc$vars) # pour recuperer le nom de la variable definie par cluster()
 	}
 	#verification pour le modele joint nested
 	 if (length(subcluster) & joint){
-		varsubclust <- gsub('(.*\\()([a-z]*)\\)', '\\2', tempsub$vars)
+		varsubclust <- gsub('(.*\\()(.*)\\)', '\\2', tempsub$vars)
 		Timet0 <- Timet0[order(data[,varclust], data[,varsubclust]),]
 		if (typeofY == "counting") troncat(as.numeric(as.vector(data[order(data[,varclust], data[,varsubclust]),varsubclust])), Timet0)
 		}
@@ -2564,8 +2564,8 @@
 		
 		fit$noVar1 <- noVar1
 		fit$noVar2 <- noVar2
-		#fit$nbintervR <- nbintervR
-		#fit$nbintervDC <- nbintervDC
+		fit$nbintervR <- nbintervR
+		fit$nbintervDC <- nbintervDC
 		fit$nvarRec <- nvarRec
 		fit$nvarEnd <- nvarEnd
 		fit$istop <- istop
@@ -2673,7 +2673,7 @@
 			
 			nfactor <- length(vec.factor)
 			p.wald <- rep(0,nfactor)
-			ntot <- nvarEnd + nvarRec
+			ntot <- nvarEnd + nvarRec	
 			
 			if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)		 
 			else fit$global_chisq <- 0
@@ -2705,7 +2705,7 @@
 			nfactor <- length(vec.factordc)
 			p.walddc <- rep(0,nfactor)
 			ntot <- nvarEnd + nvarRec
-			
+						
 			if(fit$istop == 1) fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
 			else fit$global_chisq_d <- 0 
 			
@@ -2725,7 +2725,7 @@
 		fit$contrasts2 <- contr.save2
     
 		fit$formula <- formula
-    fit$formula.terminalEvent <- fit$formula.terminalEvent
+		fit$formula.terminalEvent <- formula.terminalEvent
     
 		attr(fit,"joint")<-joint
 		attr(fit,"subcluster")<-TRUE

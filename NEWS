@@ -1,3 +1,9 @@
+Changes in Version 2.10.5 February 2017
+ o Bug fixed : use of a subcluster/cluster covariate named with upper case in joint and joint nested models 
+ o Bug fixed : Joint nested model estimation 
+ o Bug fixed : Conditional prediction for recurrent events from a shared model.
+ o Bug fixed : examples of the documentation (plot of epoce, additive model, trivariate and joint nested model)
+
 Changes in Version 2.10.4 January 2017
  o Changes in the joint nested frailty model : add calculation of the bayesian frailties estimates (for families and for individuals)
 

@@ -281,6 +281,8 @@ if((all.equal(length(hazard),1)==T)==T){
 		nnOK1<-gsub(")","",gsub("slope\\(","",aux))
 		if(any(!(c("Min.", "Median", "Mean") %in% names(summary(data[,nnOK1]))))){ # Si le programme ne reconnait pas le vecteur carcateristique d une variable continue
 			nnOK <- dimnames(model.matrix(formula(paste("~",nnOK1)), data=data))[[2]][-1]	
+		}else{
+			nnOK <- nnOK1
 		}
      }
     else

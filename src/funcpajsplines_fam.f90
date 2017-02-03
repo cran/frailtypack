@@ -410,16 +410,14 @@
             Ndc(k)=cdc(k)
         end do
         k=0
-        jj = 1
         do i= 1,ng
-            do j=1,fsize(jj)
+            do j=1,fsize(fam(i))
                 cumulhaz1(i,j) = res1(k+j)
                 cumulhaz0(i,j) = res3(k+j)
                 cumulhazdc(i,j) = aux1(k+j)
             end do
             if(i.lt.ng.and.fam(i).ne.fam(i+1)) then 
-                k = k +fsize(jj)
-                jj = jj+1
+                k = k +fsize(fam(i))
             end if
         end do    
     end if

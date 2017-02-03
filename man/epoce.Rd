@@ -57,7 +57,7 @@ temps <- c(200,500,800,1100)
 epoce <- epoce(modJoint.gap,temps)
 
 print(epoce)
-plot(epoce)
+plot(epoce,type = "cvpol")
 
 # computation on a new dataset
 # here a sample of readmission with the first 50 subjects
@@ -65,7 +65,7 @@ s <- readmission[1:100,]
 epoce <- epoce(modJoint.gap,temps,newdata=s)
 
 print(epoce)
-plot(epoce)
+plot(epoce,type = "cvpol")
 
 #################################################
 #### EPOCE on a joint  model for a biomarker ####
@@ -90,16 +90,16 @@ time <- c(1, 1.5, 2, 2.5)
 epoce <- epoce(modLongi,time)
 
 print(epoce)
-plot(epoce)
+plot(epoce, type = "cvpol")
 
 # computation on a new dataset
 # here a sample of colorectal data with the first 50 subjects
-s <-  subset(colorectal, new.lesions == 0 & id%in%1:50)
-s.Longi <- subset(colorectalLongi, id%in%1:50)
+s <-  subset(colorectal, new.lesions == 0 & id\%in\%1:50)
+s.Longi <- subset(colorectalLongi, id\%in\%1:50)
 epoce <- epoce(modLongi, time, newdata = s, newdata.Longi = s.Longi)
 
 print(epoce)
-plot(epoce)
+plot(epoce, type = "cvpol")
 
 
 ###################################################
@@ -125,17 +125,17 @@ time <- c(1, 1.5, 2, 2.5)
 # (computation takes around 10 minutes)
 epoce <- epoce(modTriv,time)
 print(epoce)
-plot(epoce)
+plot(epoce,type = "cvpol")
 
 # computation on a new dataset
 # here a sample of colorectal data with the first 100 subjects
-s <-  subset(colorectal,  id%in%1:100)
-s.Longi <- subset(colorectalLongi, id%in%1:100)
+s <-  subset(colorectal,  id\%in\%1:100)
+s.Longi <- subset(colorectalLongi, id\%in\%1:100)
 # (computation takes around 10 minutes)
 epoce <- epoce(modTriv, time, newdata = s, newdata.Longi = s.Longi)
 
 print(epoce)
-plot(epoce)
+plot(epoce,type = "cvpol")
 
 
 dev.off()

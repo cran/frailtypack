@@ -16,7 +16,7 @@ When considering time-varying effects in a survival model, regression coefficien
 
 You can notice that a linear combination of B-splines of order 1 without any interior knots (0 interior knot) is the same as a model without time-varying effect (or with constant effect over time).
 
-Statistical tests (likelihood ratio tests) can be done in order to know whether the time-dependant coefficients are significantly different from zero or to test whether a covariate has a time-dependant effect significantly different from zero or not. These tests are correct only with a parametric approach yet.
+Statistical tests (likelihood ratio tests) can be done in order to know whether the time-dependent coefficients are significantly different from zero or to test whether a covariate has a time-dependent effect significantly different from zero or not. These tests are correct only with a parametric approach yet.
 
 - Proportional Hazard assumption ?
 
@@ -65,7 +65,7 @@ timedep(sex)+chemo,data=readmission,n.knots=8,kappa=1,
 betaknots=3,betaorder=3)
 
 #-- print results of the fit and the associated curves for the
-#-- time-dependant effects
+#-- time-dependent effects
 print(sha.time)
 
 ###--- Joint Frailty model with time-varying effect ---###
