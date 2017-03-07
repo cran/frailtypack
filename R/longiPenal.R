@@ -1022,7 +1022,7 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
    cat("Be patient. The program is computing ... \n")
   }
 
-        ans <- .Fortran("joint_longi",
+        ans <- .Fortran(C_joint_longi,
 			as.integer(1),
 			as.integer(nsujety),
 			as.integer(ng),
@@ -1087,8 +1087,9 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
 			BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
 			EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
 			GH = c(as.integer(GH),as.integer(n.nodes)),
-			paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol))),
-		PACKAGE = "frailtypack") #62 arguments
+			paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol)))
+			)#,
+		#PACKAGE = "frailtypack") #62 arguments
 
         MartinGale <- matrix(ans$MartinGale,nrow=ng,ncol=5)
 		Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)

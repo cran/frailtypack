@@ -169,8 +169,10 @@
     
     typeofY <- attr(model.extract(m, "response"),"type") # type de reponse : interval etc..
 		
-	vart0 <- dimnames(m)[[2]][1]	
-	vart0 <- gsub('(.*\\()(.*)', '\\2', strsplit(vart0,",")[[1]][1])	
+	# # # We retrieve here the t0 name give in the 'data' dataframe (needed for checking if left truncated data)
+	# # # vart0 <- dimnames(m)[[2]][1]	
+	# # # vart0 <- gsub('(.*\\()(.*)', '\\2', strsplit(vart0,",")[[1]][1])
+	
 		
     #Al : tri du jeu de donnees par cluster croissant
     if (length(cluster)){
@@ -232,43 +234,46 @@
     
     ll <- attr(Terms, "term.labels")#liste des variables explicatives
  
-    #cluster(id) as.factor(dukes) as.factor(charlson) sex chemo terminal(death)
-
-	
-	# add Myriam 11/05/2016 Verification troncature a gauche
-	troncat <- function(cluster, time0){
-		mini = time0[1]
-		indiv <- cluster[1]
-		for (i in 1:length(time0)){
-			if (cluster[i] != indiv){
-				if (mini != 0) stop('Sorry but left-troncature is not allowed for joint or joint nested frailty models')
-				else {
-					indiv <- cluster[i]
-					mini <- time0[i]
-				}
-			}
-			else{
-				if (mini > time0[i]) mini <- time0[i]
-			}	
-		}
-	}
-	Timet0 <- data[vart0]
-	if(length(cluster)){		
-		varclust <- gsub('(.*\\()(.*)\\)', '\\2', tempc$vars) # pour recuperer le nom de la variable definie par cluster()
-	}
+	##########################################################################################################################
+	# add Myriam 11/05/2016 Checking left-truncating data 
+	# # # troncat <- function(cluster, time0){
+		# # # mini = time0[1]
+		# # # indiv <- cluster[1]
+		# # # for (i in 1:length(time0)){
+			# # # if (cluster[i] != indiv){
+				# # # if (mini != 0) stop('Sorry but left-troncature is not allowed for joint or joint nested frailty models')
+				# # # else {
+					# # # indiv <- cluster[i]
+					# # # mini <- time0[i]
+				# # # }
+			# # # }
+			# # # else{
+				# # # if (mini > time0[i]) mini <- time0[i]
+			# # # }	
+		# # # }
+	# # # }
+	# # # Timet0 <- data[vart0]
+	# # # if(length(cluster)){		
+		# # # varclust <- gsub('(.*\\()(.*)\\)', '\\2', tempc$vars) # pour recuperer le nom de la variable definie par cluster()
+	# # # }
 	#verification pour le modele joint nested
-	 if (length(subcluster) & joint){
-		varsubclust <- gsub('(.*\\()(.*)\\)', '\\2', tempsub$vars)
-		Timet0 <- Timet0[order(data[,varclust], data[,varsubclust]),]
-		if (typeofY == "counting") troncat(as.numeric(as.vector(data[order(data[,varclust], data[,varsubclust]),varsubclust])), Timet0)
-		}
+	 # # # if (length(subcluster) & joint){
+		# # # varsubclust <- gsub('(.*\\()(.*)\\)', '\\2', tempsub$vars)
+		# # # Timet0 <- Timet0[order(data[,varclust], data[,varsubclust]),]
+		# # # if (typeofY == "counting") troncat(as.numeric(as.vector(data[order(data[,varclust], data[,varsubclust]),varsubclust])), Timet0)
+		# # # }
 	# verification pour le modele joint
-	if (!length(subcluster) & joint){
-		Timet0 <- list(Timet0)[[1]][order(data[,varclust]),]
-		#data[,varclust] = data[order(data[,varclust]), varclust]
-		if (typeofY == "counting") troncat(as.numeric(as.vector(data[order(data[,varclust]), varclust])), Timet0)
-		}
-    
+	# # # if (!length(subcluster) & joint){
+		# # # Timet0 <- list(Timet0)[[1]][order(data[,varclust]),]
+		# # # #data[,varclust] = data[order(data[,varclust]), varclust]
+		# # # if (typeofY == "counting") troncat(as.numeric(as.vector(data[order(data[,varclust]), varclust])), Timet0)
+		# # # }
+		
+	# # # NOTE : 07-03-17 : this operation makes errors in frailtyPenal execution when the user put in surv() formula 
+	# # # covariates with a such name : 'data$var' or 'data[,2]' or 'data[,"var"]'
+	# # # So, for the moment we disable this process, any left-truncated data will not be  detected by frailtypack 
+	# # # and calculation will done with  bias because left truncating is not took into account joint and joint nested modelling
+	##############################################################################################################################    
     #=========================================================>
     
     mt <- attr(m, "terms") #m devient de class "formula" et "terms"
@@ -573,7 +578,7 @@
 	filtretps[grep("timedep",colnames(X))] <- 1    
 	var<-matrix(c(X),nrow=nrow(X),ncol=nvar)
 	
-	n<-nrow(X)	
+	n<-nrow(X)
 	
 	#add Alexandre 04/06/2012
     #lire les donnees differemment si censure par intervalle
@@ -683,7 +688,7 @@
 			cat("Be patient. The program is computing ... \n")
 		}
 			
-		ans <- .Fortran("frailpenal",                      
+		ans <- .Fortran(C_frailpenal,                      
                       as.integer(n),
                       as.integer(length(uni.cluster)),
                       as.integer(cens.data),
@@ -746,8 +751,9 @@
                       as.integer(betaorder),
                       as.integer(filtretps),
                       BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
-                      EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-                      PACKAGE = "frailtypack") # 58 arguments
+                      EPS=as.double(c(LIMparam,LIMlogl,LIMderiv))
+					  )#,
+                      #PACKAGE = "frailtypack") # 58 arguments
       #AD:      
 		if (ans$istop == 4){
 			warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")
@@ -898,7 +904,6 @@
 				VarBeta <- fit$varH
 				nfactor <- length(vec.factor)
 				p.wald <- rep(0,nfactor)
-         # print(nvar);print(nfactor);print(ind.place);print(occur);print(Beta)
 		 
 		        if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvar,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta)
 				else fit$global_chisq <- 0 
@@ -991,78 +996,35 @@
 				   
 					n <- length(tt0)
 					uni.cluster<-unique(num.id)#unique(cluster)
-					
-				   
-				   # print(length(uni.cluster))
-					# 				tt0 <- aggregate(tt0,by=list(num.id),FUN=function(x) x[1])[,2]
-					# 				tt1 <- aggregate(tt1,by=list(num.id),FUN=function(x) x[1])[,2]
-					# 				cens <- aggregate(cens,by=list(num.id),FUN=function(x) x[1])[,2]
-					# 				cluster <- aggregate(cluster,by=list(num.id),FUN=function(x) x[1])[,2]
-					# 				if (!is.null(ncol(var))){ # si plus d'une variable explicative
-					# 					varAG<-aggregate(var[,1],by=list(num.id), FUN=function(x) x[1])[,2]
-					# 					if (ncol(var)>1){
-					# 						for (i in 2:ncol(var)){
-					# 							varAG.i<-aggregate(var[,i],by=list(num.id), FUN=function(x) x[1])[,2]
-					# 							varAG<-cbind(varAG,varAG.i)
-					# 						}
-					# 					}
-					# 					var<-varAG
-					# 				}else{
-					# 					var<-aggregate(var,by=list(num.id), FUN=function(x) x[1])[,2]
-					# 				}
-					# 				nobs <- n
-					# 				n <- length(tt0)
             
 				}else{
-					#tt1.death<-aggregate(tt1,by=list(cluster),FUN=sum)[,2]
 					tt1.death<-aggregate(tt1,by=list(cluster),FUN=function(x) x[length(x)])[,2]
 					tt0.death<-rep(0,length(tt1.death))
 					clusterdc <- 0
 					lignedc0 <- 0
-					tempdc <- 0
-					
-					# 				tt0 <- aggregate(tt0,by=list(cluster),FUN=function(x) x[1])[,2]
-					# 				tt1 <- aggregate(tt1,by=list(cluster),FUN=function(x) x[1])[,2]
-					# 				ttU <- aggregate(ttU,by=list(cluster),FUN=function(x) x[1])[,2]
-					# 				cens <- aggregate(cens,by=list(cluster),FUN=function(x) x[1])[,2]
-					# 				if (!is.null(ncol(var))){ # si plus d'une variable explicative
-					# 					varAG<-aggregate(var[,1],by=list(cluster), FUN=function(x) x[1])[,2]
-					# 					if (ncol(var)>1){
-					# 						for (i in 2:ncol(var)){
-					# 							varAG.i<-aggregate(var[,i],by=list(cluster), FUN=function(x) x[1])[,2]
-					# 							varAG<-cbind(varAG,varAG.i)
-					# 						}
-					# 					}
-					# 					var<-varAG
-					# 				}else{
-					# 					var<-aggregate(var,by=list(cluster), FUN=function(x) x[1])[,2]
-					# 				}
-					# 				nobs <- n
-					# 				n <- length(tt0)
-            
+					tempdc <- 0            
 				}
 			}
 		}
-		else{ # censure par intervalle
+		else{ # Interval censoring
 			if (recurrentAG == TRUE) stop("You can't fit joint models on interval-censored data with recurrentAG = TRUE")
 			if (joint.clust==0){
 				tempdc0 <- aggregate(tt0,by=list(num.id),FUN=function(x) x[length(x)])[,2]
 				tempdc <- aggregate(tt1,by=list(num.id),FUN=function(x) x[length(x)])[,2]
 		  
 				lignedc0 <- length(tempdc)
-				#tempdc <- cbind(rep(0,lignedc0),tempdc)
 				tempdc <- cbind(tempdc0,tempdc)
 				clusterdc <- aggregate(cluster,by=list(num.id),FUN=function(x) x[length(x)])[,2]
 				tt1.death <- 0
 				tt0.death <- 0
 			  
-			  # prendre en compte seulement un evenement pour le joint cluster
 				tt0 <- aggregate(tt0,by=list(num.id),FUN=function(x) x[1])[,2]
 				tt1 <- aggregate(tt1,by=list(num.id),FUN=function(x) x[1])[,2]
 				ttU <- aggregate(ttU,by=list(num.id),FUN=function(x) x[1])[,2]
 				cens <- aggregate(cens,by=list(num.id),FUN=function(x) x[1])[,2]
 				cluster <- aggregate(cluster,by=list(num.id),FUN=function(x) x[1])[,2]
-				if (!is.null(ncol(var))){ # si plus d'une variable explicative
+				
+				if (!is.null(ncol(var))){ # if more than one covariate 
 					varAG<-aggregate(var[,1],by=list(num.id), FUN=function(x) x[1])[,2]
 					if (ncol(var)>1){
 						for (i in 2:ncol(var)){
@@ -1085,12 +1047,11 @@
 				lignedc0 <- 0
 				tempdc <- 0
 			  
-			  # prendre en compte seulement un evenement pour le joint
-				tt0 <- aggregate(tt0,by=list(cluster),FUN=function(x) x[1])[,2]
+			  	tt0 <- aggregate(tt0,by=list(cluster),FUN=function(x) x[1])[,2]
 				tt1 <- aggregate(tt1,by=list(cluster),FUN=function(x) x[1])[,2]
 				ttU <- aggregate(ttU,by=list(cluster),FUN=function(x) x[1])[,2]
 				cens <- aggregate(cens,by=list(cluster),FUN=function(x) x[1])[,2]
-				if (!is.null(ncol(var))){ # si plus d'une variable explicative
+				if (!is.null(ncol(var))){ # if more than one covariate 
 					varAG<-aggregate(var[,1],by=list(cluster), FUN=function(x) x[1])[,2]
 					if (ncol(var)>1){
 						for (i in 2:ncol(var)){
@@ -1124,7 +1085,7 @@
       
       #AD:Joint model needs "terminal()"
 		if (ind.terminal){
-			if(joint.clust==0 ){        ################################ || joint.clust==2
+			if(joint.clust==0 ){
 				icdc00 <- aggregate(terminal,by=list(num.id),FUN=function(x) x[length(x)])[,2] #+aggregate(cens,by=list(num.id),FUN=function(x) x[length(x)])[,2]
 				terminalEvent <- 0
 			}
@@ -1485,7 +1446,7 @@
 			cat("Be patient. The program is computing ... \n")
 		}  
 		
-		ans <- .Fortran("joint",                      
+		ans <- .Fortran(C_joint,                      
                       as.integer(n),
                       as.integer(length(uni.cluster),0),
                       as.integer(uni.strat),
@@ -1570,8 +1531,9 @@
                       as.integer(c(filtretps,filtretps2)),
                       BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep)),
                       BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*nvartimedep2)),
-                      EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-                      PACKAGE = "frailtypack") # 65 arguments
+                      EPS=as.double(c(LIMparam,LIMlogl,LIMderiv))
+					  )#,
+                      #PACKAGE = "frailtypack") # 65 arguments
 					  
 		MartinGale <- matrix(ans$MartinGale,nrow=as.integer(length(uni.cluster)),ncol=5) 
 		
@@ -1886,12 +1848,8 @@
 		}      
 		subgbyg <- subgrpe(grp,as.integer(subcluster))      
 		maxng <- max(subgbyg)
-		ngg <- length(uni.cluster)      
-		#	cat("nombre de sujet par groupe\n")
-		#	print(grp)
-		#	cat("nombre de sous-groupe par groupe\n")
-		#	print(subgbyg)	
-		#### group and subgroup      
+		ngg <- length(uni.cluster)    
+		
 		flush.console()
 		if (print.times){
 			ptm<-proc.time()
@@ -1899,7 +1857,7 @@
 			cat("Be patient. The program is computing ... \n")
 		}	  
 		
-		ans <- .Fortran("nested",
+		ans <- .Fortran(C_nested,
                       as.integer(n),
                       as.integer(length(uni.cluster)),
                       as.integer(length(uni.subcluster)),
@@ -1961,8 +1919,9 @@
                       frailty.sd.group=as.double(rep(0,as.integer(length(uni.cluster)))),
                       frailty.sd.subgroup=as.double(matrix(0,nrow=ngg,ncol=maxng)),
                       linear.pred=as.double(rep(0,n)),
-                      EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-                      PACKAGE = "frailtypack") # 57 arguments
+                      EPS=as.double(c(LIMparam,LIMlogl,LIMderiv))
+					  )#,
+                      #PACKAGE = "frailtypack") # 57 arguments
       
 		if (ans$istop == 4){
 			warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")
@@ -2435,7 +2394,7 @@
 			cat("Be patient. The program is computing ... \n")
 		}	
 				
-		ans <- .Fortran("joint", 
+		ans <- .Fortran(C_joint, 
 				as.integer(n), 		
 				as.integer(c(length(uni.subcluster),length(uni.cluster))),  
 				as.integer(uni.strat),
@@ -2513,8 +2472,9 @@
 				as.integer(c(filtretps, filtretps2)),
 				BetaTpsMat = as.double(matrix(0,nrow=101, ncol=1+4*nvartimedep)),
 				BetaTpsMatDc = as.double(matrix(0,nrow=101, ncol=1+4*nvartimedep2)),
-				EPS = as.double(c(LIMparam, LIMlogl, LIMderiv)),
-				PACKAGE = "frailtypack") #65 arguments
+				EPS = as.double(c(LIMparam, LIMlogl, LIMderiv))
+				)#,
+				#PACKAGE = "frailtypack") #65 arguments
 		
 		###########################################
 		### Verification de l'execution du code ###
@@ -2662,7 +2622,7 @@
 			if (indic_alpha == 1) {
 				#if (indic_xi ==1) VarBeta <- diag(diag(fit$varH)[-c(1,2,3,4)])
 				#else VarBeta <- diag(diag(fit$varH)[-c(1,2,3)])
-				if(indic_alpha == 1) VarBeta <- fit$varH[5:dim(fit$varH)[1],5:dim(fit$varH)[2]]
+				if(indic_xi == 1) VarBeta <- fit$varH[5:dim(fit$varH)[1],5:dim(fit$varH)[2]]
 				else VarBeta <- fit$varH[4:dim(fit$varH)[1],4:dim(fit$varH)[2]]
 			}else{
 				#if (indic_xi == 1) VarBeta <- diag(diag(fit$varH)[-c(1,2,3)])
@@ -2673,7 +2633,7 @@
 			
 			nfactor <- length(vec.factor)
 			p.wald <- rep(0,nfactor)
-			ntot <- nvarEnd + nvarRec	
+			ntot <- nvarEnd + nvarRec
 			
 			if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvarRec,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarEnd,Ntot=ntot)		 
 			else fit$global_chisq <- 0
@@ -2705,7 +2665,7 @@
 			nfactor <- length(vec.factordc)
 			p.walddc <- rep(0,nfactor)
 			ntot <- nvarEnd + nvarRec
-						
+			
 			if(fit$istop == 1) fit$global_chisq_d <- waldtest(N=nvarEnd,nfact=nfactor,place=ind.placedc,modality=occurdc,b=Beta,Varb=VarBeta,Lfirts=nvarRec,Ntot=ntot)
 			else fit$global_chisq_d <- 0 
 			

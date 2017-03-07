@@ -4,7 +4,7 @@
 !--------------------------------------------------------------------
 
 
-    subroutine cvpl_LogN(nobs,nsujet,groupe0,c0,cdc0,nva10,nva20,ve0,vedc0, &
+    subroutine cvpl_logn(nobs,nsujet,groupe0,c0,cdc0,nva10,nva20,ve0,vedc0, &
     typeof0,nz0,zi0,ttt0,tttdc0,nbintervR0,nbintervDC0,np,b,H_1, &
     t00,t10,t0dc0,t1dc0,nt,valT,rl_cond,epoir,contribt,atrisk)
 
@@ -229,7 +229,7 @@
     deallocate(c,cdc,ve,vedc,zi,ttt,tttdc,date,datedc)
     deallocate(t0,t1,t0dc,t1dc,g)
 
-    end subroutine cvpl_LogN
+    end subroutine cvpl_logn
 
 
 !-----------------------------------------------------------

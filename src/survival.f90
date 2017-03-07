@@ -5,7 +5,7 @@
 !AM:modification 12/07/2012-baseline hazard
 
 !AM:add argument lam
-    subroutine survival(t,the_s,the1_s,nz,zi_s,su,lam,nst)
+    subroutine survival_frailty(t,the_s,the1_s,nz,zi_s,su,lam,nst)
 
     implicit none
 
@@ -98,7 +98,7 @@
     su(1) = dexp(-gl)
     if(nst == 2) su(2) = dexp(-gl1)
 
-    end subroutine survival
+    end subroutine survival_frailty
 
 
    subroutine survival2(t,the0,nz,zi0,su,nst)

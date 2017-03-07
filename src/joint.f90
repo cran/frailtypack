@@ -1889,7 +1889,7 @@
             allocate(vecuiRes(ng),I_hess(1,1),H_hess(1,1))
             effetres = effet
             
-            Call ResidusMartingalej_fam(b,np,funcpajres_fam,Resmartingale,Resmartingaledc,frailtypred_fam,&
+            Call ResidusMartingalej_fam(funcpajres_fam,Resmartingale,Resmartingaledc,frailtypred_fam,&
                 frailtyvar_fam, frailtypred_fam_ind,frailtyvar_fam_ind)         
 
             MartinGales(1:nfam,1)=Resmartingale

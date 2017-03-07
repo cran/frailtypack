@@ -2,7 +2,7 @@
 
 ! ============================================== prediction Joint
 
-    subroutine predict(np,b,nz,nbintervR,nbintervDC,nva1,nva2,nst,typeof,typevent,zi,HIHOut,time,timedc, &
+    subroutine predict(np,b,nz,nbintervR,nbintervDC,nva1,nva2,nst,typeof0,typevent,zi,HIHOut,time,timedc, &
     ntimeAll,npred0,predTime,window,predtimerec,nrec0,vaxpred0,vaxdcpred0, &
     predAll1,predAll2,predAll3,predAll1R,predAlllow1,predAllhigh1, &
     predAlllow2,predAllhigh2,predAlllow3,predAllhigh3,predAlllow1R,predAllhigh1R,&
@@ -10,9 +10,9 @@
 
     implicit none
 
-    integer::i,ii,iii,j,npred0,nrec0,nsample
+    integer::i,ii,iii,j,npred0,nrec0,nsample,typeof
     integer,intent(in)::np,nz,nbintervR,nbintervDC,nva1,nva2,nst,&
-            typeof,typevent,ntimeAll,icproba,intcens,movingwindow,modeltype
+            typeof0, typevent,ntimeAll,icproba,intcens,movingwindow,modeltype
     double precision,dimension(np),intent(in)::b
     double precision,dimension(nz+6),intent(in)::zi
     double precision,dimension(np,np),intent(in)::HIHOut
@@ -52,7 +52,7 @@
     ! typevent = 2 if prediction for terminal event ; =3 if prediction for recurrent event ; =1 if prediction for the both
     ! modeltype =0 if joint gamma modelling; =1 if joint log-normal modelling
 
-    
+    typeof = typeof0
     coefBeta(1,:) = b((np-nva1-nva2+1):(np-nva2))
     coefBetadc(1,:) = b((np-nva2+1):np)
 
@@ -124,24 +124,24 @@
             theDC = b((nz+3):2*(nz+2))*b((nz+3):2*(nz+2))
             predTime2 = predtimerec2(1,1)
 
-            call survival(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
+            call survival_frailty(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
             survR(:,1) = surv(1)
             hazR(:,1) = lam(1)
             survDC(1) = surv(2)
             do i=1,npred0
                 if (intcens.eq.1) then 
-                    call survival(trunctime(i),theR,theDC,nz+2,zi,surv,lam,nst)
+                    call survival_frailty(trunctime(i),theR,theDC,nz+2,zi,surv,lam,nst)
                     survLT(i) = surv(1)
                     if (trunctime(i).eq.0.d0) survLT(i) = 1.d0
-                    call survival(lowertime2(i),theR,theDC,nz+2,zi,surv,lam,nst)
+                    call survival_frailty(lowertime2(i),theR,theDC,nz+2,zi,surv,lam,nst)
                     survL(i) = surv(1)
-                    call survival(uppertime2(i),theR,theDC,nz+2,zi,surv,lam,nst) !!
+                    call survival_frailty(uppertime2(i),theR,theDC,nz+2,zi,surv,lam,nst) !!
                     survU(i) = surv(1)
                 endif
 
                 do ii=1,nrec0
                     predTime2 = predtimerec2(i,ii+1)
-                    call survival(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
+                    call survival_frailty(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
                     survR(i,ii+1) = surv(1)
                     hazR(i,ii+1) = lam(1)
 
@@ -150,7 +150,7 @@
 
             predTime2 = predtimerec2(1,nrec0+2)
 
-            call survival(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
+            call survival_frailty(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
             survR(:,nrec0+2) = surv(1)
             hazR(:,nrec0+2) = lam(1)
             survDC(2) = surv(2)
@@ -305,30 +305,30 @@
                     theRalea = balea(j,1:(nz+2))*balea(j,1:(nz+2))
                     theDCalea = balea(j,(nz+3):2*(nz+2))*balea(j,(nz+3):2*(nz+2))
                     predTime2 = predtimerec2(1,1)
-                    call survival(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
+                    call survival_frailty(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                     survRalea(:,1) = surv(1)
                     hazRalea(:,1) = lam(1)
                     survDCalea(1) = surv(2)
                     do i=1,npred0
                         if (intcens.eq.1) then 
-                            call survival(trunctime(i),theRalea,theDCalea,nz+2,zi,surv,lam,nst)
+                            call survival_frailty(trunctime(i),theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                             survLTalea(i) = surv(1)
                             if (trunctime(i).eq.0.d0) survLTalea(i) = 1.d0
-                            call survival(lowertime(i),theRalea,theDCalea,nz+2,zi,surv,lam,nst)
+                            call survival_frailty(lowertime(i),theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                             survLalea(i) = surv(1)
-                            call survival(uppertime(i),theRalea,theDCalea,nz+2,zi,surv,lam,nst) !!
+                            call survival_frailty(uppertime(i),theRalea,theDCalea,nz+2,zi,surv,lam,nst) !!
                             survUalea(i) = surv(1)
                         endif
 
                         do ii=1,nrec0
                             predTime2 = predtimerec2(i,ii+1)
-                            call survival(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
+                            call survival_frailty(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                             survRalea(i,ii+1) = surv(1)
                             hazRalea(i,ii+1) = lam(1)
                         end do
                     end do
                     predTime2 = predtimerec2(1,nrec0+2)
-                    call survival(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
+                    call survival_frailty(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                     survRalea(:,nrec0+2) = surv(1)
                     hazRalea(:,nrec0+2) = lam(1)
                     survDCalea(2) = surv(2)

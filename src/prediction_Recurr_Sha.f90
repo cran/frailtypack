@@ -3,7 +3,7 @@
 ! **** Created on the 2016, 17 october
 ! **** Modified : 2016, 21 october by Myriam, L.
 
-    subroutine predict_Recurr_Sha(LogN,npred0,surv_s,surv_t,surv_r,betapred,var,&
+    subroutine predict_recurr_sha(LogN,npred0,surv_s,surv_t,surv_r,betapred,var,&
                  predAll,nreci,ntimeAll,icproba,nsample,varalea,&
                  surv_smc,surv_tmc,surv_rmc,betapredmc,predAlllow,predAllhigh)
     
@@ -72,7 +72,7 @@
 
       end do 
 
-    end subroutine predict_Recurr_Sha    
+    end subroutine predict_recurr_sha    
 
 !=========================
 ! Prediction : numerator

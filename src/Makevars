@@ -14,7 +14,6 @@ aamarq98o.o: aaOptim.o aaOptimres.o Aparameters.o
 aaOptim.o: Aparameters.o
 afuncpasres.o: aaOptim.o aaOptimres.o Aparameters.o
 aresidusMartingale.o: aaOptim.o aaOptimres.o Aparameters.o
-atestWald.o: aaOptim.o aaOptimres.o
 aaUseFunction.o: aaOptim.o aaOptimres.o Aparameters.o
 aaUseFunctionG.o: aaOptim.o aaOptimres.o Aparameters.o
 aaOptimres.o: Aparameters.o

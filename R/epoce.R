@@ -371,7 +371,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
         cat("Calculating ... \n")
   if(class(fit)== 'jointPenal'){
         if(fit$logNormal==0){
-        ans <- .Fortran("cvpl",
+        ans <- .Fortran(C_cvpl,
                         as.integer(nobs),
                         as.integer(nsujet),
                         as.integer(cluster),
@@ -400,11 +400,11 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                         rl_cond=as.double(rep(0,nt)),
                         epoir=as.double(rep(0,nt)),
                         contribt=as.double(rep(0,nt*nsujet)),
-                        atrisk=as.double(rep(0,nt)),
-                        PACKAGE="frailtypack")
+                        atrisk=as.double(rep(0,nt))
+						)
 }else{
 #  cat('logn...')
-  ans <- .Fortran("cvpl_logN",
+  ans <- .Fortran(C_cvpl_logn,
                   as.integer(nobs),
                   as.integer(nsujet),
                   as.integer(cluster),
@@ -433,12 +433,12 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                   rl_cond=as.double(rep(0,nt)),
                   epoir=as.double(rep(0,nt)),
                   contribt=as.double(rep(0,nt*nsujet)),
-                  atrisk=as.double(rep(0,nt)),
-                  PACKAGE="frailtypack")
+                  atrisk=as.double(rep(0,nt))
+				  )
+				  
   }}else if(class(fit) == "longiPenal"){
 
-   
-    ans <- .Fortran("cvpl_long",
+    ans <- .Fortran(C_cvpl_long,
                     as.integer(nsujet),
                     as.integer(1),
                     as.integer(length(clusterY)),
@@ -476,13 +476,13 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                     rl_cond=as.double(rep(0,nt)),
                     epoir=as.double(rep(0,nt)),
                     contribt=as.double(rep(0,nt*nsujet)),
-                    atrisk=as.double(rep(0,nt)),
-                    PACKAGE="frailtypack")
+                    atrisk=as.double(rep(0,nt))
+					)
 
   }else if(class(fit) == "trivPenal"){
 
 
-    ans <- .Fortran("cvpl_long",
+    ans <- .Fortran(C_cvpl_long,
                     as.integer(nsujet),
                     as.integer(nobs),
                     as.integer(length(clusterY)),
@@ -520,8 +520,8 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                     rl_cond=as.double(rep(0,nt)),
                     epoir=as.double(rep(0,nt)),
                     contribt=as.double(rep(0,nt*nsujet)),
-                    atrisk=as.double(rep(0,nt)),
-                    PACKAGE="frailtypack")
+                    atrisk=as.double(rep(0,nt))
+					)
 
   }
         out <- NULL

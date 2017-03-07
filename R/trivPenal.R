@@ -1,11 +1,6 @@
-
-
-"trivPenal" <-
-  function (formula, formula.terminalEvent, formula.LongitudinalData, data,  data.Longi, random, id, intercept = TRUE, link="Random-effects",
-            left.censoring=FALSE, recurrentAG=FALSE, n.knots, kappa,
-            maxit=300, hazard="Splines", init.B,
-            init.Random, init.Eta, init.Alpha, method.GH = "Standard", n.nodes, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE)
-  {
+"trivPenal" <- function (formula, formula.terminalEvent, formula.LongitudinalData, data,  data.Longi, random, id, intercept = TRUE, link="Random-effects",
+            left.censoring=FALSE, recurrentAG=FALSE, n.knots, kappa, maxit=300, hazard="Splines", init.B,init.Random, init.Eta, init.Alpha, 
+      method.GH = "Standard", n.nodes, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE){
 
     m3 <- match.call() # longitudinal
     m3$formula <- m3$formula.terminalEvent <- m3$data <- m3$recurrentAG <- m3$random <- m3$id <- m3$link <- m3$n.knots <- m3$kappa <- m3$maxit <- m3$hazard <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$left.censoring <- m3$init.Random <- m3$init.Eta <- m3$init.Alpha <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$... <- NULL
@@ -1335,7 +1330,7 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
     }
 
 
-    ans <- .Fortran("joint_longi",
+    ans <- .Fortran(C_joint_longi,
                     as.integer(nsujet),
                     as.integer(nsujety),
                     as.integer(ng),
@@ -1400,8 +1395,8 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
                     BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),# for future developments
                     EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
                     GH = c(as.integer(GH),as.integer(n.nodes)),
-                    paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol))),
-                    PACKAGE = "frailtypack")
+                    paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol)))
+					)
 
 
 
@@ -1616,19 +1611,18 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
 
    if ((length(vec.factor) > 0) ){
      Beta <- ans$b[(np - nvar + 1):np]
-     VarBeta <- fit$varH#[-c(1:(1+indic.alpha+netar+netadc+1+ne_re))])
+     VarBeta <- fit$varH  #[-c(1:(1+indic.alpha+netar+netadc+1+ne_re))])
 
      nfactor <- length(vec.factor)
      p.wald <- rep(0,nfactor)
      ntot <- nvarR + nvarT + nvarY
+
      fit$global_chisqR <- waldtest(N=nvarR,nfact=nfactor,place=ind.place,modality=occur,b=Beta,Varb=VarBeta,Llast=nvarT+nvarY,Ntot=ntot)
-  
-     
      fit$dof_chisqR <- occur
      fit$global_chisq.testR <- 1
      # Calcul de pvalue globale
      for(i in 1:length(vec.factor)){
-       p.wald[i] <- signif(1 - pchisq(fit$global_chisqR[i], occur[i]), 3)
+		p.wald[i] <- signif(1 - pchisq(fit$global_chisqR[i], occur[i]), 3)
      }
      fit$p.global_chisqR <- p.wald
      fit$names.factorR <- vec.factor
@@ -1649,6 +1643,7 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
       nfactor <- length(vec.factorY)
       p.wald <- rep(0,nfactor)
       ntot <- nvarR + nvarT + nvarY
+
       fit$global_chisqY <- waldtest(N=nvarY,nfact=nfactor,place=ind.placeY,modality=occurY,b=Beta,Varb=VarBeta,Lfirts=nvarT+nvarR,Ntot=ntot)
       fit$dof_chisqY <- occurY
       fit$global_chisq.testY <- 1
@@ -1667,7 +1662,7 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
     #========================= Test de Wald
  
     if ((length(vec.factorT) > 0) ){
-      Beta <- ans$b[(np - nvar - nvarY + 1):np]
+      Beta <- ans$b[(np - nvar + 1):np]
 
       VarBeta <- fit$varH#[-c(1:(1+indic.alpha+netar+netadc+1+ne_re))])
 
@@ -1675,6 +1670,7 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
       p.wald <- rep(0,nfactor)
       ntot <- nvarR + nvarT + nvarY
    # print("deces")
+
       fit$global_chisqT <- waldtest(N=nvarT,nfact=nfactor,place=ind.placeT,modality=occurT,b=Beta,Varb=VarBeta,Llast=nvarY,Lfirts=nvarR,Ntot=ntot)
       fit$dof_chisqT <- occurT
       fit$global_chisq.testT <- 1
@@ -1690,13 +1686,15 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
       fit$global_chisq.testT <- 0
     }
 
-   fit$max_rep <- max_rep
-   fit$joint.clust <- 1
-if(intercept)fit$intercept <- TRUE
-else fit$intercept <- FALSE
-   fit$Frailty <- FALSE
-   fit$methodGH <- method.GH
-  fit$n.nodes <- n.nodes
+    fit$max_rep <- max_rep
+    fit$joint.clust <- 1
+
+    if(intercept)fit$intercept <- TRUE
+    else fit$intercept <- FALSE
+
+    fit$Frailty <- FALSE
+    fit$methodGH <- method.GH
+    fit$n.nodes <- n.nodes
     class(fit) <- "trivPenal"
 
     if (print.times){

@@ -408,7 +408,7 @@ if((all.equal(length(hazard),1)==T)==T){
 				cat("Be patient. The program is computing ... \n")
 			}
 
-			ans <- .Fortran("additive",
+			ans <- .Fortran(C_additive,
 				as.integer(n),
 				as.integer(length(uni.cluster)),
 				as.integer(uni.strat),
@@ -476,8 +476,9 @@ if((all.equal(length(hazard),1)==T)==T){
 				frailty.cov=as.double(rep(0,as.integer(length(uni.cluster)))),
 				
 				linear.pred=as.double(rep(0,n)),
-				EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
-			PACKAGE = "frailtypack")  # 62 arguments		
+				EPS=as.double(c(LIMparam,LIMlogl,LIMderiv))
+				)#,
+			#PACKAGE = "frailtypack")  # 62 arguments		
 
     if (ans$trunc == 1){
     	stop("'addivePenal' can not deal with left truncation.")

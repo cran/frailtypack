@@ -15,7 +15,7 @@
 !ResMartingaleEvent=c(Res_martingale,Res_martingaledc,Res_martingale2)
 !frailtyEstimates=c(frailtypred,frailtypred2,frailtyvar,frailtyvar2,frailtyCorr)
 
-    subroutine jointMultiv(nobsEvent,nz0,k0,tt00,tt10,tt0meta0,tt1meta0,ic0,icmeta0, &
+    subroutine joint_multiv(nobsEvent,nz0,k0,tt00,tt10,tt0meta0,tt1meta0,ic0,icmeta0, &
     groupe0,groupe0meta,groupe0dc,tt0dc0,tt1dc0,icdc0,nbvar,vax0,vaxmeta0,vaxdc0,noVarEvent, &
     maxIteration,initialize,np,b,H_hessOut,HIHOut,resOut,LCV,critCV,x1Out,lamOut,xSu1,suOut,x2Out, & 
     lam2Out,xSu2,su2Out,x3Out,lam3Out,xSu3,su3Out,typeof0,equidistant0,nbIntervEvent, &
@@ -1576,7 +1576,7 @@
 
     return
 
-    end subroutine jointMultiv
+    end subroutine joint_multiv
 
 
 !========================== VECSPLI ==============================

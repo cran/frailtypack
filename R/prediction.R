@@ -8,7 +8,10 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	if ((class(fit)!="frailtyPenal")&(class(fit)!="jointPenal")&(class(fit)!='longiPenal')&(class(fit)!='trivPenal')&(class(fit)!='jointNestedPenal')) stop("The argument fit must be one of these objects : frailtyPenal; jointPenal; longiPenal; trivPenal or jointNestedPenal")
 	if (fit$istop != 1) stop("Attempting to do predictions with a wrong model")
 	
-	if ((class(fit) == "jointPenal") && (fit$joint.clust == 0)) stop("Prediction method is not available for joint model for clustered data")
+	if (class(fit) == "jointPenal"){
+		if (fit$joint.clust == 0) stop("Prediction method is not available for joint model for clustered data")
+		else if (fit$joint.clust == 2) stop("Prediction method is not available for joint general model")
+	}
 
 	if (missing(data)) stop("Need data to do some predictions")
 
@@ -104,7 +107,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	m <- fit$call
 	m2 <- match.call()
 
-	m$formula.terminalEvent <- m$formula.LongitudinalData <- m$data.Longi <- m$random <- m$id  <- m$link <- m$left.censoring <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$init.Random <- m$init.Eta <- m$Alpha <- m$method.GH <- m$intercept <- m$n.nodes <- m$...  <- NULL
+	m$formula.terminalEvent <- m$formula.LongitudinalData <- m$data.Longi <- m$random <- m$id  <- m$link <- m$left.censoring <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$init.Random <- m$init.Eta <- m$Alpha <- m$method.GH <- m$intercept <- m$n.nodes <- m$jointGeneral <- m$... <- NULL
 		
 	m[[1]] <- as.name("model.frame")
 	m3 <- m # pour recuperer les donnees du dataset initial en plus
@@ -414,7 +417,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		m3 <- fit$call
 		m2 <- match.call()
 
-		m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$... <- NULL
+		m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$jointGeneral <- m3$... <- NULL
 
 		m3$formula <- formula_fit
 		m3$formula[[3]] <- fit$formula.terminalEvent[[2]]		
@@ -452,7 +455,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		cat("\n")
 		cat("Calculating the probabilities ... \n")
 		#if(fit$logNormal==0){	#Myriam modifie le 18-08-16	
-			ans <- .Fortran("predict",
+			ans <- .Fortran(C_predict,
 				as.integer(np),
 				as.double(b),
 				as.integer(nz),
@@ -495,8 +498,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 				as.double(uppertime),
 				as.integer(moving.window),
 				as.double(timeAll),
-				as.integer(fit$logNormal),
-				PACKAGE = "frailtypack") #43 arguments
+				as.integer(fit$logNormal)
+				)
 				
 		# Myriam 18-08-2016 Fusion des fichiers predict et predict_logN
 		
@@ -817,7 +820,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		}				
 		
 		if(class(fit)=="longiPenal"){
-			ans <- .Fortran("predict_biv",
+			ans <- .Fortran(C_predict_biv,
 				as.integer(np),
 				as.double(b),
 				as.integer(nz),
@@ -849,8 +852,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 				as.integer(moving.window),
 				as.double(timeAll),
 				as.integer(s_cag_id),
-				as.double(s_cag),
-				PACKAGE = "frailtypack")#32 arguments
+				as.double(s_cag)
+				)
 
 			predMat <- matrix(ans$pred,nrow=nrow(data),ncol=ntimeAll)
 			predMatLow <- matrix(ans$predlow,nrow=nrow(data),ncol=ntimeAll)
@@ -890,7 +893,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		}else if(class(fit)=="trivPenal"){             
 			predtimerec <- predtimerec[order(unique(cluster)),]	
 						
-			ans <- .Fortran("predict_tri",
+			ans <- .Fortran(C_predict_tri,
 				as.integer(np),
 				as.double(b),
 				as.integer(nz),
@@ -928,8 +931,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 				as.integer(moving.window),
 				as.double(timeAll),
 				as.integer(s_cag_id),
-				as.double(s_cag),
-				PACKAGE = "frailtypack") #38 arguments
+				as.double(s_cag)
+				)
 				
 			out <- NULL
 			out$call <- match.call()
@@ -1044,7 +1047,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 					nbrec <- nbrec[order(uni.cluster)]
 					mat.survival.LastRec[,1] <- mat.survival.LastRec[order(uni.cluster)]	
 					
-					ans <- .Fortran("predict_Recurr_Sha",
+					ans <- .Fortran(C_predict_recurr_sha,
 						as.integer(fit$logNormal),
 						as.integer(npred0),
 						as.double(mat.survival.X),
@@ -1063,8 +1066,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 						as.double(rep(0,nrow=npred0*MC.sample)),
 						as.double(rep(0,nrow=npred0*MC.sample)),
 						predlow1=as.double(matrix(0,nrow=npred0,ncol=ntimeAll)),
-						predhigh1=as.double(matrix(0,nrow=npred0,ncol=ntimeAll)),
-						PACKAGE = "frailtypack")#19 arguments
+						predhigh1=as.double(matrix(0,nrow=npred0,ncol=ntimeAll))
+						)
  						
 					predMat <- matrix(ans$pred,nrow=npred0,ncol=ntimeAll)
 					
@@ -1092,7 +1095,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 							mat.survival.X <- rbind(mat.survival.X,vect.survival.X)
 							mat.survival.X.horizon <- rbind(mat.survival.X.horizon,vect.survival.X.horizon)							
 						}								
-						ans <- .Fortran("predict_LogN_sha",
+						ans <- .Fortran(C_predict_logn_sha,
 							as.integer(nrow(data)),
 							as.double(mat.survival.X),
 							as.double(mat.survival.X.horizon),
@@ -1102,47 +1105,47 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 							as.integer(0),
 							as.integer(ntimeAll),
 							as.integer(MC.sample),
+							as.double(sigma2.mc),
 							as.double(rep(0,MC.sample)),
 							as.double(matrix(0,nrow=nrow(data)*MC.sample,ncol=ntimeAll)),
 							as.double(matrix(0,nrow=nrow(data)*MC.sample,ncol=ntimeAll)),
 							predlow1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
-							predhigh1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
-							PACKAGE = "frailtypack")	#14 arguments							
+							predhigh1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll))
+							)					
 						predMat <- matrix(ans$pred,nrow=nrow(data),ncol=ntimeAll)
 					}
 				}				
 			###############################
 			###Prediction conditionnelle###
 			###############################
-			}else{ 			
+			}else{
 				if (event =="Recurrent"){
-					if (is.null(nrow(X))){						
-						if (!(unique(cluster) %in% uni.clusterfit)) stop("Are you sure that the group",unique(cluster)," is present in your cluster variable ?")			
+					if (is.null(nrow(X))){	
+						if (!(unique(cluster) %in% uni.clusterfit)) stop("Are you sure that the group ",unique(cluster)," is present in your cluster variable ?")			
 						vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX
 						vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX
-						pred <- 1-(vect.survival.X.horizon/vect.survival.X)**fit$frailty.pred[uni.clusterfit==as.integer(unique(cluster))]
+						pred <- 1-(vect.survival.X.horizon/vect.survival.X)**fit$frailty.pred[as.integer(uni.clusterfit)==unique(as.integer(cluster))]						
 						predMat <- rbind(predMat,pred)
 					}else{
 						uni.cluster <- uni.cluster[order(uni.cluster)]
-						for (k in 1:nrow(X)){
-							# if (!(group %in% uni.clusterfit)) stop("Are you sure that the group",group," is present in your cluster variable ?")					
-							if (!(uni.cluster[k] %in% uni.clusterfit)) stop("Are you sure that the group",uni.cluster[k]," is present in your cluster variable ?")			
+						for (k in 1:nrow(X)){					
+							if (!(uni.cluster[k] %in% uni.clusterfit)) stop("Are you sure that the group ",uni.cluster[k]," is present in your cluster variable ?")
 							vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
 							vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]
-							pred <- 1-(vect.survival.X.horizon/vect.survival.X)**fit$frailty.pred[uni.clusterfit==as.integer(uni.cluster[k])]
+							pred <- 1-(vect.survival.X.horizon/vect.survival.X)**fit$frailty.pred[as.integer(uni.clusterfit)==unique(as.integer(cluster))[k]]
 							predMat <- rbind(predMat,pred)
 						}
 					}
 				}else{
 					cluster <- as.integer(as.vector(cluster))														
-					if (any(!(uni.cluster %in% uni.clusterfit))) stop("Are you sure that the group", uni.cluster, "is present in your cluster variable ?")					
+					if (any(!(uni.cluster %in% uni.clusterfit))) stop("Are you sure that the group ", uni.cluster, "is present in your cluster variable ?")					
 					for (i in 1:nrow(data)){										
 						vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[i]
 						vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[i]
 						if (fit$logNormal==0){ # Gamma distribution
-							pred <- 1-(vect.survival.X.horizon/vect.survival.X)**fit$frailty.pred[uni.clusterfit==cluster[i]]
+							pred <- 1-(vect.survival.X.horizon/vect.survival.X)**fit$frailty.pred[as.integer(uni.clusterfit)==as.integer(cluster)[i]]
 						}else{ #AK: Normal distribution
-							pred <- 1-(vect.survival.X.horizon/vect.survival.X)**exp(fit$frailty.pred[uni.clusterfit==cluster[i]])
+							pred <- 1-(vect.survival.X.horizon/vect.survival.X)**exp(fit$frailty.pred[as.integer(uni.clusterfit)==as.integer(cluster)[i]])
 						}
 						predMat <- rbind(predMat,pred)
 					}
@@ -1152,7 +1155,6 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		#-*-*-*-*-Pour un modele de Cox-*-*-*-*-#
 		#*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*#		
 		}else{
-			# if (!missing(group)) stop("No need for a group to predict on a proportionnal hazard model")
 			for (k in 1:nrow(data)){
 				vect.survival.X <- sapply(sequence,FUN=survival,ObjFrailty=fit)**expBX[k]
 				vect.survival.X.horizon <- sapply(sequence2,FUN=survival,ObjFrailty=fit)**expBX[k]				
@@ -1194,7 +1196,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 					res <- NULL
 					nst <- ObjFrailty$n.strat
 					
-					out <- .Fortran("survival",
+					out <- .Fortran(C_survival_frailty,
 						as.double(t),
 						as.double(para1),
 						as.double(para2),
@@ -1202,8 +1204,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 						as.double(zi),
 						survival=as.double(c(0,0)),
 						lam=as.double(c(0,0)),
-						as.integer(nst),# lam ajoute suite aux modif de survival
-						PACKAGE = "frailtypack") #8 arguments
+						as.integer(nst)#lam ajoute suite aux modif de survival
+						)
 						
 					if(ObjFrailty$n.strat == 2){
 						res <- c(res,out$survival)
@@ -1219,15 +1221,14 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 					else b <- para1
 					time <- ObjFrailty$time
 					
-					out <- .Fortran("survival_cpm",
+					out <- .Fortran(C_survival_cpm,
 						as.double(t),
 						as.double(b),
 						as.integer(ObjFrailty$n.strat),
 						as.integer(ObjFrailty$nbintervR),
 						as.double(time),
-						survival=as.double(c(0,0)),
-						PACKAGE = "frailtypack"
-					) #6 arguments
+						survival=as.double(c(0,0))
+						)
 					
 					if(ObjFrailty$n.strat == 2){
 						res <- c(res,out$survival)
@@ -1306,7 +1307,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 							variance.mc <- sigma2.mc
 						}	
 						
-						ans <- .Fortran("predict_Recurr_Sha",
+						ans <- .Fortran(C_predict_recurr_sha,
 							as.integer(fit$logNormal),
 							as.integer(npred0),
 							as.double(mat.survival.X),
@@ -1325,8 +1326,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 							as.double(mat.survival.LastRec.mc),
 							as.double(expBX.mc),
 							predlow1=as.double(matrix(0,nrow=npred0,ncol=ntimeAll)),
-							predhigh1=as.double(matrix(0,nrow=npred0,ncol=ntimeAll)),
-							PACKAGE = "frailtypack") #19 arguments
+							predhigh1=as.double(matrix(0,nrow=npred0,ncol=ntimeAll))
+							)
 							
 						predMatLow <- matrix(ans$predlow1,nrow=npred0,ncol=ntimeAll)
 						predMatHigh <- matrix(ans$predhigh1,nrow=npred0,ncol=ntimeAll)
@@ -1371,7 +1372,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 								mat.survival.X.horizon.mc <- rbind(mat.survival.X.horizon.mc,mat.survival.X.horizon.samp)
 							}		
 							
-							ans <- .Fortran("predict_LogN_sha",
+							ans <- .Fortran(C_predict_logn_sha,
 								as.integer(nrow(data)),
 								as.double(mat.survival.X),
 								as.double(mat.survival.X.horizon),
@@ -1386,8 +1387,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 								as.double(mat.survival.X.horizon.mc),
 								as.double(expBX.mc),
 								predlow1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
-								predhigh1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
-								PACKAGE = "frailtypack")#15 arguments
+								predhigh1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll))
+								)
 
 							predMatLow <- matrix(ans$predlow1,nrow=nrow(data),ncol=ntimeAll)
 							predMatHigh <- matrix(ans$predhigh1,nrow=nrow(data),ncol=ntimeAll)
@@ -1430,13 +1431,13 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 							######### AK: Distribution LogNormale #########
 							}else{
 								# if (k==1){
-									res<-.Fortran("frailpred_sha_nor_mc",
+									res<-.Fortran(C_frailpred_sha_nor_mc,
 										as.integer(fit$npar),
 										frail.out=as.double(0),
 										as.double(sigma2.mc[i]),
 										as.double(res1),
-										as.integer(mi),
-										PACKAGE = "frailtypack" ) #5 arguments
+										as.integer(mi)
+										)
 									frailty.mc[i] <- res$frail.out
 								# }
 								pred <- 1-(vect.survival.X.horizon/vect.survival.X)**exp(frailty.mc[i])
@@ -1488,7 +1489,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 			out$x.time <- sequence
 		}
 		out$pred <- predMat
-		# colnames(out$pred) <- c("times",rep(" ",dim(out$pred)[2]-1))			
+		# colnames(out$pred) <- c("times",rep(" ",dim(out$pred)[2]-1))		
 		colnames(out$pred) <- paste("time=", out$x.time)
 		
 		if (out$event == "Terminal") rownames(out$pred) <- paste("ind",1:out$npred)

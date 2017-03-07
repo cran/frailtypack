@@ -1098,7 +1098,7 @@ if(length(vec.factor) > 0){
 # 	print(dim(varformula2))
 # 	print(dim(vardc))
 
-	ans <- .Fortran("jointMultiv",
+	ans <- .Fortran(C_joint_multiv,
 		as.integer(nobsEvent),
 		as.integer(n.knots),
 		k0=as.double(kappa),
@@ -1167,8 +1167,9 @@ if(length(vec.factor) > 0){
 		
 		time=as.double(time),
 		timedc=as.double(timedc),
-		time2=as.double(time2),
-	PACKAGE = "frailtypack")#63 arguments
+		time2=as.double(time2)
+		)#,
+	# PACKAGE = "frailtypack")#63 arguments
 
 
 	if (ans$critCV[2] == 4){

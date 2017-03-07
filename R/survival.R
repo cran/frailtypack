@@ -31,8 +31,8 @@ survival <- function(t,ObjFrailty){
 				}
 			}
 		}
-		out <- .Fortran("survival2",as.double(t),as.double(the),as.integer(nz+2),
-		as.double(zi),survival=as.double(rep(0,nst)),as.integer(nst),PACKAGE = "frailtypack")
+		out <- .Fortran(C_survival2,as.double(t),as.double(the),as.integer(nz+2),
+		as.double(zi),survival=as.double(rep(0,nst)),as.integer(nst))#,PACKAGE = "frailtypack")
 
 		res <- c(res,out$survival)
 		return(res)
@@ -48,9 +48,9 @@ survival <- function(t,ObjFrailty){
 			timedc <- ObjFrailty$timedc
 			if((ObjFrailty$xR[,1] > t) || (max(ObjFrailty$xSuR[,1]) < t)) stop(" Time exceeds the range allowed ")
 			if((ObjFrailty$xD > t) || (max(ObjFrailty$xSuD) < t)) stop(" Time exceeds the range allowed ")
-			out <- .Fortran("survivalj_cpm2",as.double(t),as.double(b),as.integer(nst+1),as.integer(ObjFrailty$nbintervR),
+			out <- .Fortran(C_survivalj_cpm2,as.double(t),as.double(b),as.integer(nst+1),as.integer(ObjFrailty$nbintervR),
 			as.integer(ObjFrailty$nbintervDC),as.double(time),as.double(timedc),
-			survival=as.double(rep(0,nst+1)),PACKAGE = "frailtypack")
+			survival=as.double(rep(0,nst+1)))#,PACKAGE = "frailtypack")
 
 			res <- c(res,out$survival)
 		}else{
@@ -59,8 +59,8 @@ survival <- function(t,ObjFrailty){
 			time <- ObjFrailty$time
 			if((ObjFrailty$x[,1] > t) || ((max(ObjFrailty$xSu[,1])+0.00001) < t)) stop(" Time exceeds the range allowed ")
 			if((ObjFrailty$n.strat == 2) && ((ObjFrailty$x[,2] > t) || (max(ObjFrailty$xSu[,2]) < t))) stop(" Time exceeds the range allowed ")
-			out <- .Fortran("survival_cpm2",as.double(t),as.double(b),as.integer(nst),as.integer(ObjFrailty$nbintervR),
-			as.double(time),survival=as.double(rep(0,nst)),PACKAGE = "frailtypack")
+			out <- .Fortran(C_survival_cpm2,as.double(t),as.double(b),as.integer(nst),as.integer(ObjFrailty$nbintervR),
+			as.double(time),survival=as.double(rep(0,nst)))#,PACKAGE = "frailtypack")
 
 			res <- c(res,out$survival)
 			

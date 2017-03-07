@@ -346,7 +346,7 @@
 !                       CALCUL DES RESIDUS de MARTINGALES  Joint Nested (AK 12/12/2016)
 !=============================================================================
     
-    subroutine ResidusMartingalej_fam(b,np,namesfuncres,Resmartingale,Resmartingaledc,&
+    subroutine ResidusMartingalej_fam(namesfuncres,Resmartingale,Resmartingaledc,&
                     frailtypred,frailtyvar,frailtypredind,frailtyvarind)
 
     use residusM
@@ -356,8 +356,8 @@
 
     implicit none
     
-    integer::i,j,np
-    double precision,dimension(np),intent(in)::b
+    integer::i,j!,np
+    !double precision,dimension(np),intent(in)::b
     double precision,external::namesfuncres
     double precision,dimension(ng),intent(out)::Resmartingale,Resmartingaledc
     double precision,dimension(ng),intent(out)::frailtypred,frailtyvar

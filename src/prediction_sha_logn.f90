@@ -2,7 +2,7 @@
 !AK 19/02/2015 shared log normal predictions and MC confidence bands
 ! ============================================== prediction Shared - logNormale
     
-    subroutine predict_LogN_sha(npred0,surv_s,surv_t,betapred,sigma2, &
+    subroutine predict_logn_sha(npred0,surv_s,surv_t,betapred,sigma2, &
         predAll,icproba,ntimeAll,nsample,sig2alea,surv_smc,surv_tmc, &
         betapredmc,predAlllow,predAllhigh)
     
@@ -61,7 +61,7 @@
 
     end do
  
-    end subroutine predict_LogN_sha
+    end subroutine predict_logn_sha
     
     
 !=========================
