@@ -1416,10 +1416,10 @@
     subroutine vraistotlong(ndim2,xea,nf2,funvls)
     
     use lois_normales
-    !use comon,only:cdc,datedc,vey,zidc,stra,ndatedc,t1dc,tttdc,all,etayr2,utt,
+    !use comon,only:cdc,datedc,vey,zidc,stra,ndatedc,t1dc,tttdc,all,etayr2,utt,the1_e
     use comon,only:typeof,nst,nbintervDC,nva,nz1, &
         date,ndate,nva1,nva2,vedc,t0,t1,&
-            nb_re,nva3,nz2,sigmae,the1_e,netar,&
+            nb_re,nva3,nz2,sigmae,netar,&
             alpha,etaydc2,effet,typeJoint,netadc,&
             etayr1,etaydc1,nbintervR,etaR,etaD,betaR,betaD,nsujet,&
             vals,ve,g,zi,ttt,c,npp,s_cag,s_cag_id,ut,nea
@@ -1789,7 +1789,7 @@
         !use donnees,only:x2,w2,x3,w3,
         use donnees,only:x9,w9
         !use comon,only:typeof,netadc,netar,effet
-        use donnees_indiv,only : frailpol,numpat
+        use donnees_indiv,only : frailpol!,numpat
         Implicit none
     
         double precision,intent(out)::ss
@@ -1897,7 +1897,7 @@
         double precision function func6Jcvpl(frail,choix)
     
         use tailles
-        use comongroup,only:vet,vet2
+        use comongroup,only:vet2!,vet
         !use comon,only:nea,date,auxig,alpha,sig2,res1,res3,aux1,nig,netar,utt,
         use comon,only:sigmae,&
             nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc1,link,&

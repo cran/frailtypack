@@ -2541,7 +2541,7 @@
 !==================================================================
 
     SUBROUTINE qgauss2N(a,b,ss) ! avec troncature
-    use comon,only:auxig
+    !use comon,only:auxig
     implicit none
 
     double precision::a,b,ss,func2N

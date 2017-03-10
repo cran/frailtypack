@@ -1,4 +1,4 @@
-prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditional=FALSE, MC.sample=0){
+prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditional=FALSE, MC.sample=0, individual){
 	# set.global <- function (x, value) { # Combinee a la fonction aggregate personnalisee, permet de tenir compte de variable dependantes du temps
 		# x <- deparse(substitute(x))
 		# assign(x, value, pos=.GlobalEnv)
@@ -12,7 +12,9 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		if (fit$joint.clust == 0) stop("Prediction method is not available for joint model for clustered data")
 		else if (fit$joint.clust == 2) stop("Prediction method is not available for joint general model")
 	}
-
+	
+	if ((class(fit) != "jointNestedPenal") && (!missing(individual))) warning("No need for 'individual' option to predict anything other than a joint nested model.")
+	
 	if (missing(data)) stop("Need data to do some predictions")
 
 	if (missing(data.Longi) & (class(fit)=="longiPenal") & (class(fit)=="trivPenal")) stop("Need data.Longi to do predictions")
@@ -32,6 +34,9 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	if (event.type == 0) {
 		stop("event must be 'Both', 'Terminal' or 'Recurrent'")
 	}
+	if (class(fit) == "jointNestedPenal"){
+		if(!missing(event) && (event.type != 2)) stop ("Only 'Terminal' event is allowed for a joint nested frailty modeling of parameters")
+	}	
 	
 	if ((MC.sample < 0) | (MC.sample > 1000))  stop("MC.sample needs to be positive integer up to 1000")
 
@@ -107,7 +112,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	m <- fit$call
 	m2 <- match.call()
 
-	m$formula.terminalEvent <- m$formula.LongitudinalData <- m$data.Longi <- m$random <- m$id  <- m$link <- m$left.censoring <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$init.Random <- m$init.Eta <- m$Alpha <- m$method.GH <- m$intercept <- m$n.nodes <- m$jointGeneral <- m$... <- NULL
+	m$formula.terminalEvent <- m$formula.LongitudinalData <- m$data.Longi <- m$random <- m$id  <- m$link <- m$left.censoring <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$init.Random <- m$init.Eta <- m$Alpha <- m$method.GH <- m$intercept <- m$n.nodes <- m$jointGeneral <- m$initialize <- m$... <- NULL
 		
 	m[[1]] <- as.name("model.frame")
 	m3 <- m # pour recuperer les donnees du dataset initial en plus
@@ -417,7 +422,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		m3 <- fit$call
 		m2 <- match.call()
 
-		m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$jointGeneral <- m3$... <- NULL
+		m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$jointGeneral <- m3$initialize <- m3$... <- NULL
 
 		m3$formula <- formula_fit
 		m3$formula[[3]] <- fit$formula.terminalEvent[[2]]		
@@ -1523,164 +1528,202 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	####-*-*-*-*-Prediction pour un Joint Nested Model-*-*-*-*-*-####
 	####*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*####
 		
-	# # # # # }else if (class(fit) == "jointNestedPenal"){	
-		# # # # # nst <- 2
-		# # # # # indID <- 2
-		# # # # # famID <- 5
+	}else if (class(fit) == "jointNestedPenal"){
+		nst <- 2
+		indID <- 2
 		
-		# # # # # # predtimerec <- predtimerec[order(unique(cluster)),]
-		# # # # # taille = 0
-		# # # # # listPrec <- NULL  
-		# # # # # for (k in 1:npred){
-			# # # # # tPrec <- which(predtimerec[k,] < predTime)   
-			# # # # # if (length(tPrec) == 0) tPrec <- taille + 1 
-			# # # # # tPrec <- taille + length(tPrec)  
+		# predtimerec <- predtimerec[order(unique(cluster)),]
+		taille = 0
+		listPrec <- NULL  
+		for (k in 1:npred){
+			tPrec <- which(predtimerec[k,] < predTime)   
+			if (length(tPrec) == 0) tPrec <- taille + 1 
+			tPrec <- taille + length(tPrec)  
 			
-			# # # # # rowTimes <- predtimerec[k,][which(!is.na(predtimerec[k,]))]
-			# # # # # if (length(rowTimes)==0) rowTimes <- 1
-			# # # # # taille = length(rowTimes)+taille
-			# # # # # listPrec <- c(listPrec,tPrec)                				
-		# # # # # }		
-		# # # # # predtimerec <- replace(predtimerec, is.na(predtimerec),0)
+			rowTimes <- predtimerec[k,][which(!is.na(predtimerec[k,]))]
+			if (length(rowTimes)==0) rowTimes <- 1
+			taille = length(rowTimes)+taille
+			listPrec <- c(listPrec,tPrec)                				
+		}		
+		predtimerec <- replace(predtimerec, is.na(predtimerec),0)
 		
-		# # # # # # X <- X[order(cluster),]
 		
-		# # # # # vaxpred <- X[,-c(1,2), drop=FALSE]		
+		# X <- X[order(cluster),]
 		
-		# # # # # m3 <- fit$call
-		# # # # # m2 <- match.call() # formule appelee pour prediction()
+		vaxpred <- X[,-c(1,2), drop=FALSE]		
 		
-		# # # # # m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$... <- NULL
+		m3 <- fit$call
+		m2 <- match.call() # formule appelee pour prediction()
 		
-		# # # # # mPred <- m3
-		# # # # # m3$formula <- formula_fit
-		# # # # # # mPred$formula <- fit$call[[2]][[3]][[3]]
-		# # # # # m3$formula[[3]][[2]] <- fit$formula.terminalEvent[[2]]				
-		# # # # # m3$formula.terminalEvent <- NULL
-		# # # # # m3[[1]] <- as.name("model.frame")
-		# # # # # m3[[3]] <- as.name(m2$data)
+		m3$formula.LongitudinalData <- m3$data.Longi <- m3$random <- m3$id <- m3$link <- m3$left.censoring <- m3$n.knots <- m3$recurrentAG <- m3$cross.validation <- m3$kappa <- m3$maxit <- m3$hazard <- m3$nb.int <- m3$RandDist <- m3$betaorder <- m3$betaknots <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$init.Theta <- m3$init.Alpha <- m3$Alpha <- m3$init.Random <- m3$init.Eta <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$jointGeneral <- m3$initialize <- m3$... <- NULL
+		
+		mPred <- m3
+		m3$formula <- formula_fit
+		# mPred$formula <- fit$call[[2]][[3]][[3]]
+		m3$formula[[3]][[2]] <- fit$formula.terminalEvent[[2]]				
+		m3$formula.terminalEvent <- NULL
+		m3[[1]] <- as.name("model.frame")
+		m3[[3]] <- as.name(m2$data)
 
-		# # # # # temp <- as.character(m3$formula[[2]])
+		temp <- as.character(m3$formula[[2]])
 		
-		# # # # # if (temp[1]=="Surv"){
-			# # # # # if (length(temp) == 4) m3$formula[[2]] <- as.name(temp[3])
-			# # # # # else if (length(temp) == 3) m3$formula[[2]] <- as.name(temp[2])
-			# # # # # else stop("Wrong Surv function")
-		# # # # # }else{ # SurvIC
-			# # # # # if (length(temp) == 4) m3$formula[[2]] <- as.name(temp[2])
-			# # # # # else if (length(temp) == 5) m3$formula[[2]] <- as.name(temp[3])
-			# # # # # else stop("Wrong SurvIC function")
-		# # # # # }
-		# # # # # datasetdc <- eval(m3, sys.parent())		
+		if (temp[1]=="Surv"){
+			if (length(temp) == 4) m3$formula[[2]] <- as.name(temp[3])
+			else if (length(temp) == 3) m3$formula[[2]] <- as.name(temp[2])
+			else stop("Wrong Surv function")
+		}else{ # SurvIC
+			if (length(temp) == 4) m3$formula[[2]] <- as.name(temp[2])
+			else if (length(temp) == 5) m3$formula[[2]] <- as.name(temp[3])
+			else stop("Wrong SurvIC function")
+		}
+		datasetdc <- eval(m3, sys.parent())		
 		
-		# # # # # class(m3$formula) <- "formula"
-		# # # # # special2 <- c("strata", "timedep")				
-		# # # # # Terms2 <- terms(m3$formula, special2, data = data)		
-		# # # # # X2 <- model.matrix(Terms2, datasetdc)			
+		class(m3$formula) <- "formula"
+		special2 <- c("strata", "timedep")				
+		Terms2 <- terms(m3$formula, special2, data = data)		
+		X2 <- model.matrix(Terms2, datasetdc)			
 		
-		# # # # # icdc <- X2[,ncol(X2)]		
-		# # # # # tt1dc <- aggregate(gap, by = list(subcluster), sum)[-1][,1]
+		icdc <- X2[,ncol(X2)]		
+		tt1dc <- aggregate(gap, by = list(subcluster), sum)[-1][,1]
 		
-		# # # # # icdcT <- aggregate(icdc, by = list(subcluster), FUN = function(x){x[length(x)]})[-1]
+		icdcT <- aggregate(icdc, by = list(subcluster), FUN = function(x){x[length(x)]})[-1]
 			
-		# # # # # for (i in 1:length(icdcT)){if (tt1dc[i] > t) icdcT[i] <- 0}
+		for (i in 1:length(icdcT)){if (tt1dc[i] > t) icdcT[i] <- 0}
 		
-		# # # # # tt1dc <- sapply(tt1dc, FUN = function(x,tpred=t){
-                                    # # # # # if(x > tpred){tpred} 
-                                    # # # # # else{x}
-                                    # # # # # }, simplify=TRUE)
+		tt1dc <- sapply(tt1dc, FUN = function(x,tpred=t){
+                                    if(x > tpred){tpred} 
+                                    else{x}
+                                    }, simplify=TRUE)
 									
-		# # # # # if (ncol(X2) > 1) X2 <- X2[, -1, drop = FALSE]	
-		# # # # # X2 <- X2[, -(ncol(X2)), drop = FALSE]		
+		if (ncol(X2) > 1) X2 <- X2[, -1, drop = FALSE]	
+		X2 <- X2[, -(ncol(X2)), drop = FALSE]		
 		
-		# # # # # vaxdcpred <- aggregate(X2, by = list(subcluster), FUN = function(x){x[1]})[-1] 
-		# # # # # # X2 <- X2[order(cluster),]
-		# # # # # # vaxdcpred <- X2[listPrec,]	
-		# # # # # icT <- ic		
-		# # # # # for (i in 1:length(icT)){
-			# # # # # if (gap[i] > t) icT[i] <- 0
-			# # # # # }
+		vaxdcpred <- aggregate(X2, by = list(subcluster), FUN = function(x){x[1]})[-1] 
+		# X2 <- X2[order(cluster),]
+		# vaxdcpred <- X2[listPrec,]	
+		icT <- ic		
+		for (i in 1:length(icT)){
+			if (gap[i] > t) icT[i] <- 0
+			}
 		
-		# # # # # tt1gap <- gap		
-		# # # # # indiv <- subcluster[1]
+		tt1gap <- gap		
+		indiv <- subcluster[1]
 		
-		# # # # # for (i in 2:length(tt1gap)){
-            # # # # # if (subcluster[i] == indiv){
-                # # # # # tt1gap[i] <- tt1gap[i-1]+tt1gap[i]					
-            # # # # # }else{
-                # # # # # indiv = subcluster[i]
-            # # # # # }
-        # # # # # }	
+		for (i in 2:length(tt1gap)){
+            if (subcluster[i] == indiv){
+                tt1gap[i] <- tt1gap[i-1]+tt1gap[i]					
+            }else{
+                indiv = subcluster[i]
+            }
+        }	
 		
-		# # # # # tt1T <- gap 
-		# # # # # indiv <- subcluster[1]
-		# # # # # cpt <- 1
-		# # # # # for (i in 1: length(tt1T)){
-			# # # # # if (indiv == subcluster[i]){
-				# # # # # if(i == 1){
-					# # # # # if(tt1T[i] > t) tt1T[i] <- t 
-				# # # # # }else{
-					# # # # # if(tt1gap[i] > t){
-						# # # # # if ((icT[i-1] == 1)&&(icT[i] == 0)) tt1T[i] <- t-tt1gap[i]
-						# # # # # else tt1T[i] <- 0
-					# # # # # } 
-				# # # # # }
-				# # # # # cpt <- cpt+1
-			# # # # # }else{
-				# # # # # if(tt1T[i] > t) tt1T[i] <- t
-				# # # # # indiv <- subcluster[i]
-			# # # # # }
-		# # # # # }
-		# # # # # nrecT <- unlist(aggregate(icT, by = list(subcluster), FUN = sum)[,-1])
+		tt1T <- gap 
+		indiv <- subcluster[1]
+		cpt <- 1
+		for (i in 1: length(tt1T)){
+			if (indiv == subcluster[i]){
+				if(i == 1){
+					if(tt1T[i] > t) tt1T[i] <- t 
+				}else{
+					if(tt1gap[i] > t){
+						if ((icT[i-1] == 1)&&(icT[i] == 0)) tt1T[i] <- t-tt1gap[i]
+						else{
+							tt1T[i] <- 0
+							vaxpred[i,] <- 0
+							}
+					} 
+				}
+				cpt <- cpt+1
+			}else{
+				if(tt1T[i] > t) tt1T[i] <- t
+				indiv <- subcluster[i]
+			}
+		}
+		nrecT <- unlist(aggregate(icT, by = list(subcluster), FUN = sum)[,-1])	
 		
-		# # # # # ans <- .Fortran("predictfam",
-			# # # # # as.integer(fit$npar),
-			# # # # # as.double(fit$b),
-			# # # # # as.integer(fit$n.knots.temp),
-			# # # # # as.integer(fit$nbintervR),
-			# # # # # as.integer(fit$nbintervDC),
-			# # # # # as.integer(fit$nvarRec),
-			# # # # # as.integer(fit$nvarEnd),
-			# # # # # as.integer(nst),
-			# # # # # as.integer(fit$typeof),
-			# # # # # as.double(fit$zi),
-			# # # # # as.double(fit$varHIHtotal),
-			# # # # # as.integer(indID), 
-			# # # # # as.double(tt1T), 
-			# # # # # as.double(tt1dc), 
-			# # # # # as.integer(unlist(icdcT)), 
-			# # # # # as.integer(nrow(data)), 
-			# # # # # as.integer(npred), 
-			# # # # # as.integer(window), 
-			# # # # # as.integer(5), 
-			# # # # # as.integer(nrecList), 
-			# # # # # as.integer(nrecT), 
-			# # # # # as.double(as.matrix(vaxpred)),
-			# # # # # as.double(as.matrix(vaxdcpred)), 
-			# # # # # as.integer(ICproba), 
-			# # # # # as.integer(MC.sample),
-			# # # # # predAll=as.double(0), 
-			# # # # # predAlllow=as.double(0), 
-			# # # # # predAllhigh=as.double(0), 
-			# # # # # as.double(0), 
-			# # # # # as.double(0),
-			# # # # # pred = as.double(matrix(0,nrow=npred,ncol=ntimeAll)),
-			# # # # # PACKAGE = "frailtypack" ) #31 arguments
+		out <- NULL	
+		out$pred <- NULL
+		out$predLow <- NULL
+		out$predHigh <- NULL
+		VecIND <- NULL
+		
+		for (i in individual){	
 
-		# # # # # out <- NULL
-		# # # # # out$pred <- ans$predAll			
-		# colnames(out$pred) <- paste("time=", t)
+			indiceID <- which(as.integer(names(nrecList))==i)
+			ans <- .Fortran(C_predictfam,
+				as.integer(fit$npar),
+				as.double(fit$b),
+				as.integer(fit$n.knots.temp),
+				as.integer(fit$nvarRec),
+				as.integer(fit$nvarEnd),
+				as.integer(nst),
+				as.integer(fit$typeof),
+				as.double(fit$zi),
+				as.double(fit$varHIHtotal),
+				as.integer(indiceID), 
+				as.double(tt1T), 
+				as.double(tt1dc), 
+				as.integer(unlist(icdcT)),
+				as.integer(ntimeAll),
+				as.integer(nrow(data)),			
+				as.integer(npred), 
+				as.double(window), 
+				as.integer(max(nrecList)), 
+				as.integer(nrecList), 
+				as.integer(nrecT), 
+				as.double(as.matrix(vaxpred)),
+				as.double(as.matrix(vaxdcpred)), 
+				as.integer(ICproba), 
+				as.integer(MC.sample),	
+				predAll=as.double(matrix(0,nrow=1,ncol=ntimeAll)), 
+				predAlllow=as.double(matrix(0,nrow=1,ncol=ntimeAll)), 
+				predAllhigh=as.double(matrix(0,nrow=1,ncol=ntimeAll)), 
+				as.double(0), 
+				as.double(0),
+				pred = as.double(matrix(0,nrow=1,ncol=ntimeAll))
+				)
+				# PACKAGE = "frailtypack" )#31 arguments
+				
+			out$pred <- rbind(out$pred,ans$predAll)
+			out$predLow <- rbind(out$predLow,ans$predAlllow)
+			out$predHigh <- rbind(out$predHigh, ans$predAllhigh)
+			
+			VecIND <- c(VecIND, indiceID)
+			print(VecIND)
+		}
 		
-		# if (ICproba){
-			# out$predLow <- ans$predAlllow
-			# out$predHigh <- ans$predAllhigh
-			# colnames(out$predLow) <- paste("time=", t)
-			# rownames(out$predLow) <- paste("ind",1:npred)
-			# colnames(out$predHigh) <- paste("time=", t)
-			# rownames(out$predHigh) <- paste("ind",1:npred)
-		# }		
-	}
-	
-	
+		out$call <- match.call()
+		out$name.fit <- match.call()[[2]]
+		out$npred <- length(individual)
+		out$window <- window
+		out$moving.window <- moving.window
+		
+		out$nrecList <- nrecList
+		out$nrecT <- nrecT
+		
+		if (moving.window){
+			out$x.time <- timeAll
+			out$t <- predTime
+		}else{
+			out$x.time <- timeAll - window
+		} 
+		
+		colnames(out$pred) <- paste("time=", out$x.time)
+		rownames(out$pred) <- paste("ind", individual)
+		out$icproba <- ICproba
+		
+		if (ICproba){
+			colnames(out$predLow) <- paste("time=", out$x.time)
+			rownames(out$predLow) <- paste("ind",individual)
+			colnames(out$predHigh) <- paste("time=", out$x.time)
+			rownames(out$predHigh) <- paste("ind",individual)
+		}
+		
+		print(VecIND)
+		out$predtimerec <- rbind(NULL, predtimerec[VecIND,])		
+		out$group <- individual		
+		cat("Predictions done for",out$npred,"subjects and",ntimeAll,"times \n")
+		class(out) <- "predJointNested"		
+	}	
 	out
 } 

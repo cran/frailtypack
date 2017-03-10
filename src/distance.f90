@@ -1575,9 +1575,8 @@
     subroutine distancejcpm(b,m,mt1,mt2,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC)
 
     use tailles
-    !use comon,only:c,nsujet,t0,t1,nva1,nva2,cdc,t0dc,t1dc,cens,nva
-    use comon,only:vvv,nst,nbintervR,nbintervDC,&
-    ttt,tttDC,date,nstRec
+    !use comon,only:c,nsujet,t0,t1,nva1,nva2,cdc,t0dc,t1dc,cens,nva,nst
+    use comon,only:vvv,nbintervR,nbintervDC,ttt,tttDC,date,nstRec
     use optim
 
     implicit none
@@ -2272,8 +2271,8 @@
     
     use taillesmultiv
     !use comonmultiv,only:c,nsujet,t0,t1,nva1,nva2,t0dc,t1dc,t0meta,cens,&
-    !t1meta,cdc,nsujetmeta,cmeta,nva3,nva
-    use comonmultiv,only:vvv,nst,nbintervR,nbintervDC,&
+    !t1meta,cdc,nsujetmeta,cmeta,nva3,nst,nva
+    use comonmultiv,only:vvv,nbintervR,nbintervDC,&
     nbintervM,ttt,tttDC,tttmeta,date
     use optim
     
@@ -3259,8 +3258,8 @@
         subroutine distanceLongiweib(b,m,mt,xR2,moyLamR2,xSu2,moysuR2)
     
         use tailles
-        !use comon,only:nva1,nva2,nva3,t0dc,t1dc,cdc,ng,typeof2,nva
-        use comon,only:cens,vvv,nst,etaD,betaD,datedc,mint
+        !use comon,only:nva1,nva2,nva3,t0dc,t1dc,cdc,ng,typeof2,nst,nva
+        use comon,only:cens,vvv,etaD,betaD,datedc,mint
         use optim
     
         implicit none

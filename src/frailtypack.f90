@@ -24,13 +24,13 @@
     icen,irep1,nvacross,nstcross,effetcross,mt,mt1,p
 
     integer::ss,sss,noVar,AGAux,maxitAux,nsujetAux,ngAux,icenAux,nstAux,effetAux, &
-    nzAux,nvaAux,intcensAux
+    nzAux,nvaAux,intcensAux,str
 
     integer,dimension(nvaAux)::filtre
     integer,dimension(nsujetAux)::stracross
     double precision,dimension(nvaAux)::vax
     double precision::tt0,tt1,ttU
-    double precision::h,res,min,max,maxt,str,pord !,scoreT,scoretest
+    double precision::h,res,min,max,maxt,pord !,scoreT,scoretest
     double precision,dimension(2)::auxkappa,k0,res01
     double precision,dimension(3*nsujetAux)::aux
     double precision,dimension(np*(np+3)/2)::v

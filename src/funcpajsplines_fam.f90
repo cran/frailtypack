@@ -13,7 +13,7 @@
     fam,nfam,fsize,indic_xi, xi, eta, & !for family 
     aux1,aux2,res1,res3,kkapa,resnonpen 
     use residusM
-    use comongroup,only:vet,vet2,the1,the2
+    use comongroup,only:vet,vet2,the2!,the1
 
     IMPLICIT NONE
 
@@ -27,7 +27,8 @@
     integer::n,i,j,k,vj,ig,choix,jj
     integer,dimension(ngmax)::cpt
     double precision::pe2,sum,som2,res,h1
-!deleted unused inv argument %myriam!added inv2 for 1/eta
+!deleted unused inv argument %myriam
+!added inv2 for 1/eta
 !deleted unused inv2 argument %myriam
     double precision,dimension(nstRec)::pe1T,som1T
     double precision,dimension(np)::bh

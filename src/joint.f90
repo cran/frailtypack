@@ -2125,7 +2125,7 @@
 
     use tailles
 
-    use comon,only:date,datedc,zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    use comon,only:zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m!date,datedc
 
     IMPLICIT NONE
 

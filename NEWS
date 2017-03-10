@@ -1,3 +1,6 @@
+Changes in Version 2.11.0 March 2017
+ o NEW : Marginal prediction method in the Joint Nested Frailty model, only for terminal event.
+
 Changes in Version 2.10.6 March 2017
 
  o Bug fixed in the conditional prediction for shared frailty model. 

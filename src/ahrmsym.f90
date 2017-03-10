@@ -614,7 +614,7 @@
 !     Computes product integration rule
 !
         external::funsub
-        integer::ndim,np,numfun,ici,i
+        integer::ndim,np,numfun,i,ici
         double precision::wtprod
         double precision,dimension(*)::point,weight,intval,x,funs,ic
 

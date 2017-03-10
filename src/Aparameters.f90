@@ -128,7 +128,7 @@
     double precision,save::vet3
 !***** random effects
         double precision,dimension(:,:),allocatable,save :: ziy,ziyd,ziyr!random effects for y
-         double precision,save :: sigmae                         !sigma of epsilon
+         double precision,save :: sigmae                        !sigma of epsilon
         double precision,save :: etaydc1, etaydc2,etayr1,etayr2                 !reg coef for link functions
         integer,save :: nb_re,netar,netadc
         integer,save :: linkidyr,linkidyd,link

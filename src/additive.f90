@@ -47,13 +47,13 @@
     double precision::xmin10,xmin20
     double precision,dimension(np)::b
 !------------------
-    real::tt0,tt1
+    double precision::tt0,tt1
     integer,dimension(nva0)::filtre,filtre2
     double precision::xmin1,xmin2,res,min,max,maxt,pord, &
     lrs,trace,trace1,trace2,auxi,ax,bx,cx,tol,ddl, &
     fa,fb,fc,goldenadd,estimvadd,f1,f2,f3,varcov    
     double precision,dimension(2):: auxkappa,k0 
-    real,dimension(:),allocatable::vax
+    double precision,dimension(:),allocatable::vax
     double precision::rhoEnd,covEnd,varcovEnd
     double precision,dimension(nva0)::coef,varcoef,varcoef2    
     double precision,dimension(2)::varSigma2,varTau2
@@ -1121,7 +1121,7 @@
     subroutine vecpenadd(n) 
     
     use tailles
-    use comon,only:zi,date,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m
+    use comon,only:zi,m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m!date
     
     implicit none
     

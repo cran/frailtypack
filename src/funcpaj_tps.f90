@@ -6,8 +6,8 @@
     !use comon,only:mm3,mm2,mm1,mm,im3,im2,im1,im,nva1,nva2,res4,ve,vedc
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m,nva, &
     t0,t1,t0dc,t1dc,c,cdc,nsujet, &
-    nst,effet,stra,ng,g,nig,AG,kkapa,indic_alpha,alpha,theta, &
-    auxig,aux1,aux2,res1,res3,typeof,pe,resnonpen
+    nst,effet,ng,g,nig,kkapa,indic_alpha,alpha,theta, &
+    auxig,aux1,aux2,res1,res3,typeof,pe,resnonpen!,stra,AG
     use residusM
     use betatttps
 

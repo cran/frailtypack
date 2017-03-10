@@ -5,9 +5,10 @@
     use tailles
     use comon,only:m3m3,m2m2,m1m1,mmm,m3m2,m3m1,m3m,m2m1,m2m,m1m, &
     mm3,mm2,mm1,mm,im3,im2,im1,im,date,zi,pe,effet,nz1,nz2,stra, &
-    t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst,auxig,ng,ve,g,nig,indictronq,resnonpen,indic_tronc
+    c,nt0,nt1,nsujet,nva,ndate,nst,auxig,ng,ve,g,nig,indictronq, &
+     resnonpen,indic_tronc!,t0,t1
     use additiv,only: &
-    dut1,dut2,ut1,ut2,correl,ngexact,ve2,sigma2,tau2,rho,cov,mid,betaaux,invD
+    dut1,dut2,ut1,ut2,correl,ngexact,ve2,sigma2,tau2,cov,mid,betaaux!,invD,rho
     use residusM,only:som_Xbeta
 
     implicit none
@@ -561,8 +562,8 @@
     subroutine distanceasplines(nz1,nz2,b,effet,x1Out,lamOut,suOut,x2Out,lam2Out,su2Out)
 
     use tailles
-    use comon,only:zi,date,t0,t1,c,nt0,nt1,nsujet,nva,ndate,nst, &
-    PEN_deri,I_hess,H_hess,Hspl_hess,hess
+    use comon,only:zi,nva,nst,H_hess
+    !use comon,only:c,date,hess,Hspl_hess,I_hess,ndate,nsujet,nt0,nt1,PEN_deri,t0,t1
 
     implicit none
 

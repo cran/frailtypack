@@ -401,7 +401,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                         epoir=as.double(rep(0,nt)),
                         contribt=as.double(rep(0,nt*nsujet)),
                         atrisk=as.double(rep(0,nt))
-						)
+		       )
 }else{
 #  cat('logn...')
   ans <- .Fortran(C_cvpl_logn,
@@ -434,7 +434,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                   epoir=as.double(rep(0,nt)),
                   contribt=as.double(rep(0,nt*nsujet)),
                   atrisk=as.double(rep(0,nt))
-				  )
+	         )
 				  
   }}else if(class(fit) == "longiPenal"){
 
@@ -477,7 +477,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                     epoir=as.double(rep(0,nt)),
                     contribt=as.double(rep(0,nt*nsujet)),
                     atrisk=as.double(rep(0,nt))
-					)
+		   )
 
   }else if(class(fit) == "trivPenal"){
 
@@ -521,7 +521,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                     epoir=as.double(rep(0,nt)),
                     contribt=as.double(rep(0,nt*nsujet)),
                     atrisk=as.double(rep(0,nt))
-					)
+		   )
 
   }
         out <- NULL

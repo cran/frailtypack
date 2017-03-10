@@ -114,7 +114,7 @@
     !use comon,only: c,cdc,Hspl_hess,indic_eta,ndate,ndatedc,nst,nsujet,&
     !nt0,nt0dc,nt1,nt1dc,nva1,nva2,PEN_deri,t0,t0dc,t1,t1dc
     use comon,only:nva,model,I_hess,H_hess,hess,indic_ALPHA,&
-    typeof,vvv,indic_tronc
+    typeof,vvv!,indic_tronc
 
 !add additive
     !use additiv,only:correl
@@ -508,7 +508,7 @@
 
     subroutine derivaJ(b,m,v,rl,k0,fctnames)
     !use comon,only:nst,k0T
-    use comon,only:model,nstRec, indic_tronc
+    use comon,only:model!,nstRec, indic_tronc
     implicit none
 
     integer,intent(in)::m

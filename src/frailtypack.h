@@ -154,6 +154,15 @@ F77_SUB(predict_biv)(int *np, double *b, int *nz, int *nva20, int *nva30, int *n
 						int *nsample, int *movingwindow, double *timeAll, int *s_cag_id0, double *s_cag0);
 						
 void 
+F77_SUB(predictfam)(int *np, double *b, int *nz, int *nbintervR, int *nbintervDC, int *nva1, 
+						int *nva2, int *nst, int *typeof0, double *zi, double *HIHOut,
+						int *indID, double *tt1T, double *tt1dcT, int *icdctime, int *ntimeAll,  
+						int *nsujet, int *npred0, double *window, int *nrec0, int *nrec, int *nrecT, 
+						double *vaxpred0, double *vaxdcpred0, int *icproba, int *nsample,
+						double *predAll, double *predIClow, double *predIChigh, double *frailfam0,  
+						double *frailind0, double *pred);
+						
+void 
 F77_SUB(predict_logn_sha)(int *npred0, double *surv_s, double *surv_t, double *betapred, 
 						double *sigma2, double *predAll, int *icproba, int *ntimeAll, 
 						int *nsample, double *sig2alea, double *surv_smc, double *surv_tmc,

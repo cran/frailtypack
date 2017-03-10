@@ -33,6 +33,8 @@ S3method(print,Cmeasures)
 
 S3method(plot,predJoint)
 S3method(print,predJoint)
+S3method(print,predJointNested)
+S3method(plot,predJointNested)
 S3method(print,predFrailty)
 S3method(plot,predFrailty)
 S3method(print,predLongi)

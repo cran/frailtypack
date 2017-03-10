@@ -1018,6 +1018,7 @@
 				tt1.death <- 0
 				tt0.death <- 0
 			  
+			  # prendre en compte seulement un evenement pour le joint cluster
 				tt0 <- aggregate(tt0,by=list(num.id),FUN=function(x) x[1])[,2]
 				tt1 <- aggregate(tt1,by=list(num.id),FUN=function(x) x[1])[,2]
 				ttU <- aggregate(ttU,by=list(num.id),FUN=function(x) x[1])[,2]
@@ -1047,7 +1048,8 @@
 				lignedc0 <- 0
 				tempdc <- 0
 			  
-			  	tt0 <- aggregate(tt0,by=list(cluster),FUN=function(x) x[1])[,2]
+			  # prendre en compte seulement un evenement pour le joint
+				tt0 <- aggregate(tt0,by=list(cluster),FUN=function(x) x[1])[,2]
 				tt1 <- aggregate(tt1,by=list(cluster),FUN=function(x) x[1])[,2]
 				ttU <- aggregate(ttU,by=list(cluster),FUN=function(x) x[1])[,2]
 				cens <- aggregate(cens,by=list(cluster),FUN=function(x) x[1])[,2]

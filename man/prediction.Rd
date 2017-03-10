@@ -11,6 +11,7 @@ A predictive probability of event between t and horizon time t+w, with w the win
 
 \deqn{P(t,t+w)=\frac{S_i(t)-S_i(t+w)}{S_i(t)}=1-\left(\frac{S_0(t+w)}{S_0(t)}\right)^{\exp(\beta'Z_i)}}
 
+
 \bold{For Gamma Shared Frailty model for clustered (not recurrent) events}
 
 Two kinds of predictive probabilities can be calculated:
@@ -22,6 +23,7 @@ Two kinds of predictive probabilities can be calculated:
 - a marginal predictive probability of event between t and horizon time t+w, i.e. averaged over the population
 
 \deqn{P^{marg}(t,t+w)=1-\left(\frac{1+\theta H_0(t)\exp(\beta'Z_{ij})}{1+\theta H_0(t+w)\exp(\beta'Z_{ij})}\right)^{1/ \theta}}
+
 
 \bold{For Gaussian Shared Frailty model for clustered (not recurrent) events}
 
@@ -35,6 +37,7 @@ Two kinds of predictive probabilities can be calculated:
 
 \deqn{P^{marg}(t,t+w)=\frac{\int_{-\infty}^{+\infty}(S_{ij}(t|\eta_i)-S_{ij}(t+w|\eta_i))g(\eta)d\eta}{\int_{-\infty}^{+\infty}S_{ij}(t)g(\eta)d\eta}}
 
+
 \bold{For Gamma Shared Frailty model for recurrent events}
 
 Two kinds of predictive probabilities can be calculated:
@@ -46,6 +49,7 @@ Two kinds of predictive probabilities can be calculated:
 - a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific individual. 
 
 This prediction method is the same as the conditional gamma prediction method applied for clustered events (see formula \deqn{P^{cond}} before). 
+
 
 \bold{For Gaussian Shared Frailty model for recurrent events}
 
@@ -62,6 +66,7 @@ This prediction method is the same as the conditional gaussian prediction method
 It is possible to compute all these predictions in two ways on a scale of times :
 - either you want a cumulative probability of developping the event between t and t+w (with t fixed, but with a varying window of prediction w);
 - either you want at a specific time the probability to develop the event in the next w (ie, for a varying prediction time t, but for a fixed window of prediction). See Details.
+
 
 \bold{For Joint Frailty model}
 
@@ -98,6 +103,27 @@ It is possible to compute all these predictions in two ways :
 
 With Gaussian frailties (\eqn{\eta}), the same expressions are used but with \eqn{{u_i}^{J}} replaced by \eqn{\exp(J\eta_i)} and  \eqn{g(\eta)} corresponds to the gaussian distribution.
 
+
+\bold{For Joint Nested Frailty models}
+
+Prediction of the probability of developing a terminal event between t and t+w for subject i who survived by time t based on the visiting and disease histories of their own and other family members observed by time t. 
+
+Let (\eqn{Y_{fi}^R(t)}) be the history of subject \eqn{i} in family \eqn{f}, before time \eqn{t}, which includes all the recuurent events and covariate information. For disease history, let \eqn{T_{fi}^D(t) = min(T_{fi},t)} be the observed time to an event before t ; \eqn{\delta_{fi}^D(t)} the disease indicador by time \eqn{t} and \eqn{X_{fi}^D(t)} the covariate information observed up to time t.
+We define the family history of subject \eqn{i} in family \eqn{f} by 
+\deqn{H_{f(-i)}(t) = \{Y_{fl}^R(t), T_{fl}^D(t), \delta_{fl}^D(t), X_{fl}^D(t), \forall l \in \{1, ..., i-1, i+1, ..., m_f \}\} }
+
+which includes the visiting and disease history af all subjects except for subject \eqn{i} in family \eqn{f} as well as their covariate information by time \eqn{t}.
+
+The prediction probability can be written as :
+
+\deqn{
+P(T_{fi}^D < t+s|T_{fi}^D > t, Y_i(t), H_{(f-i)}(t)) = }
+
+\deqn{
+\frac{ \int \int P(t<T_{fi}^D < t+s| X_{fi}^D, \omega_{fi}) P(Y_i(t)|X_{fi}^R(t), \omega_{i}) P(H_{f(-i)}(t)|X_{f(-i)}(t), \omega_{fi}) g_{ui} g_{\omega f} }{\int \int P(T_{fi}^D > t| X_{fi}^D, \omega_{fi}) P(Y_i(t)|X_{fi}^R(t), \omega_{i}) P(H_{f(-i)}(t)|X_{f(-i)}(t), \omega_{fi}) g_{ui} g_{\omega f} }
+}
+
+
 \bold{For Joint models for longitudinal data and a terminal event}
 
 The predicted probabilities are calculated in a specific time window given the history of biomarker measurements before the time of prediction t (\eqn{\mathcal{Y}_i(t)}). The probabilities are conditional also on covariates before time t and that the subject was at risk at t.
@@ -106,6 +132,7 @@ The predicted probabilities are calculated in a specific time window given the h
 \deqn{P(t,t+w)=P(D_i \le t+w|D_i>t,\mathcal{Y}_i(t))=\frac{\int_0^\infty[S_i^D(t)-S_i^D(t+w)]f(\mathcal{Y}_i(t)|\bold{X}_{Li},\bold{b}_i)f(\bold{b}_i)d\bold{b}_i}{\int_0^\infty S_i^D(t)f(\mathcal{Y}_i(t)|\bold{X}_{Li},\bold{b}_i)f(\bold{b}_i)d\bold{b}_i}}
 
 These probabilities can be calculated in several time points with fixed time of prediction t and varying window w or with fixed window w and varying time of prediction t. See Details for an example of how to construct time windows.
+
 
 \bold{For Trivariate joint models for longitudinal data, recurrent events and a terminal event}
 
@@ -127,7 +154,7 @@ These probabilities can be calculated in several time points with fixed time of 
 \usage{
 
 prediction(fit, data, data.Longi, t, window, event="Both",
- conditional = FALSE, MC.sample=0)
+ conditional = FALSE, MC.sample=0, individual)
 
 }
 
@@ -135,12 +162,13 @@ prediction(fit, data, data.Longi, t, window, event="Both",
   \item{fit}{A frailtyPenal or jointPenal object.}
   \item{data}{Dataframe for the prediction. See Details.}
   \item{data.Longi}{Dataframe for the prediction used for joint models with longitudinal data. See Details.}
-  \item{event}{Only for joint and shared models. The type of event you want to predict : "Terminal" for a terminal event, "Recurrent" for a recurrent event or "Both". Default value is "Both". 
+  \item{event}{Only for joint and shared models. The type of event you want to predict : "Terminal" for a terminal event, "Recurrent" for a recurrent event or "Both". Default value is "Both". For joint nested model, only 'Terminal' is allowed. 
   In a shared model, if you want to predict a new recurrent event then the argument "Recurrent" should be use. If you want to predict a new event from clustered data, do not use this option.}
   \item{t}{Time or vector of times for prediction.}
   \item{window}{Window or vector of windows for prediction.}
   \item{conditional}{Only for prediction method applied on shared models. Provides distinction between the conditional and marginal prediction methods. Default is FALSE.}
   \item{MC.sample}{Number of samples used to calculate confidence bands with a Monte-Carlo method (with a maximum of 1000 samples). If MC.sample=0 (default value), no confidence intervals are calculated.}
+  \item{individual}{Only for joint nested model. Vector of individuals (of the same family) you want to make prediction.}
 }
 
 \value{
@@ -502,6 +530,33 @@ t = seq(1, 2.5, 0.5), window = 0.5, MC.sample = 100)
 plot(pred.jointLongi2, conf.bands = TRUE)
 # each y-value of the plot corresponds to the prediction between [x,x+0.5], 
 or in the next 0.5
+
+#############################################################################
+##### marginal prediction on a JOINT NESTED model for a terminal event ######
+#############################################################################
+#*--Warning! You can compute this prediction method with ONLY ONE family 
+#*--by dataset of prediction. 
+#*--Please make sure your data frame contains a column for individuals AND a 
+#*--column for the reference number of the family chosen.
+
+data(readmission)
+readmissionNested <- transform(readmission,group=id\%\%30+1)
+
+#-- construction of the dataframe for predictions : 
+#-- family 5 was selected for the prediction
+
+DataPred <- readmissionNested[which(readmissionNested$group==5),]
+
+#-- Fitting the model
+modJointNested_Splines <- 
+frailtyPenal(formula = Surv(t.start, t.stop, event)~subcluster(id)+ 
+cluster(group) + dukes + terminal(death),formula.terminalEvent
+=~dukes, data = readmissionNested, recurrentAG = TRUE,n.knots = 8, 
+kappa = c(9.55e+9, 1.41e+12), initialize = TRUE)
+
+#-- Compute prediction over the individuals 274 and 4 of the family 5
+predRead <- prediction(modJointNested_Splines, data=DataPred,t=10.2, 
+window = seq(1,10,1), conditional=FALSE, individual = c(274, 4))
 
 
 ###################################################
