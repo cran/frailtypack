@@ -1,3 +1,6 @@
+Changes in Version 2.11.1 March 2017
+ o Warnings about native subroutine registry fixed
+
 Changes in Version 2.11.0 March 2017
  o NEW : Marginal prediction method in the Joint Nested Frailty model, only for terminal event.
 

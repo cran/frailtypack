@@ -50,8 +50,8 @@
     
      predAlllow = 0.d0
      predAllhigh = 0.d0 
-	 
-	typeof = typeof0
+     
+    typeof = typeof0
     
     coefBeta(1,:) = b((np-nva1-nva2+1):(np-nva2))
     coefBetadc(1,:) = b((np-nva2+1):np)
@@ -275,8 +275,8 @@
     XbetapredR, XbetapredDC,survR,survDC,survDCi, icdctime, nrec0,nrecT, npred0)
     ! calcul de l integrant (numerateur de la fonction de prediction)
     
-    use comon, only:typeof
-    use donnees, only:w,x,w1,x1
+    !use comon, only:typeof
+    use donnees, only:w1,x1!w,x
      
     implicit none
     
@@ -360,8 +360,8 @@
     XbetapredR, XbetapredDC,survR,survDC,survDCi, icdctime, nrec0,nrecT, npred0)
     ! calcul de l integrant (denominateur de la fonction de prediction)
     
-    use comon, only:typeof
-    use donnees, only:w,x,w1,x1
+    !use comon, only:typeof
+    use donnees, only:w1,x1!w,x,
      
     implicit none
     

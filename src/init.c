@@ -17,7 +17,7 @@ static const R_FortranMethodDef FortEntries[] = {
     {"nested",               (DL_FUNC) &F77_SUB(nested),               57},
     {"predict",              (DL_FUNC) &F77_SUB(predict),              43},
     {"predict_biv",          (DL_FUNC) &F77_SUB(predict_biv),          32},
-	{"predictfam",          (DL_FUNC) &F77_SUB(predictfam),          32},
+	{"predictfam",          (DL_FUNC) &F77_SUB(predictfam),          30},
     {"predict_logn_sha",     (DL_FUNC) &F77_SUB(predict_logn_sha),     15},
     {"predict_recurr_sha",   (DL_FUNC) &F77_SUB(predict_recurr_sha),   19},
     {"predict_tri",          (DL_FUNC) &F77_SUB(predict_tri),          38},

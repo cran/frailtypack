@@ -439,7 +439,7 @@ pred.joint2 <- prediction(joi,datapredj,t=seq(100,1000,50),
 window=500,event = "Terminal")
 plot(pred.joint2)
 # each y-value of the plot corresponds to the prediction between [x,x+500], 
-or in the next 500
+#or in the next 500
 
 #-- prediction of relapse between 100 and 100+w given relapses 
 (with confidence intervals)
@@ -529,7 +529,7 @@ pred.jointLongi2 <- prediction(model.spli.CL, datapredj, datapredj_longi,
 t = seq(1, 2.5, 0.5), window = 0.5, MC.sample = 100)
 plot(pred.jointLongi2, conf.bands = TRUE)
 # each y-value of the plot corresponds to the prediction between [x,x+0.5], 
-or in the next 0.5
+#or in the next 0.5
 
 #############################################################################
 ##### marginal prediction on a JOINT NESTED model for a terminal event ######

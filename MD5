@@ -1,6 +1,6 @@
-77a9b60ee67b59c1220bf93054880390 *DESCRIPTION
+b3a0f0ecdf2099d150eb169f5c8149c9 *DESCRIPTION
 34b20247ad55ec0f7624acfa8557272d *NAMESPACE
-7d2c239147d2905191898b26a9485fde *NEWS
+bfee16aebb8c9bb22b6881acf8e4a970 *NEWS
 7d0e5a93868a77976c232932b0a5cf3c *R/Cmeasures.R
 ea152fa392691f9b73e52466474ab42d *R/Diffepoce.R
 568ccb7a37705e70ed4b5259016fd74c *R/SurvIC.R
@@ -118,7 +118,7 @@ a6def62fbf0e745d65bbae2b5917534d *man/plotJointPenal.Rd
 2dbaf430308aa463e390c739f6241d85 *man/plotLongiPenal.Rd
 9dda4d82818e4b3bbb00de10948e72ba *man/plotNestedPenal.Rd
 bab175491c2966fcdfa0def52c0b7fd0 *man/plotTrivPenal.Rd
-90f81697fb3e909742253d2c24abdee4 *man/prediction.Rd
+c5d6ac2b463b0ebc5b6db127eb9ef3e4 *man/prediction.Rd
 66e0fbe84977b89a1548c9ac36d49bce *man/print.Cmeasures.Rd
 5d71930b4531bd0c0dae3bc5256df22b *man/print.multivPenal.Rd
 a63e28efa395a3ffbd574e1e3adcc673 *man/print.prediction.Rd
@@ -158,13 +158,12 @@ dab3acc9b4648109cbde82705912b853 *src/aaUseFunctionG.f90
 c80c462bd8ed37eaf28df9895da0021e *src/afuncpasres.f90
 ecf32cf9f7c5a27a419ed797d485fb07 *src/ahrmsym.f90
 7264dabce7c00272d0a92322129192ba *src/aresidusMartingale.f90
-8b34455605074913492e4bf2c6c4db09 *src/atestWald.f90
 0dfda0abc71e2b689de08e64ebb30f83 *src/distance.f90
 d9996e1965e51137a04562e8ef1ab012 *src/epoce.f90
 ab453cc268abe6b7cff0def8b479c4ab *src/epoce_log.f90
 62cee5a33813ea1196a613e9f437ace3 *src/epoce_long.f90
 58e270eb6d6043359af52f0066c16864 *src/frailtypack.f90
-bebe16b365d1f4d5e57243545e2c6b8c *src/frailtypack.h
+4bdd292d6338a69e687519a3cc1efc09 *src/frailtypack.h
 55c66453e5eea79af67cc7b76f846023 *src/funcpaG_tps.f90
 ad6572b00eaaadfaad287c5e347588cd *src/funcpaGcpm.f90
 0006d2d1d2f4acb4b0f7ec09089d1135 *src/funcpaGcpm_intcens.f90
@@ -208,7 +207,7 @@ a9066bca21aa072120e6bcb35e9e4566 *src/funcpascpm_intcens.f90
 11391184b35bf7db4f333fab0bbc7a7a *src/funcpasweib.f90
 e30e0e7d3062c50f7b1b6570be903a5d *src/funcpasweib_intcens.f90
 1417c892834f2fe6ad3205b4e622a1b4 *src/funcpasweib_log.f90
-1cbb0e72bf6f699857f161e594212c30 *src/init.c
+a648ae59f5f5f56d171e1a7ee5604ca9 *src/init.c
 ffa593faff07a21ed052edc70d43796c *src/joint.f90
 0f6c843319960a55f67edf2015f497bd *src/joint_longi.f90
 1792999dfdc6d2e484178461ccdcebbe *src/multiveJoint.f90
@@ -218,7 +217,7 @@ ffa593faff07a21ed052edc70d43796c *src/joint.f90
 9b797d21b5f8b1d577f334e50dd672c8 *src/prediction_biv.f90
 b7f00f0b3cbb4957f90cb745b94160ff *src/prediction_sha_logn.f90
 77ce815ca1abf240c497f6d21c9018b6 *src/prediction_tri.f90
-64add21ff85947a88b5d3a43589aee96 *src/predictionfam.f90
+55f26a16c1612ab500a9903fb7165ad9 *src/predictionfam.f90
 cecbe58ce72b3504d4164ecbc68b799d *src/risque.f90
 4049c2ade27987d57e8b0c3953beb24a *src/survival.f90
 68987efeb5143d163e5bf8eae76b6b53 *vignettes/Package_summary.Rmd
