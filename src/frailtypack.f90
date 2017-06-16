@@ -252,7 +252,7 @@
             ttU=ttUAux(i)
             ic=icAux(i)
             groupe=groupeAux(i)
-            str=strAux(i)
+            str=INT(strAux(i))
             
             do j=1,nva
                 vax(j)=vaxAux(i,j)

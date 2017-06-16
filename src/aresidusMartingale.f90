@@ -673,7 +673,7 @@
     use residusM
     use optimres
     !use comon,only:ut,utt,netadc
-    use comon,only:ng,nsujety,etaydc1,etaydc2,yy,nmesy,nb1,vey,varcov_marg,&
+    use comon,only:ng,nsujety,etaydc,yy,nmesy,nb1,vey,varcov_marg,&
     nva3,sum_mat,link,t1dc,vey,npp,res_ind
     use donnees_indiv,only:X2cur,Z1cur
     use optim
@@ -688,10 +688,10 @@
     double precision,dimension(nsujety),intent(out)::ResLongi_marg,ResLongi_chol,&
     ResLongi_cond,ResLongi_cond_st
     double precision,dimension(nsujety,2),intent(out)::Pred_yy
-    double precision,dimension(ng,3),intent(out)::re_pred
+    double precision,dimension(ng,nb1+1),intent(out)::re_pred
     double precision,dimension(nb1) ::zet_vec
     double precision,dimension(nb1) :: b_pred
-    double precision,dimension(3) :: vres_inv
+    double precision,dimension((nb1-1)*nb1/2+nb1) :: vres_inv
     double precision :: ep,eps
     double precision,dimension(nb1,nb1)::mat_vres_inv,mat_vres
     double precision,dimension(:,:),allocatable::v_rim,v_rim_chol,Varcov_inv,&
@@ -720,12 +720,11 @@
     vuu=0.1d0
         
     call marq98res(vuu,nb1,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
-    
+ 
         if (istopres.eq.1) then
                 if(link.eq.1) then
-                        if(nb1.eq.1)Residusdc(indg)=Ndc(indg)-(exp(etaydc1*vuu(1)))*Rdc(indg)
-                        if(nb1.eq.2)Residusdc(indg)=Ndc(indg)-(exp(etaydc1*vuu(1)&
-                                        +etaydc2*vuu(2)))*Rdc(indg)
+                    Residusdc(indg)=Ndc(indg)-exp(dot_product(etaydc,vuu))*Rdc(indg)
+                     
                 else
                     X2cur(1,1) = 1.d0
         X2cur(1,2) =t1dc(indg)
@@ -741,7 +740,7 @@
         current_meanres(1) =dot_product(X2cur(1,1:nva3),b((npp-nva3+1):npp))+&
         dot_product(Z1cur(1,1:nb1),vuu(1:nb1))
     
-                        Residusdc(indg)=Ndc(indg)-(exp(etaydc1*current_meanres(1)))*Rdc(indg)
+                        Residusdc(indg)=Ndc(indg)-(exp(etaydc(1)*current_meanres(1)))*Rdc(indg)
                 end if
                 b_pred(1)  = vuu(1)
             if(nb1.eq.2)b_pred(2)  = vuu(2)
@@ -771,12 +770,11 @@
                 end do
             end do
     
-    
-    
-    
-            allocate(v_rim(nmesy(indg),nmesy(indg)),V_rim_chol(nmesy(indg),nmesy(indg)),Varcov_inv(nmesy(indg),nmesy(indg)),&
-                            varcov_chol(nmesy(indg),nmesy(indg)),V_rim_inv(nmesy(indg),nmesy(indg)))
-    
+   
+      
+    allocate(V_rim_chol(nmesy(indg),nmesy(indg)),v_rim(nmesy(indg),nmesy(indg)),Varcov_inv(nmesy(indg),nmesy(indg)),&
+            varcov_chol(nmesy(indg),nmesy(indg)),V_rim_inv(nmesy(indg),nmesy(indg)))
+   
                         allocate(matv(nva3*(nva3+1)/2),matv2(nmesy(indg)*(nmesy(indg)+1)/2))
                         matv = 0.d0
                         do j=1,nva3
@@ -818,7 +816,7 @@
     ier = 0
     eps = 1.d-10
     
-    
+   
         call dsinvj(matv2,nmesy(indg),eps,ier)
     
         V_rim_inv=0.d0
@@ -832,24 +830,18 @@
             end do
                 end do
     
-    
         !       call choldc(nmesy(indg),V_rim,V_rim_chol)
                         call cholesky_sub( V_rim_inv,nmesy(indg))
-    
+   
                         v_rim_chol = V_rim_inv! transpose( V_rim_inv)
-    
     
     do j= it_res,(it_res+nmesy(indg)-1)
         zet_vec(1:nb1) = Zet(j,1:nb1)
         ResLongi_marg(j) = yy(j) - XbetaY_res(1,j)
            
-        if(nb1.eq.1) then 
-            ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
-            Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
-        else if(nb1.eq.2) then
-            ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)-zet_vec(2)*b_pred(2)
-            Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
-        end if
+           ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -dot_product(zet_vec(1:nb1),b_pred(1:nb1))
+            Pred_yy(j,1) = XbetaY_res(1,j) +dot_product(zet_vec(1:nb1),b_pred(1:nb1))
+       
                         
         Pred_yy(j,2) =  XbetaY_res(1,j)
                         
@@ -888,14 +880,11 @@
     
             ResLongi_chol(it_res:(it_res+nmesy(indg)-1)) = Matmul(varcov_chol(1:nmesy(indg),1:nmesy(indg)),&
                                                         ResLongi_marg(it_res:(it_res+nmesy(indg)-1)))
-                        vecuiRes2(indg,1) = vuu(1)
-            if(nb1.eq.2)vecuiRes2(indg,2) = vuu(2)
-            if(nb1.eq.1)vecuiRes2(indg,2)  = 0.d0
-                        vecuiRes2(indg,3) = 0.d0
+                        vecuiRes2(indg,1:nb1) = vuu(1:nb1)
+                        vecuiRes2(indg,nb1+1) = 0.d0
             Resmartingaledc(indg) = Residusdc(indg)
                 re_pred(indg,:) = vecuiRes2(indg,:)
-        
-        deallocate(matv,matv2,v_rim,v_rim_chol,varcov_inv,varcov_chol,V_rim_inv)
+       deallocate(matv,matv2,v_rim,v_rim_chol,varcov_inv,varcov_chol,V_rim_inv)
         else
             ! non convergence ou erreur de calcul de la fonction a maximiser
             do j= it_res,(it_res+nmesy(indg)-1)
@@ -931,7 +920,7 @@
     use residusM
     use optimres
     !use comon,only:ut,utt,netar,nsujet
-    use comon,only:ng,nsujety,etayr1,etayr2,etaydc1,etaydc2,yy,nmesy,nmesrec,netadc,&
+    use comon,only:ng,nsujety,etayr,etaydc,yy,nmesy,nmesrec,netadc,&
          nb1,vey,varcov_marg,nva3,sum_mat,link,t1dc,vey,nea,alpha,npp,res_ind
     use donnees_indiv,only:X2cur,Z1cur
         use optim
@@ -946,10 +935,10 @@
         double precision,dimension(nsujety),intent(out)::ResLongi_marg,ResLongi_cond,&
         ResLongi_chol,ResLongi_cond_st
         double precision,dimension(nsujety,2),intent(out)::Pred_yy
-    double precision,dimension(ng,3),intent(out)::re_pred
+    double precision,dimension(ng,nb1+1),intent(out)::re_pred
     double precision,dimension(nb1) ::zet_vec
     double precision,dimension(nea) :: b_pred
-    double precision,dimension(3) :: vres_inv
+    double precision,dimension((nb1-1)*nb1/2+nb1) :: vres_inv
     double precision :: ep,eps
     double precision,dimension(nb1,nb1)::mat_vres_inv,mat_vres
         double precision,dimension(:,:),allocatable::v_rim,v_rim_chol,Varcov_inv,varcov_chol,V_rim_inv
@@ -988,12 +977,10 @@
         !print*,"----------",indg
         if (istopres.eq.1) then
                         if(link.eq.1) then
-                                if(nb1.eq.1)Residusdc(indg)=Ndc(indg)-(exp(vuu(2)*alpha+etaydc1*vuu(1)))*Rdc(indg)
-                                if(nb1.eq.1)ResidusRec(indg)=Nrec(indg)-(exp(vuu(2)+etayr1*vuu(1)))*Rrec(indg)
-                                if(nb1.eq.2)Residusdc(indg)=Ndc(indg)-(exp(vuu(3)*alpha+etaydc1*vuu(1)&
-                                        +etaydc2*vuu(2)*vuu(2)))*Rdc(indg)
-                                if(nb1.eq.2)ResidusRec(indg)=Nrec(indg)-(exp(vuu(3)+etayr1*vuu(1)&
-                                                                                +etayr2*vuu(2)))*Rrec(indg)
+                            Residusdc(indg)=Ndc(indg)-exp(vuu(nb1+1)*alpha+&
+                                    dot_product(etaydc,vuu(1:nb1)))*Rdc(indg)
+                            ResidusRec(indg)=Nrec(indg)-exp(vuu(nb1+1)+&
+                                    dot_product(etayr,vuu(1:nb1)))*Rrec(indg)
                         else if(link.eq.2) then
                                 X2cur(1,1) = 1.d0
                                 X2cur(1,2) =t1dc(indg)
@@ -1007,14 +994,13 @@
                                 current_meanres = 0.d0
                                 current_meanres(1) =dot_product(X2cur(1,1:nva3),b((npp-nva3+1):npp))+&
                         dot_product(Z1cur(1,1:nb1),vuu(1:nb1))
-                        Residusdc(indg)=Ndc(indg)-(exp(vuu(3)*alpha+etaydc1*current_meanres(1)))*Rdc(indg)
-                                ResidusRec(indg)=Nrec(indg)-(exp(vuu(3)+etayr1**current_meanres(1)))*Rrec(indg)
+                        Residusdc(indg)=Ndc(indg)-(exp(vuu(3)*alpha+etaydc(1)*current_meanres(1)))*Rdc(indg)
+                                ResidusRec(indg)=Nrec(indg)-(exp(vuu(3)+etayr(1)**current_meanres(1)))*Rrec(indg)
     
                         end if
     
-                b_pred(1)  = vuu(1)
-            if(nb1.eq.2)b_pred(2)  = vuu(2)
-                        b_pred(nb1+1) = vuu(nb1+1)
+                b_pred(1:nb1)  = vuu(1:nb1)
+                b_pred(nb1+1) = vuu(nb1+1)
     
             vres_inv = 0.d0
             do i=1,nb1
@@ -1114,13 +1100,10 @@
         zet_vec(1:nb1) = Zet(j,1:netadc)
         
         ResLongi_marg(j) = yy(2) - XbetaY_res(1,j)
-        if(nb1.eq.1) then 
-            ResLongi_cond(j) = yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)
-            Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)
-        else if(nb1.eq.2) then
-            ResLongi_cond(j) =  yy(j) - XbetaY_res(1,j) -zet_vec(1)*b_pred(1)-zet_vec(2)*b_pred(2)
-            Pred_yy(j,1) = XbetaY_res(1,j) +zet_vec(1)*b_pred(1)+zet_vec(2)*b_pred(2)
-        end if
+    
+        ResLongi_cond(j) =  yy(j) - XbetaY_res(1,j) -dot_product(zet_vec(1:nb1),b_pred(1:nb1))
+        Pred_yy(j,1) = XbetaY_res(1,j) +dot_product(zet_vec(1:nb1),b_pred(1:nb1))
+       
         Pred_yy(j,2) =  XbetaY_res(1,j)
     end do
                                                 matv2 = 0.d0
@@ -1159,10 +1142,7 @@
             ResLongi_chol(it_res:(it_res+nmesy(indg)-1)) = Matmul(v_rim_chol(1:nmesy(indg),1:nmesy(indg)),&
                                                         ResLongi_marg(it_res:(it_res+nmesy(indg)-1)))
     
-            vecuiRes2(indg,1) = vuu(1)
-            if(nb1.eq.2)vecuiRes2(indg,2) = vuu(2)
-            if(nb1.eq.1)vecuiRes2(indg,2)  = 0.d0
-                        vecuiRes2(indg,3) = 0.d0
+            vecuiRes2(indg,:) = vuu
             Resmartingaledc(indg) = Residusdc(indg)
                         Resmartingale(indg) = ResidusRec(indg)
             ! ResLongi_marg(it_res:(it_res+nmesy(indg)-1))= ResidusLongi(it_res:(it_res+nmesy(indg)-1))
@@ -1191,4 +1171,259 @@
     end do
     
     end subroutine Residusj_tri 
+    
+    
+    
+    
+    
+        !=============================================================================
+     !                   CALCUL DES RESIDUS  Joint univarie : longitudinal (non-linear)
+    !=============================================================================
+    
+    subroutine Residus_uni(b,np,namesfuncres)!
+    
+    use residusM
+    use optimres
+    use comon,only:ng,nsujety,yy,nmesy,nva3,nva4,&
+         nb1,vey,ut,utt,nva3,nva4,vey,nea,npp,res_ind,H_hess_GH,I_hess_GH,b_paGH
+    use donnees_indiv,only:X2cur,Z1cur,mu,b1
+        use optim
+    !  use ParametresPourParallelisation
+    implicit none
+    
+    integer::np,j,i,ij,ier,k,jj
+    double precision,external::namesfuncres
+    double precision,dimension(np),intent(in)::b
+    double precision,dimension(np)::bint
+    double precision :: ep,eps,finddet
+        double precision,dimension(:),allocatable:: matv,matv2
+    double precision,dimension(nea,nea)::H_hess_GH_inv
+       ! double precision,dimension(1)::residus_sd
+    
+    res_ind=1
+    bint=b
+     
+    it_res = 1
+ 
+ do indg=1,ng
+    
+            cares=0.d0
+        cbres=0.d0
+        ddres=0.d0
+        nires=0
+        vuu=0.1d0
+    
+        mu = 0.d0
+            mu(1:nmesy(indg),1) = matmul(vey(it_res:it_res+nmesy(indg)-1,&
+            1:(nva3)),b1((npp-nva4-nva3+1):(npp-nva4)))
+    
+            mu(1:nmesy(indg),2) = matmul(vey(it_res:it_res+nmesy(indg)-1,&
+            (nva3+1):(nva3+nva4)),b1((npp-nva4+1):npp))
+  
+    call marq98res(vuu,nea,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
+
+!if(CurrentProcessorID.eq.0.and.indg.eq.1) write(*,*)indg,vuu,istopres 
+  !  if(indg.eq.1)write(*,*)vuu
+    !stop
+           do i=1,nea
+             do j=i,nea
+                 H_hess_GH(i,j)=vres((j-1)*j/2+i)
+             end do
+         end do
+         do i=2,nea
+       do j=1,i-1
+            H_hess_GH(i,j)=H_hess_GH(j,i)
+       end do
+    end do
+    
+
+ 
+        !print*,"6:",vres
+        !print*,"----------",indg
+        if (istopres.eq.1) then
+                      
+    
+            
+    
+    b_paGH(indg,1:nea) = vuu 
+    
+!    allocate(matv2(nea*(nea+1)/2))
+!                         matv2 = 0.d0
+!                        do j=1,nea
+!    do k=j,nea
+!        jj=j+k*(k-1)/2
+!        matv2(jj)=H_hess_GH(j,k)
+!        end do
+!    end do
+!    ier = 0
+!    eps = 1.d-10
+!    
+!    
+!        call dsinvj(matv2,nea,eps,ier)
+!    
+!        H_hess_GH_inv=0.d0
+!        do j=1,nea
+!                do k=1,nea
+!                            if (k.ge.j) then
+!                H_hess_GH_inv(j,k)=matv2(j+k*(k-1)/2)
+!            else
+!                H_hess_GH_inv(j,k)=matv2(k+j*(j-1)/2)
+!            end if
+!            end do
+!                end do
+!                
+!    H_hess_GH = H_hess_GH_inv            !H_i
+    
+          call cholesky_sub( H_hess_GH,nea) !B_i
+     
+!         allocate(matv2(nea*(nea+1)/2))
+!                         matv2 = 0.d0
+!                        do j=1,nea
+!    do k=j,nea
+!        jj=j+k*(k-1)/2
+!        matv2(jj)=H_hess_GH(j,k)
+!        end do
+!    end do
+!    ier = 0
+!    eps = 1.d-10
+!    
+!    
+!        call dsinvj(matv2,nea,eps,ier)
+!    
+!        H_hess_GH_inv=0.d0
+!        do j=1,nea
+!                do k=1,nea
+!                            if (k.ge.j) then
+!                H_hess_GH_inv(j,k)=matv2(j+k*(k-1)/2)
+!            else
+!                H_hess_GH_inv(j,k)=matv2(k+j*(j-1)/2)
+!            end if
+!            end do
+!                end do
+     
+!    call inverse(H_hess_GH,H_hess_GH_inv,nea)     !B_i^-1
+
+!     if(indg.eq.5) then 
+!     write(*,*)'res'
+!     write(*,*)H_hess_GH
+!     write(*,*) vuu 
+!     write(*,*)vres
+!     stop
+!     end if
+     
+         b_paGH(indg,(nea+1)) =  finddet(H_hess_GH,nea)
+
+    
+           do j=1,nea
+                do k=1,j
+                 b_paGH(indg,nea+1+k+j*(j-1)/2) = H_hess_GH(j,k)
+                
+                end do
+                end do
+!        deallocate(matv2)
+
+            
+            
+            
+        else
+            ! non convergence ou erreur de calcul de la fonction a maximiser
+          !write(*,*)indg,istopres  
+           b_paGH(indg,:) = 0.d0
+    
+        endif
+        
+    it_res = it_res + nmesy(indg)
+     
+
+    end do
+    
+    end subroutine Residus_uni
+    
+    
+      !=============================================================================
+     !                     Joint trivariate non-linear : longitudinal, recurrences and death
+    !                        Posterior random effects
+    !=============================================================================
+    
+    subroutine PostRE_triNL(b,np,namesfuncres, re_pred)!
+    
+    use residusM
+    use optimres
+    use comon,only:ng,nmesy,nmesrec,nea,&
+         nb1,vey,nva3,H_hess_GH,I_hess_GH,nva4
+    use donnees_indiv,only:mu
+        use optim
+!    use ParametresPourParallelisation
+    implicit none
+    
+    integer::np,j,i,ij,ier,k,jj
+    double precision,external::namesfuncres
+    double precision,dimension(np),intent(in)::b
+    double precision,dimension(ng,nea+1+nea + (nea*(nea-1))/2),intent(out)::re_pred
+    double precision :: finddet
+    
+    
+   
+       it_res = 1
+        it_res_rec = 1
+    do indg=1,ng
+    
+            cares=0.d0
+        cbres=0.d0
+        ddres=0.d0
+        nires=0
+        vuu=0.1d0
+        vuu=0.1d0
+    
+      mu = 0.d0
+            mu(1:nmesy(indg),1) = matmul(vey(it_res:it_res+nmesy(indg)-1,&
+            1:(nva3)),b((np-nva4-nva3+1):(np-nva4)))
+    
+            mu(1:nmesy(indg),2) = matmul(vey(it_res:it_res+nmesy(indg)-1,&
+            (nva3+1):(nva3+nva4)),b((np-nva4+1):np))
+   
+    call marq98res(vuu,nea,nires,vres,rlres,ierres,istopres,cares,cbres,ddres,namesfuncres)
+
+           do i=1,nea
+             do j=i,nea
+                 H_hess_GH(i,j)=vres((j-1)*j/2+i)
+             end do
+         end do
+         do i=2,nea
+       do j=1,i-1
+            H_hess_GH(i,j)=H_hess_GH(j,i)
+       end do
+    end do
+    
+
+        if (istopres.eq.1) then
+     
+        
+    re_pred(indg,1:nea) = vuu 
+    
+                
+     call cholesky_sub( H_hess_GH,nea)
+     
+    
+    re_pred(indg,(nea+1)) =  finddet(H_hess_GH,nea)
+    
+           do j=1,nea
+                do k=1,j
+                 re_pred(indg,nea+1+k+j*(j-1)/2) = H_hess_GH(j,k)
+                
+                end do
+                end do
+            
+            
+        else
+     
+     re_pred(indg,:) = 0.d0
+        endif
+    it_res = it_res + nmesy(indg)
+        it_res_rec = it_res_rec + nmesrec(indg)
+    
+    end do
+
+    end subroutine PostRE_triNL
+    
     

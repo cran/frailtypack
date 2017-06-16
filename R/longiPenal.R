@@ -5,6 +5,9 @@ function (formula, formula.LongitudinalData, data,  data.Longi, random, id, inte
              init.Random, init.Eta, method.GH = "Standard", n.nodes, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE)
 {
 
+OrderLong <- data.Longi[,id]
+OrderDat <- data[,id]
+
 m2 <- match.call()
 m2$formula <-  m2$data <- m2$random <- m2$id <- m2$link <- m2$n.knots <- m2$kappa <- m2$maxit <- m2$hazard  <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$left.censoring <- m2$init.Random <- m2$init.Eta <- m2$method.GH <- m2$intercept <- m2$n.nodes <- m2$... <- NULL
 Names.data.Longi <- m2$data.Longi
@@ -180,7 +183,6 @@ if((all.equal(length(hazard),1)==T)==T){
   name.Y <- as.character(attr(TermsY, "variables")[[2]])
   Y <- data.Longi[,which(names(data.Longi)==name.Y)]
 
-
  # on identifie les variables explicatives facteurs avec nombre de niveau plus que 2
   
   ind.placeY <- which(llY%in%names(which(lapply(data.Longi[,which(names(data.Longi)%in%llY)],function(x) length(levels(x)))>2)))
@@ -303,19 +305,23 @@ ind.placeY <- sort(ind.placeY)
               llY.real.names <- llY3  
                llY3 <- llY3[!llY2%in%llY]
 
-   
-  if(is.factor(data.Longi[,names(data.Longi)==llY.real.names[1]]))X_L<- as.numeric(data.Longi[,names(data.Longi)==llY.real.names[1]])-1
-  else X_L<- data.Longi[,names(data.Longi)==llY.real.names[1]]
-  
-
-
+    data.Longi <- data.Longi[order(OrderLong),]
+    if(is.factor(data.Longi[,names(data.Longi)==llY.real.names[1]])){
+		X_L<- as.numeric(data.Longi[,names(data.Longi)==llY.real.names[1]])-1
+	}
+	else X_L <- data.Longi[,names(data.Longi)==llY.real.names[1]]
+	
+	
 
   if(length(llY)>1){
   for(i in 2:length(llY.real.names)){
   
-    if(is.factor(data.Longi[,names(data.Longi)==llY.real.names[i]]))X_L<- cbind(X_L,as.numeric(data.Longi[,names(data.Longi)==llY.real.names[i]])-1)
-    else X_L<- cbind(X_L,data.Longi[,names(data.Longi)==llY.real.names[i]])
+    if(is.factor(data.Longi[,names(data.Longi)==llY.real.names[i]])){
+		X_L <- cbind(X_L,as.numeric(data.Longi[,names(data.Longi)==llY.real.names[i]])-1)
+	}
+    else X_L <- cbind(X_L,data.Longi[,names(data.Longi)==llY.real.names[i]])
   }}
+  
 
   #X_L<- data.Longi[,names(data.Longi)%in%(llY)]
 
@@ -387,8 +393,6 @@ ind.placeY <- sort(ind.placeY)
   }
   }
 
-
-
 if(length(grep(":",llY))>0){
   for(i in 1:length(grep(":",llY))){
     if(length(levels(data.Longi[,which(names(data.Longi)%in%strsplit(llY[grep(":",llY)[i]],":")[[1]])[1]]))>2 || length(levels(data.Longi[,which(names(data.Longi)%in%strsplit(llY[grep(":",llY)[i]],":")[[1]])[2]]))>2){
@@ -404,9 +408,6 @@ if(length(vec.factorY.tmp)>0)vec.factorY <- c(llY[ind.placeY],vec.factorY.tmp)
 else vec.factorY <- c(vec.factorY,llY[ind.placeY])
 
 vec.factorY <- unique(vec.factorY)
-
-
-
 
 mat.factorY <- matrix(vec.factorY,ncol=1,nrow=length(vec.factorY))
 # Fonction servant a prendre les termes entre "as.factor" et (AK 04/11/2015) interactions
@@ -524,7 +525,6 @@ Intercept <- rep(1,dim(X_L)[1])
 }
 }
 
-
   if (ncol(X_L) == 0){
    noVarY <- 1
   }else{
@@ -535,37 +535,24 @@ Intercept <- rep(1,dim(X_L)[1])
 
         clusterY <- data.Longi[,which(colnames(data.Longi)==id)]
 
-max_rep <- max(table(clusterY))
+		max_rep <- max(table(clusterY))
         uni.cluster<-as.factor(unique(clusterY))
-
 
         if(is.null(id)) stop("grouping variable is needed")
 
         if(is.null(random))     stop("variable for random effects is needed")
 
-
         if(length(uni.cluster)==1){
                 stop("grouping variable must have more than 1 level")
         }
 
-
         if (length(subcluster))stop("'Subcluster' is not allowed")
 
-
-
-                if (typeof==0 && missing(kappa)) stop("smoothing parameter (kappa) is required")
-
-
+        if (typeof==0 && missing(kappa)) stop("smoothing parameter (kappa) is required")
 
         if ((typeof==0) & (length(kappa)!=1)) stop("wrong length of argument 'kappa'")
 
-
-
 #newTerm vaut Terms - les variables dont les position sont dans drop
-
-
-
-
 
 #========================================>
 
@@ -604,9 +591,6 @@ max_rep <- max(table(clusterY))
                 }
         }
 
-
-
-
  # Random effects
 
   if(link=="Random-effects") link0 <- 1
@@ -626,7 +610,8 @@ max_rep <- max(table(clusterY))
 
   matzy <- data.matrix(X_L[,which(names(X_L)%in%names.matzy)])
   if(!intercept && 1%in%random) matzy <- as.matrix(cbind(rep(1,nsujety),matzy))
-
+  if(dim(matzy)[2]>=3 && link0 == 2)stop("The current-level link can be chosen only if the biomarker random effects are associated with the intercept and time.")
+  
   if(link0==1)netadc <- ncol(matzy)
   if(link0==2)netadc <- 1
 
@@ -645,7 +630,12 @@ max_rep <- max(table(clusterY))
 #============= pseudo-adaptive Gauss Hermite ==============
 #m <- lme(measuret ~ time+interact+treatment, data = data, random = ~ 1| idd)
 if(method.GH=="Pseudo-adaptive"){
-inn <-paste("pdSymm(form=~",random,")",sep="")
+if(length(random)>2){
+  random_lme <- random[2]
+  for(i in 3:length(random)){
+    random_lme <- paste(random_lme, "+", random[i])
+  }}else{random_lme <- random}
+inn <-paste("pdSymm(form=~",random_lme,")",sep="")
 rand <- list(eval(parse(text=inn)))
 names(rand) <- id
 
@@ -714,9 +704,7 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
   m <- eval(m, sys.parent()) #ici la classe de m est un data.frame donc il recupere ce qu'on lui donne en argument
 
   cluster <- id # (indice) nbre de var qui sont en fonction de cluster()
-
-
-
+  
   subcluster <- attr(Terms, "specials")$subcluster #nbre de var qui sont en fonction de subcluster()
 
   # booleen pour voir si l'objet Y est reponse avant tri des donnees Surv ou SurvIC
@@ -725,32 +713,21 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
   if (length(classofT)>1) classofT <- classofT[2]
 
   typeofT <- attr(model.extract(m, "response"),"type") # type de reponse : interval etc..
-
-
-
-
-
-# verification de la sutructure nested si besoin
+  
+# verification de la structure nested si besoin
   if (length(subcluster))stop("subcluster can not be used in the model")
 
-
-
   # tri par ordre croissant de subcluster a l'interieur des clusters
-  ordre <- as.integer(row.names(m))
-
-
+  # ordre <- as.integer(row.names(m))
 
   if (NROW(m) == 0)stop("No (non-missing) observations") #nombre ligne different de 0
 
   T <- model.extract(m, "response") # objet de type Surv =Time
-
-
+  
   if (classofT != "Surv") stop("Response must be a survival object")
 
 
   llT <- attr(Terms, "term.labels")#liste des variables explicatives
-
-#cluster(id) as.factor(dukes) as.factor(charlson) sex chemo terminal(death)
 
 #=========================================================>
 
@@ -865,13 +842,9 @@ dropx <- NULL
   clusterT <- 1:nrow(m) #nrow(data) # valeurs inutiles pour un modele de Cox
   uni.clusterT <- 1:nrow(m) #nrow(data)
 
-
   if(length(uni.cluster)==1)stop("grouping variable must have more than 1 level")
-
-
   if (length(subcluster))stop("subcluster can not be used in the model")
-
- if (length(strats))stop("Stratified analysis not allowed")
+  if (length(strats))stop("Stratified analysis not allowed")
 
 
 #type <- attr(Y, "type")
@@ -890,11 +863,10 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
 #newTerm vaut Terms - les variables dont les position sont dans drop
 
   X_T <- model.matrix(Terms, m)
-
+      
   assign <- lapply(attrassign(X_T, Terms)[-1], function(x) x - 1)
   Xlevels <- .getXlevels(Terms, m)
   contr.save <- attr(X_T, 'contrasts')
-
 
 # assigne donne la position pour chaque variables
 #ncol(X) : nombre de variable sans sans les fonction speciaux comme terminal()...+id
@@ -913,8 +885,6 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
    noVarT <- 0
   }
 # on enleve ensuite la premiere colonne correspondant a id
-
-
   nvarT<-ncol(X_T) #nvar==1 correspond a 2 situations:
 
 
@@ -934,10 +904,10 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
 #  filtretpsT <- rep(0,nvarT)
 #  filtretpsT[grep("timedep",colnames(X_T))] <- 1
 
-  varT<-matrix(c(X_T),nrow=nrow(X_T),ncol=nvarT) #matrix sans id et sans partie ex terminal(death)
-
+  varT<-matrix(c(X_T),nrow=nrow(X_T),ncol=nvarT) #matrix sans id et sans partie ex terminal(death)  
+  varT <- varT[order(OrderDat),]  
+  T <- T[order(OrderDat)]  # add myriam 24/04/17 
   ng<-nrow(X_T)
-
 
 #add Alexandre 04/06/2012
 #lire les donnees differemment si censure par intervalle
@@ -958,8 +928,6 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
 
   AG<-0
 
-
-
   #=======================================>
   #======= Construction du vecteur des indicatrice
   if(length(vec.factorT) > 0){
@@ -977,6 +945,7 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
 
 # Preparing data ...
   nvar = nvarY + nvarT
+  Y <- Y[order(OrderLong)]
 
   if ((typeof == 0) | (typeof == 2)) indic.nb.int <- 0
 
@@ -1021,7 +990,9 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
     cat("\n")
    cat("Be patient. The program is computing ... \n")
   }
-
+  
+	
+  
         ans <- .Fortran(C_joint_longi,
 			as.integer(1),
 			as.integer(nsujety),
@@ -1072,7 +1043,7 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
 			counts=as.integer(c(0,0,0)),
 			ier_istop=as.integer(c(0,0)),
 			paraweib=as.double(rep(0,4)),
-			MartinGale=as.double(matrix(0,nrow=ng,ncol=5)),###
+			MartinGale=as.double(matrix(0,nrow=ng,ncol=3+nRE)),###
 			ResLongi = as.double(matrix(0,nrow=nsujety,ncol=4)),
 			Pred_y  = as.double(matrix(0,nrow=nsujety,ncol=2)),
 
@@ -1091,7 +1062,7 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
 			)#,
 		#PACKAGE = "frailtypack") #62 arguments
 
-        MartinGale <- matrix(ans$MartinGale,nrow=ng,ncol=5)
+        MartinGale <- matrix(ans$MartinGale,nrow=ng,ncol=3+nRE)
 		Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
 
     if (ans$ier_istop[2] == 4){

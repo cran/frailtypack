@@ -28,6 +28,7 @@
 
     module parameters
         double precision,save::epsa,epsb,epsd
+        double precision,save::epsa_res,epsb_res,epsd_res
         integer,save::maxiter
     end module parameters
 
@@ -60,7 +61,7 @@
       implicit none
       double precision,dimension(:,:),allocatable,save::bb1,bb2,grandb
           double precision,save :: sigmav,range
-      double precision,dimension(:),allocatable,save::mu,mu1
+      double precision,dimension(:,:),allocatable,save::mu,mu1
       double precision,dimension(:,:),allocatable,save::Z1,Z2
       integer,save::numpat,nmescur,nmescur2,nmescurr,nmescurr1,nmes,it_cur
       integer,parameter ::nf=1
@@ -70,7 +71,7 @@
                 double precision,dimension(:,:),allocatable,save:: x2,x22,z22,z11,x2cur,z1cur
                 integer,dimension(:),allocatable,save:: nii,nii2,nmes_o,nmes_o2
                 integer,save:: it_rec
-                double precision:: ut2cur,frailpol,frailpol2
+                double precision:: ut2cur,frailpol,frailpol2,frailpol3,frailpol4
                 double precision,dimension(:),allocatable,save :: res1cur,res3cur,res2cur
     end module donnees_indiv
 
@@ -94,11 +95,14 @@
     module comon
     implicit none
 !*****************************************************************
+    double precision,save :: K_G0, K_D0, lambda,y0
+    double precision,dimension(:,:),allocatable:: nodes,weights
       integer,dimension(2),save::genz
-      integer,save::npp,ni_cur
+      integer,save::npp,ni_cur, which_random
         double precision,save::vals
-        integer ,save:: all
+        integer ,save:: all, nnodes_all
         double precision,dimension(:),allocatable,save ::range
+        integer,dimension(:),allocatable,save::RE_which
         !double precision,parameter::pi = 3.141592653589793238462643d0
         double precision,dimension(:),allocatable,save:: vi
         integer,dimension(:),allocatable,save:: nmesrec,nmesy,nmesrec1
@@ -114,7 +118,7 @@
     integer,dimension(:),allocatable,save:: c, cdc
     integer,dimension(:),allocatable,save:: nt0,nt1,ntU
     integer,dimension(:),allocatable,save:: nt0dc,nt1dc
-    integer,save::nsujet,nva,nva1,nva2,nva3,ndate,ndatedc,nst,nstRec,nsujety,nobs,np_e
+    integer,save::nsujet,nva,nva1,nva2,nva3,nva4,ndate,ndatedc,nst,nstRec,nsujety,nobs,np_e
 !*****dace4
     integer,dimension(:),allocatable,save::stra
 !*****family
@@ -128,14 +132,15 @@
     double precision,save::vet3
 !***** random effects
         double precision,dimension(:,:),allocatable,save :: ziy,ziyd,ziyr!random effects for y
-         double precision,save :: sigmae                        !sigma of epsilon
+         double precision,save :: sigmae                         !sigma of epsilon
         double precision,save :: etaydc1, etaydc2,etayr1,etayr2                 !reg coef for link functions
+        double precision,dimension(:),allocatable,save:: etaydc,etayr              !reg coef for link functions
         integer,save :: nb_re,netar,netadc
         integer,save :: linkidyr,linkidyd,link
         double precision,dimension(:,:),allocatable,save::Ut,Utt,varcov_marg,sum_mat
          !****** censure à gauche
-        double precision,save :: s_cag
-        integer,save :: s_cag_id
+        double precision,save :: s_cag, box_cox_par
+        integer,save :: s_cag_id, box_cox1
 !*****dace3
     double precision,save::pe
     integer,save::effet,nz1,nz2,nzloco,nzdc
@@ -144,6 +149,7 @@
     double precision,dimension(:,:),allocatable,save::Hspl_hess!(npmax,npmax)
     double precision,dimension(:,:),allocatable,save::PEN_deri!(npmax,1)
     double precision,dimension(:,:),allocatable,save::hess!(npmax,npmax)
+    double precision,dimension(:,:),allocatable,save::H_hess_GH,I_hess_Gh,b_paGh
 !*****contrib
     integer,save::ng          !nb de gpes
 !*****groupe
@@ -205,17 +211,18 @@
     double precision,dimension(:),allocatable,save::resL,resU
 ! distribution des frailty par une log-normale
     integer::logNormal,timedep
-    double precision,save::sig2
+    double precision,save::sig2, det
     
      double precision,dimension(:),allocatable,save::b_e
         integer,save::nea,nb1
         double precision,dimension(:),allocatable,save::timecur,timecur2
         double precision,dimension(:),allocatable,save::the1_e
         !parametres pour GH pseudo-adaptative
-        double precision,dimension(:),allocatable,save::invBi_cholDet
-        double precision,dimension(:,:),allocatable,save:: invBi_chol,b_lme
-        integer :: methodGH,nodes_number
-        integer :: res_ind
+        double precision,dimension(:),allocatable,save::invBi_cholDet,vet22
+        double precision,dimension(:,:),allocatable,save:: invBi_chol,b_lme,mat,matb_chol
+        double precision,dimension(:),allocatable,save::v_jf,varv_jf
+        integer :: methodGH,nodes_number,initGH
+        integer :: res_ind,it,n_wezly
     end module comon
 !=====================================================================================
 
@@ -304,7 +311,7 @@
     double precision,dimension(:,:),allocatable,save::HIH,IH,HI
     double precision,dimension(:,:),allocatable,save::BIAIS
     double precision,dimension(:),allocatable,save:: vax,vaxdc,vaxmeta,vaxy
-    integer,dimension(:),allocatable,save::filtre,filtre2,filtre3
+    integer,dimension(:),allocatable,save::filtre,filtre2,filtre3, filtre4
     integer,save::ver
 
     end module splines

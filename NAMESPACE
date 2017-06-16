@@ -1,6 +1,6 @@
 useDynLib("frailtypack", .registration = TRUE, .fixes = "C_")
 
-export(frailtyPenal,additivePenal,hazard,survival,slope,cluster,subcluster,terminal,num.id,Cmeasures,SurvIC,event2,multivPenal,timedep,prediction,epoce,Diffepoce,longiPenal,trivPenal)
+export(frailtyPenal,additivePenal,hazard,survival,slope,cluster,subcluster,terminal,num.id,Cmeasures,SurvIC,event2,multivPenal,timedep,prediction,epoce,Diffepoce,longiPenal,trivPenal,trivPenalNL)
 
 import("survival","boot","MASS","survC1","nlme")
 importFrom("graphics", "abline", "legend", "lines", "matlines","matplot", "par", "plot")
@@ -9,6 +9,8 @@ importFrom("stats", ".getXlevels", "aggregate", "as.formula","complete.cases",
 		"model.matrix", "pchisq","pnorm", "qnorm", "quantile", 
 		"rgamma", "terms", "update","var","model.frame","na.pass")
 importFrom("utils", "flush.console")
+importFrom(statmod, gauss.quad)
+importFrom(nlme, lme)
 
 S3method(plot,frailtyPenal)
 S3method(lines,frailtyPenal)
@@ -56,3 +58,7 @@ S3method(plot,longiPenal)
 S3method(print,trivPenal)
 S3method(summary,trivPenal)
 S3method(plot,trivPenal)
+
+S3method(print,trivPenalNL)
+S3method(summary,trivPenalNL)
+S3method(plot,trivPenalNL)

@@ -44,6 +44,18 @@ F77_SUB(cvpl_long)(int *ng0, int *nsujet, int *nsujety0, int *groupe0, int *grou
 						double *valT, double *rl_cond, double *epoir, 
 						double *contribt, double *atrisk);
 						
+void
+F77_SUB(cvplnl)(int *ng0, int *nsujet0, int *nsujety0, int *groupe0, int *groupey0,
+					int *c0, int *cdc0, double *Y0, int *nva10, int *nva20, int *nva30,
+					int *nva40, int *nb10, int which_random0, double box_cox0,int *netar0,
+					int *netadc0, int *link0, double *ve0,
+					double *vedc0, double *velong0, double *matzy0, double *s_cag0,
+					int *s_cag_id0, int *typeof0, int *nz0, double *zi0, int *np0,
+					double *b0, double *H_1, double *t00, double *t10, double *t0dc0,
+					double *t1dc0, int *nt, double *valT, double *rl_cond, double *epoir,
+					double *contribt, double *atrisk, int *GH, double *paGH0, double *weights0,
+					double *nodes0, int *nnodes_all0);
+						
 void 
 F77_SUB(frailpenal)(int *nsujetAux, int *ngAux, int *icenAux, int *nstAux, int *effetAux,
 						int *nzAux, double *axT, double *tt0Aux, double *tt1Aux,int *icAux, 
@@ -98,6 +110,20 @@ F77_SUB(joint_longi)(int *nsujet0, int *nsujety0, int *ng0, int *nz0, double *k0
 						double *linearpreddc, double *ziOut, int *paratps, int *filtretps0, 
 						double *BetaTpsMat, double *BetaTpsMatDc, double *BetaTpsMatY, 
 						double *EPS, int *GH, double *paGH);
+
+void
+F77_SUB(jointlonginl)(int *nsujet0, int *nsujety0, int *ng0, int *nz0, double *k0, double *tt00,
+						double *tt10, int *ic0, int *groupe0, double *tt0dc0, double *tt1dc0,
+						int *icdc0, int *link0, double *yy0, int *groupey0, int *nb0, int *which_random0,
+						double *box_cox0, double *matzy0, double *cag0, int *nva10, double *vax0,
+						int *nva20, double *vaxdc0, int *nva30, int *nva40, double *vaxy0, int *noVar,
+						int *ag0, int *maxit0, int *np, int *neta0, double *b, double *H_hessOut,
+						double *HIHOut, double *resOut, double *LCV, double *x1Out, double *lamOut,
+						double *xSu1, double *suOut, double *x2Out, double *lam2Out, double *xSu2,
+						double *su2Out, int *typeof0, int *equidistant, int *mtaille, int *counts,
+						double *ier_istop, double *paraweib, double *ziOut, double *EPS,
+						double *GH, double *paGH0, double *b_pred0, int *effet0, int *indic_alpha0,
+						double *weights0, double *nodes0, double *nnodes_all0, int *RE_which0);
 						
 void 
 F77_SUB(joint_multiv)(int *nobsEvent, int *nz0, double *k0, double *tt00, double *tt10, 
@@ -115,6 +141,15 @@ F77_SUB(joint_multiv)(int *nobsEvent, int *nz0, double *k0, double *tt00, double
 						double *frailtyEstimates, double *linearpred, double *linearpreddc, 
 						double *linearpredM, double *ziOut1, double *ziOutdc, double *ziOutmeta, 
 						double *time, double *timedc, double *timeM);
+						
+void
+F77_SUB(longiuninl)(int *nsujety0, int *ng0, double *yy0, int *groupey0, int *nb0,
+						int *which_random0, double *box_cox0, double *matzy0, double *cag0,
+						int *nva30, int *nva40, double *vaxy0, int *noVar, int *maxit0,
+						int *np, double *b, double *H_hessOut, double *HIHOut, double *resOut,
+						double *LCV, double *counts, double *ier_istop, double *EPS,
+						double *GH, double *paGH, double *b_pred, double *weights0,
+						double *nodes0, double *nnodes_all0, int *initialGH, double *axT);
 						
 void 
 F77_SUB(nested)(int *ns0, int *ng0, int *nssgbyg0, int *nst0, int *nz0, double *axT, 
@@ -142,7 +177,7 @@ F77_SUB(predict)(int *np, double *b, int *nz, int *nbintervR, int *nbintervDC, i
 						double *predAllhigh2, double *predAlllow3, double *predAllhigh3, 
 						double *predAlllow1R, double *predAllhigh1R, int *icproba, 
 						int *nsample, int *intcens, double *trunctime, double *lowertime, 
-						double *uppertime, int *movingwindow, double *timeAll, int *modeltype);
+						double *uppertime, int *movingwindow, double *timeAll, int *modeltype, int *indic_alpha);
 						
 void 
 F77_SUB(predict_biv)(int *np, double *b, int *nz, int *nva20, int *nva30, int *nb_re0, int *nzyd, 
@@ -159,7 +194,7 @@ F77_SUB(predictfam)(int *np, double *b, int *nz, int *nva1, int *nva2, int *nst,
 						int *icdctime, int *ntimeAll, int *nsujet, int *npred0, double *window, 
 						int *nrec0, int *nrec, int *nrecT,double *vaxpred0, double *vaxdcpred0, 
 						int *icproba, int *nsample,	double *predAll, double *predIClow, 
-						double *predIChigh, double *frailfam0, double *frailind0, double *pred);
+						double *predIChigh, double *frailfam0, double *frailind0, double *pred, int *indic);
 						
 void 
 F77_SUB(predict_logn_sha)(int *npred0, double *surv_s, double *surv_t, double *betapred, 
@@ -182,6 +217,19 @@ F77_SUB(predict_tri)(int *np, double *b, int *nz, int *nva10, int *nva20, int *n
 						int *npred0, double *predTime, double *window, 
 						double *predtimerec, int *nrec0, int *nrecy0, double *yy0, 
 						double *vaxpred0, double *vaxdcpred0, double *vaxypred0, 
+						int *groupey, int *uniGroupey, int *nsujety, int *nsujet, 
+						double *predAll1, double *predAlllow1, double *predAllhigh1,
+						int *icproba, int *nsample, int *movingwindow, double *timeAll, 
+						int *s_cag_id0, double *s_cag0);
+						
+void
+F77_SUB(predicttrinl)(int *np, double *b, int *nz, int *nva10, int *nva20, int *nva30, 
+						int *nva40, int *nb_re0, int *random_which0, double *box_cox0,
+						int *nzyr, int *nzyd, int *link0, int *nst, 
+						int *typeof0, double *zi0, double *HIHOut, int *ntimeAll, 
+						int *npred0, double *predTime, double *window, 
+						double *predtimerec, int *nrec0, int *nrecy0, double *yy0, 
+						double *matzy0, double *vaxpred0, double *vaxdcpred0, double *vaxypred0, 
 						int *groupey, int *uniGroupey, int *nsujety, int *nsujet, 
 						double *predAll1, double *predAlllow1, double *predAllhigh1,
 						int *icproba, int *nsample, int *movingwindow, double *timeAll, 

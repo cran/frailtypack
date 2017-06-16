@@ -25,10 +25,10 @@
         
         
         use donnees_indiv,only:nmescur,mu,ycurrent,z2,b1,X2cur,Z1cur,nmescurr
-        use comon,only:etaydc1,etaydc2,sigmae,netadc,s_cag_id,s_cag,ut,&
+        use comon,only:etaydc,sigmae,netadc,s_cag_id,s_cag,ut,&
                     utt,nva,link,npp,nea,vey,nb1,netar,indic_Alpha,&
                     nva1,nva2, nva3,effet,zi,nz1,typeof,nb_re,alpha,&
-                    etayr1, etayr2,typeJoint !it_cur
+                    etayr,typeJoint !it_cur
         use lois_normales
         use prediction
         
@@ -82,7 +82,7 @@
         netar = nzyr    
         nea = nb_re0+1
         nb1 = nb_re0    
-        nb_re = nb_re0+ (nb_re0*(nb_re0-1))/2.d0
+        nb_re = nb_re0+ INT((nb_re0*(nb_re0-1))/2.d0)
         typeof = typeof0
         indic_Alpha = 1
         nva1 = nva10
@@ -129,7 +129,7 @@
         allocate(Ut(nea,nea),Utt(nea,nea))    
         ut = 0.d0
         utt = 0.d0
-        allocate(ycurrent(nrecy0),mu(nrecy0),z2(nrecy0,nzyr))    
+        allocate(ycurrent(nrecy0),mu(nrecy0,1),z2(nrecy0,nzyr),etaydc(netadc),etayr(netar))    
         allocate(vey(nsujety,nva3),X2cur(1,nrecy0),Z1cur(1,nb1))
         do i=1,nsujety
             do j=1,nva3
@@ -191,11 +191,7 @@
                     it = it+nreci_all(kk)    
             end do
     
-            !write(*,*)iii,'predtimred2'
-            !do i=1,npred0
-            !   write(*,*)predtimerec2(i,1:nrec0+2)
-            !end do
-            
+                      
             ! Calcul des risques de base
             ! A chaque fois, calculé pour :
             ! DC au temps de base (predtimerec2(1,1)) et à l'horizon (predtimerec2(1,nrec0+2))
@@ -252,11 +248,9 @@
             alpha = b(np-nva-nb_re-1-netadc - netar)    
             sigmae = b(np-nva-nb_re)*b(np-nva-nb_re)    
     
-            etaydc1 = b(np-nva-nb_re-netadc)
-            etaydc2 =b(np-nva-nb_re-netadc +1)
+            etaydc = b(np-nva-nb_re-netadc:np-nva-nb_re-1)
     
-            etayr1 =b(np-nva-nb_re-netadc - netar)
-            etayr2 =b(np-nva-nb_re-netadc - netar + 1)    
+            etayr =b(np-nva-nb_re-netadc - netar:np-nva-nb_re-netadc -1) 
     
             Ut = 0.d0
             Utt = 0.d0
@@ -270,8 +264,6 @@
             Ut(nea,nea) =  b(np-nva-nb_re-1-netadc - netar-1)
             Utt(nea,nea) =  b(np-nva-nb_re-1-netadc - netar-1)    
   
-            !theta = b(np-nva1-nva2-1)*b(np-nva1-nva2-1)
-            !alpha = b(np-nva1-nva2)
             it = 1
             do i=1,npred0
                 ycurrent  =0.d0
@@ -288,7 +280,7 @@
                 
                 if(nmescur.gt.0) then    
                     ycurrent(1:nmescur) = yy_matrice(i,1:nrecyi(i))    
-                    mu(1:nmescur) = matmul(vaxypred0(it:(it+nmescur-1),1:(nva3)),b((np-nva3+1):np))    
+                    mu(1:nmescur,1) = matmul(vaxypred0(it:(it+nmescur-1),1:(nva3)),b((np-nva3+1):np))    
                     if(nzyr.eq.1) then    
                         z2(1:nmescur,1)= 1.d0
                     else    
@@ -296,20 +288,21 @@
                         z2(1:nrecyi(i),2) = vaxypred0(it:(it+nmescur-1),2)
                     end if    
                 end if
-                !if(i.eq.82)then    
+                
                 if(nb1.eq.1) call gauherPred_tri2(ss11,1)
                 if(nb1.eq.2) call gauherPred_tri3(ss11,1) 
                 
+                if(nb1.eq.3) call gauherPred_tri4(ss11,1) 
+                
                 if(nb1.eq.1) call gauherPred_tri2(ss12,2)
                 if(nb1.eq.2) call gauherPred_tri3(ss12,2)
-                ! end if
+                if(nb1.eq.3) call gauherPred_tri4(ss12,2)
+             
                                 
                 predProba1(i) = ss11/ss12
                 it = it +nreci_all(i)
-                ! write(*,*)i,ss11/ss12
             end do
-            ! stop
-            ! if(iii.eq.2)stop
+         
             predAll1(:,iii) = predProba1    
     
             !=============================================
@@ -385,11 +378,8 @@
                     alpha = balea(j,np-nva-nb_re-1-netadc - netar)    
                     sigmae =balea(j,np-nva-nb_re)*balea(j,np-nva-nb_re)    
     
-                    etaydc1 = balea(j,np-nva-nb_re-netadc)
-                    etaydc2 = balea(j,np-nva-nb_re-netadc +1)
-                    
-                    etayr1 =balea(j,np-nva-nb_re-netadc - netar)
-                    etayr2 =balea(j,np-nva-nb_re-netadc - netar + 1)   
+                    etaydc = balea(j,np-nva-nb_re-netadc:np-nva-nb_re-1)
+                    etayr =balea(j,np-nva-nb_re-netadc - netar:np-nva-nb_re-netadc -1)
     
                     Ut = 0.d0
                     Utt = 0.d0
@@ -420,7 +410,7 @@
                         nmescurr = nreci(i)
                         if(nmescur.gt.0) then    
                             ycurrent(1:nmescur) = yy_matrice(i,1:nrecyi(i))
-                            mu(1:nmescur) = matmul(vaxypred0(it:(it+nmescur-1),1:(nva3)),balea(j,(np-nva3+1):np))    
+                            mu(1:nmescur,1) = matmul(vaxypred0(it:(it+nmescur-1),1:(nva3)),balea(j,(np-nva3+1):np))    
                             if(nzyr.eq.1) then    
                                 z2(1:nrecyi(i),1) = 1.d0
                             else    
@@ -430,10 +420,11 @@
                         end if    
                         if(nb1.eq.1) call gauherPred_tri2(ss11,1)
                         if(nb1.eq.2) call gauherPred_tri3(ss11,1)
+                        if(nb1.eq.3) call gauherPred_tri4(ss11,1)
                         
                         if(nb1.eq.1) call gauherPred_tri2(ss12,2)
                         if(nb1.eq.2) call gauherPred_tri3(ss12,2)
-    
+                         if(nb1.eq.3) call gauherPred_tri4(ss11,1)
                         predProbaalea1(j,i) = ss11/ss12
                         it = it +nreci_all(i)   
                     end do  
@@ -448,12 +439,46 @@
         
         !stop
         deallocate(mu,ycurrent,z2,survRi,hazRi,ut,utt)
-        deallocate(vey,X2cur,Z1cur,b1,zi)
+        deallocate(vey,X2cur,Z1cur,b1,zi,etaydc,etayr)
         !   deallocate(ut)
         
         end subroutine predict_tri  
     
+     !**************************************************************************
+            !********* Gauss-Hermit pour la dimension 4 - modèle trviarie b_10,b_11, b_12,v
+            !**************************************************************************    
+      SUBROUTINE gauherPred_tri4(ss,choix)    
+        use tailles
+        use donnees,only:x2,w2,x3,w3
+        use comon,only:typeof!,netadc,auxig
+        use donnees_indiv,only : frailpol3!,numpat
+        
+        Implicit none
     
+        double precision,intent(out)::ss
+        integer,intent(in)::choix
+        double precision::auxfunca
+        external::gauherPred_tri2
+        integer::j
+        ss=0.d0
+        if (typeof.eq.0) then
+            do j=1,20    
+                frailpol3 = x2(j)
+                call gauherPred_tri3(auxfunca,choix)
+                ss = ss+w2(j)*(auxfunca)    
+            end do
+        else   
+            do j=1,32
+                frailpol3 = x3(j)
+                call gauherPred_tri3(auxfunca,choix)    
+                ss = ss+w3(j)*(auxfunca)
+            end do    
+        endif
+    
+        return
+    
+        END SUBROUTINE gauherPred_tri4
+        
             !**************************************************************************
             !********* Gauss-Hermit pour la dimension 3 - modèle trviarie b_10,b_11, v
             !**************************************************************************    
@@ -531,15 +556,17 @@
         use tailles
         use donnees,only:x2,w2,x3,w3
         use comon,only:typeof,nb1!auxig
-        use donnees_indiv,only : frailpol,frailpol2
+        use donnees_indiv,only : frailpol,frailpol2,frailpol3
         
         Implicit none
     
         double precision,intent(out)::ss
         integer,intent(in)::choix
         double precision::auxfunca,func1pred1GHtri,func2pred1GHtri,&
-                          func1pred2GHtri,func2pred2GHtri
-        external::func1pred1GHtri,func2pred1GHtri,func1pred2GHtri,func2pred2GHtri
+                          func1pred2GHtri,func2pred2GHtri,&
+                          func1pred3GHtri,func2pred3GHtri
+        external::func1pred1GHtri,func2pred1GHtri,func1pred2GHtri,func2pred2GHtri,&
+        func1pred3GHtri,func2pred3GHtri
         integer::j
     
         ss=0.d0
@@ -560,6 +587,13 @@
                         auxfunca = func2pred2GHtri(frailpol2,frailpol,x2(j))
                     endif
                     ss = ss+w2(j)*(auxfunca)
+                 else if(nb1.eq.3)then
+                    if(choix.eq.1) then
+                        auxfunca=func1pred3GHtri(frailpol3,frailpol2,frailpol,x2(j))
+                    else if(choix.eq.2) then
+                        auxfunca = func2pred3GHtri(frailpol3,frailpol2,frailpol,x2(j))
+                    endif
+                    ss = ss+w2(j)*(auxfunca)
                 end if
             end do
         else
@@ -578,6 +612,13 @@
                         auxfunca = func2pred2GHtri(frailpol2,frailpol,x3(j))
                     endif
                     ss = ss+w3(j)*(auxfunca)
+                    else if(nb1.eq.3) then
+                    if(choix.eq.1) then
+                        auxfunca=func1pred3GHtri(frailpol3,frailpol2,frailpol,x3(j))
+                    else if(choix.eq.2) then
+                        auxfunca = func2pred3GHtri(frailpol3,frailpol2,frailpol,x3(j))
+                    endif
+                    ss = ss+w3(j)*(auxfunca)
                 end if
             end do
         endif   
@@ -591,7 +632,7 @@
     !=========================
       double precision function func1pred1GHtri(frail,frail2)
         ! calcul de l integrant (numerateur de la fonction de prediction)
-        use comon,only:etaydc1,sigmae,netar,etayr1,&
+        use comon,only:etaydc,sigmae,netar,etayr,nb1,&
             s_cag,s_cag_id,alpha,ut,utt,link,npp
             !etaydc2,etayr2,netadc,nva3,vey
         use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur
@@ -603,11 +644,11 @@
         double precision,dimension(nmescur)::mu1
         double precision :: yscalar,eps,finddet,det,prod_cag
         integer :: j,jj,k,ier
-        double precision,dimension((netar+1)*(netar+1+1)/2)::matv
-        double precision,dimension((netar+1),1)::  Xea2
-        double precision,dimension((netar+1)):: uii, Xea22
+        double precision,dimension((nb1+1)*(nb1+1+1)/2)::matv
+        double precision,dimension((nb1+1),1)::  Xea2
+        double precision,dimension((nb1+1)):: uii, Xea22
         double precision,dimension(1)::uiiui
-        double precision,dimension((netar+1),(netar+1))::mat
+        double precision,dimension((nb1+1),(nb1+1))::mat
         double precision,external::survdcCM_pred,survRCM_pred
         double precision,parameter::pi=3.141592653589793d0
         logical :: upper
@@ -625,8 +666,8 @@
         mat = matmul(ut,utt)
     
         jj=0
-        do j=1,(netar+1)
-            do k=j,(netar+1)
+        do j=1,(nb1+1)
+            do k=j,(nb1+1)
                 jj=j+k*(k-1)/2
                 matv(jj)=mat(j,k)
             end do
@@ -634,11 +675,11 @@
         ier = 0
         eps = 1.d-10
     
-        call dsinvj(matv,(netar+1),eps,ier)
+        call dsinvj(matv,(nb1+1),eps,ier)
     
         mat=0.d0
-        do j=1,(netar+1)
-            do k=1,(netar+1)
+        do j=1,(nb1+1)
+            do k=1,(nb1+1)
                 if (k.ge.j) then
                     mat(j,k)=matv(j+k*(k-1)/2)
                 else
@@ -648,7 +689,7 @@
         end do
     
         uii = matmul(Xea22,mat)
-        det = finddet(matmul(ut,utt),(netar+1))    
+        det = finddet(matmul(ut,utt),(nb1+1))    
         uiiui=matmul(uii,Xea2)    
         if(link.eq.2) then
             call integrationdc(survdcCM_pred,0.d0,predtime_cm(1),resultdc,abserr,resabs,resasc,1,b1,npp,Xea22)
@@ -659,14 +700,14 @@
             ! do ii=it_rec,it_rec+nmescurr-1
             resultR = 0.d0
             call integrationdc(survRCM_pred,0.d0,predtime_cm(1),resultR,abserr,resabs,resasc,1,b1,npp,xea22)    
-            survRi(1) = survRi(1) + resultR !c'est déjà res1-res3
+            survRi(1) = survRi(1) + resultR !c'est deja res1-res3
             ! end do
         end if    
     
         if(nmescur.gt.0) then    
-            mu1(1:nmescur) = mu(1:nmescur) +MATMUL(Z2(1:nmescur,1:netar),Xea22(1:netar))
+            mu1(1:nmescur) = mu(1:nmescur,1) +MATMUL(Z2(1:nmescur,1:nb1),Xea22(1:nb1))
         else
-            mu1(1:nmescur)  = mu(1:nmescur)
+            mu1(1:nmescur)  = mu(1:nmescur,1)
         end if    
         
         yscalar = 0.d0
@@ -685,21 +726,20 @@
             end do
         end if
     
-        !yscalar = norm2(ycurrent(1:nmescur) - mu1(1:nmescur))    
         yscalar = dsqrt(yscalar)   
         func1pred1GHtri = 0.d0
         
         if(link.eq.1) then
-            func1pred1GHtri = (survDC(1)**(exp(XbetapredDCi+etaydc1*frail+frail2*alpha)) &
-                - survDC(2)**(exp(XbetapredDCi+etaydc1*frail+frail2*alpha))) &
-                * exp((frail2+etayr1*frail))**nmescurr &
-                * (survRi(1)**( exp(XbetapredRi+frail2+etayr1*frail))) &
+            func1pred1GHtri = (survDC(1)**(exp(XbetapredDCi+etaydc(1)*frail+frail2*alpha)) &
+                - survDC(2)**(exp(XbetapredDCi+etaydc(1)*frail+frail2*alpha))) &
+                * exp((frail2+etayr(1)*frail))**nmescurr &
+                * (survRi(1)**( exp(XbetapredRi+frail2+etayr(1)*frail))) &
                 * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*dsqrt(2.d0*pi)
         else if(link.eq.2) then
             func1pred1GHtri =  (dexp(-survDC(1)*dexp(frail2*alpha))&
                 -dexp(- survDC(2)*dexp(frail2*alpha))) &
-                * exp((frail2+etayr1*frail))**nmescurr &
+                * exp((frail2+etayr(1)*frail))**nmescurr &
                 * dexp(-survRi(1)* exp(frail2)) &
                 * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*dsqrt(2.d0*pi)    
@@ -713,7 +753,7 @@
       double precision  function func2pred1GHtri(frail,frail2)
         ! calcul de l integrant (denominateur de la fonction de prediction)
         use optim
-        use comon,only:etaydc1,sigmae,netar,etayr1,s_cag,s_cag_id,&
+        use comon,only:etaydc,sigmae,netar,etayr,s_cag,s_cag_id,nb1,&
             alpha,ut,utt,link,npp!,nva3,vey,netadc,etaydc2,etayr2
         use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur,
         use prediction
@@ -723,11 +763,11 @@
         double precision,dimension(nmescur)::mu1
         double precision :: yscalar,eps,finddet,det,prod_cag
         integer :: j,jj,k,ier
-        double precision,dimension((netar+1)*(netar+1+1)/2)::matv
-        double precision,dimension((netar+1),1)::  Xea2
-        double precision,dimension((netar+1)):: uii, Xea22
+        double precision,dimension((nb1+1)*(nb1+1+1)/2)::matv
+        double precision,dimension((nb1+1),1)::  Xea2
+        double precision,dimension((nb1+1)):: uii, Xea22
         double precision,dimension(1)::uiiui
-        double precision,dimension((netar+1),(netar+1))::mat
+        double precision,dimension((nb1+1),(nb1+1))::mat
         double precision,external::survdcCM_pred,survRCM_pred
         double precision,parameter::pi=3.141592653589793d0
         logical :: upper
@@ -743,18 +783,18 @@
         mat = matmul(ut,utt)
     
         jj=0
-        do j=1,(netar+1)
-            do k=j,(netar+1)
+        do j=1,(nb1+1)
+            do k=j,(nb1+1)
                 jj=j+k*(k-1)/2
                 matv(jj)=mat(j,k)
             end do
         end do
         ier = 0
         eps = 1.d-10    
-        call dsinvj(matv,(netar+1),eps,ier)    
+        call dsinvj(matv,(nb1+1),eps,ier)    
         mat=0.d0
-        do j=1,(netar+1)
-            do k=1,(netar+1)
+        do j=1,(nb1+1)
+            do k=1,(nb1+1)
                 if (k.ge.j) then
                     mat(j,k)=matv(j+k*(k-1)/2)
                 else
@@ -764,7 +804,7 @@
         end do
     
         uii = matmul(Xea22,mat)
-        det = finddet(matmul(ut,utt),(netar+1))    
+        det = finddet(matmul(ut,utt),(nb1+1))    
         uiiui=matmul(uii,Xea2)   
         if(link.eq.2) then
             call integrationdc(survdcCM_pred,0.d0,predtime_cm(1),resultdc,abserr,resabs,resasc,1,b1,npp,Xea22)
@@ -773,15 +813,14 @@
             ! do ii=it_rec,it_rec+nmescurr-1
             resultR = 0.d0
             call integrationdc(survRCM_pred,0.d0,predtime_cm(1),resultR,abserr,resabs,resasc,1,b1,npp,xea22)    
-            survRi(1) = survRi(1) + resultR !c'est déjà res1-res3
+            survRi(1) = survRi(1) + resultR !c'est deja res1-res3
             !  end do
         end if    
 
         if(nmescur.gt.0) then    
-        !mu1(1:nmescur) = mu(1:nmescur) +MATMUL(Z2(1:nmescur,1:netadc),ui((netar+1):(netadc+netar),1))
-        mu1(1:nmescur) = mu(1:nmescur) +MATMUL(Z2(1:nmescur,1:netar),Xea22(1:netar))
+        mu1(1:nmescur) = mu(1:nmescur,1) +MATMUL(Z2(1:nmescur,1:nb1),Xea22(1:nb1))
         else
-            mu1(1:nmescur)  = mu(1:nmescur)
+            mu1(1:nmescur)  = mu(1:nmescur,1)
         end if
     
         yscalar = 0.d0
@@ -804,14 +843,14 @@
         yscalar = dsqrt(yscalar)    
         func2pred1GHtri = 0.d0
         if(link.eq.1) then
-            func2pred1GHtri = ((survDC(1)**(exp(XbetapredDCi+etaydc1*frail+frail2*alpha)) ) &
-                * exp((frail2+etayr1*frail))**nmescurr &
-                * (survRi(1)**( exp(XbetapredRi+frail2+etayr1*frail))) &
+            func2pred1GHtri = ((survDC(1)**(exp(XbetapredDCi+etaydc(1)*frail+frail2*alpha)) ) &
+                * exp((frail2+etayr(1)*frail))**nmescurr &
+                * (survRi(1)**( exp(XbetapredRi+frail2+etayr(1)*frail))) &
                 * exp(-(yscalar**2.d0)/(2.d0*sigmae)))*exp(prod_cag) &
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*dsqrt(2.d0*pi)
         else if(link.eq.2) then
             func2pred1GHtri =  dexp(-survDC(1)*dexp(frail2*alpha)) &
-                * exp((frail2+etayr1*frail))**nmescurr &
+                * exp((frail2+etayr(1)*frail))**nmescurr &
                 * dexp(-survRi(1)* exp(frail2)) &
                 * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*dsqrt(2.d0*pi)    
@@ -826,7 +865,7 @@
     !=========================
       double precision function func1pred2GHtri(frail,frail2,frail3)
         ! calcul de l integrant (numerateur de la fonction de prediction)
-        use comon,only:etaydc1,etaydc2,sigmae,netar,etayr1,etayr2,&
+        use comon,only:etaydc,sigmae,netar,etayr,nb1,&
             s_cag,s_cag_id,alpha,ut,utt,link,npp!netadc,nva3,vey
         use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur
         use prediction
@@ -837,11 +876,11 @@
         double precision,dimension(nmescur)::mu1
         double precision :: yscalar,eps,finddet,det,prod_cag
         integer :: j,jj,k,ier
-        double precision,dimension((netar+1)*(netar+1+1)/2)::matv
-        double precision,dimension((netar+1),1)::  Xea2
-        double precision,dimension((netar+1)):: uii, Xea22
+        double precision,dimension((nb1+1)*(nb1+1+1)/2)::matv
+        double precision,dimension((nb1+1),1)::  Xea2
+        double precision,dimension((nb1+1)):: uii, Xea22
         double precision,dimension(1)::uiiui
-        double precision,dimension((netar+1),(netar+1))::mat
+        double precision,dimension((nb1+1),(nb1+1))::mat
         double precision,external::survdcCM_pred,survRCM_pred
         double precision,parameter::pi=3.141592653589793d0
         logical :: upper
@@ -860,8 +899,8 @@
         mat = matmul(ut,utt)
     
         jj=0
-        do j=1,(netar+1)
-            do k=j,(netar+1)
+        do j=1,(nb1+1)
+            do k=j,(nb1+1)
                 jj=j+k*(k-1)/2
                 matv(jj)=mat(j,k)
             end do
@@ -869,10 +908,10 @@
         ier = 0
         eps = 1.d-10    
         
-        call dsinvj(matv,(netar+1),eps,ier)    
+        call dsinvj(matv,(nb1+1),eps,ier)    
         mat=0.d0
-        do j=1,(netar+1)
-            do k=1,(netar+1)
+        do j=1,(nb1+1)
+            do k=1,(nb1+1)
                 if (k.ge.j) then
                     mat(j,k)=matv(j+k*(k-1)/2)
                 else
@@ -882,7 +921,7 @@
         end do
     
         uii = matmul(Xea22,mat)
-        det = finddet(matmul(ut,utt),(netar+1))  
+        det = finddet(matmul(ut,utt),(nb1+1))  
     
         uiiui=matmul(uii,Xea2)    
         if(link.eq.2) then
@@ -894,15 +933,14 @@
             ! do ii=it_rec,it_rec+nmescurr-1    
             resultR = 0.d0
             call integrationdc(survRCM_pred,0.d0,predtime_cm(1),resultR,abserr,resabs,resasc,1,b1,npp,xea22)    
-            survRi(1) = survRi(1) + resultR !c'est déjà res1-res3
+            survRi(1) = survRi(1) + resultR !c'est deja res1-res3
             ! end do
         end if    
     
         if(nmescur.gt.0) then    
-            !mu1(1:nmescur) = mu(1:nmescur) +MATMUL(Z2(1:nmescur,1:netadc),ui((netar+1):(netadc+netar),1))
-            mu1(1:nmescur) = mu(1:nmescur) +MATMUL(Z2(1:nmescur,1:netar),Xea22(1:netar))
+            mu1(1:nmescur) = mu(1:nmescur,1) +MATMUL(Z2(1:nmescur,1:nb1),Xea22(1:nb1))
         else
-            mu1(1:nmescur)  = mu(1:nmescur)
+            mu1(1:nmescur)  = mu(1:nmescur,1)
         end if
     
         yscalar = 0.d0
@@ -925,10 +963,10 @@
         func1pred2GHtri  = 0.d0
                 
         if(link.eq.1) then
-            func1pred2GHtri = (survDC(1)**(exp(XbetapredDCi+etaydc1*frail+etaydc2*frail2+frail3*alpha)) &
-                - survDC(2)**(exp(XbetapredDCi+etaydc1*frail+etaydc2*frail2+frail3*alpha))) &
-                * exp((frail3+etayr1*frail+etayr2*frail2))**nmescurr &
-                * (survRi(1)**( exp(XbetapredRi+frail3+etayr1*frail+etayr2*frail2))) &
+            func1pred2GHtri = (survDC(1)**(exp(XbetapredDCi+etaydc(1)*frail+etaydc(2)*frail2+frail3*alpha)) &
+                - survDC(2)**(exp(XbetapredDCi+etaydc(1)*frail+etaydc(2)*frail2+frail3*alpha))) &
+                * exp((frail3+etayr(1)*frail+etayr(2)*frail2))**nmescurr &
+                * (survRi(1)**( exp(XbetapredRi+frail3+etayr(1)*frail+etayr(2)*frail2))) &
                 * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)
         else if(link.eq.2) then
@@ -939,10 +977,7 @@
                 * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)    
         end if
-        !! if(xea22(1).eq.-5.38748073577881.and.Xea22(2).eq.-5.38748073577881.and.Xea22(3).eq.-5.38748073577881) then
-        ! write(*,*)XbetapredRi
-        !   stop
-        !end if
+      
 
         return
     
@@ -952,7 +987,7 @@
       double precision  function func2pred2GHtri(frail,frail2,frail3)
         ! calcul de l integrant (denominateur de la fonction de prediction)
         use optim
-        use comon,only:etaydc1,etaydc2,sigmae,netar,etayr1,etayr2,&
+        use comon,only:etaydc,sigmae,netar,etayr,nb1,&
             s_cag,s_cag_id,alpha,ut,utt,link,npp !,nva3,vey,netadc
         use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur    
         use prediction
@@ -962,11 +997,11 @@
         double precision,dimension(nmescur)::mu1
         double precision :: yscalar,eps,finddet,det,prod_cag
         integer :: j,jj,k,ier
-        double precision,dimension((netar+1)*(netar+1+1)/2)::matv
-        double precision,dimension((netar+1),1)::  Xea2
-        double precision,dimension((netar+1)):: uii, Xea22
+        double precision,dimension((nb1+1)*(nb1+1+1)/2)::matv
+        double precision,dimension((nb1+1),1)::  Xea2
+        double precision,dimension((nb1+1)):: uii, Xea22
         double precision,dimension(1)::uiiui
-        double precision,dimension((netar+1),(netar+1))::mat
+        double precision,dimension((nb1+1),(nb1+1))::mat
         double precision,external::survdcCM_pred,survRCM_pred
         double precision,parameter::pi=3.141592653589793d0
         logical :: upper
@@ -985,18 +1020,18 @@
         mat = matmul(ut,utt)
     
         jj=0
-        do j=1,(netar+1)
-            do k=j,(netar+1)
+        do j=1,(nb1+1)
+            do k=j,(nb1+1)
                 jj=j+k*(k-1)/2
                 matv(jj)=mat(j,k)
             end do
         end do
         ier = 0
         eps = 1.d-10    
-        call dsinvj(matv,(netar+1),eps,ier)    
+        call dsinvj(matv,(nb1+1),eps,ier)    
         mat=0.d0
-        do j=1,(netar+1)
-            do k=1,(netar+1)
+        do j=1,(nb1+1)
+            do k=1,(nb1+1)
                 if (k.ge.j) then
                     mat(j,k)=matv(j+k*(k-1)/2)
                 else
@@ -1005,7 +1040,7 @@
             end do
         end do    
         uii = matmul(Xea22,mat)
-        det = finddet(matmul(ut,utt),(netar+1))    
+        det = finddet(matmul(ut,utt),(nb1+1))    
         uiiui=matmul(uii,Xea2)   
 
         if(link.eq.2) then
@@ -1015,15 +1050,14 @@
             ! do ii=it_rec,it_rec+nmescurr-1
             resultR = 0.d0
             call integrationdc(survRCM_pred,0.d0,predtime_cm(1),resultR,abserr,resabs,resasc,1,b1,npp,xea22)    
-            survRi(1) = survRi(1) + resultR !c'est déjà res1-res3
+            survRi(1) = survRi(1) + resultR !c'est deja res1-res3
             ! end do
         end if
     
         if(nmescur.gt.0) then    
-            !mu1(1:nmescur) = mu(1:nmescur) +MATMUL(Z2(1:nmescur,1:netadc),ui((netar+1):(netadc+netar),1))
-            mu1(1:nmescur) = mu(1:nmescur) +MATMUL(Z2(1:nmescur,1:netar),Xea22(1:netar))
+             mu1(1:nmescur) = mu(1:nmescur,1) +MATMUL(Z2(1:nmescur,1:nb1),Xea22(1:nb1))
         else
-            mu1(1:nmescur)  = mu(1:nmescur)
+            mu1(1:nmescur)  = mu(1:nmescur,1)
         end if
     
         yscalar = 0.d0
@@ -1046,13 +1080,13 @@
         yscalar = dsqrt(yscalar)   
         func2pred2GHtri = 0.d0
         if(link.eq.1) then
-            func2pred2GHtri = ((survDC(1)**(exp(XbetapredDCi+etaydc1*frail+etaydc2*frail2+frail3*alpha)) ) &
-                * exp((frail3+etayr1*frail+etayr2*frail2))**nmescurr &
-                * (survRi(1)**( exp(XbetapredRi+frail3+etayr1*frail+etayr2*frail2))) &
+            func2pred2GHtri = ((survDC(1)**(exp(XbetapredDCi+etaydc(1)*frail+etaydc(2)*frail2+frail3*alpha)) ) &
+                * exp((frail3*alpha+etayr(1)*frail+etayr(2)*frail2))**nmescurr &
+                * (survRi(1)**( exp(XbetapredRi+frail3+etayr(1)*frail+etayr(2)*frail2))) &
                 * exp(-(yscalar**2.d0)/(2.d0*sigmae)))*exp(prod_cag) &
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)
         else if(link.eq.2) then
-            func2pred2GHtri =  dexp(-survDC(1)*dexp(frail2*alpha)) &
+            func2pred2GHtri =  dexp(-survDC(1)*dexp(frail3*alpha)) &
                 * exp(frail3)**nmescurr &
                 * dexp(-survRi(1)* exp(frail3)) &
                 * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
@@ -1063,8 +1097,253 @@
     
       end function func2pred2GHtri    
     
+    
+        
+    !=========================
+    ! Prediction  : 3 effet aleatoire
+    !=========================
+      double precision function func1pred3GHtri(frail,frail2,frail3,frail4)
+        ! calcul de l integrant (numerateur de la fonction de prediction)
+        use comon,only:etaydc,sigmae,netar,etayr,nb1,nea,&
+            s_cag,s_cag_id,alpha,ut,utt,link,npp!netadc,nva3,vey
+        use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur
+        use prediction
+        use optim
+        implicit none  
+    
+        double precision,intent(in)::frail,frail2,frail3,frail4
+        double precision,dimension(nmescur)::mu1
+        double precision :: yscalar,eps,finddet,det,prod_cag
+        integer :: j,jj,k,ier
+        double precision,dimension((nb1+1)*(nb1+1+1)/2)::matv
+        double precision,dimension((nb1+1),1)::  Xea2
+        double precision,dimension((nb1+1)):: uii, Xea22
+        double precision,dimension(1)::uiiui
+        double precision,dimension((nb1+1),(nb1+1))::mat
+        double precision,external::survdcCM_pred,survRCM_pred
+        double precision,parameter::pi=3.141592653589793d0
+        logical :: upper
+        double precision :: alnorm
+        double precision :: resultdc,resultR,abserr,resabs,resasc  
+
+        upper = .false.
+    
+        Xea2(1,1) = frail
+        Xea2(2,1) = frail2
+        Xea2(3,1) = frail3
+        Xea2(4,1) = frail4
+        Xea22(1) = frail
+        Xea22(2) = frail2
+        Xea22(3) = frail3
+        Xea22(4) = frail4
+    
+        mat = matmul(ut,utt)
+    
+        jj=0
+        do j=1,(nb1+1)
+            do k=j,(nb1+1)
+                jj=j+k*(k-1)/2
+                matv(jj)=mat(j,k)
+            end do
+        end do
+        ier = 0
+        eps = 1.d-10    
+        
+        call dsinvj(matv,(nb1+1),eps,ier)    
+        mat=0.d0
+        do j=1,(nb1+1)
+            do k=1,(nb1+1)
+                if (k.ge.j) then
+                    mat(j,k)=matv(j+k*(k-1)/2)
+                else
+                    mat(j,k)=matv(k+j*(j-1)/2)
+                end if
+            end do
+        end do
+    
+        uii = matmul(Xea22,mat)
+        det = finddet(matmul(ut,utt),(nb1+1))  
+    
+        uiiui=matmul(uii,Xea2)    
+        if(link.eq.2) then
+            call integrationdc(survdcCM_pred,0.d0,predtime_cm(1),resultdc,abserr,resabs,resasc,1,b1,npp,Xea22)
+            survDC(1) = resultdc    
+            call integrationdc(survdcCM_pred,0.d0,predtime_cm(2),resultdc,abserr,resabs,resasc,1,b1,npp,Xea22)
+            survDC(2) = resultdc
+            survRi(1) = 0.d0
+            ! do ii=it_rec,it_rec+nmescurr-1    
+            resultR = 0.d0
+            call integrationdc(survRCM_pred,0.d0,predtime_cm(1),resultR,abserr,resabs,resasc,1,b1,npp,xea22)    
+            survRi(1) = survRi(1) + resultR !c'est deja res1-res3
+            ! end do
+        end if    
+    
+        if(nmescur.gt.0) then    
+            mu1(1:nmescur) = mu(1:nmescur,1) +MATMUL(Z2(1:nmescur,1:nb1),Xea22(1:nb1))
+        else
+            mu1(1:nmescur)  = mu(1:nmescur,1)
+        end if
+    
+        yscalar = 0.d0
+        prod_cag = 1.d0
+        if(s_cag_id.eq.1)then
+            do k = 1,nmescur
+                if(ycurrent(k).le.s_cag) then    
+                    prod_cag =  prod_cag*(1.d0-alnorm((mu1(k)-s_cag)/sqrt(sigmae),upper))    
+                else
+                    yscalar = yscalar + (ycurrent(k)-mu1(k))**2
+                end if
+            end do
+        else
+            do k=1,nmescur
+                yscalar = yscalar + (ycurrent(k)-mu1(k))**2
+            end do
+        end if
+            
+        yscalar = dsqrt(yscalar)
+        func1pred3GHtri  = 0.d0
+                
+        if(link.eq.1) then
+            func1pred3GHtri = (survDC(1)**(exp(XbetapredDCi+dot_product(etaydc,Xea22(1:nb1))+Xea22(nea)*alpha)) &
+                - survDC(2)**(exp(XbetapredDCi+dot_product(etaydc,Xea22(1:nb1))+Xea22(nea)*alpha))) &
+                * exp(dot_product(etayr,Xea22(1:nb1))+Xea22(nea))**nmescurr &
+                * (survRi(1)**( exp(XbetapredRi+dot_product(etayr,Xea22(1:nb1))+Xea22(nea)))) &
+                * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
+                *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)
+        else if(link.eq.2) then
+            func1pred3GHtri =  (dexp(-survDC(1)*dexp(Xea22(nea)*alpha))&
+                -dexp(- survDC(2)*dexp(Xea22(nea)*alpha))) &
+                * exp(Xea22(nea))**nmescurr &
+                * dexp(-survRi(1)* exp(Xea22(nea))) &
+                * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
+                *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)    
+        end if
+      
+
+        return
+    
+        end function func1pred3GHtri    
+    
+        !*************************************************
+      double precision  function func2pred3GHtri(frail,frail2,frail3,frail4)
+        ! calcul de l integrant (denominateur de la fonction de prediction)
+        use optim
+        use comon,only:etaydc,sigmae,netar,etayr,nb1,nea,&
+            s_cag,s_cag_id,alpha,ut,utt,link,npp !,nva3,vey,netadc
+        use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1,nmescurr!x2cur,z1cur    
+        use prediction
+        implicit none   
+    
+        double precision,intent(in)::frail,frail2,frail3,frail4
+        double precision,dimension(nmescur)::mu1
+        double precision :: yscalar,eps,finddet,det,prod_cag
+        integer :: j,jj,k,ier
+        double precision,dimension((nb1+1)*(nb1+1+1)/2)::matv
+        double precision,dimension((nb1+1),1)::  Xea2
+        double precision,dimension((nb1+1)):: uii, Xea22
+        double precision,dimension(1)::uiiui
+        double precision,dimension((nb1+1),(nb1+1))::mat
+        double precision,external::survdcCM_pred,survRCM_pred
+        double precision,parameter::pi=3.141592653589793d0
+        logical :: upper
+        double precision :: alnorm
+        double precision :: resultdc,resultR,abserr,resabs,resasc
+    
+        upper = .false.
+    
+        Xea2(1,1) = frail
+        Xea2(2,1) = frail2
+        Xea2(3,1) = frail3
+        Xea2(4,1) = frail4
+        Xea22(1) = frail
+        Xea22(2) = frail2
+        Xea22(3) = frail3
+        Xea22(4)  = frail4 
+        
+        mat = matmul(ut,utt)
+    
+        jj=0
+        do j=1,(nb1+1)
+            do k=j,(nb1+1)
+                jj=j+k*(k-1)/2
+                matv(jj)=mat(j,k)
+            end do
+        end do
+        ier = 0
+        eps = 1.d-10    
+        call dsinvj(matv,(nb1+1),eps,ier)    
+        mat=0.d0
+        do j=1,(nb1+1)
+            do k=1,(nb1+1)
+                if (k.ge.j) then
+                    mat(j,k)=matv(j+k*(k-1)/2)
+                else
+                    mat(j,k)=matv(k+j*(j-1)/2)
+                end if
+            end do
+        end do    
+        uii = matmul(Xea22,mat)
+        det = finddet(matmul(ut,utt),(nb1+1))    
+        uiiui=matmul(uii,Xea2)   
+
+        if(link.eq.2) then
+            call integrationdc(survdcCM_pred,0.d0,predtime_cm(1),resultdc,abserr,resabs,resasc,1,b1,npp,Xea22)
+            survDC(1) = resultdc   
+            survRi(1) = 0.d0
+            ! do ii=it_rec,it_rec+nmescurr-1
+            resultR = 0.d0
+            call integrationdc(survRCM_pred,0.d0,predtime_cm(1),resultR,abserr,resabs,resasc,1,b1,npp,xea22)    
+            survRi(1) = survRi(1) + resultR !c'est deja res1-res3
+            ! end do
+        end if
+    
+        if(nmescur.gt.0) then    
+             mu1(1:nmescur) = mu(1:nmescur,1) +MATMUL(Z2(1:nmescur,1:nb1),Xea22(1:nb1))
+        else
+            mu1(1:nmescur)  = mu(1:nmescur,1)
+        end if
+    
+        yscalar = 0.d0
+        prod_cag = 1.d0
+        if(s_cag_id.eq.1)then
+            do k = 1,nmescur
+                if(ycurrent(k).le.s_cag) then    
+                    prod_cag = prod_cag*(1.d0-alnorm((mu1(k)-s_cag)/sqrt(sigmae),upper))    
+                else
+                    yscalar = yscalar + (ycurrent(k)-mu1(k))**2
+                end if
+            end do
+        else
+            do k=1,nmescur
+                yscalar = yscalar + (ycurrent(k)-mu1(k))**2
+            end do
+        end if
+    
+        !yscalar = norm2(ycurrent(1:nmescur) - mu1(1:nmescur))    
+        yscalar = dsqrt(yscalar)   
+        func2pred3GHtri = 0.d0
+        if(link.eq.1) then
+            func2pred3GHtri = ((survDC(1)**(exp(XbetapredDCi+dot_product(etaydc,Xea22(1:nb1))+Xea22(nea)*alpha)) ) &
+                * exp(dot_product(etaydc,Xea22(1:nb1))+Xea22(nea)*alpha)**nmescurr &
+                * (survRi(1)**( exp(XbetapredRi+dot_product(etayr,Xea22(1:nb1))+Xea22(nea)))) &
+                * exp(-(yscalar**2.d0)/(2.d0*sigmae)))*exp(prod_cag) &
+                *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)
+        else if(link.eq.2) then
+            func2pred3GHtri =  dexp(-survDC(1)*dexp(Xea22(nea)*alpha)) &
+                * exp(Xea22(nea))**nmescurr &
+                * dexp(-survRi(1)* exp(Xea22(nea))) &
+                * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*exp(prod_cag)&
+                *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)    
+        end if    
+    
+        return
+    
+      end function func2pred3GHtri    
+    
+    
+    
     !====================================================================
-      double precision function survRCM_pred(tps,it,bh,np,frail)    
+      double precision function survRCM_pred(tps,it2,bh,np,frail)    
         use tailles
         use comon
         use betatttps
@@ -1072,7 +1351,7 @@
         use random_effect
         use prediction,only: XbetapredRi
     
-        integer::j,np,k,n,it,it1
+        integer::j,np,k,n,it2,it1
         double precision::tps
         double precision,dimension(-2:np)::the2
         double precision::bbb,su
@@ -1085,7 +1364,7 @@
         su=0.d0
         bbb=0.d0
         ! frail(1:nea) = re(1:nea)
-        it1 = it   
+        it1 = it2   
         X2cur(1,1) = 1.d0
         X2cur(1,2) = tps
         if(nva3.gt.2) then
@@ -1126,7 +1405,7 @@
                 bbb = (betaR*dexp((betaR-1.d0)*dlog(tps))/(etaR**betaR))   
         end select
     
-        survRCM_pred = bbb*XbetapredRi*dexp(etayr1*current_m(1))!+re(2))!+cdc(i)*etaydc1*current_mean(1)  
+        survRCM_pred = bbb*XbetapredRi*dexp(etayr(1)*current_m(1))!+re(2))!+cdc(i)*etaydc1*current_mean(1)  
     
         return
     

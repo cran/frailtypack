@@ -29,7 +29,7 @@
         double precision,dimension(nea) :: xea
         integer ::neval,ifail
         !
-        integer::n,i,j,k,vj,ig,choix,l,it
+        integer::n,i,j,k,vj,ig,choix,l!,it
         integer,dimension(ngmax)::cpt
         double precision::pe1,pe2,sum,som1,som2,res,vet,vet2,h1
         double precision :: eps_s
@@ -93,7 +93,7 @@
     
     
     
-    
+
         if(typeJoint.eq.3) then
             sigmav = bh(np-nva-nb_re-1-netadc - netar-1)
             alpha = bh(np-nva-nb_re-1-netadc - netar)
@@ -102,12 +102,9 @@
         end if
     
         if(nea.ge.1) then
-            etaydc1 = bh(np-nva-nb_re-netadc)
-            etaydc2 =bh(np-nva-nb_re-netadc +1)
-    
-            etayr1 =bh(np-nva-nb_re-netadc - netar)
-            etayr2 =bh(np-nva-nb_re-netadc - netar + 1)
-    
+            etaydc(1:netadc) = bh(np-nva-nb_re-netadc:np-nva-nb_re-1)
+            etayr(1:netar) =bh(np-nva-nb_re-netadc - netar:np-nva-nb_re-netadc - 1)
+           
             sigmae = bh(np-nva-nb_re)*bh(np-nva-nb_re)
     
             Ut = 0.d0
@@ -131,6 +128,7 @@
             end if
     
         end if
+
     !----------  calcul de ut1(ti) et ut2(ti) ---------------------------
     !    attention the(1)  sont en nz=1
     !        donc en ti on a the(i)
@@ -451,22 +449,25 @@
     
     
             mu = 0.d0
-            mu(1:nmescur) = matmul(X2(1:nmescur,1:(nva3)),bh((np-nva3+1):np))
+            mu(1:nmescur,1) = matmul(X2(1:nmescur,1:(nva3)),bh((np-nva3+1):np))
             xea = 0.d0
     
             ut2cur = ut2(nt1dc(ig))
     
-    
                     choix = 3
             if(methodGH.le.1) then
                 if(typeJoint.eq.2.and.nb1.eq.1) then
-                    call gauherJ1(int,choix,nodes_number)
+                    call gauherJ21(int,choix,nodes_number)
                 else if(typeJoint.eq.2.and.nb1.eq.2) then
-                            call gauherJ2(int,choix,nodes_number)
+                    call gauherJ22(int,choix,nodes_number)
+                else if(typeJoint.eq.2.and.nb1.eq.3) then 
+                    call gauherJ23(int, choix, nodes_number)
                 else if(typeJoint.eq.3.and.nb1.eq.1) then
-                    call gauherJ3(int,choix,nodes_number)
+                    call gauherJ31(int,choix,nodes_number)
                 else if(typeJoint.eq.3.and.nb1.eq.2) then
-                    call gauherJ4(int,choix,nodes_number)
+                    call gauherJ32(int,choix,nodes_number)
+                else if(typeJoint.eq.3.and.nb1.eq.3) then
+                    call gauherJ33(int,choix,nodes_number)
                 end if
                 integrale4(ig) =int !result(1) !
             else
@@ -474,7 +475,7 @@
                     epsrel, restar, result, abserr2, neval, ifail, work)
                 integrale4(ig) =result(1)
             end if
-    
+
             it_rec = it_rec + nmescurr
             it = it + nmescur
     
@@ -527,7 +528,7 @@
     !*************************************************************************
     !     vraisemblnce
     !*************************************************************************
-    
+
             if(effet.eq.0.or.link.eq.2) then
                 res2(k) = 0.d0
     
@@ -548,9 +549,9 @@
                 funcpajLongisplines=-1.d9
                 goto 123
             end if
-    
+  !  write(*,*)k,res,integrale4(k)
         end do
-    
+   ! stop
     !---------- calcul de la penalisation -------------------
     
         pe1 = 0.d0
@@ -654,9 +655,9 @@
         end do
     
         if(nmesy(i).gt.0) then
-            allocate(mu1(nmesy(i)))
+            allocate(mu1(nmesy(i),1))
         else
-            allocate(mu1(1))
+            allocate(mu1(1,1))
         end if
     
         allocate(re(nea),ui(nea))
@@ -666,9 +667,9 @@
     
     
         if(nmescur.gt.0) then
-            mu1(1:nmescur) = mu(1:nmescur) + MATMUL(Z1(1:nmescur,1:nb1),ui(1:nb1))
+            mu1(1:nmescur,1) = mu(1:nmescur,1) + MATMUL(Z1(1:nmescur,1:nb1),ui(1:nb1))
         else
-            mu1(1:nmescur)  = mu(1:nmescur)
+            mu1(1:nmescur,1)  = mu(1:nmescur,1)
         end if
     
         res22 = 0.d0
@@ -694,29 +695,14 @@
                                     endif
     
     
-    
-    !      if((etayr1*ui(1)+etayr2*ui(2)).ge.720.d0) then
-    !              res1(i) =  res1(i)+res1cur(ii)*vet*520.d0
-    !               res3(i) = res3(i)+res3cur(ii)*vet*520.d0
-    !       else
                                             res1(i) = res1(i)+res1cur(ii)*vet!*dexp(etayr1*ui(1)+etayr2*ui(2))
                                             res3(i) = res3(i)+res3cur(ii)*vet!*dexp(etayr1*ui(1)+etayr2*ui(2))
     
-    !     end if
-        !    if ((res1(i).ne.res1(i))) then !.or.(abs(res1(i)).ge. 1.d30))
-        !        if(CurrentProcessorID.eq.0)  print*,'ok 2'
-        !     end if
-    
-        !    if ((res3(i).ne.res3(i))) then !.or.(abs(res3(i)).ge. 1.d30))
-        !        if(CurrentProcessorID.eq.0)   print*,'ok 3'
-        !       if(CurrentProcessorID.eq.0) write(*,*)res3(i),vet!,dexp(etayr1*ui(1)+etayr2*ui(2))
-        !    end if
+
     
                     end do
     
-        !    write(*,*)'***res3',res3(g(i)),vet,i,g(i)
-            !if(link.eq.1) then
-                    res = res1(i) - res3(i)
+                   res = res1(i) - res3(i)
     
         else !*********** Current Mean ******************
                     
@@ -746,9 +732,7 @@
             end if
     
     
-    !if(CurrentProcessorID.eq.0.and.numpat.eq.7)write(*,*) i,res1(i), res3(i)
-    
-    !ccccccccccccccccccccccccccccccccccccccccc
+     !ccccccccccccccccccccccccccccccccccccccccc
     ! pour le deces
     !ccccccccccccccccccccccccccccccccccccccccc
     
@@ -765,22 +749,8 @@
             endif
     
             if(link.eq.1) then
-    ! pour le calcul des integrales / pour la survie, pas les donn?es recurrentes:
-    
-    !  if(nb1.eq.1) then
-    !      if(etaydc1*ui(1).ge.720.d0) then
-    !          aux1(i)=ut2cur*vet2*520.d0
-    !      else
-                aux1(i)=ut2cur*vet2!*dexp(etaydc1*ui(1))
-    !      end if
-    !  else
-    !      if((etaydc1*ui(1)+etaydc2*ui(2)).ge.720.d0) then
-    !          aux1(i)=ut2cur*vet2*520.d0
-    !      else
-    !          aux1(i)=ut2cur*vet2*dexp(etaydc1*ui(1)+etaydc2*ui(2))
-    !      end if
-    !  end if
-    
+                 aux1(i)=ut2cur*vet2!*dexp(etaydc1*ui(1))
+      
         else !********* Current Mean ****************
     
     
@@ -797,8 +767,7 @@
                 end do
             end if
     
-        !     write(*,*)numpat,'x2cur',x2cur
-            Z1cur(1,1) = 1.d0
+             Z1cur(1,1) = 1.d0
             if(nb1.eq.2) then
                 Z1cur(1,2) =t1dc(numpat)
             end if
@@ -816,9 +785,7 @@
     
             if ((aux1(i).ne.aux1(i)) ) then!.or.(abs(aux1(i)).ge. 1.d30)) then
     
-    !            if(CurrentProcessorID.eq.0)   print*,'ok 5'
-    !            if(CurrentProcessorID.eq.0)  write(*,*)aux1(i),etaydc1*ui(1)
-            end if
+              end if
     
     
         vraisind = 1.d0
@@ -828,14 +795,14 @@
         if(s_cag_id.eq.1)then
             do k = 1,nmescur
                 if(ycurrent(k).le.s_cag) then
-                    prod_cag = prod_cag*(1.d0-alnorm((mu1(k)-s_cag)/sqrt(sigmae),upper))
+                    prod_cag = prod_cag*(1.d0-alnorm((mu1(k,1)-s_cag)/sqrt(sigmae),upper))
                 else
-                    yscalar = yscalar + (ycurrent(k)-mu1(k))**2
+                    yscalar = yscalar + (ycurrent(k)-mu1(k,1))**2
                 end if
             end do
         else
             do k=1,nmescur
-                yscalar = yscalar + (ycurrent(k)-mu1(k))**2
+                yscalar = yscalar + (ycurrent(k)-mu1(k,1))**2
             end do
         end if
     
@@ -843,60 +810,40 @@
     
         vraisindtemp = 0.d0
         if(link.eq.1)then
-            if(typeJoint.eq.3.and.nea.eq.3) then
+            if(typeJoint.eq.3) then
     
             vraisindtemp = dlog(prod_cag) -(yscalar**2.d0)/(sigmae*2.d0)&
-                                    -dexp(ui(3)+etayr1*ui(1)+etayr2*ui(2))&
-                                    *(res1(i)-res3(i)) +nig(i)*(etayr1*ui(1)+etayr2*ui(2)) &
-                                    -dexp(ui(3)*alpha+etaydc1*ui(1)+etaydc2*ui(2))&
+                                    -dexp(ui(nb1+1)+dot_product(etayr,ui(1:nb1)))&
+                                    *(res1(i)-res3(i)) +nig(i)*(dot_product(etayr,ui(1:nb1))) &
+                                    -dexp(ui(nb1+1)*alpha+dot_product(etaydc,ui(1:nb1)))&
                                     *aux1(i) & !(res1(auxig)) &
-                                    +cdc(i)*(etaydc1*ui(1)+etaydc2*ui(2)) &
-                                    +ui(3)*(nig(i)+alpha*cdc(i)) !&
+                                    +cdc(i)*(dot_product(etaydc,ui(1:nb1))) &
+                                    +ui(nb1+1)*(nig(i)+alpha*cdc(i)) !&
     
-            else if(typeJoint.eq.3.and.nea.eq.2) then
-    
-            vraisindtemp = dlog(prod_cag)  -(yscalar**2.d0)/(sigmae*2.d0)&
-                                    -dexp(ui(2)+etayr1*ui(1))&
-                                    *(res1(i)-res3(i)) +nig(i)*etayr1*ui(1) &
-                                    -dexp(ui(2)*alpha+etaydc1*ui(1))&
-                                    *aux1(i) & !(res1(auxig)) &
-                                    +cdc(i)*(etaydc1*ui(1)) &
-                                    +ui(2)*(nig(i)+alpha*cdc(i))! &
-    
-            else  if(typeJoint.eq.2.and.nea.eq.2) then
+          
+            else  if(typeJoint.eq.2) then
     
             vraisindtemp = dlog(prod_cag) -(yscalar**2.d0)/(sigmae*2.d0)&
-                                    -aux1(i) *dexp(etaydc1*ui(1)+etaydc2*ui(2))  & !(res1(auxig)) &
-                                    +cdc(i)*(etaydc1*ui(1)+etaydc2*ui(2))
+                               -aux1(i) *dexp(dot_product(etaydc,ui(1:nb1)))  & !(res1(auxig)) &
+                                    +cdc(i)*(dot_product(etaydc,ui(1:nb1)))
     
-            else
-    
-                vraisindtemp =   dlog(prod_cag) -(yscalar**2.d0)/(2.d0*sigmae)&
-                                    -aux1(i) *dexp(etaydc1*ui(1))+ cdc(i)*etaydc1*ui(1)
             end if
     
         else if(link.eq.2) then
-            if(typeJoint.eq.3.and.nb1.eq.2) then
+            if(typeJoint.eq.3) then
     
                 vraisindtemp = dlog(prod_cag)  -(yscalar**2.d0)/(sigmae*2.d0)&
-                    -dexp(ui(3))*res +etayr1*current_meanR(1) &
-                    -dexp((ui(3)*alpha))*aux1(i) & !(res1(auxig)) &
-                    +cdc(i)*(etaydc1*current_mean(1)) &
-                    +ui(3)*(nig(i)+alpha*cdc(i))! &
+                    -dexp(ui(nb1+1))*res +etayr(1)*current_meanR(1) &
+                    -dexp((ui(nb1+1)*alpha))*aux1(i) & !(res1(auxig)) &
+                    +cdc(i)*(etaydc(1)*current_mean(1)) &
+                    +ui(nb1+1)*(nig(i)+alpha*cdc(i))! &
     
-            else if(typeJoint.eq.3.and.nb1.eq.1) then
-    
-                vraisindtemp = dlog(prod_cag)  -(yscalar**2.d0)/(sigmae*2.d0)&
-                    -dexp(ui(2))*res +etayr1*current_meanR(1)&
-                    -dexp((ui(2)*alpha))*aux1(i) & !(res1(auxig)) &
-                    +cdc(i)*(etaydc1*current_mean(1)) &
-                    +ui(2)*(nig(i)+alpha*cdc(i))! &
-    
-            else  if(typeJoint.eq.2.and.nb1.ge.1) then
+          
+            else  if(typeJoint.eq.2) then
     
                 vraisindtemp = dlog(prod_cag) -(yscalar**2.d0)/(sigmae*2.d0)&
                     -aux1(i) & !(res1(auxig)) &
-                    +cdc(i)*(etaydc1*current_mean(1))
+                    +cdc(i)*(etaydc(1)*current_mean(1))
             end if
         end if
     

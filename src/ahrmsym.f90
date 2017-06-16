@@ -410,7 +410,7 @@
 
 
                                 call fulsmh(s,m,n,f,fulsms(1,prtcnt),x,work)
-                                intcls=intcls+fulsms(n+1,prtcnt)
+                                intcls=intcls+INT(fulsms(n+1,prtcnt))
 
                         end if
 
@@ -629,7 +629,7 @@
  10   wtprod = 1
 
         do i= 1,ndim
-                ici = ic(i)
+                ici = INT(ic(i))
                 x(i) = point(ici)
                 wtprod = wtprod*weight(ici)
         end do

@@ -6,13 +6,13 @@
     ntimeAll,npred0,predTime,window,predtimerec,nrec0,vaxpred0,vaxdcpred0, &
     predAll1,predAll2,predAll3,predAll1R,predAlllow1,predAllhigh1, &
     predAlllow2,predAllhigh2,predAlllow3,predAllhigh3,predAlllow1R,predAllhigh1R,&
-    icproba,nsample,intcens,trunctime,lowertime,uppertime,movingwindow,timeAll,modeltype)
+    icproba,nsample,intcens,trunctime,lowertime,uppertime,movingwindow,timeAll,modeltype,indic_alpha)
 
     implicit none
 
     integer::i,ii,iii,j,npred0,nrec0,nsample,typeof
     integer,intent(in)::np,nz,nbintervR,nbintervDC,nva1,nva2,nst,&
-            typeof0, typevent,ntimeAll,icproba,intcens,movingwindow,modeltype
+            typeof0, typevent,ntimeAll,icproba,intcens,movingwindow,modeltype,indic_alpha
     double precision,dimension(np),intent(in)::b
     double precision,dimension(nz+6),intent(in)::zi
     double precision,dimension(np,np),intent(in)::HIHOut
@@ -216,7 +216,11 @@
         end select
 
         thesig = b(np-nva1-nva2-1)*b(np-nva1-nva2-1)
-        alpha = b(np-nva1-nva2)
+        if(indic_alpha.eq.1) then 
+            alpha = b(np-nva1-nva2)
+        else 
+            alpha = 1.d0
+        end if
 
         do i=1,npred0
             if (intcens.eq.0) then
@@ -254,6 +258,7 @@
                 predProba2(i) = ss21/ss22
                 predProba3(i) = 0.d0
             endif
+               
         end do
 
         if ((typevent.eq.1).or.(typevent.eq.2)) then
@@ -393,7 +398,11 @@
                     survDCalea(2) = exp(-(predtimerec2(1,nrec0+2)/scDCalea)**shDCalea)
                 end select
 
-                alphaalea = balea(j,np-nva1-nva2)
+                if(indic_alpha.eq.1) then 
+                    alphaalea = balea(j,np-nva1-nva2)
+                else 
+                    alphaalea = 1.d0
+                endif
                 thesigalea = balea(j,np-nva1-nva2-1)*balea(j,np-nva1-nva2-1)
                 do i=1,npred0
                     if (intcens.eq.0) then
@@ -471,8 +480,9 @@
     - survDC(2)**((frail**palpha) * exp(XbetapredDCi))) &
     * (frail**recj) &
     * (survRi(1)**(frail * exp(XbetapredRi))) &
-    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta))) 
-        
+    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta)))) 
+    
+      
     return
 
     end function func1pred1
@@ -491,7 +501,7 @@
     func2pred1 = ((survDC(1)**((frail**palpha) * exp(XbetapredDCi))) &
     * (frail**recj) &
     * (survRi(1)**(frail * exp(XbetapredRi))) &
-    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta))) 
+    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) *dexp( gammaJ(1.d0/ptheta))) )
     return
 
     end function func2pred1
@@ -514,7 +524,7 @@
     - survDC(2)**((frail**palpha) * exp(XbetapredDCi))) &
     * (frail**recj) &
     * ((survRi(recj+1))**(frail * exp(XbetapredRi))) &
-    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta))) 
+    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta)))) 
 
     return
 
@@ -534,7 +544,7 @@
     func2pred2 = ((survDC(1)**((frail**palpha) * exp(XbetapredDCi))) &
     * (frail**recj) &
     * ((survRi(recj+1))**(frail * exp(XbetapredRi))) & !!
-    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta)))
+    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta))))
 
     return
 
@@ -560,13 +570,13 @@
         !* (frail**recj) &
         !* ((survL**(frail * exp(XbetapredRi))-survU**(frail * exp(XbetapredRi)))
         /(survLT**(frail * exp(XbetapredRi))) & !!
-        * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta)))
+        * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta))))
     else
         func1pred2ic = ((survDC(1)**((frail**palpha) * exp(XbetapredDCi)) &
         - survDC(2)**((frail**palpha) * exp(XbetapredDCi))) &
         !* (frail**recj) &
         * ((survL**(frail * exp(XbetapredRi))-survU**(frail * exp(XbetapredRi)))/survLT**(frail * exp(XbetapredRi))) & !!
-        * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta)))
+        * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta))))
     endif
 
     return
@@ -589,12 +599,12 @@
         !* (frail**recj) &
         !* ((survL**(frail * exp(XbetapredRi))-survU**(frail * exp(XbetapredRi)))
         /(survLT**(frail * exp(XbetapredRi))) & !!
-        * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta)))
+        * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta))))
     else
         func2pred2ic = ((survDC(1)**((frail**palpha) * exp(XbetapredDCi))) &
         !* (frail**recj) &
         * ((survL**(frail * exp(XbetapredRi))-survU**(frail * exp(XbetapredRi)))/survLT**(frail * exp(XbetapredRi))) & !!
-        * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta)))
+        * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta))))
     endif
 
     return
@@ -615,7 +625,7 @@
 
     func1pred3 = ((survDC(1)**((frail**palpha) * exp(XbetapredDCi)) &
     - survDC(2)**((frail**palpha) * exp(XbetapredDCi))) &
-    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta))) 
+    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta))) )
 
     return
 
@@ -631,7 +641,7 @@
     double precision::ptheta,palpha,gammaJ
 
     func2pred3 = ((survDC(1)**((frail**palpha) * exp(XbetapredDCi))) &
-    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta)))
+    * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta))))
 
     return
 
@@ -658,7 +668,7 @@
       * (frail**recj) &
       * (survRi(recj+1)**(frail * exp(XbetapredRi))) &
       * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta)) / &
-      (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta))) 
+      (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta))))
       return
 
       end function func1pred1_rec
@@ -679,7 +689,7 @@
       * (frail**recj) &
       * (survRi(recj+1)**(frail * exp(XbetapredRi))) &
       * (frail**(1.d0/ptheta -1.d0) * exp(-frail/ptheta))/ &
-      (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta))) 
+      (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta)))) 
 
       return
     
@@ -731,6 +741,7 @@
             do j=1,20
                 var1 = x(j)
                 auxfunca11 = func1pred1(var1,ptheta,palpha,XbetapredRi,XbetapredDCi,survRi,survDC,nrec0,recj)
+                
                 ss11 = ss11 + w(j)*(auxfunca11)
                 auxfunca12 = func2pred1(var1,ptheta,palpha,XbetapredRi,XbetapredDCi,survRi,survDC,nrec0,recj)
                 ss12 = ss12 + w(j)*(auxfunca12)
@@ -1174,9 +1185,9 @@
                 do j=1,32
                     !Myriam : prediction pour recidive
                     auxfunca11_rec = func1pred1LogN_rec(var1,psig2,palpha,XbetapredRi,XbetapredDCi,survRi,survDC,nrec0,recj)
-                    ss11R = ss11R + w2(j)*(auxfunca11_rec)
+                    ss11R = ss11R + w3(j)*(auxfunca11_rec)
                     auxfunca12_rec = func2pred1LogN_rec(var1,psig2,palpha,XbetapredRi,XbetapredDCi,survRi,survDC,nrec0,recj)
-                    ss12R = ss12R + w2(j)*(auxfunca12_rec)            
+                    ss12R = ss12R + w3(j)*(auxfunca12_rec)            
                 end do
             end if
         endif

@@ -11,6 +11,7 @@ prediction_sha_logn.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_Recurr_Sha.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_biv.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_tri.o: aaOptim.o aaOptimres.o Aparameters.o
+prediction_tri_nl.o: aaOptim.o aaOptimres.o Aparameters.o
 aamarq98o.o: aaOptim.o aaOptimres.o Aparameters.o
 aaOptim.o: Aparameters.o
 afuncpasres.o: aaOptim.o aaOptimres.o Aparameters.o
@@ -75,7 +76,15 @@ joint_longi.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajlongisplines.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o
 funcpajlongiweib.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o
 
+joint_longi_nl.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpajlongisplines_nl.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpajlongiweib_nl.o: aaOptim.o aaOptimres.o Aparameters.o
+
+longi_uni_nl.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpalongi_uni.o: aaOptim.o aaOptimres.o Aparameters.o
+
 epoce_log.o: aaOptim.o aaOptimres.o Aparameters.o
 epoce.o: aaOptim.o aaOptimres.o Aparameters.o
 epoce_long.o: aaOptim.o aaOptimres.o Aparameters.o
+epoce_long_nl.o: aaOptim.o aaOptimres.o Aparameters.o
 survival.o: aaOptim.o aaOptimres.o Aparameters.o

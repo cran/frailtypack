@@ -5,23 +5,25 @@
     subroutine predictfam(np,b,nz,nva1,nva2,nst,typeof0,zi,HIHOut,&
     indID, tt1T, tt1dcT, icdctime, ntimeAll, nsujet, npred0, &
     window, nrec0, nrec, nrecT, vaxpred0,vaxdcpred0, icproba,nsample,&
-    predAll, predIClow, predIChigh, frailfam0, frailind0, pred)
+    predAll, predIClow, predIChigh, frailfam0, frailind0, pred, indic)
     
     implicit none
     
     integer::i,ii,iii,j,jj,k,typeof
     integer,intent(in)::np,nz,nva1,nva2,nst,typeof0,&
-    icproba,nsujet,nsample, npred0, nrec0,indID,ntimeAll    
+    icproba,nsujet,nsample, npred0, nrec0,indID,ntimeAll  
+    integer,dimension(2)::indic
     double precision,intent(in):: frailfam0, frailind0
-    double precision,dimension(np),intent(in)::b
+    double precision,dimension(np)::b!,intent(in)::b
     double precision,dimension(nz+6),intent(in)::zi
     double precision,dimension(np,np),intent(in)::HIHOut
     
     double precision,dimension(nsujet,nva1),intent(in)::vaxpred0
     double precision,dimension(npred0,nva2),intent(in)::vaxdcpred0
-    double precision,dimension(npred0), intent(in):: tt1dcT
-    double precision,dimension(nsujet), intent(in):: tt1T
-    integer,dimension(npred0), intent(in):: icdctime, nrec, nrecT
+    double precision,dimension(npred0,ntimeAll), intent(in):: tt1dcT
+    double precision,dimension(nsujet,ntimeAll), intent(in):: tt1T
+    integer,dimension(npred0,ntimeAll), intent(in):: icdctime, nrecT
+    integer,dimension(npred0), intent(in)::  nrec
     !integer,dimension(nsujet), intent(in):: icT
     
     double precision,dimension(ntimeAll)::window
@@ -53,27 +55,37 @@
      
     typeof = typeof0
     
+
+
+
     coefBeta(1,:) = b((np-nva1-nva2+1):(np-nva2))
     coefBetadc(1,:) = b((np-nva2+1):np)
-        
+          
     XbetapredRall = matmul(coefBeta,transpose(vaxpred0))
     XbetapredDC = matmul(coefBetadc,transpose(vaxdcpred0))
     
+
     ! change XbetapredRall(1,nsujet) to XbetapredR(ng, nrec0)
     
     XbetapredR = 0.d0
-    
+
     k=0
     do i=1, npred0
-        ii=0
-        do j=1,nsujet
-            if(k.lt.j.and.j.le.k+nrec(i)) then
-                ii=ii+1
-                XbetapredR(i,ii)=XbetapredRall(1,j)
-            end if
-        end do 
+        XbetapredR(i,1:nrec(i))=XbetapredRall(1,k+1:k+nrec(i))
+        k = k+nrec(i)
     end do
- 
+
+!    k=0
+!    do i=1, npred0
+!        ii=0
+!        do j=1,nsujet
+!            if(k.lt.j.and.j.le.k+nrec(i)) then
+!                ii=ii+1
+!                XbetapredR(i,ii)=XbetapredRall(1,j)
+!            end if
+!        end do 
+!    end do
+
     if (icproba.eq.1) then ! generation des parametres
         do j=1,nsample
             do i=1,np
@@ -112,7 +124,7 @@
                 do j=1,nsujet
                     if((k.lt.j).and.(j.le.k+nrec(i))) then
                         ii=ii+1
-                        predTime2 = tt1T(j)
+                        predTime2 = tt1T(j,iii)
                         call survival_frailty(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
                         survR(i,ii) = surv(1)
                             !hazR(i,ii) = lam(1) 
@@ -121,27 +133,35 @@
                 k=k+nrec(i)
             end do
             
-            predTime2 = tt1dcT(indID)
+            predTime2 = tt1dcT(indID,iii)
             call survival_frailty(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
             survDCi(1) = surv(2)
             
-            predTime2 = tt1dcT(indID)+window(iii)
+            predTime2 = tt1dcT(indID,iii)+window(iii)
             call survival_frailty(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
             survDCi(2) = surv(2)
 
             do i=1,npred0                
-                predTime2 = tt1dcT(i)
+                predTime2 = tt1dcT(i,iii)
                 call survival_frailty(predTime2,theR,theDC,nz+2,zi,surv,lam,nst)
                 survDC(i) = surv(2)
                 !hazDC(i) = lam(2)
             end do             
         end if
             
-            xi = b(np-nva1-nva2)
-            alpha = b(np-nva1-nva2-1)
+            if(indic(2).eq.1) then
+                xi = b(np-nva1-nva2)
+            else 
+                xi = 1.d0
+            end if
+            if(indic(1).eq.1) then
+                alpha = b(np-nva1-nva2-1)
+            else 
+                alpha  = 1.d0
+            end if
             eta = b(np-nva1-nva2-2)*b(np-nva1-nva2-2)
             theta = b(np-nva1-nva2-3)*b(np-nva1-nva2-3)        
-        
+
 !            pred1 = survDCi(1)**( ((frailind0**alpha)*frailfam0)*dexp(XbetapredDC(1,indID)) )
 !            pred2 = survDCi(2)**( ((frailind0**alpha)*frailfam0)*dexp(XbetapredDC(1,indID)) )
 !            write(*,*) 'tt1dcT(indID)', indID, tt1dcT(indID)
@@ -154,9 +174,9 @@
             !write(*,*) 'surv2/1', survDCi(2)/survDCi(1)
             !write(*,*) 'power', ((frailind0**alpha)*frailfam0)*dexp(XbetapredDC(1,indID))
             !write(*,*) 'predictfam, pred', window, pred
-            
+             
             call gaulagJpredfam(ss1,ss2, indID, theta,alpha,eta,xi, &
-            XbetapredR, XbetapredDC,survR,survDC,survDCi, icdctime, nrec0,nrecT, npred0)
+            XbetapredR, XbetapredDC,survR,survDC,survDCi, icdctime(1:npred0,iii), nrec0,nrecT(1:npred0,iii), npred0)
                          
             predProb = ss1/ss2
             predAll(1,iii) = predProb
@@ -200,14 +220,20 @@
                 
                     k=0
                     do i=1, npred0
-                        ii=0
-                        do jj=1,nsujet
-                            if(k.lt.jj.and.jj.le.k+nrec(i)) then
-                                ii=ii+1
-                                XbetapredRalea(i,ii)=XbetapredRallalea(1,jj)
-                            end if
-                        end do 
+                        XbetapredRalea(i,1:nrec(i))=XbetapredRallalea(1,k+1:k+nrec(i))
+                        k = k+nrec(i)
                     end do
+                    
+            !        k=0
+            !        do i=1, npred0
+            !            ii=0
+            !            do jj=1,nsujet
+            !                if(k.lt.jj.and.jj.le.k+nrec(i)) then
+            !                    ii=ii+1
+            !                    XbetapredRalea(i,ii)=XbetapredRallalea(1,jj)
+            !                end if
+            !            end do 
+            !        end do
                                        
                     theRalea = balea(j,1:(nz+2))*balea(j,1:(nz+2))
                     theDCalea = balea(j,(nz+3):2*(nz+2))*balea(j,(nz+3):2*(nz+2))                
@@ -218,7 +244,7 @@
                         do jj=1,nsujet
                             if((k.lt.jj).and.(jj.le.k+nrec(i))) then
                                 ii=ii+1
-                                predTime2 = tt1T(jj)
+                                predTime2 = tt1T(jj,iii)
                                 call survival_frailty(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                                 survRalea(i,ii) = surv(1)
                                 !hazRalea(i,ii) = lam(1) 
@@ -227,32 +253,40 @@
                         k=k+nrec(i)
                     end do
                 
-                    predTime2 = tt1dcT(indID)
+                    predTime2 = tt1dcT(indID,iii)
                     call survival_frailty(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                     survDCialea(1) = surv(2)
                 
-                    predTime2 = tt1dcT(indID)+window(iii)
+                    predTime2 = tt1dcT(indID,iii)+window(iii)
                     call survival_frailty(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                     survDCialea(2) = surv(2)
                 
                     do i=1,npred0                
-                        predTime2 = tt1dcT(i)
+                        predTime2 = tt1dcT(i,iii)
                         call survival_frailty(predTime2,theRalea,theDCalea,nz+2,zi,surv,lam,nst)
                         survDCalea(i) = surv(2)
                         !hazDCalea(i) = lam(2)
                     end do
         
-                    xialea = balea(j,np-nva1-nva2)
-                    alphaalea = balea(j,np-nva1-nva2-1)
+                    if(indic(2).eq.1) then 
+                        xialea = balea(j,np-nva1-nva2)
+                    else 
+                        xialea = 1.d0
+                    end if
+                    if(indic(1).eq.1) then 
+                        alphaalea = balea(j,np-nva1-nva2-1)
+                    else 
+                        alphaalea = 1.d0
+                    end if
                     etaalea = balea(j,np-nva1-nva2-2)*balea(j,np-nva1-nva2-2)
                     thetaalea = balea(j,np-nva1-nva2-3)*balea(j,np-nva1-nva2-3)
                     
                     call gaulagJpredfam(ss1,ss2, indID, thetaalea,alphaalea,etaalea,xialea, &
                     XbetapredRalea, XbetapredDCalea,&
-                    SurvRalea,survDCalea,survDCialea, icdctime, nrec0,nrecT, npred0)
+                    SurvRalea,survDCalea,survDCialea, icdctime(1:npred0,iii), nrec0,nrecT(1:npred0,iii), npred0)
                     
                     predProbaalea(j) = ss1/ss2
-        !write(*,*) 'predictfam: predprobaalea(j)',j, predProbaalea(j)         
+        !write(*,*) 'predictfam: predprobaalea(j)',j, predProbaalea(j)  
             end do
         !write(*,*) 'predictfam: predprobaalea, nsample', predProbaalea, nsample
         ! utilisation de la fonction percentile2 de aaUseFunction
@@ -326,12 +360,15 @@
         do k=1,32
             frailx = x1(k)
             gu = (frailx**(1.d0/ptheta -1.d0) * exp(-frailx/ptheta)) / &
-                    (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta))  
+                    (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta)))  
             do j=1, nrec0
                 survRfam(i)=survRfam(i)*survR(i,j)**(frailx*(frail2**pxi)*dexp(XbetapredR(i,j)))
             end do
             survDCfam(i)=((frailx**palpha)*frail2)**icdctime(i)*&
                     survDC(i)**( (frailx**palpha)*frail2*dexp(XbetapredDC(1,i)) )
+    !            write(*,*)    famHist(i) , &
+     !               w1(k),frailx,frail2,pxi,nrecT(i),survRfam(i),survDCfam(i),gu
+                
             famHist(i) = famHist(i) + &
                     w1(k)*(frailx*(frail2**pxi))**nrecT(i)*survRfam(i)*survDCfam(i)*gu            
         end do
@@ -408,7 +445,7 @@
         do k=1,32
             frailx = x1(k)
             gu = (frailx**(1.d0/ptheta -1.d0) * exp(-frailx/ptheta)) / &
-                    (ptheta**(1.d0/ptheta) * gammaJ(1.d0/ptheta))              
+                    (ptheta**(1.d0/ptheta) * dexp(gammaJ(1.d0/ptheta)))              
             do j=1, nrec0
                 survRfam(i)=survRfam(i)*survR(i,j)**(frailx*(frail2**pxi)*dexp(XbetapredR(i,j)))
             end do
@@ -425,8 +462,9 @@
         famHistALL = famHistALL*famHist(i)
     end do
     
-    gui = (frail**(1.d0/ptheta -1.d0)*exp(-frail/ptheta))/(ptheta**(1.d0/ptheta)*gammaJ(1.d0/ptheta))  
-    gw = (frail2**(1.d0/peta -1.d0)*exp(-frail2/peta))/(peta**(1.d0/peta)*gammaJ(1.d0/peta))  
+    gui = (frail**(1.d0/ptheta -1.d0)*exp(-frail/ptheta))/(ptheta**(1.d0/ptheta)*dexp(gammaJ(1.d0/ptheta)))  
+    gw = (frail2**(1.d0/peta -1.d0)*exp(-frail2/peta))/(peta**(1.d0/peta)*dexp(gammaJ(1.d0/peta)) ) 
+
     func2predfam = term*famHistALL*gui*gw
     
     return

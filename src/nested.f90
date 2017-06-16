@@ -902,7 +902,7 @@
     deallocate(hess,I_hess,H_hess,v)
     allocate(hess(np,np),I_hess(np,np),H_hess(np,np),v(np*(np+3)/2))
     select case(typeof)
-        case(0)
+        case(0)            
             call marq98j(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpansplines) 
         case(1)
             deallocate(vvv)

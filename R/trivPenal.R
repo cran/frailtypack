@@ -9,8 +9,7 @@
     m2 <- match.call() #terminal
     m2$formula <- m2$formula.terminalEvent <- m2$formula.LongitudinalData <- m2$data.Longi <- m2$recurrentAG <- m2$random <- m2$id <- m2$link <- m2$n.knots <- m2$kappa <- m2$maxit <- m2$hazard  <-  m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$left.censoring <- m2$init.Random <- m2$init.Eta <- m2$init.Alpha <- m2$method.GH <- m2$intercept <- m2$n.nodes <- m2$... <- NULL
     Names.data.Terminal <- m2$data
-
-
+	
     #### Frailty distribution specification ####
     if (!(all(random %in% c("1",names(data.Longi))))) { stop("Random effects can be only related to variables from the longitudinal data or the intercept (1)") }
     if (!(id %in% c(names(data.Longi))) || !(id %in% c(1,names(data)))) { stop("Identification for individuals can be only related to variables from both data set") }
@@ -66,7 +65,6 @@
           equidistant <- 2
 
         }
-
       }
     }else{
       #### longueur hazard > 1
@@ -334,17 +332,16 @@
       stop("grouping variable is needed in the formula")
 
     }
-
-    if (length(num.id))stop("'num.id' is not an allowed option")
+	
+	if (length(num.id))stop("'num.id' is not an allowed option")
 
     if(length(uni.cluster)==1){
       stop("grouping variable must have more than 1 level")
-    }
+
+	  }
 
 
     if (length(subcluster))stop("subcluster is not an allowed option")
-
-
 
     if (length(strats))stop("Stratified analysis is not allowed")
 
@@ -463,8 +460,6 @@
       }
     }
 
-
-
     #========= Longitudinal Data preparation =========================
 
     TermsY <- if (missing(data.Longi)){
@@ -479,9 +474,7 @@
 
     m3$formula <- TermsY
 
-
     m3[[1]] <- as.name("model.frame") # m[[1]]=frailtypenal, il le remplace par model.frame en fait
-
 
     if (NROW(m3) == 0)stop("No (non-missing) observations") #nombre ligne different de 0
 
@@ -490,9 +483,10 @@
 
     #=========================================================>
 
+	data.Longi <- data.Longi[order(data.Longi[,id]),]
     name.Y <- as.character(attr(TermsY, "variables")[[2]])
     Y <- data.Longi[,which(names(data.Longi)==name.Y)]
- 
+	 
     
   # on identifie les variables explicatives facteurs avec nombre de niveau plus que 2
 
@@ -694,9 +688,7 @@
       }
     }
   }
-  
-  
-  
+    
   if(length(grep(":",llY))>0){
     for(i in 1:length(grep(":",llY))){
       if(length(levels(data.Longi[,which(names(data.Longi)%in%strsplit(llY[grep(":",llY)[i]],":")[[1]])[1]]))>2 || length(levels(data.Longi[,which(names(data.Longi)%in%strsplit(llY[grep(":",llY)[i]],":")[[1]])[2]]))>2){
@@ -712,9 +704,6 @@
   else vec.factorY <- c(vec.factorY,llY[ind.placeY])
   
   vec.factorY <- unique(vec.factorY)
-  
-  
-
   
   mat.factorY <- matrix(vec.factorY,ncol=1,nrow=length(vec.factorY))
   # Fonction servant a prendre les termes entre "as.factor" et (AK 04/11/2015) interactions
@@ -781,11 +770,7 @@
         if(factor.spot<ncol(X_L))  X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1],X_L[(factor.spot+1):ncol(X_L)])
         else X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorY[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1])
         
-      } }
-    
- 
-	
-	
+      } }	
 	
     vect.factY<-names(X_L)[which(!(names(X_L)%in%llY))]
     if(intercept) vect.factY <- vect.factY[-1]
@@ -808,16 +793,12 @@
     interaction<-as.vector(apply(matrix(vect.factY,nrow=length(vect.factY)),MARGIN=1,FUN=function(x){length(grep(":",unlist(strsplit(x,split=""))))}))
     which.interaction <- which(interaction==1)
    
-    for(i in 1:length(vec.factorY)){
-      
-      if(length(grep(":",unlist(strsplit(vec.factorY[i],split=""))))>0){
-        
-        
+    for(i in 1:length(vec.factorY)){      
+      if(length(grep(":",unlist(strsplit(vec.factorY[i],split=""))))>0){        
         pos <- grep(":",unlist(strsplit(vec.factorY[i],split="")))
         length.grep <- 0
         for(j in 1:length(vect.factY)){
-          if(j%in%which.interaction){
-            
+          if(j%in%which.interaction){            
             if(length(grep(substr(vec.factorY[i],start=1,stop=pos-1),vect.factY[j]))>0 && length(grep(substr(vec.factorY[i],start=pos+1,stop=length(unlist(strsplit(vec.factorY[i],split="")))),vect.factY[j]))>0){
               length.grep <- length.grep + 1
               which <- i}
@@ -839,8 +820,6 @@
     }else{
       noVarY <- 0
     }
-
-
 
     #=========================================================>
 
@@ -869,14 +848,8 @@
 
 
     #newTerm vaut Terms - les variables dont les position sont dans drop
-
-
-
-
-
-
+	
     #========================================>
-
 
     nvarY<-ncol(X_L) #nvar==1 correspond a 2 situations:
 
@@ -933,6 +906,7 @@
 
     matzy <- data.matrix(X_Lall[,which(names(X_Lall)%in%names.matzy)])
     if(!intercept && 1%in%random) matzy <- as.matrix(cbind(rep(1,nsujety),matzy))
+	 if(dim(matzy)[2]>=3 && link0 == 2)stop("The current-level link can be chosen only if the biomarker random effects are associated with the intercept and time.")
 
     if(link0==1){netadc <- ncol(matzy)
                  netar <- ncol(matzy)}
@@ -951,7 +925,13 @@
     }
     #============= pseudo-adaptive Gauss Hermite ==============
     #m <- lme(measuret ~ time+interact+treatment, data = data, random = ~ 1| idd)
-    inn <-paste("pdSymm(form=~",random,")",sep="")
+     if(method.GH=="Pseudo-adaptive"){
+     if(length(random)>2){
+      random_lme <- random[2]
+      for(i in 3:length(random)){
+        random_lme <- paste(random_lme, "+", random[i])
+      }}else{random_lme <- random}
+    inn <-paste("pdSymm(form=~",random_lme,")",sep="")
     rand <- list(eval(parse(text=inn)))
     names(rand) <- id
 
@@ -963,33 +943,10 @@
     model_lme <- model.frame(terms(formula_lme), data = data.Longi)
     Terms_lme <- attr(model_lme, "terms")
     Z_lme <- model.matrix(formula_lme, model_lme)
-    #id <- as.vector(unclass(m2$groups[[1]]))
-    # Cholesky matrices for GH
-    #B_lme <- lapply(pdMatrix(m_lme$modelStruct$reStruct), "*",  m_lme$sigma^2)[[1]]
-
-
-    #invBi_chol <- lapply(Bi_lme, function (x) solve(chol(solve(x))))
-
-
-    ### model - frailtyPenal
-#    m_penal <- match.call() #terminal
-#    m_penal$formula.LongitudinalData <- m_penal$data.Longi <-   m_penal$random <-  m_penal$id <-  m_penal$link <-   m_penal$LIMparam <-  m_penal$LIMlogl <-  m_penal$LIMderiv <-  m_penal$print.times <-  m_penal$left.censoring <-  m_penal$init.Random <-  m_penal$init.Eta <-  m_penal$init.Alpha <- m_penal$init.B <- m_penal$method.GH <-  m_penal$intercept <-  m_penal$... <- NULL
-#  print(paste(m_penal$formula))
-#    print(paste(m_penal$formula)[[2]])
-
-#formu<-paste("frailtyPenal(",paste(m_penal$formula)[[2]],"~",paste(m_penal$formula)[[3]],",formula.terminalEvent=~",paste(m_penal$formula.terminalEvent)[[2]],",data=data, recurrentAG=",
-#        m_penal$recurrentAG,", hazard='Weibull',RandDist='LogN',print.times=FALSE)" )
-
- #  f<-eval(parse(text=formu))
-
-
-#u_paGH <-cbind(b_lme,f$frailty.pred)
+ 
 
   B_lme <-pdMatrix(m_lme$modelStruct$reStruct)[[1]]
- # B_paGH <- cbind(B_lme,rep(0,dim(B_lme)[1]))
- # B_paGH <- rbind(B_paGH,rep(0,dim(B_paGH)[2]))
-#B_paGH[dim(B_paGH)[1],dim(B_paGH)[2]] <- f$sigma2
-#print(B_paGH)
+
 
   Bi_tmp  <- vector("list", length(uni.cluster) )
 invBi_chol <- matrix(rep(0,ne_re*length(uni.cluster)),nrow=length(uni.cluster) )
@@ -1010,7 +967,13 @@ for (i in 1:length(uni.cluster )) {
 #Vs[[i]] <- solve(crossprod(Z.i) / m2$sigma^2 + inv.VC)
 #}
 invBi_cholDet <- sapply(Bi_tmp,  det)
-
+  }else{
+      
+      b_lme <- matrix(rep(0,length(uni.cluster)*nRE),ncol=nRE,nrow=length(uni.cluster))
+      invBi_cholDet <-  matrix(rep(0,length(uni.cluster)),ncol=1,nrow=length(uni.cluster))
+      invBi_chol <- matrix(rep(0,length(uni.cluster)*ne_re),ncol=ne_re,nrow=length(uni.cluster))
+      
+    }
    #==============================================
     #=== preparation survival data ===============
 
@@ -1065,9 +1028,10 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
 
     #=========================================================>
     if (!missing(formula.terminalEvent)){
-      X_T <- model.matrix(newTermsT, m2)
-
-      llT <- attr(newTermsT,"term.labels")
+      X_T <- model.matrix(newTermsT, m2)  
+	    
+      llT <- attr(newTermsT,"term.labels")	  
+	  
       #ind.placedc <- grep("factor",lldc)
       ind.placeT <- unique(attr(X_T,"assign")[duplicated(attr(X_T,"assign"))])#changement unique le 26/09/2014
       
@@ -1111,8 +1075,7 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
         vect.factT <- attr(X_T,"dimnames")[[2]]
         vect.factT <- vect.factT[grep(paste(vec.factorT,collapse="|"),vect.factT)]
         
-        occurT <- rep(0,length(vec.factorT))
-  
+        occurT <- rep(0,length(vec.factorT))  
         
         interactionT<-as.vector(apply(matrix(vect.factT,nrow=length(vect.factT)),MARGIN=1,FUN=function(x){length(grep(":",unlist(strsplit(x,split=""))))}))
         which.interactionT <- which(interactionT==1)
@@ -1132,8 +1095,7 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
               }}
             occurT[i] <- length.grep
             
-          }else{
-            
+          }else{           
             
             if(length(vect.factT[-which.interactionT])>0){occurT[i] <- length(grep(vec.factorT[i],vect.factT[-which.interactionT]))
             }else{occurT[i] <- length(grep(vec.factorT[i],vect.factT))}
@@ -1180,9 +1142,8 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
       #filtretpsT <- rep(0,nvarT)
       #filtretpsT[grep("timedep",colnames(X_T))] <- 1
 
-      varT.temp<-matrix(c(X_T),nrow=nrow(X_T),ncol=nvarT)
-
-
+	  X_T <- X_T[order(data[,id]),]		  
+      varT.temp<-matrix(c(X_T),nrow=nrow(X_T),ncol=nvarT)	
       if(is.null(nrow(m2)))
       {
         if (length(m2) != nrow(m)){
@@ -1193,9 +1154,7 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
         if (nrow(m2) != nrow(m)){
           stop(" There are missing values in the covariates modelling the terminal event. \n Prepare data only with complete cases")
         }
-
       }
-
 
       if (!is.null(ncol(varT.temp))){
         varT<-aggregate(varT.temp[,1],by=list(cluster), FUN=function(x) x[length(x)])[,2]
@@ -1319,14 +1278,15 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
    initialize <- 1
 
    npinit <- switch(as.character(typeof),
-                    "0"=((n.knots + 2) + nvarR + effet),
-                    "2"=(2 + nvarR + effet))
-
-    flush.console()
-    if (print.times){
-      ptm<-proc.time()
-      cat("\n")
-      cat("Be patient. The program is computing ... \n")
+		"0"=((n.knots + 2) + nvarR + effet),
+		"2"=(2 + nvarR + effet)
+		)
+					
+	flush.console()
+	if (print.times){
+		ptm<-proc.time()
+		cat("\n")
+		cat("Be patient. The program is computing ... \n")
     }
 
 
@@ -1380,7 +1340,7 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
                     counts=as.integer(c(0,0,0)),
                     ier_istop=as.integer(c(0,0)),
                     paraweib=as.double(rep(0,4)),
-                    MartinGale=as.double(matrix(0,nrow=ng,ncol=5)),###
+                    MartinGale=as.double(matrix(0,nrow=ng,ncol=3+nRE)),###
                     ResLongi = as.double(matrix(0,nrow=nsujety,ncol=4)),
                     Pred_y  = as.double(matrix(0,nrow=nsujety,ncol=2)),
 
@@ -1398,10 +1358,8 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
                     paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol)))
 					)
 
-
-
-    MartinGale <- matrix(ans$MartinGale,nrow=ng,ncol=5)
-Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
+    MartinGale <- matrix(ans$MartinGale,nrow=ng,ncol=3+nRE)
+	Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
 
     if (ans$ier_istop[2] == 4){
       warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")
@@ -1495,7 +1453,7 @@ Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
                         (np  - nvar - 1 - ne_re - netadc +1):(np  - nvar - 1 - ne_re )]
    if(netadc>1)fit$se.etaT <- sqrt(diag(varH.etaT))
    if(netadc==1)fit$se.etaT <- sqrt(varH.etaT)
-    fit$se.ResidualSE <- sqrt(temp1[(np  - nvar - ne_re- 1 ),(np  - nvar - ne_re- 1)])
+    fit$se.ResidualSE <- sqrt(temp1[(np  - nvar - ne_re ),(np  - nvar - ne_re)])
     fit$varHtotal <- temp1
     fit$varHIHtotal <- temp2
 

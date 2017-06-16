@@ -399,7 +399,7 @@
         integer,intent(in)::id,jd,np
         double precision,intent(in)::thi,thj
         double precision,dimension(np)::uu,bh
-        double precision::frail1,frail2,res,yscalar,prod_cag,eps,det
+        double precision::res,yscalar,prod_cag,eps
             double precision::finddet,alnorm
             double precision,dimension(nb1)::b_vec,uii
             double precision,dimension(nb1*(nb1+1)/2)::matv
@@ -418,18 +418,10 @@
         if (id.ne.0) bh(id)=bh(id)+thi
         if (jd.ne.0) bh(jd)=bh(jd)+thj
     
-        frail1=bh(1)!*bh(1)
-        frail2 = 0.d0
-            if(nb1.eq.2)frail2 = bh(2)!*bh(2)
-            b_vec(1) = frail1
-            if(nb1.eq.2)b_vec(2) = frail2
-            b_vecT(1,1) = frail1
-            if(nb1.eq.2)b_vecT(2,1) = frail2
-            !!!Nrec(indg) - zastapic f_Y(O_i|u_i)
-        !res = dexp((Ndc(indg))*frail1- &
-        !dexp(frail1)*Rrec(indg) - dexp(alpha*frail1)*Rdc(indg)- &
-        !(frail1**2.d0)/(2.d0*sig2))
-            matv = 0.d0
+        b_vec(1:nb1) = bh(1:nb1)
+        b_vecT(1:nb1,1) = bh(1:nb1)
+          
+          matv = 0.d0
             mu1_res = 0.d0
     
             if(nmesy(indg).gt.0) then
@@ -518,30 +510,15 @@
     
             res = 0.d0
             if(link.eq.1) then
-                    if(nb1.eq.1) then
-                            res =  dlog(prod_cag) &
-                                            -(yscalar**2.d0)/(2.d0*sigmae)&
-                                            -(frail1**2.d0)/(2.d0*ut(1,1)**2) &
-                                            +Ndc(indg)*(etaydc1*frail1) - &
-                                            Rdc(indg)*dexp(etaydc1*frail1)
-    
-                    else if(nb1.eq.2) then
-                                    res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
-                                    Ndc(indg)*(etaydc1*frail1+etaydc2*frail2) - &
-                                    Rdc(indg)*dexp(etaydc1*frail1+etaydc2*frail2)-uiiui(1)/2.d0
-                    end if
+                res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
+                Ndc(indg)*dot_product(etaydc,b_vec) - &
+                Rdc(indg)*dexp(dot_product(etaydc,b_vec))-uiiui(1)/2.d0
+          
             else
-                    if(nb1.eq.1) then
-    
-                            res =  dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)&
-                                    +Ndc(indg)*(etaydc1*current_mean(1)) &
-                                    -(frail1**2.d0)/(2.d0*ut(1,1)**2)  - resultdc   !        -Rdc(indg)*dexp(etaydc1*current_mean(1))
-    
-                    else if(nb1.eq.2) then
-                            res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)&
-                                    +Ndc(indg)*(etaydc1*current_mean(1))  &
+                res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)&
+                                    +Ndc(indg)*(etaydc(1)*current_mean(1))  &
                                     -uiiui(1)/2.d0 - resultdc!      -       Rdc(indg)*dexp(etaydc1*current_mean(1))
-                    end if
+            
             end if
     
         if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
@@ -576,7 +553,7 @@
         integer,intent(in)::id,jd,np
         double precision,intent(in)::thi,thj
         double precision,dimension(np)::uu,bh
-        double precision::frail1,frail2,frail3,res,yscalar,prod_cag,eps,det
+        double precision::frail1,frail2,frail3,res,yscalar,prod_cag,eps
             double precision::finddet,alnorm
             double precision,dimension(nea)::b_vec,uii
             double precision,dimension(nea*(nea+1)/2)::matv
@@ -596,31 +573,13 @@
         if (id.ne.0) bh(id)=bh(id)+thi
         if (jd.ne.0) bh(jd)=bh(jd)+thj
     
-        frail1=bh(1)!*bh(1)
-        frail2 = 0.d0
-            if(nb1.eq.2)frail2 = bh(2)!*bh(2)
-            frail3 = bh(nb1+1)!*bh(nb1+1)
-            b_vec(1) = frail1
-            if(nb1.eq.2) then
-                    b_vec(2) = frail2
-                    b_vec(3) = frail3
-                    b_vecT(2,1) = frail2
-                    b_vecT(3,1) = frail3
-            else
-                    b_vec(2) = frail3
-                    b_vecT(2,1) = frail3
-            end if
-            b_vecT(1,1) = frail1
-    
-            !!!Nrec(indg) - zastapic f_Y(O_i|u_i)
-        !res = dexp((Ndc(indg))*frail1- &
-        !dexp(frail1)*Rrec(indg) - dexp(alpha*frail1)*Rdc(indg)- &
-        !(frail1**2.d0)/(2.d0*sig2))
+        b_vec(1:nea) = bh(1:nea)
+        b_vecT(1:nea,1) = bh(1:nea)
+         
             matv = 0.d0
             mu1_res = 0.d0
     
             if(nmesy(indg).gt.0) then
-            !if(nb1.eq.1)mu1_res(1:nmesy(indg)) = XbetaY_res(1,indg) +Zet(1:nmesy(indg),1:netadc)*b_vec
             if(nb1.eq.2)mu1_res(1:nmesy(indg)) = XbetaY_res(1,indg) +MATMUL(Zet(1:nmesy(indg),1:nb1),b_vec(1:nb1))
             end if
     
@@ -728,36 +687,20 @@
             
             res = 0.d0
             if(link.eq.1) then
-                    if(nb1.eq.1) then
-                            res =  dlog(prod_cag) &
-                                            -(yscalar**2.d0)/(2.d0*sigmae)&
-                                            -(frail1**2.d0)/(2.d0*ut(1,1)**2) &
-                                            +Ndc(indg)*(etaydc1*frail1+frail3*alpha) - &
-                                            Rdc(indg)*dexp(etaydc1*frail1+frail3*alpha) &
-                                            +Nrec(indg)*(frail3+etayr1*frail1)-Rrec(indg)*dexp(frail3+etayr1*frail1)
-    
-                    else if(nb1.eq.2) then
-                            res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
-                                    Ndc(indg)*(etaydc1*frail1+etaydc2*frail2+frail3*alpha) - &
-                                    Rdc(indg)*dexp(etaydc1*frail1+etaydc2*frail2+frail3*alpha)-uiiui(1)/2.d0 &
-                                    +Nrec(indg)*(frail3+etayr1*frail1+etayr2*frail2)-&
-                                    Rrec(indg)*dexp(frail3+etayr1*frail1+etayr2*frail2)
-                    end if
+                 res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
+                       Ndc(indg)*(dot_product(etaydc,b_vec(1:nb1))+b_vec(nb1+1)*alpha) - &
+                       Rdc(indg)*dexp(dot_product(etaydc,b_vec(1:nb1))+b_vec(1+nb1)*alpha)-uiiui(1)/2.d0 &
+                        +Nrec(indg)*(b_vec(nb1+1)+dot_product(etayr,b_vec(1:nb1)))-&
+                       Rrec(indg)*dexp(b_vec(nb1+1)+dot_product(etayr,b_vec(1:nb1)))
+         
             else
-                    if(nb1.eq.1) then
-                            res =  dlog(prod_cag) &
-                                            -(yscalar**2.d0)/(2.d0*sigmae)&
-                                            -(frail1**2.d0)/(2.d0*ut(1,1)**2) &
-                                            +Ndc(indg)*(etaydc1*current_mean(1)+frail3*alpha) - &
-                                            Rdc(indg)*dexp(etaydc1*current_mean(1)+frail3*alpha) &
-                                            +Nrec(indg)*(frail3+etayr1*current_meanR(1))&
-                                            -ress*dexp(frail3+etayr1*current_meanR(1))
-                    else if(nb1.eq.2) then
-                            res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
-                                    Ndc(indg)*(etaydc1*current_mean(1)+frail3*alpha) - &
-                                    Rdc(indg)*dexp(etaydc1*current_mean(1)+frail3*alpha)-uiiui(1)/2.d0 &
-                                    +Nrec(indg)*(frail3+etayr1*current_meanR(1))-ress*dexp(frail3+etayr1*current_meanR(1))
-                    end if
+                  
+                res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
+                      Ndc(indg)*(etaydc(1)*current_mean(1)+b_vec(nb1+1)*alpha) - &
+                      Rdc(indg)*dexp(etaydc(1)*current_mean(1)+b_vec(nb1+1)*alpha)-uiiui(1)/2.d0 &
+                      +Nrec(indg)*(b_vec(nb1+1)+etayr(1)*current_meanR(1))&
+                      -ress*dexp(b_vec(nb1+1)+etayr(1)*current_meanR(1))
+              
             end if
     
         if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
@@ -772,4 +715,689 @@
         return
     
         end function funcpajres_tri
+ 
+ 
+ 
+!!!!
+!!!! =============================== Calcul Residus joint bivariate - longitudinales et deces ==============================
+    
+    
+    
+        double precision function funcpares_uni(uu,np,id,thi,jd,thj)
+    
+            use optim
+        use comon
+            use donnees_indiv,only:z1cur,x2cur,current_mean,b1,mu
+            use residusM
+ !   use ParametresPourParallelisation
+    
+        implicit none
+    
+        integer,intent(in)::id,jd,np
+        double precision,intent(in)::thi,thj
+        double precision,dimension(np)::uu,bh
+        double precision::frail1,frail2,frail3,frail4,res,yscalar,prod_cag,eps
+            double precision::finddet,alnorm
+            double precision,dimension(nb1)::b_vec,uii
+            double precision,dimension(nb1*(nb1+1)/2)::matv
+            double precision,dimension(nb1,1)::b_vecT
+            double precision,dimension(nb1,nb1)::mat_B
+            double precision,dimension(1)::uiiui
+            integer::jj,j,k,ier
+            logical :: upper
+        double precision,parameter::pi=3.141592653589793d0
+        double precision :: abserr,resabs,resasc
+            upper=.false.
+        bh=uu
+    
+        if (id.ne.0) bh(id)=bh(id)+thi
+        if (jd.ne.0) bh(jd)=bh(jd)+thj
+    
+        frail1=bh(1)!*bh(1)
+        frail2 = 0.d0
+        frail3 = 0.d0
+        
+        b_vec(1) = frail1
+        b_vecT(1,1) = frail1
+        
+         if(nb1.ge.2) then
+            frail2 = bh(2)!*bh(2)
+            b_vec(2) = frail2
+            b_vecT(2,1) = frail2
+        end if
+        
+        if(nb1.ge.3) then
+            frail3 = bh(3)!*bh(2)
+            b_vec(3) = frail3
+            b_vecT(3,1) = frail3
+        end if
+    
+        if(nb1.ge.4) then
+            frail4 = bh(4)!*bh(2)
+            b_vec(4) = frail4
+            b_vecT(4,1) = frail4
+        end if
+    
+    Ut = 0.d0
+            Utt = 0.d0
+    
+                    do j=1,nb1
+                do k=1,j
+                    if(j.eq.k) then
+    
+                       Ut(j,k)=b1(npp-nva-nb_re+k)!sqrt(bh(np-nva-nb_re+k)**2.d0)
+                  Utt(k,j)=b1(npp-nva-nb_re+k)!sqrt(bh(np-nva-nb_re+k)**2.d0)
+                  
+            end if
+                end do
+            end do
+  
+
+  
+            matv = 0.d0
+            mu1_res = 0.d0
+    
+            if(nmesy(indg).gt.0) then
+ 
+
+    !    mu1_res(1:nmesy(indg)) =dexp(b1(npp-nva-nb_re-1)+b_vec(1)) * &
+    !    dexp(dexp( b1(npp-nva-nb_re-1-3)+b_vec(2)+mu(1:nmesy(indg),1))*&
+    !    ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+    !    dexp(b1(npp-nva-nb_re-1-2)+b_vec(3)-&
+    !    (b1(npp-nva-nb_re-1-1))+&!+b_vec(2)
+    !    mu(1:nmesy(indg),2))*&!*ziy((it+1):(it+nmescur),3)+b_vec(3)
+    !    (dexp(-dexp(b1(npp-nva-nb_re-1-1))*&!+b_vec(3)
+    !    ziy(it_res:(it_res+nmesy(indg)-1),1)) -1))!)**0.4d0-1)/0.4d0
+    
+
+         select case(which_random)
+        case(1)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+b_vec(1) +dexp( b1(npp-nva-nb_re-1-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)-&
+        (b1(npp-nva-nb_re-1-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(2)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+dexp( b1(npp-nva-nb_re-1-3)+b_vec(1)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)-&
+        (b1(npp-nva-nb_re-1-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(3)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+dexp( b1(npp-nva-nb_re-1-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)+b_vec(1)-&
+        (b1(npp-nva-nb_re-1-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))*box_cox_par-box_cox1)/box_cox_par
+            
+        case(4)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+dexp( b1(npp-nva-nb_re-1-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)-&
+        (b1(npp-nva-nb_re-1-1)+b_vec(1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1)+b_vec(1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(5)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+b_vec(1) +dexp( b1(npp-nva-nb_re-1-3)+b_vec(2)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)-&
+        (b1(npp-nva-nb_re-1-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(6)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+b_vec(1) +dexp( b1(npp-nva-nb_re-1-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)+b_vec(2)-&
+        (b1(npp-nva-nb_re-1-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(7)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+b_vec(1) +dexp( b1(npp-nva-nb_re-1-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)-&
+        (b1(npp-nva-nb_re-1-1)+b_vec(2))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1)+b_vec(2))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(8)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1) +dexp( b1(npp-nva-nb_re-1-3)+b_vec(1)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)+b_vec(2)-&
+        (b1(npp-nva-nb_re-1-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(9)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1) +dexp( b1(npp-nva-nb_re-1-3)+b_vec(1)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)-&
+        (b1(npp-nva-nb_re-1-1)+b_vec(2))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1)+b_vec(2))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(10)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1) +dexp( b1(npp-nva-nb_re-1-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)+b_vec(1)-&
+        (b1(npp-nva-nb_re-1-1)+b_vec(2))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1)+b_vec(2))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(11)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+b_vec(1) +dexp( b1(npp-nva-nb_re-1-3)+b_vec(2)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)+b_vec(3)-&
+        (b1(npp-nva-nb_re-1-1)+b_vec(4))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1)+b_vec(4))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(12)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+b_vec(1) +dexp( b1(npp-nva-nb_re-1-3)+b_vec(2)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)-&
+        (b1(npp-nva-nb_re-1-1)+b_vec(3))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1)+b_vec(3))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(13)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+b_vec(1) +dexp( b1(npp-nva-nb_re-1-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)+b_vec(2)-&
+        (b1(npp-nva-nb_re-1-1)+b_vec(3))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1)+b_vec(3))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(14)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1) +dexp( b1(npp-nva-nb_re-1-3)+b_vec(1)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)+b_vec(2)-&
+        (b1(npp-nva-nb_re-1-1)+b_vec(3))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1)+b_vec(3))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(15)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1)+b_vec(1) +dexp( b1(npp-nva-nb_re-1-3)+b_vec(2)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-2)+b_vec(3)-&
+        (b1(npp-nva-nb_re-1-1)+b_vec(4))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-1)+b_vec(4))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        end select
+        
+           end if
+    
+    
+!    write(*,*)'yy',yy(it_res:it_res+nmesy(indg)-1)
+    
+    
+!if(indg.eq.400)write(*,*)b1,mu(2,1),b_vec(1)
+    
+            !********* Left-censoring ***********
+            yscalar = 0.d0
+                    prod_cag = 1.d0
+            if(s_cag_id.eq.1)then
+                    do k = 0,nmesy(indg)-1
+                            if(yy(k+it_res).le.s_cag) then
+                            
+                                    prod_cag = prod_cag*(1.d0-alnorm((mu1_res(k+1)-s_cag)/sqrt(sigmae),upper))
+                            else
+                                    yscalar = yscalar + (yy(k+it_res)-mu1_res(k+1))**2
+                            end if
+                    end do
+            else
+                    do k=0,nmesy(indg)-1
+                            yscalar = yscalar + (yy(k+it_res)-mu1_res(k+1))**2.d0
+                    end do
+            end if
+    
+            yscalar = dsqrt(yscalar)
+        !    write(*,*)mu1_res(1),yy(1)
+    
+            mat_B = matmul(ut,utt)
+            det = finddet(matmul(ut,utt),nb1)
+    
+        if(nb1.ge.2) then
+                    jj=0
+                    do j=1,nb1
+                            do k=j,nb1
+                                    jj=j+k*(k-1)/2
+                                    matv(jj)=mat_B(j,k)
+                            end do
+                    end do
+                    ier = 0
+                    eps = 1.d-10
+                    call dsinvj(matv,nb1,eps,ier)
+                    mat_b=0.d0
+                    do j=1,nb1
+                            do k=1,nb1
+                                    if (k.ge.j) then
+                                            mat_b(j,k)=matv(j+k*(k-1)/2)
+                                    else
+                                            mat_b(j,k)=matv(k+j*(j-1)/2)
+                                    end if
+                            end do
+                    end do
+            else
+    
+                    matv(1) = 1.d0/mat_B(1,1)
+    
+                    Mat_B(1,1) = matv(1)
+            end if
+    
+          
+
+            uii = matmul(b_vec,mat_b)
+            uiiui=matmul(uii,b_vecT)
+    
+            if(prod_cag.lt.0.1d-321)prod_cag= 0.1d-321
+    
+            res = 0.d0
+        
+                    if(nb1.eq.1) then
+                            res =  dlog(prod_cag) &
+                                            -(yscalar**2.d0)/(2.d0*b1(npp-nva-nb_re)*b1(npp-nva-nb_re))&
+                                            -(frail1**2.d0)/(2.d0*ut(1,1)**2) 
+    
+                    else if(nb1.ge.2) then
+                                    res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*b1(npp-nva-nb_re)*b1(npp-nva-nb_re))&
+                                   -uiiui(1)/2.d0
+                
+                    end if
+          
+
+    !            if(CurrentProcessorID.eq.0.and.indg.eq.1) write(*,*)mu1_res(1:2),'y0',b1(npp-nva-nb_re-1),&
+    !    'k_g0',b1(npp-nva-nb_re-1-3),'first cova',mu(1:2,1),&
+    !    'temps',ziy(it_res:(it_res+2),1), 'dose',ziy(it_res:(it_res+2),2),&
+    !    'k_d0',b1(npp-nva-nb_re-1-2),&
+    !    'lambda',b1(npp-nva-nb_re-1-1),&!+b_vec(2)
+    !    'second cova',mu(1:2,2)
+        
+        !  if(indg.eq.50)write(*,*)'vu', res,yy(it_res),mu1_res(1),CurrentProcessorID
+        !  stop
+!      write(*,*)'res',res,b_vec
+          
+!    if(indg.eq.1)write(*,*)yscalar,b_vec,yy(it_res:it_res+nmesy(indg)-1)
+    !write(*,*)dlog(prod_cag) , -(yscalar**2.d0),(2.d0*b1(npp-nva-nb_re)*b1(npp-nva-nb_re)),&
+     !                                       -(frail1**2.d0)/(2.d0*ut(1,1)**2) 
+
+    
+        if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+           funcpares_uni=-1.d9
+            goto 222
+        end if
+            funcpares_uni = res
+    
+    222    continue
+    
+        return
+    
+        end function funcpares_uni
+    
+
+    
+        
+    !!!!
+    !!!! =============================== Calcul Residus joint trivariate nonlinear ==========
+    
+    
+    
+        double precision function funcpajres_triNL(uu,np,id,thi,jd,thj)
+    
+            use optim
+        use comon
+            use donnees_indiv,only:z1cur,x2cur,current_mean,b1,mu,sigmav
+            use residusM
+        implicit none
+    
+        integer,intent(in)::id,jd,np
+        double precision,intent(in)::thi,thj
+        double precision,dimension(np)::uu,bh
+        double precision::frail1,frail2,frail3,frail4,res,yscalar,prod_cag,eps
+            double precision::finddet,alnorm
+            double precision,dimension(nea)::b_vec,uii
+            double precision,dimension(nea*(nea+1)/2)::matv
+            double precision,dimension(nea,1)::b_vecT
+            double precision,dimension(nea,nea)::mat_B
+            double precision,dimension(1)::uiiui
+            integer::jj,j,k,ier,ii
+            logical :: upper
+        double precision,parameter::pi=3.141592653589793d0
+            double precision :: resultdc,resultr
+            double precision,external::survdcCM,survRCM
+        double precision :: abserr,resabs,resasc,ress
+            double precision,dimension(1)::current_meanR
+            upper=.false.
+            
+        bh=uu
+        if (id.ne.0) bh(id)=bh(id)+thi
+        if (jd.ne.0) bh(jd)=bh(jd)+thj
+    
+    
+        b_vec(1:nea) = bh(1:nea)
+        b_vecT(1:nea,1) = bh(1:nea)
+            
+        Ut = 0.d0
+           Utt = 0.d0
+    
+                   do j=1,nb1
+               do k=1,j
+                   if(j.eq.k) then
+    
+                Ut(j,k)=b1(npp-nva-nb_re+k)
+                 Utt(k,j)=b1(npp-nva-nb_re+k)
+                  
+           end if
+               end do
+           end do
+        
+           Ut(nea,nea) = sqrt(sigmav**2.d0)
+                Utt(nea,nea) = sqrt(sigmav**2.d0)
+        
+        etaydc(1:netadc) = b1(npp-nva-nb_re-netadc:npp-nva-nb_re-1)
+                 etayr(1:netar) =b1(npp-nva-nb_re-netadc - netar:npp-nva-nb_re-netadc - 1)
+        
+
+            matv = 0.d0
+            mu1_res = 0.d0
+    
+            if(nmesy(indg).gt.0) then
+
+             select case(which_random)
+        case(1)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+b_vec(1) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+            
+        case(2)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+b_vec(1)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+    
+        case(3)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)+b_vec(1)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))*box_cox_par-box_cox1)/box_cox_par
+            
+        case(4)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(5)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+b_vec(1) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+b_vec(2)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(6)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+b_vec(1) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)+b_vec(2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(7)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+b_vec(1) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(2))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(2))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(8)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+b_vec(1)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)+b_vec(2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(9)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+b_vec(1)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(2))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(2))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(10)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)+b_vec(1)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(2))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(2))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(11)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+b_vec(1) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+b_vec(2)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)+b_vec(3)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(4))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(4))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(12)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+b_vec(1) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+b_vec(2)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(3))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(3))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(13)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+b_vec(1) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)+b_vec(2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(3))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(3))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(14)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+b_vec(1)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)+b_vec(2)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(3))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(3))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        case(15)
+                mu1_res(1:nmesy(indg)) =(( &
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha)+b_vec(1) +&
+        dexp( b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-3)+b_vec(2)+mu(1:nmesy(indg),1))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1) + ziy(it_res:(it_res+nmesy(indg)-1),2)*&
+        dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-2)+b_vec(3)-&
+        (b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(4))+&
+        mu(1:nmesy(indg),2))*&
+        (dexp(-dexp(b1(npp-nva-nb_re-1-netadc - netar-effet-indic_alpha-1)+b_vec(4))*&
+        ziy(it_res:(it_res+nmesy(indg)-1),1)) -1)))**box_cox_par-box_cox1)/box_cox_par
+            
+        end select
+        
+        
+        
+        
+        end if
+    
+
+    
+            !********* Left-censoring ***********
+            yscalar = 0.d0
+                    prod_cag = 1.d0
+            if(s_cag_id.eq.1)then
+                    do k = 0,nmesy(indg)-1
+                            if(yy(k+it_res).le.s_cag) then
+                                    prod_cag = prod_cag*(1.d0-alnorm((mu1_res(k+1)-s_cag)/sqrt(sigmae),upper))
+                                           
+                            else
+                                    yscalar = yscalar + (yy(k+it_res)-mu1_res(k+1))**2
+                            end if
+                    end do
+            else
+                    do k=0,nmesy(indg)-1
+                            yscalar = yscalar + (yy(k+it_res)-mu1_res(k+1))**2
+                    end do
+            end if
+    
+            yscalar = dsqrt(yscalar)
+    
+    
+            mat_B = matmul(ut,utt)
+            det = finddet(matmul(ut,utt),nea)
+    
+    
+                    jj=0
+                    do j=1,nea
+                            do k=j,nea
+                                    jj=j+k*(k-1)/2
+                                    matv(jj)=mat_B(j,k)
+                            end do
+                    end do
+                    ier = 0
+                    eps = 1.d-10
+                    call dsinvj(matv,nea,eps,ier)
+                    mat_b=0.d0
+                    do j=1,nea
+                            do k=1,nea
+                                    if (k.ge.j) then
+                                            mat_b(j,k)=matv(j+k*(k-1)/2)
+                                    else
+                                            mat_b(j,k)=matv(k+j*(j-1)/2)
+                                    end if
+                            end do
+                    end do
+    
+        ress = 0.d0
+        current_mean = 0.d0
+        current_meanR = 0.d0
+           
+    
+    
+            uii = matmul(b_vec,mat_b)
+            uiiui=matmul(uii,b_vecT)
+    
+            if(prod_cag.lt.0.1d-321)prod_cag= 0.1d-321
+      
+            res = 0.d0
+          
+
+                            res = dlog(prod_cag)-(yscalar**2.d0)/(2.d0*sigmae)+&
+                                    Ndc(indg)*(dot_product(etaydc,b_vec(1:netadc))+b_vec(nea)*alpha) - &
+                                    Rdc(indg)*dexp(dot_product(etaydc,b_vec(1:netadc))+b_vec(nea)*alpha)-uiiui(1)/2.d0 &
+                                    +Nrec(indg)*(b_vec(nea)+dot_product(etayr,b_vec(1:netar)))-&
+                                    Rrec(indg)*dexp(b_vec(nea)+dot_product(etayr,b_vec(1:netar)))
+                        
+        
+
+    
+    
+        if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+            funcpajres_triNL=-1.d9
+            goto 222
+        end if
+    
+        funcpajres_triNL = res
+    
+    222    continue
+    
+        return
+    
+        end function funcpajres_triNL
  

@@ -1,11 +1,11 @@
 \name{prediction}
 \alias{prediction}
 
-\title{ Prediction probabilities for Cox proportionnal hazard, Shared, Joint frailty models, Joint models for longitudinal data and a terminal event and Trivariate joint model for longitudinal data, recurrent events and a terminal event.  }
+\title{ Prediction probabilities for Cox proportional hazard, Shared, Joint frailty models, Joint models for longitudinal data and a terminal event and Trivariate joint model for longitudinal data, recurrent events and a terminal event (linear and non-linear).  }
 
 \description{
 
-\bold{For Cox proportionnal hazard model}
+\bold{For Cox proportional hazard model}
 
 A predictive probability of event between t and horizon time t+w, with w the window of prediction.
 
@@ -29,7 +29,7 @@ Two kinds of predictive probabilities can be calculated:
 
 Two kinds of predictive probabilities can be calculated:
 
-- a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific group and given a specific gaussian random effect \eqn{\eta}
+- a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific group and given a specific Gaussian random effect \eqn{\eta}
 
 \deqn{P^{cond}(t,t+w)=\frac{S_{ij}(t|\eta_i)-S_{ij}(t+w|\eta_i)}{S_{ij}(t|\eta_i)}=1-\left(\frac{S_0(t+w)}{S_0(t)}\right)^{\exp(\eta_i+\beta'Z_{ij})}}
 
@@ -61,10 +61,10 @@ Two kinds of predictive probabilities can be calculated:
 
 - a conditional predictive probability of event between t and horizon time t+w, i.e. given a specific individual. 
 
-This prediction method is the same as the conditional gaussian prediction method applied for clustered events (see formula \deqn{P^{cond}} before). 
+This prediction method is the same as the conditional Gaussian prediction method applied for clustered events (see formula \deqn{P^{cond}} before). 
 
 It is possible to compute all these predictions in two ways on a scale of times :
-- either you want a cumulative probability of developping the event between t and t+w (with t fixed, but with a varying window of prediction w);
+- either you want a cumulative probability of developing the event between t and t+w (with t fixed, but with a varying window of prediction w);
 - either you want at a specific time the probability to develop the event in the next w (ie, for a varying prediction time t, but for a fixed window of prediction). See Details.
 
 
@@ -98,21 +98,21 @@ The marginal probability computed is a prediction of a new recurrent event betwe
 \deqn{\frac{\int_0^\infty[S_{i(J+1)}^R(t)-S_{i(J+1)}^R(t+w)]S_i^D(t)(u_i)^JS_{i(J+1)}^R(X_{ij})g(u)du_i}{\int_0^\infty S_{i(J+1)}^R(t)S_i^D(t)(u_i)^JS_{i(J+1)}^R(X_{ij})g(u)du_i}}
 
 It is possible to compute all these predictions in two ways :
-- either you want a cumulative probability of developping the event between t and t+w (with t fixed, but with a varying window of prediction w);
+- either you want a cumulative probability of developing the event between t and t+w (with t fixed, but with a varying window of prediction w);
 - either you want at a specific time the probability to develop the event in the next w (ie, for a varying prediction time t, but for a fixed window of prediction). See Details.
 
-With Gaussian frailties (\eqn{\eta}), the same expressions are used but with \eqn{{u_i}^{J}} replaced by \eqn{\exp(J\eta_i)} and  \eqn{g(\eta)} corresponds to the gaussian distribution.
+With Gaussian frailties (\eqn{\eta}), the same expressions are used but with \eqn{{u_i}^{J}} replaced by \eqn{\exp(J\eta_i)} and  \eqn{g(\eta)} corresponds to the Gaussian distribution.
 
 
 \bold{For Joint Nested Frailty models}
 
 Prediction of the probability of developing a terminal event between t and t+w for subject i who survived by time t based on the visiting and disease histories of their own and other family members observed by time t. 
 
-Let (\eqn{Y_{fi}^R(t)}) be the history of subject \eqn{i} in family \eqn{f}, before time \eqn{t}, which includes all the recuurent events and covariate information. For disease history, let \eqn{T_{fi}^D(t) = min(T_{fi},t)} be the observed time to an event before t ; \eqn{\delta_{fi}^D(t)} the disease indicador by time \eqn{t} and \eqn{X_{fi}^D(t)} the covariate information observed up to time t.
+Let (\eqn{Y_{fi}^R(t)}) be the history of subject \eqn{i} in family \eqn{f}, before time \eqn{t}, which includes all the recurrent events and covariate information. For disease history, let \eqn{T_{fi}^D(t) = min(T_{fi},t)} be the observed time to an event before t ; \eqn{\delta_{fi}^D(t)} the disease indicator by time \eqn{t} and \eqn{X_{fi}^D(t)} the covariate information observed up to time t.
 We define the family history of subject \eqn{i} in family \eqn{f} by 
 \deqn{H_{f(-i)}(t) = \{Y_{fl}^R(t), T_{fl}^D(t), \delta_{fl}^D(t), X_{fl}^D(t), \forall l \in \{1, ..., i-1, i+1, ..., m_f \}\} }
 
-which includes the visiting and disease history af all subjects except for subject \eqn{i} in family \eqn{f} as well as their covariate information by time \eqn{t}.
+which includes the visiting and disease history of all subjects except for subject \eqn{i} in family \eqn{f} as well as their covariate information by time \eqn{t}.
 
 The prediction probability can be written as :
 
@@ -146,6 +146,8 @@ P(t,t+w)&=P(D_i \le t+w|D_i>t,H_i^{J,1},\mathcal{Y}_i(t))\\
 f(\bold{u}_i)d\bold{u}_i}{\int_0^\infty S_i^D(t)\exp(J(v_i+g(t)^\top\bold{\eta}_R))S_{i(J+1)}^R(t)f(\mathcal{Y}_i(t)|\bold{X}_{Li},\bold{b}_i)f(\bold{u}_i)d\bold{u}_i}
 \end{array}}
 
+The biomarker history can be represented using a linear (\code{trivPenal}) or non-linear mixed-effects model (\code{trivPenalNL}).
+
 These probabilities can be calculated in several time points with fixed time of prediction t and varying window w or with fixed window w and varying time of prediction t. See Details for an example of how to construct time windows.
 
 
@@ -159,9 +161,9 @@ prediction(fit, data, data.Longi, t, window, event="Both",
 }
 
 \arguments{
-  \item{fit}{A frailtyPenal or jointPenal object.}
-  \item{data}{Dataframe for the prediction. See Details.}
-  \item{data.Longi}{Dataframe for the prediction used for joint models with longitudinal data. See Details.}
+  \item{fit}{A frailtyPenal, jointPenal, longiPenal, trivPenal or trivPenalNL object.}
+  \item{data}{Data frame for the prediction. See Details.}
+  \item{data.Longi}{Data frame for the prediction used for joint models with longitudinal data. See Details.}
   \item{event}{Only for joint and shared models. The type of event you want to predict : "Terminal" for a terminal event, "Recurrent" for a recurrent event or "Both". Default value is "Both". For joint nested model, only 'Terminal' is allowed. 
   In a shared model, if you want to predict a new recurrent event then the argument "Recurrent" should be use. If you want to predict a new event from clustered data, do not use this option.}
   \item{t}{Time or vector of times for prediction.}
@@ -173,7 +175,7 @@ prediction(fit, data, data.Longi, t, window, event="Both",
 
 \value{
 
-The following components are included in a 'predFrailty' object obtained by using prediction function for Cox proportionnal hazard and shared frailty model.
+The following components are included in a 'predFrailty' object obtained by using prediction function for Cox proportional hazard and shared frailty model.
 
 \item{npred}{Number of individual predictions}
 \item{x.time}{A vector of prediction times of interest (used for plotting predictions): vector of prediction times t if fixed window. Otherwise vector of prediction times t+w}
@@ -226,8 +228,8 @@ Otherwise, you can have a variable prediction time and a fixed window.
 Or fix both prediction time t and window.
 \preformatted{prediction(fit, datapred, t=10, window=5)}
 
-The dataframe building is an important step. It will contain profiles of patient on which you want to do predictions.
-To make predictions on a Cox proportional hazard or a shared frailty model, only covariates need to be included. You have to distinguish between numerical and categorical variables (factors). If we fit a shared frailty model with two covariates sex (factor) and age (numeric), here is the associated dataframe for three profiles of prediction.
+The data frame building is an important step. It will contain profiles of patient on which you want to do predictions.
+To make predictions on a Cox proportional hazard or a shared frailty model, only covariates need to be included. You have to distinguish between numerical and categorical variables (factors). If we fit a shared frailty model with two covariates sex (factor) and age (numeric), here is the associated data frame for three profiles of prediction.
 
 \preformatted{
 datapred <- data.frame(sex=0,age=0)
@@ -241,7 +243,7 @@ datapred[3,] <- c(1,60) # man, 60 years old
 \bold{Time-dependent covariates:}
 In the context of time-dependent covariate, the last previous value of the covariate is used before the time t of prediction.
 
-It should be noted, that the dataframe for a conditional prediction on a shared frailty model, you need to specify the group to which the individuals belong to in adding the same cluster covariate as that used for model fitted. 
+It should be noted, that the data frame for a conditional prediction on a shared frailty model, you need to specify the group to which the individuals belong to in adding the same cluster covariate as that used for model fitted. 
 Here, the three individual belongs to the group 5.
 
 \preformatted{
@@ -253,7 +255,7 @@ datapred[2,] <- c(5,2,45) # woman, 45 years old (cluster 5)
 datapred[3,] <- c(5,1,60) # man, 60 years old (cluster 5)
 }
 
-To use the prediction function on joint frailty models and trivariate joint models, the construction will be a little bit different. In these cases, the prediction for the terminal event takes into account covariates but also history of recurrent event times for a patient. You have to create a dataframe with the relapse times, the indicator of event, the cluster variable and the covariates. Relapses occuring after the prediction time may be included but will be ignored for the prediction. A joint model with calendar-timescale need to be fitted with Surv(start,stop,event), relapse times correspond to the "stop" variable and indicators of event correspond to the "event" variable (if event=0, the relapse will not be taken into account). For patients without relapses, all the values of "event" variable should be set to 0. Finally, the same cluster variable name needs to be in the joint model and in the dataframe for predictions ("id" in the following example). For instance, we observe relapses of a disease and fit a joint model adjusted for two covariates sex (1:male 2:female) and chemo (treatment by chemotherapy 1:no 2:yes).
+To use the prediction function on joint frailty models and trivariate joint models, the construction will be a little bit different. In these cases, the prediction for the terminal event takes into account covariates but also history of recurrent event times for a patient. You have to create a data frame with the relapse times, the indicator of event, the cluster variable and the covariates. Relapses occurring after the prediction time may be included but will be ignored for the prediction. A joint model with calendar-timescale need to be fitted with Surv(start,stop,event), relapse times correspond to the "stop" variable and indicators of event correspond to the "event" variable (if event=0, the relapse will not be taken into account). For patients without relapses, all the values of "event" variable should be set to 0. Finally, the same cluster variable name needs to be in the joint model and in the data frame for predictions ("id" in the following example). For instance, we observe relapses of a disease and fit a joint model adjusted for two covariates sex (1:male 2:female) and chemo (treatment by chemotherapy 1:no 2:yes).
 We describe 3 different profiles of prediction all treated by chemotherapy: 1) a man with four relapses at 100, 200, 300 and 400 days, 2) a man with only one relapse at 1000 days, 3) a woman without relapse.
 
 \preformatted{
@@ -272,7 +274,7 @@ datapred[6,] <- c(100,0,3,2,2) # patient 3 did not relapse
 
 The data can also be the dataset used to fit the joint model. In this case, you will obtain as many prediction rows as patients.
 
-Finally, for the predictions using joint models for longitudinal data and a terminal event and trivariate joint models, a dataframe with the history of the biomarker measurements must be provided. It must include data on measurements (values and time points), cluster variable and covariates. Measurements taken after the prediction time may be included but will be ignored for the prediction. The same cluster variable name must be in the dataframe, in the dataframe used for the joint model and in the dataframe with the recurrent event and terminal event times. For instance, we observe two patients and each one had 5 tumor size measurements (patient 1 had an increasing tumor size and patient 2, decreasing). The joint model used for the predictions was adjusted on sex (1: male, 2: female), treatment (1: sequential arm, 2: combined arm), WHO baseline performance status (1: 0 status, 2: 1 status, 3: 2 status) and previous resection of the primate tumor (0: no, 1: yes). The dataframe for the biomarker measurements can be:
+Finally, for the predictions using joint models for longitudinal data and a terminal event and trivariate joint models, a data frame with the history of the biomarker measurements must be provided. It must include data on measurements (values and time points), cluster variable and covariates. Measurements taken after the prediction time may be included but will be ignored for the prediction. The same cluster variable name must be in the data frame, in the data frame used for the joint model and in the data frame with the recurrent event and terminal event times. For instance, we observe two patients and each one had 5 tumor size measurements (patient 1 had an increasing tumor size and patient 2, decreasing). The joint model used for the predictions was adjusted on sex (1: male, 2: female), treatment (1: sequential arm, 2: combined arm), WHO baseline performance status (1: 0 status, 2: 1 status, 3: 2 status) and previous resection of the primate tumor (0: no, 1: yes). The data frame for the biomarker measurements can be:
 \preformatted{
 datapredj_longi <- data.frame(id = 0, year = 0, tumor.size = 0, 
 treatment = 0, age = 0, who.PS = 0, prev.resection = 0)
@@ -304,7 +306,7 @@ datapredj_longi[10,] <- c(2,0.9,0.1,2,1,1,1)
 \references{
 A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2016). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
 Event: Predictive Abilities of Tumor Burden for Cancer Evolution with Application to the
-FFCD 2000-05 Trial. \emph{Biometrics}.
+FFCD 2000-05 Trial. \emph{Biometrics} \bold{72}(3) 907-16.
 
 A. Mauguen, B. Rachet, S. Mathoulin-Pelissier, G. MacGrogan, A. Laurent, V. Rondeau (2013). Dynamic prediction of risk of death using history of cancer recurrences in joint frailty models. \emph{Statistics in Medicine}, \bold{32(30)}, 5366-80.
 
@@ -332,7 +334,7 @@ readmission <- aggregate(readmission,by=list(readmission$id),
 cox <- frailtyPenal(Surv(t.stop,death)~sex+dukes,
 n.knots=10,kappa=10000,data=readmission)
 
-#-- construction of the dataframe for predictions
+#-- construction of the data frame for predictions
 datapred <- data.frame(sex=0,dukes=0)
 datapred$sex <- as.factor(datapred$sex)
 levels(datapred$sex)<- c(1,2)
@@ -360,7 +362,7 @@ pred.sha.marg <- prediction(sha,datapred,t=100,window=seq(50,1900,50))
 plot(pred.sha.marg)
 
 #-- conditional prediction, given a specific cluster (group=5)
-#-- construction of the dataframe for predictions
+#-- construction of the data frame for predictions
 datapred <- data.frame(group=0,sex=0,dukes=0)
 datapred$sex <- as.factor(datapred$sex)
 levels(datapred$sex)<- c(1,2)
@@ -411,7 +413,7 @@ joi <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)
 +sex+dukes+terminal(death),formula.terminalEvent=~sex
 +dukes,data=readmission,n.knots=10,kappa=c(100,100),recurrentAG=TRUE)
 
-#-- construction of the dataframe for predictions
+#-- construction of the data frame for predictions
 datapredj <- data.frame(t.stop=0,event=0,id=0,sex=0,dukes=0)
 datapredj$sex <- as.factor(datapredj$sex)
 levels(datapredj$sex) <- c(1,2)
@@ -466,7 +468,7 @@ data(colorectalLongi)
 # Survival data preparation - only terminal events 
 colorectalSurv <- subset(colorectal, new.lesions == 0)
 
-#-- construction of the dataframe for predictions
+#-- construction of the data-frame for predictions
 #-- biomarker observations
 datapredj_longi <- data.frame(id = 0, year = 0, tumor.size = 0, treatment = 0,
  age = 0, who.PS = 0, prev.resection = 0)
@@ -542,7 +544,7 @@ plot(pred.jointLongi2, conf.bands = TRUE)
 data(readmission)
 readmissionNested <- transform(readmission,group=id\%\%30+1)
 
-#-- construction of the dataframe for predictions : 
+#-- construction of the data frame for predictions : 
 #-- family 5 was selected for the prediction
 
 DataPred <- readmissionNested[which(readmissionNested$group==5),]
@@ -559,11 +561,14 @@ predRead <- prediction(modJointNested_Splines, data=DataPred,t=10.2,
 window = seq(1,10,1), conditional=FALSE, individual = c(274, 4))
 
 
-###################################################
-##### prediction on a TRIVARIATE JOINT model ######
-###################################################
+#########################################################################
+##### prediction on TRIVARIATE JOINT model (linear and non-linear) ######
+#########################################################################
 
-#-- construction of the dataframe for predictions
+data(colorectal)
+data(colorectalLongi)
+
+#-- construction of the data frame for predictions
 #-- history of recurrences and terminal event
 datapredj <- data.frame(time0 = 0, time1 = 0, new.lesions = 0, id = 0, 
 treatment = 0, age = 0, who.PS = 0, prev.resection =0)
@@ -580,8 +585,9 @@ datapredj[1,] <- c(0,0.4,1,1,2,1,1,1)
 datapredj[2,] <- c(0.4,1.2,1,1,2,1,1,1)
 datapredj[3,] <- c(0,0.5,1,2,2,1,1,1)
 
+# Linear trivariate joint model
 # (computation takes around 40 minutes)
-model.spli.RE.cal <-trivPenal(Surv(time0, time1, new.lesions) ~ cluster(id)
+model.trivPenal <-trivPenal(Surv(time0, time1, new.lesions) ~ cluster(id)
 + age + treatment + who.PS +  terminal(state),
 formula.terminalEvent =~ age + treatment + who.PS + prev.resection, 
 tumor.size ~ year * treatment + age + who.PS, data = colorectal, 
@@ -592,23 +598,51 @@ n.nodes=7, init.B = c(-0.07, -0.13, -0.16, -0.17, 0.42, #recurrent events covara
 -0.23, -0.1, -0.09, -0.12, 0.8, -0.23, #terminal event covariates
 3.02, -0.30, 0.05, -0.63, -0.02, -0.29, 0.11, 0.74)) #biomarker covariates
 
-#-- prediction of death between 1 year and 1+2 given history of the biomarker 
-and recurrences pred.jointTri0 <- prediction(model.spli.RE.cal, datapredj, 
+#-- prediction of death between 1 year and 1+2
+pred.jointTri0 <- prediction(model.trivPenal, datapredj, 
 datapredj_longi, t = 1, window = 2)
 print(pred.jointTri0)
 
-#-- prediction of death between 1 year and 1+w given history of the biomarker 
-and recurrences pred.jointTri <- prediction(model.spli.RE.cal, datapredj, 
+#-- prediction of death between 1 year and 1+w
+pred.jointTri <- prediction(model.trivPenal, datapredj, 
 datapredj_longi, t = 1, window = seq(0.5, 2.5, 0.2), MC.sample = 100)
 plot(pred.jointTri, conf.bands = TRUE)
-# each y-value of the plot corresponds to the prediction between [1,x]
 
-#-- prediction of death between t and t+0.5 given history of the biomarker 
-and recurrences pred.jointTri2 <- prediction(model.spli.RE.cal, datapredj, 
+#-- prediction of death between t and t+0.5
+pred.jointTri2 <- prediction(model.trivPenal, datapredj, 
 datapredj_longi, t = seq(1, 2.5, 0.5), window = 0.5, MC.sample = 100)
 plot(pred.jointTri2, conf.bands = TRUE)
-# each y-value of the plot corresponds to the prediction between [x,x+0.5], 
-or in the next 0.5
+
+
+###############################
+
+# No information on dose - creation of a dummy variable 
+colorectalLongi$dose <- 1
+
+# (computation can take around 40 minutes)
+model.trivPenalNL <- trivPenalNL(Surv(time0, time1, new.lesions) ~ cluster(id) + age + treatment
+ + terminal(state), formula.terminalEvent =~ age + treatment, biomarker = "tumor.size",
+ formula.KG ~ 1, formula.KD ~ treatment, dose = "dose", time.biomarker = "year", 
+ data = colorectal, data.Longi =colorectalLongi, random = c("y0", "KG"), id = "id", 
+ init.B = c(-0.22, -0.16, -0.35, -0.19, 0.04, -0.41, 0.23), init.Alpha = 1.86,
+ init.Eta = c(0.5, 0.57, 0.5, 2.34), init.Biomarker = c(1.24, 0.81, 1.07, -1.53),
+ recurrentAG = TRUE, n.knots = 5, kappa = c(0.01, 2), method.GH = "Pseudo-adaptive")
+
+#-- prediction of death between 1 year and 1+2
+pred.jointTriNL0 <- prediction(model.trivPenalNL, datapredj, 
+datapredj_longi, t = 1, window = 2)
+print(pred.jointTriNL0)
+
+#-- prediction of death between 1 year and 1+w 
+pred.jointTriNL <- prediction(model.trivPenalNL, datapredj, 
+datapredj_longi, t = 1, window = seq(0.5, 2.5, 0.2), MC.sample = 100)
+plot(pred.jointTriNL, conf.bands = TRUE)
+
+#-- prediction of death between t and t+0.5
+pred.jointTriNL2 <- prediction(model.trivPenalNL, datapredj, 
+datapredj_longi, t = seq(2, 3, 0.2), window = 0.5, MC.sample = 100)
+plot(pred.jointTriNL2, conf.bands = TRUE)
+
 }
 
 }

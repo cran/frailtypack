@@ -49,11 +49,11 @@ longiPenal(formula, formula.LongitudinalData, data,  data.Longi,
   \item{data}{a 'data.frame' with the variables used in \code{formula}.}
  \item{data.Longi}{a 'data.frame' with the variables used in \code{formula.LongitudinalData}.}
 
-  \item{random}{ Names of variables for the random effects of the longitudinal outcome. Maximum 2 random effects are possible at the moment. The random intercept is chosen using \code{"1"}.}
+  \item{random}{ Names of variables for the random effects of the longitudinal outcome. Maximum 3 random effects are possible at the moment. The random intercept is chosen using \code{"1"}.}
 
   \item{id}{Name of the variable representing the individuals.}
   \item{intercept}{Logical value. Is the fixed intercept of the biomarker included in the mixed-effects model? The default is \code{TRUE}.}
-        \item{link}{Type of link function for the dependence between the biomarker and death: \code{"Random-effects"} for the association directly via the random effects of the biomarker, \code{"Current-level"} for the association via the true current level of the biomarker. The default is \code{"Random-effects"}. }
+        \item{link}{Type of link function for the dependence between the biomarker and death: \code{"Random-effects"} for the association directly via the random effects of the biomarker, \code{"Current-level"} for the association via the true current level of the biomarker.  The option \code{"Current-level"} can be chosen only if the biomarker random effects are associated with the intercept and time (following this order). The default is \code{"Random-effects"}. }
         \item{left.censoring}{Is the biomarker left-censored below a threshold \eqn{s}? The default is \code{FALSE}, ie. no left-censoring. In case of a left-censored biomarker, this argument must be equal to the threshold \eqn{s}.}
   \item{n.knots}{Integer giving the number of knots to use. Value required in the penalized likelihood estimation.
                 It corresponds to the (n.knots+2) splines functions for the approximation of the hazard or the survival functions.
@@ -190,9 +190,10 @@ A. Genz and B. Keister (1996). Fully symmetric interpolatory rules for multiple 
 over infinite regions with Gaussian weight. \emph{Journal of Computational and Applied
 Mathematics} \bold{71}, 299-309.
 
-A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2015). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
+A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2016). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
 Event: Predictive Abilities of Tumor Burden for Cancer Evolution with Application to the
-FFCD 2000-05 Trial. \emph{Submitted}.
+FFCD 2000-05 Trial. \emph{Biometrics} \bold{72}(3) 907-16.
+
 
 D. Rizopoulos (2012). Fast fitting of joint models for longitudinal and event time data
 using a pseudo-adaptive Gaussian quadrature rule. \emph{Computational Statistics and Data

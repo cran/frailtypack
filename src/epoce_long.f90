@@ -19,7 +19,7 @@
         use comon,only:typeJoint,typeof,nst,nva,nva1,nva2,nva3,ve,vey,vedc, &
         nz1,nz2,zi,yy,c,cdc,date,ndate,datedc,ndatedc,t0,t1,t0dc,t1dc, &
             ng,nsujet,nsujety,npp,nea,nb_re,nb1,ziyd,ziyr,g,b_e,vals,effet,&
-            s_cag,s_cag_id,link,netar,netadc,indic_alpha,res_ind!,groupeey
+            s_cag,s_cag_id,link,netar,netadc,indic_alpha,res_ind,etaydc,etayr!,groupeey
             use lois_normales
             use donnees_indiv
     
@@ -68,7 +68,7 @@
             nea = nb1
     
             if(typeJoint0.eq.3) nea = nea + 1
-            nb_re  =  nb1 + (nb1*(nb1-1))/2.d0 !number of elements to estimate from matrix B1
+            nb_re  =  nb1 + INT((nb1*(nb1-1))/2.d0) !number of elements to estimate from matrix B1
     
             res_ind = 0  !for integral for the current level
     ! effet = 1
@@ -90,6 +90,7 @@
     else if(typejoint.eq.3) then
     netar = netar0
     netadc = 0
+    allocate(etayr(netar))
     end if
             if(typeJoint.ne.2) then
             effet = 1
@@ -103,7 +104,8 @@
             allocate(vedc(ng,nva2),ve(nsujet,nva1),vey(nsujety,nva3))
             allocate(zi(-2:nz1+3))
             allocate(ziyd(nsujety,nb1 ),ziyr(nsujety,nb1 ))
-    
+            allocate(etaydc(netadc))
+            
             allocate(nii(ng),g(nsujet),b_e(npp))
     
             zi(-2:nz1+3) = zi0(-2:nz1+3)
@@ -204,9 +206,7 @@
             if (maxt.lt.t1(i)) then
                 maxt = t1(i)
             endif
-    !         if ((maxt.lt.tU(i)).and.(tU(i).ne.t1(i))) then
-    !             maxt = tU(i)
-    !         endif
+
             if (mint.gt.t0(i)) then
                 mint = t0(i)
             endif
@@ -306,9 +306,7 @@
     contribt = 0.d0
     
     
-    !     write(*,*)'time         ','mpl          ','cvpl         ','AtRisk'
         do t=1,nt ! boucle sur les temps de validation
-            !write(*,*)'t',t
             vals = valT(t)
             indT = 0
             nsujet_t = 0
@@ -321,7 +319,6 @@
             end do
             atrisk(t) = nsujet_t
             j=1
-    !       allocate(nii2(ng))
     
             nii2 = 0
     
@@ -339,7 +336,6 @@
             end if
             end do
     
-    !write(*,*)groupeey
     
                     J_condt = 0.d0
                 rlindiv = 0.d0
@@ -347,8 +343,7 @@
     
             call derivc_condT_long(b_e,npp,J_condt,rlindiv,ng,nsujet,indT)
     
-            !if(t.eq.2)stop
-    
+   
             rl_condt = 0.d0
             do i=1,ng
     
@@ -356,29 +351,21 @@
                     contribt(ng*(t-1)+i)=rlindiv(i)
     
                 if (rlindiv(i).eq.-1.d9) then
-                !    print*,"oups",i,rlindiv(i)
-                    rl_cond(t) = -1.d9
+                     rl_cond(t) = -1.d9
                     epoir(t) = -1.d9
                     goto 5289
                 end if
                 rl_condt = rl_condt + rlindiv(i)
     
-                    !if(rlindiv(i).gt.0.d0)nsujet_t = nsujet_t - 1
-            end do
+           end do
     
             mat3 = MATMUL(H_1,J_condt)
-            !       if(t.eq.2) then
-    !               write(*,*)J_condt
-            !stop
-            !       end if
-            trace3 = 0.d0
+              trace3 = 0.d0
     
             do k=1,npp
-              !    write(*,*)k,'mat',H_1(k,1:npp)
-                trace3 = trace3 + mat3(k,k)
+               trace3 = trace3 + mat3(k,k)
             end do
-         !          stop
-            epoir(t) = -rl_condt/dble(nsujet_t)+(trace3*dble(ng)/(dble(nsujet_t)*dble(ng-1))) !cvpl
+              epoir(t) = -rl_condt/dble(nsujet_t)+(trace3*dble(ng)/(dble(nsujet_t)*dble(ng-1))) !cvpl
             rl_cond(t) = -rl_condt/dble(nsujet_t) !mpl
     
             if (epoir(t).ne.epoir(t)) then
@@ -387,13 +374,7 @@
             if (rl_cond(t).ne.rl_cond(t)) then
                 rl_cond(t) = -1.d9
             end if
-        !         write(*,*)t,rl_cond(t),epoir(t),nsujet_t,trace3,(trace3*dble(ng)/(dble(nsujet_t)*dble(ng-1)))
-    
-            !write(*,*)'cvpl',epoir(t),trace3,nsujet_t
-    !       stop
-    5289    continue
-    
-    !       deallocate(nii2)
+       5289    continue
     
         end do
     
@@ -402,18 +383,16 @@
             deallocate(nmes_o,nmes_o2)
             deallocate(ziyd,ziyr,c)
         deallocate(t0,t1,t0dc,g)
-            !write(*,*)t1dc
-            deallocate(t1dc)
+             deallocate(t1dc)
                     deallocate(nii)
             deallocate(nii2)
                     deallocate(b_e)
-                    !deallocate(groupeey)
                     deallocate(z1)
                     deallocate(z11)
             deallocate(z2)
-    
+        deallocate(etaydc)
+        if(typeJoint.eq.3)deallocate(etayr)
             deallocate(z22)
-            !       deallocate(groupeey)
     
             deallocate(ycurrent,date,datedc)
     
@@ -447,21 +426,17 @@
         integer,dimension(nsujet)::indT
     
     
-    !       write(*,*)'jestem'
-            allocate(b1(m))
+           allocate(b1(m))
             b1 = b_e
     V= 0.d0
     
-    !  rlindiv = 0.d0
-        z = 0.d0
+         z = 0.d0
         id = 0
             it = 0
     
         do i=1,nobs
-    !       write(*,*)'i',i
-                    z1 = 0.d0
+                     z1 = 0.d0
             z11 = 0.d0
-        !  ui = pred(g(i))
             Uscore = 0.d0
             Uscore2 = 0.d0
                     nmes_o = 0
@@ -470,29 +445,12 @@
                     nmescur2 = nii2(i)
                     it_cur = it
     
-                            !        allocate(grandb(1,1))
-    !write(*,*)'i in', i,nmescur,nmescur2
-    
-    !               allocate(ycurrent(nmescur))
-                    ycurrent = 0.d0
-            !       allocate(X2(nmescur,nva3))
+                     ycurrent = 0.d0
                             x2 = 0.d0
-    !               if(typeJoint.ne.2) then
-    !               write(*,*)i,nmescur,nmescur2,netar
-    !               allocate(Z1(nmescur,netar),z11(nmescur2,netar))
-    !
-    !               end if
-    !       write(*,*)'i',i
-    
+   
             z22 = 0.d0
             z2 = 0.d0
-    !               allocate(z22(nmescur2,netadc),Z2(nmescur,netadc))
-    !       write(*,*)'i',i
-    
-    
-    !timecur = 0.d0
-            !       allocate(timecur(nmescur))
-    
+  
                     do l=1,nmescur
     
     
@@ -504,51 +462,31 @@
                                             nmes_o(i) = nmescur
                                             end if
     
-            !       timecur(l) = t1(l+it)
                     ycurrent(l) = yy(l+it)
                     do k=1,nva3
-                    if(k.eq.1) then
-                    x2(l,k) = 1
-                    else
-                    x2(l,k) =  vey(it+l,k)
-                    end if
+                   x2(l,k) =  vey(it+l,k)
                     end do
     
     
                     do k = 1,nb1
-                    if(k.eq.1) then
-                    z2(l,k) = 1.d0
-                    else
-                    z2(l,k) = ziyd(it+l,k)
-                    end if
-                    end do
+                     z2(l,k) = ziyd(it+l,k)
+                      end do
     
     
                     if(typeJoint.ne.2) then
                     do k = 1,nb1
-                    if(k.eq.1) then
-                    z1(l,k) = 1.d0
-                    else
                     z1(l,k) = ziyr(it+l,k)
-                    end if
-                    end do
+                   end do
                     end if
                     end do
     
     
                     all = 0
                     ycurrent2= 0.d0
-                    !allocate(ycurrent2(nmescur2))
                     x22 =0.d0
-            !       allocate(X22(nmescur2,nva3))
-    
-    
-            !       allocate(timecur2(nmescur2))
-    
+           
                     do l=1,nmescur2
-            !       timecur2 = t1(l+it)
-    
-            ycurrent2(l) = yy(l+it)
+           ycurrent2(l) = yy(l+it)
     
                     if(s_cag_id.eq.1)then
                                                     if(ycurrent2(l).gt.s_cag) then
@@ -559,56 +497,36 @@
                                             end if
     
                     do k=1,nva3
-                    if(k.eq.1) then
-                    x22(l,k) = 1
-                    else
                     x22(l,k) =  vey(it+l,k)
-                    end if
                     end do
     
     
                     do k = 1,nb1
-                    if(k.eq.1) then
-                    z22(l,k) = 1
-                    else
-                    z22(l,k) = ziyd(it+l,k)
-                    end if
-                    end do
+                     z22(l,k) = ziyd(it+l,k)
+                     end do
     
                     if(typeJoint.ne.2) then
                     do k = 1,nb1
-                    if(k.eq.1) then
-                    z11(l,k) = 1
-                    else
                     z11(l,k) = ziyr(it+l,k)
-                    end if
-                    end do
+                     end do
                     end if
     
                     end do
     
             if (indT(i).eq.1) then ! contribution de i sachant T
-            !       write(*,*)funcpi_long(b,m,id,z,id,z,i), funcpi2_long(b,m,id,z,id,z,i)
-            !       stop
             choix_e = 1
             all = 0
     
-    !    write(*,*)i,funcpi_long(b,m,id,z,id,z,i), funcpi2_long(b,m,id,z,id,z,i)
-            rlindiv(i) =funcpi_long(b,m,id,z,id,z,i)- funcpi2_long(b,m,id,z,id,z,i)
+             rlindiv(i) =funcpi_long(b,m,id,z,id,z,i)- funcpi2_long(b,m,id,z,id,z,i)
     
-            !write(*,*)i,rlindiv(i)
-                    !       if(i.eq.72)stop
-                if (rlindiv(i).eq.-1.d9) then
+                 if (rlindiv(i).eq.-1.d9) then
                     V = 0.d0
                     rlindiv = -1.d9
-                !                    write(*,*)'ble'
                     goto 777
                 end if
             end if
-            !       write(*,*)'b',b
             do k=1,m
-            ! th = 1.d-6
-                    th =  1.d-6!DMAX1(1.d-3, (1.d-4)*DABS(b(k)))!
+                     th =  1.d-6!DMAX1(1.d-3, (1.d-4)*DABS(b(k)))!
             thn = -1.D0*th
             if (indT(i).eq.1) then ! calcul des derivees sachant T
                                     all = 0
@@ -616,42 +534,26 @@
                 temp1 =  funcpi_long(b,m,k,th,id,z,i)-funcpi2_long(b,m,k,th,id,z,i)
                                     choix_e = 1
                     temp2 = funcpi_long(b,m,k,thn,id,z,i)-funcpi2_long(b,m,k,thn,id,z,i)
-    !write(*,*)temp1,temp2
-    
+     
                     if (temp1.eq.-1.d9.or.temp2.eq.-1.d9) then
                         V = 0.d0
-                        !rlindiv = -1.d9
-        !                                 write(*,*)'ble2'
-                        goto 777
+                       goto 777
                     end if
-                            !,temp1,temp2
-                    Uscore(k,1) = -(temp1-temp2)/(2.d0*th)
-                    !               write(*,*)k,temp1-temp2 , -(temp1-temp2)/(2.d0*th)
-            !       write(*,*)all,temp1 ,temp2
-    
+                     Uscore(k,1) = -(temp1-temp2)/(2.d0*th)
+       
                             end if
                 ! calcul des derivees
                             all = 1
                             choix_e = 2
                     temp1 = funcpi_long(b,m,k,th,id,z,i)!-funcpi2(b,m,k,th,id,z,i)
-                            !  write(*,*)k,'bleeeeeeeeeeeeeeeeeeeeeeeeeeee'
                 temp2 = funcpi_long(b,m,k,thn,id,z,i)!-funcpi2(b,m,k,th,id,z,i)
-            !               write(*,*)all,temp1,temp2
-            !       write(*,*)temp1-temp2,-(temp1-temp2)/(2.d0*th)
-            !write(*,*)k,b(k),th,thn ,temp1,temp2
-            !stop
-                if (temp1.eq.-1.d9.or.temp2.eq.-1.d9) then
+            if (temp1.eq.-1.d9.or.temp2.eq.-1.d9) then
                     V = 0.d0
-                    !rlindiv = -1.d9
-                            !       write(*,*)'ble3',temp1,temp2,i
                     goto 777
                 end if
                 Uscore2(k,1) = -(temp1-temp2)/(2.d0*th)
-    !write(*,*)all,temp1 ,temp2
     
             end do
-    !if(i.eq.2) stop
-    !write(*,*)i,'uscore2',transpose(Uscore2)
     
                 V = V + MATMUL(Uscore,transpose(Uscore2))
     
@@ -683,21 +585,17 @@
         !nst,vey,nz1,zidc,stra,ndatedc,nva1,nva2,t0,t1dc,tttdc,nva3,nz2,&
         !the1_e
         use comon,only:nva,&
-            nea,sigmae,netar,etaydc1,netadc,&
-            alpha,all,etaydc2,effet,typeJoint,&
-            etayr1,etayr2,betaR,etaR,betaD,etaD,ut,utt,nb1,nb_re
+            nea,sigmae,netar,etaydc,netadc,&
+            alpha,all,effet,typeJoint,&
+            etayr,betaR,etaR,betaD,etaD,ut,utt,nb1,nb_re
         use donnees_indiv
         use choix_epoce
         implicit none
     
         integer::n,npp,id,jd,i,j,k
     double precision::thi,thj
-        !double precision,dimension(-2:npp)::the1
-    ! double precision,dimension(npp)::betacoef
-    ! double precision::betaR,etaR,betaD,etaD
-        double precision,dimension(npp)::b,bh
-    ! double precision,dimension(2)::su,sut1,sut0,sudc
-        double precision::vrais,int!,temp
+          double precision,dimension(npp)::b,bh
+       double precision::vrais,int!,temp
             integer::ndim,mintps,maxtps,restar,nf2
             double precision::epsabs,epsrel, integrale4
             double precision,dimension(nea) :: xea
@@ -723,9 +621,8 @@
             b1 = bh
     
             if(effet.eq.1) then
-                    sigmav = bh(npp-nva-1-nb_re-effet-netadc - netar)! &
-                                    !*bh(np-nva-indic_ALPHA-nb_re-1-netadc - netar)
-    
+                    sigmav = bh(npp-nva-1-nb_re-effet-netadc - netar)
+   
                     alpha = bh(npp-nva-nb_re-effet-netadc - netar)
     
             end if
@@ -737,15 +634,13 @@
             nmes = nmescur2
             end if
     
-            etaydc1 = bh(npp-nva-nb_re-netadc)
-            etaydc2 = bh(npp-nva-nb_re-netadc+1)
+            etaydc = bh(npp-nva-nb_re-netadc:npp-nva-nb_re-1)
+            if(typeJoint.eq.3)etayr = bh(npp-nva-nb_re-netadc - netar:npp-nva-nb_re-netadc - 1)
     
     
             sigmae = bh(npp-nva-nb_re)*bh(npp-nva-nb_re)!
     
-            etayr1 = bh(npp-nva-nb_re-netadc-netar)
-            etayr2 = bh(npp-nva-nb_re-netadc-netar+1)
-    
+          
     
             allocate(Ut(nea,nea),Utt(nea,nea))
                 Ut = 0.d0
@@ -787,7 +682,7 @@
     
                     choix = 1
     
-            if(ndim.lt.4) then
+            if(nb1.lt.3) then
     
             if(typeJoint.eq.2.and.nb1.eq.1) then
                     call gauherJcvpl(int,choix_e)
@@ -879,8 +774,8 @@
         use comongroup,only:vet,vet2
         !use comon,only:res1,res3,aux1,nig,utt
         use comon,only:alpha,cdc,sigmae,&
-            nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc1,etayr1,&
-            t0,t1,betaR,etaR,effet,etaydc2,etayr2,typeof,link,nva,vey,c,s_cag_id,s_cag,&
+            nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,nb1,&
+            t0,t1,betaR,etaR,effet,etaydc,etayr,typeof,link,nva,vey,c,s_cag_id,s_cag,&
             all,zi,ndatedc,ndate,nea,nz1,nz2,indic_ALPHA,&
             date,datedc,vals,nsujet,g,typeJoint,ut
         use donnees_indiv
@@ -893,11 +788,7 @@
     double precision,dimension(nea)::ui
     integer :: ndim2,jj,nf2,i,k,j,n,ndim
     double precision :: yscalar
-    !double precision,dimension(:),allocatable::yvec
             double precision,dimension(nmes)::mu11
-    !  double precision,dimension(-2:npp)::the1_e
-    !  double precision,dimension(npp)::betacoef
-    !  double precision::betaR,etaR,betaD
         double precision,dimension(npp)::bh
         double precision::sudc
         double precision::lamdc,temp
@@ -962,19 +853,10 @@
         end select
     
             vraisind = 1.d0
-    !       ier = 0
-    !       eps=1.d-20
-    !       call dsinvj(vi,nea,eps,ier)
-    
-    !       ui = MATMUL(grandb,Xea2)
     
             ui = MATMUL(Ut,Xea2)
     
     
-    !ui = MATMUL(sqrt(grandb1),Xea2)
-    !ui = sqrt(1/abs(finddet(grandb,5)))*Xea2
-    
-    !       ui = Xea2
     
                     !ccccccccccccccccccccccccccccccccccccccccc
             ! pour les recurrences
@@ -1013,7 +895,7 @@
                                     end select
     
                                 vraisind = vraisind * (sut1(1)/sut0(1))&
-                                                            **(dexp(ui(3))*vet*dexp(etayr1*ui(1)+etayr2*ui(2)))
+                                           **(dexp(ui(nea))*vet*dexp(dot_product(etayr,ui(1:nb1))))
     
     
                                     if ((vraisind.ne.vraisind).or.(abs(vraisind).gt.1.d30)) then
@@ -1035,7 +917,7 @@
                                                             lam = (betaR*dexp((betaR-1.d0)*dlog(t1(k)))/(etaR**betaR))
                                                     end select
     
-                    vraisind = vraisind * dexp(ui(3))*lam*vet*dexp(etayr1*ui(1)+etayr2*ui(2))
+                    vraisind = vraisind * dexp(ui(nea))*lam*vet*dexp(dot_product(etayr,ui(1:nb1)))
     
     
                     if ((vraisind.ne.vraisind).or.(abs(vraisind).gt.1.d30)) then
@@ -1092,10 +974,10 @@
     
                     if(typeJoint.ne.2) then
     vraisind = vraisind*sudc**(vet2&
-                            *dexp(ui(3)*alpha+etaydc1*ui(1)+etaydc2*ui(2)))
+                            *dexp(ui(nea)*alpha+dot_product(etaydc,ui(1:nb1))))
                     else
                     vraisind = vraisind*sudc**(vet2&
-                            *dexp(etaydc1*ui(1)+etaydc2*ui(2)))
+                            *dexp(dot_product(etaydc,ui(1:nb1))))
                     end if
     
             !end if
@@ -1119,7 +1001,7 @@
                             current_mean = MATMUL(X2cur,b1((npp-nva3+1):npp))+Matmul(z1cur,ui(1:2))
     
             vraisind = vraisind*sudc**(vet2&
-                            *dexp(ui(3)*alpha+etaydc1*current_mean(1)) )
+                            *dexp(ui(nea)*alpha+etaydc(1)*current_mean(1)) )
     
             end if
     
@@ -1140,12 +1022,12 @@
     
             if(link.eq.1) then
                     if(typeJoint.ne.2) then
-                            vraisind = vraisind*lamdc*vet2*dexp(ui(3)*alpha+etaydc1*ui(1)+etaydc2*ui(2) )
+                            vraisind = vraisind*lamdc*vet2*dexp(ui(nea)*alpha+dot_product(etaydc,ui(1:nb1)) )
                     else
-                            vraisind = vraisind*lamdc*vet2*dexp(etaydc1*ui(1)+etaydc2*ui(2) )
+                            vraisind = vraisind*lamdc*vet2*dexp(dot_product(etaydc,ui(1:nb1)))
                     end if
             else
-                            vraisind =vraisind*lamdc*vet2*dexp(ui(3)*alpha+etaydc1*current_mean(1) )
+                            vraisind =vraisind*lamdc*vet2*dexp(ui(nea)*alpha+etaydc(1)*current_mean(1) )
             end if
     
             end if
@@ -1156,13 +1038,13 @@
     if(nmescur.gt.0) then
     
             mu11 =MATMUL(X2(1:nmescur,1:nva3),b1((npp-nva3+1):npp))&
-                                    +MATMUL(Z2(1:nmescur,1:max(netadc,netar)),ui(1:2))
+                                    +MATMUL(Z2(1:nmescur,1:max(netadc,netar)),ui(1:nb1))
             end if
             else
             if(nmescur2.gt.0) then
     
             mu11 =MATMUL(X22(1:nmescur2,1:nva3),b1((npp-nva3+1):npp))&
-                                    +MATMUL(Z22(1:nmescur2,1:max(netadc,netar)),ui(1:2))
+                                    +MATMUL(Z22(1:nmescur2,1:max(netadc,netar)),ui(1:nb1))
             end if
             end if
     
@@ -1210,8 +1092,6 @@
                     yscalar = dsqrt(yscalar)
     
     
-    !       write(*,*)vraisind,prod_cag,dexp( -(yscalar**2.d0)/(sigmae*2.d0))
-    !stop
             vraisind= vraisind *prod_cag*dexp( -(yscalar**2.d0)/(sigmae*2.d0))
     
     
@@ -1232,20 +1112,16 @@
             use lois_normales
     !use comon,only:g,t1,t0,vedc,betacoef,cdc,date,datedc,ndate,typeof,nst,&
     !vey,nz1,zidc,stra,ndatedc,nva1,nva2,t1dc,tttdc,nva3,nz2,the1_e,
-    use comon,only:nva, nea,sigmae,netar,etaydc1,netadc,&
-            alpha,all,etaydc2,effet,typeJoint,&
-            etayr1,etayr2,betaR,etaR,betaD,etaD,ut,utt,nb1,nb_re
+    use comon,only:nva, nea,sigmae,netar,etaydc,netadc,&
+            alpha,all,effet,typeJoint,&
+            etayr,betaR,etaR,betaD,etaD,ut,utt,nb1,nb_re
             use donnees_indiv
             use choix_epoce
         implicit none
     
         integer::n,npp,id,jd,i,j,k
         double precision::thi,thj
-        !double precision,dimension(-2:npp)::the1
-    ! double precision,dimension(npp)::betacoef
-        !double precision::betaR,etaR,betaD,etaD
-        double precision,dimension(npp)::b,bh
-    ! double precision,dimension(2)::su,sut1,sut0,sudc
+      double precision,dimension(npp)::b,bh
         double precision::vrais,int!,temp
             integer::ndim,mintps,maxtps,restar,nf2
             double precision::epsabs,epsrel, integrale4
@@ -1269,10 +1145,8 @@
     
             b1 = bh
             if(effet.eq.1) then
-                    sigmav = bh(npp-nva-1-nb_re-effet-netadc - netar)! &
-                                    !*bh(np-nva-indic_ALPHA-nb_re-1-netadc - netar)
-    
-                    alpha = bh(npp-nva-nb_re-effet-netadc - netar)
+                sigmav = bh(npp-nva-1-nb_re-effet-netadc - netar)
+                alpha = bh(npp-nva-nb_re-effet-netadc - netar)
     
             end if
     
@@ -1283,14 +1157,11 @@
             nmes = nmescur2
             end if
     
-            etaydc1 = bh(npp-nva-nb_re-netadc)
-            etaydc2 = bh(npp-nva-nb_re-netadc+1)
+               etaydc = bh(npp-nva-nb_re-netadc:npp-nva-nb_re-1)
+            if(typeJoint.eq.3)etayr = bh(npp-nva-nb_re-netadc - netar:npp-nva-nb_re-netadc - 1)
     
     
             sigmae = bh(npp-nva-nb_re)*bh(npp-nva-nb_re)!
-    
-            etayr1 = bh(npp-nva-nb_re-netadc-netar)
-            etayr2 = bh(npp-nva-nb_re-netadc-netar+1)
     
     
             allocate(Ut(nea,nea),Utt(nea,nea))
@@ -1330,21 +1201,11 @@
     if(nmes.gt.0) then
     
                     xea = 0.d0
-            !       xea(netar+netadc+1) = 1.d0
-    
-    !if(nmes.gt.0) then
-    !       allocate(mu_vv(nmes))
-    !       mu_vv = 0.d0
-    !       mu_vv =MATMUL(X2(1:nmes,1:nva3),b1((npp-nva3+1):npp))
-    !else
-    !       allocate(mu_vv(1))
-    !mu=0.d0
-    !       end if
-    
+         
     
                     choix = 2
                     choix_e = 2
-            if(ndim.lt.4) then
+            if(nb1.lt.3) then
     if(nea.eq.1.and.typeJoint.eq.2) then
                     call gauherJcvpl(int,choix_e)
             else if(nea.eq.2.and.typeJoint.eq.2) then
@@ -1417,11 +1278,11 @@
     
     use lois_normales
     !use comon,only:cdc,datedc,vey,zidc,stra,ndatedc,t1dc,tttdc,all,etayr2,utt,the1_e
-    use comon,only:typeof,nst,nbintervDC,nva,nz1, &
+    use comon,only:typeof,nst,nbintervDC,nva,nz1,nb1, &
         date,ndate,nva1,nva2,vedc,t0,t1,&
             nb_re,nva3,nz2,sigmae,netar,&
-            alpha,etaydc2,effet,typeJoint,netadc,&
-            etayr1,etaydc1,nbintervR,etaR,etaD,betaR,betaD,nsujet,&
+            alpha,effet,typeJoint,netadc,&
+            etayr,etaydc,nbintervR,etaR,etaD,betaR,betaD,nsujet,&
             vals,ve,g,zi,ttt,c,npp,s_cag,s_cag_id,ut,nea
     use donnees_indiv
     
@@ -1431,15 +1292,10 @@
     double precision,dimension(nea)::ui
     integer :: ndim2,ii,jj,nf2,k,n,j
     double precision :: yscalar
-    !integer::nmes
-    !double precision,dimension(:),allocatable::yvec,mu11
     double precision,dimension(nmes)::mu11
         integer::gg
         double precision::vet,vet2
-    !  double precision,dimension(npp)::the2
-    !  double precision,dimension(npp)::betacoef
-    !  double precision::betaR,etaR,betaD
-        double precision,dimension(npp)::bh
+         double precision,dimension(npp)::bh
         double precision::sudc
         double precision::temp,lamdc
             double precision,dimension(-2:npp)::the1,the2
@@ -1457,26 +1313,17 @@
     n=0
     nf2 = nf
     ii = numpat
-    !if(all.eq.1) then
-    !nmes = nmescur
-    !else
-            nmes = nmescur2
+           nmes = nmescur2
     
     mu11 = 0.d0
-    !end if
-    !nrec = nig(ii)
-    
+     
     Xea2=0.d0
     
             do jj=1,nea
             Xea2(jj)=Xea(jj)
         end do
     
-                            !      vi2 = vi
-    !       ier = 0
-    !       eps=1.d-20
-    !       call dsinvj(vi,nea,eps,ier)
-            select case(typeof)
+           select case(typeof)
             case(0)
     
                             if(typeJoint.ne.2) then
@@ -1546,7 +1393,7 @@
                 end select
     
                 vraisind  = vraisind  * (sut1(1)/sut0(1))&
-                            **(dexp(ui(netar+netadc+1))*vet*dexp(etayr1*ui(1)))
+                            **(dexp(ui(nea))*vet*dexp(dot_product(etayr,ui(1:nb1))))
     
                 if ((vraisind .ne.vraisind ).or.(abs(vraisind ).gt.1.d30)) then
     !                 print*,"1",func2E
@@ -1577,7 +1424,7 @@
                             lam = (betaR*dexp((betaR-1.d0)*dlog(t1(k)))/(etaR**betaR))
                     end select
     
-                vraisind  = vraisind  *dexp( ui(netar+netadc+effet))*lam*vet*dexp(etayr1*ui(1))
+                vraisind  = vraisind*dexp(ui(nea))*lam*vet*dexp(dot_product(etayr,ui(1:nb1)))
     
                     if ((vraisind.ne.vraisind).or.(abs(vraisind).gt.1.d30)) then
                         vraisind = -1.d9
@@ -1618,17 +1465,14 @@
                 sudc = dexp(-(vals/etaD)**betaD)
         end select
     
-    !      if(sudc**(dexp(alpha*ui(netadc+netar+effet)*vet2&
-            !               *dexp(etaydc1*ui(netar+1)))).eq.0.d0) then
-                    !       vraisind = vraisind*1d-12
-            !               else
+    
     
             if(typeJoint.ne.2) then
-    vraisind = vraisind*sudc**(dexp(alpha*ui(netadc+netar+effet))*vet2&
-                            *dexp(etaydc1*ui(netar+1)+etaydc2*ui(2)))
+    vraisind = vraisind*sudc**(dexp(alpha*ui(nea))*vet2&
+                            *dexp(dot_product(etaydc,ui(1:nb1))))
             else
             vraisind = vraisind*sudc**(dexp(vet2)&
-                            *dexp(etaydc1*ui(1)+etaydc2*ui(2)))
+                            *dexp(dot_product(etaydc,ui(1:nb1))))
     
             end if
     
@@ -1639,42 +1483,18 @@
         end if
     
     
-    
-    
-    !       if(all.eq.1) then
-    !if(nmescur.gt.0) then
-    
-    !       mu11 =MATMUL(X2(1:nmescur,1:nva3),b1((npp-nva3):npp))&
-    !                               +MATMUL(Z1(1:nmescur,1:netar),ui(1:netar))&
-    !                               +MATMUL(Z2(1:nmescur,1:netadc),ui((netar+1):(netar+netadc)))
-    !       end if
-    !       else
             if(nmescur2.gt.0) then
     
-            mu11 =MATMUL(X22(1:nmescur2,1:nva3),b1((npp-nva3):npp))+MATMUL(Z11(1:nmescur2,1:netar),ui(1:netar))&
-                                    +MATMUL(Z22(1:nmescur2,1:netadc),ui((netar+1):(netar+netadc)))
+            mu11 =MATMUL(X22(1:nmescur2,1:nva3),b1((npp-nva3):npp))+MATMUL(Z11(1:nmescur2,1:nb1),ui(1:nb1))&
+                  +MATMUL(Z22(1:nmescur2,1:nb1),ui(1:nb1))
             end if
-    !       end if
-    
-    
     
     
             prod_cag =1.d0
             !----- censure à gauche-----------
     
             if(s_cag_id.eq.1)then
-    !       if(all.eq.1) then
-    !       do k = 1,nmescur
-    
-    !       if(ycurrent(k).le.s_cag) then
-    !       prod_cag = prod_cag+dlog(alnorm((mu11(k)-s_cag)/sqrt(sigmae),upper))
-    
-    !       mu11(k) = ycurrent(k)
-    
-    
-    !               end if
-    !               end do
-    !       else
+  
             do k = 1,nmescur2
             if(ycurrent2(k).le.s_cag) then
                     prod_cag = prod_cag*(1.d0-alnorm((mu11(k)-s_cag)/sqrt(sigmae),upper))
@@ -1900,7 +1720,7 @@
         use comongroup,only:vet2!,vet
         !use comon,only:nea,date,auxig,alpha,sig2,res1,res3,aux1,nig,netar,utt,
         use comon,only:sigmae,&
-            nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc1,link,&
+            nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc,link,&
             vey,typeof,s_cag_id,s_cag,cdc,all,zi,ndatedc,nva,nz2,&
             datedc,ut,nb_re,t0dc,vals,nzdc
         use donnees_indiv
@@ -1976,7 +1796,7 @@
         end select
     
                     vraisind = vraisind*sudc**(vet2&
-                            *dexp(etaydc1*frail))
+                            *dexp(etaydc(1)*frail))
     
             else !********** Current Mean ****************
     
@@ -2021,9 +1841,9 @@
                             end select
     
                             if(link.eq.1) then
-                                    vraisind = vraisind*lamdc*vet2*dexp(etaydc1*frail )
+                                    vraisind = vraisind*lamdc*vet2*dexp(etaydc(1)*frail )
                             else
-                                    vraisind =vraisind*lamdc*vet2*dexp(etaydc1*current_mean(1) )
+                                    vraisind =vraisind*lamdc*vet2*dexp(etaydc(1)*current_mean(1) )
                             end if
                     end if
                     !if(frail.eq.-7.12581396102905.and.lamdc.ge.1.d0)write(*,*)i,lamdc,t1dc(i),betaD,etaD
@@ -2099,7 +1919,7 @@
             !use comon,only:nea,date,auxig,alpha,sig2,res1,res3,aux1,nig,netar,&
             !res_ind
             use comon,only:cdc,sigmae,&
-                nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc1,etaydc2,link,&
+                nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc,link,&
                 vey,typeof,s_cag_id,s_cag,all,zi,ndatedc,nva,nz2,&
                 datedc,vals,ut,utt,nb_re,t0dc,nb1,nzdc
             use donnees_indiv
@@ -2240,9 +2060,9 @@
         case(2)
                 sudc = dexp(-(T/etaD)**betaD)
         end select
-    
+   
     vraisind = vraisind*sudc**(vet2&
-                            *dexp(etaydc1*xea22(1)+etaydc2*xea22(2)))
+                            *dexp(etaydc(1)*xea22(1)+etaydc(2)*xea22(2)))
     
             !end if
     
@@ -2298,14 +2118,15 @@
             end select
     
             if(link.eq.1) then
-                    vraisind = vraisind*lamdc*vet2*dexp(etaydc1*xea22(1)+etaydc2*xea22(2) )
+            
+                    vraisind = vraisind*lamdc*vet2*dexp(etaydc(1)*xea22(1)+etaydc(2)*xea22(2) )
             else
-                            vraisind =vraisind*lamdc*vet2*dexp(etaydc1*current_mean(1) )
+                            vraisind =vraisind*lamdc*vet2*dexp(etaydc(1)*current_mean(1) )
             end if
     
             end if
     end if
-    
+
     if(all.eq.1) then
     if(nmescur.gt.0) then
     
@@ -2386,7 +2207,7 @@
         use comongroup,only:vet,vet2
         !use comon,only:res1,res3,aux1,nig,etaydc2,etayr2,indic_ALPHA,
         use comon,only:alpha,cdc,sigmae,&
-            nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc1,etayr1,&
+            nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc,etayr,&
             t0,t1,betaR,etaR,effet,typeof,link,nva,vey,c,s_cag_id,s_cag,&
             all,zi,ndatedc,ndate,nb_re,nz1,nz2,&
             date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc
@@ -2532,7 +2353,7 @@
                                     end select
     
                                             vraisind = vraisind * (sut1(1)/sut0(1))&
-                                                            **(dexp(Xea22(2))*vet*dexp(etayr1*Xea22(1)))
+                                                            **(dexp(Xea22(2))*vet*dexp(etayr(1)*Xea22(1)))
                                     else
                                             resultR = 0.d0
                                             call integrationdc(survRCM,t0(k),t1(k),resultR,abserr,resabs,resasc,k,b1,npp,xea22(1))
@@ -2572,7 +2393,7 @@
                                                     end select
     
                                     if(link.eq.1) then
-                                            vraisind = vraisind * dexp(Xea22(2))*lam*vet*dexp(etayr1*Xea22(1))
+                                            vraisind = vraisind * dexp(Xea22(2))*lam*vet*dexp(etayr(1)*Xea22(1))
                                     else
                                             X2cur(1,1) = 1.d0
                                             X2cur(1,2) = t1(k)
@@ -2624,7 +2445,7 @@
         end select
     
     vraisind = vraisind*sudc**(vet2&
-                            *dexp(alpha*Xea22(2)+etaydc1*xea22(1)))
+                            *dexp(alpha*Xea22(2)+etaydc(1)*xea22(1)))
     
     
             !end if
@@ -2671,9 +2492,9 @@
             end select
     
             if(link.eq.1) then
-            vraisind = vraisind*lamdc*vet2*dexp(alpha*Xea22(2)+etaydc1*xea22(1))
+            vraisind = vraisind*lamdc*vet2*dexp(alpha*Xea22(2)+etaydc(1)*xea22(1))
             else
-                            vraisind =vraisind*lamdc*vet2*dexp(alpha*Xea22(2)+etaydc1*current_mean(1) )
+                            vraisind =vraisind*lamdc*vet2*dexp(alpha*Xea22(2)+etaydc(1)*current_mean(1) )
             end if
     
             end if
@@ -2757,8 +2578,8 @@
         use comongroup,only:vet,vet2
         !use comon,only:res1,res3,aux1,nig,indic_ALPHA
         use comon,only:alpha,cdc,sigmae,&
-            nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc1,etayr1,&
-            t0,t1,betaR,etaR,effet,etaydc2,etayr2,typeof,link,nva,vey,c,s_cag_id,s_cag,&
+            nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc,etayr,&
+            t0,t1,betaR,etaR,effet,typeof,link,nva,vey,c,s_cag_id,s_cag,&
             all,zi,ndatedc,ndate,nb_re,nz1,nz2,&
             date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc
         use donnees_indiv
@@ -2910,7 +2731,7 @@
                                     end select
     
                                             vraisind = vraisind * (sut1(1)/sut0(1))&
-                                                            **(dexp(Xea22(3))*vet*dexp(etayr1*Xea22(1)+etayr2*Xea22(2)))
+                                                            **(dexp(Xea22(3))*vet*dexp(etayr(1)*Xea22(1)+etayr(2)*Xea22(2)))
                                     else
                                             resultR = 0.d0
          call integrationdc(survRCM,t0(k),t1(k),resultR,abserr,resabs,resasc,k,b1,npp,xea22(1:nb1))
@@ -2938,7 +2759,7 @@
                                                     end select
     
                                     if(link.eq.1) then
-                                            vraisind = vraisind * dexp(Xea22(3))*lam*vet*dexp(etayr1*Xea22(1)+etayr2*Xea22(2))
+                                            vraisind = vraisind * dexp(Xea22(3))*lam*vet*dexp(etayr(1)*Xea22(1)+etayr(2)*Xea22(2))
                                     else
                                             X2cur(1,1) = 1.d0
                                             X2cur(1,2) = t1(k)
@@ -2991,7 +2812,7 @@
         end select
     
     vraisind = vraisind*sudc**(vet2&
-                            *dexp(alpha*Xea22(3)+etaydc1*xea22(1)+etaydc2*xea22(2)))
+                            *dexp(alpha*Xea22(3)+etaydc(1)*xea22(1)+etaydc(2)*xea22(2)))
     
     
             !end if
@@ -3040,9 +2861,9 @@
             end select
     
             if(link.eq.1) then
-            vraisind = vraisind*lamdc*vet2*dexp(alpha*Xea22(3)+etaydc1*xea22(1)+etaydc2*xea22(2))
+            vraisind = vraisind*lamdc*vet2*dexp(alpha*Xea22(3)+etaydc(1)*xea22(1)+etaydc(2)*xea22(2))
             else
-                            vraisind =vraisind*lamdc*vet2*dexp(alpha*Xea22(3)+etaydc1*current_mean(1) )
+                            vraisind =vraisind*lamdc*vet2*dexp(alpha*Xea22(3)+etaydc(1)*current_mean(1) )
             end if
     
             end if

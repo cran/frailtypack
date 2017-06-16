@@ -1,12 +1,13 @@
 Package: frailtypack
-Version: 2.11.1
-Date: 2017-03-21
+Version: 2.12.1
+Date: 2017-06-16
 Title: General Frailty Models: Shared, Joint and Nested Frailty Models
         with Prediction
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
         Mauguen, Agnieszka Krol, Amadou Diakite, Alexandre Laurent and Myriam Lopez
 Maintainer: Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr>
-Depends: R (>= 2.10), survival, boot, MASS, survC1, nlme
+Depends: R (>= 2.10), survival, boot, MASS, survC1
+Imports: statmod, nlme
 LazyLoad: no
 Description: The following several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation can be fit using this R package:
         1) A shared frailty model (with gamma or log-normal frailty distribution) and Cox proportional hazard model. Clustered and recurrent survival times can be studied.
@@ -20,11 +21,9 @@ Description: The following several classes of frailty models using a penalized l
 		9) Trivariate joint models for longitudinal data, recurrent events and a terminal event. 
 		Prediction values are available (for a terminal event or for a new recurrent event). Left-truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard and shared frailty model) and strata are allowed. In each model, the random effects have the gamma or normal distribution. Now, you can also consider time-varying covariates effects in Cox, shared and joint frailty models (1-5). The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 License: GPL (>= 2.0)
-URL:
-        http://virginierondeau.com/BiostatisticalConsulting/Liste_of_examples.html
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 Repository: CRAN
-Date/Publication: 2017-03-21 16:51:45 UTC
-Packaged: 2017-03-21 09:49:08 UTC; ml12
+Date/Publication: 2017-06-16 17:57:11 UTC
+Packaged: 2017-06-16 07:39:09 UTC; ml12
 NeedsCompilation: yes

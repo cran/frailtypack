@@ -88,7 +88,7 @@
       func1predShaRec = ((survR(1)**(frail*Xbeta))-(survR(2)**(frail*Xbeta))) & 
                       *(frail**nrecj)*(survR(3)**(frail*Xbeta)) &
                       *(frail**(1.d0/theta -1.d0) * exp(-frail/theta))&
-                      /(theta**(1.d0/theta) * gammaJ(1.d0/theta))
+                      /(theta**(1.d0/theta) * dexp(gammaJ(1.d0/theta)))
       return
     end function func1predShaRec
 
@@ -105,7 +105,7 @@
 
       func2predShaRec = (survR(1)**(frail*Xbeta))*(frail**nrecj)&
              *(survR(3)**(frail*Xbeta))*(frail**(1.d0/theta -1.d0) &
-       * exp(-frail/theta)) / (theta**(1.d0/theta) * gammaJ(1.d0/theta))
+       * exp(-frail/theta)) / (theta**(1.d0/theta) *dexp( gammaJ(1.d0/theta)))
       return
     end function func2predShaRec
 

@@ -1,9 +1,24 @@
+Changes in Version 2.12.0 June 2017
+
+ o New model added: trivariate joint model for a longitudinal biomarker, recurrent events and a terminal event using a mechanistic approach for the biomarker (with analytical solution)
+ 
+ o Extension for functions longiPenal and trivPenal: up to three random effects for the biomarker can be applied
+ 
+ o Bug fixed : Estimation error in joint, joint general, joint nested, trivPenal and longiPenal models when data are unordered.
+ 
+ o Bug fixed for predictions using joint nested models - application of Gamma function
+ 
+ 
 Changes in Version 2.11.1 March 2017
+
  o Warnings about native subroutine registry fixed
 
+ 
 Changes in Version 2.11.0 March 2017
+
  o NEW : Marginal prediction method in the Joint Nested Frailty model, only for terminal event.
 
+ 
 Changes in Version 2.10.6 March 2017
 
  o Bug fixed in the conditional prediction for shared frailty model. 

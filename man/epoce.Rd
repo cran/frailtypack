@@ -6,7 +6,7 @@
 
 \description{
 
-This function computes estimators of the Expected Prognostic Observed Cross-Entropy (EPOCE) for evaluating the predictive accuracy of joint models using \code{frailtyPenal}, \code{longiPenal} or \code{trivPenal}. On the same data as used for estimation of the joint model, this function computes both the Mean Prognosis Observed Loss (MPOL) and the Cross-Validated Prognosis Observed Loss (CVPOL), two estimators of EPOCE. The latter corrects the MPOL estimate for over-optimism by approximated cross-validation. On external, this function only computes MPOL.
+This function computes estimators of the Expected Prognostic Observed Cross-Entropy (EPOCE) for evaluating the predictive accuracy of joint models using \code{frailtyPenal}, \code{longiPenal}, \code{trivPenal} or \code{trivPenalNL}. On the same data as used for estimation of the joint model, this function computes both the Mean Prognosis Observed Loss (MPOL) and the Cross-Validated Prognosis Observed Loss (CVPOL), two estimators of EPOCE. The latter corrects the MPOL estimate for over-optimism by approximated cross-validation. On external, this function only computes MPOL.
 
 }
 
@@ -15,10 +15,10 @@ epoce(fit, pred.times, newdata = NULL, newdata.Longi = NULL)
 }
 
 \arguments{
-  \item{fit}{A jointPenal object.}
+  \item{fit}{A jointPenal, longiPenal, trivPenal or trivPenalNL object.}
   \item{pred.times}{Time or vector of times to compute epoce.}
-  \item{newdata}{Optional. In case of joint models obtained with \code{frailtyPenal} or \code{trivPenal}. For models inheriting from \code{trivPenal} class, if \code{newdata} is given,  \code{newdata.Longi} must be given as well.  When missing, the data used for estimating the fit are used, and CVPOL and MPOL are computed (internal validation). When \code{newdata} is specified, only MPOL is computed on this new dataset (external validation). The new dataset and the dataset used in the estimation must have the same covariates with the same coding without missing data.}
-        \item{newdata.Longi}{Optional. In case of joint models obtained with \code{longiPenal} or \code{trivPenal}. For models inheriting from \code{longiPenal}, if the \code{newdata.Longi} is given, \code{newdata} must be \code{NULL}, but for models from \code{trivPenal} class, if \code{newdata.Longi} is given, \code{newdata} must be provided as well. The two datasets newdata and newdata.Longi must include the information concerning the same patients with the same characteristics and the appropriate data on follow up (recurrences for \code{newdata} and longitudinal measurements for \code{newdata.Longi}).}
+  \item{newdata}{Optional. In case of joint models obtained with \code{frailtyPenal}, \code{trivPenal} or \code{trivPenalNL}. For models inheriting from \code{trivPenal} or \code{trivPenalNL} class, if \code{newdata} is given,  \code{newdata.Longi} must be given as well.  When missing, the data used for estimating the fit are used, and CVPOL and MPOL are computed (internal validation). When \code{newdata} is specified, only MPOL is computed on this new dataset (external validation). The new dataset and the dataset used in the estimation must have the same covariates with the same coding without missing data.}
+        \item{newdata.Longi}{Optional. In case of joint models obtained with \code{longiPenal}, \code{trivPenal} or \code{trivPenalNL}. For models inheriting from \code{longiPenal}, if the \code{newdata.Longi} is given, \code{newdata} must be \code{NULL}, but for models from \code{trivPenal} or \code{trivPenalNL} class, if \code{newdata.Longi} is given, \code{newdata} must be provided as well. The two datasets newdata and newdata.Longi must include the information concerning the same patients with the same characteristics and the appropriate data on follow up (recurrences for \code{newdata} and longitudinal measurements for \code{newdata.Longi}).}
 
   }
 
@@ -110,8 +110,9 @@ plot(epoce, type = "cvpol")
 data(colorectal)
 data(colorectalLongi)
 
+# Linear model for the biomarker
 # (computation takes around 30 minutes)
-modTriv <- model.weib.RE.gap <-trivPenal(Surv(gap.time, new.lesions) ~ cluster(id)
+model.trivPenalNL <-trivPenal(Surv(gap.time, new.lesions) ~ cluster(id)
 + age + treatment + who.PS + prev.resection + terminal(state),
 formula.terminalEvent =~ age + treatment + who.PS + prev.resection, 
 tumor.size ~ year * treatment + age + who.PS, data = colorectal,
@@ -123,22 +124,42 @@ hazard = "Weibull", method.GH="Pseudo-adaptive", n.nodes=7)
 time <- c(1, 1.5, 2, 2.5)
 
 # (computation takes around 10 minutes)
-epoce <- epoce(modTriv,time)
+epoce <- epoce(model.trivPenalNL,time)
 print(epoce)
-plot(epoce,type = "cvpol")
+plot(epoce, type = "cvpol")
 
 # computation on a new dataset
 # here a sample of colorectal data with the first 100 subjects
 s <-  subset(colorectal,  id\%in\%1:100)
 s.Longi <- subset(colorectalLongi, id\%in\%1:100)
 # (computation takes around 10 minutes)
-epoce <- epoce(modTriv, time, newdata = s, newdata.Longi = s.Longi)
+epoce <- epoce(model.trivPenalNL, time, newdata = s, newdata.Longi = s.Longi)
 
 print(epoce)
-plot(epoce,type = "cvpol")
+plot(epoce, type = "cvpol")
 
 
-dev.off()
+
+# Non-linear model for the biomarker
+
+# No information on dose - creation of a dummy variable 
+colorectalLongi$dose <- 1
+
+# (computation can take around 40 minutes)
+model.trivPenalNL <- trivPenalNL(Surv(time0, time1, new.lesions) ~ cluster(id) + age + treatment
+ + terminal(state), formula.terminalEvent =~ age + treatment, biomarker = "tumor.size",
+ formula.KG ~ 1, formula.KD ~ treatment, dose = "dose", time.biomarker = "year", 
+ data = colorectal, data.Longi =colorectalLongi, random = c("y0", "KG"), id = "id", 
+ init.B = c(-0.22, -0.16, -0.35, -0.19, 0.04, -0.41, 0.23), init.Alpha = 1.86,
+ init.Eta = c(0.5, 0.57, 0.5, 2.34), init.Biomarker = c(1.24, 0.81, 1.07, -1.53),
+ recurrentAG = TRUE, n.knots = 5, kappa = c(0.01, 2), method.GH = "Pseudo-adaptive")
+
+# computation on the same dataset
+time <- c(1, 1.5, 2, 2.5)
+
+epoce <- epoce(model.trivPenalNL, time)
+
+
 }
 
 }

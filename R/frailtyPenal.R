@@ -200,7 +200,7 @@
 		# tri par ordre croissant de subcluster a l'interieur des clusters
 		m <- m[order(m[,tempc$vars],m[,tempsub$vars]),]
 		ordretmp <- order(m[,tempsub$vars])
-		
+				
 		subcluster <- strata(m[, tempsub$vars], shortlabel = TRUE)
 		ordre <- as.integer(row.names(m))
 			  
@@ -1857,7 +1857,8 @@
 			ptm<-proc.time()
 			cat("\n")
 			cat("Be patient. The program is computing ... \n")
-		}	  
+		}	
+
 		
 		ans <- .Fortran(C_nested,
                       as.integer(n),

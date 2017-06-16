@@ -62,11 +62,11 @@ trivPenal(formula, formula.terminalEvent, formula.LongitudinalData,
   \item{data}{A 'data.frame' with the variables used in \code{formula}.}
  \item{data.Longi}{A 'data.frame' with the variables used in \code{formula.LongitudinalData}.}
 
-  \item{random}{Names of variables for the random effects of the longitudinal outcome. Maximum 2 random effects are possible at the moment. The random intercept is chosen using \code{"1"}.}
+  \item{random}{Names of variables for the random effects of the longitudinal outcome. Maximum 3 random effects are possible at the moment. The random intercept is chosen using \code{"1"}.}
 
   \item{id}{Name of the variable representing the individuals.}
   \item{intercept}{Logical value. Is the fixed intercept of the biomarker included in the mixed-effects model? The default is \code{TRUE}.}
-        \item{link}{Type of link functions for the dependence between the biomarker and death and between the biomarker and the recurrent events: \code{"Random-effects"} for the association directly via the random effects of the biomarker, \code{"Current-level"} for the association via the true current level of the biomarker. The default is \code{"Random-effects"}. }
+        \item{link}{Type of link functions for the dependence between the biomarker and death and between the biomarker and the recurrent events: \code{"Random-effects"} for the association directly via the random effects of the biomarker, \code{"Current-level"} for the association via the true current level of the biomarker. The option \code{"Current-level"} can be chosen only if the biomarker random effects are associated with the intercept and time (following this order). The default is \code{"Random-effects"}. }
         \item{left.censoring}{Is the biomarker left-censored below a threshold \eqn{s}? If there is no left-censoring, the argument must be equal to \code{FALSE}, otherwise the value of the threshold must be given.}
  
         \item{recurrentAG}{Logical  value.   Is  Andersen-Gill  model  fitted?   If  so  indicates  that  recurrent
@@ -128,7 +128,8 @@ The following components are included in a 'trivPenal' object for each model:
 
 \item{b}{The sequence of the corresponding estimation of the coefficients for the hazard functions (parametric or semiparametric), the random effects variances and the regression coefficients.}
 \item{call}{The code used for the model.}
-\item{formula}{The formula part of the code used for the terminal event part of the model.}
+\item{formula}{The formula part of the code used for the recurrent event part of the model.}
+\item{formula.terminalEvent}{The formula part of the code used for the terminal event part of the model.}
 \item{formula.LongitudinalData}{The formula part of the code used for the longitudinal part of the model.}
 \item{coef}{The regression coefficients (first for the recurrent events, then for the terminal event and then for the biomarker.}
 \item{groups}{The number of groups used in the fit.}
@@ -206,12 +207,12 @@ matrix \eqn{\bold{V}_{\bold{R}_i^{(m)}}=\widehat{\bold{V}_i}-\bold{X}_{Li}(\sum_
 
 \item{intercept}{The logical value. Is the fixed intercept included in the linear mixed-effects model?}
 \item{B1}{The variance matrix of the random effects for the longitudinal outcome.}
-\item{sigma2}{The standard deviation of the frailty term (\eqn{\sigma_v}).}
+\item{sigma2}{The variance of the frailty term (\eqn{\sigma_v}).}
 \item{alpha}{The coefficient \eqn{\alpha} associated with the frailty parameter in the terminal hazard function.}
-\item{ResidualSE}{The standard deviation of the measurement error.}
+\item{ResidualSE}{The variance of the measurement error.}
 \item{etaR}{The regression coefficients for the link function \eqn{g(\cdot)}.}
 \item{etaT}{The regression coefficients for the link function \eqn{h(\cdot)}.}
-\item{ne_re}{The number of random effects used in the fit.}
+\item{ne_re}{The number of random effects b used in the fit.}
 \item{names.re}{The names of variables for the random effects \eqn{\bold{b}_i}.}
 \item{link}{The name of the type of the link functions.}
 
@@ -219,7 +220,7 @@ matrix \eqn{\bold{V}_{\bold{R}_i^{(m)}}=\widehat{\bold{V}_i}-\bold{X}_{Li}(\sum_
 \item{leftCensoring.threshold}{For the left-censored biomarker, the value of the left-censoring threshold used for the fit.} 
 \item{prop.censored}{The fraction of observations subjected to the left-censoring.}
 
- \item{methodGH}{The Guassian quadrature method used in the fit.}
+ \item{methodGH}{The Gaussian quadrature method used in the fit.}
 \item{n.nodes}{The number of nodes used for the Gaussian quadrature in the fit.}
   
 }
@@ -235,9 +236,10 @@ A. Genz and B. Keister (1996). Fully symmetric interpolatory rules for multiple 
 over infinite regions with Gaussian weight. \emph{Journal of Computational and Applied
 Mathematics} \bold{71}, 299-309.
 
-A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2015). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
+A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2016). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
 Event: Predictive Abilities of Tumor Burden for Cancer Evolution with Application to the
-FFCD 2000-05 Trial. \emph{Submitted}.
+FFCD 2000-05 Trial. \emph{Biometrics} \bold{72}(3) 907-16.
+
 
 D. Rizopoulos (2012). Fast fitting of joint models for longitudinal and event time data
 using a pseudo-adaptive Gaussian quadrature rule. \emph{Computational Statistics and Data

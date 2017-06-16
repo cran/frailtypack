@@ -112,6 +112,8 @@ where the \eqn{iid} random effects \eqn{\bold{u_i}\sim\Gamma(\frac{1}{\theta},\f
 
 \bold{Nested Frailty model}
 
+\bold{\emph{Data should be ordered according to cluster and subcluster}}
+
 Fit a nested frailty model using a Penalized Likelihood on the hazard function or using a parametric estimation. Nested frailty models allow survival studies for hierarchically clustered data by including two iid gamma random effects.
 Left-truncated and right-censored data are allowed. Stratification analysis is allowed (maximum of strata = 2).
 
@@ -576,6 +578,9 @@ kappa = c(2.11e+08, 9.53e+11))
 
 
 ###--- Nested Frailty model ---###
+
+##***** WARNING *****##
+# Data should be ordered according to cluster and subcluster
 
 data(dataNested)
 modClu <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
