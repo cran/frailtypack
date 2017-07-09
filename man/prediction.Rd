@@ -557,8 +557,8 @@ cluster(group) + dukes + terminal(death),formula.terminalEvent
 kappa = c(9.55e+9, 1.41e+12), initialize = TRUE)
 
 #-- Compute prediction over the individuals 274 and 4 of the family 5
-predRead <- prediction(modJointNested_Splines, data=DataPred,t=10.2, 
-window = seq(1,10,1), conditional=FALSE, individual = c(274, 4))
+predRead <- prediction(modJointNested_Splines, data=DataPred,t=500,
+window=seq(100,1500,200), conditional=FALSE, individual = c(274, 4))
 
 
 #########################################################################

@@ -13,7 +13,7 @@ prediction_biv.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_tri.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_tri_nl.o: aaOptim.o aaOptimres.o Aparameters.o
 aamarq98o.o: aaOptim.o aaOptimres.o Aparameters.o
-aaOptim.o: Aparameters.o
+aaOptim.o: Aparameters.o 
 afuncpasres.o: aaOptim.o aaOptimres.o Aparameters.o
 aresidusMartingale.o: aaOptim.o aaOptimres.o Aparameters.o
 aaUseFunction.o: aaOptim.o aaOptimres.o Aparameters.o

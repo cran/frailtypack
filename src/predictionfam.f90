@@ -379,8 +379,8 @@
          famHistALL = famHistALL*famHist(i)
     end do    
     
-    gui = (frail**(1.d0/ptheta -1.d0)*exp(-frail/ptheta))/(ptheta**(1.d0/ptheta)*gammaJ(1.d0/ptheta))  
-    gw = (frail2**(1.d0/peta -1.d0)*exp(-frail2/peta))/(peta**(1.d0/peta)*gammaJ(1.d0/peta))  
+    gui = (frail**(1.d0/ptheta -1.d0)*exp(-frail/ptheta))/(ptheta**(1.d0/ptheta)*dexp(gammaJ(1.d0/ptheta)) ) 
+    gw = (frail2**(1.d0/peta -1.d0)*exp(-frail2/peta))/(peta**(1.d0/peta)*dexp(gammaJ(1.d0/peta)))  
 
     func1predfam = term*famHistALL*gui*gw    
     
