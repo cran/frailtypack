@@ -1,6 +1,6 @@
-cf4d8561adb8823bf327a0dce8662920 *DESCRIPTION
+590276d969032834b9022b8c6a91723d *DESCRIPTION
 56b44b05efec70e7429d861cce2feca9 *NAMESPACE
-b59cc7f74d3db1ae6b3e9b7f948aa083 *NEWS
+2e094ac41500c846af71aefa90f28aaf *NEWS
 7d0e5a93868a77976c232932b0a5cf3c *R/Cmeasures.R
 ea152fa392691f9b73e52466474ab42d *R/Diffepoce.R
 568ccb7a37705e70ed4b5259016fd74c *R/SurvIC.R
@@ -73,7 +73,7 @@ c95354578ff271d83b3ed2db9de03230 *R/trivPenal.R
 c4c6c8f56f0fb125a9f0ad5f36a78a9d *R/waldtest.R
 c4501c422e7df81ab0256289663bd032 *README
 fca5ecd90d6f651c93aeb8149b9ea984 *THANKS
-b5745baec95e6884291a3cf93f787617 *build/vignette.rds
+0baf8e3814a0655266b8966ecf135ae3 *build/vignette.rds
 f9b9c4d9d73247b5e38d320cd587b621 *data/bcos.rda
 52d2b2b6fa8d5b2ef44badfdf80b509c *data/colorectal.rda
 01559782d363c615311c70ccda768add *data/colorectalLongi.rda
@@ -230,7 +230,7 @@ ffa593faff07a21ed052edc70d43796c *src/joint.f90
 9a3b348666aa3755aeab4778808053a9 *src/prediction_Recurr_Sha.f90
 708933585722e043e4a472a3dde01c7f *src/prediction_biv.f90
 b7f00f0b3cbb4957f90cb745b94160ff *src/prediction_sha_logn.f90
-0fb633d300adb792bb5cc95f845a71b2 *src/prediction_tri.f90
+5389e5bab0c093ca87cefbad47dfed8e *src/prediction_tri.f90
 3693052488232cf76bf561f503ec23ae *src/prediction_tri_nl.f90
 de7464180f38609b274c590010859cbd *src/predictionfam.f90
 cecbe58ce72b3504d4164ecbc68b799d *src/risque.f90

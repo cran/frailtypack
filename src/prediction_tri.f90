@@ -300,6 +300,7 @@
              
                                 
                 predProba1(i) = ss11/ss12
+			
                 it = it +nreci_all(i)
             end do
          
@@ -1081,7 +1082,7 @@
         func2pred2GHtri = 0.d0
         if(link.eq.1) then
             func2pred2GHtri = ((survDC(1)**(exp(XbetapredDCi+etaydc(1)*frail+etaydc(2)*frail2+frail3*alpha)) ) &
-                * exp((frail3*alpha+etayr(1)*frail+etayr(2)*frail2))**nmescurr &
+                * exp((frail3+etayr(1)*frail+etayr(2)*frail2))**nmescurr &
                 * (survRi(1)**( exp(XbetapredRi+frail3+etayr(1)*frail+etayr(2)*frail2))) &
                 * exp(-(yscalar**2.d0)/(2.d0*sigmae)))*exp(prod_cag) &
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)
@@ -1093,6 +1094,8 @@
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)    
         end if    
     
+	
+	
         return
     
       end function func2pred2GHtri    
