@@ -243,8 +243,8 @@ datapred[3,] <- c(1,60) # man, 60 years old
 \bold{Time-dependent covariates:}
 In the context of time-dependent covariate, the last previous value of the covariate is used before the time t of prediction.
 
-It should be noted, that the data frame for a conditional prediction on a shared frailty model, you need to specify the group to which the individuals belong to in adding the same cluster covariate as that used for model fitted. 
-Here, the three individual belongs to the group 5.
+It should be noted, that in a data frame for both marginal and conditional prediction on a shared frailty model for clustered data, the group must be specified. In the case of marginal predictions this can be any number as it does not influence predictions. However, for conditional predictions, the group must be also included in the data set used for the model fitting. The conditional predictions apply the empirical Bayes estimate of the frailty from the specified cluster. 
+Here, three individuals belong to group 5.
 
 \preformatted{
 datapred <- data.frame(group=0, sex=0,age=0)
@@ -358,21 +358,16 @@ sha <- frailtyPenal(Surv(t.stop,death)~cluster(group)+sex+dukes,
 n.knots=10,kappa=10000,data=readmission)
 
 #-- marginal prediction
+# a group must be specified but it does not influence the results 
+# in the marginal predictions setting
+datapred$group[1:2] <- 1
 pred.sha.marg <- prediction(sha,datapred,t=100,window=seq(50,1900,50))
 plot(pred.sha.marg)
 
 #-- conditional prediction, given a specific cluster (group=5)
-#-- construction of the data frame for predictions
-datapred <- data.frame(group=0,sex=0,dukes=0)
-datapred$sex <- as.factor(datapred$sex)
-levels(datapred$sex)<- c(1,2)
-datapred$dukes <- as.factor(datapred$dukes)
-levels(datapred$dukes)<- c(1,2,3)
-datapred[1,] <- c(5,1,2) # man, dukes 2
-datapred[2,] <- c(5,2,3) # woman, dukes 3
-
+datapred$group[1:2] <- 5
 pred.sha.cond <- prediction(sha,datapred,t=100,window=seq(50,1900,50),
-conditional = TRUE)
+                            conditional = TRUE)
 plot(pred.sha.cond)
 
 ##-- marginal prediction of a recurrent event, on a shared frailty model
@@ -430,7 +425,7 @@ pred.joint0 <- prediction(joi,datapredj,t=100,window=500,event = "Terminal")
 print(pred.joint0)
 
 #-- prediction of death between 100 and 100+w given relapses 
-(with confidence intervals)
+# (with confidence intervals)
 pred.joint <- prediction(joi,datapredj,t=100,window=seq(50,1500,50),
 event = "Terminal",MC.sample=100)
 plot(pred.joint,conf.bands=TRUE)
@@ -444,14 +439,14 @@ plot(pred.joint2)
 #or in the next 500
 
 #-- prediction of relapse between 100 and 100+w given relapses 
-(with confidence intervals)
+# (with confidence intervals)
 pred.joint <- prediction(joi,datapredj,t=100,window=seq(50,1500,50),
 event = "Recurrent",MC.sample=100)
 plot(pred.joint,conf.bands=TRUE)
 # each y-value of the plot corresponds to the prediction between [100,x]
 
 #-- prediction of relapse and death between 100 and 100+w given relapses 
-(with confidence intervals)
+# (with confidence intervals)
 pred.joint <- prediction(joi,datapredj,t=100,window=seq(50,1500,50),
 event = "Both",MC.sample=100)
 plot(pred.joint,conf.bands=TRUE)

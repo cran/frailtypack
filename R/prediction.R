@@ -3,7 +3,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		# x <- deparse(substitute(x))
 		# assign(x, value, pos=.GlobalEnv)
 	# }
-
+  
 	if (missing(fit)) stop("Need a fit")
 	if ((class(fit)!="frailtyPenal")&(class(fit)!="jointPenal")&(class(fit)!='longiPenal')&(class(fit)!='trivPenal')&(class(fit)!='jointNestedPenal')&class(fit)!='trivPenalNL') stop("The argument fit must be one of these objects : frailtyPenal; jointPenal; longiPenal; trivPenal or jointNestedPenal")
 	if (fit$istop != 1) stop("Attempting to do predictions with a wrong model")
@@ -27,7 +27,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	if ((class(fit) == "frailtyPenal") && ((fit$Frailty==TRUE) & (!missing (event)) && (event != "Recurrent"))){ # Prediction modele shared pour evenement repete
 		stop("Only 'Recurrent' event is allowed for a shared frailty modeling of parameters")
 	}
-
+  
 	if (any(window <= 0)) stop("Window must be positive")
 	
 	event.type <- charmatch(event, c("Both", "Terminal", "Recurrent"), nomatch = 0)
@@ -77,7 +77,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	ng <- fit$groups
 	nst <- 2
 	HIH <- fit$varHIHtotal
-
+	
 	# a definir meme si non utilise
 	nz <- 1
 	zi <- 0
@@ -122,7 +122,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	m3 <- m # pour recuperer les donnees du dataset initial en plus
 	m3$formula <- fit$formula
 	m[[3]] <- as.name(m2$data)
-			
+	
 	if (class(fit) == "jointPenal" | class(fit)=="trivPenal" | class(fit)=="trivPenalNL" | class(fit) == "jointNestedPenal"){
 		temp <- as.character(fit$formula[[2]])
 		if (temp[1]=="Surv"){
@@ -169,11 +169,13 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 				clus <- grep("cluster",fit$formula)
 				m$formula <- as.formula(paste(fit$formula,collapse=""))					
 			}else{
+			
 				fit$formula <- unlist(strsplit(deparse(fit$formula)," "))				
 				clus <- grep("cluster",fit$formula)
 				# if (clus==length(fit$formula)) m$formula <- as.formula(paste(fit$formula[-c(clus,max(which(fit$formula=="+")))],collapse=""))
 				# else m$formula <- as.formula(paste(fit$formula[-clus],collapse=""))				
 				m$formula <- as.formula(paste(fit$formula,collapse=""))
+				
 			}
 		}else if(class(fit)=='longiPenal'){
 			fit$formula <- unlist(strsplit(deparse(fit$formula)," "))
@@ -192,23 +194,23 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	}
 	indic.ksi <- 1
 	if(class(fit) == "jointNestedPenal"&& is.null(fit$ksi))indic.ksi <- 0
-
-	
 	dataset <- eval(m, sys.parent())
 	dataset3 <- eval(m3, sys.parent())
+	
 	typeofY <- attr(model.extract(dataset3, "response"),"type")
 	Y <- model.extract(dataset3, "response")
+
 	if (typeofY=="right") tt1 <- Y[,1]
 	else tt1 <- Y[,2]
 	class(m$formula) <- "formula"
 	if ((ICproba) && (conditional) && (event == "Recurrent")) class(mIC$formula) <- "formula"
 	special <- c("strata", "cluster", "subcluster", "terminal", "num.id", "timedep")		
 	Terms <- terms(m$formula, special, data = data)
-	
+
 	if((event == "Recurrent") && (ICproba) && (conditional)) Terms2 <- terms(mIC$formula, special, data = data)	
 	fit$formula <- Terms
 	dropx <- NULL	
-
+	
 	if (class(fit) == 'jointPenal' | class(fit) == 'trivPenal' | class(fit) == 'trivPenalNL' | class(fit) == "jointNestedPenal"){	
 		if (fit$joint.clust==1){ # joint classique	
 			tempc <- untangle.specials(Terms, "cluster", 1:10)		
@@ -326,7 +328,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 			}
 		}
 	}else{
-		if (fit$Frailty){			
+		if (fit$Frailty){		
+		  
 			#--Traitement donnees prediction
 			tempc <- untangle.specials(Terms, "cluster", 1:10)
 			dropx <- c(dropx,tempc$terms)
@@ -1834,10 +1837,10 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 							as.integer(0),
 							as.integer(ntimeAll),
 							as.integer(MC.sample),
-							as.double(sigma2.mc),
 							as.double(rep(0,MC.sample)),
 							as.double(matrix(0,nrow=nrow(data)*MC.sample,ncol=ntimeAll)),
 							as.double(matrix(0,nrow=nrow(data)*MC.sample,ncol=ntimeAll)),
+							as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
 							predlow1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll)),
 							predhigh1=as.double(matrix(0,nrow=nrow(data),ncol=ntimeAll))
 							)					

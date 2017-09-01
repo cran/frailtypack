@@ -1,4 +1,4 @@
-590276d969032834b9022b8c6a91723d *DESCRIPTION
+b2d1b09dc74446b8e88aa2c7e87c0540 *DESCRIPTION
 56b44b05efec70e7429d861cce2feca9 *NAMESPACE
 2e094ac41500c846af71aefa90f28aaf *NEWS
 7d0e5a93868a77976c232932b0a5cf3c *R/Cmeasures.R
@@ -34,7 +34,7 @@ a25640b786ba52c043f97aed6a8036ba *R/plot.predFrailty.R
 2a8dc4d511435a64c16a1edef189ce61 *R/plot.predLongi.R
 9fc524277dd9b281ddfcef76037a068a *R/plot.trivPenal.R
 1636e40e0dca79ded8de75c37e68ef78 *R/plot.trivPenalNL.R
-1acabd883a844810a3937c4c02be69b7 *R/prediction.R
+21dce3906a276167a67d0d4b72cd83b3 *R/prediction.R
 79a06e0faff389cb54f0e7191eac06dd *R/print.Cmeasures.R
 8ed4f036c28da23399e7037d84935b4a *R/print.Diffepoce.R
 109a4e813415d33ba93b196a4bf43747 *R/print.additivePenal.R
@@ -73,7 +73,7 @@ c95354578ff271d83b3ed2db9de03230 *R/trivPenal.R
 c4c6c8f56f0fb125a9f0ad5f36a78a9d *R/waldtest.R
 c4501c422e7df81ab0256289663bd032 *README
 fca5ecd90d6f651c93aeb8149b9ea984 *THANKS
-0baf8e3814a0655266b8966ecf135ae3 *build/vignette.rds
+b5745baec95e6884291a3cf93f787617 *build/vignette.rds
 f9b9c4d9d73247b5e38d320cd587b621 *data/bcos.rda
 52d2b2b6fa8d5b2ef44badfdf80b509c *data/colorectal.rda
 01559782d363c615311c70ccda768add *data/colorectalLongi.rda
@@ -123,7 +123,7 @@ a6def62fbf0e745d65bbae2b5917534d *man/plotJointPenal.Rd
 9dda4d82818e4b3bbb00de10948e72ba *man/plotNestedPenal.Rd
 c75be3cddf940743e5e9925db8430eef *man/plotTrivPenal.Rd
 29fd250dc4267f1dff13607a5c19ac1b *man/plotTrivPenalNL.Rd
-4d82bd32f8a261ada177637b40fb5aa8 *man/prediction.Rd
+14e70923612f986ed80305e455bc98df *man/prediction.Rd
 66e0fbe84977b89a1548c9ac36d49bce *man/print.Cmeasures.Rd
 5d71930b4531bd0c0dae3bc5256df22b *man/print.multivPenal.Rd
 a63e28efa395a3ffbd574e1e3adcc673 *man/print.prediction.Rd

@@ -1,11 +1,11 @@
 Package: frailtypack
-Version: 2.12.3
-Date: 2017-07-31
+Version: 2.12.4
+Date: 2017-08-19
 Title: General Frailty Models: Shared, Joint and Nested Frailty Models
         with Prediction
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
         Mauguen, Agnieszka Krol, Amadou Diakite, Alexandre Laurent and Myriam Lopez
-Maintainer: Virginie Rondeau <Virginie.Rondeau@isped.u-bordeaux2.fr>
+Maintainer: Virginie Rondeau <Virginie.Rondeau@inserm.fr>
 Depends: R (>= 2.10), survival, boot, MASS, survC1
 Imports: statmod, nlme
 LazyLoad: no
@@ -24,6 +24,6 @@ License: GPL (>= 2.0)
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 Repository: CRAN
-Date/Publication: 2017-08-01 19:00:02 UTC
-Packaged: 2017-08-01 01:54:55 UTC; Agnieszka
+Date/Publication: 2017-09-01 16:17:55 UTC
+Packaged: 2017-09-01 14:34:05 UTC; vr
 NeedsCompilation: yes
