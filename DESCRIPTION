@@ -1,5 +1,5 @@
 Package: frailtypack
-Version: 2.12.4
+Version: 2.12.5
 Date: 2017-08-19
 Title: General Frailty Models: Shared, Joint and Nested Frailty Models
         with Prediction
@@ -21,9 +21,11 @@ Description: The following several classes of frailty models using a penalized l
 		9) Trivariate joint models for longitudinal data, recurrent events and a terminal event. 
 		Prediction values are available (for a terminal event or for a new recurrent event). Left-truncated (not for Joint model), right-censored data, interval-censored data (only for Cox proportional hazard and shared frailty model) and strata are allowed. In each model, the random effects have the gamma or normal distribution. Now, you can also consider time-varying covariates effects in Cox, shared and joint frailty models (1-5). The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 License: GPL (>= 2.0)
+URL:
+        https://virginie1rondeau.wixsite.com/virginierondeau/software-frailtypack
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 Repository: CRAN
-Date/Publication: 2017-09-01 16:17:55 UTC
-Packaged: 2017-09-01 14:34:05 UTC; vr
+Date/Publication: 2017-09-21 13:27:17 UTC
+Packaged: 2017-09-21 09:18:00 UTC; vr
 NeedsCompilation: yes
