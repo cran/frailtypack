@@ -364,13 +364,15 @@
     double precision,dimension(ng,ng),intent(out)::frailtypredind,frailtyvarind
     double precision,dimension(:),allocatable::vuuu
     double precision,dimension(:,:),allocatable::H_hess0
+	integer::indiv
 
     cares=0.d0
     cbres=0.d0
     ddres=0.d0
     vecuiRes=0.d0
     moyuiR=0.d0
-    
+    indiv = 1 
+	
     Resmartingale = Nrec_fam(1:nfam) !
     Resmartingaledc = Ndc_fam(1:nfam) !    
 
@@ -394,11 +396,12 @@
     
         if (istopres.eq.1) then
             do i=1,fsize(indg)
-                Resmartingale(indg) = Resmartingale(indg) -(((vuuu(1)*vuuu(1))**xi)*&
+                Resmartingale(indiv) =Nrec(indiv) -(((vuuu(1)*vuuu(1))**xi)*&
                         (vuuu(1+i)*vuuu(1+i)))*cumulhaz1(indg,i)
-                Resmartingaledc(indg) = Resmartingaledc(indg) - ((vuuu(1)*vuuu(1))*&
+                Resmartingaledc(indiv) = Ndc(indiv) - ((vuuu(1)*vuuu(1))*&
                         ((vuuu(1+i)*vuuu(1+i))**alpha))*cumulhazdc(indg,i)
-                frailtypredind(indg,i) = vuuu(1+i)**2
+			      frailtypredind(indg,i) = vuuu(1+i)**2
+				indiv = indiv + 1
             end do
 
             frailtypred(indg) = vuuu(1)**2
@@ -408,7 +411,8 @@
                 frailtyvarind(indg,i) = ((2.d0*vuuu(1+i))**2)*H_hess0(1+i,1+i)
             end do
         else
-            Resmartingale(indg) = 0.d0
+            Resmartingale(indiv) = 0.d0
+			Resmartingaledc(indiv)  = 0.d0
             frailtypredind(indg,:) = 0.d0
             frailtyvarind(indg,:) = 0.d0
             frailtyvar(indg) = 0.d0
@@ -416,7 +420,7 @@
         end if
         deallocate(vuuu,vres,H_hess0)!,I_hess,H_hess)
     end do
-    end subroutine ResidusMartingalej_fam
+  end subroutine ResidusMartingalej_fam
 
 
 !=============================================================================
@@ -430,21 +434,23 @@
     use optimres
     !use comon,only:alpha,eta
     use commun
+	use tailles,only:nssgbyg
 
     implicit none
     
     integer::i,j,maxng
     double precision,external::namesfuncres
-    double precision,dimension(ngexact),intent(out)::Resmartingale
+    double precision,dimension(nssgbyg),intent(out)::Resmartingale
     double precision,dimension(ngexact),intent(out)::frailtypred,frailtysd,frailtyvar
     double precision,dimension(ngexact,maxng),intent(out)::frailtypredg,frailtysdg,frailtyvarg
     double precision,dimension(:),allocatable::vuuu
     double precision,dimension(:,:),allocatable::H_hess0
+	integer:: indiv
 
     cares=0.d0
     cbres=0.d0
     ddres=0.d0
-
+	indiv = 1
     Resmartingale = mid(1:ngexact) !mid
 
     do indg=1,ngexact
@@ -471,8 +477,10 @@
         if (istopres.eq.1) then
 
             do i=1,n_ssgbygrp(indg)
-                Resmartingale(indg) = Resmartingale(indg) - ((vuuu(1)*vuuu(1+i))**2)*cumulhaz1(indg,i)
+			
+                Resmartingale(indiv) =  mij(indg,i)- ((vuuu(1)*vuuu(1+i))**2)*cumulhaz1(indg,i)
                 frailtypredg(indg,i) = vuuu(1+i)**2
+				indiv  = indiv + 1
             end do
 
             frailtypred(indg) = vuuu(1)**2
@@ -486,7 +494,7 @@
             end do
 
         else
-            Resmartingale(indg) = 0.d0
+            Resmartingale(indiv) = 0.d0
             frailtypredg(indg,:) = 0.d0
             frailtysdg(indg,:) = 0.d0
             frailtyvarg(indg,:) = 0.d0

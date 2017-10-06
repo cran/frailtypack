@@ -1892,8 +1892,8 @@
             Call ResidusMartingalej_fam(funcpajres_fam,Resmartingale,Resmartingaledc,frailtypred_fam,&
                 frailtyvar_fam, frailtypred_fam_ind,frailtyvar_fam_ind)         
 
-            MartinGales(1:nfam,1)=Resmartingale
-            MartinGales(1:nfam,2)=Resmartingaledc
+            MartinGales(1:ngrp(1),1)=Resmartingale
+            MartinGales(1:ngrp(1),2)=Resmartingaledc
             MartinGales(1:nfam,5)=frailtypred_fam
             MartinGales(1:nfam,4)=frailtyvar_fam        
             k = 1

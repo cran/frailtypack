@@ -34,3 +34,32 @@ citEntry(entry = "Article",
         "{Frailtypack}: A computer program for the analysis of correlated failure time data using penalized likelihood estimation",
         "Computer Methods and Programs in Biomedicine, 80(2), 154-164.")
 )
+
+bibentry(bibtype = "Article",
+  title        = "Tutorial in Joint Modeling and Prediction: A Statistical Software for Correlated Longitudinal Outcomes, Recurrent Events and a Terminal Event",
+  author       = c(person(given = "Agnieszka",
+                          family = "Kr\\'{o}l",
+                          email = "Agnieszka.Listwon@u-bordeaux.fr"),
+                   person(given = "Audrey",
+                          family = "Mauguen",
+                          email = "Audrey.Mauguen@u-bordeaux.fr"),
+                   person(given = "Yassin",
+                          family = "Mazroui",
+                          email = "Yassin.Mazroui@upmc.fr"),
+                   person(given = "Alexandre",
+                          family = "Laurent"),
+                   person(given = "Stefan",
+                          family = "Michiels",
+                          email = "Stefan.Michiels@gustaveroussy.fr"),
+                   person(given = "Virginie",
+                          family = "Rondeau",
+                          email = "Virginie.Rondeau@u-bordeaux.fr")),
+  journal      = "Journal of Statistical Software",
+  year         = "2017",
+  volume       = "81",
+  number       = "3",
+  pages        = "1--52",
+  doi          = "10.18637/jss.v081.i03",
+
+  header       = "To cite frailtypack in publications use:"
+)

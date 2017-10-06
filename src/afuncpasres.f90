@@ -217,15 +217,16 @@
     prod4 = 1.d0
     prod5 = 1.d0        
 
+	
     do j=1,fsize(indg)
         prod1 = prod1 * (frail2(j)**Nrec_ind(sum(fsize(1:(indg-1)))+j)) * dexp(-frail1**xi * frail2(j) * cumulhaz1(indg,j))
-        prod2 = prod2 * frail2(j)**((1.d0/theta) - 1.d0) * dexp(-frail2(j)/theta)
+        prod2 = prod2 *  dexp(-frail2(j)/theta)
         prod3 = prod3 * dexp(-frail1**xi * frail2(j) * cumulhaz0(indg,j))
         prod4 = prod4 * dexp(-frail1 * frail2(j)**alpha * cumulhazdc(indg,j))
         prod5 = prod5 * frail2(j)**(Nrec_ind(sum(fsize(1:(indg-1)))+j)+alpha*cdc(sum(fsize(1:(indg-1)))+j))
     end do
 
-    res = frail1**(1.d0/eta - 1.d0) * prod1 * prod3 * dexp(-frail1/eta) * prod2 * &
+    res = prod1 * prod3 * dexp(-frail1/eta) * prod2 * &! frail1**(1.d0/eta - 1.d0) *
             prod4 * prod5 * frail1**(Nrec_fam(indg)*xi+Ndc_fam(indg))
             
     if ((res.ne.res).or.(abs(res).ge. 1.d300)) then

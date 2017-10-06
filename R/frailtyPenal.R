@@ -1913,7 +1913,7 @@
                       as.integer(mt1),
                       zi=as.double(rep(0,(n.knots+6))),
                       time=as.double(rep(0,(nbintervR+1))),
-                      martingale.res=as.double(rep(0,as.integer(length(uni.cluster)))),
+                      martingale.res=as.double(rep(0,as.integer(length(uni.subcluster)))),
                       frailty.pred.group=as.double(rep(0,as.integer(length(uni.cluster)))),
                       
                       frailty.pred.subgroup=as.double(matrix(0,nrow=ngg,ncol=maxng)),
@@ -2609,8 +2609,8 @@
 		#		fit$lineardeath.pred <- ans$linearpreddc
 		#	}
 		#}    
-		fit$martingale.res <- MartinGale[1:length(uni.cluster),1] # seulement pour les familles
-		fit$martingaledeath.res <- MartinGale[1:length(uni.cluster),2]		
+		fit$martingale.res <- MartinGale[,1] # seulement pour les familles
+		fit$martingaledeath.res <- MartinGale[,2]		
 		fit$frailty.pred <- MartinGale[,3]   
 		fit$frailty.fam.pred <- MartinGale[1:length(uni.cluster),5] ### AK 12/12/2016 (family frailties)
 		fit$linear.pred <- ans$linear.pred[order(ordre)]# a faire

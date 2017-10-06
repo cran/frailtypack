@@ -38,6 +38,7 @@
     integer,dimension(:,:),allocatable,save::ssg
     integer,dimension(:),allocatable,save:: mid
     integer,dimension(:,:),allocatable,save::mij,mij2
+	integer,dimension(:),allocatable,save::mij_ind
     integer,save::nbpara
     double precision,dimension(:,:),allocatable,save::aux1,aux2
     end module commun

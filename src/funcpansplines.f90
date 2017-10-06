@@ -12,7 +12,7 @@
     ,stra,pe,effet,nz1,ve &
     ,g,nig,indictronq,AG,auxig,alpha,eta,resnonpen
     !use commun,only:nssgexact,
-    use commun,only:ngexact,mij,mid,ssg,aux1,aux2
+    use commun,only:ngexact,mij,mid,ssg,aux1,aux2,mij_ind
     use residusM
 
     Implicit none
@@ -330,6 +330,7 @@
 
         mid=0
         mij=0
+		mij_ind = 0
         res1=0.d0
         res2=0.d0
         aux1=0.d0
@@ -341,13 +342,14 @@
 !===== MODIFICATION DE LA VRAISEMBLANCE POUR LE NESTED FRAILTY MODEL
 
         do k=1,nsujet
+		
             if(c(k).eq.1)then
                 mid(g(k))=mid(g(k))+1
                 mij(g(k),ssg(k,g(k)))=mij(g(k),ssg(k,g(k)))+1
+				mij_ind(g(k)) = mij_ind(g(k))+1
 !nb de dc ds ss gpe ssg(k)
             endif
         end do
-
         do k=1,nsujet
             if(nva.gt.0)then
                 vet = 0.d0

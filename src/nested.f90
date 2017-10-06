@@ -71,7 +71,8 @@
     double precision,dimension(nbintervR0+1)::time
 !cpm
 !predictor
-    double precision,dimension(ng0),intent(out)::Resmartingale,frailtypred,frailtysd,frailtyvar
+	double precision,dimension(nssgbyg0),intent(out)::Resmartingale
+    double precision,dimension(ng0),intent(out)::frailtypred,frailtysd,frailtyvar
     double precision,external::funcpanres
     double precision,dimension(ns0),intent(out)::linearpred
     double precision,dimension(1,nva0)::coefBeta
@@ -853,7 +854,7 @@
     end do
 
     indic_cumul=1
-    allocate(mij(ng0,nssgmax),aux1(ngexact,nssgmax),aux2(ngexact,nssgmax))
+	 allocate(mij(ng0,nssgmax),mij_ind(nssgbyg0),aux1(ngexact,nssgmax),aux2(ngexact,nssgmax))
     allocate(cumulhaz1(ngmax,nssgmax),cumulhaz0(ngmax,nssgmax))
 
     effet=1
@@ -1121,7 +1122,7 @@
     end if
 
     if((istopp(2)== 0).and.(istopp(3)== 0)) then
-        deallocate(mij,aux1,aux2,cumulhaz1,cumulhaz0)
+        deallocate(mij,mij_ind,aux1,aux2,cumulhaz1,cumulhaz0)
     end if
 
     deallocate(H1_hess,I2_hess,H2_hess,HI1,HI2,HIH,IH,HI,y,Hspl_hess,hess,gaux,gnew,aux,H_hess,I_hess)
