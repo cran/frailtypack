@@ -625,7 +625,7 @@ if((all.equal(length(hazard),1)==T)==T){
 	}
 	
 #===============================================	
-
+    fit$beta_p.value <- 1 - pchisq((fit$coef/sqrt(diag(as.matrix(fit$varH))))^2,1 )
 
 if (length(Xlevels) >0)fit$Xlevels <- Xlevels
     fit$contrasts <- contr.save

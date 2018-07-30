@@ -478,7 +478,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		}else { # vaxdcpred <- aggregate(X2,by=list(num.id),FUN=function(x) {x[1]})[,-1]
 			X2 <- X2[order(num.id),]
 			}
-		vaxdcpred <- X2[listPrec,]	
+		vaxdcpred <- as.matrix(X2)[listPrec,]
 		cat("\n")
 		cat("Calculating the probabilities ... \n")
 		#if(fit$logNormal==0){	#Myriam modifie le 18-08-16	

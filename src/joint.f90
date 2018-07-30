@@ -253,8 +253,9 @@
     allocate(cdc(ngtemp),t0dc(ngtemp),t1dc(ngtemp),aux1(ngtemp),aux2(ngtemp) &
     ,res1(ngtemp),res4(ngtemp),res3(ngtemp),mi(ngtemp))
 
-    allocate(nig(ngtemp),nigdc(ng), fsize(nfam),fam(ng))
-    shapeweib = 0.d0
+      allocate(nig(ngtemp),nigdc(ng))
+  if(typeJoint.eq.3)allocate(fsize(nfam),fam(ng))
+	shapeweib = 0.d0
     scaleweib = 0.d0
     allocate(etaT(nstRecAux),betaT(nstRecAux))
     etaT = 0.d0 !Myriam
@@ -368,7 +369,7 @@
 !ccccccccccccccccccccc
 ! pour le deces
 !cccccccccccccccccccc
-    fam(1:ng) = fam0(1:ng)
+      if(typeJoint.eq.3)fam(1:ng) = fam0(1:ng)
 
     do k = 1,ngtemp
 
@@ -442,6 +443,7 @@
 
 
 ! Family size 
+ if(typeJoint.eq.3) then
     do j=1,nfam
         k=0
         do i=1,ng
@@ -451,6 +453,7 @@
         end do
         fsize(j)=k
     end do
+end if
 
 !write(*,*) 'joint: fsize', fsize
 
@@ -1990,8 +1993,9 @@
 !         end if
 !     endif
 
-    deallocate(nig,cdc,t0dc,t1dc,aux1,aux2,res1,res4,res3,mi,t0,t1,tU,c,stra,g,resL,resU,res5,fam, fsize)
-    deallocate(aux,vax,vaxdc,ve,vedc)
+    deallocate(nig,cdc,t0dc,t1dc,aux1,aux2,res1,res4,res3,mi,t0,t1,tU,c,stra,g,resL,resU,res5)
+	if(typeJoint.eq.3)deallocate(fam, fsize)
+	deallocate(aux,vax,vaxdc,ve,vedc)
     deallocate(hess,v,I1_hess,H1_hess,I2_hess,H2_hess,HI2,HIH,IH,HI,BIAIS,date,datedc)
     deallocate(ResidusRec,Residusdc,Rrec,Nrec,Rdc,Ndc,vuu,ve1,ve2)
     deallocate(the1,the2,nigdc,gsuj)

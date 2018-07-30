@@ -1148,7 +1148,10 @@ if (type != "right" && type != "counting" && type != "interval" && type != "inte
 
     if(netadc>1)fit$se.eta <- sqrt(diag(varH.eta))
     if(netadc==1)fit$se.eta <- sqrt(varH.eta)
-
+    
+    fit$eta_p.value <- 1 - pchisq((fit$eta/fit$se.eta)^2,1)
+    
+    
     fit$se.ResidualSE <- sqrt(temp1[(np  - nvar - ne_re ),(np  - nvar - ne_re)])
     fit$varHtotal <- temp1
     fit$varHIHtotal <- temp2
@@ -1304,6 +1307,16 @@ fit$pred.y.cond <- matrix(ans$Pred_y,ncol=2)[,1]
                 }else{
                         fit$global_chisq.test_d <- 0
                 }
+    
+    if (!is.null(fit$coef)){
+      if(nvar != 1){
+        seH <- sqrt(diag(fit$varH))
+      }else{
+        seH <- sqrt(fit$varH)
+      }
+      fit$beta_p.value <- 1 - pchisq((fit$coef/seH)^2, 1)
+    }
+    
 if(intercept)fit$intercept <- TRUE
 else fit$intercept <- FALSE
         fit$Frailty <- FALSE

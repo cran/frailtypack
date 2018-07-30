@@ -171,6 +171,9 @@ matrix \eqn{\bold{V}_{\bold{R}_i^{(m)}}=\widehat{\bold{V}_i}-\bold{X}_{Li}(\sum_
 \item{names.re}{The names of variables for the random effects.}
 \item{link}{The name of the type of the link function.}
 
+\item{eta_p.value}{p-values of the Wald test for the estimated regression coefficients for the link function.}
+\item{beta_p.value}{p-values of the Wald test for the estimated regression coefficients.}
+
 \item{leftCensoring}{The logical value. Is the longitudinal outcome left-censored?}
 \item{leftCensoring.threshold}{For the left-censored biomarker, the value of the left-censoring threshold used for the fit.} 
 \item{prop.censored}{The fraction of observations subjected to the left-censoring.}
@@ -186,9 +189,8 @@ matrix \eqn{\bold{V}_{\bold{R}_i^{(m)}}=\widehat{\bold{V}_i}-\bold{X}_{Li}(\sum_
 
 \references{
 
-A. Genz and B. Keister (1996). Fully symmetric interpolatory rules for multiple integrals
-over infinite regions with Gaussian weight. \emph{Journal of Computational and Applied
-Mathematics} \bold{71}, 299-309.
+A. Krol, A. Mauguen, Y. Mazroui, A. Laurent, S. Michiels and V. Rondeau (2017). Tutorial in Joint Modeling and Prediction: A Statistical Software for Correlated Longitudinal Outcomes, 
+Recurrent Events and a Terminal Event. \emph{Journal of Statistical Software} \bold{81}(3), 1-52.
 
 A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2016). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
 Event: Predictive Abilities of Tumor Burden for Cancer Evolution with Application to the
@@ -202,7 +204,9 @@ Analysis} \bold{56}, 491-501.
 M.S. Wulfsohn, A.A. and Tsiatis, A. A. (1997). A joint model for survival and longitudinal data
 measured with error. \emph{Biometrics} \bold{53}, 330-9.
 
-
+A. Genz and B. Keister (1996). Fully symmetric interpolatory rules for multiple integrals
+over infinite regions with Gaussian weight. \emph{Journal of Computational and Applied
+Mathematics} \bold{71}, 299-309.
 
 
 }

@@ -2123,7 +2123,24 @@
     fit$se.lambda <- sqrt(temp1[(np - nvar - ne_re - 1 - netadc - netar-2-1),(np - nvar - ne_re - 1 - netadc - netar-2-1)])
     fit$se.y_0 <- sqrt(temp1[(np - nvar - ne_re - 1 - netadc - netar-2),(np - nvar - ne_re - 1 - netadc - netar-2)])
     
+    fit$alpha_p.value <- 1 - pchisq((fit$alpha/sqrt(diag(fit$varH))[2])^2,1)
+    seH.frail <- sqrt(((2 * (fit$sigma2^0.5))^2) *diag(fit$varH)[1]) # delta methode
+    fit$sigma2_p.value <- 1 - pnorm(fit$sigma2/seH.frail)
     
+    
+    if(netadc>1)fit$se.etaT <- sqrt(diag(varH.etaT))
+    if(netadc==1)fit$se.etaT <- sqrt(varH.etaT)
+    
+    if(netar>1)fit$se.etaR <- sqrt(diag(varH.etaR))
+    if(netar==1)fit$se.etaR <- sqrt(varH.etaR)
+    
+    fit$etaR_p.value <- 1 - pchisq((fit$etaR/fit$se.etaR)^2, 1)
+    fit$etaT_p.value <- 1 - pchisq((fit$etaT/fit$se.etaT)^2, 1)
+    
+    fit$y_0_p.value <- 1 - pchisq((fit$y_0/fit$se.y_0)^2, 1) 
+    fit$K_G0_p.value <- 1 - pchisq((fit$K_G0/fit$se.K_G0)^2, 1)
+    fit$K_D0_p.value <- 1 - pchisq((fit$K_D0/fit$se.K_D0)^2, 1)
+    fit$lambda_p.value <- 1 - pchisq((fit$lambda/fit$se.lambda)^2, 1)
     #if (timedep == 1){ # on enleve les variances des parametres des B-splines
     #  while (length(grep("timedep",noms))!=0){
     #    pos <- grep("timedep",noms)[1]
@@ -2320,7 +2337,14 @@
     }else{
       fit$global_chisq.testT <- 0
     }
-    
+    if (!is.null(fit$coef)){
+      if(nvar != 1){
+        seH <- sqrt(diag(fit$varH))
+      }else{
+        seH <- sqrt(fit$varH)
+      }
+      fit$beta_p.value <- 1 - pchisq((fit$coef/seH)^2, 1)
+    }
     fit$max_rep <- max_rep
     fit$joint.clust <- 1
     fit$Frailty <- FALSE

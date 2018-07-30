@@ -175,6 +175,7 @@ The splines and the regression coefficients are initialized to 0.1. An adjusted 
 \item{names.factor}{Names of the "as.factor" variables.}
 \item{Xlevels}{vector of the values that factor might have taken.}
 \item{contrasts}{type of contrast for factor variable.}
+\item{beta_p.value}{p-values of the Wald test for the estimated regression coefficients.}
 }
 
 \note{

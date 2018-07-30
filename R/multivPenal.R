@@ -1245,7 +1245,15 @@ if(length(vec.factor) > 0){
     fit$varH <- temp1[(np - (nvar) - 1):np, (np - (nvar) - 1):np]
     fit$varHIH <- temp2[(np - (nvar) - 1):np, (np - (nvar) - 1):np]
 
-
+    seH.theta1 <- sqrt(((2 * (fit$theta1^0.5))^2) * diag(fit$varH)[1])
+    fit$theta1_p.value <- 1 - pnorm(fit$theta1/seH.theta1)
+    
+    seH.theta2 <- sqrt(((2 * (fit$theta2^0.5))^2) * diag(fit$varH)[2])
+    fit$theta2_p.value <- 1 - pnorm(fit$theta2/seH.theta2)
+    
+    fit$alpha1_p.value <- 1 - pchisq((fit$alpha1/sqrt(diag(fit$varH))[3])^2,1)
+    fit$alpha2_p.value <- 1 - pchisq((fit$alpha2/sqrt(diag(fit$varH))[4])^2,1)
+    
 
     fit$formula <- formula(Terms.formula)
     fit$formula.terminalEvent <- formula(Terms2)
@@ -1409,7 +1417,8 @@ if(length(vec.factor) > 0){
 	}else{
 		fit$global_chisq.test2 <- 0
 	}
-
+	fit$beta_p.value <- 1 - pchisq((fit$coef/sqrt(diag(fit$varH))[-c(1,2)])^2,1 )
+	
 
 	class(fit) <- "multivPenal"
 

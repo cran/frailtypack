@@ -89,7 +89,7 @@
 			if (x$noVar2 == 0){
 				cat("Terminal event:\n")
 				cat("---------------- \n")
-				prmatrix(tmp[-c(1:x$nvar[2]), ,drop=FALSE])
+				prmatrix(tmp[-c(1:x$nvar[1]), ,drop=FALSE]) 
 				if(x$global_chisq.test_d==1){
 					cat("\n")
 					prmatrix(tmpwalddc)
@@ -120,8 +120,9 @@
 		cat(" Frailty parameters: \n")
 		cat("   theta (variance of Frailties, u):", frail1, "(SE (H):",seH.frail1, ")", "p =", signif(1 - pnorm(frail1/seH.frail1), digits - 1), "\n")
 		cat("	eta (variance of Frailties, w) :", frail2, "(SE (H) :", seH.frail2,")", "p =", signif(1 - pnorm(frail2/seH.frail2), digits - 1), "\n")
-		if (indic_alpha == 1) cat("   alpha (u^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[2], ")", "p =", signif(1 - pchisq((x$alpha/sqrt(diag(x$varH))[2])^2,1), digits - 1), "\n")
-		if (indic_xi == 1) cat("   ksi (w^ksi for recurrent event):", x$ksi, "(SE (H):",sqrt(diag(x$varH))[3], ")", "p =", signif(1 - pchisq((x$ksi/sqrt(diag(x$varH))[3])^2,1), digits - 1), "\n")
+		if (indic_alpha == 1) cat("   alpha (u^alpha for terminal event):", x$alpha, "(SE (H):",sqrt(diag(x$varH))[3], ")", "p =", signif(1 - pchisq((x$alpha/sqrt(diag(x$varH))[3])^2,1), digits - 1), "\n")
+		if (indic_xi == 1 & indic_alpha == 1) cat("   ksi (w^ksi for recurrent event):", x$ksi, "(SE (H):",sqrt(diag(x$varH))[4], ")", "p =", signif(1 - pchisq((x$ksi/sqrt(diag(x$varH))[4])^2,1), digits - 1), "\n")
+		if (indic_xi == 1 & indic_alpha == 0) cat("   ksi (w^ksi for recurrent event):", x$ksi, "(SE (H):",sqrt(diag(x$varH))[3], ")", "p =", signif(1 - pchisq((x$ksi/sqrt(diag(x$varH))[3])^2,1), digits - 1), "\n")
 		cat(" \n")
     
 		if (x$typeof == 0){

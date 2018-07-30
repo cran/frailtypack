@@ -776,7 +776,8 @@
 		fit$groups <- length(uni.cluster)
 		fit$n.events <- ans[[34]]
       #Al:
-		fit$n.eventsbygrp <- table(cens,cluster)[2,]      
+		if(dim(table(cens,cluster))[1]==2)	fit$n.eventsbygrp <- table(cens,cluster)[2,] 
+		
 		if(as.character(typeof)=="0"){
 			fit$logLikPenal <- ans[[23]]
 		}else{
@@ -785,8 +786,9 @@
       
 		if (Frailty) {
 			fit$coef <- ans[[20]][(np - nvar - npbetatps + 1):np]
-			if (logNormal == 0) fit$theta <- (ans[[20]][np - nvar - npbetatps])^2
-        	else fit$sigma2 <- (ans[[20]][np - nvar - npbetatps])^2
+			if (logNormal == 0){fit$theta <- (ans[[20]][np - nvar - npbetatps])^2
+			}else{fit$sigma2 <- (ans[[20]][np - nvar - npbetatps])^2
+			}
 		}
 		if (!Frailty) {
 			if (logNormal == 0) fit$theta <- NULL
@@ -813,7 +815,10 @@
 		if (Frailty) {
 			fit$varTheta <- c(temp1[(np - nvar - npbetatps),(np - nvar - npbetatps)],temp2[(np - nvar - npbetatps),(np - nvar - npbetatps)])
 			fit$varTheta <- ((2*ans[[20]][np - nvar - npbetatps])^2)*fit$varTheta # delta-method
-		}
+			if (logNormal == 0)	fit$theta_p.value <- 1 - pnorm(fit$theta/sqrt(fit$varTheta[1]))
+			else fit$sigma2_p.value <- 1 - pnorm(fit$sigma2/sqrt(fit$varTheta[1]))
+			
+			}
       
       #AD:modification des dimensions des tableaux
 		if(nvar > 0){        
@@ -920,6 +925,15 @@
 			else{
 				fit$global_chisq.test <- 0
 			}
+		}
+		
+		if(!is.null(fit$coef)){
+		  if(nvar != 1){
+		    seH <- sqrt(diag(fit$varH))
+		  }else{
+		    seH <- sqrt(fit$varH)
+		  }
+		  fit$beta_p.value <- 1 - pchisq((fit$coef/seH)^2, 1)
 		}
       
       #===============================================
@@ -1616,6 +1630,16 @@
 		fit$varHIHtotal <- temp2      
 		fit$varH <- temp1[(np - nvar - npbetatps - indic_alpha):np, (np - nvar - npbetatps - indic_alpha):np]
 		fit$varHIH <- temp2[(np - nvar - npbetatps - indic_alpha):np, (np - nvar - npbetatps - indic_alpha):np]
+		
+		if (indic_alpha == 1)fit$alpha_p.value <- 1 - pchisq((fit$alpha/sqrt(diag(fit$varH))[2])^2,1)
+		
+		if (logNormal == 0){seH.frail <- sqrt(((2 * (fit$theta^0.5))^2) * diag(fit$varH)[1])
+		fit$theta_p.value <- 1 - pnorm(fit$theta/seH.frail)
+		}else{ seH.frail <- sqrt(((2 * (fit$sigma2^0.5))^2) * diag(fit$varH)[1])
+		fit$sigma2_p.value <- 1 - pnorm(fit$sigma2/seH.frail)
+		}
+		
+		
 		if (indic_alpha == 1) noms <- c("theta","alpha",factor.names(colnames(X)),factor.names(colnames(X2)))
 		else noms <- c("theta",factor.names(colnames(X)),factor.names(colnames(X2)))
 		if(length(grep(":",noms))>0)noms <- factor.names(noms)
@@ -1771,6 +1795,15 @@
 		else{
 			fit$global_chisq.test_d <- 0
 		}
+		if(!is.null(fit$coef)){
+		  if (indic_alpha == 1 || fit$joint.clust==2) {
+		    seH <- sqrt(diag(fit$varH))[-c(1,2)]
+		  }else{
+		    seH <- sqrt(diag(fit$varH))[-1]
+		  }
+		  fit$beta_p.value <- 1 - pchisq((fit$coef/seH)^2, 1)
+		}
+		
 		if (length(Xlevels) >0)	fit$Xlevels <- Xlevels
 		fit$contrasts <- contr.save
 		if (length(Xlevels2) >0) fit$Xlevels2 <- Xlevels2
@@ -1967,6 +2000,13 @@
 		fit$varH <- temp1[(np - nvar - 1):np, (np - nvar - 1):np]
 		fit$varHIH <- temp2[(np - nvar - 1):np, (np - nvar - 1):np]
       
+		seH.alpha <- sqrt(((2 * (fit$alpha^0.5))^2) * diag(fit$varH)[1])
+		fit$alpha_p.value <- 1 - pnorm(fit$alpha/seH.alpha)
+		
+		seH.eta <- sqrt(((2 * (fit$eta^0.5))^2) * diag(fit$varH)[2])
+		fit$eta_p.value <- 1 - pnorm(fit$eta/seH.eta)
+		
+		
 	#	fit$formula <- formula(Terms)
       
 		fit$x <- cbind(ans$x1,ans$x2)
@@ -2078,6 +2118,14 @@
 		else{
 			fit$global_chisq.test <- 0
 		}
+		
+		if(!is.null(fit$coef)){
+		  if(length(fit$coef)>1) seH <- sqrt(diag(fit$varH))[-c(1:2)]
+		  else seH <- sqrt(fit$varH)[-c(1:2)]
+		  
+		  fit$beta_p.value <- 1 - pchisq((fit$coef/seH)^2, 1)
+		}
+		
 		if (length(Xlevels) >0) fit$Xlevels <- Xlevels
 		fit$contrasts <- contr.save
     
@@ -2580,6 +2628,17 @@
 		fit$varH <- temp1[(np-nvar-indic_xi-indic_alpha-1):np, (np-nvar-indic_xi-indic_alpha-1):np]
 		fit$varHIH <- temp2[(np-nvar-indic_xi-indic_alpha-1):np, (np-nvar-indic_xi-indic_alpha-1):np]
 		
+		seH.theta <- sqrt(((2 * (fit$theta^0.5))^2) * diag(fit$varH)[1])
+		fit$theta_p.value <- 1 - pnorm(fit$theta/seH.theta)
+		
+		seH.eta <- sqrt(((2 * (fit$eta^0.5))^2) * diag(fit$varH)[2])
+		fit$eta_p.value <- 1 - pnorm(fit$eta/seH.eta)
+		
+		if (indic_alpha == 1) fit$alpha_p.value <- 1 - pchisq((fit$alpha/sqrt(diag(fit$varH))[3])^2,1)
+		if (indic_xi == 1)fit$ksi_p.value <- 1 - pchisq((fit$ksi/sqrt(diag(fit$varH))[3+indic_alpha])^2,1)
+		
+		
+		
 		if (indic_alpha == 1) noms <- c("theta","alpha",factor.names(colnames(X)),factor.names(colnames(X2)))
 		else noms <- c("theta",factor.names(colnames(X)),factor.names(colnames(X2)))
 		if(length(grep(":",noms))>0)noms <- factor.names(noms)		
@@ -2681,6 +2740,17 @@
 			fit$p.global_chisq_d <- p.walddc
 			fit$names.factordc <- vec.factordc
 		}else fit$global_chisq.test_d <- 0
+		
+		
+		if(!is.null(fit$coef)){
+		  
+		  if (indic_alpha == 1 & indic_xi == 1) seH <- sqrt(diag(fit$varH))[-c(1:4)]
+		  else if (indic_alpha == 0 | indic_xi == 0) seH <- sqrt(diag(fit$varH))[-c(1:3)]
+		  else if(indic_alpha == 0 & indic_xi == 0) seH <- sqrt(diag(fit$varH))[-c(1:2)]
+		  
+		  
+		  fit$beta_p.value <- 1 - pchisq((fit$coef/seH)^2, 1)
+		}
 		
 		if (length(Xlevels) >0)	fit$Xlevels <- Xlevels
 		fit$contrasts <- contr.save

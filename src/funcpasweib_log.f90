@@ -6,7 +6,7 @@
     !use comon,only:etaR,etaD,betaR,betaD
     use comon,only:t0,t1,c,nsujet,nva, &
     nst,stra,ve,effet,ng,g,nig,AG,kkapa,sig2, &
-    indictronq,auxig,res3,res5, &
+    indictronq,auxig,res3,res5,res1, &
     etaT,betaT
     use residusM
 
@@ -18,7 +18,7 @@
     integer,dimension(ngmax)::cpt
     double precision::thi,thj,dnb,res,vet,int
     double precision,dimension(np)::b,bh
-    double precision,dimension(ngmax)::res1,res2
+    double precision,dimension(ngmax)::res2!res1,
     double precision,dimension(2)::k0
     double precision,dimension(ngmax)::integrale1,integrale2,integrale3
     double precision,parameter::pi=3.141592653589793d0

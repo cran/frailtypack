@@ -990,18 +990,18 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
     
     matzy <- as.matrix(matzy)
     
+    if(fit$link=="Random-effects")link <- 1
+    if(fit$link=="Current-level") link <- 2
+    if(fit$leftCensoring==FALSE){
+      s_cag_id = 0
+      s_cag = 0
+    }else{
+      s_cag_id = 1
+      s_cag = fit$leftCensoring.threshold
+    }	
     }
         
-        
-        if(fit$link=="Random-effects")link <- 1
-        if(fit$link=="Current-level") link <- 2
-        if(fit$leftCensoring==FALSE){
-          s_cag_id = 0
-          s_cag = 0
-        }else{
-          s_cag_id = 1
-          s_cag = fit$leftCensoring.threshold
-        }				
+   
   
         cat("\n")
         cat("Calculating ... \n")

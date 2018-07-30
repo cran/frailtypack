@@ -244,7 +244,7 @@ The following components are included in a 'trivPenalNL' object for each model:
 \item{K_G0}{Value of the estimate of the biomarker growth parameter.}
 \item{K_D0}{Value of the estimate of the biomarker decay parameter.}
 \item{lambda}{Value of the estimate of the biomarker resistance to drug.}
-\item{y_0}{Values of the estimate of the biomarker intial level.}
+\item{y_0}{Value of the estimate of the biomarker intial level.}
 
 \item{biomarker}{Name of the variable associated with the biomarker in the data.}
  \item{time.biomarker}{Name of the variable associated with the time of measurements of the biomarker in the data.}
@@ -252,7 +252,17 @@ The following components are included in a 'trivPenalNL' object for each model:
  
  \item{BoxCox}{The logical value. Is the BoxCox transformation applied for the biomarker?}
  \item{BoxCox_parameter}{The value of the BoxCox transformation parameter.}
-}
+
+\item{alpha_p.value}{p-value of the Wald test for the estimated coefficient \eqn{\alpha}.}
+\item{sigma2_p.value}{p-value of the Wald test for the estimated variance of the frailty term (\eqn{\sigma_v}).}
+\item{etaR_p.value}{p-values of the Wald test for the estimated regression coefficients for the link function \eqn{g(\cdot)}.}
+\item{etaT_p.value}{p-values of the Wald test for the estimated regression coefficients for the link function \eqn{h(\cdot)}.}
+\item{y_0_p.value}{p-value of the Wald test for the estimated biomarker intial level.}
+\item{K_G0_p.value}{p-value of the Wald test for the estimated biomarker growth parameter.}
+\item{K_D0_p.value}{p-value of the Wald test for the estimated biomarker decay parameter.}
+\item{lambda_p.value}{p-value of the Wald test for the estimated biomarker resistance to drug.}
+\item{beta_p.value}{p-values of the Wald test for the estimated regression coefficients.}
+ }
 
 \note{
 It is recommended to initialize the parameter values using the results from a corresponding reduced model (\code{frailtyPenal} for the recurrent and terminal part). See example.
@@ -262,8 +272,7 @@ Estimations of models with more than three random effects can be very long.
 
 
 \references{
-L. Claret, P. Girard, P.M. Hoff, E. Van Cutsem, K.P. Zuideveld, K. Jorga, J. Fagerberg, R Bruno (2009). Model-based prediction of phase III overall survival in colorectal 
-cancer on the basis of phase II tumor dynamics. \emph{Journal of Clinical Oncology} \bold{27}(25), 4103-8.
+A. Krol, C. Tournigand, S. Michiels and V. RondeauS (2018). Multivariate joint frailty model for the analysis of nonlinear tumor kinetics and dynamic predictions of death. \emph{Statistics in Medicine}.
 
 A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2016). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
 Event: Predictive Abilities of Tumor Burden for Cancer Evolution with Application to the
@@ -272,6 +281,9 @@ FFCD 2000-05 Trial. \emph{Biometrics} \bold{72}(3) 907-16.
 D. Rizopoulos (2012). Fast fitting of joint models for longitudinal and event time data
 using a pseudo-adaptive Gaussian quadrature rule. \emph{Computational Statistics and Data
 Analysis} \bold{56}, 491-501.
+
+L. Claret, P. Girard, P.M. Hoff, E. Van Cutsem, K.P. Zuideveld, K. Jorga, J. Fagerberg, R Bruno (2009). Model-based prediction of phase III overall survival in colorectal 
+cancer on the basis of phase II tumor dynamics. \emph{Journal of Clinical Oncology} \bold{27}(25), 4103-8.
 
 
 }

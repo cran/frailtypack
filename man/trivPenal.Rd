@@ -223,6 +223,13 @@ matrix \eqn{\bold{V}_{\bold{R}_i^{(m)}}=\widehat{\bold{V}_i}-\bold{X}_{Li}(\sum_
  \item{methodGH}{The Gaussian quadrature method used in the fit.}
 \item{n.nodes}{The number of nodes used for the Gaussian quadrature in the fit.}
   
+  
+\item{alpha_p.value}{p-value of the Wald test for the estimated coefficient \eqn{\alpha}.}
+\item{sigma2_p.value}{p-value of the Wald test for the estimated variance of the frailty term (\eqn{\sigma_v}).}
+\item{etaR_p.value}{p-values of the Wald test for the estimated regression coefficients for the link function \eqn{g(\cdot)}.}
+\item{etaT_p.value}{p-values of the Wald test for the estimated regression coefficients for the link function \eqn{h(\cdot)}.}
+\item{beta_p.value}{p-values of the Wald test for the estimated regression coefficients.}
+
 }
 
 \note{
@@ -232,9 +239,9 @@ It is recommended to initialize the parameter values using the results from the 
 
 \references{
 
-A. Genz and B. Keister (1996). Fully symmetric interpolatory rules for multiple integrals
-over infinite regions with Gaussian weight. \emph{Journal of Computational and Applied
-Mathematics} \bold{71}, 299-309.
+A. Krol, A. Mauguen, Y. Mazroui, A. Laurent, S. Michiels and V. Rondeau (2017). Tutorial in Joint Modeling and Prediction: A Statistical Software for Correlated Longitudinal Outcomes, 
+Recurrent Events and a Terminal Event. \emph{Journal of Statistical Software} \bold{81}(3), 1-52.
+
 
 A. Krol, L. Ferrer, JP. Pignon, C. Proust-Lima, M. Ducreux, O. Bouche, S. Michiels, V. Rondeau (2016). Joint Model for Left-Censored Longitudinal Data, Recurrent Events and Terminal
 Event: Predictive Abilities of Tumor Burden for Cancer Evolution with Application to the
@@ -244,6 +251,10 @@ FFCD 2000-05 Trial. \emph{Biometrics} \bold{72}(3) 907-16.
 D. Rizopoulos (2012). Fast fitting of joint models for longitudinal and event time data
 using a pseudo-adaptive Gaussian quadrature rule. \emph{Computational Statistics and Data
 Analysis} \bold{56}, 491-501.
+
+A. Genz and B. Keister (1996). Fully symmetric interpolatory rules for multiple integrals
+over infinite regions with Gaussian weight. \emph{Journal of Computational and Applied
+Mathematics} \bold{71}, 299-309.
 
 
 }

@@ -1116,7 +1116,7 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
         X_T<-X_T-1
         noVarT <- 1
       }else{
-        X_T <- X_T[, -1, drop = FALSE]
+        X_T <- data.frame(X_T[, -1, drop = FALSE])
         noVarT <- 0
       }
 
@@ -1142,8 +1142,14 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
       #filtretpsT <- rep(0,nvarT)
       #filtretpsT[grep("timedep",colnames(X_T))] <- 1
 
-	  X_T <- X_T[order(data[,id]),]		  
-      varT.temp<-matrix(c(X_T),nrow=nrow(X_T),ncol=nvarT)	
+      names_x_t <- colnames(X_T)
+      X_T <- data.frame(X_T[order(data[,id]),])
+      colnames(X_T) <- names_x_t
+      
+      
+      
+      if(nvarT>1)varT.temp<-matrix(c(X_T),nrow=nrow(X_T),ncol=nvarT)
+      else varT.temp<-matrix(c(X_T),nrow=length(X_T),ncol=nvarT)
       if(is.null(nrow(m2)))
       {
         if (length(m2) != nrow(m)){
@@ -1412,7 +1418,7 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
       }}
     fit$B1 <- Ut%*%Utt
 
-    fit$ResidualSE <- ans$b[(np  - nvar - 1)]^2
+    fit$ResidualSE <- ans$b[(np  - nvar - ne_re - 1)]^2
     fit$etaR <- ans$b[(np  - nvar - 1 - ne_re - netadc - netar + 1):(np  - nvar - 1 -ne_re - netadc)]
    fit$etaT <- ans$b[(np - nvar - 1 - ne_re - netadc + 1):(np - nvar - 1 -ne_re)]
 
@@ -1460,7 +1466,20 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
     fit$varH <- temp1[(np  - nvar +1):np, (np  - nvar +1 ):np]
     fit$varHIH <- temp2[(np  - nvar +1):np, (np  - nvar +1):np]
     noms <- c("alpha","Eta","MeasurementError","B1",factor.names(colnames(X)),factor.names(colnames(X_T)),factor.names(colnames(X_L)))
-
+  
+      fit$alpha_p.value <- 1 - pchisq((fit$alpha/sqrt(diag(fit$varH))[2])^2,1)
+    seH.frail <- sqrt(((2 * (fit$sigma2^0.5))^2) *diag(fit$varH)[1]) # delta methode
+    fit$sigma2_p.value <- 1 - pnorm(fit$sigma2/seH.frail)
+    
+    
+    if(netadc>1)fit$se.etaT <- sqrt(diag(varH.etaT))
+    if(netadc==1)fit$se.etaT <- sqrt(varH.etaT)
+    
+    if(netar>1)fit$se.etaR <- sqrt(diag(varH.etaR))
+    if(netar==1)fit$se.etaR <- sqrt(varH.etaR)
+    
+    fit$etaR_p.value <- 1 - pchisq((fit$etaR/fit$se.etaR)^2, 1)
+    fit$etaT_p.value <- 1 - pchisq((fit$etaT/fit$se.etaT)^2, 1)
     #if (timedep == 1){ # on enleve les variances des parametres des B-splines
     #  while (length(grep("timedep",noms))!=0){
     #    pos <- grep("timedep",noms)[1]
@@ -1643,7 +1662,16 @@ invBi_cholDet <- sapply(Bi_tmp,  det)
     }else{
       fit$global_chisq.testT <- 0
     }
-
+   
+   if (!is.null(fit$coef)){
+     if(nvar != 1){
+       seH <- sqrt(diag(fit$varH))
+     }else{
+       seH <- sqrt(fit$varH)
+     }
+     fit$beta_p.value <- 1 - pchisq((fit$coef/seH)^2, 1)
+   }
+   
     fit$max_rep <- max_rep
     fit$joint.clust <- 1
 

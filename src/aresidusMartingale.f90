@@ -411,8 +411,10 @@
                 frailtyvarind(indg,i) = ((2.d0*vuuu(1+i))**2)*H_hess0(1+i,1+i)
             end do
         else
-            Resmartingale(indiv) = 0.d0
-			Resmartingaledc(indiv)  = 0.d0
+                 Resmartingale(indiv:(indiv+fsize(indg)-1)) = 0.d0
+Resmartingaledc(indiv:(indiv+fsize(indg)-1))  = 0.d0
+
+indiv = indiv + fsize(indg)
             frailtypredind(indg,:) = 0.d0
             frailtyvarind(indg,:) = 0.d0
             frailtyvar(indg) = 0.d0

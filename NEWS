@@ -1,3 +1,12 @@
+Changes in Version 2.12.7 July 2018
+
+o  Now the p-values of the estimates can be directly extracted from the models
+
+o  Small bugs corrected in epoce, trivPenal, trivPenalNL, prediction and print.JointNestedPenal
+
+o Shared frailty model (Weibull baseline hazard function, calendar time-scale and log-normal frailty) now works
+
+
 Changes in Version 2.12.6 October 2017
 
 o For joint nested and nested models martingale residuals are calculated at the lower level of clustering (individual level)

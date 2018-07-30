@@ -360,6 +360,7 @@ The following components are included in a 'frailtyPenal' object for each model.
 \item{names.factor}{Names of the "as.factor" variables.}
 \item{Xlevels}{vector of the values that factor might have taken.}
 \item{contrasts}{type of contrast for factor variable.}
+\item{beta_p.value}{p-values of the Wald test for the estimated regression coefficients.}
 
 The following components are specific to \bold{shared} models.
 
@@ -369,6 +370,8 @@ The following components are specific to \bold{shared} models.
 \item{sigma2}{variance of the log-normal frailty parameter \eqn{(\bold{Var}(\eta_i))}}
 \item{linear.pred}{linear predictor: uses simply "Beta'X" in the cox proportional hazard model or "Beta'X + log w_i" in the shared gamma frailty models, otherwise uses "Beta'X + w_i" for log-normal frailty distribution.}
 \item{BetaTpsMat}{matrix of time varying-effects and confidence bands (the first column used for abscissa of times)}
+\item{theta_p.value}{p-value of the Wald test for the estimated variance of the gamma frailty.}
+\item{sigma2_p.value}{p-value of the Wald test for the estimated variance of the log-normal frailty.}
 
 The following components are specific to \bold{joint} models.
 \item{intcens}{Logical value. Indicator if a joint frailty model with interval-censored data was fitted)}
@@ -400,6 +403,7 @@ The following components are specific to \bold{joint} models.
 \item{contrasts2}{type of contrast for factor variable for the death part.}
 \item{BetaTpsMat}{matrix of time varying-effects and confidence bands for recurrent event (the first column used for abscissa of times of recurrence)}
 \item{BetaTpsMatDc}{matrix of time varying-effects and confidence bands for terminal event (the first column used for abscissa of times of death)}
+\item{alpha_p.value}{p-value of the Wald test for the estimated \eqn{\alpha}.}
 
 The following components are specific to \bold{nested} models.
 
@@ -411,6 +415,8 @@ The following components are specific to \bold{nested} models.
 \item{linear.pred}{linear predictor: uses "Beta'X + log v_i.w_ij".}
 \item{subgbyg}{subgroup by group.}
 \item{n.strat}{A vector with the number of covariates of each type of hazard function as components.}
+\item{alpha_p.value}{p-value of the Wald test for the estimated variance of the cluster effect.}
+\item{eta_p.value}{p-value of the Wald test for the estimated variance of the subcluster effect.}
 
 The following components are specific to \bold{joint nested frailty} models.
 \item{theta}{variance of the subcluster effect \eqn{(\bold{Var}(u_{fi}))}}
@@ -420,6 +426,9 @@ The following components are specific to \bold{joint nested frailty} models.
 \item{indic_alpha}{indicator if a joint frailty model with \eqn{\alpha} parameter was fitted or not.}
 \item{indic_ksi}{indicator if a joint frailty model with \eqn{\xi} parameter was fitted or not.}
 \item{frailty.fam.pred}{empirical Bayes prediction of the frailty term by family.}
+\item{eta_p.value}{p-value of the Wald test for the estimated variance of the cluster effect.}
+\item{alpha_p.value}{p-value of the Wald test for the estimated power coefficient \eqn{\alpha}.}
+\item{ksi_p.value}{p-value of the Wald test for the estimated power coefficient \eqn{\xi}.}
 }
 
 \note{
@@ -439,10 +448,13 @@ not converge, multiply or divide this value by 10 or 5 until it converges.
 
 \references{
 
+A. Krol, A. Mauguen, Y. Mazroui, A. Laurent, S. Michiels and V. Rondeau (2017). Tutorial in Joint Modeling and Prediction: A Statistical Software for Correlated Longitudinal Outcomes, 
+Recurrent Events and a Terminal Event. \emph{Journal of Statistical Software} \bold{81}(3), 1-52.
+
 V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack: An R package for the analysis of correlated survival data with frailty models using penalized likelihood estimation or parametric estimation.
 \emph{Journal of Statistical Software} \bold{47}, 1-28.
 
-Y. Mazroui, S. Mathoulin-Pelissier,P. Soubeyranb and Virginie Rondeau (2012) General joint frailty model for recurrent event data with a dependent terminalevent: Application to follicular lymphoma data.
+Y. Mazroui, S. Mathoulin-Pelissier, P. Soubeyranb and V. Rondeau (2012) General joint frailty model for recurrent event data with a dependent terminalevent: Application to follicular lymphoma data.
 \emph{Statistics in Medecine}, \bold{31}, 11-12, 1162-1176.
 
 V. Rondeau, J.P. Pignon, S. Michiels (2011). A joint model for the dependance between clustered times to tumour progression and deaths: A meta-analysis of chemotherapy in head and neck cancer.
@@ -452,7 +464,7 @@ V. Rondeau, S. Mathoulin-Pellissier, H. Jacqmin-Gadda, V. Brouste, P. Soubeyran 
 \emph{Biostatistics} \bold{8},4, 708-721.
 
 V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum penalized likelihood estimation.
-\emph{Statistics in Medecine}, \bold{25}, 4036-4052.
+\emph{Statistics in Medicine}, \bold{25}, 4036-4052.
 
 V. Rondeau, D. Commenges, and P. Joly (2003). Maximum penalized likelihood estimation in a gamma-frailty model.
 \emph{Lifetime Data Analysis} \bold{9}, 139-153.
