@@ -219,8 +219,8 @@ The following components are included in a 'trivPenalNL' object for each model:
 \item{random.effects.pred}{ The empirical Bayes predictions of the random effects (ie. using conditional posterior distributions).}
 \item{global_chisq.testR}{The binary variable equals to 0 when no multivariate Wald is given, 1 otherwise (for the recurrent  part).}
 \item{global_chisq.testT}{The binary variable equals to 0 when no multivariate Wald is given, 1 otherwise (for the terminal part).}
-\\item{global_chisq.testKG}{The binary variable equals to 0 when no multivariate Wald is given, 1 otherwise (for the biomarker growth).}
-\\item{global_chisq.testKD}{The binary variable equals to 0 when no multivariate Wald is given, 1 otherwise (for the biomarker decline).}
+\item{global_chisq.testKG}{The binary variable equals to 0 when no multivariate Wald is given, 1 otherwise (for the biomarker growth).}
+\item{global_chisq.testKD}{The binary variable equals to 0 when no multivariate Wald is given, 1 otherwise (for the biomarker decline).}
 
 \item{AG}{The logical value. Is Andersen-Gill model fitted? }
 

@@ -1,6 +1,6 @@
 Package: frailtypack
-Version: 2.12.7
-Date: 2018-07-27
+Version: 2.13.1
+Date: 2018-09-13
 Title: General Frailty Models: Shared, Joint and Nested Frailty Models
         with Prediction
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
@@ -26,6 +26,6 @@ URL:
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 Repository: CRAN
-Date/Publication: 2018-07-30 11:00:12 UTC
-Packaged: 2018-07-27 10:08:45 UTC; agnie
+Date/Publication: 2018-09-17 14:40:03 UTC
+Packaged: 2018-09-17 07:34:15 UTC; agnie
 NeedsCompilation: yes

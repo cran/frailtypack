@@ -20,7 +20,7 @@ citEntry(entry = "Article",
 )
 
 citEntry(entry = "Article",
-  title        = "{Frailtypack}: A computer program for the analysis of correlated failure time data using penalized likelihood estimation",
+  title        = "Frailtypack: A computer program for the analysis of correlated failure time data using penalized likelihood estimation",
   author       = personList(as.person("Virginie Rondeau"),
                    as.person("Juan R. Gonzalez")),
   journal      = "Computer Methods and Programs in Biomedicine",

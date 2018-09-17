@@ -1,6 +1,6 @@
-5c035d65cdaa5cd2c228e9cf51a70089 *DESCRIPTION
-56b44b05efec70e7429d861cce2feca9 *NAMESPACE
-46045d84394c55d55ce504968346c5a3 *NEWS
+4818ddb3248425e60f47730801a019f8 *DESCRIPTION
+6d6ba9f4a4107291b5718d7422a5abaf *NAMESPACE
+31a1a8d2d901c135a1278e545f8e7f60 *NEWS
 7d0e5a93868a77976c232932b0a5cf3c *R/Cmeasures.R
 ea152fa392691f9b73e52466474ab42d *R/Diffepoce.R
 568ccb7a37705e70ed4b5259016fd74c *R/SurvIC.R
@@ -14,7 +14,7 @@ f56a0a92e485a448dbed35925d97d34d *R/epoce.R
 6787bc9cea9288aa53d85a380eb041d4 *R/event2.R
 eee9f7375e47c491fc37bc6257c0a5ca *R/factor.names.R
 7ce5e24b4268a870dcdcf73eee578e04 *R/firstlib.R
-78523a411bc59bc0dea72820150d275a *R/frailtyPenal.R
+e7c2cba377de211be883bdb4a6b76dd5 *R/frailtyPenal.R
 0ef4f55c1be5c9d8e236100ca1cd5230 *R/hazard.R
 12b7eed3f5458f17a8d780b2e8772cd6 *R/lines.frailtyPenal.R
 8d43a0e50b5a1b4fe930ba50df8d53ff *R/longiPenal.R
@@ -41,7 +41,7 @@ a25640b786ba52c043f97aed6a8036ba *R/plot.predFrailty.R
 4b9e66956f84fb4a8355eef46e597614 *R/print.epoce.R
 c978fdfd49503bc1bd647335937a7c4d *R/print.frailtyPenal.R
 539bac2e144409ad22393d9f4edca9a3 *R/print.jointNestedPenal.R
-2f272af43c50748451c6f83023439c83 *R/print.jointPenal.R
+fd9f0bce905f7a9d0d21184ba8282b01 *R/print.jointPenal.R
 90a5caa582c4e2d1bd0cf9841acb3e25 *R/print.longiPenal.R
 9ec093bc452e02f764ad922c82f83fe0 *R/print.multivPenal.R
 5ce5f410bb6d23dd0a7adeab939e21d8 *R/print.nestedPenal.R
@@ -71,6 +71,7 @@ c39ea378ab6d22cd840a88d16b3f9917 *R/timedep.names.R
 ac3e77d967e6bf5e24fc42cb768d67f5 *R/trivPenal.R
 143e26161a50fcd0fb34c18effa0eb06 *R/trivPenalNL.R
 c4c6c8f56f0fb125a9f0ad5f36a78a9d *R/waldtest.R
+33509771cad95e89a2fd0f567007e559 *R/wts.R
 c4501c422e7df81ab0256289663bd032 *README
 fca5ecd90d6f651c93aeb8149b9ea984 *THANKS
 0baf8e3814a0655266b8966ecf135ae3 *build/vignette.rds
@@ -79,6 +80,7 @@ f9b9c4d9d73247b5e38d320cd587b621 *data/bcos.rda
 01559782d363c615311c70ccda768add *data/colorectalLongi.rda
 0aaff38c38b72647712069d781f31a2a *data/dataAdditive.rda
 313a4bc912d2f2342c22049e895a287a *data/dataMultiv.rda
+e08f127154103582c05bd755cbee0e1e *data/dataNCC.rda
 be6e167944b7ee30df6f022df7103111 *data/dataNested.rda
 b81af115c94af71ee49b52dba2379e77 *data/readmission.rda
 f682dcc9f668a63c45d8482d3d8da39a *demo/00Index
@@ -87,7 +89,7 @@ e5c3f976a2fb76b2e59ff5a9a46aabf5 *demo/frailtypack_frailtyPenal.R
 fcb199ccc422257918c4b706ac63362a *demo/frailtypack_jointPenal.R
 4af5fd879b04c8a98172646fefa04111 *demo/frailtypack_multivPenal.R
 ff5bcb421316a8fb4e02f18802c304b1 *demo/frailtypack_nestedPenal.R
-574ab974f061aed6499a7c18bb2d8190 *inst/CITATION
+b65669f1f534afa6d64dfc7a7e30fdbb *inst/CITATION
 68987efeb5143d163e5bf8eae76b6b53 *inst/doc/Package_summary.Rmd
 1bfbfe56b03b0b04b985630d26f36948 *inst/doc/Package_summary.html
 95837cac8328128337bae3b1db128460 *man/Cmeasures.Rd
@@ -100,10 +102,11 @@ e5d42ad40c83520b95a22d46089f20bb *man/colorectal.Rd
 669328a3ce30419481fa07d2f1717a52 *man/colorectalLongi.Rd
 f810af7f668a353514b34f9f703ab96b *man/dataAdditive.Rd
 ee3726d56a71f646f361724b98f4e909 *man/dataMultiv.Rd
+8cf7c68c65115c059805e7f76e5c26be *man/dataNCC.Rd
 ee09dd17f2adfa71971b760793956bfa *man/dataNested.Rd
 b4f74f24d8584970eef93c7363adac3a *man/epoce.Rd
 c35befa1ad0be10544261074dfb2216a *man/event2.Rd
-1b21099f677bb0056692a3fc139faaf3 *man/frailtyPenal.Rd
+efc8097a127aa4204aa6522775b9dcda *man/frailtyPenal.Rd
 d086a89e3aed53dbc6a65cfb0c157140 *man/frailtypack-package.Rd
 a7ea7e149c4a36d2a9dadd438a066c4b *man/hazard.Rd
 265ab483b7f0c2d0e4578e9245e91427 *man/longiPenal.Rd
@@ -151,13 +154,14 @@ e4fdc87de2107f3f8c3443b2afe0dec7 *man/summaryTrivPenal.Rd
 2b323f5f7348a08cd5a48bb262e3c2c3 *man/terminal.Rd
 c5ac4855db4423cf5c19199816fba488 *man/timedep.Rd
 b23929710832eb642dc84cac55396617 *man/trivPenal.Rd
-0e3cfd4d30a88150463704ea4887564d *man/trivPenalNL.Rd
+6a1b368278b32a43cce38b9ebadac2b1 *man/trivPenalNL.Rd
+ed5edd0db13a1bdfd2ddffb9d0abf40d *man/wts.Rd
 c6731b9e674376f5339f58c71e3a0fb2 *src/Adonnees.f90
 df9317183eb568d5bd8038011c7fa16d *src/AparamMultive.f90
-2cdcf6ad78326830f0606e552af90e4c *src/Aparameters.f90
+8f9203d866726d4cc037827866fbb9b2 *src/Aparameters.f90
 3ec7df67eb0ff4e4d31ffbbec8e181bc *src/Makevars
 266766bbd949461ccea88e1b5c4cc8e9 *src/aGhermite.f90
-5651369cca5b9ce88e63046a735ed9c5 *src/aaOptim.f90
+151ad9d06a641e24fed3b2665a3409b3 *src/aaOptim.f90
 c333855bf0984cd486390c21dd10221d *src/aaOptimres.f90
 6d23683c670162afd72438e333f59f3a *src/aaUseFunction.f90
 dab3acc9b4648109cbde82705912b853 *src/aaUseFunctionG.f90
@@ -172,7 +176,7 @@ ab453cc268abe6b7cff0def8b479c4ab *src/epoce_log.f90
 09eb1495a0e689639b211e35885ae4c3 *src/epoce_long.f90
 885737113b574920076c08d746a52db2 *src/epoce_long_nl.f90
 a251f33c4eeffeaf43918df6258c52ae *src/frailtypack.f90
-7f51344a27914d853965ab48abbb00a3 *src/frailtypack.h
+270a50ab6dfed2875a01d2cb6ea53104 *src/frailtypack.h
 55c66453e5eea79af67cc7b76f846023 *src/funcpaG_tps.f90
 ad6572b00eaaadfaad287c5e347588cd *src/funcpaGcpm.f90
 0006d2d1d2f4acb4b0f7ec09089d1135 *src/funcpaGcpm_intcens.f90
@@ -197,10 +201,12 @@ f09a1926613410cca62efb32d570da40 *src/funcpajcpm.f90
 964eb9736aff5b695465f7d8cdffca8c *src/funcpajlongisplines_nl.f90
 6c9e7c24c659c53e045443fbeb201e84 *src/funcpajlongiweib.f90
 55182015cebab29693904f7ee3ae151a *src/funcpajlongiweib_nl.f90
-0f0ca4d3a4febae6644fbd9069833385 *src/funcpajsplines.f90
+f480c02d5d8b0ac39266a0a07446d94c *src/funcpajsplines.f90
+b67b57981350ba3b8da968d3301e06a8 *src/funcpajsplinesIndiv.f90
 8901b99d530fcf33fe9e014b5a03afee *src/funcpajsplines_fam.f90
 1a208761a68a0226c51fd9aa2f384b37 *src/funcpajsplines_intcens.f90
-8f3f153a6e1930c5534bca0e51d6d495 *src/funcpajsplines_log.f90
+e2d494a10e46c3a7eeae2d3b6c26c408 *src/funcpajsplines_log.f90
+89aa31a9c0dabf59cda49e8207cb450c *src/funcpajsplines_logIndiv.f90
 a70bffbfd616a5cff7e50dba3f87b213 *src/funcpajweib.f90
 4fb815230c8b486b965dcc0cd44a4a20 *src/funcpajweib_fam.f90
 c2af515ec20217c73640aa05e3b3015d *src/funcpajweib_intcens.f90
@@ -219,8 +225,8 @@ a9066bca21aa072120e6bcb35e9e4566 *src/funcpascpm_intcens.f90
 11391184b35bf7db4f333fab0bbc7a7a *src/funcpasweib.f90
 e30e0e7d3062c50f7b1b6570be903a5d *src/funcpasweib_intcens.f90
 09e0b16fe331dbe42a745b0c9d72d43c *src/funcpasweib_log.f90
-a89aad1196d1ec603e60f7092e54ef07 *src/init.c
-b9d184494913c17fb7121c9645e5abb7 *src/joint.f90
+622abccdb6c5b64428fdf5b395a1a50d *src/init.c
+0c06908a21f117c1e3c4e723d3d072db *src/joint.f90
 1f8137c8efaa0da99862523bf8accb6f *src/joint_longi.f90
 09c77947d7e80a85dc8c06e6fce50f86 *src/joint_longi_nl.f90
 2b50069c392d0a60f21804c4e8c7f67d *src/longi_uni_nl.f90
@@ -232,7 +238,7 @@ b9d184494913c17fb7121c9645e5abb7 *src/joint.f90
 b7f00f0b3cbb4957f90cb745b94160ff *src/prediction_sha_logn.f90
 5389e5bab0c093ca87cefbad47dfed8e *src/prediction_tri.f90
 3693052488232cf76bf561f503ec23ae *src/prediction_tri_nl.f90
-de7464180f38609b274c590010859cbd *src/predictionfam.f90
+f0b43ca099a92a67ec3bbc92b7710f0a *src/predictionfam.f90
 cecbe58ce72b3504d4164ecbc68b799d *src/risque.f90
 4049c2ade27987d57e8b0c3953beb24a *src/survival.f90
 68987efeb5143d163e5bf8eae76b6b53 *vignettes/Package_summary.Rmd

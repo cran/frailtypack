@@ -129,6 +129,9 @@
     double precision,dimension(:,:),allocatable,save::ve
     double precision,dimension(:,:),allocatable,save::vedc
     double precision,dimension(:,:),allocatable,save::vey
+	 !*** IJ: vector of weights
+	 double precision,dimension(:),allocatable,save::wtsvec
+
 !*** donnees longitudinales
     double precision,save::vet3
 !***** random effects

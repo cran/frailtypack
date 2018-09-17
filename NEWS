@@ -1,3 +1,10 @@
+Changes in Version 2.13.1 September 2018
+
+o  NEW: Weighted penalized maximum likelihood approach for joint frailty models for data from nested case-control studies
+
+o  Bug corrected in predictions with joint nested frailty models that do not include power parameters 
+
+
 Changes in Version 2.12.7 July 2018
 
 o  Now the p-values of the estimates can be directly extracted from the models

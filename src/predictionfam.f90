@@ -155,12 +155,12 @@
                 xi = 1.d0
             end if
             if(indic(1).eq.1) then
-                alpha = b(np-nva1-nva2-1)
+                alpha = b(np-nva1-nva2-indic(2))
             else 
                 alpha  = 1.d0
             end if
-            eta = b(np-nva1-nva2-2)*b(np-nva1-nva2-2)
-            theta = b(np-nva1-nva2-3)*b(np-nva1-nva2-3)        
+            eta = b(np-nva1-nva2-indic(1)-indic(2))*b(np-nva1-nva2-indic(1)-indic(2))
+            theta = b(np-nva1-nva2-1-indic(1)-indic(2))*b(np-nva1-nva2-1-indic(1)-indic(2))        
 
 !            pred1 = survDCi(1)**( ((frailind0**alpha)*frailfam0)*dexp(XbetapredDC(1,indID)) )
 !            pred2 = survDCi(2)**( ((frailind0**alpha)*frailfam0)*dexp(XbetapredDC(1,indID)) )
@@ -181,8 +181,8 @@
             predProb = ss1/ss2
             predAll(1,iii) = predProb
         
-            !write(*,*) 'predictfam: ss1,ss2', ss1,ss2
-            !write(*,*) 'predictfam: predprob', predProb
+        !    write(*,*) 'predictfam: ss1,ss2', ss1,ss2
+       !     write(*,*) 'predictfam: predprob', predProb,theta,alpha,eta,xi
                 
             !=============================================
             ! Variabilite des proba predites

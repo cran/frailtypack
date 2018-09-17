@@ -135,34 +135,34 @@
     m <- match.call(expand.dots = FALSE) # recupere l'instruction de l'utilisateur	
 	    
     m$formula.terminalEvent <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$jointGeneral <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <-  m$print.times <- m$init.Theta <- m$init.Alpha <- m$Alpha <- m$init.Ksi <- m$Ksi <- m$init.Eta <- m$Eta <- m$initialize <- m$... <- NULL    
-    
-    special <- c("strata", "cluster", "subcluster", "terminal","num.id","timedep")
+    special <- c("strata", "cluster", "subcluster", "terminal","num.id","timedep", "wts") #wts for weights (ncc design) ncc - nested case-control
     
     Terms <- if (missing(data)){ 
 		terms(formula, special)
     }else{
 		terms(formula, special, data = data)
     }
-	    
+    
     ord <- attr(Terms, "order") # longueur de ord=nbre de var.expli
-   
-    #if (length(ord) & any(ord != 1))stop("Interaction terms are not valid for this function")
+   #if (length(ord) & any(ord != 1))stop("Interaction terms are not valid for this function")
     #si pas vide tous si il ya au moins un qui vaut 1 on arrete
     
 	m$formula <- Terms    
-    
+
     m[[1]] <- as.name("model.frame") # m[[1]]=frailtypenal, il le remplace par model.frame en fait    
+   
+       m <- eval(m, sys.parent()) #ici la classe de m est un data.frame donc il recupere ce qu'on lui donne en argument
     
-    m <- eval(m, sys.parent()) #ici la classe de m est un data.frame donc il recupere ce qu'on lui donne en argument
-	
     cluster <- attr(Terms, "specials")$cluster # (indice) nbre de var qui sont en fonction de cluster()
     # al 13/02/14 : suppression de l'argument Frailty
     if (length(cluster)) Frailty <- TRUE
     else                 Frailty <- FALSE
     
     subcluster <- attr(Terms, "specials")$subcluster #nbre de var qui sont en fonction de subcluster()	
-	    
-    # booleen pour voir si l'objet Y est reponse avant tri des donnees Surv ou SurvIC
+    
+    wts <- attr(Terms, "specials")$wts #nbre de var qui sont en fonction de wts()	
+  
+      # booleen pour voir si l'objet Y est reponse avant tri des donnees Surv ou SurvIC
     classofY <- attr(model.extract(m, "response"),"class")
     # attention le package pec rajoute un element dans l'attribut "class" des objets de survie
     if (length(classofY)>1) classofY <- classofY[2]
@@ -184,7 +184,8 @@
 		cluster <- strata(m[, tempc$vars], shortlabel = TRUE)
 		uni.cluster <- unique(cluster)
     }
-	
+    
+   
 	#Verification de l'utilisation du parametre Ksi pour le nested joint modele
 	if ((!missing(Ksi) | !missing (init.Ksi)) & (!joint & !length(subcluster))) stop("init.Ksi and Ksi parameters belong only to nested joint frailty model")
     
@@ -217,7 +218,6 @@
     }
 		
     #Al
-    
     if (NROW(m) == 0)stop("No (non-missing) observations") #nombre ligne different de 0
     
     Y <- model.extract(m, "response") # objet de type Surv =Time
@@ -291,7 +291,8 @@
     cluster <- attr(Terms, "specials")$cluster #nbre de var qui sont en fonction de cluster()
     num.id <- attr(Terms, "specials")$num.id #nbre de var qui sont en fonction de patkey()
     vartimedep <- attr(Terms, "specials")$timedep #nbre de var en fonction de timedep()
-    
+   wts <- attr(Terms, "specials")$wts #nbre de var en fonction de wts()....redundant but keeping with cluster()
+  
     #booleen pour savoir si au moins une var depend du tps
     if (is.null(vartimedep)) timedep <- 0
     else timedep <- 1
@@ -331,12 +332,17 @@
 		ll <- ll[-grep("strata",ll)]
     }
     
+    if (length(wts)){
+      ll <- ll[-grep("wts",ll)]
+    }
+    
     #   plus besoin de as.factor() pour afficher le test de Wald global
     if (length(grep("strata",vec.factor))) vec.factor <- vec.factor[-grep("strata",vec.factor)]
     if (length(grep("cluster",vec.factor))) vec.factor <- vec.factor[-grep("cluster",vec.factor)]
     if (length(grep("subcluster",vec.factor))) vec.factor <- vec.factor[-grep("subcluster",vec.factor)]
     if (length(grep("num.id",vec.factor))) vec.factor <- vec.factor[-grep("num.id",vec.factor)]
-
+    if (length(grep("wts",vec.factor))) vec.factor <- vec.factor[-grep("wts",vec.factor)]
+    
     mat.factor <- matrix(vec.factor,ncol=1,nrow=length(vec.factor))
     # Fonction servant a prendre les termes entre "as.factor" et (AK 04/11/2015) interactions
     vec.factor <-apply(mat.factor,MARGIN=1,FUN=function(x){
@@ -518,6 +524,21 @@
 		terminal <- strata(m[, tempterm$vars], shortlabel = TRUE)
 		terminal <- as.numeric(as.character(terminal))      
     }
+    
+    
+    #IJ 2018:
+    if (length(wts)){      
+      tempwts <- untangle.specials(Terms, "wts", 1:10)    
+      ord <- attr(Terms, "order")[tempwts$terms] # ord[6]=1 ici dans notre exemple      
+      if (any(ord > 1))stop("Weights can not be used in an interaction")
+      dropx <- c(dropx,tempwts$terms) # vecteur de position
+      weights.vec <- strata(m[, tempwts$vars], shortlabel = TRUE)
+      weights.vec <- as.numeric(as.character(weights.vec))      
+    } else{
+      weights.vec <- rep(1, nrow(data))
+    }
+    weights.agg <- aggregate(weights.vec, by=list(cluster), FUN=function(x) x[length(x)])[,2]	
+    
     
     #type <- attr(Y, "type")
 	type <- typeofY 
@@ -1464,9 +1485,9 @@
 		
 		ans <- .Fortran(C_joint,                      
                       as.integer(n),
-                      as.integer(length(uni.cluster),0),
-                      as.integer(uni.strat),
-                      as.integer(strats),
+		                  as.integer(c(length(uni.cluster),0, uni.strat)), #IJ 
+		                   #as.integer(uni.strat),
+		                  as.integer(strats),
                       as.integer(lignedc0),###
                       as.integer(n.knots),
                       #k0=as.double(kappa), # joint intcens,tps,cluster
@@ -1491,7 +1512,8 @@
                       as.double(vaxdc00),###
                       as.integer(c(noVar1,noVar2)),
 					  #as.integer(noVar2),
-                      as.integer(maxit),
+					            as.double(weights.agg),
+					            as.integer(maxit),
                       np=as.integer(np),
                       b=as.double(Beta),
                       H=as.double(matrix(0,nrow=np,ncol=np)),
@@ -1508,9 +1530,9 @@
                       xSuD=as.double(xSu2),
                       survD=as.double(matrix(0,nrow=mt12,ncol=3)),
                       
-                      as.integer(typeof),
-                      as.integer(equidistant),
-                      as.integer(c(nbintervR, nbintervDC)),
+					            as.integer(c(typeof, equidistant)),
+					            #as.integer(equidistant),
+					            as.integer(c(nbintervR, nbintervDC)),
                       #as.integer(nbintervDC),
                       as.integer(c(size1,size2,mt11,mt12)),###
                       counts=as.integer(c(0,0,0,0)),					  
@@ -1808,7 +1830,12 @@
 		fit$contrasts <- contr.save
 		if (length(Xlevels2) >0) fit$Xlevels2 <- Xlevels2
 		fit$contrasts2 <- contr.save2
-    
+
+		#NCC design
+		fit$ncc <- FALSE
+		if(length(wts))fit$ncc <- TRUE
+		
+		    
 		fit$formula <- formula
 		fit$formula.terminalEvent <- formula.terminalEvent
     
@@ -2434,6 +2461,9 @@
 			
 		if ((typeof == 0) & (length(kappa) != (uni.strat+1))) stop ("Wrong length of argument kappa")
 		
+		weights.vec <- rep(1, nrow(data))
+    weights.agg <- aggregate(weights.vec, by=list(cluster), FUN=function(x) x[length(x)])[,2]	
+		
 		#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		# Fin de preparation des arguments 
 		#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
@@ -2447,8 +2477,7 @@
 				
 		ans <- .Fortran(C_joint, 
 				as.integer(n), 		
-				as.integer(c(length(uni.subcluster),length(uni.cluster))),  
-				as.integer(uni.strat),
+				as.integer(c(length(uni.subcluster),length(uni.cluster),uni.strat)),
 				as.integer(strats), 
 				as.integer(lignedc0), 
 				as.integer(n.knots),
@@ -2473,6 +2502,7 @@
 				as.double(vardc),
 				as.double(vaxdc00),
 				as.integer(c(noVar1, noVar2)),
+				as.double(weights.agg),
 				#as.integer(noVar2),
 				as.integer(maxit),				
 				np = as.integer(np),
@@ -2491,8 +2521,7 @@
 				xSuD = as.double(xSu2),
 				survD = as.double(matrix(0, nrow=mt12, ncol=3)),
 				
-				as.integer(typeof),
-				as.integer(equidistant),
+				as.integer(typeof,equidistant),
 				as.integer(c(nbintervR,nbintervDC)),
 				#as.integer(nbintervDC),
 				as.integer(c(size1,size2, mt11, mt12)),

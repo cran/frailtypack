@@ -6,10 +6,10 @@
 !!counts = c(ni,cpt,cpt_dc)
 
 !--entête pour fortran
-    subroutine joint(nsujet0,ngrp,nstRecAux,strAux,lignedc0,nz0,axT,tt00,tt10,ic0,groupe0,groupe00,fam0 &
-    ,tt0dc0,tt1dc0,icdc0,tempdc,icdc00,nva10,vax0,nva20,vaxdc0,vaxdc00,noVar, maxit0 & ! ag0
+    subroutine joint(nsujet0,ngrp,strAux,lignedc0,nz0,axT,tt00,tt10,ic0,groupe0,groupe00,fam0 & ! removed nstRecAux, combined with ngrp
+    ,tt0dc0,tt1dc0,icdc0,tempdc,icdc00,nva10,vax0,nva20,vaxdc0,vaxdc00,noVar, wtsvec0, maxit0 & ! ag0
     ,np,b,H_hessOut,HIHOut,resOut,LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out &
-    ,typeof0,equidistant,nbinterv0, mtaille &
+    ,typeofequidist,nbinterv0, mtaille &
     ,counts &
     ,IerIstop,paraweib &
     ,MartinGales &
@@ -37,9 +37,10 @@
     integer:: ng0, nfam0, maxit0,npinit,nvatmp,mt1,mt2,mt11,mt12,nstRecAux, &
     str, noVar1, noVar2, indic_alpha0, indic_xi0 !nn
     integer,dimension(4),intent(in)::mtaille
-    integer, dimension(2), intent(in)::ngrp, noVar, nbinterv0, indices0 !Myriam : ngrp = [nbsubclust,nbclust]; noVar = [noVar1, noVar2] ; nbinterv0 = [nbintervR00, nbintervDC0] ; indices0 = [indic_alpha0, indic_xi0]
-    integer,intent(in)::nsujet0, nz0,nva10,nva20,lignedc0, initialize !ag0
-    double precision,dimension(nz0+6),intent(out)::ziOut
+    integer, dimension(2), intent(in)::noVar, nbinterv0, indices0 !IJ: removed ngrp; Myriam : noVar = [noVar1, noVar2] ; nbinterv0 = [nbintervR00, nbintervDC0] ; indices0 = [indic_alpha0, indic_xi0]
+    integer, dimension(3), intent(in)::ngrp !IJ: modification to ML's earlier comment: ngrp = [nbsubclust,nbclust,nstrata];
+	integer,intent(in)::nsujet0, nz0,nva10,nva20,lignedc0, initialize !ag0
+	 double precision,dimension(nz0+6),intent(out)::ziOut
     integer::np,equidistant
     integer,dimension(nsujet0),intent(in)::groupe0,ic0,ordretmp
     integer,dimension(ngrp(1)),intent(in)::icdc0, fam0 
@@ -47,6 +48,7 @@
 
     integer,dimension(nsujet0),intent(in)::strAux !en plus strates A.Lafourcade 07/2014
     double precision,dimension(ngrp(1))::tt0dc0,tt1dc0
+    double precision,dimension(ngrp(1)), intent(in)::wtsvec0 !IJ: added weights
     double precision,dimension(lignedc0,2)::tempdc
     double precision,dimension(nsujet0)::tt00,tt10,ttU0
     double precision,dimension(2)::k0
@@ -55,19 +57,19 @@
     double precision,dimension(lignedc0,nva20),intent(in):: vaxdc00
     double precision,dimension(np,np)::H_hessOut,HIHOut
     double precision::resOut
-    double precision,dimension(mtaille(1),nstRecAux)::x1Out
+   double precision,dimension(mtaille(1),ngrp(3))::x1Out !IJ: all instances of nstRecAux are changed to ngrp(3)
     double precision,dimension(mtaille(2))::x2Out
-    double precision,dimension(mtaille(1),3,nstRecAux)::lamOut
-    double precision,dimension(mtaille(3),3,nstRecAux)::suOut
+    double precision,dimension(mtaille(1),3,ngrp(3))::lamOut !IJ
+    double precision,dimension(mtaille(3),3,ngrp(3))::suOut !IJ
     double precision,dimension(mtaille(2),3)::lam2Out
     double precision,dimension(mtaille(4),3)::su2Out
     integer::ss,sss
     double precision,dimension(np):: b
     double precision,dimension(2),intent(out)::LCV
-    double precision,dimension(nstRecAux+1)::shapeweib,scaleweib
-    double precision,dimension(nstRecAux+1),intent(in)::axT
-    double precision,dimension(nstRecAux+1)::xminT
-    double precision,dimension(2*(nstRecAux+1)),intent(out)::paraweib
+    double precision,dimension(ngrp(3)+1)::shapeweib,scaleweib !IJ
+    double precision,dimension(ngrp(3)+1),intent(in)::axT !IJ
+    double precision,dimension(ngrp(3)+1)::xminT !IJ
+    double precision,dimension(2*(ngrp(3)+1)),intent(out)::paraweib !IJ
 
     !integer,intent(in)::noVar1,noVar2
     integer, intent(in)::intcens0 !,indic_alpha0, indic_xi0
@@ -83,9 +85,9 @@
     double precision,dimension(2)::res01
 !AD: add for new marq
     double precision::ca,cb,dd
-    double precision,external::funcpajsplines,funcpajsplines_fam, funcpajcpm,funcpajweib, funcpajweib_fam
+    double precision,external::funcpajsplines,funcpajsplines_fam, funcpajcpm,funcpajweib, funcpajweib_fam,funcpajsplinesindiv !IJ
     double precision,external::funcpajsplines_intcens,funcpajweib_intcens
-    double precision,external::funcpajsplines_log,funcpajcpm_log,funcpajweib_log
+    double precision,external::funcpajsplines_log,funcpajcpm_log,funcpajweib_log,funcpajsplines_logindiv !IJ
     double precision,external::funcpaGsplines,funcpaGcpm,funcpaGweib, funcpajgeneral
     double precision,external::funcpaGsplines_intcens,funcpaGcpm_intcens,funcpaGweib_intcens
     double precision,external::funcpaGsplines_log,funcpaGcpm_log,funcpaGweib_log
@@ -93,9 +95,10 @@
     double precision,dimension(100)::xSu2
     double precision,dimension(100,nstRec)::xSu1
 !cpm
-    integer::indd,ent,entdc,typeof0,nbintervR0,nbintervDC0
+    integer::indd,ent,entdc,nbintervR0,nbintervDC0
+    integer,dimension(2)::typeofequidist
     double precision::temp
-!predictor
+    !predictor
     double precision,dimension(ngrp(1))::Resmartingale,Resmartingaledc,frailtypred,frailtyvar
     double precision,dimension(ngrp(1))::frailtypred_fam,frailtyvar_fam
     double precision,dimension(ngrp(1),ngrp(1)) :: frailtypred_fam_ind, frailtyvar_fam_ind
@@ -136,7 +139,8 @@
     
     ng0 = ngrp(1)
     nfam0 = ngrp(2)
-    noVar1 = noVar(1)
+    nstRecAux = ngrp(3) !IJ
+	noVar1 = noVar(1)
     noVar2 = noVar(2)
     
     ier = IerIstop(1)
@@ -165,6 +169,7 @@
 
     allocate(filtretps(nva10),filtre2tps(nva20))
     allocate(betatps(nva10),betatps2(nva20))
+	allocate(wtsvec(ng0))
     filtretps = filtretps0(1:nva10)
     filtre2tps = filtretps0(nva10+1:nva10+nva20)
 
@@ -185,7 +190,8 @@
     
 
     !   ag = ag0
-    typeof = typeof0
+    typeof = typeofequidist(1)
+    equidistant = typeofequidist(2)
     
     k0(1) = axT(1) !axT sera tjs au moins de 2 dimensions
     k0(2) = axT(2) !on a besoin de k0 pour le joint cluster,timedep et intcens
@@ -225,6 +231,7 @@
     nb0recu = 0
     moyrecu =0.d0
 
+	wtsvec=wtsvec0 !IJ
     ngmax=ng0                !!!!!!!!!!!!! FB comment
     ng=ng0                   !!!!!!!!!!!!! FB comment
     ngtemp=ng0
@@ -1250,14 +1257,14 @@ end if
                             call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines_intcens)
                         else 
                             if (typeJoint /= 3) then
-                                call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines)
-                            else                            
+                                 call marq98JAlt(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines,funcpajsplinesindiv)
+                           else                            
                                 call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines_fam)
                             endif
                         endif
                     else
-                        call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines_log)
-                    endif
+                        call marq98JAlt(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajsplines_log,funcpajsplines_logIndiv)
+                     endif
                 else
                     call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpaj_tps)
                 endif
@@ -2018,7 +2025,7 @@ end if
         deallocate(ttt,tttdc,betacoef)
     end if
 
-    deallocate(etaT,betaT,k0T)
+    deallocate(etaT,betaT,k0T,wtsvec)
     
     return
 

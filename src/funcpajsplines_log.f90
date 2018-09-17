@@ -10,7 +10,7 @@
     im3,im2,im1,im,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,date,datedc,zi,&
     c,cdc,nt0,nt1,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst, &
     effet,stra,ve,vedc,pe,ng,g,nig,indic_ALPHA,ALPHA,sig2, &
-    auxig,aux1,aux2,res1,res3,kkapa,resnonpen,nstRec,k0T
+    auxig,aux1,aux2,res1,res3,kkapa,resnonpen,nstRec,k0T, wtsvec
     use residusM
     !use comongroup,only:the1
     use comongroup,only:vet,vet2,the2
@@ -278,11 +278,11 @@
         if(cpt(k).gt.0)then
             !if(theta.gt.(1.d-8)) then
 !cccc ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
-                res= res + res2(k) &
+                res= res + wtsvec(k)*(res2(k) &
 !--      pour le deces:
                 + res2dc(k)  &
                 - dlog(dsqrt(sig2))-dlog(2.d0*pi)/2.d0  &
-                + dlog(integrale3(k))
+                + dlog(integrale3(k)))
             !else
 !*************************************************************************
 !     developpement de taylor d ordre 3

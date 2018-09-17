@@ -1,5 +1,5 @@
-!========================          FUNCPAJ_SPLINES FOR JOINT MODEL      ====================
-    double precision function funcpajsplines(b,np,id,thi,jd,thj,k0)
+!========================          FUNCPAJ_SPLINES FOR JOINT MODEL - SINGLE INDIVIDUAL      ====================
+    double precision function funcpajsplinesindiv(b,np,id,thi,jd,thj,k0,index)
 
     use tailles
     !use comon,only:AG,nt0dc,res4,t0,t1,t0dc,t1dc
@@ -7,7 +7,7 @@
     im3,im2,im1,im,mm3dc,mm2dc,mm1dc,mmdc,im3dc,im2dc,im1dc,imdc,date,datedc,zi,&
     c,cdc,nt0,nt1,nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst, &
     effet,stra,ve,vedc,pe,ng,g,nig,indic_ALPHA,ALPHA,theta,nstRec,k0T, &
-    auxig,aux1,aux2,res1,res3,kkapa,resnonpen,wtsvec
+    auxig,aux1,aux2,res1,res3,kkapa,resnonpen, wtsvec !IJ: wtsvec added (incorporated into comon)
     use residusM
     !use comongroup,only:the1
     use comongroup,only:vet,vet2,the2
@@ -16,7 +16,7 @@
 
 ! *** NOUVELLLE DECLARATION F90 :
 
-    integer,intent(in)::id,jd,np
+    integer,intent(in)::id,jd,np,index
     double precision,dimension(np),intent(in)::b
     double precision,dimension(2),intent(in)::k0
     double precision,intent(in)::thi,thj
@@ -35,6 +35,7 @@
     double precision,dimension(0:ndatemax,nstRec)::ut1T
     double precision,dimension(0:ndatemaxdc)::ut2
     double precision::int,gammaJ
+	
     
     kkapa=k0
     choix=0
@@ -68,15 +69,15 @@
         end if
     end do
     
-    if(effet.eq.1) then
+	if(effet.eq.1) then
         theta = bh(np-nva-indic_ALPHA)*bh(np-nva-indic_ALPHA)
         if (indic_alpha.eq.1) then ! new : joint more flexible alpha = 1 
             alpha = bh(np-nva)
-        else
-            alpha = 1.d0
+        !else
+        !    alpha = 1.d0
         endif
     endif
-    
+
 !----------  calcul de ut1(ti) et ut2(ti) ---------------------------
 !    attention the(1)  sont en nz=1
 !        donc en ti on a the(i)
@@ -204,7 +205,7 @@
         endif
         if ((res2(g(i)).ne.res2(g(i))).or.(abs(res2(g(i))).ge. 1.d30)) then
 !             print*,"here1"
-            funcpajsplines=-1.d9
+            funcpajsplinesindiv=-1.d9
             goto 123
         end if
 
@@ -213,7 +214,7 @@
 
         if ((res1(g(i)).ne.res1(g(i))).or.(abs(res1(g(i))).ge. 1.d30)) then
 !             print*,"here2"
-            funcpajsplines=-1.d9
+            funcpajsplinesindiv=-1.d9
             goto 123
         end if
 
@@ -221,7 +222,7 @@
         res3(g(i)) = res3(g(i)) + ut1T(nt0(i),stra(i))*vet
         if ((res3(g(i)).ne.res3(g(i))).or.(abs(res3(g(i))).ge. 1.d30)) then
 !             print*,"here3"
-            funcpajsplines=-1.d9
+            funcpajsplinesindiv=-1.d9
             goto 123
         end if    
     end do
@@ -244,7 +245,7 @@
         if(cdc(k).eq.1)then
             res2dc(k) = dlog(dut2(nt1dc(k))*vet2)
             if ((res2dc(k).ne.res2dc(k)).or.(abs(res2dc(k)).ge. 1.d30)) then
-                funcpajsplines=-1.d9
+                funcpajsplinesindiv=-1.d9
 !                 print*,'gt 1'
                 goto 123
             end if
@@ -255,12 +256,12 @@
         aux2(k)=aux2(k)+ut2(nt0(k))*vet2 !vraie troncature
 
         if ((aux1(k).ne.aux1(k)).or.(abs(aux1(k)).ge. 1.d30)) then
-            funcpajsplines=-1.d9
+            funcpajsplinesindiv=-1.d9
 !             print*,'gt 2'
             goto 123
         end if
         if ((aux2(k).ne.aux2(k)).or.(abs(aux2(k)).ge. 1.d30)) then
-            funcpajsplines=-1.d9
+            funcpajsplinesindiv=-1.d9
             goto 123
         end if
     end do
@@ -275,78 +276,38 @@
 !************* FIN INTEGRALES **************************
 
     res = 0.d0
-    do k=1,ng
-        sum=0.d0
-        if(cpt(k).gt.0)then
-            if(theta.gt.(1.d-8)) then
+    sum=0.d0
+    if(cpt(index).gt.0)then
+        if(theta.gt.(1.d-8)) then
 !cccc ancienne vraisemblance : pour calendar sans vrai troncature cccccccc
 
-                res= res + res2(k) &
+            res= res + wtsvec(index)*(res2(index) &
 !--      pour le deces:
-                + res2dc(k)  &
-                - gammaJ(1./theta)-dlog(theta)/theta  &
-                + dlog(integrale3(k))
-            else
+            + res2dc(index)  &
+            - gammaJ(1./theta)-dlog(theta)/theta  &
+            + dlog(integrale3(index))) ! IJ: weighted each individual likelihood contribution
+        else
 !*************************************************************************
 !     developpement de taylor d ordre 3
 !*************************************************************************
 !                   write(*,*)'************** TAYLOR *************'                   
-                res= res + wtsvec(k)*(res2(k) &
-                + res2dc(k)  &
-                - gammaJ(1./theta)-dlog(theta)/theta  &
-                + dlog(integrale3(k))) ! IJ: weighted each individual likelihood contribution
-            endif
-            if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-!                 print*,"here",k,res2(k),res2dc(k),gammaJ(1./theta),dlog(theta),dlog(integrale3(k))
-                funcpajsplines=-1.d9
-                goto 123
-            end if
-        endif
-    end do
-
-!---------- calcul de la penalisation -------------------
-
-    pe1T=0.d0
-    pe2 = 0.d0
-
-    do jj=1,nstRec !en plus strates A.Lafourcade 07/2014
-        do i=1,n-3
-            pe1T(jj) = pe1T(jj)+(the1T(i-3,jj)*the1T(i-3,jj)*m3m3(i))+(the1T(i-2,jj) &
-            *the1T(i-2,jj)*m2m2(i))+(the1T(i-1,jj)*the1T(i-1,jj)*m1m1(i))+( &
-            the1T(i,jj)*the1T(i,jj)*mmm(i))+(2.d0*the1T(i-3,jj)*the1T(i-2,jj)* &
-            m3m2(i))+(2.d0*the1T(i-3,jj)*the1T(i-1,jj)*m3m1(i))+(2.d0* &
-            the1T(i-3,jj)*the1T(i,jj)*m3m(i))+(2.d0*the1T(i-2,jj)*the1T(i-1,jj)* &
-            m2m1(i))+(2.d0*the1T(i-2,jj)*the1T(i,jj)*m2m(i))+(2.d0*the1T(i-1,jj) &
-            *the1T(i,jj)*m1m(i))
-        end do
-    end do
-
-    do i=1,n-3
-        if(nst.eq.1)then
-            pe2=0.d0
-        else
-            pe2 = pe2+(the2(i-3)*the2(i-3)*m3m3(i))+(the2(i-2) &
-            *the2(i-2)*m2m2(i))+(the2(i-1)*the2(i-1)*m1m1(i))+( &
-            the2(i)*the2(i)*mmm(i))+(2.d0*the2(i-3)*the2(i-2)* &
-            m3m2(i))+(2.d0*the2(i-3)*the2(i-1)*m3m1(i))+(2.d0* &
-            the2(i-3)*the2(i)*m3m(i))+(2.d0*the2(i-2)*the2(i-1)* &
-            m2m1(i))+(2.d0*the2(i-2)*the2(i)*m2m(i))+(2.d0*the2(i-1) &
-            *the2(i)*m1m(i))
-        endif
-    end do
-
-    pe=0.d0
-    do jj=1,nstRec !en plus strates A.Lafourcade 05/2014
-        pe=pe+pe1T(jj)*k0T(jj)
-    end do
-    pe=pe+pe2*k0T(nstRec+1)
+            res= res + wtsvec(index)*(res2(index) &
+            + res2dc(index)  &
+            - gammaJ(1./theta)-dlog(theta)/theta  &
+        	+ dlog(integrale3(index))) ! IJ: weighted each individual likelihood contribution
+       	endif
+    	if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+!            print*,"here",k,res2(k),res2dc(k),gammaJ(1./theta),dlog(theta),dlog(integrale3(k))
+        	funcpajsplinesindiv=-1.d9
+        	goto 123
+    	end if
+    endif
 
     resnonpen = res
 
-    res = res - pe
 
     if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
-        funcpajsplines=-1.d9
+        funcpajsplinesindiv=-1.d9
         Rrec = 0.d0
         Nrec = 0.d0
         Rdc = 0.d0
@@ -354,7 +315,7 @@
         goto 123
 
     else
-        funcpajsplines = res
+        funcpajsplinesindiv = resnonpen
         do k=1,ng
             Rrec(k)=res1(k)
             Nrec(k)=nig(k)
@@ -367,4 +328,4 @@
     
     return
 
-    end function funcpajsplines    
+    end function funcpajsplinesindiv    

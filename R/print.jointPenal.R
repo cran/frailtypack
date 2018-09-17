@@ -108,6 +108,7 @@
       }
       if (any(x$nvartimedep != 0)) cat("  and some time-dependant covariates","\n")
       if (x$n.strat>1) cat("  (Stratification structure used for recurrences) :",x$n.strat,"strata \n")
+      if(x$ncc==TRUE)cat("  and considering weights for the nested case-control design \n")
       if (x$typeof == 0){
         if(x$global_chisq.test==1){
           dimnames(tmpwald) <- list(x$names.factor,c("chisq", "df", "global p"))

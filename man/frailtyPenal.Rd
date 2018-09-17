@@ -92,6 +92,9 @@ This joint frailty model can also be applied to clustered recurrent events and a
 
 From now on, you can also consider time-varying effects covariates in your model, see \code{timedep} function for more details.
 
+There is a possibility to use a weighted penalized maximum likelihood approach for nested case-control design, in which risk set sampling
+is performed based on a single outcome (Jazic et al., \emph{Submitted}).
+
 
 General Joint Frailty model
 Fit a general joint frailty model for recurrent and terminal events considering two independent
@@ -264,6 +267,11 @@ for a joint model for clustered data
 \preformatted{frailtyPenal(Surv(time,event)~cluster(group)+num.id(group2)+
              var1+var2+var3+terminal(death),
              formula.terminalEvent=~var1+var4, data, \dots)}
+			 
+for a joint model for data from nested case-control studies
+\preformatted{frailtyPenal(Surv(time,event)~cluster(group)+num.id(group2)+
+             var1+var2+var3+terminal(death)+wts(wts.ncc),
+             formula.terminalEvent=~var1+var4, data, \dots)}
 
 for a nested model
 \preformatted{frailtyPenal(Surv(time,event)~cluster(group)+subcluster(sbgroup)+
@@ -313,6 +321,13 @@ In case of a joint nested model, the splines and the regression coefficients are
 If the option \code{'initialize'} is \code{TRUE}, the program fits a joint frailty model to provide initial values for the splines, covariates coefficients, variance \eqn{\theta} of the frailty terms and \eqn{\alpha}.
 The variances of the second frailty term (\eqn{\eta}) and the second coefficient \eqn{\xi} are initialized to 1. 
 Then, a joint nested frailty model is fitted.
+
+\bold{NCC DESIGN}
+
+It is possible to fit a joint frailty model for data from nested case-control studies using the approach of weighted penalized maximum likelihood.
+For this model, only splines can be used for baseline hazards and no time-varying effects of covariates can be included. To accommodate the nested case-control design,
+ the formula for the recurrent events should simply include the special term wts(wts.ncc), where wts.ncc refers to a column of prespecified weights in the data set for every observation. 
+ For details, see Jazic et al., \emph{Submitted} (available on request from the package authors).
 }
 
 \value{
@@ -404,6 +419,7 @@ The following components are specific to \bold{joint} models.
 \item{BetaTpsMat}{matrix of time varying-effects and confidence bands for recurrent event (the first column used for abscissa of times of recurrence)}
 \item{BetaTpsMatDc}{matrix of time varying-effects and confidence bands for terminal event (the first column used for abscissa of times of death)}
 \item{alpha_p.value}{p-value of the Wald test for the estimated \eqn{\alpha}.}
+\item{ncc}{Logical value whether nested case-control design with weights was used for the joint model.}
 
 The following components are specific to \bold{nested} models.
 
@@ -447,6 +463,8 @@ not converge, multiply or divide this value by 10 or 5 until it converges.
 }
 
 \references{
+I. Jazic, S. Haneuse, B. French, G. MacGrogan, and V. Rondeau. Design and analysis of nested case-control studies for recurrent
+events subject to a terminal event. \emph{Submitted}.
 
 A. Krol, A. Mauguen, Y. Mazroui, A. Laurent, S. Michiels and V. Rondeau (2017). Tutorial in Joint Modeling and Prediction: A Statistical Software for Correlated Longitudinal Outcomes, 
 Recurrent Events and a Terminal Event. \emph{Journal of Statistical Software} \bold{81}(3), 1-52.
@@ -469,7 +487,7 @@ V. Rondeau, L. Filleul, P. Joly (2006). Nested frailty models using maximum pena
 V. Rondeau, D. Commenges, and P. Joly (2003). Maximum penalized likelihood estimation in a gamma-frailty model.
 \emph{Lifetime Data Analysis} \bold{9}, 139-153.
 
-McGilchrist CA and Aisbett CW (1991). Regression with frailty in survival analysis.
+C.A. McGilchrist, and C.W. Aisbett (1991). Regression with frailty in survival analysis.
 \emph{Biometrics} \bold{47}, 461-466.
 
 D. Marquardt (1963). An algorithm for least-squares estimation of nonlinear parameters.
@@ -561,6 +579,13 @@ modJoint.log <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+sex
 +dukes+charlson+terminal(death),formula.terminalEvent=~sex
 +dukes+charlson,data=readmission,n.knots=10,kappa=c(9.55e9,1.41e12),
 recurrentAG=TRUE,RandDist="LogN")
+
+###--- Joint frailty model for NCC data ---###
+data(dataNCC)
+modJoint.ncc <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+cov1
++cov2+terminal(death)+wts(ncc.wts), formula.terminalEvent=~cov1+cov2,
+data=dataNCC,n.knots=8,kappa=c(1.6e+10, 5.0e+03),recurrentAG=TRUE, RandDist="LogN") 
+
 
 ###--- Joint Frailty model for clustered data ---###
 
