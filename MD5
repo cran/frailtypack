@@ -1,6 +1,6 @@
-4818ddb3248425e60f47730801a019f8 *DESCRIPTION
+0e7c1f882c8ab8d70eee04411e6ee6a9 *DESCRIPTION
 6d6ba9f4a4107291b5718d7422a5abaf *NAMESPACE
-31a1a8d2d901c135a1278e545f8e7f60 *NEWS
+c4762e51edd4b0a8085b553b829fcb44 *NEWS
 7d0e5a93868a77976c232932b0a5cf3c *R/Cmeasures.R
 ea152fa392691f9b73e52466474ab42d *R/Diffepoce.R
 568ccb7a37705e70ed4b5259016fd74c *R/SurvIC.R
@@ -34,7 +34,7 @@ a25640b786ba52c043f97aed6a8036ba *R/plot.predFrailty.R
 2a8dc4d511435a64c16a1edef189ce61 *R/plot.predLongi.R
 9fc524277dd9b281ddfcef76037a068a *R/plot.trivPenal.R
 1636e40e0dca79ded8de75c37e68ef78 *R/plot.trivPenalNL.R
-582dc7f0086e2e09c6b3eae5b22096c0 *R/prediction.R
+ebc9df82dd08c43f22c202036ec30dd6 *R/prediction.R
 79a06e0faff389cb54f0e7191eac06dd *R/print.Cmeasures.R
 8ed4f036c28da23399e7037d84935b4a *R/print.Diffepoce.R
 109a4e813415d33ba93b196a4bf43747 *R/print.additivePenal.R
@@ -74,7 +74,7 @@ c4c6c8f56f0fb125a9f0ad5f36a78a9d *R/waldtest.R
 33509771cad95e89a2fd0f567007e559 *R/wts.R
 c4501c422e7df81ab0256289663bd032 *README
 fca5ecd90d6f651c93aeb8149b9ea984 *THANKS
-0baf8e3814a0655266b8966ecf135ae3 *build/vignette.rds
+3b8782b194b5368fbaa69939d938cde0 *build/vignette.rds
 f9b9c4d9d73247b5e38d320cd587b621 *data/bcos.rda
 52d2b2b6fa8d5b2ef44badfdf80b509c *data/colorectal.rda
 01559782d363c615311c70ccda768add *data/colorectalLongi.rda
@@ -232,7 +232,7 @@ e30e0e7d3062c50f7b1b6570be903a5d *src/funcpasweib_intcens.f90
 2b50069c392d0a60f21804c4e8c7f67d *src/longi_uni_nl.f90
 1792999dfdc6d2e484178461ccdcebbe *src/multiveJoint.f90
 436f383e59f32b5ab24888c52cbf7678 *src/nested.f90
-48494c70271076363a8030c43275134b *src/prediction.f90
+36ef57c3825b58bf8284840926d7495d *src/prediction.f90
 9a3b348666aa3755aeab4778808053a9 *src/prediction_Recurr_Sha.f90
 708933585722e043e4a472a3dde01c7f *src/prediction_biv.f90
 b7f00f0b3cbb4957f90cb745b94160ff *src/prediction_sha_logn.f90

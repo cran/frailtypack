@@ -235,7 +235,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 					# NA car permet de differencier les t=0 donnes par l utilisateur de ceux qui sont remplis par defaut
 				}
 				predtimerec <- matrix(Y,nrow=npred,byrow=TRUE)
-				trunctime <- rep(0,npred)
+					trunctime <- rep(0,npred)
 				lowertime <- rep(0,npred)
 				uppertime <- rep(0,npred)			
 
@@ -367,7 +367,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 						Y <- c(Y,c(temp,rep(NA,nrec-length(temp))))
 						# NA car permet de differencier les t=0 donnes par l utilisateur de ceux qui sont remplis par defaut
 					}
-					predtimerec <- matrix(Y,nrow=npred,byrow=TRUE)
+				predtimerec <- matrix(Y,nrow=npred,byrow=TRUE)
                     predtimerectmp <- predtimerec 
                     predtimerectmp[which(is.na(predtimerectmp))] <- 0
 				}
@@ -401,8 +401,9 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 	
 	if (class(fit) == "jointPenal"){	
 		#--------ML 30-11-16...
-		predtimerec <- predtimerec[order(unique(cluster)),]
-				
+	 
+	predtimerec <- predtimerec[order(unique(cluster)),]
+		
 		# listPrec <- NULL	
 		# for (k in 1:nrow(predtimerec)){
 			# tPrec <- which(predtimerec[k,] < predTime)
@@ -413,7 +414,8 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		
 		taille = 0
 		listPrec <- NULL  
-		if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = 1)
+		if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = npred)
+	
 		for (k in 1:nrow(predtimerec)){
 			tPrec <- which(predtimerec[k,] < predTime)   
 			if (length(tPrec) == 0) tPrec <- taille + 1 
@@ -674,7 +676,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 			#-----------ML:07-12-16
 			taille = 0
 			listPrec <- NULL  
-			if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = 1)
+			if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = npred)
 			for (k in 1:nrow(predtimerec)){
 				tPrec <- which(predtimerec[k,] < predTime)   
 				if (length(tPrec) == 0) tPrec <- taille + 1 
@@ -1539,7 +1541,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 			
 		}else if(class(fit)=="trivPenal"){             
 			predtimerec <- predtimerec[order(unique(cluster)),]	
-						
+			if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = npred)
 			ans <- .Fortran(C_predict_tri,
 				as.integer(np),
 				as.double(b),
@@ -1611,7 +1613,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 			out$trivariate <- TRUE
 			}else if(class(fit)=="trivPenalNL"){             
 		  predtimerec <- predtimerec[order(unique(cluster)),]	
-		  
+		  if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = npred)
 		  box_cox <- c(0,1)
 		  box_cox[1] <- ifelse(fit$BoxCox == TRUE, 1, 0)
 		  if(!is.null(fit$BoxCox_parameter))box_cox[2] <- fit$BoxCox_parameter
@@ -1706,7 +1708,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
 		if (event == 'Recurrent'){	
 			taille = 0
 			listPrec <- NULL  
-			if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = 1)
+			if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = npred)
 			for (k in 1:nrow(predtimerec)){
 				tPrec <- which(predtimerec[k,] < predTime)   
 				if (length(tPrec) == 0) tPrec <- taille + 1 
