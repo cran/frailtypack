@@ -31,6 +31,11 @@ static const R_FortranMethodDef FortEntries[] = {
     {"survival_frailty",     (DL_FUNC) &F77_SUB(survival_frailty),      8},
     {"survival2",            (DL_FUNC) &F77_SUB(survival2),             6},
     {"survivalj_cpm2",       (DL_FUNC) &F77_SUB(survivalj_cpm2),        8},
+	{"somme",                (DL_FUNC) &F77_SUB(somme),                 5},
+    {"jointsurrogate",       (DL_FUNC) &F77_SUB(jointsurrogate),       51},
+    {"test",                 (DL_FUNC) &F77_SUB(test),       3},
+    {"surrosim",             (DL_FUNC) &F77_SUB(surrosim), 36},
+    {"jointsurrokendall",    (DL_FUNC) &F77_SUB(jointsurrokendall), 24},
     {NULL, NULL, 0}
 };
 
@@ -40,5 +45,5 @@ R_init_frailtypack(DllInfo *dll)
 {
     R_registerRoutines(dll, NULL, NULL, FortEntries, NULL);
     R_useDynamicSymbols(dll, FALSE);
-	R_forceSymbols(dll, TRUE);
+	  R_forceSymbols(dll, TRUE);
 }

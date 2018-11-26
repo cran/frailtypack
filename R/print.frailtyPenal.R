@@ -1,4 +1,19 @@
-
+#' Print a Short Summary of parameter estimates of a shared frailty model
+#' 
+#' Prints a short summary of parameter estimates of a 'frailtyPenal' object
+#' 
+#' 
+#' @usage \method{print}{frailtyPenal}(x, digits = max(options()$digits - 4, 6),
+#' ...)
+#' @param x the result of a call to the frailtyPenal function.
+#' @param digits number of digits to print.
+#' @param \dots other unused arguments.
+#' @return
+#' 
+#' Print the parameter estimates of the survival or hazard functions.
+#' @seealso \code{\link{frailtyPenal}}
+#' @keywords methods
+##' @export
 "print.frailtyPenal" <- function (x, digits = max(options()$digits - 4, 6), ...) 
 {
 
@@ -71,13 +86,13 @@
 				seH <- sqrt(x$varH)
 				seHIH <- sqrt(x$varHIH)
 			}
-			if (x$typeof == 0){
-				tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
-				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)
-			}else{
-				tmp <- cbind(coef, exp(coef), seH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
-				if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,x$p.global_chisq)
-			}
+		  if (x$typeof == 0){
+		    tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, ifelse(signif(1 - pchisq((coef/seH)^2, 1), digits - 1) == 0, "< 1e-16", signif(1 - pchisq((coef/seH)^2, 1), digits - 1))) # ifelse pour eviter que R n'affiche pval = 0 lorsque celle-ci est tres petite
+		    if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,ifelse(x$p.global_chisq == 0, "< 1e-16", x$p.global_chisq))
+		  }else{
+		    tmp <- cbind(coef, exp(coef), seH, coef/seH, ifelse(signif(1 - pchisq((coef/seH)^2, 1), digits - 1) == 0, "< 1e-16", signif(1 - pchisq((coef/seH)^2, 1), digits - 1)))
+		    if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq,x$dof_chisq,ifelse(x$p.global_chisq == 0, "< 1e-16", x$p.global_chisq))
+		  }
 		
 			cat("\n")
 			if (!is.null(frail)){
@@ -173,13 +188,13 @@
 # 			}
 
 			if (x$logNormal == 0){
-				cat("    Frailty parameter, Theta:", frail, "(SE (H):",
-				seH, ")", "p =", signif(1 - pnorm(frail/seH), digits - 1), "\n")
+			  cat("    Frailty parameter, Theta:", frail, "(SE (H):",
+			  seH, ")", "p =", ifelse(signif(1 - pnorm(frail/seH), digits - 1) == 0, "< 1e-16", signif(1 - pnorm(frail/seH), digits - 1)), "\n")
 			}else{
-				cat("    Frailty parameter, Sigma Square:", frail, "(SE (H):",
-				seH, ")", "p =", signif(1 - pnorm(frail/seH), digits - 1), "\n")
+			  cat("    Frailty parameter, Sigma Square:", frail, "(SE (H):",
+			  seH, ")", "p =", ifelse(signif(1 - pnorm(frail/seH), digits - 1) == 0, "< 1e-16", signif(1 - pnorm(frail/seH), digits - 1)), "\n")
 			}
-
+			
         }
 
 		cat(" \n")

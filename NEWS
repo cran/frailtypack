@@ -1,3 +1,25 @@
+Changes in Version 3.0.1 November 2018
+
+o New model added: Joint frailty models for the validation of surrogate endpoints in multiple randomized clinical trials with failure-time endpoints (vignettes file updated)
+
+o Parsing all the Rd files under the man directory and updating the corresponding R source code by inserting roxygen documentation into the R scripts
+
+o Bug fixed in summary function for jointNestedPenal when alpha or ksi is not included in the model and JointPenal when alpha is not included in the model
+ 
+o Bug fixed for predictions from joint nested frailty models with data with different values of covariates for a given individuals
+ 
+o Bug fixed for confidence intervals of predictions from joint nested frailty models without one or two power parameters (alpha, ksi) included in the model
+ 
+o Bug fixed for displaying for baseline hazard function (lam) for Piecewise hazard functions in frailtyPenal
+
+o Bug fixed for trivPenalNL: missing parenthesis was leading to an error when adjusting on covariates in KG part
+
+o Modification in longiPenal: Switch optimizer from nlminb to optim (BFGS) to get the initial values for pseudo-adaptive quadrature (better convergence rates)
+
+o Modification of the writing of the p-value
+
+o Bug fixed in the Fortran subroutines percentile, percentile2 and percentile3: change in the subroutine to account for vector overflows + update of the percentile formula
+
 Changes in Version 2.13.2 September 2018
 
  o Bug fixed for predictions for prediction data with only one observation per individual

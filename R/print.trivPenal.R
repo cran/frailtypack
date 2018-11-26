@@ -1,4 +1,24 @@
-
+#' Print a Summary of parameter estimates of a joint model for longitudinal
+#' data, recurrent events and a terminal event
+#' 
+#' Prints a short summary of parameter estimates of a joint model for
+#' longitudinal data, recurrent events and a terminal event, an object
+#' inheriting from class 'trivPenal'.
+#' 
+#' 
+#' @usage
+#' 
+#' \method{print}{trivPenal}(x, digits = max(options()$digits - 4, 6), ...)
+#' @param x an object inheriting from \code{trivPenal} class
+#' @param digits number of digits to print
+#' @param \dots other unused arguments
+#' @return
+#' 
+#' Print, separately for each part of the model (longitudinal, recurrent and
+#' terminal) the parameter estimates and details on the estimation.
+#' @seealso \code{\link{trivPenal}}
+#' @keywords methods
+##' @export
 "print.trivPenal" <- function (x, digits = max(options()$digits - 4, 6), ...)
 {
 
@@ -67,24 +87,24 @@
         seH <- sqrt(diag(x$varH))
         seHIH <- sqrt(diag(x$varHIH))
 
-      if (x$typeof == 0){
+        if (x$typeof == 0){
 
-        tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
-        if(x$global_chisq.testR==1) tmpwald <- cbind(x$global_chisqR,x$dof_chisqR,x$p.global_chisqR)
-        if(x$global_chisq.testT==1) tmpwalddc <- cbind(x$global_chisqT,x$dof_chisqT,x$p.global_chisqT)
+          tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, ifelse(signif(1 - pchisq((coef/seH)^2, 1), digits - 1) == 0, "< 1e-16", signif(1 - pchisq((coef/seH)^2, 1), digits - 1)))
+          if(x$global_chisq.testR==1) tmpwald <- cbind(x$global_chisqR, x$dof_chisqR, ifelse(x$p.global_chisqR == 0, "< 1e-16", x$p.global_chisqR))
+          if(x$global_chisq.testT==1) tmpwalddc <- cbind(x$global_chisqT, x$dof_chisqT, ifelse(x$p.global_chisqT == 0, "< 1e-16", x$p.global_chisqT))
+          
+          
+          if(x$global_chisq.testY==1) tmpwaldY <- cbind(x$global_chisqY,x$dof_chisqY,ifelse(x$p.global_chisqY == 0, "< 1e-16", x$p.global_chisqY))
+        }else{
 
-
-        if(x$global_chisq.testY==1) tmpwaldY <- cbind(x$global_chisqY,x$dof_chisqY,x$p.global_chisqY)
-      }else{
-
-        tmp <- cbind(coef, exp(coef), seH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
-        if(x$global_chisq.testR==1) tmpwald <- cbind(x$global_chisqR,x$dof_chisqR,x$p.global_chisqR)
-        if(x$global_chisq.testT==1) tmpwalddc <- cbind(x$global_chisqT,x$dof_chisqT,x$p.global_chisqT)
-
-
-        if(x$global_chisq.testY==1) tmpwaldY <- cbind(x$global_chisqY,x$dof_chisqY,x$p.global_chisqY)
-
-      }
+          tmp <- cbind(coef, exp(coef), seH, coef/seH, ifelse(signif(1 - pchisq((coef/seH)^2, 1), digits - 1) == 0, "< 1e-16", signif(1 - pchisq((coef/seH)^2, 1), digits - 1)))
+          if(x$global_chisq.testR==1) tmpwald <- cbind(x$global_chisqR, x$dof_chisqR, ifelse(x$p.global_chisqR == 0, "< 1e-16", x$p.global_chisqR))
+          if(x$global_chisq.testT==1) tmpwalddc <- cbind(x$global_chisqT, x$dof_chisqT, ifelse(x$p.global_chisqT == 0, "< 1e-16", x$p.global_chisqT))
+          
+          
+          if(x$global_chisq.testY==1) tmpwaldY <- cbind(x$global_chisqY,x$dof_chisqY,ifelse(x$p.global_chisqY == 0, "< 1e-16", x$p.global_chisqY))
+          
+        }
       cat("\n")
       cat("   Trivariate Joint Model for Longitudinal Data, Recurrent Events and a Terminal Event","\n")
       if (x$typeof == 0){
@@ -232,8 +252,8 @@
 
     cat("Recurrent event and longitudinal outcome association: \n")
     if(x$link=='Random-effects'){
-      tab.Asso <- cbind(x$etaR, x$se.etaR, x$etaR/x$se.etaR, signif(1 - pchisq((x$etaR/x$se.etaR)^2, 1), digits - 1))
-
+      tab.Asso <- cbind(x$etaR, x$se.etaR, x$etaR/x$se.etaR, ifelse(signif(1 - pchisq((x$etaR/x$se.etaR)^2, 1), digits - 1) == 0, "< 1e-16", signif(1 - pchisq((x$etaR/x$se.etaR)^2, 1), digits - 1)))
+      
       if(sum(tab.Asso[,4]<1e-16)>1){
         d1 <- dim(tab.Asso)[1]
         d2 <- dim(tab.Asso)[2]
@@ -251,8 +271,8 @@
       dimnames(tab.Asso) <- list(paste("Asso:",x$names.re,sep=""),c("coef",  "SE", "z", "p"))
       prmatrix(tab.Asso,quote=FALSE,right=TRUE)
     }else{
-      tab.Asso <- cbind(x$etaR, x$se.etaR, x$etaR/x$se.etaR, signif(1 - pchisq((x$etaR/x$se.etaR)^2, 1), digits - 1))
-
+      tab.Asso <- cbind(x$etaR, x$se.etaR, x$etaR/x$se.etaR, ifelse(signif(1 - pchisq((x$etaR/x$se.etaR)^2, 1), digits - 1) == 0, "< 1e-16", signif(1 - pchisq((x$etaR/x$se.etaR)^2, 1), digits - 1)))
+      
       if(sum(tab.Asso[,4]<1e-16)>1){
         d1 <- dim(tab.Asso)[1]
         d2 <- dim(tab.Asso)[2]
@@ -274,8 +294,8 @@
     cat("Terminal event and longitudinal outcome association: \n")
     if(x$link=='Random-effects'){
 
-      tab.Asso <- cbind(x$etaT, x$se.etaT, x$etaT/x$se.etaT, signif(1 - pchisq((x$etaT/x$se.etaT)^2, 1), digits - 1))
-
+      tab.Asso <- cbind(x$etaT, x$se.etaT, x$etaT/x$se.etaT, ifelse(signif(1 - pchisq((x$etaT/x$se.etaT)^2, 1), digits - 1) == 0, "< 1e-16", signif(1 - pchisq((x$etaT/x$se.etaT)^2, 1), digits - 1)))
+      
       if(sum(tab.Asso[,4]<1e-16)>1){
         d1 <- dim(tab.Asso)[1]
         d2 <- dim(tab.Asso)[2]
@@ -293,8 +313,8 @@
       dimnames(tab.Asso) <- list(paste("Asso:",x$names.re,sep=""),c("coef",  "SE", "z", "p"))
       prmatrix(tab.Asso,quote=FALSE,right=TRUE)
     }else{
-      tab.Asso <- cbind(x$etaT, x$se.etaT, x$etaT/x$se.etaT, signif(1 - pchisq((x$etaT/x$se.etaT)^2, 1), digits - 1))
-
+      tab.Asso <- cbind(x$etaT, x$se.etaT, x$etaT/x$se.etaT, ifelse(signif(1 - pchisq((x$etaT/x$se.etaT)^2, 1), digits - 1) == 0, "< 1e-16", signif(1 - pchisq((x$etaT/x$se.etaT)^2, 1), digits - 1)))
+      
       if(sum(tab.Asso[,4]<1e-16)>1){
         d1 <- dim(tab.Asso)[1]
         d2 <- dim(tab.Asso)[2]
