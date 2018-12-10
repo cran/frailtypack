@@ -99,7 +99,8 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
     integer,dimension(4)::mtaille
     double precision,dimension(4)::paraweib
     double precision,dimension(3)::paratps,descripSurr,descripDeces
-    double precision,dimension(:,:),allocatable:: paGH,matrice_generation ! parametre pour l'adaptative: en ligne les individus, en colone on a respectivement: les ui_cham,racine carree du determinant de l'inverse de la cholesky,variance des ui_chap,les covariances estimees des fragilites pour chaque individu, sachant que la matrice de variances covariance est bien la cholesky                                                        
+    double precision,dimension(:,:),allocatable:: paGH,matrice_generation ! parametre pour l'adaptative: en ligne les individus, en colone on a respectivement: les ui_cham,
+	    !     racine carree du determinant de l'inverse de la cholesky,variance des ui_chap,les covariances estimees des fragilites pour chaque individu, sachant que la matrice de variances covariance est bien la cholesky                                                        
     !parametres de simulation
     integer::n_col,mode_cens,n_essai,n_obs,weib,frailty_cor,affiche_stat,s_i,indice_eta,indice_theta&
                 ,rangparam,rangparam2,nbre_rejet,ind_temp,seed_,une_donnee,gener_only,kapa_use,&
@@ -548,8 +549,10 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
     ! read(2,*)N_MC_kendall ! nombre de boucle MC pour le calcul du taux de kendal en approximant l'integrale par montye carlo
     ! read(2,*)nboot_kendal ! nombre d'echantillon bootstrap pour le calcul de l'IC du taux de ke,ndall
     ! read(2,*)fichier_kendall ! fichier dans lequel saugarder les taux de kendall avec les IC par boostrap
-    if(method_int_kendal==4) then
-        nparam_kendall=4 ! on a 4 parametres qui rentrent dans le calcul du tau de kendall: theta, alpha, gamma, zeta
+    
+	nparam_kendall=4 ! on a 4 parametres qui rentrent dans le calcul du tau de kendall: theta, alpha, gamma, zeta
+	
+	if(method_int_kendal==4) then
         if(indice_alpha==0) nparam_kendall=nparam_kendall-1
         if(indice_eta==0) nparam_kendall=nparam_kendall-1        
     endif
@@ -681,14 +684,16 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
     ! read(5,*)sigma_t
     ! read(5,*)weib ! 0= on simule les temps par une loi exponentielle, 1= on simule par une weibull
     ! read(5,*)param_weibull ! parametrisation de la weibull utilisee: 0= parametrisation par defaut dans le programme de Virginie, 1= parametrisation a l'aide de la fonction de weibull donnee dans le cous de Pierre
-    ! read(5,*)frailty_cor ! indique si l'on considere pour le modele de simulation deux effets aleatoire correles au niveau essai(=1) ou un effet aleatoire partage(=0) ou encore on simule sans effet aleatoire au niveau essai(=2, model conjoint classique)
+	! read(5,*)frailty_cor ! indique si l'on considere pour le modele de simulation deux effets aleatoire correles au niveau essai(=1) ou un effet aleatoire partage(=0) ou encore on simule sans effet aleatoire au niveau essai(=2, model conjoint classique)
     ! read(5,*)affiche_stat ! dit si l'on affiche les statistiques des donnees simulees(1) ou non (0)
     ! read(5,*)seed_  !jeux de donnees a retenir pour la validation croisee
     ! read(5,*)une_donnee ! pour dire si on simule avec un seul jeu de donnees(1) ou pas (0). ceci pour tester le programme d'estimation
     ! read(5,*)donne_reel !dit si 1 a la question precedente dit s'il sagit du jeux de donnees reel (1) ou non (0)
     ! read(5,*)gener_only ! dit si on voudrait seulement generer les donnees(1) ou generer et faire des simulation(0)
     ! read(5,*)kapa_use ! dit si on utilise un kappa a chaque generation de donnee (1) ou le premier kappa pour tous les jeux de donnees(0)
-    ! read(5,*)decoup_simul ! dans le cas où l'on a decoupe les simulations en plusieurs paquets, donne le nombre de generation de donnees a ne pas considerer avant d'engager les simulations. ceci empêche de reproduire les meme jeux de donnees pour tous les paquets de simulation. vaut 0 si pas de decoupage pevu sinon pour chaque jeux de simulation mettre cette valeur a jour. Exp si 10 paquets de simul pour un total de 100, on affecte 0 pour le premier paquet, 10 pour le second, 20 pour le 3 ieme, ... 90 pour le 10ieme
+	! read(5,*)decoup_simul ! dans le cas où l'on a decoupe les simulations en plusieurs paquets, donne le nombre de generation de donnees a ne pas considerer avant d'engager les simulations. ceci empêche de reproduire les meme 
+	!          jeux de donnees pour tous les paquets de simulation. vaut 0 si pas de decoupage pevu sinon pour chaque jeux de simulation mettre cette valeur a jour. Exp si 10 paquets de simul pour un total de 100, on affecte 0 
+	!          pour le premier paquet, 10 pour le second, 20 pour le 3 ieme, ... 90 pour le 10ieme
     ! read(5,*)aleatoire    ! dit si on reinitialise la generation des nombre aleatoire avec un environnement different a chaque appel (1) ou non(O).En cas de generation differente, on utilise l'horloge (heure) de l'ordinateur comme graine. Dans ce cas, il n'est pas possible de reproduire les donnees simulees
     ! read(5,*)nbre_sim    ! dans le cas ou aleatoire=1, cette variable indique le nombre de generation qui vont etre faites
     ! read(5,*)graine    ! dans le cas ou l'on voudrait avoir la possibilite de reproduire les donnees generees alors on met la variable aleatoire=0 et on donne dans cette variable la graine a utiliser pour la generation
@@ -700,9 +705,8 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
     thetast_vrai=rsqrt_theta*dsqrt(theta2)*dsqrt(theta2_t)
     gammast_vrai=rsqrt_gamma_ui*dsqrt(gamma_ui)*dsqrt(gamma_uit)
     
-    
+    allocate(d_S(nsujet*n_sim,6),d_T(ng*n_sim,6))   
     if(une_donnee==1) then
-        allocate(d_S(nsujet*n_sim,6),d_T(ng*n_sim,6))
         ! on recupere le jeu de donnees reelles
         ! do i=1,size(d_S,1)
             ! read(13,*)(d_S(i,j),j=1,6) 
@@ -711,7 +715,6 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
         d_S=donnees
         d_T=death
     else
-        !allocate(d_S(nsujet*n_sim,6),d_T(ng*n_sim,6))
         ! on recupere le jeu de donnees reelles
         !do i=1,size(d_S,1)
         !    read(13,*)(d_S(i,j),j=1,6) 
@@ -3652,11 +3655,8 @@ end do
     ! !print*,"suis là=================5"
     ! close(19)
     ! close(445)
-    !!print*,"suis là=================7"
-   
-   goto 998
-   
-   
+    !!print*,"suis là=================7"   
+   goto 998 
     if (istop.ne.1) then
         !write(*,*)"ERREUR : LE MODELE N'A PAS CONVERGE"
     else
@@ -3894,9 +3894,8 @@ end do
     ! deallocate(kappa,tab_var_theta,donnee_essai,tableNsim,parametre_estimes_MPI,parametre_estimes_MPI_T)
     ! deallocate(vect_kendall_tau,v_chap_kendall,theta_chap_kendall,t_chap_kendall,v_chap_R2,theta_chap_R2,t_chap_R2,result_bootstrap)
     ! !deallocate(Vect_sim_MC)
-    ! if(une_donnee==1) deallocate(d_S,d_T)
+    deallocate(d_S,d_T)
     endsubroutine jointsurrogate
-    
     !complilation:
     !mpif90 -fopenmp -O3 -o exe_joint_surr_MPI_OMP  Adonnees.f90 Aparameters.f90 autres_fonctions.f90 Integrant_scl.f90 aaOptim_New_scl.f90 aaOptim_New_scl2.f90 funcpa_laplace.f90 aaOptim.f90 aaOptim_SCL_0.f90 aaOptimres.f90 funcpa_adaptative.f90 Integrale_mult_scl.f90 Pour_Adaptative.f90 aaUseFunction.f90 funcpajsplines_surrogate_scl_1.f90 funcpajsplines_surrogate_scl_2.f90 afuncpasres.f90 aresidusMartingale.f90 distance.f90 joint_surrogate.f90 main_Surr_simulation.f90
     !execution
