@@ -1,5 +1,5 @@
 Package: frailtypack
-Version: 3.0.2
+Version: 3.0.2.1
 Date: 2018-12-04
 Title: General Frailty Models: Shared, Joint and Nested Frailty Models
         with Prediction; Evaluation of Failure-Time Surrogate Endpoints
@@ -28,7 +28,7 @@ URL:
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 Repository: CRAN
-Date/Publication: 2018-12-10 14:30:03 UTC
-Packaged: 2018-12-06 16:14:16 UTC; cs10
+Date/Publication: 2019-01-07 16:30:23 UTC
+Packaged: 2019-01-07 16:26:24 UTC; ripley
 NeedsCompilation: yes
 RoxygenNote: 6.0.1
