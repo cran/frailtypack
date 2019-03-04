@@ -4,8 +4,8 @@
 \alias{jointSurroPenal}
 \title{Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint}
 \usage{
-jointSurroPenal(data, maxit=40, indice.zeta = 1, 
-   indice.alpha = 1, frail.base = 1, n.knots = 6, 
+jointSurroPenal(data, maxit=40, indicator.zeta = 1, 
+   indicator.alpha = 1, frail.base = 1, n.knots = 6, 
    LIMparam = 0.001, LIMlogl = 0.001, LIMderiv = 0.001, 
    nb.mc = 300, nb.gh = 32, nb.gh2 = 20, adaptatif = 0, 
    int.method = 2, nb.iterPGH = 5, nb.MC.kendall = 10000, 
@@ -15,7 +15,7 @@ jointSurroPenal(data, maxit=40, indice.zeta = 1,
    zeta.init = 1, betas.init = 0.5, betat.init = 0.5, scale = 1, 
    random.generator = 1, kappa.use = 4, random = 0, 
    random.nb.sim = 0, seed = 0, init.kappa = NULL, nb.decimal = 4, 
-   print.times = TRUE, print.itter=FALSE)
+   print.times = TRUE, print.iter=FALSE)
 }
 \arguments{
 \item{data}{A \code{\link{data.frame}} containing at least \code{7} variables intitled: 
@@ -34,12 +34,12 @@ jointSurroPenal(data, maxit=40, indice.zeta = 1,
 \item{maxit}{maximum number of iterations for the Marquardt algorithm.
 Default is \code{40}.}
 
-\item{indice.zeta}{A binary, indicates whether the power's parameter \eqn{\zeta} should 
+\item{indicator.zeta}{A binary, indicates whether the power's parameter \eqn{\zeta} should 
 be estimated (1) or not (0). If \code{0}, \eqn{\zeta} will be set to \code{1} during estimation. 
 The default is \code{1}. This parameter can be seted to \code{0} in case of convergence and 
 identification issues.}
 
-\item{indice.alpha}{A binary, indicates whether the power's parameter \eqn{\alpha} should 
+\item{indicator.alpha}{A binary, indicates whether the power's parameter \eqn{\alpha} should 
 be estimated (1) or not (0). If \code{0}, \eqn{\alpha} will be set to \code{1} during estimation.
 The default is 1.}
 
@@ -171,7 +171,7 @@ are obtain by cross-validation.}
 \item{print.times}{a logical parameter to print estimation time. Default
 is TRUE.}
 
-\item{print.itter}{a logical parameter to print iteration process. Default
+\item{print.iter}{a logical parameter to print iteration process. Default
 is FALSE.}
 }
 \value{
@@ -180,11 +180,11 @@ This function return an object of class jointSurroPenal with elements :
    \item{EPS}{A vector containing the obtained convergence thresholds with the Marquardt algorithm,  
     for the parameters, the log-likelihood and for the gradient;}
    \item{b}{A vector containing estimates for the splines parameter's, 
-   the power's parameter \eqn{\zeta} (if \code{indice.zeta} is set to \code{1}),
+   the power's parameter \eqn{\zeta} (if \code{indicator.zeta} is set to \code{1}),
     the standard error of the shared individual-level frailty \eqn{\omega_{ij}} (\eqn{\theta}), elements of the
     lower triangular matrix (L) from the Cholesky decomposition such that \eqn{\Sigma = LL^T}, with \eqn{\Sigma} 
     the covariances of the random effects \eqn{(v_{S_i},v_{T_i})}, the coefficient \eqn{\alpha} 
-    (if \code{indice.alpha} is set to \code{1}), the satandard error of the random effect \eqn{u_i} and the 
+    (if \code{indicator.alpha} is set to \code{1}), the satandard error of the random effect \eqn{u_i} and the 
     regression coefficients \eqn{\beta_S} and \eqn{\beta_T};}
     \item{varH}{The variance matrix of all parameters in \code{b} (before positivity constraint transformation 
    for the variance of the measurement error, for which the delta method is used);}
@@ -220,10 +220,89 @@ This function return an object of class jointSurroPenal with elements :
    \item{kappa}{Positive smoothing parameters used for convergence. These values could be different to initial 
    values if \code{kappa.use} is set to \code{3} or \code{4};}
    \item{scale}{The value used to rescale the survival times}
+   \item{data}{The dataset used in the model}
+   \item{varcov.Sigma}{covariance matrix of (\eqn{\hat{\sigma_S}},\eqn{\hat{\sigma_{T}}}, \eqn{\hat{\sigma_{ST}}})
+   obtained from the delta-method}
+   \item{parameter}{list of all arguments used in the model}
 }
 \description{
 {
-\bold{Joint Frailty Surrogate model definition} 
+\if{html}{\bold{Joint Frailty Surrogate model definition} 
+
+Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint, 
+with different integration methods on the random effects, using a semiparametric penalized 
+likelihood estimation. This approach extends that of Burzykowski \code{et al.} (2001) by 
+including in the same joint frailty model the individual-level and the trial-level random effects.
+ 
+For the j\out{<sup>th</sup>} subject (j=1,...,n\out{<sub>i</sub>}) of the i\out{<sup>th</sup>} 
+trial i (i=1,...,G), the joint surrogate model is defined as follows:
+
+{\figure{surromodel1.png}{options: width="100\%"}}
+
+where,
+\eqn{\omega}\out{<sub>ij</sub>} \out{&#126;} \eqn{N}(0,\eqn{\theta}), u\out{<sub>i</sub>} \out{&#126;} \eqn{N}(0,\eqn{\gamma}), \eqn{\omega}\out{<sub>i</sub>} \out{&#8869;} u\out{<sub>i</sub>},
+u\out{<sub>i</sub>} \out{&#8869;} v\out{<sub>S<sub>i</sub></sub>}, u\out{<sub>i</sub>} \out{&#8869;} v\out{<sub>T<sub>i</sub></sub>}
+
+and 
+(v\out{<sub>S<sub>i</sub></sub>},v\out{<sub>T<sub>i</sub></sub>})\out{<sup>T</sup>} \out{&#126;} \eqn{N}(0,\eqn{\Sigma}\out{<sub>v</sub>})
+
+with
+
+{\figure{surromodel2.png}{options: width="100\%"}}
+
+In this model, \eqn{\lambda}\out{<sub>0s</sub>}(t) is the baseline hazard function associated with the 
+surrogate endpoint and \eqn{\beta}\out{<sub>S</sub>} the fixed treatment effect (or log-hazard ratio); 
+\eqn{\lambda}\out{<sub>0T</sub>}(t) is the baseline hazard function associated with the true endpoint 
+and \eqn{\beta}\out{<sub>T</sub>} the fixed treatment effect. \eqn{\omega}\out{<sub>ij</sub>} is a shared individual-level frailty that serve to take into account the 
+heterogeneity in the data at the individual level; u\out{<sub>i</sub>} is a shared frailty effect associated 
+with the baseline hazard function that serve to take into account the heterogeneity between trials 
+of the baseline hazard function, associated with the fact that we have several trials in this 
+meta-analytical design. The power parameters \eqn{\zeta} and \eqn{\alpha} distinguish 
+both individual and trial-level heterogeneities between the surrogate and the true endpoint. 
+v\out{<sub>S<sub>i</sub></sub>} and v\out{<sub>T<sub>i</sub></sub>} are two correlated random effects treatment-by-trial interactions. 
+\eqn{Z}\out{<sub>ij1</sub>} represents the treatment arm to which the patient has been randomized.
+
+\bold{Surrogacy evaluation}
+
+We proposed new definitions of Kendall's \eqn{\tau} and coefficient of determination as 
+individual-level and trial-level association measurements, to evaluate a candidate 
+surrogate endpoint (Sofeu \emph{et al.}, 2018). The formulations are given below.
+
+\bold{Individual-level surrogacy}
+
+To measure the strength of association between \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>} after 
+adjusting the marginal distributions for the trial and the treatment effects, as show in 
+Sofeu \emph{et al.}(2018), we use the Kendall's \eqn{\tau} define by :
+
+{\figure{surromodel3.png}{options: width="100\%"}}
+       
+ 
+ where \eqn{\theta}, \eqn{\zeta}, \eqn{\alpha} and \eqn{\gamma} are estimated using the joint surrogate model
+ defined previously. Kendall's \eqn{\tau} is the difference between the probability of 
+ concordance and the probability of discordance of two realizations of \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>}. 
+ It belongs to the interval [-1,1] and assumes a zero value when \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>} are 
+ independent. We estimate Kendall's \eqn{\tau} using Monte-Carlo or Gaussian Hermite
+ quadrature integration methods. Its confidence interval is estimated using parametric 
+ bootstrap
+ 
+ \bold{Trial-level surrogacy}
+ 
+ The key motivation for validating a surrogate endpoint is to be able to predict the effect 
+ of treatment on the true endpoint, based on the observed effect of treatment on the 
+ surrogate endpoint. As shown by Buyse \emph{et al.} (2000), the coefficenient of 
+ determination obtains from the covariance matrix \eqn{\Sigma}\out{<sub>v</sub>} of the random effects 
+ treatment-by-trial interaction can be used to evaluate underlined prediction, and 
+ therefore as surrogacy evaluation measurement at trial-level. It is defined by: 
+ 
+ {\figure{surromodel4.png}{options: width="100\%"}}
+ 
+ The SEs of \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} is calculated using the Delta-method. We also propose 
+ \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} and 95\% CI computed using the parametric bootstrap. The use of delta-method 
+ can lead to confidence limits violating the [0,1], as noted by 
+ (Burzykowski \emph{et al.}, 2001). However, using other methods would not significantly alter
+ the findings of the surrogacy assessment 
+ }
+ \if{latex}{\bold{Joint Frailty Surrogate model definition} 
 
 Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint, 
 with different integration methods on the random effects, using a semiparametric penalized 
@@ -244,7 +323,6 @@ where,
  u_i \perp v_{T_i} }
 
 and 
-
 \eqn{(v_{S_i},v_{T_i})^{T}\sim\mathcal{N}\left({{0}},\Sigma_{v}\right)}, with
 \deqn{\Sigma_{v}=\left(
                       \begin{array}{cc} 
@@ -317,6 +395,7 @@ Sofeu \emph{et al.}(2018), we use the Kendall's \eqn{\tau} define by :
  can lead to confidence limits violating the [0,1], as noted by 
  (Burzykowski \emph{et al.}, 2001). However, using other methods would not significantly alter
  the findings of the surrogacy assessment 
+ }
 
 }
 }
@@ -369,7 +448,7 @@ data.sim <- jointSurrSimul(n.obs=600, n.trial = 30,cens.adm=549.24,
 
 \dontrun{
 #Surrogacy evaluation based on ganerated data with a combination of Monte Carlo 
-and classical Gaussian Hermite integration.*
+#and classical Gaussian Hermite integration.*
 # (Computation takes around 5 minutes)
 
 joint.surro.sim.MCGH <- jointSurroPenal(data = data.sim, int.method = 2, 
@@ -384,23 +463,23 @@ joint.surro.sim.MCPGH <- jointSurroPenal(data = data.sim, int.method = 2,
                    
 # Results
 summary(joint.surro.sim.MCGH)
-summary(joint.surro.sim.PMCGH)
+summary(joint.surro.sim.MCPGH)
 
 # Data from the advanced ovarian cancer randomized clinical trials.
-# Joint surrogate model with \\eqn{\\zeta} fixed to \\code{1}, 8 nodes spline 
+# Joint surrogate model with \\eqn{\\zeta} fixed to 1, 8 nodes spline 
 # and the rescaled survival time. 
 
 data(dataOvarian)
-# (Computation takes around 13 minutes)
+# (Computation takes around 20 minutes)
  
 joint.surro.ovar <- jointSurroPenal(data = dataOvarian, n.knots = 8, 
-                init.kappa = c(2000,1000), indice.alpha = 0, nb.mc = 200, 
+                init.kappa = c(2000,1000), indicator.alpha = 0, nb.mc = 200, 
                 scale = 1/365)
 # results
 summary(joint.surro.ovar)
 
 # data from the adjuvant chemotherapy and resectable gastric cancer 
-  meta-analyses :
+# meta-analyses :
 # Joint surrogate model with initial values for the parameters and the 
 # smoothing parameters, and sample for the Monte-Carlo integration
 # generated by the subroutine \\code{uniran}.
@@ -408,7 +487,7 @@ summary(joint.surro.ovar)
 
 data(gastadj)
 joint.surro.gast <- jointSurroPenal(data = gastadj, nb.mc = 100, nb.gh = 20, 
-                indice.zeta = 0, indice.alpha = 0, n.knots = 10, 
+                indicator.zeta = 0, indicator.alpha = 0, n.knots = 10, 
                 random.generator = 2, init.kappa = c(367700100,10025184521))
 
 # results

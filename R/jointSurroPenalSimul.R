@@ -47,8 +47,8 @@
 #' 
 #' @aliases jointSurroPenalSimul
 #' @usage 
-#' jointSurroPenalSimul(maxit=40, indice.zeta = 1, 
-#'    indice.alpha = 1, frail.base = 1, n.knots = 6, nb.dataset = 1, 
+#' jointSurroPenalSimul(maxit=40, indicator.zeta = 1, 
+#'    indicator.alpha = 1, frail.base = 1, n.knots = 6, nb.dataset = 1, 
 #'    nbSubSimul=1000, ntrialSimul=30, LIMparam = 0.001, 
 #'    LIMlogl = 0.001, LIMderiv = 0.001, nb.mc = 300, nb.gh = 32, 
 #'    nb.gh2 = 20, adaptatif = 0, int.method = 2, nb.iterPGH = 5, 
@@ -63,14 +63,14 @@
 #'    lambdat = 3, nut = 0.0025, time.cens = 549, R2 = 0.81,
 #'    sigma.s = 0.7, sigma.t = 0.7, kappa.use = 4, random = 0, 
 #'    random.nb.sim = 0, seed = 0, init.kappa = NULL, 
-#'    nb.decimal = 4, print.times = TRUE, print.itter=FALSE)
+#'    nb.decimal = 4, print.times = TRUE, print.iter=FALSE)
 #'
 #' @param maxit maximum number of iterations for the Marquardt algorithm.
 #' Default is \code{40}. 
-#' @param indice.zeta A binary, indicates whether the power's parameter \eqn{\zeta} should 
+#' @param indicator.zeta A binary, indicates whether the power's parameter \eqn{\zeta} should 
 #' be estimated (1) or not (0). If \code{0}, \eqn{\zeta} will be set to \code{1} during estimation. 
 #' The default is \code{1}. This parameter can be seted to \code{0} in case of identification issues. 
-#' @param indice.alpha A binary, indicates whether the power's parameter \eqn{\alpha} should 
+#' @param indicator.alpha A binary, indicates whether the power's parameter \eqn{\alpha} should 
 #' be estimated (1) or not (0). If \code{0}, \eqn{\alpha} will be set to \code{1} during estimation.
 #' The default is 1.
 #' @param frail.base Considered the heterogeneity between trial on the baseline risk (\code{1}), using 
@@ -152,13 +152,13 @@
 #' different trial sizes, fill in \code{prop.subj.trial} the proportions
 #' of subjects to be considered per trial. The default is \code{1}.
 #' @param prop.subj.trial Vector of the proportions of subjects to consider per trial. 
-#' Requires if \code{equi.subj.trial} is different to \code{1}. The size of this vector is equal to the 
+#' Requires if the argument \code{equi.subj.trial} is different to \code{1}. The size of this vector is equal to the 
 #' number of trials.
 #' @param equi.subj.trt Indicates if the same proportion of treated subjects per trial should be
 #' considered \code{(1)} or not \code{(0)}. If \code{0}, fill in \code{prop.subj.trt} 
 #' the proportions of treated subjects to be considered per trial. The default is \code{1}.
 #' @param prop.subj.trt Vector of the proportions of treated subjects to consider per trial. 
-#' Requires if \code{equi.subj.trt} is different to \code{0.5}. The size of this vector is equal to the 
+#' Requires if the argument \code{equi.subj.trt} is different to \code{0.5}. The size of this vector is equal to the 
 #' number of trials.
 #' @param theta2 True value for \eqn{\theta}. The default is \code{3.5}.
 #' @param zeta True value for \eqn{\zeta} in case of simulation. The default is \code{1}.
@@ -206,7 +206,7 @@
 #' @param nb.decimal Number of decimal required for results presentation.
 #' @param print.times a logical parameter to print estimation time. Default
 #' is TRUE.
-#' @param print.itter a logical parameter to print iteration process. Default
+#' @param print.iter a logical parameter to print iteration process. Default
 #' is FALSE.
 #' 
 #' @return
@@ -238,8 +238,11 @@
 #'    and theirs confidence intervals using the parametric bootstrap. All non-convergence cases are represented by a line of 0.}
 #'    \item{dataParamEstim}{a dataframe including all estimates with the associated standard errors, for all simulation. 
 #'    All non-convergence cases  are represented by a line of 0;}
-#'
-#' 
+#'    \item{dataHessian}{Dataframe of the variance-Covariance matrices  of the estimates for all simulations}
+#'    \item{dataHessianIH}{Dataframe of the robust estimation of the variance matrices  of the estimates for all simulations}
+#'    \item{datab}{Dataframe of the estimates for all simulations which rich convergence}
+#'    
+#'   
 #' @seealso \code{\link{jointSurroPenal}}, \code{\link{summary.jointSurroPenalSimul}}, \code{\link{jointSurrSimul}}
 #' 
 #' @author Casimir Ledoux Sofeu \email{casimir.sofeu@u-bordeaux.fr}, \email{scl.ledoux@gmail.com} and 
@@ -257,14 +260,15 @@
 #' 
 #' \dontrun{
 #' # Surrogacy model evaluation performance study based on 10 generated data
-#' # (Computation takes around 30 minutes)
+#' # (Computation takes around 20 minutes using a processor including 40 
+#' # cores and a read only memory of 378 Go)
 #' # To realize a simulation study on 100 samples or more (as required), use 
 #' # nb.dataset = 100
 #' 
 #' joint.simul <- jointSurroPenalSimul(nb.dataset = 10, nbSubSimul=600, 
 #'                    ntrialSimul=30, LIMparam = 0.001, LIMlogl = 0.001, 
 #'                    LIMderiv = 0.001, nb.mc = 200, nb.gh = 20, 
-#'                    nb.gh2 = 32, true.init.val = 1, print.itter=F)
+#'                    nb.gh2 = 32, true.init.val = 1, print.iter=F)
 #'
 #' # results
 #' summary(joint.simul, d = 3, R2boot = 1) # bootstrap
@@ -272,7 +276,7 @@
 #' 
 #' }
 #' 
-jointSurroPenalSimul = function(maxit=40, indice.zeta = 1, indice.alpha = 1, frail.base = 1, n.knots = 6,
+jointSurroPenalSimul = function(maxit=40, indicator.zeta = 1, indicator.alpha = 1, frail.base = 1, n.knots = 6,
                       nb.dataset = 1, nbSubSimul=1000, ntrialSimul=30, LIMparam = 0.001, LIMlogl = 0.001,
                       LIMderiv = 0.001, nb.mc = 300, nb.gh = 32, nb.gh2 = 20, adaptatif = 0, int.method = 2, 
                       nb.iterPGH = 5, nb.MC.kendall = 10000, nboot.kendall = 1000, true.init.val = 0, 
@@ -283,7 +287,7 @@ jointSurroPenalSimul = function(maxit=40, indice.zeta = 1, indice.alpha = 1, fra
                       gamma.ui = 2.5, alpha.ui = 1, betas = -1.25, betat = -1.25, lambdas = 1.8, nus = 0.0045, 
                       lambdat = 3, nut = 0.0025, time.cens = 549, R2 = 0.81, sigma.s = 0.7, sigma.t = 0.7, 
                       kappa.use = 4, random = 0, random.nb.sim = 0, seed = 0, init.kappa = NULL,
-                      nb.decimal = 4, print.times = TRUE, print.itter = FALSE){
+                      nb.decimal = 4, print.times = TRUE, print.iter = FALSE){
   
   data <- NULL
   scale <- 1
@@ -293,8 +297,8 @@ jointSurroPenalSimul = function(maxit=40, indice.zeta = 1, indice.alpha = 1, fra
   param.weibull <- 0
   
   # ==============parameters checking======================
-  if(!(indice.zeta %in% c(0,1)) | !(indice.alpha %in% c(0,1)) | !(frail.base %in% c(0,1))){
-    stop("model options indice.zeta, indice.alpha and frail.base must be set to 0 or 1")
+  if(!(indicator.zeta %in% c(0,1)) | !(indicator.alpha %in% c(0,1)) | !(frail.base %in% c(0,1))){
+    stop("model options indicator.zeta, indicator.alpha and frail.base must be set to 0 or 1")
   }
   
   
@@ -332,17 +336,17 @@ jointSurroPenalSimul = function(maxit=40, indice.zeta = 1, indice.alpha = 1, fra
   indice_covST <- 1
   indice_gamma_st <- 0 #  indice_gamma_st: dit si l'on estime gamma_st_ut (1) ou non(0), pour les effets aleatoires correlees sur le risque de base, pas traite ici 
   
-  if(frail.base==0) indice.alpha <- 0 
+  if(frail.base==0) indicator.alpha <- 0 
   
-  indice_a_estime <- c(indice.zeta, indice_covST, indice.alpha, indice_gamma_st,frail.base)
+  indice_a_estime <- c(indicator.zeta, indice_covST, indicator.alpha, indice_gamma_st,frail.base)
   
   if(indice_covST == 1){
     # we estimated at least 4 parameters correspondint to the covariance matrix \sigma and the variance of \omega_ij
     nb.frailty <- 4
-    nparamfrail <- nb.frailty + indice.zeta + indice.alpha + frail.base
+    nparamfrail <- nb.frailty + indicator.zeta + indicator.alpha + frail.base
   } else{
     nb.frailty <- 3
-    nparamfrail <- nb.frailty + indice.zeta + indice.alpha + frail.base
+    nparamfrail <- nb.frailty + indicator.zeta + indicator.alpha + frail.base
   }
   
   # parametre fonction de risque de base
@@ -407,10 +411,10 @@ jointSurroPenalSimul = function(maxit=40, indice.zeta = 1, indice.alpha = 1, fra
         death[,i] <- as.double(death[,i])
       }
       
-      if(print.itter) cat("+++++++++++estimation of Kappas by ccross-validation +++++++++++")
+      if(print.iter) cat("+++++++++++estimation of Kappas by cross-validation +++++++++++")
       vect_kappa[j,] <- kappa_val_croisee(don_S = donnees, don_T = death, njeu = 1, n_obs = nsujet1,
                                      n_node = n.knots, adjust_S = 1, adjust_T = 1, kapp_0 = 0,
-                                     print.times = print.itter)
+                                     print.times = print.iter)
       # I deleate the created text file
       file.remove(dir(pattern="kappa_valid_crois.txt"))
     }
@@ -570,6 +574,10 @@ jointSurroPenalSimul = function(maxit=40, indice.zeta = 1, indice.alpha = 1, fra
   ier <- 0 # informe sur le comportement du modele(-1 = erreur, k = perte de significativite le modele continu, 0 = pas d'erreur)
   istop <- 0 # critere d'arret: 1= le modele a converge, 2= on a attent le nombre max d'itteration, 3= echec inversion de la hessienne, 4= erreur dans les calculs 
   ziOut <- rep(0,nz+6)  # knots for baseline hazard estimated with splines
+  Varcov <- matrix(0, nrow = 3, ncol = 3) # matrice de variance-covariance de (sigma_S,sigma_ST,sigmaT) obtenue par delta methode a partir de la hesienne, en raison du changement de variable au moment de l'estimation
+  dataHessian <- matrix(0, nrow = np*n_sim1, ncol = np) # sauvegarde des matrices hessiennes des differentes simulations 
+  dataHessianIH <- matrix(0, nrow = np*n_sim1, ncol = np) # pour la matrice hessienne corrigee (HIH)
+  datab <- matrix(0, nrow = n_sim1, ncol = np) # sauvegarde des vecteurs de parametres des simulation 
   
   # proportion de sujet par essai
   if(sujet_equi==1){
@@ -590,7 +598,7 @@ jointSurroPenalSimul = function(maxit=40, indice.zeta = 1, indice.alpha = 1, fra
   }
   
   
-  if(print.itter) 
+  if(print.iter) 
     affiche.itter <- 1
   else
     affiche.itter <- 0
@@ -649,6 +657,10 @@ jointSurroPenalSimul = function(maxit=40, indice.zeta = 1, indice.alpha = 1, fra
                   istop = 0,
                   ziOut = rep(0,nz+6),
                   as.integer(affiche.itter),
+                  Varcov = matrix(0, nrow = 3, ncol = 3),
+                  dataHessian = matrix(0, nrow = np*n_sim1, ncol = np),
+                  dataHessianIH = matrix(0, nrow = np*n_sim1, ncol = np),
+                  datab = matrix(0, nrow = n_sim1, ncol = np),
                   PACKAGE="frailtypack"
   )
   
@@ -682,6 +694,8 @@ jointSurroPenalSimul = function(maxit=40, indice.zeta = 1, indice.alpha = 1, fra
                                     "R2trial","SE.R2trial","tau")
   names(result$dataTkendall) <- c("Ktau","inf.95%CI","sup.95%CI")
   names(result$dataR2boot) <- c("R2.boot","inf.95%CI","sup.95%CI")
+  result$dataHessian <- data.frame(ans$dataHessian)
+  result$datab <- data.frame(ans$datab)
   
   #if(is.na(result$n.iter)) result=NULL # model did not converged 
   

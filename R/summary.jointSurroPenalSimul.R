@@ -2,7 +2,7 @@
 ##' 
 ##' This function returns the true value, the mean of the estimates, 
 ##' the empirical standard error, the mean of the estimated standard errors 
-##' (Mean SE), and the percentage of coverate for model parameters
+##' (Mean SE), and the coverage probability for model parameters
 ##' 
 ##' 
 ##' @aliases summary.jointSurroPenalSimul print.summary.jointSurroPenalSimul
@@ -17,10 +17,10 @@
 ##'  
 ##' @return For each parameter of the joint surrogate model , we print the true simulation value,  
 ##' the empirical standard error (empirical SE), the mean of the estimated standard errors 
-##' (Mean SE), and the percentage of coverate (CP) for each model parameters. 
+##' (Mean SE), and the coverate probability (CP) for each model parameters. 
 ##' For the Kendall's \eqn{\tau}, the 95\% Confidence interval is obtained by the 
 ##' parametric bootstrap. For \eqn{R^2_{trial}}(R2trial), the standard error is obtained
-##' by Delta-method and the 95\% Confidence interval could be obtained by Delta-method or 
+##' by Delta-method and the 95\% Confidence interval could be obtained directly or by 
 ##' parametric bootstrap. We also display the total number of non convergence case with 
 ##' the associated percentage (R : n(\%)), the mean number of iterations to reach convergence,
 ##' and other estimation and simulation parameters
@@ -34,14 +34,14 @@
 ##' @export
 ##' @examples
 ##' 
-##' # studies simulation
+##' # Studies simulation
 #' \dontrun{
-#' # Studies simulation
-#' # (Computation takes around 11 hours)
+#' # (Computation takes around 45 minutes using a processor including 40
+#' # cores and a read only memory of 378 Go)
 #' joint.simul <- jointSurroPenalSimul(nb.dataset = 10, nbSubSimul=600, 
 #'                    ntrialSimul=30, LIMparam = 0.001, LIMlogl = 0.001, 
 #'                    LIMderiv = 0.001, nb.mc = 200, nb.gh = 20, 
-#'                    nb.gh2 = 32, true.init.val = 1, print.itter=F)
+#'                    nb.gh2 = 32, true.init.val = 1, print.iter=F)
 #'
 #' # results
 #' summary(joint.simul, d = 3, R2boot = 1) # bootstrap
@@ -90,6 +90,7 @@
     resultSimul[-nrow(resultSimul),1] <- substr(resultSimul[-nrow(resultSimul),1],1,nchar(resultSimul[-nrow(resultSimul),1])-6)
     if(is.na(resultSimul[nrow(resultSimul)-2,ncol(resultSimul)-1]))resultSimul[nrow(resultSimul)-2,ncol(resultSimul)-1] <- "-"
     cat("Simulation results", "\n")
-    print(resultSimul)
+    print(resultSimul[-nrow(resultSimul),])
+    cat(c("Rejected datasets : n(%) = ",resultSimul[nrow(resultSimul),3]), "\n")
     
   }

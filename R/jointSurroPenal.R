@@ -2,7 +2,82 @@
 #' Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint
 #'
 #'@description{
-#'\bold{Joint Frailty Surrogate model definition} 
+#' \if{html}{\bold{Joint Frailty Surrogate model definition} 
+#'
+#' Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint, 
+#' with different integration methods on the random effects, using a semiparametric penalized 
+#' likelihood estimation. This approach extends that of Burzykowski \code{et al.} (2001) by 
+#' including in the same joint frailty model the individual-level and the trial-level random effects.
+#'  
+#' For the j\out{<sup>th</sup>} subject (j=1,...,n\out{<sub>i</sub>}) of the i\out{<sup>th</sup>} 
+#' trial i (i=1,...,G), the joint surrogate model is defined as follows:
+#' 
+#' {\figure{surromodel1.png}{options: width="100\%"}}
+#' 
+#' where,
+#' \eqn{\omega}\out{<sub>ij</sub>} \out{&#126;} \eqn{N}(0,\eqn{\theta}), u\out{<sub>i</sub>} \out{&#126;} \eqn{N}(0,\eqn{\gamma}), \eqn{\omega}\out{<sub>i</sub>} \out{&#8869;} u\out{<sub>i</sub>},
+#' u\out{<sub>i</sub>} \out{&#8869;} v\out{<sub>S<sub>i</sub></sub>}, u\out{<sub>i</sub>} \out{&#8869;} v\out{<sub>T<sub>i</sub></sub>}
+#' 
+#' and 
+#' (v\out{<sub>S<sub>i</sub></sub>},v\out{<sub>T<sub>i</sub></sub>})\out{<sup>T</sup>} \out{&#126;} \eqn{N}(0,\eqn{\Sigma}\out{<sub>v</sub>})
+#' 
+#' with
+#' 
+#' {\figure{surromodel2.png}{options: width="100\%"}}
+#' 
+#' In this model, \eqn{\lambda}\out{<sub>0s</sub>}(t) is the baseline hazard function associated with the 
+#' surrogate endpoint and \eqn{\beta}\out{<sub>S</sub>} the fixed treatment effect (or log-hazard ratio); 
+#' \eqn{\lambda}\out{<sub>0T</sub>}(t) is the baseline hazard function associated with the true endpoint 
+#' and \eqn{\beta}\out{<sub>T</sub>} the fixed treatment effect. \eqn{\omega}\out{<sub>ij</sub>} is a shared individual-level frailty that serve to take into account the 
+#' heterogeneity in the data at the individual level; u\out{<sub>i</sub>} is a shared frailty effect associated 
+#' with the baseline hazard function that serve to take into account the heterogeneity between trials 
+#' of the baseline hazard function, associated with the fact that we have several trials in this 
+#' meta-analytical design. The power parameters \eqn{\zeta} and \eqn{\alpha} distinguish 
+#' both individual and trial-level heterogeneities between the surrogate and the true endpoint. 
+#' v\out{<sub>S<sub>i</sub></sub>} and v\out{<sub>T<sub>i</sub></sub>} are two correlated random effects treatment-by-trial interactions. 
+#' \eqn{Z}\out{<sub>ij1</sub>} represents the treatment arm to which the patient has been randomized.
+#' 
+#' \bold{Surrogacy evaluation}
+#'
+#' We proposed new definitions of Kendall's \eqn{\tau} and coefficient of determination as 
+#' individual-level and trial-level association measurements, to evaluate a candidate 
+#' surrogate endpoint (Sofeu \emph{et al.}, 2018). The formulations are given below.
+#' 
+#' \bold{Individual-level surrogacy}
+#' 
+#' To measure the strength of association between \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>} after 
+#' adjusting the marginal distributions for the trial and the treatment effects, as show in 
+#' Sofeu \emph{et al.}(2018), we use the Kendall's \eqn{\tau} define by :
+#' 
+#' {\figure{surromodel3.png}{options: width="100\%"}}
+#'        
+#'  
+#'  where \eqn{\theta}, \eqn{\zeta}, \eqn{\alpha} and \eqn{\gamma} are estimated using the joint surrogate model
+#'  defined previously. Kendall's \eqn{\tau} is the difference between the probability of 
+#'  concordance and the probability of discordance of two realizations of \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>}. 
+#'  It belongs to the interval [-1,1] and assumes a zero value when \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>} are 
+#'  independent. We estimate Kendall's \eqn{\tau} using Monte-Carlo or Gaussian Hermite
+#'  quadrature integration methods. Its confidence interval is estimated using parametric 
+#'  bootstrap
+#'  
+#'  \bold{Trial-level surrogacy}
+#'  
+#'  The key motivation for validating a surrogate endpoint is to be able to predict the effect 
+#'  of treatment on the true endpoint, based on the observed effect of treatment on the 
+#'  surrogate endpoint. As shown by Buyse \emph{et al.} (2000), the coefficenient of 
+#'  determination obtains from the covariance matrix \eqn{\Sigma}\out{<sub>v</sub>} of the random effects 
+#'  treatment-by-trial interaction can be used to evaluate underlined prediction, and 
+#'  therefore as surrogacy evaluation measurement at trial-level. It is defined by: 
+#'  
+#'  {\figure{surromodel4.png}{options: width="100\%"}}
+#'  
+#'  The SEs of \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} is calculated using the Delta-method. We also propose 
+#'  \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} and 95\% CI computed using the parametric bootstrap. The use of delta-method 
+#'  can lead to confidence limits violating the [0,1], as noted by 
+#'  (Burzykowski \emph{et al.}, 2001). However, using other methods would not significantly alter
+#'  the findings of the surrogacy assessment 
+#'  }
+#'  \if{latex}{\bold{Joint Frailty Surrogate model definition} 
 #'
 #' Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint, 
 #' with different integration methods on the random effects, using a semiparametric penalized 
@@ -23,7 +98,6 @@
 #'  u_i \perp v_{T_i} }
 #' 
 #' and 
-#' 
 #' \eqn{(v_{S_i},v_{T_i})^{T}\sim\mathcal{N}\left({{0}},\Sigma_{v}\right)}, with
 #' \deqn{\Sigma_{v}=\left(
 #'                       \begin{array}{cc} 
@@ -96,6 +170,7 @@
 #'  can lead to confidence limits violating the [0,1], as noted by 
 #'  (Burzykowski \emph{et al.}, 2001). However, using other methods would not significantly alter
 #'  the findings of the surrogacy assessment 
+#'  }
 #' 
 #' }
 #' 
@@ -139,8 +214,8 @@
 #' 
 #' @aliases jointSurroPenal
 #' @usage 
-#' jointSurroPenal(data, maxit=40, indice.zeta = 1, 
-#'    indice.alpha = 1, frail.base = 1, n.knots = 6, 
+#' jointSurroPenal(data, maxit=40, indicator.zeta = 1, 
+#'    indicator.alpha = 1, frail.base = 1, n.knots = 6, 
 #'    LIMparam = 0.001, LIMlogl = 0.001, LIMderiv = 0.001, 
 #'    nb.mc = 300, nb.gh = 32, nb.gh2 = 20, adaptatif = 0, 
 #'    int.method = 2, nb.iterPGH = 5, nb.MC.kendall = 10000, 
@@ -150,7 +225,7 @@
 #'    zeta.init = 1, betas.init = 0.5, betat.init = 0.5, scale = 1, 
 #'    random.generator = 1, kappa.use = 4, random = 0, 
 #'    random.nb.sim = 0, seed = 0, init.kappa = NULL, nb.decimal = 4, 
-#'    print.times = TRUE, print.itter=FALSE)
+#'    print.times = TRUE, print.iter=FALSE)
 #'
 #' @param data A \code{\link{data.frame}} containing at least \code{7} variables intitled: 
 #'    \itemize{
@@ -166,11 +241,11 @@
 #'    }
 #' @param maxit maximum number of iterations for the Marquardt algorithm.
 #' Default is \code{40}. 
-#' @param indice.zeta A binary, indicates whether the power's parameter \eqn{\zeta} should 
+#' @param indicator.zeta A binary, indicates whether the power's parameter \eqn{\zeta} should 
 #' be estimated (1) or not (0). If \code{0}, \eqn{\zeta} will be set to \code{1} during estimation. 
 #' The default is \code{1}. This parameter can be seted to \code{0} in case of convergence and 
 #' identification issues. 
-#' @param indice.alpha A binary, indicates whether the power's parameter \eqn{\alpha} should 
+#' @param indicator.alpha A binary, indicates whether the power's parameter \eqn{\alpha} should 
 #' be estimated (1) or not (0). If \code{0}, \eqn{\alpha} will be set to \code{1} during estimation.
 #' The default is 1.
 #' @param frail.base Considered the heterogeneity between trial on the baseline risk (\code{1}), using 
@@ -269,7 +344,7 @@
 #' @param nb.decimal Number of decimal required for results presentation.
 #' @param print.times a logical parameter to print estimation time. Default
 #' is TRUE.
-#' @param print.itter a logical parameter to print iteration process. Default
+#' @param print.iter a logical parameter to print iteration process. Default
 #' is FALSE.
 #' 
 #' @return
@@ -278,11 +353,11 @@
 #'    \item{EPS}{A vector containing the obtained convergence thresholds with the Marquardt algorithm,  
 #'     for the parameters, the log-likelihood and for the gradient;}
 #'    \item{b}{A vector containing estimates for the splines parameter's, 
-#'    the power's parameter \eqn{\zeta} (if \code{indice.zeta} is set to \code{1}),
+#'    the power's parameter \eqn{\zeta} (if \code{indicator.zeta} is set to \code{1}),
 #'     the standard error of the shared individual-level frailty \eqn{\omega_{ij}} (\eqn{\theta}), elements of the
 #'     lower triangular matrix (L) from the Cholesky decomposition such that \eqn{\Sigma = LL^T}, with \eqn{\Sigma} 
 #'     the covariances of the random effects \eqn{(v_{S_i},v_{T_i})}, the coefficient \eqn{\alpha} 
-#'     (if \code{indice.alpha} is set to \code{1}), the satandard error of the random effect \eqn{u_i} and the 
+#'     (if \code{indicator.alpha} is set to \code{1}), the satandard error of the random effect \eqn{u_i} and the 
 #'     regression coefficients \eqn{\beta_S} and \eqn{\beta_T};}
 #'     \item{varH}{The variance matrix of all parameters in \code{b} (before positivity constraint transformation 
 #'    for the variance of the measurement error, for which the delta method is used);}
@@ -318,6 +393,10 @@
 #'    \item{kappa}{Positive smoothing parameters used for convergence. These values could be different to initial 
 #'    values if \code{kappa.use} is set to \code{3} or \code{4};}
 #'    \item{scale}{The value used to rescale the survival times}
+#'    \item{data}{The dataset used in the model}
+#'    \item{varcov.Sigma}{covariance matrix of (\eqn{\hat{\sigma_S}},\eqn{\hat{\sigma_{T}}}, \eqn{\hat{\sigma_{ST}}})
+#'    obtained from the delta-method}
+#'    \item{parameter}{list of all arguments used in the model}
 #'
 #' 
 #' @seealso \code{\link{jointSurrSimul}}, \code{\link{summary.jointSurroPenal}}, \code{\link{jointSurroPenalSimul}}
@@ -350,7 +429,7 @@
 #' 
 #' \dontrun{
 #' #Surrogacy evaluation based on ganerated data with a combination of Monte Carlo 
-#' and classical Gaussian Hermite integration.*
+#' #and classical Gaussian Hermite integration.*
 #' # (Computation takes around 5 minutes)
 #' 
 #' joint.surro.sim.MCGH <- jointSurroPenal(data = data.sim, int.method = 2, 
@@ -365,23 +444,23 @@
 #'                    
 #' # Results
 #' summary(joint.surro.sim.MCGH)
-#' summary(joint.surro.sim.PMCGH)
+#' summary(joint.surro.sim.MCPGH)
 #' 
 #' # Data from the advanced ovarian cancer randomized clinical trials.
-#' # Joint surrogate model with \eqn{\zeta} fixed to \code{1}, 8 nodes spline 
+#' # Joint surrogate model with \eqn{\zeta} fixed to 1, 8 nodes spline 
 #' # and the rescaled survival time. 
 #' 
 #' data(dataOvarian)
-#' # (Computation takes around 13 minutes)
+#' # (Computation takes around 20 minutes)
 #'  
 #' joint.surro.ovar <- jointSurroPenal(data = dataOvarian, n.knots = 8, 
-#'                 init.kappa = c(2000,1000), indice.alpha = 0, nb.mc = 200, 
+#'                 init.kappa = c(2000,1000), indicator.alpha = 0, nb.mc = 200, 
 #'                 scale = 1/365)
 #' # results
 #' summary(joint.surro.ovar)
 #' 
 #' # data from the adjuvant chemotherapy and resectable gastric cancer 
-#'   meta-analyses :
+#' # meta-analyses :
 #' # Joint surrogate model with initial values for the parameters and the 
 #' # smoothing parameters, and sample for the Monte-Carlo integration
 #' # generated by the subroutine \code{uniran}.
@@ -389,7 +468,7 @@
 #' 
 #' data(gastadj)
 #' joint.surro.gast <- jointSurroPenal(data = gastadj, nb.mc = 100, nb.gh = 20, 
-#'                 indice.zeta = 0, indice.alpha = 0, n.knots = 10, 
+#'                 indicator.zeta = 0, indicator.alpha = 0, n.knots = 10, 
 #'                 random.generator = 2, init.kappa = c(367700100,10025184521))
 #'
 #' # results
@@ -397,17 +476,29 @@
 #' 
 #' }
 #' 
-jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, frail.base = 1, 
+jointSurroPenal = function(data, maxit = 40, indicator.zeta = 1, indicator.alpha = 1, frail.base = 1, 
                       n.knots = 6, LIMparam = 0.001, LIMlogl = 0.001, LIMderiv = 0.001, nb.mc = 300, 
                       nb.gh = 32, nb.gh2 = 20, adaptatif = 0, int.method = 2, nb.iterPGH = 5, 
                       nb.MC.kendall = 10000, nboot.kendall = 1000, true.init.val = 0, theta.init = 1, 
                       sigma.ss.init = 0.5, sigma.tt.init = 0.5, sigma.st.init = 0.48, gamma.init = 0.5, 
                       alpha.init = 1, zeta.init = 1, betas.init = 0.5, betat.init = 0.5, scale = 1, 
                       random.generator = 1, kappa.use = 4, random = 0, random.nb.sim = 0, seed = 0, 
-                      init.kappa = NULL, nb.decimal = 4, print.times = TRUE, print.itter = FALSE){
+                      init.kappa = NULL, nb.decimal = 4, print.times = TRUE, print.iter = FALSE){
   
  # The initial followup time. The default value is 0
   data$initTime <- 0 
+  
+ # list of models parameters:
+  parameter <- c(maxit = maxit,indicator.zeta = indicator.zeta, indicator.alpha = indicator.alpha,
+                 frail.base = frail.base, n.knots = n.knots, LIMparam = LIMparam, LIMlogl = LIMlogl, 
+                 LIMderiv = LIMderiv, nb.mc = nb.mc, nb.gh = nb.gh, nb.gh2 = nb.gh2, adaptatif = adaptatif, 
+                 int.method = int.method, nb.iterPGH = nb.iterPGH, nb.MC.kendall = nb.MC.kendall, 
+                 nboot.kendall = nboot.kendall, true.init.val = true.init.val, theta.init = theta.init, 
+                 sigma.ss.init = sigma.ss.init, sigma.tt.init = sigma.tt.init, sigma.st.init = sigma.st.init, 
+                 gamma.init = gamma.init, alpha.init = alpha.init, zeta.init = zeta.init, betas.init = betas.init, 
+                 betat.init = betat.init, scale = scale, random.generator = random.generator, kappa.use = kappa.use, 
+                 random = random, random.nb.sim = random.nb.sim, seed = seed, init.kappa = init.kappa, 
+                 nb.decimal = nb.decimal, print.times = print.times, print.iter = print.iter)
   
  # some initializations: for all these parameters, refers to the function jointSurroPenalSimul for help (or descriptions)
   nb.dataset <- 1
@@ -437,8 +528,8 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
   # end initialization
   
   # ==============parameters checking======================
-  if(!(indice.zeta %in% c(0,1)) | !(indice.alpha %in% c(0,1)) | !(frail.base %in% c(0,1))){
-    stop("model options indice.zeta, indice.alpha and frail.base must be set to 0 or 1")
+  if(!(indicator.zeta %in% c(0,1)) | !(indicator.alpha %in% c(0,1)) | !(frail.base %in% c(0,1))){
+    stop("model options indicator.zeta, indicator.alpha and frail.base must be set to 0 or 1")
   }
   
   if(is.null(data) & nb.dataset == 1){
@@ -479,7 +570,7 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
     # dataset's names control
     varStatus=(c("initTime","timeS","statusS","timeT","statusT","trialID","patienID","trt") %in% names(data))
     if(F %in% varStatus){
-      stop("Control the names of your variables. They must contain at leat 7 variables named: timeS, statusS, timeT, statusT, trialID, patienID and trt. seed the help on this function")
+      stop("Control the names of your variables. They must contain at leat 7 variables named: timeS, statusS, timeT, statusT, trialID, patienID and trt. see the help on this function")
     }
     
     # traitement des donnees
@@ -545,17 +636,17 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
   indice_covST <- 1
   indice_gamma_st <- 0 #  indice_gamma_st: dit si l'on estime gamma_st_ut (1) ou non(0), pour les effets aleatoires correlees sur le risque de base, pas traite ici 
   
-  if(frail.base==0) indice.alpha <- 0 
+  if(frail.base==0) indicator.alpha <- 0 
   
-  indice_a_estime <- c(indice.zeta, indice_covST, indice.alpha, indice_gamma_st,frail.base)
+  indice_a_estime <- c(indicator.zeta, indice_covST, indicator.alpha, indice_gamma_st,frail.base)
   
   if(indice_covST == 1){
     # we estimated at least 4 parameters correspondint to the covariance matrix \sigma and the variance of \omega_ij
     nb.frailty <- 4
-    nparamfrail <- nb.frailty + indice.zeta + indice.alpha + frail.base
+    nparamfrail <- nb.frailty + indicator.zeta + indicator.alpha + frail.base
   } else{
     nb.frailty <- 3
-    nparamfrail <- nb.frailty + indice.zeta + indice.alpha + frail.base
+    nparamfrail <- nb.frailty + indicator.zeta + indicator.alpha + frail.base
   }
   
   # parametre fonction de risque de base
@@ -609,7 +700,7 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
       death[,i] <- as.double(death[,i])
     }
     if(is.null(kappa0)){
-      if(print.itter) cat("+++++++++++estimation of Kappas by ccross-validation +++++++++++")
+      if(print.iter) cat("+++++++++++estimation of Kappas by ccross-validation +++++++++++")
       # kappas obtenus par validation croisee correspondant sur le jeu de donnees reelles
       #kappa0 <- frailtypack:::kappa_val_croisee(don_S=donnees,don_T=death,njeu=1,n_obs=nsujet1,n_node=n.knots,adjust_S=1,adjust_T=1,kapp_0 = 0)
       kappa0 <- kappa_val_croisee(don_S=donnees,don_T=death,njeu=1,n_obs=nsujet1,n_node=n.knots,adjust_S=1,adjust_T=1,kapp_0 = 0, print.times = F, scale = scale)
@@ -682,7 +773,7 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
   if(nb.dataset == 1){
     # jeux de donnees (6 colonnes): donnees pour surrogate et death pour true
     if(true.init.val == 2){ # recherche des parametres initiaux
-      if(print.itter) cat("+++++++++++initialization of the parameters using reduced models +++++++++++")
+      if(print.iter) cat("+++++++++++initialization of the parameters using reduced models +++++++++++")
       # # estimation of sigma.s and gamma, using an additive gaussian random effects cox model (Rondeau et al. 2008)
       # cox_surr_sigmaS=try(additivePenal(Surv(initTime, timeS, statusS) ~ cluster(trialID) + trt 
       #                                   + slope (trt), correlation = FALSE, data = donnees, n.knots = nz,
@@ -706,7 +797,7 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
                                   data = dataUse, n.knots = nz, kappa = kappa0, print.times = F), silent = TRUE)
       
       if(class(cox_surr_sigmaS)=="try-error"){
-        if(print.itter) cat("Estimation problem with the shared frailty model: 
+        if(print.iter) cat("Estimation problem with the shared frailty model: 
               initialization of gamma using the given default value",fill=T)
       }else{
         gamma.init <- cox_surr_sigmaS$sigma2
@@ -721,28 +812,28 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
       }
       
       if((class(cox_surr_sigmaS)=="try-error") | (class(cox_true_sigmaT)=="try-error")){
-        if(print.itter) cat("initialization of alpha using the given default value",fill=T)
+        if(print.iter) cat("initialization of alpha using the given default value",fill=T)
       }else{
         alpha.init <- cox_surr_sigmaS$sigma2/cox_true_sigmaT$sigma2
       }
       
       if(class(joint_w)=="try-error"){
         if((class(cox_surr_sigmaS)=="try-error") & (class(cox_true_sigmaT)=="try-error")){
-          if(print.itter) cat("Estimation problem with the joint frailty model: 
+          if(print.iter) cat("Estimation problem with the joint frailty model: 
               initialization of eta, theta, beta_S and beta_T using the given default values",fill=T)
         }else{
             if((class(cox_surr_sigmaS)!="try-error") & (class(cox_true_sigmaT)!="try-error")){
-              if(print.itter) cat("Estimation problem with the joint frailty model: 
+              if(print.iter) cat("Estimation problem with the joint frailty model: 
                 initialization of eta and theta using the given default values",fill=T)
               betas.init <- cox_surr_sigmaS$b[length(cox_surr_sigmaS$b)]
               betat.init <- cox_true_sigmaT$b[length(cox_true_sigmaT$b)]
             }else{
               if(class(cox_surr_sigmaS)=="try-error"){
-                if(print.itter) cat("Estimation problem with the joint frailty model: 
+                if(print.iter) cat("Estimation problem with the joint frailty model: 
                 initialization of eta, theta and beta_S using the given default values",fill=T)
                 betat.init <- cox_true_sigmaT$b[length(cox_true_sigmaT$b)]
               }else{
-                if(print.itter) cat("Estimation problem with the joint frailty model: 
+                if(print.iter) cat("Estimation problem with the joint frailty model: 
                 initialization of eta, theta and beta_T using the given default values",fill=T)
                 betas.init <- cox_surr_sigmaS$b[length(cox_surr_sigmaS$b)]
               }
@@ -757,7 +848,7 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
       true.init.val <- 0 
       # je remets cette variable a 0 car le programme principal ne connait que 0 et 1. le valeur
       # 2 etait juste pour gener l'initialisation avec les models reduits
-      if(print.itter) cat("+++++++++++++++++++End initialization+++++++++++++++++++",fill=T)
+      if(print.iter) cat("+++++++++++++++++++End initialization+++++++++++++++++++",fill=T)
     }
   }
     
@@ -860,6 +951,11 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
   ier <- 0 # informe sur le comportement du modele(-1 = erreur, k = perte de significativite le modele continu, 0 = pas d'erreur)
   istop <- 0 # critere d'arret: 1= le modele a converge, 2= on a attent le nombre max d'itteration, 3= echec inversion de la hessienne, 4= erreur dans les calculs 
   ziOut <- rep(0,nz+6)  # knots for baseline hazard estimated with splines
+  Varcov = matrix(0, nrow = 3, ncol = 3) # matrice de variance-covariance de (sigma_S,sigma_ST,sigmaT) obtenue par delta methode a partir de la hesienne, en raison du changement de variable au moment de l'estimation
+  dataHessian <- matrix(0, nrow = np, ncol = np) # sauvegarde des matrices hessiennes des differentes simulations 
+  dataHessianIH <- matrix(0, nrow = np*n_sim1, ncol = np)
+  datab <- matrix(0, nrow = 1, ncol = np) # sauvegarde des vecteurs de parametres des simulation 
+  
   
   # print("quelques parametre")
   # print(dim(H_hessOut))
@@ -872,7 +968,7 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
   
   vect_kappa <- matrix(0,nrow = n_sim1, ncol = 2)
   
-  if(print.itter) 
+  if(print.iter) 
     affiche.itter <- 1
   else
     affiche.itter <- 0
@@ -931,6 +1027,10 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
                   istop = 0,
                   ziOut = rep(0,nz+6),
                   as.integer(affiche.itter),
+                  Varcov = matrix(0, nrow = 3, ncol = 3),
+                  dataHessian = matrix(0, nrow = np, ncol = np),
+                  dataHessianIH = matrix(0, nrow = np*n_sim1, ncol = np),
+                  datab = matrix(0, nrow = 1, ncol = np),
                   PACKAGE="frailtypack"
   )
   
@@ -979,8 +1079,8 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
     
     param.estim2["Ktau",c("Inf.95%CI","Sup.95%CI")] <- ans$ktau[,c(2,3)]
     
-    if(indice.zeta == 0) param.estim2 <- param.estim2[!(row.names(param.estim2) =="zeta"),]
-    if(indice.alpha == 0) param.estim2 <- param.estim2[!(row.names(param.estim2) == "alpha"),]
+    if(indicator.zeta == 0) param.estim2 <- param.estim2[!(row.names(param.estim2) =="zeta"),]
+    if(indicator.alpha == 0) param.estim2 <- param.estim2[!(row.names(param.estim2) == "alpha"),]
     if(frail.base == 0) param.estim2 <- param.estim2[!(row.names(param.estim2) == "gamma"),]
     
     param.estim2 <- round(param.estim2, nb.decimal)
@@ -1017,6 +1117,9 @@ jointSurroPenal = function(data, maxit=40, indice.zeta = 1, indice.alpha = 1, fr
   result$Coefficients <- ans$Coefficients
   result$kappa  <- kappa0
   result$scale <- scale
+  result$data <- dataUse
+  result$varcov.Sigma <- ans$Varcov
+  result$parameter <- parameter
   #result$dataTkendall <- ans$fichier_kendall
   #result$dataR2boot <- ans$fichier_R2
   

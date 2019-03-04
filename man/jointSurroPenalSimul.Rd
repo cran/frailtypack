@@ -5,8 +5,8 @@
 \title{Simulation studies based on the one-step Joint surrogate model for the evaluation of a canditate 
 surrogate endpoint}
 \usage{
-jointSurroPenalSimul(maxit=40, indice.zeta = 1, 
-   indice.alpha = 1, frail.base = 1, n.knots = 6, nb.dataset = 1, 
+jointSurroPenalSimul(maxit=40, indicator.zeta = 1, 
+   indicator.alpha = 1, frail.base = 1, n.knots = 6, nb.dataset = 1, 
    nbSubSimul=1000, ntrialSimul=30, LIMparam = 0.001, 
    LIMlogl = 0.001, LIMderiv = 0.001, nb.mc = 300, nb.gh = 32, 
    nb.gh2 = 20, adaptatif = 0, int.method = 2, nb.iterPGH = 5, 
@@ -21,17 +21,17 @@ jointSurroPenalSimul(maxit=40, indice.zeta = 1,
    lambdat = 3, nut = 0.0025, time.cens = 549, R2 = 0.81,
    sigma.s = 0.7, sigma.t = 0.7, kappa.use = 4, random = 0, 
    random.nb.sim = 0, seed = 0, init.kappa = NULL, 
-   nb.decimal = 4, print.times = TRUE, print.itter=FALSE)
+   nb.decimal = 4, print.times = TRUE, print.iter=FALSE)
 }
 \arguments{
 \item{maxit}{maximum number of iterations for the Marquardt algorithm.
 Default is \code{40}.}
 
-\item{indice.zeta}{A binary, indicates whether the power's parameter \eqn{\zeta} should 
+\item{indicator.zeta}{A binary, indicates whether the power's parameter \eqn{\zeta} should 
 be estimated (1) or not (0). If \code{0}, \eqn{\zeta} will be set to \code{1} during estimation. 
 The default is \code{1}. This parameter can be seted to \code{0} in case of identification issues.}
 
-\item{indice.alpha}{A binary, indicates whether the power's parameter \eqn{\alpha} should 
+\item{indicator.alpha}{A binary, indicates whether the power's parameter \eqn{\alpha} should 
 be estimated (1) or not (0). If \code{0}, \eqn{\alpha} will be set to \code{1} during estimation.
 The default is 1.}
 
@@ -142,7 +142,7 @@ different trial sizes, fill in \code{prop.subj.trial} the proportions
 of subjects to be considered per trial. The default is \code{1}.}
 
 \item{prop.subj.trial}{Vector of the proportions of subjects to consider per trial. 
-Requires if \code{equi.subj.trial} is different to \code{1}. The size of this vector is equal to the 
+Requires if the argument \code{equi.subj.trial} is different to \code{1}. The size of this vector is equal to the 
 number of trials.}
 
 \item{equi.subj.trt}{Indicates if the same proportion of treated subjects per trial should be
@@ -150,7 +150,7 @@ considered \code{(1)} or not \code{(0)}. If \code{0}, fill in \code{prop.subj.tr
 the proportions of treated subjects to be considered per trial. The default is \code{1}.}
 
 \item{prop.subj.trt}{Vector of the proportions of treated subjects to consider per trial. 
-Requires if \code{equi.subj.trt} is different to \code{0.5}. The size of this vector is equal to the 
+Requires if the argument \code{equi.subj.trt} is different to \code{0.5}. The size of this vector is equal to the 
 number of trials.}
 
 \item{theta2}{True value for \eqn{\theta}. The default is \code{3.5}.}
@@ -217,7 +217,7 @@ are obtain by cross-validation.}
 \item{print.times}{a logical parameter to print estimation time. Default
 is TRUE.}
 
-\item{print.itter}{a logical parameter to print iteration process. Default
+\item{print.iter}{a logical parameter to print iteration process. Default
 is FALSE.}
 }
 \value{
@@ -249,6 +249,9 @@ This function return an object of class jointSurroPenalSimul with elements :
    and theirs confidence intervals using the parametric bootstrap. All non-convergence cases are represented by a line of 0.}
    \item{dataParamEstim}{a dataframe including all estimates with the associated standard errors, for all simulation. 
    All non-convergence cases  are represented by a line of 0;}
+   \item{dataHessian}{Dataframe of the variance-Covariance matrices  of the estimates for all simulations}
+   \item{dataHessianIH}{Dataframe of the robust estimation of the variance matrices  of the estimates for all simulations}
+   \item{datab}{Dataframe of the estimates for all simulations which rich convergence}
 }
 \description{
 {
@@ -299,14 +302,15 @@ with about a 23\% rejection rate.
 
 \dontrun{
 # Surrogacy model evaluation performance study based on 10 generated data
-# (Computation takes around 30 minutes)
+# (Computation takes around 20 minutes using a processor including 40 
+# cores and a read only memory of 378 Go)
 # To realize a simulation study on 100 samples or more (as required), use 
 # nb.dataset = 100
 
 joint.simul <- jointSurroPenalSimul(nb.dataset = 10, nbSubSimul=600, 
                    ntrialSimul=30, LIMparam = 0.001, LIMlogl = 0.001, 
                    LIMderiv = 0.001, nb.mc = 200, nb.gh = 20, 
-                   nb.gh2 = 32, true.init.val = 1, print.itter=F)
+                   nb.gh2 = 32, true.init.val = 1, print.iter=F)
 
 # results
 summary(joint.simul, d = 3, R2boot = 1) # bootstrap

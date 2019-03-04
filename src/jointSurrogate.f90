@@ -6,7 +6,8 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
                           filtre0,donnees,death,p,prop_i,n_sim1,EPS2,kappa0,vect_kappa,logNormal,nsim_node,Param_kendall_boot,&
                           vrai_val_init,param_init,revision_echelle,random_generator0,sujet_equi,prop_trait,paramSimul,&
                           autreParamSim,fichier_kendall,fichier_R2, param_estimes, sizeVect, b, H_hessOut,HIHOut,resOut,&
-                          LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,ni,ier,istop,ziOut, affiche_itter)
+                          LCV,x1Out,lamOut,xSu1,suOut,x2Out,lam2Out,xSu2,su2Out,ni,ier,istop,ziOut, affiche_itter,Varcov,&
+						  dataHessian,dataHessianIH,datab)
                           
     ! programme principale permettant le traitement des donnees et l'appel du joint_surogate pour l'estimation des parametres
     
@@ -54,7 +55,9 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
     double precision,dimension(sizeVect(2)), intent(out)::x1Out
     double precision,dimension(sizeVect(3)), intent(out)::x2Out
     double precision,dimension(sizeVect(1),sizeVect(1)), intent(out)::H_hessOut,HIHOut ! H_hessOut = matrice hesienne (des variance-covariance), HIHOut= matrice hessienne corrigee
-    double precision,dimension(sizeVect(2),3), intent(out)::lamOut
+    double precision,dimension(sizeVect(1)*n_sim1,sizeVect(1)), intent(out)::dataHessian, dataHessianIH ! sauvegarde des matrices hessiennes des differentes simulations 
+	double precision,dimension(n_sim1,sizeVect(1)), intent(out)::datab ! sauvegarde des vecteurs de parametres de toutes les simulations 
+	double precision,dimension(sizeVect(2),3), intent(out)::lamOut
     double precision,dimension(sizeVect(3),3), intent(out)::lam2Out
     double precision,dimension(sizeVect(4),3), intent(out)::suOut
     double precision,dimension(sizeVect(5),3), intent(out)::su2Out
@@ -62,7 +65,7 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
     double precision,dimension(sizeVect(4)), intent(out)::xSu1
     double precision,dimension(sizeVect(5)), intent(out)::xSu2
     double precision, intent(out)::resOut
-    
+    double precision,dimension(3,3), intent(out):: Varcov ! pour la matrice de variance covariance de (sigma_S,sigma_ST_,sigma_T) par la delta-metode 
 
     ! =====Autres variables utilisees dans la subroutine
     !character(len=30)::donnees
@@ -169,6 +172,8 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
     integer::nb_processus,rang,code,n_sim_total,suplement,erreur,comm,init_i,max_i,debut_exe,indice_sim_proc,sofeu, &
             rang_proc,init_i_proc,max_i_proc, code_print ! je redefini ces indices car les precedentes sont utilisees autrement: cas OpenMP
     double precision,dimension(10)::t
+	double precision,dimension(3,3):: sigmac ! pour la mtrice de variance covariance de Sigma par la delta-metode 
+	double precision,dimension(3,3):: hb 
     
     !=====================================================================================
     !*********fin declaration des variables et debut du programme principale**************
@@ -2146,7 +2151,44 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
                 varS_es=sigma_st(1,1)
                 varT_es=sigma_st(2,2)
                 covST_es=sigma_st(1,2)
-                
+				
+				! =========Delta methode pour varcov des elements de sigme_v===============
+				! recherche de la matrice de variance-covariance de (sigma_S,sigma_ST,sigmaT) par la delta methode:
+				! à partir de la hessienne. voir le raisonnement dans le cahier à la date du 04/01/2019
+				hb(1,:) = (/ 2.d0*Chol(1,1), 0.d0, 0.d0 /)
+				hb(2,:) = (/ 0.d0, 2.d0*Chol(2,2), 2.d0*Chol(2,1) /)
+				hb(3,:) = (/ Chol(2,1), 0.d0, Chol(1,1) /)
+				sigmac(1,:) = (/H_hessOut(rangparam_sigs,rangparam_sigs), H_hessOut(rangparam_sigs,rangparam_sigt), &
+				                H_hessOut(rangparam_sigs,rangparam_sigst)/)
+				sigmac(2,:) = (/H_hessOut(rangparam_sigt,rangparam_sigs), H_hessOut(rangparam_sigt,rangparam_sigt), &
+				                H_hessOut(rangparam_sigt,rangparam_sigst)/)
+				sigmac(3,:) = (/H_hessOut(rangparam_sigst,rangparam_sigs), H_hessOut(rangparam_sigst,rangparam_sigt), &
+				                H_hessOut(rangparam_sigst,rangparam_sigst)/)
+				
+				hb = TRANSPOSE(hb)
+				varcov = MATMUL(TRANSPOSE(hb), sigmac)
+				varcov = MATMUL(varcov, hb)
+				
+				
+				! ========== Fin delta methode ==================
+				
+				! ====sauvegarde de la hessienne et du vecteur b des parametres====
+				
+				do i=1,np
+					dataHessian(np*(s_i-nbre_rejet-1) + i,:) = H_hessOut(i,:)
+					dataHessianIH(np*(s_i-nbre_rejet-1) + i,:) = HIHOut(i,:)
+				enddo
+				
+				datab(s_i-nbre_rejet,:) = b
+				
+				! Write(aaa,'(i3)') s_i ! instruction pour convertir un entier en chaine de caractere (3 caracteres)
+				! aaa="H_hessOut"//aaa ! instruction pour concatener deux chaines de caracteres
+				! aaa=aaa//".txt"
+                ! open(270,file=aaa)				
+				! write(270,*) dataHessian				
+				! close(270)
+				
+				!====Fin sauvegarde hessienne et b======
                 !calcul du R2(trial) reduit, c'est a dire sans prise en compte des effets aleatoires sur le risque de base
                 R2_trial=(covST1**2)/(covST1**2+varT1**2)
                 se_R2_trial=2.d0*dsqrt((covST1**2 * varT1**4 * H_hessOut(rangparam_sigst,rangparam_sigst)-2.d0*covST1**3 &
@@ -2168,9 +2210,12 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
             
             !sigma_s
             moy_sigmas_est=moy_sigmas_est+varS_es ! sigma_s estime
-            moy_se_sigmas=moy_se_sigmas+(dsqrt(((2.d0*b(rangparam_sigs))**2.d0)*H_hessOut(rangparam_sigs,rangparam_sigs)))
-            bi_sigmas = varS_es - 1.96d0*(dsqrt(((2.d0*b(rangparam_sigs))**2.d0)*H_hessOut(rangparam_sigs,rangparam_sigs)))
-            bs_sigmas = varS_es + 1.96d0*(dsqrt(((2.d0*b(rangparam_sigs))**2.d0)*H_hessOut(rangparam_sigs,rangparam_sigs)))
+			! moy_se_sigmas=moy_se_sigmas+(dsqrt(((2.d0*b(rangparam_sigs))**2.d0)*H_hessOut(rangparam_sigs,rangparam_sigs)))
+            ! bi_sigmas = varS_es - 1.96d0*(dsqrt(((2.d0*b(rangparam_sigs))**2.d0)*H_hessOut(rangparam_sigs,rangparam_sigs)))
+            ! bs_sigmas = varS_es + 1.96d0*(dsqrt(((2.d0*b(rangparam_sigs))**2.d0)*H_hessOut(rangparam_sigs,rangparam_sigs)))
+            moy_se_sigmas=moy_se_sigmas+ dsqrt(varcov(1,1))
+            bi_sigmas = varS_es - 1.96d0*dsqrt(varcov(1,1))
+            bs_sigmas = varS_es + 1.96d0*dsqrt(varcov(1,1))
             !taux de couverture
             if(sigma_s>=bi_sigmas .and. sigma_s<=bs_sigmas)then ! taux de couverture
                 taux_couverture_sigmas=taux_couverture_sigmas+1.d0
@@ -2178,15 +2223,18 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
         
             !sigma_t
             moy_sigmat_est=moy_sigmat_est+varT_es ! sigma_t estime
-            moy_se_sigmat=moy_se_sigmat+2.d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst)+&
-                        2.d0*varT1*covST1*H_hessOut(rangparam_sigst,rangparam_sigt)+&
-                        varT1**2.d0*H_hessOut(rangparam_sigt,rangparam_sigt))
-            bi_sigmat = varT_es - 1.96d0*2.d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst)+&
-                        2.d0*varT1*covST1*H_hessOut(rangparam_sigst,rangparam_sigt)+&
-                        varT1**2.d0*H_hessOut(rangparam_sigt,rangparam_sigt))
-            bs_sigmat = varT_es + 1.96d0*2.d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst)+&
-                        2.d0*varT1*covST1*H_hessOut(rangparam_sigst,rangparam_sigt)+&
-                        varT1**2.d0*H_hessOut(rangparam_sigt,rangparam_sigt))
+            ! moy_se_sigmat=moy_se_sigmat+2.d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst)+&
+                        ! 2.d0*varT1*covST1*H_hessOut(rangparam_sigst,rangparam_sigt)+&
+                        ! varT1**2.d0*H_hessOut(rangparam_sigt,rangparam_sigt))
+            ! bi_sigmat = varT_es - 1.96d0*2.d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst)+&
+                        ! 2.d0*varT1*covST1*H_hessOut(rangparam_sigst,rangparam_sigt)+&
+                        ! varT1**2.d0*H_hessOut(rangparam_sigt,rangparam_sigt))
+            ! bs_sigmat = varT_es + 1.96d0*2.d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst)+&
+                        ! 2.d0*varT1*covST1*H_hessOut(rangparam_sigst,rangparam_sigt)+&
+                        ! varT1**2.d0*H_hessOut(rangparam_sigt,rangparam_sigt))
+		    moy_se_sigmat=moy_se_sigmat+dsqrt(varcov(2,2))
+            bi_sigmat = varT_es - 1.96d0*dsqrt(varcov(2,2))
+            bs_sigmat = varT_es + 1.96d0*dsqrt(varcov(2,2))
             !taux de couverture
             
             if(sigma_t>=bi_sigmat .and. sigma_t<=bs_sigmat)then ! taux de couverture
@@ -2195,15 +2243,18 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
         
             !sigma_st
             moy_sigmast_est=moy_sigmast_est+covST_es ! sigma_t estime
-            moy_se_sigmast=moy_se_sigmast+dsqrt(covST1**2.d0*H_hessOut(rangparam_sigs,rangparam_sigs)+&
-                        2.d0*varS1*covST1*H_hessOut(rangparam_sigs,rangparam_sigst)+&
-                        varS1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst))
-            bi_sigmast = covST_es - 1.96d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigs,rangparam_sigs)+&
-                        2.d0*varS1*covST1*H_hessOut(rangparam_sigs,rangparam_sigst)+&
-                        varS1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst))
-            bs_sigmast = covST_es + 1.96d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigs,rangparam_sigs)+&
-                        2.d0*varS1*covST1*H_hessOut(rangparam_sigs,rangparam_sigst)+&
-                        varS1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst))
+            ! moy_se_sigmast=moy_se_sigmast+dsqrt(covST1**2.d0*H_hessOut(rangparam_sigs,rangparam_sigs)+&
+                        ! 2.d0*varS1*covST1*H_hessOut(rangparam_sigs,rangparam_sigst)+&
+                        ! varS1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst))
+            ! bi_sigmast = covST_es - 1.96d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigs,rangparam_sigs)+&
+                        ! 2.d0*varS1*covST1*H_hessOut(rangparam_sigs,rangparam_sigst)+&
+                        ! varS1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst))
+            ! bs_sigmast = covST_es + 1.96d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigs,rangparam_sigs)+&
+                        ! 2.d0*varS1*covST1*H_hessOut(rangparam_sigs,rangparam_sigst)+&
+                        ! varS1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst))
+			moy_se_sigmast=moy_se_sigmast+dsqrt(varcov(3,3))
+            bi_sigmast = covST_es - 1.96d0*dsqrt(varcov(3,3))
+            bs_sigmast = covST_es + 1.96d0*dsqrt(varcov(3,3))
             !taux de couverture
             !sigmast_vrai=rsqrt*dsqrt(sigma_s)*dsqrt(sigma_t)
             if(sigmast_vrai>=bi_sigmast .and. sigmast_vrai<=bs_sigmast)then ! taux de couverture
@@ -2307,15 +2358,11 @@ subroutine jointsurrogate(nsujet1,ng,ntrials1,maxiter,nst,nparamfrail,indice_a_e
             
         if(nsim_node(8).ne.0)then !model conjoint surrogate (se calcule par la delta methode)    
             parametre_estimes(s_i-nbre_rejet,9)= varS_es!siqma_s
-            parametre_estimes(s_i-nbre_rejet,10)=dsqrt(((2.d0*b(rangparam_sigs))**2.d0)*H_hessOut(rangparam_sigs,rangparam_sigs))! se sigma_s
+            parametre_estimes(s_i-nbre_rejet,10)=dsqrt(varcov(1,1))! se sigma_s
             parametre_estimes(s_i-nbre_rejet,11)= varT_es!siqma_t
-            parametre_estimes(s_i-nbre_rejet,12)=2.d0*dsqrt(covST1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst)+&
-                        2.d0*varT1*covST1*H_hessOut(rangparam_sigst,rangparam_sigt)+&
-                        varT1**2.d0*H_hessOut(rangparam_sigt,rangparam_sigt))! se sigma_t
+            parametre_estimes(s_i-nbre_rejet,12)=dsqrt(varcov(2,2))! se sigma_t
             parametre_estimes(s_i-nbre_rejet,13)= covST_es !siqma_st
-            parametre_estimes(s_i-nbre_rejet,14)=dsqrt(covST1**2.d0*H_hessOut(rangparam_sigs,rangparam_sigs)+&
-                        2.d0*varS1*covST1*H_hessOut(rangparam_sigs,rangparam_sigst)+&
-                        varS1**2.d0*H_hessOut(rangparam_sigst,rangparam_sigst))! se sigma_st
+            parametre_estimes(s_i-nbre_rejet,14)=dsqrt(varcov(3,3))! se sigma_st
             if(frailt_base==1)then
                 parametre_estimes(s_i-nbre_rejet,15)=(b(rangparam_gamma)**2.d0) !gamma
                 parametre_estimes(s_i-nbre_rejet,16)=(dsqrt(((2.d0*b(rangparam_gamma))**2.d0)*H_hessOut(rangparam_gamma,&

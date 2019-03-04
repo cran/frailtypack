@@ -52,7 +52,7 @@
 #' as seed. In the last case, it is not possible to reproduce the generated datasets". 
 #' The default is \code{0}. Required if \code{random.generator} is set to 1.
 #' @param random.nb.sim required if \code{random.generator} is set to 1, and if \code{random} is set to 1.
-#' @param seed The seed to use for data (or samples) generation. Required if \code{random.generator} is set to 1. 
+#' @param seed The seed to use for data (or samples) generation. Required if the argument \code{random.generator} is set to 1. 
 #' Must be a positive value. If negative, the program do not account for seed. The default is \code{0}.
 #' @param nb.reject.data Number of generation to reject before the considered dataset. this parameter is required
 #' when data generation is for simulation. With a fixed parameter and \code{random.generator} set to 1,
@@ -97,10 +97,11 @@
 #'
 #' @examples
 #' 
-#' data.sim <- jointSurrSimul(n.obs=600, n.trial = 30,cens.adm=549.24, alpha = 1.5, 
-#'             theta = 3.5, gamma = 2.5, zeta = 1, sigma.s = 0.7, sigma.t = 0.7,
-#'             rsqrt = 0.8, betas = -1.25, betat = -1.25, full.data = 0, 
-#'             random.generator = 1, seed = 0, nb.reject.data = 0)
+#' data.sim <- jointSurrSimul(n.obs=600, n.trial = 30,cens.adm=549.24, 
+#'             alpha = 1.5, theta = 3.5, gamma = 2.5, sigma.s = 0.7, 
+#'             zeta = 1, sigma.t = 0.7, rsqrt = 0.8, betas = -1.25, 
+#'             betat = -1.25, full.data = 0, random.generator = 1, 
+#'             seed = 0, nb.reject.data = 0)
 #' 
 jointSurrSimul <- function(n.obs = 600, n.trial = 30, cens.adm = 549.24, alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1, 
                            sigma.s = 0.7, sigma.t = 0.7,rsqrt = 0.8, betas = -1.25, betat = -1.25, frailt.base = 1,
@@ -144,10 +145,13 @@ jointSurrSimul <- function(n.obs = 600, n.trial = 30, cens.adm = 549.24, alpha =
     else{
       prop_i <- prop.subj.trial
     }
+    
+    don_simul = as.double(matrix(0, nrow = n.obs , ncol = n.col))
+    don_simulS1 = as.double(matrix(0, nrow = n.obs , ncol = n.col))
       
     ans <- .Fortran(C_surrosim,
-                    don_simul = matrix(0, nrow = n.obs , ncol = n.col),
-                    don_simulS1 = matrix(0, nrow = n.obs , ncol = n.col),
+                    don_simul = as.double(matrix(0, nrow = n.obs , ncol = n.col)),
+                    don_simulS1 = as.double(matrix(0, nrow = n.obs , ncol = n.col)),
                     as.integer(n.obs),
                     as.integer(n.col),
                     as.integer(lognormal),
@@ -184,9 +188,13 @@ jointSurrSimul <- function(n.obs = 600, n.trial = 30, cens.adm = 549.24, alpha =
                     as.integer(param.weibull),
                     PACKAGE="frailtypack"
                     )
+    
+    #ans$don_simul <- data.frame(ans$don_simul)
+    #ans$don_simulS1 <- data.frame(ans$don_simulS1)
+    
+    ans$don_simul <- data.frame(matrix(ans$don_simul,nrow = n.obs , ncol = n.col))
+    ans$don_simulS1 <- data.frame(matrix(ans$don_simulS1,nrow = n.obs , ncol = n.col))
 
-    ans$don_simul <- data.frame(ans$don_simul)
-    ans$don_simulS1 <- data.frame(ans$don_simulS1)
     names(ans$don_simul) <- c("trt1","v_s1","v_t1","trialref1","w_ij1","timeS1","timeT1",
                               "timeC1","statusS1","statusT1","initTime1","Patienref1","u_i1")
     names(ans$don_simulS1) <- c("trt1","v_s1","v_t1","trialref1","w_ij1","timeS1","timeT1",
