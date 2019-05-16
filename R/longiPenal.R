@@ -215,7 +215,9 @@
 #' time is the vector of survival times.} \item{lamD}{The array (dim=3) of
 #' baseline hazard estimates and confidence bands (terminal event).}
 #' \item{survD}{The array (dim=3) of baseline survival estimates and confidence
-#' bands (terminal event).} \item{typeof}{The type of the baseline hazard
+#' bands (terminal event).} 
+#' \item{median}{The value of the median survival and its confidence bands.}
+#' \item{typeof}{The type of the baseline hazard
 #' functions (0:"Splines", "2:Weibull").} \item{npar}{The number of parameters.}
 #' \item{nvar}{The vector of number of explanatory variables for the terminal
 #' event and biomarker.} \item{nvarEnd}{The number of explanatory variables for
@@ -351,6 +353,20 @@
             maxit=350, hazard="Splines",   init.B,
             init.Random, init.Eta, method.GH = "Standard", n.nodes, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE)
   {
+    
+    # Ajout de la fonction minmin issue de print.survfit, permettant de calculer la mediane
+    minmin <- function(y, x) {
+      tolerance <- .Machine$double.eps^.5   #same as used in all.equal()
+      keep <- (!is.na(y) & y <(.5 + tolerance))
+      if (!any(keep)) NA
+      else {
+        x <- x[keep]
+        y <- y[keep]
+        if (abs(y[1]-.5) <tolerance  && any(y< y[1])) 
+          (x[1] + x[min(which(y<y[1]))])/2
+        else x[1]
+      }
+    }
     
     OrderLong <- data.Longi[,id]
     OrderDat <- data[,id]
@@ -1080,7 +1096,7 @@
     
     mt <- attr(m, "terms") #m devient de class "formula" et "terms"
     
-    X_T <- if (!is.empty.model(mt))model.matrix(mt, m, contrasts) #idem que mt sauf que ici les factor sont divise en plusieurs variables
+    X_T <- if (!is.empty.model(mt))model.matrix(mt, m) #idem que mt sauf que ici les factor sont divise en plusieurs variables
     
     ind.placeT <- unique(attr(X_T,"assign")[duplicated(attr(X_T,"assign"))]) ### unique : changement au 25/09/2014
     
@@ -1539,6 +1555,14 @@
     }
     
     #AD:
+    
+    median <- NULL
+    for (i in (1:fit$n.strat)) median[i] <- ifelse(typeof==0, minmin(fit$survD[,1,i],fit$xD), minmin(fit$survD[,1,i],fit$xSuD))
+    lower <- NULL
+    for (i in (1:fit$n.strat)) lower[i] <- ifelse(typeof==0, minmin(fit$survD[,2,i],fit$xD), minmin(fit$survD[,2,i],fit$xSuD))
+    upper <- NULL
+    for (i in (1:fit$n.strat)) upper[i] <- ifelse(typeof==0, minmin(fit$survD[,3,i],fit$xD), minmin(fit$survD[,3,i],fit$xSuD))
+    fit$median <- cbind(lower,median,upper)
     
     fit$noVarEnd <- noVarT
     fit$noVarY <- noVarY

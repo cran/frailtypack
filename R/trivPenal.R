@@ -253,7 +253,9 @@
 #' terminal event are estimated. By default seq(0,max(time),length=99), where
 #' time is the vector of survival times.} \item{lamD}{The array (dim=3) of
 #' baseline hazard estimates and confidence bands.} \item{survD}{The array
-#' (dim=3) of baseline survival estimates and confidence bands.}
+#' (dim=3) of baseline survival estimates and confidence bands.} 
+#' \item{medianR}{The value of the median survival and its confidence bands for the recurrent event.}
+#' \item{medianD}{The value of the median survival and its confidence bands for the terminal event.}
 #' \item{typeof}{The type of the baseline hazard function (0:"Splines",
 #' "2:Weibull").} \item{npar}{The number of parameters.} \item{nvar}{The vector
 #' of number of explanatory variables for the recurrent events, terminal event
@@ -454,6 +456,20 @@
                          left.censoring=FALSE, recurrentAG=FALSE, n.knots, kappa, maxit=300, hazard="Splines", init.B,init.Random, init.Eta, init.Alpha, 
                          method.GH = "Standard", n.nodes, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE){
   
+  # Ajout de la fonction minmin issue de print.survfit, permettant de calculer la mediane
+  minmin <- function(y, x) {
+    tolerance <- .Machine$double.eps^.5   #same as used in all.equal()
+    keep <- (!is.na(y) & y <(.5 + tolerance))
+    if (!any(keep)) NA
+    else {
+      x <- x[keep]
+      y <- y[keep]
+      if (abs(y[1]-.5) <tolerance  && any(y< y[1])) 
+        (x[1] + x[min(which(y<y[1]))])/2
+      else x[1]
+    }
+  }
+  
   m3 <- match.call() # longitudinal
   m3$formula <- m3$formula.terminalEvent <- m3$data <- m3$recurrentAG <- m3$random <- m3$id <- m3$link <- m3$n.knots <- m3$kappa <- m3$maxit <- m3$hazard <- m3$init.B <- m3$LIMparam <- m3$LIMlogl <- m3$LIMderiv <- m3$print.times <- m3$left.censoring <- m3$init.Random <- m3$init.Eta <- m3$init.Alpha <- m3$method.GH <- m3$intercept <- m3$n.nodes <- m3$... <- NULL
   Names.data.Longi <- m3$data.Longi
@@ -633,7 +649,7 @@
   
   mt <- attr(m, "terms") #m devient de class "formula" et "terms"
   
-  X <- if (!is.empty.model(mt))model.matrix(mt, m, contrasts) #idem que mt sauf que ici les factor sont divise en plusieurs variables
+  X <- if (!is.empty.model(mt))model.matrix(mt, m) #idem que mt sauf que ici les factor sont divise en plusieurs variables
   
   ind.place <- unique(attr(X,"assign")[duplicated(attr(X,"assign"))]) ### unique : changement au 25/09/2014
   
@@ -1968,6 +1984,19 @@
     fit$n.knots.temp <- n.knots.temp
     fit$zi <- ans$zi
   }
+  
+  medianR <- NULL
+  for (i in (1:fit$n.strat)) medianR[i] <- ifelse(typeof==0, minmin(fit$survR[,1,i],fit$xR), minmin(fit$survR[,1,i],fit$xSuR))
+  lowerR <- NULL
+  for (i in (1:fit$n.strat)) lowerR[i] <- ifelse(typeof==0, minmin(fit$survR[,2,i],fit$xR), minmin(fit$survR[,2,i],fit$xSuR))
+  upperR <- NULL
+  for (i in (1:fit$n.strat)) upperR[i] <- ifelse(typeof==0, minmin(fit$survR[,3,i],fit$xR), minmin(fit$survR[,3,i],fit$xSuR))
+  fit$medianR <- cbind(lowerR,medianR,upperR)
+  
+  medianD <- ifelse(typeof==0, minmin(fit$survD[,1],fit$xD), minmin(fit$survD[,1],fit$xSuD))
+  lowerD <- ifelse(typeof==0, minmin(fit$survD[,2],fit$xD), minmin(fit$survD[,2],fit$xSuD))
+  upperD <- ifelse(typeof==0, minmin(fit$survD[,3],fit$xD), minmin(fit$survD[,3],fit$xSuD))
+  fit$medianD <- cbind(lowerD,medianD,upperD)
   
   #AD:
   fit$noVarRec <- noVarR
