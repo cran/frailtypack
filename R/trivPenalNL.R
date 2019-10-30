@@ -52,7 +52,7 @@
 #' v\out{<sub>i</sub>} is gaussian with mean 0 and variance \eqn{\sigma}\out{<sub>v</sub>}. Together with
 #' \bold{b}\out{<sub>i</sub>} constitutes the random effects of the model: 
 #' 
-#' {\figure{trivNLmodel3.png}{options: width="100\%"}}
+#' {\figure{trivNLmodel2.png}{options: width="100\%"}}
 #' 
 #' Any combination of the random effects \bold{b}\out{<sub>i</sub>}, e.g.
 #' \bold{b}\out{<sub>i</sub>}=b\out{<sub>y0,i</sub>} or \bold{b}\out{<sub>i</sub>} =
@@ -74,7 +74,7 @@
 #' 
 #' \deqn{\left\{ \begin{array}{ll}
 #' \frac{dy_{i}(t)}{dt}&=\exp(K_{G,0}+b_{G,i}+\bold{X}_{G,i}(t)^\top\bold{\beta}_G)y_{i}(t)\\
-#' &-d_i\exp(K_{D,0}+b_{D,i}-t\times\exp(\lambda+b_{\lambda,i})+\bold{X}_{D,i}(t)^\top\bold{\beta}_D)y_{i}(t)\\
+#' &-d_i\exp(K_{D,0}+b_{D,i}-t\times\exp(\lambda+b_{\lambda,i})+\bold{X}_{D,i}(t)^\top\bold{\beta}_D)\\
 #' y_{i}(0)&=\exp(y_0+b_{y_0,i}) \\ \end{array}, \right. }
 #' 
 #' The model includes the following parameters (using the interpretation of
@@ -103,7 +103,7 @@
 #' y(t_{ik})&=\exp[y_0+b_{y_0,i}+t_{ik}\times\exp(K_{G,0}+b_{G,i}+\bold{X}_{G,i}(t)^\top\bold\beta_{G})\\
 #' &+d_i\times
 #' \exp(K_{D,0}+b_{D,i}-\lambda-b_{\lambda,i}+\bold{X}_{D,i}(t)^\top\bold{\beta}_{D})\\
-#' &\times(\exp(-\exp(\lambda+b_{\lambda,i})t_{ik})-1)]+\epsilon_{ik}\\
+#' &\times(\exp((\lambda+b_{\lambda,i})t_{ik})-1)]+\epsilon_{ik}\\
 #' r_{ij}(t|\bold{b}_i)&=r_0(t)\exp(v_i+\bold{X}_{Rij}(t)^\top\bold{\beta}_R+g(y_i(t))^\top
 #' \bold{\eta}_R ) \\ \lambda_i(t|\bold{b}_i)&=\lambda_0(t)\exp(\alpha
 #' v_i+\bold{X}_{Ti}(t)^\top\bold{\beta}_T+h(y_i(t))^\top \bold{\eta}_T ) \\
@@ -1163,10 +1163,10 @@
       
       
       
-      if(is.factor(data.Longi[,names(data.Longi)==llKG.real.names[1]]))X_KG<- as.numeric(data.Longi[,names(data.Longi)==llKG.real.names[1]])-1
-      else X_KG<- data.Longi[,names(data.Longi)==llKG.real.names[1]]
+      if(is.factor(data.Longi[,names(data.Longi)==llKG.real.names[1]]))X_L<- as.numeric(data.Longi[,names(data.Longi)==llKG.real.names[1]])-1
+      else X_L<- data.Longi[,names(data.Longi)==llKG.real.names[1]]
       
-      if(length(llKG) == 1)X_KG <- as.data.frame(X_KG)
+      if(length(llKG) == 1)X_L <- as.data.frame(X_L)
       
       
       if(length(llKG)>1){
@@ -1174,11 +1174,11 @@
         
         for(i in 2:length(llKG.real.names)){
           
-          if(is.factor(data.Longi[,names(data.Longi)==llKG.real.names[i]]))X_KG<- cbind(X_KG,as.numeric(data.Longi[,names(data.Longi)==llKG.real.names[i]])-1)
-          else X_KG<- cbind(X_KG,data.Longi[,names(data.Longi)==llKG.real.names[i]])
+          if(is.factor(data.Longi[,names(data.Longi)==llKG.real.names[i]]))X_L<- cbind(X_L,as.numeric(data.Longi[,names(data.Longi)==llKG.real.names[i]])-1)
+          else X_L<- cbind(X_L,data.Longi[,names(data.Longi)==llKG.real.names[i]])
         }
       }
-      #X_KG<- data.Longi[,names(data.Longi)%in%(llY)]
+      #X_L<- data.Longi[,names(data.Longi)%in%(llY)]
       
       llKG.fin <- llKG.real.names
       llKG <- llKG.real.names
@@ -1206,7 +1206,7 @@
               dummy <- model.matrix( ~ v1 - 1)
               # if(length(levels(v1)>2))vec.factorY <- c(vec.factorY,paste(name_v1,":",name_v2,sep=""))
               for(j in 2:length(levels(v1))){
-                X_KG <- cbind(X_KG,dummy[,j]*v2)
+                X_L <- cbind(X_L,dummy[,j]*v2)
                 if(i>1 && i<length(llKG.fin))llKG.fin <- c(llKG.fin[1:(i-1+j-2)],paste(name_v1,".",levels(v1)[j],":",name_v2,sep=""),llKG.fin[(i+1+j-2):length(llKG.fin)])
                 else if(i==length(llKG.fin))llKG.fin <- c(llKG.fin[1:(i-1+j-2)],paste(name_v1,".",levels(v1)[j],":",name_v2,sep=""))
                 else llKG.fin <- c(paste(name_v1,".",levels(v1)[j],":",name_v2,sep=""),llKG.fin[(2+j-2):length(llKG.fin)])
@@ -1218,7 +1218,7 @@
               #  if(length(levels(v2)>2))vec.factorY <- c(vec.factorY,paste(name_v1,":",name_v2,sep=""))
               for(j in 2:length(levels(v2))){
                 
-                X_KG <- cbind(X_KG,dummy[,j]*v1)
+                X_L <- cbind(X_L,dummy[,j]*v1)
                 
                 if(i>1 && i<length(llKG.fin))llKG.fin <- c(llKG.fin[1:(i-1+j-2)],paste(name_v1,":",name_v2,levels(v2)[j],sep=""),llKG.fin[(i+1+j-2):length(llKG.fin)])
                 else if(i==length(llKG.fin))llKG.fin <- c(llKG.fin[1:(i-1+j-2)],paste(name_v1,":",name_v2,levels(v2)[j],sep=""))
@@ -1233,7 +1233,7 @@
               for(j in 2:length(levels(v1))){
                 for(k in 2:length(levels(v2))){
                   
-                  X_KG <- cbind(X_KG,dummy1[,j]*dummy2[,k])
+                  X_L <- cbind(X_L,dummy1[,j]*dummy2[,k])
                   if(i>1 && i<length(llKG.fin))llKG.fin <- c(llKG.fin[1:(i-1+j-2+k-2)],paste(name_v1,levels(v1)[j],":",name_v2,levels(v2)[k],sep=""),llKG.fin[(i+1+j-2+k-2):length(llKG.fin)])
                   else if(i==length(llKG.fin))llKG.fin <- c(llKG.fin[1:(i-1+j-2+k-2)],paste(name_v1,levels(v1)[j],":",name_v2,levels(v2)[k],sep=""))
                   else llKG.fin <- c(paste(name_v1,levels(v1)[j],":",name_v2,levels(v2)[k],sep=""),llKG.fin[(2+j-2+k-2):length(llKG.fin)])
@@ -1241,7 +1241,7 @@
               } 
             }else{
               
-              X_KG <- cbind(X_KG,v1*v2)
+              X_L <- cbind(X_L,v1*v2)
             }
             
           }
@@ -1308,22 +1308,22 @@
       }
       
       #  llY <- llY.fin
-      X_KG <- as.data.frame(X_KG)
-      if(dim(X_KG)[2]!=length(llKG.fin))stop("The variables in the longitudinal part must be in the data.Longi")
+      X_L <- as.data.frame(X_L)
+      if(dim(X_L)[2]!=length(llKG.fin))stop("The variables in the longitudinal part must be in the data.Longi")
       
-      names(X_KG) <- llKG.fin
+      names(X_L) <- llKG.fin
       
       
-      X_KGall<- X_KG
+      X_Lall<- X_L
       "%+%"<- function(x,y) paste(x,y,sep="")
       if(length(vec.factorKG) > 0){
         for(i in 1:length(vec.factorKG)){
           if(length(grep(":",vec.factorKG[i]))==0){
             
-            factor.spot <- which(names(X_KG)==vec.factorKG[i])
+            factor.spot <- which(names(X_L)==vec.factorKG[i])
             
-            if(factor.spot<ncol(X_KG))  X_KG <- cbind(X_KG[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorKG[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1],X_KG[(factor.spot+1):ncol(X_KG)])
-            else X_KG <- cbind(X_KG[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorKG[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1])
+            if(factor.spot<ncol(X_L))  X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorKG[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1],X_L[(factor.spot+1):ncol(X_L)])
+            else X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorKG[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1])
             
           } }
         
@@ -1331,7 +1331,7 @@
         
         
         
-        vect.factKG<-names(X_KG)[which(!(names(X_KG)%in%llKG))]
+        vect.factKG<-names(X_L)[which(!(names(X_L)%in%llKG))]
         
         
         #               vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
@@ -1376,15 +1376,15 @@
         }
       }
       
-      if (ncol(X_KG) == 0){
+      if (ncol(X_L) == 0){
         noVarKG <- 1
       }else{
         noVarKG <- 0
       }
-      nvarKG<-ncol(X_KG) #nvar==1 correspond a 2 situations:
-      varKG <- as.matrix(sapply(X_KG, as.numeric))
+      nvarKG<-ncol(X_L) #nvar==1 correspond a 2 situations:
+      varKG <- as.matrix(sapply(X_L, as.numeric))
       
-      nsujety<-nrow(X_KG)
+      nsujety<-nrow(X_L)
       
     }
     
@@ -1430,8 +1430,8 @@
     # au cas ou on a aucune var explicative dans la partie rec, mais X=0
     # cas ou on a 1seul var explicative, ici X est en general different de 0
     
-    #varnotdepY <- colnames(X_KG)[-grep("timedep",colnames(X_KG))]
-    #vardepY <- colnames(X_KG)[grep("timedep",colnames(X_KG))]
+    #varnotdepY <- colnames(X_L)[-grep("timedep",colnames(X_L))]
+    #vardepY <- colnames(X_L)[grep("timedep",colnames(X_L))]
     #vardepY <- apply(matrix(vardepY,ncol=1,nrow=length(vardepY)),1,timedep.names)
     
     #if (length(intersect(varnotdepY,vardepY)) != 0) {
@@ -1441,7 +1441,7 @@
     #nvartimedepY <- length(vardepY)
     
     #filtretpsY <- rep(0,nvarY)
-    #filtretpsY[grep("timedep",colnames(X_KG))] <- 1
+    #filtretpsY[grep("timedep",colnames(X_L))] <- 1
     
     
     
@@ -1465,7 +1465,6 @@
       noVarKG <- 1 
       nvarKG <- 0 
       varKG <- c()#rep(0, dim(data.Longi)[1])
-      X_KG <- c()
       nsujety <- length(Y)
       vec.factorKG <- NULL
     }
@@ -1610,8 +1609,8 @@
       llKD3 <- llKD3[!llKD2%in%llKD]
       
       
-      if(is.factor(data.Longi[,names(data.Longi)==llKD.real.names[1]]))X_KD<- as.numeric(data.Longi[,names(data.Longi)==llKD.real.names[1]])-1
-      else X_KD<- data.Longi[,names(data.Longi)==llKD.real.names[1]]
+      if(is.factor(data.Longi[,names(data.Longi)==llKD.real.names[1]]))X_L<- as.numeric(data.Longi[,names(data.Longi)==llKD.real.names[1]])-1
+      else X_L<- data.Longi[,names(data.Longi)==llKD.real.names[1]]
       
       
       
@@ -1619,11 +1618,11 @@
       if(length(llKD)>1){
         for(i in 2:length(llKD.real.names)){
           
-          if(is.factor(data.Longi[,names(data.Longi)==llKD.real.names[i]]))X_KD<- cbind(X_KD,as.numeric(data.Longi[,names(data.Longi)==llKD.real.names[i]])-1)
-          else X_KD<- cbind(X_KD,data.Longi[,names(data.Longi)==llKD.real.names[i]])
+          if(is.factor(data.Longi[,names(data.Longi)==llKD.real.names[i]]))X_L<- cbind(X_L,as.numeric(data.Longi[,names(data.Longi)==llKD.real.names[i]])-1)
+          else X_L<- cbind(X_L,data.Longi[,names(data.Longi)==llKD.real.names[i]])
         }}
       
-      #X_KD<- data.Longi[,names(data.Longi)%in%(llY)]
+      #X_L<- data.Longi[,names(data.Longi)%in%(llY)]
       
       llKD.fin <- llKD.real.names
       llKD <- llKD.real.names
@@ -1651,7 +1650,7 @@
               dummy <- model.matrix( ~ v1 - 1)
               # if(length(levels(v1)>2))vec.factorY <- c(vec.factorY,paste(name_v1,":",name_v2,sep=""))
               for(j in 2:length(levels(v1))){
-                X_KD <- cbind(X_KD,dummy[,j]*v2)
+                X_L <- cbind(X_L,dummy[,j]*v2)
                 if(i>1 && i<length(llKD.fin))llKD.fin <- c(llKD.fin[1:(i-1+j-2)],paste(name_v1,".",levels(v1)[j],":",name_v2,sep=""),llKD.fin[(i+1+j-2):length(llKD.fin)])
                 else if(i==length(llKD.fin))llKD.fin <- c(llKD.fin[1:(i-1+j-2)],paste(name_v1,".",levels(v1)[j],":",name_v2,sep=""))
                 else llKD.fin <- c(paste(name_v1,".",levels(v1)[j],":",name_v2,sep=""),llKD.fin[(2+j-2):length(llKD.fin)])
@@ -1663,7 +1662,7 @@
               #  if(length(levels(v2)>2))vec.factorY <- c(vec.factorY,paste(name_v1,":",name_v2,sep=""))
               for(j in 2:length(levels(v2))){
                 
-                X_KD <- cbind(X_KD,dummy[,j]*v1)
+                X_L <- cbind(X_L,dummy[,j]*v1)
                 
                 if(i>1 && i<length(llKD.fin))llKD.fin <- c(llKD.fin[1:(i-1+j-2)],paste(name_v1,":",name_v2,levels(v2)[j],sep=""),llKD.fin[(i+1+j-2):length(llKD.fin)])
                 else if(i==length(llKD.fin))llKD.fin <- c(llKD.fin[1:(i-1+j-2)],paste(name_v1,":",name_v2,levels(v2)[j],sep=""))
@@ -1678,7 +1677,7 @@
               for(j in 2:length(levels(v1))){
                 for(k in 2:length(levels(v2))){
                   
-                  X_KD <- cbind(X_KD,dummy1[,j]*dummy2[,k])
+                  X_L <- cbind(X_L,dummy1[,j]*dummy2[,k])
                   if(i>1 && i<length(llKD.fin))llKD.fin <- c(llKD.fin[1:(i-1+j-2+k-2)],paste(name_v1,levels(v1)[j],":",name_v2,levels(v2)[k],sep=""),llKG.fin[(i+1+j-2+k-2):length(llKG.fin)])
                   else if(i==length(llKD.fin))llKD.fin <- c(llKD.fin[1:(i-1+j-2+k-2)],paste(name_v1,levels(v1)[j],":",name_v2,levels(v2)[k],sep=""))
                   else llKD.fin <- c(paste(name_v1,levels(v1)[j],":",name_v2,levels(v2)[k],sep=""),llKD.fin[(2+j-2+k-2):length(llKD.fin)])
@@ -1686,7 +1685,7 @@
               } 
             }else{
               
-              X_KD <- cbind(X_KD,v1*v2)
+              X_L <- cbind(X_L,v1*v2)
             }
             
           }
@@ -1755,22 +1754,22 @@
       }
       
       #  llY <- llY.fin
-      X_KD <- as.data.frame(X_KD)
-      if(dim(X_KD)[2]!=length(llKD.fin))stop("The variables in the longitudinal part must be in the data.Longi")
+      X_L <- as.data.frame(X_L)
+      if(dim(X_L)[2]!=length(llKD.fin))stop("The variables in the longitudinal part must be in the data.Longi")
       
-      names(X_KD) <- llKD.fin
+      names(X_L) <- llKD.fin
       
       
-      X_KDall<- X_KD
+      X_Lall<- X_L
       "%+%"<- function(x,y) paste(x,y,sep="")
       if(length(vec.factorKD) > 0){
         for(i in 1:length(vec.factorKD)){
           if(length(grep(":",vec.factorKD[i]))==0){
             
-            factor.spot <- which(names(X_KD)==vec.factorKD[i])
+            factor.spot <- which(names(X_L)==vec.factorKD[i])
             
-            if(factor.spot<ncol(X_KD))  X_KD <- cbind(X_KD[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorKD[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1],X_KD[(factor.spot+1):ncol(X_KD)])
-            else X_KD <- cbind(X_KD[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorKD[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1])
+            if(factor.spot<ncol(X_L))  X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorKD[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1],X_L[(factor.spot+1):ncol(X_L)])
+            else X_L <- cbind(X_L[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorKD[i], collapse= "+")), model.frame(~.,data.Longi,na.action=na.pass))[,-1])
             
           } }
         
@@ -1778,7 +1777,7 @@
         
         
         
-        vect.factKD<-names(X_KD)[which(!(names(X_KD)%in%llKD))]
+        vect.factKD<-names(X_L)[which(!(names(X_L)%in%llKD))]
         
         
         #               vect.fact <-apply(matrix(vect.fact,ncol=1,nrow=length(vect.fact)),MARGIN=1,FUN=function(x){
@@ -1824,7 +1823,7 @@
       }
       
       
-      if (ncol(X_KD) == 0){
+      if (ncol(X_L) == 0){
         noVarKD <- 1
       }else{
         noVarKD <- 0
@@ -1833,13 +1832,13 @@
       #========================================>
       
       
-      nvarKD<-ncol(X_KD) #nvar==1 correspond a 2 situations:
+      nvarKD<-ncol(X_L) #nvar==1 correspond a 2 situations:
       
       # au cas ou on a aucune var explicative dans la partie rec, mais X=0
       # cas ou on a 1seul var explicative, ici X est en general different de 0
       
-      #varnotdepY <- colnames(X_KD)[-grep("timedep",colnames(X_KD))]
-      #vardepY <- colnames(X_KD)[grep("timedep",colnames(X_KD))]
+      #varnotdepY <- colnames(X_L)[-grep("timedep",colnames(X_L))]
+      #vardepY <- colnames(X_L)[grep("timedep",colnames(X_L))]
       #vardepY <- apply(matrix(vardepY,ncol=1,nrow=length(vardepY)),1,timedep.names)
       
       #if (length(intersect(varnotdepY,vardepY)) != 0) {
@@ -1849,11 +1848,11 @@
       #nvartimedepY <- length(vardepY)
       
       #filtretpsY <- rep(0,nvarY)
-      #filtretpsY[grep("timedep",colnames(X_KD))] <- 1
+      #filtretpsY[grep("timedep",colnames(X_L))] <- 1
       
-      varKD <- as.matrix(sapply(X_KD, as.numeric))
+      varKD <- as.matrix(sapply(X_L, as.numeric))
       
-      nsujety<-nrow(X_KD)
+      nsujety<-nrow(X_L)
       
       
       
@@ -2072,7 +2071,6 @@
         positionT <- unlist(assign,use.names=F)
       }
       #========================================>
-      
       if (ncol(X_T) == 1)
       {
         X_T<-X_T-1
@@ -2103,9 +2101,8 @@
       
       #filtretpsT <- rep(0,nvarT)
       #filtretpsT[grep("timedep",colnames(X_T))] <- 1
-      X_T <- X_T[order(data[,colnames(data)==id]),]
-      if(nvarT>1)varT.temp<-matrix(c(X_T),nrow=nrow(X_T),ncol=nvarT)
-      else varT.temp <- X_T
+      X_T <- X_T[order(data[,id]),]
+      varT.temp<-matrix(c(X_T),nrow=nrow(X_T),ncol=nvarT)
       
       
       if(is.null(nrow(m2)))
@@ -2389,6 +2386,50 @@
     
     
     
+    # Beta[	1	]=	1.3986762441228952E-006
+    #  Beta[	2	]=	0.31435752761934954
+    #  Beta[	3	]=	0.66012388096901187
+    #  Beta[	4	]=	0.71494882353918476
+    #  Beta[	5	]=	0.34403049282801590
+    #  Beta[	6	]=	-1.1912358262614014E-007
+    #  Beta[	7	]=	-2.0020239607002497E-007
+    #  Beta[	8	]=	-2.4405370090343496E-007
+    #  Beta[	9	]=	-2.8433835252408202E-007
+    #  Beta[	10	]=	3.2679157165607868E-002
+    #  Beta[	11	]=	7.6308858566558474E-002
+    #  Beta[	12	]=	-6.1854248188961812E-002
+    #  Beta[	13	]=	0.32769877353590859
+    #  Beta[	14	]=	0.46956915783044240
+    #  Beta[	15	]=	0.51900603759130093
+    #  Beta[	16	]=	0.50250976492116095
+    #  Beta[	17	]=	0.58767259928540427
+    #  Beta[	18	]=	0.45802866349619437
+    #  Beta[	19	]=	2.3064279917616868
+    #  Beta[	20	]=	1.3642512556803417
+    #  Beta[	21	]=	-2.0173192375688171
+    #  Beta[	22	]=	4.3956529667888971
+    #  Beta[	23	]=	0.60124734452968220
+    #  Beta[	24	]=	2.5979475769369160
+    #  Beta[	25	]=	0.60582309140509694
+    #  Beta[	26	]=	2.0006355244382923
+    #  Beta[	27	]=	2.6980089498184077
+    #  Beta[	28	]=	0.40915576495719103
+    #  Beta[	29	]=	5.4114966577766981E-002
+    #  Beta[	30	]=	5.5210013441415365E-002
+    #  Beta[	31	]=	0.12568287098239386
+    #  Beta[	32	]=	-0.13494883501492397
+    #  Beta[	33	]=	0.28953629364133054
+    #  Beta[	34	]=	0.21542270156039972
+    #  Beta[	35	]=	0.59088000837379462
+    #  Beta[	36	]=	6.9624619528895287E-002
+    #  Beta[	37	]=	0.47262297353089977
+    #  Beta[	38	]=	0.43506116790964994
+    #  Beta[	39	]=	0.11121143895792665
+    #  Beta[	40	]=	1.2261826395676747
+    #  Beta[	41	]=	2.4061945485868530
+    #  Beta[	42	]=	1.1819960709755817
+    #  Beta[	43	]=	0.11812709844303013
+    
     ans <- .Fortran(C_jointlonginl,
                     as.integer(nsujet),
                     as.integer(nsujety),
@@ -2532,13 +2573,7 @@
     else
     {
       fit$coef <- ans$b[(np - nvar + 1):np]
-      if(is.null(X_KG))names_KG <- c()
-      else names_KG <- factor.names(colnames(X_KG))
-      if(is.null(X_KD))names_KD <- c()
-      else names_KD <- factor.names(colnames(X_KD))
-      if(is.null(colnames(X_T)))names_T <- llT
-      else names_T<-factor.names(colnames(X_T))
-      noms <- c(factor.names(colnames(X)),names_T,names_KG,names_KD)
+      noms <- c(factor.names(colnames(X)),factor.names(colnames(X_T)),factor.names(colnames(X_L)))
       #  if (timedep == 1){
       #    while (length(grep("timedep",noms))!=0){
       #      pos <- grep("timedep",noms)[1]
@@ -2568,10 +2603,9 @@
     fit$varHtotal <- temp1
     fit$varHIHtotal <- temp2
     
-    
     fit$varH <- temp1[(np  - nvar +1):np, (np  - nvar +1 ):np]
     fit$varHIH <- temp2[(np  - nvar +1):np, (np  - nvar +1):np]
-    noms <- c("alpha","Eta","MeasurementError","B1",factor.names(colnames(X)),names_T,names_KG, names_KD)
+    noms <- c("alpha","Eta","MeasurementError","B1",factor.names(colnames(X)),factor.names(colnames(X_T)),factor.names(colnames(X_L)))
     
     
     fit$K_G0 <- ans$b[(np - nvar - ne_re - 1 - netadc - netar-2-3)]
@@ -2686,6 +2720,7 @@
     
     # verif que les martingales ont ete bien calculees
     msg <- "Problem in the estimation of the random effects (perhaps high number of events in some clusters)"
+    
     
     
     

@@ -1,15 +1,3 @@
-Changes in Version 3.1.0 december 2019
-o New model added:  two-part joint model (part of longiPenal function) for a longitudinal semicontinuous marker and a terminal event.
-o Add Monte-Carlo integration method for joint models longitudinal/terminal event (longiPenal function)
-o Bug fixed in the S3method plot() associated with the object of class additivePenal. In the prevous version it was not passible to call the S3method plot() on this object.
-
-
-Changes in Version 3.0.3.3 august 2019
-o Add of the shiny application for frailtypack : the runShiny() function will run the application in a local mode.
-o Add of parameter 'nb.gh' in frailtyPenal, in order to chose the number of nodes for the Gaussian-Hermite quadrature
-o Correction of a small error in trivPenalNL documentation
-o Correction of several warnings appearing during check
-
 Changes in Version 3.0.3.2 may 2019
 o Correction of warnings during installation of package
 o Bug fixed for printing results of longiPenal, trivPenal and trivPenalNL

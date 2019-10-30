@@ -6,7 +6,7 @@
 
     use tailles
     use comon,only:t0,t1,c,nsujet,nva,nst,stra,effet,ve &
-    ,g,nig,AG,auxig,alpha,eta,kkapa,etaR,etaD,betaR,betaD,indictronq,nb_gl
+    ,g,nig,AG,auxig,alpha,eta,kkapa,etaR,etaD,betaR,betaD,indictronq!,ndate
     use commun,only:ngexact,mij,mid,ssg,aux1,aux2
     use residusM
 
@@ -332,17 +332,17 @@
         do ig=1,ngexact
             auxig=ig
             choix=1
-            call gaulagN(int,choix,nb_gl)
+            call gaulagN(int,choix)
             integrale1(auxig)=int
 !     integrale sur la troncature:
             if(indictronq.eq.1)then
                 if(AG.eq.1)then !andersen gill
                     choix=3
-                    call gaulagN(int,choix,nb_gl)
+                    call gaulagN(int,choix)
                     integrale3(auxig)=int
                 else !troncature classique
                     choix=2
-                    call gaulagN(int,choix,nb_gl)
+                    call gaulagN(int,choix)
                     integrale2(auxig)=int
                 endif
             endif

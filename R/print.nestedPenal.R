@@ -195,7 +195,6 @@
     cat("    n events=", x$n.events, " n groups=", x$groups)
     cat( "\n")
     cat("    number of iterations: ", x$n.iter,"\n")
-    cat("   Number of nodes for the Gauss-Laguerre quadrature: ", x$nb.gl,"\n")
     if ((x$typeof == 1) & (x$indic.nb.int == 1)){
       cat("      Exact number of time intervals used: 20","\n")
     }else{
@@ -239,7 +238,6 @@
     cat("    n events=", x$n.events, " n groups=", x$groups)
     cat( "\n")
     cat("    number of iterations: ", x$n.iter)	
-    cat("   Number of nodes for the Gauss-Laguerre quadrature: ", x$nb.gl)
   }
   cat("\n")
   invisible()

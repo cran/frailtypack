@@ -6,7 +6,7 @@
     !use comon,only:AG,nst,cens,t0dc
     use comon,only:nbintervR,nbintervDC,t0,t1,t1dc,c,cdc,nsujet,nva,nva1,nva2, &
     effet,stra,ve,vedc,ng,g,nig,indic_ALPHA,ALPHA,theta,nstRec, &
-    auxig,aux1,aux2,res1,res3,res4,ttt,tttdc,betacoef,kkapa,nb_gl
+    auxig,aux1,aux2,res1,res3,res4,ttt,tttdc,betacoef,kkapa
     use residusM
     use comongroup,only:vet,vet2
 
@@ -209,7 +209,7 @@
     do ig=1,ng
         auxig=ig
         choix = 3
-        call gaulagj(int,choix,nb_gl)
+        call gaulagj(int,choix)
         integrale3(ig) = int !moins bon
     end do
 

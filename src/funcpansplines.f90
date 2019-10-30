@@ -10,7 +10,7 @@
     ,m2m1,m2m,m1m,mm3,mm2,mm1,mm,im3,im2,im1,im &
     ,date,zi,c,nt0,nt1,nsujet,nva,ndate,nst &
     ,stra,pe,effet,nz1,ve &
-    ,g,nig,indictronq,AG,auxig,alpha,eta,resnonpen,nb_gl
+    ,g,nig,indictronq,AG,auxig,alpha,eta,resnonpen
     !use commun,only:nssgexact,
     use commun,only:ngexact,mij,mid,ssg,aux1,aux2,mij_ind
     use residusM
@@ -395,20 +395,21 @@
 
 !================== calcul des integrales par Gauss LAGUERRE
 !     memes points et poids dans chq groupe
+
         do ig=1,ngexact
             auxig=ig
             choix=1
-            call gaulagN(int,choix,nb_gl)
+            call gaulagN(int,choix)
             integrale1(auxig)=int
 !     integrale sur la troncature:
             if(indictronq.eq.1)then
                 if(AG.eq.1)then !andersen gill
                     choix=3
-                    call gaulagN(int,choix,nb_gl)
+                    call gaulagN(int,choix)
                     integrale3(auxig)=int
                 else !troncature classique
                     choix=2
-                    call gaulagN(int,choix,nb_gl)
+                    call gaulagN(int,choix)
                     integrale2(auxig)=int
                 endif
             endif
