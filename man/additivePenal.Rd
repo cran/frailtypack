@@ -225,7 +225,7 @@ this value by 10 or 5 until it converges.
 \examples{
 
 
-\donttest{
+\dontrun{
 
 ###--- Additive model with 1 covariate ---###
 

@@ -108,7 +108,7 @@
     b = a - int(a) ! scl: 23/11/2018
     c=a-b
     ib=int(c)
-
+    
     !out= (1-b)*t(ib+1)+b*t(ib+2) ! scl: 23/11/2018
     if(ib <= n-2)then ! scl: 23/11/2018
     out = (1-b)*t(ib+1)+b*t(ib+2)
@@ -182,7 +182,7 @@
             end if
         end do
     end do
-
+	
         !t25=t(25) ! scl: 23/11/2018
         t25 = 0.25d0*t(250)+0.75d0*t(251) ! scl: 23/11/2018
         !t975=t(975) ! scl: 23/11/2018
@@ -196,7 +196,7 @@
     ! This subroutine calculates i2 th basis of spline of
     ! degree (i3-1).
     IMPLICIT NONE
-    integer(kind = kind(1.0)) i1, i2, i3
+    integer(kind=4) i1, i2, i3
     double precision y, newknots(i1), temp1, temp2, result, result1, result2
     external dumsub
 
@@ -238,11 +238,11 @@
 ! where d is the degree of the splines.
 ! k=number of spline basis=m1+d+1
     IMPLICIT NONE
-    integer(kind = kind(1.0)) d, k, m, m1
+    integer(kind=4) d, k, m, m1
     double precision x, innerknots(m1), boundaryknots(2)
     double precision newknots(m), basis(k), result
     external bb
-    integer(kind = kind(1.0)) i1, j
+    integer(kind=4) i1, j
 
     do i1=1, (d+1)
         newknots(i1)=boundaryknots(1)
@@ -357,11 +357,11 @@
     ! where d is the degree of the splines.
     ! k=number of spline basis=m1+d+1
     IMPLICIT NONE
-    integer(kind = kind(1.0)) d, k, m, m1, n
+    integer(kind=4) d, k, m, m1, n
     double precision x(n), innerknots(m1), boundaryknots(2)
     double precision newknots(m), basis(n, k), result
     external bb
-    integer(kind = kind(1.0)) i1, i, j
+    integer(kind=4) i1, i, j
 
     do i1=1, (d+1)
         newknots(i1)=boundaryknots(1)
@@ -786,209 +786,7 @@
     return
 
     end
-    subroutine integrationdcOMP(f,a,b,result,abserr,resabs,resasc,i,it_cur,bh,np,frail)
-        !***begin prologue  dqk15
-        !***date written   800101   (yymmdd)
-        !***revision date  830518   (yymmdd)
-        !***category no.  h2a1a2
-        !***keywords  15-point gauss-kronrod rules
-        !***author  piessens,robert,appl. math. & progr. div. - k.u.leuven
-        !           de doncker,elise,appl. math. & progr. div - k.u.leuven
-        !***purpose  to compute i = integral of f over (a,b), with error
-        !                           estimate
-        !                       j = integral of abs(f) over (a,b)
-        !***description
-        !
-        !           integration rules
-        !           standard fortran subroutine
-        !           double precision version
-        !
-        !           parameters
-        !            on entry
-        !              f      - double precision
-        !                       function subprogram defining the integrand
-        !                       function f(x). the actual name for f needs to be
-        !                       declared e x t e r n a l in the calling program.
-        !
-        !              a      - double precision
-        !                       lower limit of integration
-        !
-        !              b      - double precision
-        !                       upper limit of integration
-        !
-        !            on return
-        !              result - double precision
-        !                       approximation to the integral i
-        !                       result is computed by applying the 15-point
-        !                       kronrod rule (resk) obtained by optimal addition
-        !                       of abscissae to the7-point gauss rule(resg).
-        !
-        !              abserr - double precision
-        !                       estimate of the modulus of the absolute error,
-        !                       which should not exceed abs(i-result)
-        !
-        !              resabs - double precision
-        !                       approximation to the integral j
-        !
-        !              resasc - double precision
-        !                       approximation to the integral of abs(f-i/(b-a))
-        !                       over (a,b)
-        !
-        !***references  (none)
-        !***routines called  d1mach
-        !***end prologue  dqk15
-        use comon,only:nea
 
-           double precision :: a,absc,abserr,b,centr,dabs,dhlgth,dmax1,dmin1,d1mach(5),epmach,f,fc,fsum,fval1,fval2,&
-           fv1,fv2,hlgth,resabs,resasc,resg,resk,reskh,result,uflow,wg,wgk,xgk
-           double precision,dimension(nea)::frail
-           integer :: j,jtw,jtwm1
-           external :: f
-           integer ::i,np,it_cur
-           double precision :: bh(np)
-
-           dimension fv1(7),fv2(7),wg(4),wgk(8),xgk(8)
-
-          !
-          !           the abscissae and weights are given for the interval (-1,1).
-          !           because of symmetry only the positive abscissae and their
-          !           corresponding weights are given.
-          !
-          !           xgk    - abscissae of the 15-point kronrod rule
-          !                    xgk(2), xgk(4), ...  abscissae of the 7-point
-          !                    gauss rule
-          !                    xgk(1), xgk(3), ...  abscissae which are optimally
-          !                    added to the 7-point gauss rule
-          !
-          !          wgk    - weights of the 15-point kronrod rule
-          !
-          !           wg     - weights of the 7-point gauss rule
-          !
-          !
-          ! gauss quadrature weights and kronron quadrature abscissae and weights
-          ! as evaluated with 80 decimal digit arithmetic by l. w. fullerton,
-          ! bell labs, nov. 1981.
-
-        wg(1)=0.129484966168869693270611432679082d0
-        wg(2)=0.279705391489276667901467771423780d0
-        wg(3)=0.381830050505118944950369775488975d0
-        wg(4)=0.417959183673469387755102040816327d0
-
-        xgk(1)=0.991455371120812639206854697526329d0
-        xgk(2)=0.949107912342758524526189684047851d0
-        xgk(3)=0.864864423359769072789712788640926d0
-        xgk(4)=0.741531185599394439863864773280788d0
-        xgk(5)=0.586087235467691130294144838258730d0
-        xgk(6)=0.405845151377397166906606412076961d0
-        xgk(7)=0.207784955007898467600689403773245d0
-        xgk(8)=0.000000000000000000000000000000000d0
-
-        wgk(1)=0.022935322010529224963732008058970d0
-        wgk(2)=0.063092092629978553290700663189204d0
-        wgk(3)=0.104790010322250183839876322541518d0
-        wgk(4)=0.140653259715525918745189590510238d0
-        wgk(5)=0.169004726639267902826583426598550d0
-        wgk(6)=0.190350578064785409913256402421014d0
-        wgk(7)=0.204432940075298892414161999234649d0
-        wgk(8)=0.209482141084727828012999174891714d0
-
-
-        !           list of major variables
-        !           -----------------------
-        !
-        !           centr  - mid point of the interval
-        !           hlgth  - half-length of the interval
-        !           absc   - abscissa
-        !           fval*  - function value
-        !           resg   - result of the 7-point gauss formula
-        !           resk   - result of the 15-point kronrod formula
-        !           reskh  - approximation to the mean value of f over (a,b),
-        !                    i.e. to i/(b-a)
-        !
-        !           machine dependent constants
-        !           ---------------------------
-        !
-        !           epmach is the largest relative spacing.
-        !           uflow is the smallest positive magnitude.
-        !
-        !***first executable statement  dqk15
-
-
-        D1MACH(1)=2.23D-308
-        D1MACH(2)=1.79D+308
-        D1MACH(3)=1.11D-16
-        D1MACH(4)=2.22D-16
-        D1MACH(5)=0.301029995663981195D0
-
-        epmach = d1mach(4)
-        uflow = d1mach(1)
-
-        centr = 0.5d+00*(a+b)
-        hlgth = 0.5d+00*(b-a)
-        dhlgth = dabs(hlgth)
-
-        !           compute the 15-point kronrod approximation to
-        !           the integral, and estimate the absolute error.
-
-
-        fc = f(centr,i,it_cur,bh,np,frail)
-        !goto 125
-        resg = fc*wg(4)
-        resk = fc*wgk(8)
-        resabs = dabs(resk)
-
-
-
-        do j=1,3
-            jtw = j*2
-            absc = hlgth*xgk(jtw)
-
-            fval1 = f(centr-absc,i,it_cur,bh,np,frail)
-
-            fval2 = f(centr+absc,i,it_cur,bh,np,frail)
-            fv1(jtw) = fval1
-            fv2(jtw) = fval2
-            fsum = fval1+fval2
-            resg = resg+wg(j)*fsum
-            resk = resk+wgk(jtw)*fsum
-
-            resabs = resabs+wgk(jtw)*(dabs(fval1)+dabs(fval2))
-        enddo
-
-        do j = 1,4
-            jtwm1 = j*2-1
-            absc = hlgth*xgk(jtwm1)
-            fval1 = f(centr-absc,i,it_cur,bh,np,frail)
-            fval2 = f(centr+absc,i,it_cur,bh,np,frail)
-            fv1(jtwm1) = fval1
-            fv2(jtwm1) = fval2
-            fsum = fval1+fval2
-            resk = resk+wgk(jtwm1)*fsum
-
-            resabs = resabs+wgk(jtwm1)*(dabs(fval1)+dabs(fval2))
-        enddo
-
-
-
-        reskh = resk*0.5d+00
-        resasc = wgk(8)*dabs(fc-reskh)
-        do j=1,7
-            resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))
-        enddo
-    !write(*,*)resk,hlgth,a,b
-
-
-        result = resk*hlgth
-        resabs = resabs*dhlgth
-        resasc = resasc*dhlgth
-        abserr = dabs((resk-resg)*hlgth)
-        if(resasc.ne.0.0d+00.and.abserr.ne.0.0d+00) abserr = resasc*dmin1(0.1d+01,(0.2d+03*abserr/resasc)**1.5d+00)
-        if(resabs.gt.uflow/(0.5d+02*epmach)) abserr = dmax1((epmach*0.5d+02)*resabs,abserr)
-
-        return
-        125 continue
-
-        end
 
 !****************************************************************
     subroutine searchknotstps(tps0,knots0,nbinnerknots0,qorder0,nsujetmax0,equidistantTPS0,c0,begin)
@@ -1286,7 +1084,7 @@
 !
 !  Parameters:
 !
-!    Input, real ( kind = kind(1.0d0) ) X, is one endpoint of the semi-infinite interval
+!    Input, real ( kind = 8 ) X, is one endpoint of the semi-infinite interval
 !    over which the integration takes place.
 !
 !    Input, logical UPPER, determines whether the upper or lower
@@ -1294,38 +1092,38 @@
 !    .TRUE.  => integrate from X to + Infinity;
 !    .FALSE. => integrate from - Infinity to X.
 !
-!    Output, real ( kind = kind(1.0d0) ) ALNORM, the integral of the standard normal
+!    Output, real ( kind = 8 ) ALNORM, the integral of the standard normal
 !    distribution over the desired interval.
 !
       implicit none
 
-      real ( kind = kind(1.0d0) ), parameter :: a1 = 5.75885480458D+00
-      real ( kind = kind(1.0d0) ), parameter :: a2 = 2.62433121679D+00
-      real ( kind = kind(1.0d0) ), parameter :: a3 = 5.92885724438D+00
-      real ( kind = kind(1.0d0) ), parameter :: b1 = -29.8213557807D+00
-      real ( kind = kind(1.0d0) ), parameter :: b2 = 48.6959930692D+00
-      real ( kind = kind(1.0d0) ), parameter :: c1 = -0.000000038052D+00
-      real ( kind = kind(1.0d0) ), parameter :: c2 = 0.000398064794D+00
-      real ( kind = kind(1.0d0) ), parameter :: c3 = -0.151679116635D+00
-      real ( kind = kind(1.0d0) ), parameter :: c4 = 4.8385912808D+00
-      real ( kind = kind(1.0d0) ), parameter :: c5 = 0.742380924027D+00
-      real ( kind = kind(1.0d0) ), parameter :: c6 = 3.99019417011D+00
-      real ( kind = kind(1.0d0) ), parameter :: con = 1.28D+00
-      real ( kind = kind(1.0d0) ), parameter :: d1 = 1.00000615302D+00
-      real ( kind = kind(1.0d0) ), parameter :: d2 = 1.98615381364D+00
-      real ( kind = kind(1.0d0) ), parameter :: d3 = 5.29330324926D+00
-      real ( kind = kind(1.0d0) ), parameter :: d4 = -15.1508972451D+00
-      real ( kind = kind(1.0d0) ), parameter :: d5 = 30.789933034D+00
-      real ( kind = kind(1.0d0) ), parameter :: ltone = 7.0D+00
-      real ( kind = kind(1.0d0) ), parameter :: p = 0.398942280444D+00
-      real ( kind = kind(1.0d0) ), parameter :: q = 0.39990348504D+00
-      real ( kind = kind(1.0d0) ), parameter :: r = 0.398942280385D+00
+      real ( kind = 8 ), parameter :: a1 = 5.75885480458D+00
+      real ( kind = 8 ), parameter :: a2 = 2.62433121679D+00
+      real ( kind = 8 ), parameter :: a3 = 5.92885724438D+00
+      real ( kind = 8 ), parameter :: b1 = -29.8213557807D+00
+      real ( kind = 8 ), parameter :: b2 = 48.6959930692D+00
+      real ( kind = 8 ), parameter :: c1 = -0.000000038052D+00
+      real ( kind = 8 ), parameter :: c2 = 0.000398064794D+00
+      real ( kind = 8 ), parameter :: c3 = -0.151679116635D+00
+      real ( kind = 8 ), parameter :: c4 = 4.8385912808D+00
+      real ( kind = 8 ), parameter :: c5 = 0.742380924027D+00
+      real ( kind = 8 ), parameter :: c6 = 3.99019417011D+00
+      real ( kind = 8 ), parameter :: con = 1.28D+00
+      real ( kind = 8 ), parameter :: d1 = 1.00000615302D+00
+      real ( kind = 8 ), parameter :: d2 = 1.98615381364D+00
+      real ( kind = 8 ), parameter :: d3 = 5.29330324926D+00
+      real ( kind = 8 ), parameter :: d4 = -15.1508972451D+00
+      real ( kind = 8 ), parameter :: d5 = 30.789933034D+00
+      real ( kind = 8 ), parameter :: ltone = 7.0D+00
+      real ( kind = 8 ), parameter :: p = 0.398942280444D+00
+      real ( kind = 8 ), parameter :: q = 0.39990348504D+00
+      real ( kind = 8 ), parameter :: r = 0.398942280385D+00
       logical up
       logical upper
-      real ( kind = kind(1.0d0) ), parameter :: utzero = 18.66D+00
-      real ( kind = kind(1.0d0) ) x
-      real ( kind = kind(1.0d0) ) y
-      real ( kind = kind(1.0d0) ) z
+      real ( kind = 8 ), parameter :: utzero = 18.66D+00
+      real ( kind = 8 ) x
+      real ( kind = 8 ) y
+      real ( kind = 8 ) z
 
       up = upper
       z = x
@@ -1369,13 +1167,6 @@
       return
       end function alnorm
 
-double precision function PHI(u)
-double precision u, PI
-! Standard Normal Probability Function
-  PI = 4.d0*datan(1.d0)
-  PHI = (1.d0/dsqrt(2.d0 * PI))*dexp(-0.5d0*u*u)
-  return
-  end
 
 ! ------------------------------------------------
 !     Cholesky decomposition.
@@ -1407,198 +1198,3 @@ double precision u, PI
     end do
   end do
 end subroutine cholesky_sub
-
-
-subroutine log_normal_cdf ( x, mu, sigma, cdf )
-
-!*****************************************************************************80
-!
-!! LOG_NORMAL_CDF evaluates the Log Normal CDF.
-!
-!  Licensing:
-!
-!    This code is distributed under the GNU LGPL license.
-!
-!  Modified:
-!
-!    12 February 1999
-!
-!  Author:
-!
-!    John Burkardt
-!
-!  Parameters:
-!
-!    Input, real ( kind = kind(1.0d0) ) X, the argument of the PDF.
-!    0.0 < X.
-!
-!    Input, real ( kind = kind(1.0d0) ) MU, SIGMA, the parameters of the PDF.
-!    0.0 < SIGMA.
-!
-!    Output, real ( kind = kind(1.0d0) ) CDF, the value of the CDF.
-!
-  implicit none
-
-  real ( kind = kind(1.0d0) ) cdf
-  real ( kind = kind(1.0d0) ) logx
-  real ( kind = kind(1.0d0) ) mu
-  real ( kind = kind(1.0d0) ) sigma
-  real ( kind = kind(1.0d0) ) x
-
-  if ( x <= 0.0D+00 ) then
-
-    cdf = 0.0D+00
-
-  else
-
-    logx = log ( x )
-
-    call normal_cdf ( logx, mu, sigma, cdf )
-
-  end if
-
-  return
-end
-
-subroutine normal_cdf ( x, mu, sigma, cdf )
-
-!*****************************************************************************80
-!
-!! NORMAL_CDF evaluates the Normal CDF.
-!
-!  Licensing:
-!
-!    This code is distributed under the GNU LGPL license.
-!
-!  Modified:
-!
-!    23 February 1999
-!
-!  Author:
-!
-!    John Burkardt
-!
-!  Parameters:
-!
-!    Input, real ( kind = kind(1.0d0) ) X, the argument of the CDF.
-!
-!    Input, real ( kind = kind(1.0d0) ) MU, SIGMA, the parameters of the PDF.
-!    0.0 < SIGMA.
-!
-!    Output, real ( kind = kind(1.0d0) ) CDF, the value of the CDF.
-!
-  implicit none
-
-  real ( kind = kind(1.0d0) ) cdf
-  real ( kind = kind(1.0d0) ) mu
-  real ( kind = kind(1.0d0) ) sigma
-  real ( kind = kind(1.0d0) ) x
-  real ( kind = kind(1.0d0) ) y
-
-  y = ( x - mu ) / sigma
-
-  call normal_01_cdf ( y, cdf )
-
-  return
-end
-
-subroutine normal_01_cdf ( x, cdf )
-
-!*****************************************************************************80
-!
-!! NORMAL_01_CDF evaluates the Normal 01 CDF.
-!
-!  Licensing:
-!
-!    This code is distributed under the GNU LGPL license.
-!
-!  Modified:
-!
-!    10 February 1999
-!
-!  Author:
-!
-!    John Burkardt
-!
-!  Reference:
-!
-!    AG Adams,
-!    Algorithm 39,
-!    Areas Under the Normal Curve,
-!    Computer Journal,
-!    Volume 12, pages 197-198, 1969.
-!
-!  Parameters:
-!
-!    Input, real ( kind = kind(1.0d0) ) X, the argument of the CDF.
-!
-!    Output, real ( kind = kind(1.0d0) ) CDF, the value of the CDF.
-!
-  implicit none
-
-  real ( kind = kind(1.0d0) ), parameter :: a1 = 0.398942280444D+00
-  real ( kind = kind(1.0d0) ), parameter :: a2 = 0.399903438504D+00
-  real ( kind = kind(1.0d0) ), parameter :: a3 = 5.75885480458D+00
-  real ( kind = kind(1.0d0) ), parameter :: a4 = 29.8213557808D+00
-  real ( kind = kind(1.0d0) ), parameter :: a5 = 2.62433121679D+00
-  real ( kind = kind(1.0d0) ), parameter :: a6 = 48.6959930692D+00
-  real ( kind = kind(1.0d0) ), parameter :: a7 = 5.92885724438D+00
-  real ( kind = kind(1.0d0) ), parameter :: b0 = 0.398942280385D+00
-  real ( kind = kind(1.0d0) ), parameter :: b1 = 3.8052D-08
-  real ( kind = kind(1.0d0) ), parameter :: b2 = 1.00000615302D+00
-  real ( kind = kind(1.0d0) ), parameter :: b3 = 3.98064794D-04
-  real ( kind = kind(1.0d0) ), parameter :: b4 = 1.98615381364D+00
-  real ( kind = kind(1.0d0) ), parameter :: b5 = 0.151679116635D+00
-  real ( kind = kind(1.0d0) ), parameter :: b6 = 5.29330324926D+00
-  real ( kind = kind(1.0d0) ), parameter :: b7 = 4.8385912808D+00
-  real ( kind = kind(1.0d0) ), parameter :: b8 = 15.1508972451D+00
-  real ( kind = kind(1.0d0) ), parameter :: b9 = 0.742380924027D+00
-  real ( kind = kind(1.0d0) ), parameter :: b10 = 30.789933034D+00
-  real ( kind = kind(1.0d0) ), parameter :: b11 = 3.99019417011D+00
-  real ( kind = kind(1.0d0) ) cdf
-  real ( kind = kind(1.0d0) ) q
-  real ( kind = kind(1.0d0) ) x
-  real ( kind = kind(1.0d0) ) y
-!
-!  |X| <= 1.28.
-!
-  if ( abs ( x ) <= 1.28D+00 ) then
-
-    y = 0.5D+00 * x * x
-
-    q = 0.5D+00 - abs ( x ) * ( a1 - a2 * y / ( y + a3 - a4 / ( y + a5 &
-      + a6 / ( y + a7 ) ) ) )
-!
-!  1.28 < |X| <= 12.7
-!
-  else if ( abs ( x ) <= 12.7D+00 ) then
-
-    y = 0.5D+00 * x * x
-
-    q = exp ( - y ) * b0 / ( abs ( x ) - b1 &
-      + b2 / ( abs ( x ) + b3 &
-      + b4 / ( abs ( x ) - b5 &
-      + b6 / ( abs ( x ) + b7 &
-      - b8 / ( abs ( x ) + b9 &
-      + b10 / ( abs ( x ) + b11 ) ) ) ) ) )
-!
-!  12.7 < |X|
-!
-  else
-
-    q = 0.0D+00
-
-  end if
-!
-!  Take account of negative X.
-!
-  if ( x < 0.0D+00 ) then
-    cdf = q
-  else
-    cdf = 1.0D+00 - q
-  end if
-
-  return
-end
-
-

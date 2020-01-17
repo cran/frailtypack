@@ -1,7 +1,7 @@
 ##' @export
 print.predJointNested <- function(x, digits = 3, ...) 
 {
-	if(!inherits(x, "predJointNested")) stop("The object x must be a class predJoint.")
+	if(class(x)!="predJointNested") stop("The object x must be a class predJoint.")
 		
 	if (!is.null(cl <- x$call)){
 		cat("Call:\n")

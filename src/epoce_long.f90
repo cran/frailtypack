@@ -795,7 +795,7 @@
             double precision,dimension(-2:npp)::the1,the2
             double precision,dimension(2)::su,sut1,sut0
         double precision::lam
-            double precision::T, tempscl
+            double precision::T
             logical :: upper
             double precision,parameter::pi=3.141592653589793d0
             upper = .false.
@@ -907,8 +907,7 @@
                                     if (c(k).eq.1) then
                                             select case(typeof)
                                                     case(0)
-                                                            call susps(t1(k),the1,nz1,tempscl,lam,zi)
-                                                            su = tempscl
+                                                            call susps(t1(k),the1,nz1,su,lam,zi)
                                                             if (t1(k).eq.date(ndate)) then
                                                                     lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                                                             endif
@@ -1302,7 +1301,7 @@
             double precision,dimension(-2:npp)::the1,the2
             double precision,dimension(npp)::betacoef
             double precision,dimension(2)::su,sut1,sut0
-        double precision::lam, tempscl
+        double precision::lam
             logical::upper
             double precision,parameter::pi=3.141592653589793d0
     
@@ -1406,8 +1405,7 @@
                 if (c(k).eq.1) then
                     select case(typeof)
                         case(0)
-                            call susps(t1(k),the1,nz1,tempscl,lam,zi)
-                            su = tempscl
+                            call susps(t1(k),the1,nz1,su,lam,zi)
                             if (t1(k).eq.date(ndate)) then
                                 lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                             endif
@@ -1721,14 +1719,14 @@
         use tailles
         use comongroup,only:vet2!,vet
         !use comon,only:nea,date,auxig,alpha,sig2,res1,res3,aux1,nig,netar,utt,
-        use comon,only:sigmae,nea,&
+        use comon,only:sigmae,&
             nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc,link,&
             vey,typeof,s_cag_id,s_cag,cdc,all,zi,ndatedc,nva,nz2,&
             datedc,ut,nb_re,t0dc,vals,nzdc
         use donnees_indiv
         IMPLICIT NONE
     
-        double precision,dimension(nea),intent(in)::frail
+        double precision,intent(in)::frail
             integer,intent(in)::choix
             double precision :: yscalar,alnorm,prod_cag,vraisind
             integer :: j,i,k,n
@@ -1798,7 +1796,7 @@
         end select
     
                     vraisind = vraisind*sudc**(vet2&
-                            *dexp(etaydc(1)*frail(1)))
+                            *dexp(etaydc(1)*frail))
     
             else !********** Current Mean ****************
     
@@ -1818,7 +1816,7 @@
             Z1cur(1,1) = 1.d0
             current_mean = 0.d0
     
-            current_mean(1) =dot_product(X2cur(1,1:nva3),b1((npp-nva3+1):npp))+Z1cur(1,1)*frail(1)
+            current_mean(1) =dot_product(X2cur(1,1:nva3),b1((npp-nva3+1):npp))+Z1cur(1,1)*frail
     
     
                     vraisind = vraisind*dexp(-sudc)!**(vet2&
@@ -1843,7 +1841,7 @@
                             end select
     
                             if(link.eq.1) then
-                                    vraisind = vraisind*lamdc*vet2*dexp(etaydc(1)*frail(1) )
+                                    vraisind = vraisind*lamdc*vet2*dexp(etaydc(1)*frail )
                             else
                                     vraisind =vraisind*lamdc*vet2*dexp(etaydc(1)*current_mean(1) )
                             end if
@@ -1856,12 +1854,12 @@
             if(all.eq.1) then
                     if(nmescur.gt.0) then
                             mu11 =MATMUL(X2(1:nmescur,1:nva3),b1((npp-nva3+1):npp))&
-                                    +Z2(1:nmescur,1)*frail(1)
+                                    +Z2(1:nmescur,1)*frail
                     end if
             else
                     if(nmescur2.gt.0) then
                             mu11 =MATMUL(X22(1:nmescur2,1:nva3),b1((npp-nva3+1):npp))&
-                                    +Z22(1:nmescur2,1)*frail(1)
+                                    +Z22(1:nmescur2,1)*frail
                     end if
             end if
     
@@ -1899,7 +1897,7 @@
             yscalar = dsqrt(yscalar)
     
             vraisind = vraisind*prod_cag*dexp( -(yscalar**2.d0)/(sigmae*2.d0)&
-                                    - (frail(1)**2.d0)/(2.d0*ut(1,1)**2))*&
+                                    - (frail**2.d0)/(2.d0*ut(1,1)**2))*&
                                             (1/ut(1,1))*(2.d0*pi)**(1.d0/2.d0)
     
     
@@ -2236,7 +2234,7 @@
             double precision :: resultR
             double precision,dimension(1):: current_meanR
                     double precision::sudc
-        double precision::lamdc,temp,lam, tempscl
+        double precision::lamdc,temp,lam
             double precision:: T
     
     
@@ -2384,8 +2382,7 @@
                                     if (c(k).eq.1) then
                                             select case(typeof)
                                                     case(0)
-                                                            call susps(t1(k),the1,nz1,tempscl,lam,zi)
-                                                            su = tempscl
+                                                            call susps(t1(k),the1,nz1,su,lam,zi)
                                                             if (t1(k).eq.date(ndate)) then
                                                                     lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                                                             endif
@@ -2604,7 +2601,7 @@
             double precision,dimension(2)::su,sut1,sut0
             double precision,dimension(-2:npp)::the1,the2
             double precision::sudc
-        double precision::lamdc,temp,lam, tempscl
+        double precision::lamdc,temp,lam
             double precision:: T
             logical :: upper
             double precision,parameter::pi=3.141592653589793d0
@@ -2751,8 +2748,7 @@
                                     if (c(k).eq.1) then
                                             select case(typeof)
                                                     case(0)
-                                                            call susps(t1(k),the1,nz1,tempscl,lam,zi)
-                                                            su = tempscl
+                                                            call susps(t1(k),the1,nz1,su,lam,zi)
                                                             if (t1(k).eq.date(ndate)) then
                                                                     lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                                                             endif

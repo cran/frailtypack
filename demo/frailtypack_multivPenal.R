@@ -27,11 +27,11 @@ print(modMultiv, digits = 4)
 ########################################################################
 pdf(file="fig4.pdf", height = 3.6, width = 8.1)
 par(mfrow = c(1, 4))
-plot(modMultiv, type.plot = "Survival", event = "Recurrent1", main = "Recurrent1",
+plot(modMultiv, type.plot = "survival", event = "recurrent1", main = "Recurrent1",
   conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
-plot(modMultiv, type.plot = "Survival", event = "Recurrent2", main = "Recurrent2",
+plot(modMultiv, type.plot = "survival", event = "recurrent2", main = "Recurrent2",
   conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
-plot(modMultiv, type.plot = "Survival", event = "Terminal", main = "Terminal",
+plot(modMultiv, type.plot = "survival", event = "terminal", main = "Terminal",
   conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
-plot(modMultiv, type.plot = "Survival", event = "Both", main = "Both",
+plot(modMultiv, type.plot = "survival", event = "both", main = "Both",
   conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1, ylim = c(0, 1.2))

@@ -1,33 +1,28 @@
 citHeader("To cite frailtypack in publications use:")
 
-bibentry(bibtype = "Article",
+citEntry(entry = "Article",
   title        = "{frailtypack}: An {{R}} Package for the Analysis of Correlated Survival Data with Frailty Models Using Penalized Likelihood Estimation or Parametrical Estimation",
-  author       = c(person(given = "Virginie",
-                          family = "Rondeau"),
-                   person(given = "Yassin",
-                          family = "Mazroui"),
-                   person(given = "Juan",
-                          family = "R. Gonzalez")),
+  author       = personList(as.person("Virginie Rondeau"),
+                   as.person("Yassin Mazroui"),
+                   as.person("Juan R. Gonzalez")),
   journal      = "Journal of Statistical Software",
   year         = "2012",
   volume       = "47",
   number       = "4",
   pages        = "1-28",
-  url          = "https://www.jstatsoft.org/v47/i04/",
+  url          = "http://www.jstatsoft.org/v47/i04/",
 
   textVersion  =
   paste("Virginie Rondeau, Yassin Mazroui, Juan R. Gonzalez (2012).",
         "frailtypack: An R Package for the Analysis of Correlated Survival Data with Frailty Models Using Penalized Likelihood Estimation or Parametrical Estimation.",
         "Journal of Statistical Software, 47(4), 1-28.",
-        "URL https://www.jstatsoft.org/v47/i04/")
+        "URL http://www.jstatsoft.org/v47/i04/.")
 )
 
-bibentry(bibtype = "Article",
+citEntry(entry = "Article",
   title        = "Frailtypack: A computer program for the analysis of correlated failure time data using penalized likelihood estimation",
-  author       = c(person(given = "Virginie",
-                          family = "Rondeau"),
-                   person(given = "Juan",
-                          family = "R. Gonzalez")),
+  author       = personList(as.person("Virginie Rondeau"),
+                   as.person("Juan R. Gonzalez")),
   journal      = "Computer Methods and Programs in Biomedicine",
   year         = "2005",
   volume       = "80",

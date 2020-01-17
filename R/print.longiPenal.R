@@ -3,9 +3,7 @@
 #' 
 #' Prints a short summary of parameter estimates of a joint model for
 #' longitudinal data and a terminal event, an object inheriting from class
-#' 'longiPenal'. If a mediation analysis was performed (option \code{mediation} set to
-#' \code{TRUE} in \code{\link{longiPenal}}) this function displays estimations of the related 
-#' quantities.
+#' 'longiPenal'.
 #' 
 #' 
 #' @usage
@@ -17,8 +15,7 @@
 #' @return
 #' 
 #' Print, separately for each part of the model (longitudinal and terminal) the
-#' parameter estimates and details on the estimation. Also print in a separate part the
-#' results of the mediation analysis if one was performed
+#' parameter estimates and details on the estimation.
 #' @seealso \code{\link{longiPenal}}
 ##' @export
 #' @keywords methods
@@ -79,6 +76,8 @@
   }
   #AD
   
+  
+  
   if (x$istop == 1){
     if (!is.null(coef)){
       if(nvar != 1){
@@ -92,7 +91,7 @@
         tmp <- cbind(coef, exp(coef), seH, seHIH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
         if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq, x$dof_chisq, ifelse(x$p.global_chisq == 0, "< 1e-16", x$p.global_chisq))
         if(x$global_chisq.test_d==1) tmpwalddc <- cbind(x$global_chisq_d, x$dof_chisq_d, ifelse(x$p.global_chisq_d == 0, "< 1e-16", x$p.global_chisq_d))
-        if(x$TwoPart==1)if(x$global_chisq.test_B==1) tmpwaldB <- cbind(x$global_chisq_B,x$dof_chisq_B,x$p.global_chisq_B)#add TwoPart             
+       if(x$TwoPart==1)if(x$global_chisq.test_B==1) tmpwaldB <- cbind(x$global_chisq_B,x$dof_chisq_B,x$p.global_chisq_B)#add TwoPart             
       }else{
         tmp <- cbind(coef, exp(coef), seH, coef/seH, signif(1 - pchisq((coef/seH)^2, 1), digits - 1))
         if(x$global_chisq.test==1) tmpwald <- cbind(x$global_chisq, x$dof_chisq, ifelse(x$p.global_chisq == 0, "< 1e-16", x$p.global_chisq))
@@ -101,19 +100,19 @@
       }
       
       cat("\n")
-      
+
       if(x$TwoPart==0){
-        
-        if(inherits(x,'longiPenal')) cat("  Joint Model for Longitudinal Data and a Terminal Event","\n")
+          cat("  Joint Model for Longitudinal Data and a Terminal Event","\n")
+
         if (x$typeof == 0){
           cat("  Parameter estimates using a Penalized Likelihood on the hazard function","\n")
         }else{
           cat("  Parameter estimates using a Parametrical approach for the hazard function","\n")
         }
-        if(!is.null(x$mediation)) cat("  Proportion of treatment effect estimated using mediation analysis ","\n")
-        if(x$leftCensoring==TRUE)cat("  and assuming left-censored longitudinal outcome \n")
+        
+      if(x$leftCensoring==TRUE)cat("  and assuming left-censored longitudinal outcome \n")
       }else if(x$TwoPart==1){
-        if(x$TwoPart==1)cat("Joint Model for Semi-continuous Data and a Terminal Event\n")
+      if(x$TwoPart==1)cat("Joint Model for Semi-continuous Data and a Terminal Event\n")
         if (x$typeof == 0){
           cat("  Parameter estimates using a Penalized Likelihood on the hazard function","\n")
         }else{
@@ -121,7 +120,7 @@
         }
         cat("Conditional Two-Part model with correlated random-effects for Semi-continuous outcome\n")
       }
-      
+
       if(x$link=='Random-effects') cat("  Association function: random effects","\n")
       if(x$link=='current-level') cat("  Association function: current level of the longitudinal outcome","\n")
       
@@ -158,10 +157,10 @@
           
         }
         if(x$TwoPart==1){ #add TwoPart
-          if(x$global_chisq.test_B==1){
-            dimnames(tmpwaldB) <- list(x$names.factorB,c("chisq", "df", "global p"))
-            
-          }
+            if(x$global_chisq.test_B==1){
+              dimnames(tmpwaldB) <- list(x$names.factorB,c("chisq", "df", "global p"))
+
+            }
         }      
         dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)",
                                              "SE coef (H)", "SE coef (HIH)", "z", "p"))
@@ -173,18 +172,18 @@
         if(x$global_chisq.test_d==1){
           dimnames(tmpwalddc) <- list(x$names.factordc,c("chisq", "df", "global p"))
           
-          
+
         }
         if(x$TwoPart==1){ #add TwoPart
-          if(x$global_chisq.test_B==1){
-            dimnames(tmpwaldB) <- list(x$names.factorB,c("chisq", "df", "global p"))
-            
-          }  
+            if(x$global_chisq.test_B==1){
+          dimnames(tmpwaldB) <- list(x$names.factorB,c("chisq", "df", "global p"))
+
+            }  
         }
         dimnames(tmp) <- list(names(coef), c("coef", "exp(coef)",
                                              "SE coef (H)", "z", "p"))
       }
-      if(x$TwoPart==1){
+    if(x$TwoPart==1){
         if (x$noVarB == 0){
           cat("Binary outcome:\n")
           cat("---------------- \n")
@@ -194,7 +193,7 @@
             prmatrix(tmpwaldB)
           }
         }
-        cat("\n")
+      cat("\n")
         if (x$noVarY == 0){
           cat("Semi-continuous outcome:\n")
           cat("---------------- \n")
@@ -208,13 +207,13 @@
             prmatrix(tmpwald)
           }
         }
-      }else if(x$TwoPart==0){
-        
+    }else if(x$TwoPart==0){
+      
         if (x$noVarY == 0){
           cat("Longitudinal outcome:\n")
           cat("---------------- \n")
           if(!x$GLMlog){
-            prmatrix(tmp[-c(1:(x$nvarEnd)),-2 ,drop=FALSE],quote=FALSE,right=TRUE)
+          prmatrix(tmp[-c(1:(x$nvarEnd)),-2 ,drop=FALSE],quote=FALSE,right=TRUE)
           }else if(x$GLMlog){
             prmatrix(tmp[-c(1:(x$nvarEnd)),,drop=FALSE],quote=FALSE,right=TRUE)
           }
@@ -223,7 +222,7 @@
             prmatrix(tmpwald)
           }
         }
-      }   
+    }   
       cat("\n")
       #for further developments
       #      if (x$nvarnotdep[1] == 0){
@@ -238,7 +237,7 @@
         if(x$global_chisq.test_d==1){
           cat("\n")
           prmatrix(tmpwalddc)
-          
+           
         }
       }
       #  }
@@ -299,7 +298,7 @@
       #  tab.Asso[which,4]<-"<1e-16"
       # tab.Asso <- round(tab.Asso,digits)
       # tab.Asso[which(tab.Asso[,4]==0),4]<-noquote("<1e-16")
-      if(x$TwoPart==0) dimnames(tab.Asso) <- list(x$names.re,c("coef",  "SE", "z", "p"))
+     if(x$TwoPart==0) dimnames(tab.Asso) <- list(x$names.re,c("coef",  "SE", "z", "p"))
       if(x$TwoPart==1) dimnames(tab.Asso) <- list(x$names.re,c("coef",  "SE", "z", "p"))
       prmatrix(tab.Asso,quote=FALSE,right=TRUE)
     }else{
@@ -328,80 +327,17 @@
       # tab.Asso[which,4]<-"<1e-16"
       # tab.Asso <- round(tab.Asso,digits)
       # tab.Asso[which(tab.Asso[,4]==0),4]<-noquote("<1e-16")
-      if(x$link=='Current-level'){
-        dimnames(tab.Asso) <- list("Current level",c("coef",  "SE", "z", "p"))
-      }else if (x$link=="Two-part"){
-        dimnames(tab.Asso) <- list(c("Binary part", "Continuous part"),c("coef",  "SE", "z", "p"))
-      }
+if(x$link=='Current-level'){
+     dimnames(tab.Asso) <- list("Current level",c("coef",  "SE", "z", "p"))
+     }else if (x$link=="Two-part"){
+     dimnames(tab.Asso) <- list(c("Binary part", "Continuous part"),c("coef",  "SE", "z", "p"))
+     }
       prmatrix(tab.Asso,quote=FALSE,right=TRUE)
     }
     
     cat("\n")
     
     cat("Residual standard error: ",round(x$ResidualSE,6), " (SE (H): ", round(x$se.ResidualSE,6), ") \n \n")
-    
-    
-    #add mediation here
-    
-    if(!is.null(x$mediation)){
-        cat("Mediation analysis:\n")
-        cat("------------- \n")
-        cat('\n')
-      mediation<-x$mediation
-      n<-min(length(mediation$data.rt$Time),5)
-      ## PTE and NEFF ......
-      times<-round(mediation$data.rt$Time,min(4,digits))
-      rt<-round(mediation$data.rt$Rt,min(4,digits))
-      nie<-round(mediation$data.rt$NIE,min(4,digits))
-      nde<-round(mediation$data.rt$NDE,min(4,digits))
-      te<-round(mediation$data.rt$TE,min(4,digits))
-      
-      pos<-(1:n)*floor((length(times)/n))
-      
-      times<-times[pos]
-      rt<-rt[pos]
-      nie<-nie[pos]
-      nde<-nde[pos]
-      te<-te[pos]
-      cat(" ", "\n")
-      cat("Estimated PTE, natural direct, indirect and total effect at",
-          n, "time points \n \n")
-      
-      if(is.null(mediation$Rt.ci)){
-        #no confidence bands available
-        print(data.frame("Time"=times,"PTE"=rt,"Total"=te,
-                         "Direct"=nde,"Indirect"=nie))
-      }
-      if(!is.null(mediation$Rt.ci)){
-        nie.upp<-round(mediation$NIE.ci$upper[pos],min(4,digits))
-        nie.low<-round(mediation$NIE.ci$lower[pos],min(4,digits))
-        nde.upp<-round(mediation$NDE.ci$upper[pos],min(4,digits))
-        nde.low<-round(mediation$NDE.ci$lower[pos],min(4,digits))
-        te.upp<-round(mediation$TE.ci$upper[pos],min(4,digits))
-        te.low<-round(mediation$TE.ci$lower[pos],min(4,digits))
-        rt.upp<-round(mediation$Rt.ci$upper[pos],min(4,digits))
-        rt.low<-round(mediation$Rt.ci$low[pos],min(4,digits))
-        
-        nie.ci = sapply(seq_along(nie.upp),function(i){
-          paste("[",nie.low[i],";",nie.upp[i],"]",sep="")
-        })
-        nde.ci = sapply(seq_along(nde.upp),function(i){
-          paste("[",nde.low[i],";",nde.upp[i],"]",sep="")
-        })
-        te.ci = sapply(seq_along(te.upp),function(i){
-          paste("[",te.low[i],";",te.upp[i],"]",sep="")
-        })
-        rt.ci = sapply(seq_along(rt.upp),function(i){
-          paste("[",rt.low[i],";",rt.upp[i],"]",sep="")
-        })
-        print(data.frame("Time"=times,"PTE"=rt,"CI 95 PTE"=rt.ci,
-                         "TE"=te,"CI 95 TE"=te.ci,
-                         "NDE"=nde,"CI 95 NDE"=nde.ci,
-                         "NIE"=nie,"CI 95 NIE"=nie.ci))
-      }
-    }
-    
-    cat('\n')
     
     if (x$typeof == 0){
       cat(paste("      penalized marginal log-likelihood =", round(x$logLikPenal,2)))

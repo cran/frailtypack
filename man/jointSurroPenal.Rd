@@ -2,52 +2,49 @@
 % Please edit documentation in R/jointSurroPenal.R
 \name{jointSurroPenal}
 \alias{jointSurroPenal}
-\title{Fit the one-step Joint surrogate model for evaluating a canditate surrogate endpoint}
+\title{Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint}
 \usage{
-jointSurroPenal(data, maxit=50, indicator.zeta = 1,
-   indicator.alpha = 1, frail.base = 1, n.knots = 6,
-   LIMparam = 0.001, LIMlogl = 0.001, LIMderiv = 0.001,
-   nb.mc = 300, nb.gh = 32, nb.gh2 = 20, adaptatif = 0,
-   int.method = 2, nb.iterPGH = 5, nb.MC.kendall = 10000,
-   nboot.kendall = 1000, true.init.val = 0,
-   theta.init = 1, sigma.ss.init = 0.5, sigma.tt.init = 0.5,
-   sigma.st.init = 0.48, gamma.init = 0.5, alpha.init = 1,
-   zeta.init = 1, betas.init = 0.5, betat.init = 0.5, scale = 1,
-   random.generator = 1, kappa.use = 4, random = 0,
-   random.nb.sim = 0, seed = 0, init.kappa = NULL, ckappa = c(0,0),
-   nb.decimal = 4, print.times = TRUE, print.iter=FALSE,mediation=FALSE,
-   g.nknots=1,rt.times=NULL,rt.ntimes=NULL,rt.nmc=500,rt.boot=FALSE,
-   rt.nboot=2000,rt.boot.nmc=500,rt.integ.type=2)
+jointSurroPenal(data, maxit=40, indicator.zeta = 1, 
+   indicator.alpha = 1, frail.base = 1, n.knots = 6, 
+   LIMparam = 0.001, LIMlogl = 0.001, LIMderiv = 0.001, 
+   nb.mc = 300, nb.gh = 32, nb.gh2 = 20, adaptatif = 0, 
+   int.method = 2, nb.iterPGH = 5, nb.MC.kendall = 10000, 
+   nboot.kendall = 1000, true.init.val = 0, 
+   theta.init = 1, sigma.ss.init = 0.5, sigma.tt.init = 0.5, 
+   sigma.st.init = 0.48, gamma.init = 0.5, alpha.init = 1, 
+   zeta.init = 1, betas.init = 0.5, betat.init = 0.5, scale = 1, 
+   random.generator = 1, kappa.use = 4, random = 0, 
+   random.nb.sim = 0, seed = 0, init.kappa = NULL, nb.decimal = 4, 
+   print.times = TRUE, print.iter=FALSE)
 }
 \arguments{
-\item{data}{A \code{\link{data.frame}} containing at least seven variables entitled:
+\item{data}{A \code{\link{data.frame}} containing at least \code{7} variables intitled: 
 \itemize{
-\item{\code{patientID:} A numeric, that represents the patient's identifier and must be unique;}
+\item{\code{patienID:} A numeric, that represents the patient's identifier, must be unique;}
 \item{\code{trialID:} A numeric, that represents the trial in which each patient was randomized;}
-\item{\code{timeS:} The follow-up time associated with the surrogate endpoint;}
-\item{\code{statusS:} The event indicator associated with the surrogate endpoint. Normally
+\item{\code{timeS:} The follow up time associated with the surrogate endpoint;}
+\item{\code{statusS:} The event indicator associated with the surrogate endpoint. Normally 
 0 = no event, 1 = event;}
-\item{\code{timeT:} The follow-up time associated with the true endpoint;}
-\item{\code{statusT:} The event indicator associated with the true endpoint. Normally
+\item{\code{timeT:} The follow up time associated with the true endpoint;}
+\item{\code{statusT:} The event indicator associated with the true endpoint. Normally 
 0 = no event, 1 = event;}
 \item{\code{trt:} The treatment indicator for each patient, with 1 = treated, 0 = untreated.}
 }}
 
 \item{maxit}{maximum number of iterations for the Marquardt algorithm.
-The default being \code{40}.}
+Default is \code{40}.}
 
-\item{indicator.zeta}{A binary, indicates whether the power's parameter \eqn{\zeta} should
-be estimated (1) or not (0). If \code{0}, \eqn{\zeta} will be set to \code{1} during estimation.
-The default is \code{1}. This parameter can be set to \code{0} in the event of convergence and
+\item{indicator.zeta}{A binary, indicates whether the power's parameter \eqn{\zeta} should 
+be estimated (1) or not (0). If \code{0}, \eqn{\zeta} will be set to \code{1} during estimation. 
+The default is \code{1}. This parameter can be seted to \code{0} in case of convergence and 
 identification issues.}
 
-\item{indicator.alpha}{A binary, indicating whether the power's parameter \eqn{\alpha} should
+\item{indicator.alpha}{A binary, indicates whether the power's parameter \eqn{\alpha} should 
 be estimated (1) or not (0). If \code{0}, \eqn{\alpha} will be set to \code{1} during estimation.
 The default is 1.}
 
-\item{frail.base}{A binary, indicating whether the heterogeneity between trial on the baseline risk
-is  considered (\code{1}) or not (\code{0}), using
-the shared cluster specific frailties \if{html}{u\out{<sub>i</sub>}} \if{latex}{(\eqn{u_i})}. The default is \code{1}.}
+\item{frail.base}{Considered the heterogeneity between trial on the baseline risk (\code{1}), using 
+the shared cluster specific frailties (\eqn{u_i}), or not (\code{0}). The default is \code{1}.}
 
 \item{n.knots}{integer giving the number of knots to use. Value required in
 the penalized likelihood estimation.  It corresponds to the (n.knots+2)
@@ -58,37 +55,37 @@ is (k-2) and the number of splines is (k-2)+order.  Number of knots must be
 between 4 and 20. (See \code{\link{frailtyPenal}} for more details).}
 
 \item{LIMparam}{Convergence threshold of the Marquardt algorithm for the
-parameters, \if{html}{10\out{<sup>-3</sup>}} \if{latex}{\eqn{10^{-3}}} by default (See \code{\link{frailtyPenal}} for more details).}
+parameters, \eqn{10^{-3}} by default (See \code{\link{frailtyPenal}} for more details).}
 
 \item{LIMlogl}{Convergence threshold of the Marquardt algorithm for the
-log-likelihood, \if{html}{10\out{<sup>-3</sup>}} \if{latex}{\eqn{10^{-3}}} by default (See \code{\link{frailtyPenal}} for more details).}
+log-likelihood, \eqn{10^{-3}} by default (See \code{\link{frailtyPenal}} for more details).}
 
-\item{LIMderiv}{Convergence threshold of the Marquardt algorithm for the gradient, \if{html}{10\out{<sup>-3</sup>}} \if{latex}{\eqn{10^{-3}}} by default
+\item{LIMderiv}{Convergence threshold of the Marquardt algorithm for the gradient, \eqn{10^{-3}} by default 
 (See \code{\link{frailtyPenal}} for more details).}
 
-\item{nb.mc}{Number of samples considered in the Monte-Carlo integration. Required in the event
-\code{int.method} is equals to \code{0}, \code{2} or \code{4}. A value between 100 and 300 most often gives
+\item{nb.mc}{Number of samples considered in the Monte-Carlo integration. Required in case 
+\code{int.method} is equals to \code{0}, \code{2} or \code{4}. A value between 100 and 300 most often gives 
 good results. However, beyond 300, the program takes a lot of time to estimate the parameters.
 The default is \code{300}.}
 
 \item{nb.gh}{Number of nodes for the Gaussian-Hermite quadrature. It can
 be chosen among 5, 7, 9, 12, 15, 20 and 32. The default is 32.}
 
-\item{nb.gh2}{Number of nodes for the Gauss-Hermite quadrature used to re-estimate the model,
-in the event of non-convergence, defined as previously. The default is \code{20}.}
+\item{nb.gh2}{Number of nodes for the Gauss-Hermite quadrature used to re-estimate the model, 
+in case of non-convergence, defined as previously. The default is \code{20}.}
 
 \item{adaptatif}{A binary, indicates whether the pseudo adaptive Gaussian-Hermite quadrature \code{(1)} or the classical
 Gaussian-Hermite quadrature \code{(0)} is used. The default is \code{0}.}
 
-\item{int.method}{A numeric, indicates the integration method: \code{0} for Monte carlo,
-\code{1} for Gaussian-Hermite quadrature, \code{2} for a combination of both Gaussian-Hermite quadrature to
+\item{int.method}{A numeric, indicates the integration method: \code{0} for Monte carlo, 
+\code{1} for Gaussian-Hermite quadrature, \code{2} for a combination of both Gaussian-Hermite quadrature to 
 integrate over the individual-level random effects and Monte carlo to integrate over the trial-level
-random effects, \code{4} for a combination of both Monte carlo to integrate over
+random effects, \code{4} for a combination of both Monte carlo to integrate over 
 the individual-level random effects and Gaussian-Hermite quadrature to integrate over the trial-level
 random effects. The default is \code{2}.}
 
 \item{nb.iterPGH}{Number of iterations before the re-estimation of the posterior random effects,
-in the event of the two-steps pseudo-adaptive Gaussian-hermite quadrature. If set to \code{0} there is no
+in case of the two-steps pseudo-adaptive Gaussian-hermite quadrature. If set to \code{0} there is no 
 re-estimation". The default is \code{5}.}
 
 \item{nb.MC.kendall}{Number of generated points used with the Monte-Carlo to estimate
@@ -98,87 +95,76 @@ stable reseults. The default is \code{10000}.}
 \item{nboot.kendall}{Number of samples considered in the parametric bootstrap to estimate the confidence
 interval of the Kendall's \eqn{\tau}. The default is \code{1000}.}
 
-\item{true.init.val}{Numerical value. Indicates if the given initial values to parameters \code{(0)} should be considered.
-If set to \code{2}, \eqn{\alpha} and \eqn{\gamma} are initialised using two separed shared frailty model
-(see \code{\link{frailtyPenal}} for more details); \if{html}{\eqn{\sigma}\out{<sup>2</sup><sub>v<sub>S</sub></sub>},
-\eqn{\sigma}\out{<sup>2</sup><sub>v<sub>T</sub></sub>} and
-\eqn{\sigma}\out{<sub>v<sub>ST</sub></sub>}}
-\if{latex}{\eqn{\sigma^2_{v_S}}, \eqn{\sigma^2_{v_T}} and
-\eqn{\sigma_{v_{ST}}}} are fixed by the user or the default values; \eqn{\zeta},
-\eqn{\theta}, \if{html}{\eqn{\beta}\out{<sub>S</sub>} and \eqn{\beta}\out{<sub>T</sub>}}
-\if{latex}{\eqn{\beta_S} and \eqn{\beta_T}} are initialized using a classical joint
-frailty model, considering individual level random effects. If the joint frailty model is
-faced to convergence issues, \if{html}{\eqn{\beta}\out{<sub>S</sub>} and \eqn{\beta}\out{<sub>T</sub>}}
-\if{latex}{\eqn{\beta_S} and \eqn{\beta_T}} are initialized using
-two shared frailty models.  In all other scenarios, if the simplified model does not converge,
-default given parameters values are used. Initial values for spline's associated parameters
+\item{true.init.val}{Numerical value. Indicates if the given initial values to parameters \code{(0)} should be considered. 
+If set to \code{2}, \eqn{\alpha} and \eqn{\gamma} are initialised using two separed shared frailty model 
+(see \code{\link{frailtyPenal}} for more details); \eqn{\sigma^2_{v_S}}, \eqn{\sigma^2_{v_T}} and
+\eqn{\sigma_{v_{ST}}} are fixed by the user or the default values; \eqn{\zeta}, 
+\eqn{\theta}, \eqn{\beta_S} and \eqn{\beta_T} are initialized using a classical joint 
+frailty model, considering individual level random effects. If the joint frailty model is 
+faced to convergence issues, \eqn{\beta_S} and \eqn{\beta_T} are initialized using 
+two shared frailty models.  In all others scenarios, if the simplified model does not converge,
+default given parameters values are used. Initial values for spline's associated parameters 
 are fixed to \code{0.5}. The default for this argument is \code{0}.}
 
-\item{theta.init}{Initial values for \eqn{\theta}, required if \code{true.init.val}
+\item{theta.init}{Initial values for \eqn{\theta}, required if \code{true.init.val} 
 is set to \code{0} or \code{2}. The default is \code{1}.}
 
-\item{sigma.ss.init}{Initial values for \if{latex}{\eqn{\sigma^2_{v_S}}}
-\if{html}{\eqn{\sigma}\out{<sup>2</sup><sub>v<sub>S</sub></sub>}}, required if \code{true.init.val}
+\item{sigma.ss.init}{Initial values for \eqn{\sigma^2_{v_S}}, required if \code{true.init.val} 
 is set to \code{0} or \code{2}. The default is \code{0.5}.}
 
-\item{sigma.tt.init}{Initial values for \if{latex}{\eqn{\sigma^2_{v_T}}}
-\if{html}{\eqn{\sigma}\out{<sup>2</sup><sub>v<sub>T</sub></sub>}}, required if \code{true.init.val}
+\item{sigma.tt.init}{Initial values for \eqn{\sigma^2_{v_T}}, required if \code{true.init.val} 
 is set to \code{0} or \code{2}. The default is \code{0.5}.}
 
-\item{sigma.st.init}{Initial values for\if{latex}{\eqn{\sigma_{v_{ST}}}}
-\if{html}{\eqn{\sigma}\out{<sub>v<sub>ST</sub></sub>}}, required if \code{true.init.val}
+\item{sigma.st.init}{Initial values for \eqn{\sigma_{v_{ST}}}, required if \code{true.init.val} 
 is set to \code{0} or \code{2}. The default is \code{0.48}.}
 
-\item{gamma.init}{Initial values for \eqn{\gamma}, required if \code{true.init.val}
+\item{gamma.init}{Initial values for \eqn{\gamma}, required if \code{true.init.val} 
 is set to \code{0} or \code{2}. The default is \code{0.5}.}
 
-\item{alpha.init}{Initial values for \eqn{\alpha}, required if \code{true.init.val}
+\item{alpha.init}{Initial values for \eqn{\alpha}, required if \code{true.init.val} 
 is set to \code{0} or \code{2}. The default is \code{1}.}
 
-\item{zeta.init}{Initial values for \eqn{\zeta}, required if \code{true.init.val}
+\item{zeta.init}{Initial values for \eqn{\zeta}, required if \code{true.init.val} 
 is set to \code{0} or \code{2}. The default is \code{1}.}
 
-\item{betas.init}{Initial values for \if{latex}{\eqn{\beta_S}} \if{html}{\eqn{\beta}\out{<sub>S</sub>}}, required if \code{true.init.val}
+\item{betas.init}{Initial values for \eqn{\beta_S}, required if \code{true.init.val} 
 is set to \code{0} or \code{2}. The default is \code{0.5}.}
 
-\item{betat.init}{Initial values for \if{latex}{\eqn{\beta_T}} \if{html}{\eqn{\beta}\out{<sub>T</sub>}}, required if \code{true.init.val}
+\item{betat.init}{Initial values for \eqn{\beta_T}, required if \code{true.init.val} 
 is set to \code{0} or \code{2}. The default is \code{0.5}.}
 
-\item{scale}{A numeric that allows to rescale (multiplication) the survival times, to avoid numerical
-problems in the event of some convergence issues. If no change is needed the argument is set to 1, the default value.
-eg: \code{1/365} aims to convert days to years ".}
+\item{scale}{A numeric that allows to rescale the survival times, to avoid numerical 
+problems in case of some convergence issues. If no change is need the argument is set to 1, the default value. 
+eg: 365 aims to convert days to years ".}
 
-\item{random.generator}{Random number generator used by the Fortran compiler,
-\code{1} for the intrinsec subroutine \code{Random_number} and \code{2} for the
-subroutine \code{uniran()}. The default is \code{1}. in the event of convergence problem
-with \code{int.method} set to \code{0}, \code{2} or \code{4}, that requires
+\item{random.generator}{Random number generator to use by the Fortran compiler, 
+\code{1} for the intrinsec subroutine \code{Random_number} and \code{2} for the 
+subroutine \code{uniran()}. The default is \code{1}. In case of convergence problem 
+with \code{int.method} set to \code{0}, \code{2} or \code{4}, that requires  
 integration by Monte-Carlo, user could change the random numbers generator.}
 
-\item{kappa.use}{A numeric, that indicates how to manage the smoothing parameters \if{latex}{\code{k_1}} \if{html}{k\out{<sub>1</sub>}}
-and \if{latex}{\code{k_2}} \if{html}{k\out{<sub>2</sub>}}  in the event of convergence issues. If it is set to \code{1},
-the given smoothing parameters or those obtained by cross-validation are used.
-If it is set to \code{3}, the associated smoothing parameters are successively divided by 10,
-in the event of convergence issues until 5 times. If it is set to \code{4}, the management of the
-smoothing parameter is as in the event \code{1}, follows by the successive division as described
-in the event \code{3} and preceded by the changing of the number of nodes for the Gauss-Hermite quadrature.
+\item{kappa.use}{A numeric, that indicates how to manage the smoothing parameters \code{k_1} 
+and \code{k_2} in case of convergence issues. If it is set to \code{1}, 
+the given smoothing parameters or those obtained by cross-validation are used. 
+If it is set to \code{3}, the associated smoothing parameters are successively divided by 10, 
+in case of convergence issues until 5 times. If it is set to \code{4}, the management of the
+smoothing parameter is as in case \code{1}, follows by the successive division as described 
+in case \code{3} and preceded by the changing of the number of nodes for the Gauss-Hermite quadrature. 
 The default is \code{4}.}
 
-\item{random}{A binary that says if we reset the random number generation with a different environment
-at each call \code{(1)} or not \code{(0)}. If it is set to \code{1}, we use the computer clock
-as seed. In the last case, it is not possible to reproduce the generated datasets.
+\item{random}{A binary that says if we reset the random number generation with a different environment 
+at each call \code{(1)} or not \code{(0)}. If it is set to \code{1}, we use the computer clock 
+as seed. In the last case, it is not possible to reproduce the generated datasets". 
 The default is \code{0}. Required if \code{random.generator} is set to 1.}
 
-\item{random.nb.sim}{If \code{random} is set to \code{1}, a binary that indicates the number
+\item{random.nb.sim}{If \code{random} is set to \code{1}, a binary that indicates the number 
 of generations that will be made.}
 
-\item{seed}{The seed to use for data (or samples) generation. required if \code{random} is set to \code{0}.
+\item{seed}{The seed to use for data (or samples) generation. required if \code{random} is set to \code{0}. 
 The default is \code{0}.}
 
-\item{init.kappa}{smoothing parameter used to penalized the log-likelihood. By default (init.kappa = NULL) the values used
+\item{init.kappa}{smoothing parameter used to penalized the log-likelihood. By default (init.kappa = NULL) the values used 
 are obtain by cross-validation.}
-
-\item{ckappa}{Vector of two fixed values to add to the smoothing parameters. By default it is set to (0,0). this argument allows
-to well manage the smoothing parameters in the event of convergence issues.}
 
 \item{nb.decimal}{Number of decimal required for results presentation.}
 
@@ -187,79 +173,31 @@ is TRUE.}
 
 \item{print.iter}{a logical parameter to print iteration process. Default
 is FALSE.}
-
-\item{mediation}{a logical value indicating if the mediation analysis method is used.
-Default is FALSE.}
-
-\item{g.nknots}{In the case of a mediation analysis, indicates how many inner knots
-are used in the splines basis for estimating the function \eqn{g(s)}.
-The value of \code{g.nknots} should be between 1 and 5. Default is 1.}
-
-\item{rt.times}{In the mediation analysis setting, a vector of times for which the
-funtion \eqn{R(t)} is evaluated. Specified time points must be in the range of
-the observed event times. The length of the vector should be less than 200.}
-
-\item{rt.ntimes}{In the mediation setting, if the argument \code{rt.times} is not specified
-the argument \code{rt.ntimes} allows the user to only specify a number of
-time points for which the function \eqn{R(t)} has to be computed. This argument
-is only to be used if \code{rt.times} is not specified. In that case
-the default value for \code{rt.ntimes} is 10. The value of \code{rt.ntimes}
-should be less than 200.}
-
-\item{rt.nmc}{An integer indicating how many Monte Carlo simulations are used
-to integrate over the random effects in the computation of the function \eqn{R(t)}.
-in the mediation analysis setting. Default is 500.}
-
-\item{rt.boot}{A logical value indicating if bootstrapped confidence bands needs to be computed for the
-function \eqn{R(t)} in the mediation analysis setting. Default is FALSE.}
-
-\item{rt.nboot}{An integer indicating how many bootstrapped replicates of R(t) needs
-to be computed to derive confidence bands for R(t). Default is 2000.}
-
-\item{rt.boot.nmc}{If \code{rt.boot} is TRUE, indicates how many Monte Carlo simulations are used
-to integrate over the random effects in the bootstrapped functions \eqn{R(t)}
-in the mediation analysis setting. Default is 500}
-
-\item{rt.integ.type}{An integer indicating which type of integration over the distribution of
-\eqn{S} should be used in the computation of the function
-\eqn{R(t)}. If set to \code{1}, a simple trapezoidal rule is used with 300 integration points.
-If set to \code{2} a Gauss-Laguerre quadrature is used with 30 knots. Default is \code{2}.}
 }
 \value{
-This function return an object of class jointSurroPenal or jointSurroMed in the mediation analysis setting with elements:
+This function return an object of class jointSurroPenal with elements :
 
-   \item{EPS}{A vector containing the obtained convergence thresholds with the Marquardt algorithm,
+   \item{EPS}{A vector containing the obtained convergence thresholds with the Marquardt algorithm,  
     for the parameters, the log-likelihood and for the gradient;}
-   \item{b}{\if{latex}{A vector containing estimates for the splines parameter's;
+   \item{b}{A vector containing estimates for the splines parameter's, 
    the power's parameter \eqn{\zeta} (if \code{indicator.zeta} is set to \code{1}),
-    the standard error of the shared individual-level frailty \eqn{\omega_{ij}} (\eqn{\theta}),elements of the
-    lower triangular matrix (L) from the Cholesky decomposition such that \eqn{\Sigma = LL^T}, with \eqn{\Sigma}
-    the covariance of the random effects \eqn{(v_{S_i},v_{T_i})}; the coefficient \eqn{\alpha}
-    (if \code{indicator.alpha} is set to \code{1}); the satandard error of the random effect \eqn{u_i}; and
-    the regression coefficients \eqn{\beta_S} and \eqn{\beta_T};}
-    \if{html}{A vector containing estimates for the splines parameter's;
-    the power's parameter \eqn{\zeta} (if \code{indicator.zeta} is set to \code{1}),
-    the standard error of the shared individual-level frailty \eqn{\omega}\out{<sub>ij</sub>} (\eqn{\theta}),elements of the
-    lower triangular matrix (L) from the Cholesky decomposition such that \eqn{\Sigma} = LL\out{<sup>T</sup>}, with \eqn{\Sigma}
-    the covariance of the random effects (\out{v<sub>S<sub>i</sub></sub>},\out{v<sub>T<sub>i</sub></sub>});
-    the coefficient \eqn{\alpha} (if \code{indicator.alpha} is set to \code{1}); the satandard error
-    of the random effect \code{u}\out{<sub>i</sub>}and the regression coefficients \eqn{\beta}\out{<sub>S</sub>}
-    and \eqn{\beta}\out{<sub>T</sub>};}
-    }
-    \item{varH}{The variance matrix of all parameters in \code{b} (before positivity constraint transformation
+    the standard error of the shared individual-level frailty \eqn{\omega_{ij}} (\eqn{\theta}), elements of the
+    lower triangular matrix (L) from the Cholesky decomposition such that \eqn{\Sigma = LL^T}, with \eqn{\Sigma} 
+    the covariances of the random effects \eqn{(v_{S_i},v_{T_i})}, the coefficient \eqn{\alpha} 
+    (if \code{indicator.alpha} is set to \code{1}), the satandard error of the random effect \eqn{u_i} and the 
+    regression coefficients \eqn{\beta_S} and \eqn{\beta_T};}
+    \item{varH}{The variance matrix of all parameters in \code{b} (before positivity constraint transformation 
    for the variance of the measurement error, for which the delta method is used);}
    \item{varHIH}{The robust estimation of the variance matrix of all parameters in \code{b};}
    \item{loglikPenal}{The complete marginal penalized log-likelihood;}
    \item{LCV}{the approximated likelihood cross-validation criterion in the semiparametric case (with \code{H}
     minus the converged Hessian matrix, and \code{l(.)} the full log-likelihood).
-   \if{html}{
-    {\figure{lcv.png}{options: width="50\%"}}}
-    \if{latex}{\deqn{LCV = \frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))};}}
-   \item{xS}{vector of times for surrogate endpoint where both survirt.nmc.bootval and hazard function are estimated.
+   \deqn{LCV = \frac{1}{n}(trace(H^{-1}_{pl}H) - l(.));}}
+   \item{xS}{vector of times for surrogate endpoint where both survival and hazard function are estimated. 
    By default seq(0,max(time),length=99), where time is the vector of survival times;}
    \item{lamS}{array (dim = 3) of hazard estimates and confidence bands, for surrogate endpoint;}
    \item{survS}{array (dim = 3) of baseline survival estimates and confidence bands, for surrogate endpoint;}
-   \item{xT}{vector of times for true endpoint where both survival and hazard function are estimated.
+   \item{xT}{vector of times for true endpoint where both survival and hazard function are estimated. 
    By default seq(0, max(time), length = 99), where time is the vector of survival times;}
    \item{lamT}{array (dim = 3) of hazard estimates and confidence bands, for true endpoint;}
    \item{survT}{array (dim = 3) of baseline survival estimates and confidence bands, for true endpoint;}
@@ -268,54 +206,36 @@ This function return an object of class jointSurroPenal or jointSurroMed in the 
    \item{gamma}{Estimate for \eqn{\gamma};}
    \item{alpha}{Estimate for \eqn{\alpha};}
    \item{zeta}{Estimate for \eqn{\zeta};}
-   \item{sigma.s}{Estimate for \if{latex}{\eqn{\sigma^2_{v_S}}}\if{html}{\eqn{\sigma}\out{<sup>2</sup><sub>v<sub>S</sub></sub>}};}
-   \item{sigma.t}{Estimate for \if{latex}{\eqn{\sigma^2_{v_T}}}\if{html}{\eqn{\sigma}\out{<sup>2</sup><sub>v<sub>T</sub></sub>}};}
-   \item{sigma.st}{Estimate for \if{latex}{\eqn{\sigma_{v_{ST}}}} \if{html}{\eqn{\sigma}\out{<sub>v<sub>ST</sub></sub>}};}
-   \item{beta.s}{Estimate for \if{latex}{\eqn{\beta_S}} \if{html}{\eqn{\beta}\out{<sub>S</sub>}};}
-   \item{beta.t}{Estimate for \if{latex}{\eqn{\beta_T}} \if{html}{\eqn{\beta}\out{<sub>T</sub>}};}
-   \item{ui}{A binary, that indicates if the heterogeneity between trial on the baseline risk
-   has been Considered (\code{1}), using the shared cluster specific frailties \if{latex}{(\eqn{u_i})}
-   \if{html}{(\code{u}\out{<sub>i</sub>})},
+   \item{sigma.s}{Estimate for \eqn{\sigma_S};}
+   \item{sigma.t}{Estimate for \eqn{\sigma_T};}
+   \item{sigma.st}{Estimate for \eqn{\sigma_{ST}};}
+   \item{beta.s}{Estimate for \eqn{\beta_S};}
+   \item{beta.t}{Estimate for \eqn{\beta_T};}
+   \item{ui}{A binary, that indicates if the heterogeneity between trial on the baseline risk 
+   has been Considered (\code{1}), using the shared cluster specific frailties (\eqn{u_i}), 
    or not (\code{0});}
    \item{ktau}{The Kendall's \eqn{\tau} with the correspondant 95  \eqn{\%} CI computed using the parametric bootstrap;}
-   \item{R2.boot}{The \if{latex}{\eqn{R^2_{trial}}}
-   \if{html}{\code{R}\out{<sup>2</sup><sub>trial</sub>}} with the correspondant 95 \eqn{\%} CI computed using the parametric bootstrap;}
+   \item{R2.boot}{The \eqn{R^2_{trial}} with the correspondant 95 \eqn{\%} CI computed using the parametric bootstrap;}
    \item{Coefficients}{The estimates with the corresponding standard errors and the 95 \eqn{\%} CI}
-   \item{kappa}{Positive smoothing parameters used for convergence. These values could be different to initial
+   \item{kappa}{Positive smoothing parameters used for convergence. These values could be different to initial 
    values if \code{kappa.use} is set to \code{3} or \code{4};}
    \item{scale}{The value used to rescale the survival times}
    \item{data}{The dataset used in the model}
-   \item{varcov.Sigma}{covariance matrix of \if{latex}{(\eqn{\sigma^2_{v_S}},\eqn{\sigma^2_{v_T}},\eqn{\sigma_{v_{ST}}})}
-   \if{html}{the estimates of (\eqn{\sigma}\out{<sup>2</sup><sub>v<sub>S</sub></sub>},\eqn{\sigma}\out{<sup>2</sup><sub>v<sub>T</sub></sub>},
-   \eqn{\sigma}\out{<sub>v<sub>ST</sub></sub>})}
+   \item{varcov.Sigma}{covariance matrix of (\eqn{\hat{\sigma_S}},\eqn{\hat{\sigma_{T}}}, \eqn{\hat{\sigma_{ST}}})
    obtained from the delta-method}
    \item{parameter}{list of all arguments used in the model}
-   \item{mediation}{List returned in the case where the option \code{mediation} is set to \code{TRUE} which contains:
-   \itemize{
-     \item data.rt: A dataframe containing estimated values for the funtion R(t) and the natural effects for differents time points
-     \item g.knots: The vector of knots used in the spline basis for the function g.
-     \item g.order: The order of the spline basis used to estimate the function g.
-     \item g.coefficients: A vector containing the estimated coefficients associated with the splines in the estimation of the function g.
-     \item data.g: A dataframe containing the values of the estimated function g computed at several time points and the associated 95% confidence bands.
-     \item Rt.ci: A dataframe containing the 95% confidences bands for the function R(t), returned only if the option \code{rt.boot} is set to TRUE
-     \item TE.ci: A dataframe containing the 95% confidences bands for the total effect, returned only if the option \code{rt.boot} is set to TRUE
-     \item NDE.ci: A dataframe containing the 95% confidences bands for the natural direct effect, returned only if the option \code{rt.boot} is set to TRUE
-     \item NIE.ci: A dataframe containing the 95% confidences bands for the natural indirect effect, returned only if the option \code{rt.boot} is set to TRUE
-   }}
 }
 \description{
 {
-\if{html}{\bold{Joint Frailty Surrogate model definition}
+\if{html}{\bold{Joint Frailty Surrogate model definition} 
 
-Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint,
-with different integration methods on the random effects, using a semiparametric penalized
-likelihood estimation. This approach extends that of Burzykowski \code{et al.} (2001) by
+Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint, 
+with different integration methods on the random effects, using a semiparametric penalized 
+likelihood estimation. This approach extends that of Burzykowski \code{et al.} (2001) by 
 including in the same joint frailty model the individual-level and the trial-level random effects.
-This function can also be used for mediation analysis where a direct effect of the surrogate time \eqn{S}
-on the final endpoint \eqn{T} is allowed through a function \eqn{g(S)}.
-
-For the j\out{<sup>th</sup>} subject (j=1,...,n\out{<sub>i</sub>}) of the i\out{<sup>th</sup>}
-trial (i=1,...,G), the joint surrogate model is defined as follows:
+ 
+For the j\out{<sup>th</sup>} subject (j=1,...,n\out{<sub>i</sub>}) of the i\out{<sup>th</sup>} 
+trial i (i=1,...,G), the joint surrogate model is defined as follows:
 
 {\figure{surromodel1.png}{options: width="100\%"}}
 
@@ -323,100 +243,73 @@ where,
 \eqn{\omega}\out{<sub>ij</sub>} \out{&#126;} \eqn{N}(0,\eqn{\theta}), u\out{<sub>i</sub>} \out{&#126;} \eqn{N}(0,\eqn{\gamma}), \eqn{\omega}\out{<sub>i</sub>} \out{&#8869;} u\out{<sub>i</sub>},
 u\out{<sub>i</sub>} \out{&#8869;} v\out{<sub>S<sub>i</sub></sub>}, u\out{<sub>i</sub>} \out{&#8869;} v\out{<sub>T<sub>i</sub></sub>}
 
-and
+and 
 (v\out{<sub>S<sub>i</sub></sub>},v\out{<sub>T<sub>i</sub></sub>})\out{<sup>T</sup>} \out{&#126;} \eqn{N}(0,\eqn{\Sigma}\out{<sub>v</sub>})
 
 with
 
 {\figure{surromodel2.png}{options: width="100\%"}}
 
-In this model, \eqn{\lambda}\out{<sub>0s</sub>}(t) is the baseline hazard function associated with the
-surrogate endpoint and \eqn{\beta}\out{<sub>S</sub>} the fixed treatment effect (or log-hazard ratio);
-\eqn{\lambda}\out{<sub>0T</sub>}(t) is the baseline hazard function associated with the true endpoint
-and \eqn{\beta}\out{<sub>T</sub>} the fixed treatment effect. \eqn{\omega}\out{<sub>ij</sub>} is a shared individual-level frailty that serve to take into account the
-heterogeneity in the data at the individual level; u\out{<sub>i</sub>} is a shared frailty effect associated
-with the baseline hazard function that serve to take into account the heterogeneity between trials
-of the baseline hazard function, associated with the fact that we have several trials in this
-meta-analytical design. The power parameters \eqn{\zeta} and \eqn{\alpha} distinguish
-both individual and trial-level heterogeneities between the surrogate and the true endpoint.
-v\out{<sub>S<sub>i</sub></sub>} and v\out{<sub>T<sub>i</sub></sub>} are two correlated random effects treatment-by-trial interactions.
+In this model, \eqn{\lambda}\out{<sub>0s</sub>}(t) is the baseline hazard function associated with the 
+surrogate endpoint and \eqn{\beta}\out{<sub>S</sub>} the fixed treatment effect (or log-hazard ratio); 
+\eqn{\lambda}\out{<sub>0T</sub>}(t) is the baseline hazard function associated with the true endpoint 
+and \eqn{\beta}\out{<sub>T</sub>} the fixed treatment effect. \eqn{\omega}\out{<sub>ij</sub>} is a shared individual-level frailty that serve to take into account the 
+heterogeneity in the data at the individual level; u\out{<sub>i</sub>} is a shared frailty effect associated 
+with the baseline hazard function that serve to take into account the heterogeneity between trials 
+of the baseline hazard function, associated with the fact that we have several trials in this 
+meta-analytical design. The power parameters \eqn{\zeta} and \eqn{\alpha} distinguish 
+both individual and trial-level heterogeneities between the surrogate and the true endpoint. 
+v\out{<sub>S<sub>i</sub></sub>} and v\out{<sub>T<sub>i</sub></sub>} are two correlated random effects treatment-by-trial interactions. 
 \eqn{Z}\out{<sub>ij1</sub>} represents the treatment arm to which the patient has been randomized.
-In the mediation analysis setting, the hazard function for the true endpoint
-becomes:
-
-{\figure{jointsurromed.png}{options: width="100\%"}}
-
-where the term I(S\out{<sub>ij</sub>}\out{&le;} t)g(S\out{<sub>ij</sub>}) allows
-for a direct effect of the surrogate time \eqn{S} on the risk
-of occurrence of the final endpoint \eqn{T}.
 
 \bold{Surrogacy evaluation}
 
-We proposed new definitions of Kendall's \eqn{\tau} and coefficient of determination as
-individual-level and trial-level association measurements, to evaluate a candidate
-surrogate endpoint (Sofeu \emph{et al.}, 2018). For the surrogacy in the mediation analysis setting
-see the "Surrogacy through mediation" Section.
+We proposed new definitions of Kendall's \eqn{\tau} and coefficient of determination as 
+individual-level and trial-level association measurements, to evaluate a candidate 
+surrogate endpoint (Sofeu \emph{et al.}, 2018). The formulations are given below.
 
 \bold{Individual-level surrogacy}
 
-To measure the strength of association between \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>} after
-adjusting the marginal distributions for the trial and the treatment effects, as show in
+To measure the strength of association between \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>} after 
+adjusting the marginal distributions for the trial and the treatment effects, as show in 
 Sofeu \emph{et al.}(2018), we use the Kendall's \eqn{\tau} define by :
 
 {\figure{surromodel3.png}{options: width="100\%"}}
-
-
+       
+ 
  where \eqn{\theta}, \eqn{\zeta}, \eqn{\alpha} and \eqn{\gamma} are estimated using the joint surrogate model
- defined previously. Kendall's \eqn{\tau} is the difference between the probability of
- concordance and the probability of discordance of two realizations of \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>}.
- It belongs to the interval [-1,1] and assumes a zero value when \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>} are
+ defined previously. Kendall's \eqn{\tau} is the difference between the probability of 
+ concordance and the probability of discordance of two realizations of \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>}. 
+ It belongs to the interval [-1,1] and assumes a zero value when \eqn{S}\out{<sub>ij</sub>} and \eqn{T}\out{<sub>ij</sub>} are 
  independent. We estimate Kendall's \eqn{\tau} using Monte-Carlo or Gaussian Hermite
- quadrature integration methods. Its confidence interval is estimated using parametric
+ quadrature integration methods. Its confidence interval is estimated using parametric 
  bootstrap
-
+ 
  \bold{Trial-level surrogacy}
-
- The key motivation for validating a surrogate endpoint is to be able to predict the effect
- of treatment on the true endpoint, based on the observed effect of treatment on the
- surrogate endpoint. As shown by Buyse \emph{et al.} (2000), the coefficenient of
- determination obtains from the covariance matrix \eqn{\Sigma}\out{<sub>v</sub>} of the random effects
- treatment-by-trial interaction can be used to evaluate underlined prediction, and
- therefore as surrogacy evaluation measurement at trial-level. It is defined by:
-
+ 
+ The key motivation for validating a surrogate endpoint is to be able to predict the effect 
+ of treatment on the true endpoint, based on the observed effect of treatment on the 
+ surrogate endpoint. As shown by Buyse \emph{et al.} (2000), the coefficenient of 
+ determination obtains from the covariance matrix \eqn{\Sigma}\out{<sub>v</sub>} of the random effects 
+ treatment-by-trial interaction can be used to evaluate underlined prediction, and 
+ therefore as surrogacy evaluation measurement at trial-level. It is defined by: 
+ 
  {\figure{surromodel4.png}{options: width="100\%"}}
-
- The SEs of \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} is calculated using the Delta-method. We also propose
- \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} and 95\% CI computed using the parametric bootstrap. The use of delta-method
- can lead to confidence limits violating the [0,1], as noted by
+ 
+ The SEs of \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} is calculated using the Delta-method. We also propose 
+ \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} and 95\% CI computed using the parametric bootstrap. The use of delta-method 
+ can lead to confidence limits violating the [0,1], as noted by 
  (Burzykowski \emph{et al.}, 2001). However, using other methods would not significantly alter
- the findings of the surrogacy assessment
+ the findings of the surrogacy assessment 
+ }
+ \if{latex}{\bold{Joint Frailty Surrogate model definition} 
 
-
-\bold{Surrogacy through mediation}
-
-In the mediation analysis setting, the surrogacy measure is the proportion of treatment effect
-on the final endpoint \eqn{T} that goes through its effect on the surrogate \eqn{S}.
-This measure is a time-dependent function \eqn{R(t)} defined as:
-
-{\figure{rt.png}{options: width="50\%"}}
-
-where \eqn{NIE} and \eqn{TE} stand for "natual indirect effect" and "total effect"
-respectively. The numerator is the difference of the survival function of \eqn{T}
-for a subject whose treatment has been set to \eqn{1}  (experimental arm) for
-both \eqn{S} and \eqn{T} versus a subject for which the treatment for \eqn{T}
-is still \eqn{1} but is set \eqn{0} for \eqn{S}. This corresponds
-to the indirect effect (in ther of survival probability) of the treatment on \eqn{T}
-through \eqn{S}. The denominator is the total effect of the treatment on \eqn{T}.
-}
- \if{latex}{\bold{Joint Frailty Surrogate model definition}
-
-Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint,
-with different integration methods on the random effects, using a semiparametric penalized
-likelihood estimation. This approach extends that of Burzykowski \code{et al.} (2001) by
+Fit the one-step Joint surrogate model for the evaluation of a canditate surrogate endpoint, 
+with different integration methods on the random effects, using a semiparametric penalized 
+likelihood estimation. This approach extends that of Burzykowski \code{et al.} (2001) by 
 including in the same joint frailty model the individual-level and the trial-level random effects.
-This function can also be used for mediation analysis where a direct effect of the surrogate time \eqn{S}
-on the final endpoint \eqn{T} is allowed through a function \eqn{g(S)}.
-For the \eqn{j^{th}} subject (\code{j=1,\ldots,}\eqn{n_i}) of the \eqn{i^{th}}
+ 
+For the \eqn{j^{th}} subject (\code{j=1,\ldots,}\eqn{n_i}) of the \eqn{i^{th}} 
 trial \code{i} (\code{i=1,\ldots,}\eqn{G}), the joint surrogate model is defined as follows:
 
 \deqn{\left\{ \begin{array}{ll} \lambda_{S,ij}(t|\omega_{ij},u_i,v_{S_i},{Z_{ij1}}) &= \lambda_{0S}(t) \exp(\omega_{ij}+u_i+
@@ -429,105 +322,82 @@ where,
 \deqn{ \omega_{ij} \sim N (0,\theta), u_i \sim N (0,\gamma), \omega_{ij} \perp u_i, u_i \perp v_{S_i},
  u_i \perp v_{T_i} }
 
-and
+and 
 \eqn{(v_{S_i},v_{T_i})^{T}\sim\mathcal{N}\left({{0}},\Sigma_{v}\right)}, with
 \deqn{\Sigma_{v}=\left(
-                      \begin{array}{cc}
-                         \sigma^2_{v_S}  &  \sigma_{v_{ST}} \\
+                      \begin{array}{cc} 
+                         \sigma^2_{v_S}  &  \sigma_{v_{ST}} \\ 
                          \sigma_{v_{ST}} &  \sigma^2_{v_T}
                       \end{array}
                  \right)}
 
-In this model, \eqn{\lambda_{0S}(t)} is the baseline hazard function associated with the
-surrogate endpoint and \eqn{\beta_S} the fixed treatment effect (or log-hazard ratio);
-\eqn{\lambda_{0T}(t)} is the baseline hazard function associated with the true endpoint
-and \eqn{\beta_T} the fixed treatment effect. \eqn{\omega_{ij}} is a shared individual-level frailty that serve to take into account the
-heterogeneity in the data at the individual level; u\out{<sub>i</sub>} is a shared frailty effect associated
-with the baseline hazard function that serve to take into account the heterogeneity between trials
-of the baseline hazard function, associated with the fact that we have several trials in this
-meta-analytical design. The power parameters \eqn{\zeta} and \eqn{\alpha} distinguish
-both individual and trial-level heterogeneities between the surrogate and the true endpoint.
-\eqn{v_{S_i}} and \eqn{v_{T_i}} are two correlated random effects treatment-by-trial interactions.
+In this model, \eqn{\lambda_{0S}(t)} is the baseline hazard function associated with the 
+surrogate endpoint and \eqn{\beta_S} the fixed treatment effect (or log-hazard ratio); 
+\eqn{\lambda_{0T}(t)} is the baseline hazard function associated with the true endpoint 
+and \eqn{\beta_T} the fixed treatment effect. \eqn{\omega_{ij}} is a shared individual-level frailty that serve to take into account the 
+heterogeneity in the data at the individual level; \eqn{u_i} is a shared frailty effect associated 
+with the baseline hazard function that serve to take into account the heterogeneity between trials 
+of the baseline hazard function, associated with the fact that we have several trials in this 
+meta-analytical design. The power parameters \eqn{\zeta} and \eqn{\alpha} distinguish 
+both individual and trial-level heterogeneities between the surrogate and the true endpoint. 
+\eqn{v_{S_i}} and \eqn{v_{T_i}} are two correlated random effects treatment-by-trial interactions. 
 \eqn{Z_{ij1}} represents the treatment arm to which the patient has been randomized.
-In the mediation analysis setting, the hazard function for the true endpoint
-becomes:
-\deqn{\lambda_{T,ij}(t|\omega_{ij},u_i,v_{T_i},{Z_{ij1}},S_{ij}) = \lambda_{0T}(t) \exp({\zeta}\omega_{ij}+
-\alpha u_i+v_{T_i} Z_{ij1} + \beta_TZ_{ij1} + I(S_{ij}\leq t)g(S_{ij}))  }
-where the term \eqn{I(S_{ij}\leq t)g(S_{ij})} allows for a direct effect of the surrogate
-time \eqn{S} on the risk of occurrence of the final endpoint \eqn{T}.
 
 \bold{Surrogacy evaluation}
 
-We proposed new definitions of Kendall's \eqn{\tau} and coefficient of determination as
-individual-level and trial-level association measurements, to evaluate a candidate
-surrogate endpoint (Sofeu \emph{et al.}, 2018). For the surrogacy in the mediation analysis setting
-see the "Surrogacy through mediation" Section.
+We proposed new definitions of Kendall's \eqn{\tau} and coefficient of determination as 
+individual-level and trial-level association measurements, to evaluate a candidate 
+surrogate endpoint (Sofeu \emph{et al.}, 2018). The formulations are given below.
 
 \bold{Individual-level surrogacy}
 
-To measure the strength of association between \eqn{S_{ij}} and \eqn{T_{ij}} after
-adjusting the marginal distributions for the trial and the treatment effects, as show in
+To measure the strength of association between \eqn{S_{ij}} and \eqn{T_{ij}} after 
+adjusting the marginal distributions for the trial and the treatment effects, as show in 
 Sofeu \emph{et al.}(2018), we use the Kendall's \eqn{\tau} define by :
 
 \deqn{  \begin{array}{ll}
   \tau & = 2\int_{u_{i}}\int_{\omega_{ij}}
     \int_{u_{i'}}\int_{\omega_{i'j'}}\{ \\
-    & \frac{\exp(\omega_{ij}+u_{i}+\zeta \omega_{ij}+\alpha u_{i})+\exp(\omega_{i'j'}+u_{i'} +
-    \zeta \omega_{i'j'}+\alpha u_{i'})}{( \exp(\omega_{i'j'}+u_{i'})+ \exp(\omega_{ij}+u_{i}))
+    & \frac{\exp(\omega_{ij}+u_{i}+\zeta \omega_{ij}+\alpha u_{i})+\exp(\omega_{i'j'}+u_{i'} + 
+    \zeta \omega_{i'j'}+\alpha u_{i'})}{( \exp(\omega_{i'j'}+u_{i'})+ \exp(\omega_{ij}+u_{i})) 
     (\exp(\zeta \omega_{i'j'}+\alpha u_{i'}) + \exp(\zeta \omega_{ij}+\alpha u_{i}))} \\
    & \frac{1}{\sqrt{2\pi \theta}}\exp\left[-\frac{1}{2}\frac{\omega^2_{i'j'}}{\theta}\right]
      \frac{1}{\sqrt{2\pi\gamma}}\exp\left[-\frac{1}{2}\frac{u^2_{i'}}{\gamma}\right]
      d\omega_{i'j'}du_{i'} \\
    & \frac{1}{\sqrt{2\pi\theta}}\exp\left[-\frac{1}{2}\frac{\omega^2_{ij}}{\theta}\right] \frac{1}{\sqrt{2\pi\gamma}}\exp\left[-\frac{1}{2}\frac{u^2_{i}}{\gamma}\right]
-     d\omega_{ij}du_{i}\}
+     d\omega_{ij}du_{i}\} 
      -1
 \\ \end{array} }
-
-
+       
+ 
  where \eqn{\theta, \zeta, \alpha} and \eqn{\gamma} are estimated using the joint surrogate model
- defined previously. Kendall's \eqn{\tau} is the difference between the probability of
- concordance and the probability of discordance of two realizations of \eqn{S_{ij}} and \eqn{T_{ij}}.
- It belongs to the interval [-1,1] and assumes a zero value when \eqn{S_{ij}} and \eqn{T_{ij}} are
+ defined previously. Kendall's \eqn{\tau} is the difference between the probability of 
+ concordance and the probability of discordance of two realizations of \eqn{S_{ij}} and \eqn{T_{ij}}. 
+ It belongs to the interval [-1,1] and assumes a zero value when \eqn{S_{ij}} and \eqn{T_{ij}} are 
  independent. We estimate Kendall's \eqn{\tau} using Monte-Carlo or Gaussian Hermite
- quadrature integration methods. Its confidence interval is estimated using parametric
+ quadrature integration methods. Its confidence interval is estimated using parametric 
  bootstrap
-
+ 
  \bold{Trial-level surrogacy}
-
- The key motivation for validating a surrogate endpoint is to be able to predict the effect
- of treatment on the true endpoint, based on the observed effect of treatment on the
- surrogate endpoint. As shown by Buyse \emph{et al.} (2000), the coefficenient of
- determination obtains from the covariance matrix \eqn{\Sigma_v} of the random effects
- treatment-by-trial interaction can be used to evaluate underlined prediction, and
- therefore as surrogacy evaluation measurement at trial-level. It is defined by:
-
+ 
+ The key motivation for validating a surrogate endpoint is to be able to predict the effect 
+ of treatment on the true endpoint, based on the observed effect of treatment on the 
+ surrogate endpoint. As shown by Buyse \emph{et al.} (2000), the coefficenient of 
+ determination obtains from the covariance matrix \eqn{\Sigma_v} of the random effects 
+ treatment-by-trial interaction can be used to evaluate underlined prediction, and 
+ therefore as surrogacy evaluation measurement at trial-level. It is defined by: 
+ 
  \deqn{ R^2_{trial}=\frac{\sigma^2_{v_{ST}}}{\sigma^2_{v_S}\sigma^2_{v_T}}
  }
-
- The SEs of \eqn{R^2_{trial}} is calculated using the Delta-method. We also propose
- \eqn{R^2_{trial}} and 95\% CI computed using the parametric bootstrap. The use of delta-method
- can lead to confidence limits violating the [0,1], as noted by
+ 
+ The SEs of \eqn{R^2_{trial}} is calculated using the Delta-method. We also propose 
+ \eqn{R^2_{trial}} and 95\% CI computed using the parametric bootstrap. The use of delta-method 
+ can lead to confidence limits violating the [0,1], as noted by 
  (Burzykowski \emph{et al.}, 2001). However, using other methods would not significantly alter
- the findings of the surrogacy assessment
-
-\bold{Surrogacy through mediation}
-
-In the mediation analysis setting, the surrogacy measure is the proportion of treatment effect
-on the final endpoint \eqn{T} that goes through its effect on the surrogate \eqn{S}.
-This measure is a time-dependent function \eqn{R(t)} defined as:
-\deqn{
-   R(t)=\frac{S_{11}(t) - S_{10}(t)}{S_{11}(t) -  S_{00}(t)} = \frac{NIE(t)}{TE(t)}
+ the findings of the surrogacy assessment 
  }
 
-where \eqn{NIE} and \eqn{TE} stand for "natual indirect effect" and "total effect"
-respectively. The numerator is the difference of the survival function of \eqn{T}
-for a subject whose treatment has been set to \eqn{1}  (experimental arm) for
-both \eqn{S} and \eqn{T} versus a subject for which the treatment for \eqn{T}
-is still \eqn{1} but is set \eqn{0} for \eqn{S}. This corresponds
-to the indirect effect (in ther of survival probability) of the treatment on \eqn{T}
-through \eqn{S}. The denominator is the total effect of the treatment on \eqn{T}.
-
-} }
+}
 }
 \details{
 {
@@ -535,11 +405,8 @@ The estimated parameter are obtained using the robust Marquardt algorithm
 (Marquardt, 1963) which is a combination between a Newton-Raphson algorithm
 and a steepest descent algorithm. The iterations are stopped when the
 difference between two consecutive log-likelihoods was small
-(<
-\if{html}{10\out{<sup>-3</sup>}} \if{latex}{\eqn{10^{-3}}}), the estimated
-coefficients were stable (consecutive
-values (< \if{html}{10\out{<sup>-3</sup>}} \if{latex}{\eqn{10^{-3}}})), and the gradient
-small enough (< \if{html}{10\out{<sup>-3</sup>}} \if{latex}{\eqn{10^{-3}}}), by default.
+\eqn{(<10^{-3})}, the estimated coefficients were stable (consecutive
+values \eqn{(<10^{-3})}, and the gradient small enough \eqn{(<10^{-3})}, by default.
 Cubic M-splines of order 4 are used for the hazard function, and I-splines (integrated M-splines) are
 used for the cumulative hazard function.
 
@@ -548,143 +415,103 @@ with the positivity constraint of the variance component and the spline
 coefficients, a squared transformation is used and the standard errors are
 computed by the \eqn{\Delta}-method (Knight & Xekalaki, 2000). The smooth
 parameter can be chosen by maximizing a likelihood cross validation
-criterion (Joly and other, 1998).
+criterion (Joly and other, 1998). 
 
-We proposed based on the joint surrogate model a new definition
-of the Kendall's \eqn{\tau}. Moreover, distinct numerical integration methods are available to approximate the
+We proposed based on the joint surrogate model a new definition 
+of the Kendall's \eqn{\tau}. Moreover, distinct numerical integration methods are available to approximate the 
 integrals in the marginal log-likelihood.
 
 \bold{Non-convergence case management procedure}
 
-Special attention must be given to initializing model parameters, the choice of the number of
-spline knots, the smoothing parameters and the number of quadrature points to solve convergence
-issues. We first initialized parameters using the user's desired strategy, as specified
-by the option \code{true.init.val}. When numerical or convergence problems are encountered,
-with \code{kappa.use} set to \code{4}, the model is fitted again using a combination of the following strategies:
+Special attention must be given to initializing model parameters, the choice of the number of 
+spline knots, the smoothing parameters and the number of quadrature points to solve convergence 
+issues. We first initialized parameters using the user's desired strategy, as specified 
+by the option \code{true.init.val}. When numerical or convergence problems are encountered, 
+with \code{kappa.use} set to \code{4}, the model is fitted again using a combination of the following strategies: 
 vary the number of quadrature point (\code{nb.gh} to \code{nb.gh2} or \code{nb.gh2} to \code{nb.gh})
-in the event of the use of the Gaussian Hermite quadrature integration (see \code{int.method});
-divided or multiplied the smoothing parameters (\if{latex}{\code{k_1}} \if{html}{k\out{<sub>1</sub>}},
-\if{latex}{\code{k_2}} \if{html}{k\out{<sub>2</sub>}}) by 10 or 100 according to
-their preceding values, or used parameter vectors obtained during the last iteration (with a
-modification of the number of quadrature points and smoothing parameters). Using this strategy,
-we usually obtained during simulation the rejection rate less than 3\%. A sensitivity analysis
-was conducted without this strategy, and similar results were obtained on the converged samples,
-with about a 23\% rejection rate.
+in case of the use of the Gaussian Hermite quadrature integration (see \code{int.method}); 
+divided or multiplied the smoothing parameters (\code{k_1}, \code{k_2}) by 10 or 100 according to 
+their preceding values, or used parameter vectors obtained during the last iteration (with a 
+modification of the number of quadrature points and smoothing parameters). Using this strategy, 
+we usually obtained during simulation the rejection rate less than 3\%. A sensitivity analysis 
+was conducted without this strategy, and similar results were obtained on the converged samples, 
+with about a 23\% rejection rate. 
 }
 }
 \examples{
 
-\donttest{
-# Generation of data to use
-data.sim <- jointSurrSimul(n.obs=600, n.trial = 30,cens.adm=549.24,
-         alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1, sigma.s = 0.7,
-         sigma.t = 0.7, cor = 0.8, betas = -1.25, betat = -1.25,
+# Generation of data to use 
+data.sim <- jointSurrSimul(n.obs=600, n.trial = 30,cens.adm=549.24, 
+         alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1, sigma.s = 0.7, 
+         sigma.t = 0.7, rsqrt = 0.8, betas = -1.25, betat = -1.25, 
          full.data = 0, random.generator = 1, seed = 0, nb.reject.data = 0)
 
-
-#Surrogacy evaluation based on generated data with a combination of Monte Carlo
+\dontrun{
+#Surrogacy evaluation based on ganerated data with a combination of Monte Carlo 
 #and classical Gaussian Hermite integration.*
 # (Computation takes around 5 minutes)
 
-joint.surro.sim.MCGH <- jointSurroPenal(data = data.sim, int.method = 2,
+joint.surro.sim.MCGH <- jointSurroPenal(data = data.sim, int.method = 2, 
                    nb.mc = 300, nb.gh = 20)
-
-#Surrogacy evaluation based on generated data with a combination of Monte Carlo
+                   
+#Surrogacy evaluation based on ganerated data with a combination of Monte Carlo 
 # and Pseudo-adaptive Gaussian Hermite integration.
 # (Computation takes around 4 minutes)
 
-joint.surro.sim.MCPGH <- jointSurroPenal(data = data.sim, int.method = 2,
+joint.surro.sim.MCPGH <- jointSurroPenal(data = data.sim, int.method = 2, 
                    nb.mc = 300, nb.gh = 20, adaptatif = 1)
-
+                   
 # Results
 summary(joint.surro.sim.MCGH)
 summary(joint.surro.sim.MCPGH)
 
 # Data from the advanced ovarian cancer randomized clinical trials.
-# Joint surrogate model with \eqn{\zeta} fixed to 1, 8 nodes spline
-# and the rescaled survival time.
+# Joint surrogate model with \\eqn{\\zeta} fixed to 1, 8 nodes spline 
+# and the rescaled survival time. 
 
 data(dataOvarian)
 # (Computation takes around 20 minutes)
-
-joint.surro.ovar <- jointSurroPenal(data = dataOvarian, n.knots = 8,
-                init.kappa = c(2000,1000), indicator.alpha = 0, nb.mc = 200,
+ 
+joint.surro.ovar <- jointSurroPenal(data = dataOvarian, n.knots = 8, 
+                init.kappa = c(2000,1000), indicator.alpha = 0, nb.mc = 200, 
                 scale = 1/365)
 # results
 summary(joint.surro.ovar)
 
-print(joint.surro.ovar)
-
-
-# Mediation analysis on the adjuvant chemotherapy
-# dataset where the surrogate is a time-to-relapse and the final endpoint is death.
-# 4 knots are used to estimate the two baseline hazard functions.
-# The function g(s) is estimated using cubic b-splines with 1 interior
-# knot ('g.nkots=1'). The function R(t) is computed at 100 time points
-# using 10.000 Monte Carlo simulations for integration over the random effects.
-# To reduce computation time in the provided example only one fifth of the
-# the original dataset is used and the confidence bands for the function
-# R(t) are not computed as well as the power parameters associated with
-# the random effects. Full example is commented thereafter.
-
-# We first need to change the variable "statusS" which in the dataset
-# encodes the indicator of a disease free survival event to an indicator
-# of a time to relapse event (i.e., resurgence of cancer or
-# onset of a second cancer) that excludes death as a composite event.
-# Thus, the patients whose variables "timeS" and "timeT" are equal
-# and whose variable "statusS" is equal to 1 will have
-# "statuS" be set to 0. We do this because composite endpoint may not
-# be appropriate in the setting of mediation analysis.
+# data from the adjuvant chemotherapy and resectable gastric cancer 
+# meta-analyses :
+# Joint surrogate model with initial values for the parameters and the 
+# smoothing parameters, and sample for the Monte-Carlo integration
+# generated by the subroutine \\code{uniran}.
+# (Computation takes around 14 minutes)
 
 data(gastadj)
-gastadj$timeS<-gastadj$timeS/365
-gastadj$timeT<-gastadj$timeT/365
-#here changing "statusS" to corresponds to a time to relapse event
-gastadj[gastadj$timeS==gastadj$timeT & gastadj$statusS==1,c("statusS")]<-0
-
-# select 20\% of the original dataset
-set.seed(1)
-n<-nrow(gastadj)
-subset<-gastadj[sort(sample(1:nrow(gastadj),round(n*0.2),replace = F)),]
-
-# Mediation model ('mediation=T'). Computation takes around 17 minutes
-mod.gast<-jointSurroPenal(subset,n.knots = 4,indicator.zeta = 0,
-                         indicator.alpha = 0,mediation=TRUE,g.nknots=1,
-                         rt.ntimes=30,rt.nmc=10000,rt.boot=FALSE)
-
-summary(mod.gast)
-plot(mod.gast)
-
-# Example on the full dataset, including estimation of the power parameters
-# mod.gast2<-jointSurroPenal(gastadj,n.knots = 4,mediation=TRUE,g.nknots=1,
-#                            rt.ntimes=30,rt.nmc=10000,rt.boot=T,
-#                            rt.nboot=2000,rt.boot.nmc=10000)
+joint.surro.gast <- jointSurroPenal(data = gastadj, nb.mc = 100, nb.gh = 20, 
+                indicator.zeta = 0, indicator.alpha = 0, n.knots = 10, 
+                random.generator = 2, init.kappa = c(367700100,10025184521))
 
 # results
-# plot(mod.gast2)
-# summary(mod.gast2)
+summary(joint.surro.gast)
+
 }
+
 }
 \references{
 Burzykowski, T., Molenberghs, G., Buyse, M., Geys, H., and Renard, D. (2001). Validation
-of surrogate end points in multiple randomized clinical trials with failure time end points.
+of surrogate end points in multiple randomized clinical trials with failure time end points. 
 Journal of the Royal Statistical Society: Series C (Applied Statistics) 50, 405-422.
 
 Buyse, M., Molenberghs, G., Burzykowski, T., Renard, D., and Geys, H. (2000). The validation
 of surrogate endpoints in meta-analyses of randomized experiments. Biostatistics 1, 49-67
 
-Sofeu, C. L., Emura, T., and Rondeau, V. (2019). One-step validation method for surrogate
-endpoints using data from multiple randomized cancer clinical trials with failure-time endpoints.
-Statistics in Medicine 38, 2928-2942.
-
-Le Coent, Q., Legrand, C., Rondeau, V. (2021). Time-to-event surrogate endpoint validation
-using mediation and meta-analytic data. Article submitted.
+Sofeu C.L., Emura T. and Rondeau V. (2018). One-step validation method for surrogate 
+endpoints in multiple randomized cancer clinical trials with failure-time endpoints. 
+\code{Under review}
 }
 \seealso{
 \code{\link{jointSurrSimul}}, \code{\link{summary.jointSurroPenal}}, \code{\link{jointSurroPenalSimul}}
 }
 \author{
-Casimir Ledoux Sofeu \email{casimir.sofeu@u-bordeaux.fr}, \email{scl.ledoux@gmail.com},
-Quentin Le Coent \email{quentin.le-coent@u-bordeaux.fr}  and
-Virginie Rondeau \email{virginie.rondeau@inserm.fr},
+Casimir Ledoux Sofeu \email{casimir.sofeu@u-bordeaux.fr}, \email{scl.ledoux@gmail.com} and 
+Virginie Rondeau \email{virginie.rondeau@inserm.fr}
 }

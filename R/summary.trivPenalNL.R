@@ -28,7 +28,7 @@
 #' @examples
 #' 
 #' 
-#' \donttest{
+#' \dontrun{
 #' 
 #' ###--- Trivariate joint model for longitudinal data, ---###
 #' ###--- recurrent events and a terminal event ---###

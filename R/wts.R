@@ -15,7 +15,7 @@
 #' @examples
 #' 
 #' 
-#' \donttest{
+#' \dontrun{
 #' 
 #' data(dataNCC)
 #' modJoint.ncc <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+cov1

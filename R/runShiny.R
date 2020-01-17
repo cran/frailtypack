@@ -9,7 +9,7 @@
 #' @references Rizopoulos D. (2016)
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' 
 #' runShiny()
 #' 

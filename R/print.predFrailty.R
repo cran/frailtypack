@@ -8,7 +8,7 @@ print.predFrailty <- function(x, digits = 3, ...)
 # 		dput(cl)
 # 		cat("\n")
 # 	}
-	if(!inherits(x, "predFrailty")){
+	if(class(x)!="predFrailty"){
 		stop("The object x must be a class predFrailty.")
 	}else{
 		if (!is.null(cl <- x$call)){

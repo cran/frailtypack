@@ -40,20 +40,9 @@
 #'
 #' Alternatively, a two-part model is proposed to fit a semicontinuous biomarker.
 #' The two-part model decomposes the biomarker's distribution into a binary
-#' outcome (zero vs. positive values) and a continuous outcome (positive values). In the
-#' conditional form, the continuous part is conditional on a positive value while in the
-#' marginal form, the continuous part corresponds to the marginal mean of the biomarker.
-#' A logistic mixed effects model fits the binary outcome and a linear or a lognormal mixed effects
-#' model fits the continuous outcome. 
-#' 
-#' A mediation analysis is possible to derive the proportion of the treatment effect on the survival
-#' outcome due to the treatment effect on the longitudinal outcome. The proportion of treatment 
-#' effect is derived as the ratio of the indirect effect over the total effect. This proportion is
-#' defined on the survival scale and the indirect effect is taken as the difference of survivals at a given time
-#' when the treatment is set to 1 for both the survival and longitudinal outcome and when the treatment
-#' is only set to 1 for the survival endpoint and 0 for the longitudinal outcome. The total effect is the difference
-#' of survivals when the treatment is set to 1 or 0 for both endpoints. 
-#' 
+#' outcome (zero vs. positive values) and a continuous outcome (positive values).
+#' A logistic mixed effects model fits the binary outcome and a linear mixed effects
+#' model fits the continuous outcome.
 #' }
 #' \if{latex}{Fit a joint model for longitudinal data and a terminal event using a
 #' semiparametric penalized likelihood estimation or a parametric estimation on
@@ -118,14 +107,12 @@
 #' and types of corresponding covariates must be the same, as well as the number
 #' and identification of individuals. }
 #'
-#' @usage longiPenal(formula, formula.LongitudinalData, data,  data.Longi,
-#'           formula.Binary=FALSE, random,random.Binary=FALSE, fixed.Binary=FALSE, 
-#'           GLMlog=FALSE, MTP=FALSE, id, intercept = TRUE,link="Random-effects",
-#'           timevar=FALSE,left.censoring=FALSE,n.knots, kappa,maxit=350,
-#'           hazard="Splines",mediation=FALSE,med.center=NULL,med.trt=NULL,init.B,
-#'           init.Random, init.Eta, method.GH = "Standard",seed.MC=1, n.nodes,
-#'           LIMparam=1e-3,LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE,med.nmc=500,
-#'           pte.times=NULL,pte.ntimes=NULL,pte.nmc=500,pte.boot=FALSE,pte.nboot=2000)
+#' @usage longiPenal(formula, formula.LongitudinalData, data, data.Longi,
+#'   formula.Binary=FALSE, random, random.Binary=FALSE, id, intercept = TRUE,
+#'   link = "Random-effects", timevar=FALSE, left.censoring =
+#'   FALSE, n.knots, kappa, maxit = 350, hazard = "Splines", init.B,
+#'   init.Random, init.Eta, method.GH = "Standard", seed.MC=FALSE, n.nodes, LIMparam = 1e-3,
+#'   LIMlogl = 1e-3, LIMderiv = 1e-3, print.times = TRUE)
 #' @param formula a formula object, with the response on the left of a
 #'   \eqn{\sim} operator, and the terms on the right. The response must be a
 #'   survival object as returned by the 'Surv' function like in survival
@@ -148,11 +135,6 @@
 #' @param random.Binary Names of variables for the random effects of the binary
 #' part of the two-part model fitting the longitudinal semicontinuous outcome.
 #' The random intercept is chosen using \code{"1"}.
-#' @param fixed.Binary Fix the value of the intercept in the binary part of a two-part model.
-#' @param GLMlog Logical value. Use a lognormal distribution for the biomarker
-#' (instead of the default normal distribution).
-#' @param MTP Logical value. Marginal two-part joint model instead of
-#' conditional two-part joint model (only with two-part models).
 #' @param id Name of the variable representing the individuals.
 #' @param intercept Logical value. Is the fixed intercept of the biomarker
 #'   included in the mixed-effects model? The default is \code{TRUE}.
@@ -162,7 +144,7 @@
 #'   via the true current level of the biomarker.  The option
 #'   \code{"Current-level"} can be chosen only if the biomarker random effects
 #'   are associated with the intercept and time (following this order).
-#'   \code{"Two-part"}, this structure is only applicable with conditional two-part models,
+#'   \code{"Two-part"}, this structure is only applicable with two-part models,
 #'   the effect of the current probability of positive value and the effect of
 #'   the expected value among positive values on the risk of event is evaluated
 #'   separately. The default is \code{"Random-effects"}.
@@ -224,28 +206,6 @@
 #'   default.
 #' @param print.times a logical parameter to print iteration process. The
 #'   default is TRUE.
-#' @param mediation a logical value indicating if the mediation analysis method is used.
-#' Default is FALSE. 
-#' @param med.center For mediation analysis, a vector containing the center indicator for each subject
-#' If no center then this argument should be \code{NULL}. Default is \code{NULL}.  
-#' @param med.nmc  For mediation analysis, the number of Monte Carlo points used for computing the integral 
-#' over the random effects in the likelihood computation. Default is 500. 
-#' @param med.trt For mediation analysis, a vector containing the treatment indicator for each subject. 
-#' @param pte.times For mediation analysis, a vector of times for which the
-#' funtion \eqn{PTE(t)} is evaluated. Specified time points must be in the range of
-#' the observed event times. The length of the vector should be less than 200.
-#' @param pte.ntimes For mediation analysis, if the argument \code{pte.times} is not specified
-#' the argument \code{pte.ntimes} allows the user to only specify a number of
-#' time points for which the function \eqn{PTE(t)} has to be computed. This argument
-#' is only to be used if \code{pte.times} is not specified. In that case
-#' the default value for \code{pte.ntimes} is 10. Should be less than 200.
-#' @param pte.nmc For mediation analysis, nn integer indicating how many Monte Carlo simulations are used
-#' to integrate over the random effects in the computation of the function \eqn{PTE(t)}. Should be less than
-#' 10000. Default is 500. 
-#' @param pte.boot For mediation analysis, a logical value indicating if bootstrapped confidence bands needs to be computed for the
-#' function \eqn{PTE(t)} in the mediation analysis setting. Default is FALSE.
-#' @param pte.nboot For mediation analysis, an integer indicating how many bootstrapped replicates of PTE(t) needs
-#' to be computed to derive confidence bands for PTE(t). Should be less than 10000. Default is 2000. 
 #' @return
 #'
 #' The following components are included in a 'longiPenal' object for each
@@ -383,10 +343,10 @@
 #' multiple integrals over infinite regions with Gaussian weight. \emph{Journal
 #' of Computational and Applied Mathematics} \bold{71}, 299-309.
 #'
-#' D. Rustand, L. Briollais, C. Tournigand and V. Rondeau (2020).
-#' Two-part joint model for a longitudinal semicontinuous marker
-#' and a terminal event with application to metastatic colorectal
-#' cancer data. \emph{Biostatistics}.
+#' D. Rustand, L. Briollais, C. Tournigand and V. Rondeau. Two-part joint model for a
+#' longitudinal semicontinuous marker and a terminal event with application
+#' to metastatic colorectal cancer data. \emph{Under
+#' revision}.
 #' @keywords models
 #' @export
 #' @examples
@@ -431,85 +391,38 @@
 #' colorectalLongi$Yo <- (colorectalLongi$tumor.size*0.3+1)^(1/0.3)
 #' colorectalLongi$Y <- log(colorectalLongi$Y+1) # log transformation with shift=1
 #'
-#' # Conditional two-part joint model - random-effects association structure (~15min)
+#' # Two-part joint model - random-effects association structure (~15min)
 #'
-#' CTPJM_re <-longiPenal(Surv(time1, state)~age + treatment +
+#' TwoPartJoint_re <-longiPenal(Surv(time1, state)~age + treatment +
 #' who.PS+ prev.resection, Y~year*treatment, formula.Binary=Y~year*treatment,
 #' data = colorectalSurv, data.Longi = colorectalLongi, random = c("1"),
 #' random.Binary=c("1"), id = "id", link ="Random-effects", left.censoring = F,
 #' n.knots = 7, kappa = 2, hazard="Splines-per")
 #'
-#' print(CTPJM_re)
+#' print(TwoPartJoint_re)
 #'
-#' # Conditional two-part joint model - current-level association structure (~15min)
+#' # Two-part joint model - current-level association structure (~15min)
 #' # Simulated dataset (github.com/DenisRustand/TPJM_sim)
 #' data(longDat)
 #' data(survDat)
 #' tte <- frailtyPenal(Surv(deathTimes, d)~trt,n.knots=5,kappa=0, data=survDat,cross.validation = T)
 #' kap <- round(tte$kappa,2);kap # smoothing parameter
-#'   CTPJM_cl <- longiPenal(Surv(deathTimes, d)~trt, Y~timej*trtY,
+#'   TPJM <- longiPenal(Surv(deathTimes, d)~trt, Y~timej*trtY,
 #'   data=survDat, data.Longi = longDat,
 #'   random = c("1","timej"), formula.Binary=Y~timej*trtY,
 #'   random.Binary=c("1"), timevar="timej", id = "id",
 #'   link = "Current-level", n.knots = 5, kappa = kap,
 #'   hazard="Splines-per", method.GH="Monte-carlo",
-#'   n.nodes=500)
+#'   n.nodes=500, seed.MC=1)
 #'
-#'   print(CTPJM_cl)
-#'
-#'
-#' # Marginal two-part joint model - random-effects association structure (~10min)
-#' longDat$Yex <- exp(longDat$Y)-1
-#' MTPJM_re <- longiPenal(Surv(deathTimes, d)~trt, Yex~timej*trtY,
-#'                   data=survDat, data.Longi = longDat,MTP=T,GLMlog = T,
-#'                   random = c("1"), formula.Binary=Y~timej*trtY,
-#'                   random.Binary=c("1"), timevar="timej", id = "id",
-#'                   link = "Random-effects", n.knots = 5, kappa = kap,
-#'                   hazard="Splines-per", method.GH="Monte-carlo",
-#'                   n.nodes=500)
-#'
-#' print(MTPJM_re)
-#'
-#' # Marginal two-part joint model - current-level association structure (~45min)
-#'  MTPJM_cl <- longiPenal(Surv(deathTimes, d)~trt, Yex~timej*trtY,
-#'                   data=survDat, data.Longi = longDat,MTP=T,GLMlog = T,
-#'                   random = c("1","timej"), formula.Binary=Y~timej*trtY,
-#'                   random.Binary=c("1"), timevar="timej", id = "id",
-#'                   link = "Current-level", n.knots = 5, kappa = kap,
-#'                   hazard="Splines-per", method.GH="Monte-carlo",
-#'                   n.nodes=500)
-#'
-#' print(MTPJM_cl)
-#'
-#' ###--- Mediation analysis  
-#' #Takes ~ 10 minutes to run
-#' data(colorectal)
-#' data(colorectalLongi)
-#' colorectalSurv <- subset(colorectal, new.lesions == 0)
-#'
-#' colorectalSurv$treatment<-sapply(colorectalSurv$treatment,function(t) ifelse(t=="S",1,0))
-#' colorectalLongi$treatment<-sapply(colorectalLongi$treatment,function(t) ifelse(t=="S",1,0))
-#' 
-#' mod.col=longiPenal(Surv(time1, state) ~ age+treatment, 
-#'   	       tumor.size ~ age+year*treatment,
-#'            data=colorectalSurv,	data.Longi = colorectalLongi, random = c("1", "year"),
-#'            id = "id", link = "Current-level",timevar="year",method.GH = "Pseudo-adaptive",
-#'            mediation = TRUE,med.trt = colorectalSurv$treatment,
-#'            med.center = NULL,med.nmc = 50,n.knots = 7, kappa = 2,
-#'   	        pte.ntimes = 30,pte.boot = T,pte.nmc = 1000,pte.nboot = 1000)
-#' 
-#' print(mod.col)
-#' plot(mod.col,plot.mediation='All')
+#'   print(TPJM)
 #' }
 "longiPenal" <-
-  function (formula, formula.LongitudinalData, data,  data.Longi, formula.Binary=FALSE, random,
-            random.Binary=FALSE, fixed.Binary=FALSE, GLMlog=FALSE, MTP=FALSE, id, intercept = TRUE,
-            link="Random-effects",timevar=FALSE,left.censoring=FALSE,n.knots, kappa,
-            maxit=350, hazard="Splines",mediation=FALSE,med.center=NULL,med.trt=NULL,init.B,
-            init.Random, init.Eta, method.GH = "Standard",seed.MC=1, n.nodes, LIMparam=1e-3,
-            LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE,med.nmc=500,
-            pte.times=NULL,pte.ntimes=NULL,pte.nmc=500,pte.boot=FALSE,pte.nboot=2000)
+  function (formula, formula.LongitudinalData, data,  data.Longi, formula.Binary=FALSE, random, random.Binary=FALSE, id, intercept = TRUE, link="Random-effects",timevar=FALSE,left.censoring=FALSE,n.knots, kappa,
+            maxit=350, hazard="Splines",   init.B,
+            init.Random, init.Eta, method.GH = "Standard",seed.MC=FALSE, n.nodes, LIMparam=1e-3, LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE)
   {
+
     # Ajout de la fonction minmin issue de print.survfit, permettant de calculer la mediane
     minmin <- function(y, x) {
       tolerance <- .Machine$double.eps^.5   #same as used in all.equal()
@@ -523,22 +436,25 @@
         else x[1]
       }
     }
-
+GLMlog=FALSE
+MTP=FALSE
     OrderLong <- data.Longi[,id]
     OrderDat <- data[,id]
+
     m2 <- match.call()
-    m2$formula <-  m2$data <- m2$random <- m2$random.Binary <- m2$fixed.Binary<- m2$id <- m2$link <-m2$timevar <- m2$n.knots <- m2$kappa <- m2$maxit <- m2$hazard  <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$left.censoring <- m2$GLMlog <- m2$MTP <- m2$init.Random <- m2$init.Eta <- m2$method.GH <- m2$seed.MC<- m2$intercept <- m2$n.nodes <- m2$mediation <- m2$med.center <- m2$med.trt <-m2$med.nmc <- m2$pte.times <- m2$pte.ntimes <- m2$pte.nmc <- m2$pte.boot <- m2$pte.nboot <- m2$... <- NULL
+    m2$formula <-  m2$data <- m2$random <- m2$random.Binary <- m2$id <- m2$link <-m2$timevar <- m2$n.knots <- m2$kappa <- m2$maxit <- m2$hazard  <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$left.censoring <- m2$GLMlog <- m2$MTP <- m2$init.Random <- m2$init.Eta <- m2$method.GH <- m2$seed.MC<- m2$intercept <- m2$n.nodes <- m2$... <- NULL
     Names.data.Longi <- m2$data.Longi
+
     # TWO-PART indicator
     TwoPart <- ifelse(formula.Binary==FALSE, FALSE, TRUE) # true if two-part activated
     # more generally, variables related to the two-part model systematically contains the
     # letter B as for 'binary part', which is the main addition compared to a standard joint model.
 
     # association proba + current level only with two-part
-    if(link=="Two-part"){
-      if (TwoPart==F) {
-        stop("The link 'Two-part' can only be used with a Two-part joint model.") }
-    }
+        if(link=="Two-part"){
+    if (TwoPart==F) {
+    stop("The link 'Two-part' can only be used with a Two-part joint model.") }
+}
     #### Frailty distribution specification ####
     if (!(all(random %in% c(1,names(data.Longi))))) { stop("Random effects can be only related to variables from the longitudinal data or the intercept (1)") }
     if (!(id %in% c(names(data.Longi))) || !(id %in% c(1,names(data)))) { stop("Identification for individuals can be only related to variables from both data set") }
@@ -546,16 +462,15 @@
     #### Frailty distribution specification (binary part) ####
     if (!(all(random.Binary %in% c(1,names(data.Longi))))) {
     stop("Random effects (binary part) can be only related to variables from the longitudinal data or the intercept (1)") }
-    }
-
+}
     if(MTP & (!TwoPart | !GLMlog)){
     stop("Marginal two-part model requires activation of two-part and GLMlog")}
 
     #### Link function specification ####
-    if(!(link %in% c("Random-effects","Current-level","Two-part","Current-slope"))){
+    if(!(link %in% c("Random-effects","Current-level","Two-part"))){
       stop("Only 'Random-effects','Current-level' or 'Two-part' link function can be specified in link argument.")}
         ### Time variable
-    if(link %in% c("Current-level","Two-part","Current-slope") & FALSE %in% timevar){
+    if(link %in% c("Current-level","Two-part") & FALSE %in% timevar){
       stop("You must indicate the time variable in 'timevar' argument in order to use the 'Current-level' or 'Two-part' association")
     }
 
@@ -568,15 +483,15 @@
     if(!is.logical(intercept))stop("The argument 'intercept' must be logical")
     ### Gauss-Hermite method
 
-    if(all(!(c("Standard","Pseudo-adaptive","HRMSYM", "Monte-carlo","QMC") %in% method.GH))){
+    if(all(!(c("Standard","Pseudo-adaptive","HRMSYM", "Monte-carlo") %in% method.GH))){
       stop("Only 'Standard', 'Pseudo-adaptive', 'Monte-carlo' and 'HRMSYM' method can be specified as a method for the Gaussian quadrature")
     }
-    GH <- switch(method.GH,"Standard"=0,"Pseudo-adaptive"=1,"HRMSYM"=2,"Monte-carlo"=3,"QMC"=4)
+    GH <- switch(method.GH,"Standard"=0,"Pseudo-adaptive"=1,"HRMSYM"=2,"Monte-carlo"=3)
 
   if(GH<=2){
     if(!missing(n.nodes) ){
-      if(!n.nodes%in%c(5,7,9,12,15,20,32,100)) stop("Number of points used in the numerical integration must be chosen from following: 5, 7, 9, 12, 15, 20, 32")
-      if(n.nodes%in%c(5,7,9,12,15,20,32,100) && GH==2) warning("Using HRMSYM algorithm the number of points cannot be chosen")
+      if(!n.nodes%in%c(5,7,9,12,15,20,32)) stop("Number of points used in the numerical integration must be chosen from following: 5, 7, 9, 12, 15, 20, 32")
+      if(n.nodes%in%c(5,7,9,12,15,20,32) && GH==2) warning("Using HRMSYM algorithm the number of points cannot be chosen")
     }else{
       n.nodes <- 9
     }}else if(GH==3){
@@ -586,79 +501,6 @@
       n.nodes <- 200 #default number of simulations for monte-carlo
     }
   }
-    ##mediation and treatment
-    if(mediation){
-      if(TwoPart==TRUE){
-        stop("Mediation analysis currently not available for a two-parts joint model")
-      }
-      if(!is.null(med.center)){
-        stop("Mediation analysis currently not available for clustered data")
-      }
-      if(link != "Current-level"){
-        stop("Mediation analysis currently only available for 'Current-level' link")
-      }
-      if(is.null(med.trt)){
-        stop("Variable 'med.trt' must be specified when using the 'mediation=TRUE' option")
-      }
-      if(!is.null(med.center)){
-        if(!is.integer((med.center))){
-          stop("Variable 'med.center' must be numeric.")
-        }
-      }
-      if(!is.null(pte.times)){
-      if(!is.numeric(pte.times)){
-        stop("The argument 'pte.times' must be a vector of positive values")
-      }else{
-        if(sum(pte.times<0)>0){
-          stop("The argument 'pte.times' must be a vector of positive values")
-        }
-    }
-    }
-    if(!is.null(pte.ntimes) & !is.numeric(pte.ntimes)){
-      stop("The argument 'pte.ntimes' must be an integer.")
-    }
-    if(!is.null(pte.ntimes) & is.numeric(pte.ntimes)){
-      if(pte.ntimes>200){
-        stop("The argument 'pte.ntimes' should be less than 200.")
-      }
-    }
-    if(!is.null(pte.times) & !is.null(pte.ntimes)){
-      if(length(pte.times) != pte.ntimes){
-        stop("The argument 'pte.times' must have length equal to 'pte.ntimes'.")
-      }
-    }
-    if(!is.numeric(pte.nmc)){
-      stop("The argument 'pte.nmc' must be an integer.")
-    }else{
-      if(pte.nmc<0){
-        stop("The argument 'pte.nmc' must be positive.")
-      }
-      if(length(pte.nmc)>1){
-        stop("The argument 'pte.nmc' must be an integer.")
-      }
-      if(pte.nmc>10000){
-        stop("The argument 'pte.nmc' should be less than 10000.")
-      }
-    }
-    if(!is.logical(pte.boot)){
-      stop("The argument 'pte.boot' must be either TRUE of FALSE.")
-    }
-    if(pte.boot){
-      if(!is.numeric(pte.nboot)){
-        stop("The argument 'pte.nboot' must be an integer.")
-      }else{
-        if(pte.nboot<0){
-          stop("The argument 'pte.nboot' must be positive.")
-        }
-        if(length(pte.nboot)>1){
-          stop("The argument 'pte.nboot' must be an integer.")
-        }
-        if(pte.nboot>10000){
-          stop("The argument 'pte.nboot' should be less than 10000.")
-        }
-      }
-    }
-    }
 
     ##### hazard specification ######
     haztemp <- hazard
@@ -730,10 +572,8 @@
     if (missing(formula))stop("The argument formula must be specified in every model")
     if (missing(formula.LongitudinalData))stop("The argument formula.LongitudinalData must be specified in every model") #AK
 
-    #if(class(formula)!="formula")stop("The argument formula must be a formula")
-    #if(TwoPart) if(formula.Binary!=FALSE) if(class(formula.Binary)!="formula")stop("The argument formula.Binary must be a formula")
-    if(!inherits(formula,"formula"))stop("The argument formula must be a formula")
-    if(TwoPart) if(formula.Binary!=FALSE) if(!inherits(formula.Binary,"formula"))stop("The argument formula.Binary must be a formula")
+    if(class(formula)!="formula")stop("The argument formula must be a formula")
+    if(TwoPart) if(formula.Binary!=FALSE) if(class(formula.Binary)!="formula")stop("The argument formula.Binary must be a formula")
     if(typeof == 0){
       if (missing(n.knots))stop("number of knots are required")
       n.knots.temp <- n.knots
@@ -749,13 +589,11 @@
       kappa <- 0
 
     }
-
     call <- match.call()
 
     m <- match.call(expand.dots = FALSE) # recupere l'instruction de l'utilisateur
 
-
-    m$formula.LongitudinalData <- m$formula.Binary <- m$data.Longi <- m$n.knots <- m$random <- m$random.Binary <- m$fixed.Binary <- m$link <- m$timevar <- m$id <- m$kappa <- m$maxit <- m$hazard  <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$left.censoring <- m$GLMlog <- m$MTP <- m$print.times <- m$init.Random <- m$init.Eta <- m$method.GH <- m$seed.MC <- m$intercept <- m$n.nodes <- m$mediation <- m$med.center <- m$med.trt <-m$med.nmc <- m$pte.times <- m$pte.ntimes <- m$pte.nmc <- m$pte.boot <- m$pte.nboot  <- NULL
+m$formula.LongitudinalData <- m$formula.Binary <- m$data.Longi <- m$n.knots <- m$random <- m$random.Binary <- m$link <- m$timevar <- m$id <- m$kappa <- m$maxit <- m$hazard  <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$left.censoring <- m$GLMlog <- m$MTP <- m$print.times <- m$init.Random <- m$init.Eta <- m$method.GH <- m$seed.MC <- m$intercept <- m$n.nodes <- NULL
 
 
     special <- c("strata", "cluster", "subcluster", "terminal","num.id","timedep")
@@ -764,8 +602,6 @@
     if(TwoPart){
         data.Binary=data.Longi # all data for binary part / add TwoPart
     }
-	  if(fixed.Binary==FALSE) fixed.Binary=99 # binary intercept not fixed if 99
-
 
     TermsY <- if (missing(data.Longi)){
       terms(formula.LongitudinalData, special)
@@ -795,6 +631,7 @@
 
     m2[[1]] <- as.name("model.frame") # m[[1]]=frailtypenal, il le remplace par model.frame en fait
 
+
     #       m <- eval(m, sys.parent()) #ici la classe de m est un data.frame donc il recupere ce qu'on lui donne en argument
 
     clusterY <- attr(TermsY, "specials")$cluster # (indice) nbre de var qui sont en fonction de cluster()
@@ -809,6 +646,7 @@
       clusterY <- strata(m2[, tempc$vars], shortlabel = TRUE)
       uni.clusterY <- unique(clusterY)
     }
+
 
 
     if (NROW(m2) == 0)stop("No (non-missing) observations") #nombre ligne different de 0
@@ -1036,7 +874,6 @@
         }
       }
     }
-
 
     if(length(grep(":",llY))>0){
       for(i in 1:length(grep(":",llY))){
@@ -1476,14 +1313,13 @@ for(i in 1:length(llB.fin)){
  # if(dim(X_B)[2]!=length(llB.fin))stop("The variables in the longitudinal part must be in the data.Binary")
    X_B <- as.data.frame(X_B)
    names(X_B) <- llB.fin
-if(fixed.Binary==99){
-Intercept.Binary <- rep(1,dim(X_B)[1])# modif LinBin
+
+Intercept.Binary <- rep(1,dim(X_B)[1])
 
   if(intercept){
     X_B <- cbind(Intercept.Binary,X_B)
     ind.placeB <- ind.placeB+1
   }
-}
 
   X_Ball<- X_B
   "%+%"<- function(x,y) paste(x,y,sep="")
@@ -1497,6 +1333,7 @@ Intercept.Binary <- rep(1,dim(X_B)[1])# modif LinBin
      else X_B <- cbind(X_B[1:(factor.spot-1)],model.matrix(as.formula("~"%+%0%+%"+"%+%paste(vec.factorB[i], collapse= "+")), model.frame(~.,data.Binary,na.action=na.pass))[,-1])
 
          } }
+
 
 
   vect.factB<-names(X_B)[which(!(names(X_B)%in%llB))]
@@ -1516,6 +1353,7 @@ Intercept.Binary <- rep(1,dim(X_B)[1])# modif LinBin
         #                #occur[i] <- sum(vec.factor[i] == vect.fact)
          #               occurB[i] <- length(grep(vec.factorB[i],vect.factB))
           #      }
+
 
 
 
@@ -1609,6 +1447,7 @@ if(TwoPart) max_repB <- max(table(clusterB))
     varY <- as.matrix(sapply(X_L, as.numeric))
 
     nsujety<-nrow(X_L)
+
     if(TwoPart) nvarB<-ncol(X_B)
     if(TwoPart) varB <- as.matrix(sapply(X_B, as.numeric))
     if(TwoPart) nsujetB <- nrow(X_B)
@@ -1636,8 +1475,7 @@ if(TwoPart) max_repB <- max(table(clusterB))
 
     if(link=="Random-effects") link0 <- 1
     if(link=="Current-level") link0 <- 2
-    if(link=="Two-part") link0 <- 3
-    if(link=="Current-slope") link0<-4
+       if(link=="Two-part") link0 <- 3
 
     if(TwoPart){
       nREY <- length(random)
@@ -1671,13 +1509,10 @@ if(TwoPart) max_repB <- max(table(clusterB))
 
     matzy <- data.matrix(X_L[,which(names(X_L)%in%names.matzy)])
 
-    if(TwoPart){ #modif linBin (set variable intercept=FIXED to include random intercept anyway
-	if(length(which(names(X_B)%in%names.matzB))==0){
-        matzB <- data.matrix(rep(1,dim(X_B)[1])) # random intercept but fixed value
-	}else{
+    if(TwoPart){
         matzB <- data.matrix(X_B[,which(names(X_B)%in%names.matzB)])
     }
-	}
+
     if(!intercept && 1%in%random) matzy <- as.matrix(cbind(rep(1,nsujety),matzy))
 
 
@@ -1688,7 +1523,6 @@ if(TwoPart) max_repB <- max(table(clusterB))
     if(link0==1)if(TwoPart) netadc <- netadc+ncol(matzB) #add TwoPart
     if(link0==2)netadc <- 1
     if(link0==3)netadc <- 2
-    if(link0==4)netadc <- 1
 
 
     #== Left-censoring ==
@@ -1717,25 +1551,15 @@ if(TwoPart) max_repB <- max(table(clusterB))
       inn <-paste("pdSymm(form=~",random_lme,")",sep="")
       rand <- list(eval(parse(text=inn)))
       names(rand) <- id
-      #if(mediation){
-      #  formula.LongitudinalData=update.formula(formula.LongitudinalData,~.+treatment)
-      #  data.Longi2=data.Longi
-      #  data.Longi2$treatment = sapply(data.Longi$id,function(i) treatment[i])
-      #  m_lme<-lme(formula.LongitudinalData,data = data.Longi2, random = rand, control=lmeControl(opt='optim'))
-      #  b_lme <-as.matrix(ranef(m_lme))
-      #  formula_lme <- formula(m_lme$modelStruct$reStruct[[1]])
-      #  model_lme <- model.frame(terms(formula_lme), data = data.Longi2)
-      #  Terms_lme <- attr(model_lme, "terms")
-      #  Z_lme <- model.matrix(formula_lme, model_lme)
-      #}else{
-        m_lme<-lme(formula.LongitudinalData,data = data.Longi, random = rand, control=lmeControl(opt='optim'))
-        b_lme <-as.matrix(ranef(m_lme))
 
-        formula_lme <- formula(m_lme$modelStruct$reStruct[[1]])
-        model_lme <- model.frame(terms(formula_lme), data = data.Longi)
-        Terms_lme <- attr(model_lme, "terms")
-        Z_lme <- model.matrix(formula_lme, model_lme)
-      #}
+      m_lme<-lme(formula.LongitudinalData,data = data.Longi, random = rand, control=lmeControl(opt='optim'))
+
+      b_lme <-as.matrix(ranef(m_lme))
+
+      formula_lme <- formula(m_lme$modelStruct$reStruct[[1]])
+      model_lme <- model.frame(terms(formula_lme), data = data.Longi)
+      Terms_lme <- attr(model_lme, "terms")
+      Z_lme <- model.matrix(formula_lme, model_lme)
       #id <- as.vector(unclass(m2$groups[[1]]))
       # Cholesky matrices for GH
       #B_lme <- lapply(pdMatrix(m_lme$modelStruct$reStruct), "*",  m_lme$sigma^2)[[1]]
@@ -1922,6 +1746,7 @@ if(TwoPart) max_repB <- max(table(clusterB))
     }
 
 
+
     #=========================================================>
 
     dropx <- NULL
@@ -1974,6 +1799,7 @@ if(TwoPart) max_repB <- max(table(clusterB))
     }
     # on enleve ensuite la premiere colonne correspondant a id
     nvarT<-ncol(X_T) #nvar==1 correspond a 2 situations:
+
 
     # au cas ou on a aucune var explicative dans la partie rec, mais X=0
     # cas ou on a 1seul var explicative, ici X est en general different de 0
@@ -2050,35 +1876,23 @@ if(TwoPart) max_repB <- max(table(clusterB))
     np <- switch(as.character(typeof),
                  "0"=((as.integer(n.knots) + 2) + as.integer(nvar) + 1 + ne_re + netadc  ),
                  "2"=(2 + nvar + 1  + ne_re + netadc ))
-    if(mediation){
-       if(!is.null(med.center)){
-        nparammed=3
-       }else{
-        nparammed=0
-       }
-        if(link0 %in% c(2,4)){
-          #nparammed=nparammed+1
-        }
-        np<-np+nparammed
-    }else{
-      nparammed=0
-    }
+
     # traitement de l'initialisation du Beta rentre par l'utilisateur
 
     Beta <- rep(0.5,np)
     if (!missing(init.B)) {
       if (length(init.B) != nvar) stop("Wrong number of regression coefficients in init.B")
       #  if (timedep) stop("You can hardly know initial regression coefficient while time-varying effect")
-      Beta <- c(rep(0.5,np-nvar-nparammed),init.B)
+      Beta <- c(rep(0.5,np-nvar),init.B)
     }
 
     if (!missing(init.Random)) {
       if (length(init.Random)!=ne_re) stop("init.Random must be of length that corresponds to the number of elements to estimate of the B1 matrix")
-      Beta[(np-nvar-ne_re-nparammed+1):(np-nvar-nparammed)] <- init.Random
+      Beta[(np-nvar-ne_re+1):(np-nvar)] <- init.Random
     }
     if (!missing(init.Eta)) {
       if (length(init.Eta)!=netadc) stop("init.Eta must be of length that corresponds to the dimension of the link function")
-      Beta[(np -nvar-1-ne_re-netadc-nparammed+1):(np-nvar-1-ne_re-nparammed)] <- init.Eta
+      Beta[(np -nvar-1-ne_re-netadc+1):(np-nvar-1-ne_re)] <- init.Eta
     }
 
     xSuT <- matrix(0,nrow=100,ncol=1)
@@ -2089,15 +1903,16 @@ if(TwoPart) max_repB <- max(table(clusterB))
     }
     size2 <- mt1
 
-if(link0 %in% c(2,3,4)){
+
+if(link0 %in% c(2,3)){
 # Current-level association structure:
 # we need to evaluate the biomarker value at multiple time-points to approximate the cumulative hazard
 # time-interactions are particularly tricky to handle (especially in case of non-linear time trend)
-# position of time and interactions for current-level association
+      # position of time and interactions for current-level association
 
   # if interaction terms are not included, get them from survival data:
   columnsT <- colnames(X_T)
-  for(i in 1:length(timevar)){
+for(i in 1:length(timevar)){
     interact <- 0
     columns <- names(X_L)
 
@@ -2254,12 +2069,11 @@ if(i==1){
   numInterac=1
   positionVarTime=c(404,0,0,0)
 }
+
 seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspecified)
 
     if(GLMlog==F) GLMloglink=0 else GLMloglink=1
     if(MTP==F) Mtwopart=0 else Mtwopart=1
-
-	if(TwoPart) interceptBin=ifelse("Intercept.Binary"%in%names.matzB,1,2) #modif linBin
 
   if(!TwoPart){ # initialize TwoPart variables if not activated to avoid memory allocation problems
     Binary <- rep(0, length(nsujety))
@@ -2271,131 +2085,52 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
     nREB <- 0
     noVarB <- 1
     numInteracB=0
-	interceptBin=0
   }
-  if(!mediation){
-    mediation=0
-    varcenters=rep(0,ng)
-    ncenters=0
-    med.center=NULL
-  }else{
-    if(!is.null(med.center)){
-    ncenters<-length(unique(med.center))
-    cc<-cbind(1:ncenters,unique(med.center))
-    med.center<-sapply(med.center,function(k){
-      return(cc[which(cc[,2]==k),1])
-    })
-    }else{
-      ncenters=0
-      med.center=0
+    flush.console()
+    if (print.times){
+      ptm<-proc.time()
+      cat("\n")
+      cat("Be patient. The program is computing ... \n")
     }
 
-  }
-  flush.console()
-  if (print.times){
-    ptm<-proc.time()
-    cat("\n")
-    cat("Be patient. The program is computing ... \n")
-  }
-
-    if(mediation){
-        if(is.null(pte.times) & is.null(pte.ntimes)){
-          #by default pte.times = pte.ntimes evenly distributed times between
-          #min observed time death and max observed time death
-          #pte.ntimes = 10
-          pte.ntimes=10
-          pte.times=sapply(0:(pte.ntimes-1),function(i) mint + (i/(pte.ntimes-1))*(maxt-mint))
-          }else if(is.null(pte.times) & !(is.null(pte.ntimes))){
-            mint = min(tt1dc[cens==1])
-            maxt = max(tt1dc[cens==1])
-            pte.times=sapply(0:(pte.ntimes-1),function(i) mint + (i/(pte.ntimes-1))*(maxt-mint))
-          }else if(!(is.null(pte.times)) & is.null(pte.ntimes)){
-            pte.ntimes=length(pte.times)
-          }else{
-            if(length(pte.times) != pte.ntimes){
-            stop("The length of the specified time-points should be equal to pte.ntimes")
-            }
-            if((min(pte.times)<mint) | (max(pte.times)>maxt)){
-              stop("Please provide time-points for the computation of PTE(t) that are in the range of the observed follow-up times")
-            }else{
-              pte.ntimes=length(pte.times)
-            }
-          }
-      rank_trtM=which(sapply(1:ncol(varY),function(i){
-              var=varY[,i]
-              pp=var[1]
-              for(k in 1:(length(clusterY)-1)){
-              if(clusterY[k+1] != clusterY[k]) pp=c(pp,var[k+1])
-              }
-              return(sum(pp!=med.trt))
-              })==0)
-      vars=apply(varY[,-rank_trtM],2,function(var){
-            pos=apply(varY,2,function(p) sum(p!=var))
-            pos=which(pos==0)
-            xx=apply(varY[,-c(rank_trtM,pos)],2,function(vv){
-              sum(vv*varY[,rank_trtM]==var)
-            })
-            max(xx)
-      })
-      if(which(vars==nrow(varY))){
-          rank_trtMt = which(sapply(1:ncol(varY),
-          function(k) sum(varY[,k]==varY[,-rank_trtM][,which(vars==nrow(varY))]))==nrow(varY))
-      }else{
-        rank_trtMt = 0
-      }
-      rank_trtT=which(apply(varT,2,function(x) sum(x!=med.trt))==0)
-      rank_time=which(apply(varY,2,function(x) sum(x!=varY[,timevar]))==0)
-      param.res.rt =as.integer(c(pte.ntimes,pte.nmc,pte.boot,pte.nboot))
-      res.rt = array(as.double(rep(0.0,(1+pte.nboot)*(pte.ntimes)*4)),dim=c(pte.ntimes,4,1+pte.nboot))
-      res.rt[,1,1]=pte.times
-    }else{
-      #todo
-      med.nmc = 0 
-      nparammed = 0 
-      pte.ntimes=1
-      pte.boot=FALSE
-      pte.nboot=0
-      rank_trtM = 0 
-      rank_time=0
-      rank_trtT = 0
-      rank_trtMt = 0
-      res.rt=array(as.double(rep(0.0,(1+pte.nboot)*(pte.ntimes)*4)),dim=c(pte.ntimes,4,1+pte.nboot))
-      param.res.rt =as.integer(rep(0,5))
-    }
     # call joint_longi.f90
-    ans <- .Fortran(C_joint_longi,
-      VectNsujet = as.integer(c(1,nsujety, nsujetB)),
-      ngnzag=as.integer(c(ng, n.knots, 1, seed.MC)),
+        ans <- .Fortran(C_joint_longi,
+			VectNsujet = as.integer(c(1,nsujety, nsujetB)),
+
+            ngnzag=as.integer(c(ng, n.knots, 1, seed.MC)),
+
 			k0 = as.double(c(0,kappa)), # joint avec generalisation de strate
 			tt00 = as.double(0),
 			tt10 = as.double(0),
-		  ic0 = as.integer(0),
-		  groupe0 = as.integer(0),
+		    ic0 = as.integer(0),
+		    groupe0 = as.integer(0),
 			tt0dc0 = as.double(tt0dc),
 			tt1dc0 = as.double(tt1dc),
 			icdc0 = as.integer(cens),
-		  link0 = as.integer(c(link0,0)),
-		  yy0 = as.double(Y),
-      bb0 = as.double(Binary),
-		  groupey0 = as.integer(clusterY),
-      groupeB0 = as.integer(clusterB),
-		  Vectnb0 = as.integer(c(nRE, nREB,interceptBin)),
-			fixed_Binary0=as.double(fixed.Binary),
-		  matzy0 =as.double(matzy),
-      matzB0 =as.double(matzB),
-		  cag0 = as.double(cag),
-      VectNvar=as.integer(c(1, nvarT, nvarY, nvarB)),
-      vax0 = matrix(as.double(0),nrow=1,ncol=1),
+		    link0 = as.integer(c(link0,0)),
+		    yy0 = as.double(Y),
+            bb0 = as.double(Binary),
+		    groupey0 = as.integer(clusterY),
+            groupeB0 = as.integer(clusterB),
+		    Vectnb0 = as.integer(c(nRE, nREB)),
+		    matzy0 =as.double(matzy),
+            matzB0 =as.double(matzB),
+		    cag0 = as.double(cag),
+            VectNvar=as.integer(c(1, nvarT, nvarY, nvarB)),
+            vax0 = matrix(as.double(0),nrow=1,ncol=1),
+
 			vaxdc0 = as.double(varT),
 			vaxy0 = as.double(varY),
-      vaxB0 = as.double(varB),
+            vaxB0 = as.double(varB),
 			noVar = as.integer(c(0,noVarT,noVarY, noVarB)),
+
 			maxit0 = as.integer(maxit),
 			np=as.integer(np),
 			neta0 = as.integer(c(netadc,0)),
 			b=as.double(Beta),
 			H=as.double(matrix(0,nrow=np,ncol=np)),
 			HIH=as.double(matrix(0,nrow=np,ncol=np)),
+
 			loglik=as.double(0),
 			LCV=as.double(rep(0,2)),
 			xR=as.double(matrix(0,nrow=1,ncol=1)),
@@ -2406,42 +2141,38 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
 			lamD=as.double(matrix(0,nrow=size1,ncol=3)),
 			xSuD=as.double(xSuT),
 			survD=as.double(matrix(0,nrow=size2,ncol=3)),
-			#as.integer(typeof),
-			#as.integer(equidistant),
-			#as.integer(c(1,size1,1,mt1)),###
-			as.integer(c(typeof,equidistant,1,size1,1,mt1)),### merging previous arguments to keep <=65 args
+			as.integer(typeof),
+			as.integer(equidistant),
+			as.integer(c(1,size1,1,mt1)),###
 			counts=as.integer(c(0,0,0)),
 			ier_istop=as.integer(c(0,0)),
 			paraweib=as.double(rep(0,4)),
 			MartinGale=as.double(matrix(0,nrow=ng,ncol=3+nRE)),###
 			ResLongi = as.double(matrix(0,nrow=nsujety,ncol=4)),
 			Pred_y  = as.double(matrix(0,nrow=nsujety,ncol=2)),
-      GLMlog0 = as.integer(c(GLMloglink,Mtwopart)), # glm with log link + marginal two-part
+            GLMlog0 = as.integer(c(GLMloglink,Mtwopart)), # glm with log link + marginal two-part
+
 			positionVarTime = as.integer(positionVarTime),
 			numInterac = as.integer(c(numInterac, numInteracB)),
+
 			linear.pred=as.double(rep(0,ng)),
 			lineardc.pred=as.double(rep(0,as.integer(ng))),
 			zi=as.double(rep(0,(n.knots+6))),
-			paratps=as.integer(matrix(rep(0,6),2,3)),#for future developments
-			#as.integer(c(0,0,0)),#for future developments
-			#BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*0)), #for future developments
-			#BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
-			#BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
-      BetaTps=array(rep(as.double(matrix(0,nrow=101,ncol=1+4*0)),3),dim=c(101,1,3)),
+
+			paratps=as.integer(c(0,0,0)),#for future developments
+			as.integer(c(0,0,0)),#for future developments
+			BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*0)), #for future developments
+			BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
+			BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),#for future developments
 			EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
 			GH = c(as.integer(GH),as.integer(n.nodes)),
-			paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol))),
-      mediation=as.double(c(ifelse(mediation,1,0),
-                            ncenters,ifelse(TRUE,1,0),rank_trtM,rank_trtT,
-                            rank_trtMt,rank_time,med.nmc,nparammed)),
-      med.center=as.integer(med.center),
-      med.trt=as.integer(med.trt),
-      param.res.rt=as.integer(param.res.rt),
-      res.rt=as.double(res.rt)
+			paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol)))
 			)#,
-    #PACKAGE = "frailtypack") #65 arguments
+    #PACKAGE = "frailtypack") #62 arguments
+
     MartinGale <- matrix(ans$MartinGale,nrow=ng,ncol=3+nRE)
     Residuals <- matrix(ans$ResLongi,nrow=nsujety,ncol=4)
+
     if (ans$ier_istop[2] == 4){
       warning("Problem in the loglikelihood computation. The program stopped abnormally. Please verify your dataset. \n")
     }
@@ -2453,6 +2184,7 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
       warning("Matrix non-positive definite.")
     }
 
+
     #AD:
     if (noVarT==1 & noVarY==1) nvar<-0
     #AD:
@@ -2463,6 +2195,8 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
     fit$na.action <- attr(m, "na.action")
     fit$call <- call
     fit$groups <- ng
+
+
 
     fit$n.deaths <- ans$counts[3]
     fit$n.measurements <- nsujety
@@ -2482,22 +2216,23 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
     Utt <- matrix(rep(0,nRE^2),ncol=nRE,nrow=nRE)
     for(j in 1:nRE){
       for(k in 1:j){
-        Ut[j,k]=ans$b[np - nvar - ne_re - nparammed + k + j*(j-1)/2]
-        Utt[k,j]=ans$b[np -nvar - ne_re - nparammed + k + j*(j-1)/2]
+        Ut[j,k]=ans$b[np - nvar - ne_re + k + j*(j-1)/2]
+        Utt[k,j]=ans$b[np -nvar - ne_re + k + j*(j-1)/2]
       }}
     fit$B1 <- Ut%*%Utt
 
-    fit$ResidualSE <- sqrt(ans$b[(np  - nvar - ne_re - nparammed )]^2)
-    fit$eta <- ans$b[(np  - nvar - 1 - ne_re - netadc - nparammed  + 1):(np  - nvar - 1 -ne_re -nparammed)]
+    fit$ResidualSE <- sqrt(ans$b[(np  - nvar - ne_re )]^2)
+    fit$eta <- ans$b[(np  - nvar - 1 - ne_re - netadc + 1):(np  - nvar - 1 -ne_re)]
 
     fit$npar <- np
+
     #AD:
     if ((noVarT==1 & noVarY==1)) {
       fit$coef <- NULL
     }
     else
     {
-      fit$coef <- ans$b[(np - nvar  -nparammed + 1):(np-nparammed)]
+      fit$coef <- ans$b[(np - nvar + 1):np]
       noms <- c(factor.names(colnames(X_T)),factor.names(colnames(X_L)))
       if(TwoPart) noms <-  c(factor.names(colnames(X_T)),factor.names(colnames(X_L)),factor.names(colnames(X_B))) # add TwoPart
       #  if (timedep == 1){
@@ -2508,6 +2243,8 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
       #          }
       # }
       names(fit$coef) <- noms
+
+
     }
 
   if(TwoPart==1){
@@ -2516,11 +2253,12 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
   fit$names.re <- names.matzy
   }
 
+
     temp1 <- matrix(ans$H, nrow = np, ncol = np)
     temp2 <- matrix(ans$HIH, nrow = np, ncol = np)
 
-    varH.eta <- temp1[(np  - nvar - 1 - ne_re - netadc - nparammed +1):(np  - nvar - 1 - ne_re-nparammed),
-                      (np - nvar - 1 - ne_re - netadc -nparammed +1):(np  - nvar - 1 - ne_re -nparammed)]
+    varH.eta <- temp1[(np  - nvar - 1 - ne_re - netadc +1):(np  - nvar - 1 - ne_re),
+                      (np - nvar - 1 - ne_re - netadc +1):(np  - nvar - 1 - ne_re )]
 
     if(netadc>1)fit$se.eta <- sqrt(diag(varH.eta))
     if(netadc==1)fit$se.eta <- sqrt(varH.eta)
@@ -2528,12 +2266,13 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
     fit$eta_p.value <- 1 - pchisq((fit$eta/fit$se.eta)^2,1)
 
 
-    fit$se.ResidualSE <- sqrt(temp1[(np  - nvar - ne_re -nparammed ),(np  - nvar - ne_re - nparammed)])
+    fit$se.ResidualSE <- sqrt(temp1[(np  - nvar - ne_re ),(np  - nvar - ne_re)])
     fit$varHtotal <- temp1
     fit$varHIHtotal <- temp2
 
-    fit$varH <- temp1[(np  - nvar +1 - nparammed):(np-nparammed), (np  - nparammed - nvar +1 ):(np-nparammed)]
-    fit$varHIH <- temp2[(np - nvar -nparammed +1):(np-nparammed), (np - nparammed  - nvar +1):np]
+    fit$varH <- temp1[(np  - nvar +1):np, (np  - nvar +1 ):np]
+    fit$varHIH <- temp2[(np - nvar +1):np, (np - nvar +1):np]
+
     if(TwoPart==1){
   noms <- c("MeasurementError","B1",factor.names(colnames(X_T)),factor.names(colnames(X_L)),factor.names(colnames(X_B))) # add TwoPart
   }else{
@@ -2569,6 +2308,7 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
       fit$n.knots.temp <- n.knots.temp
       fit$zi <- ans$zi
     }
+
     #AD:
 
     median <- NULL
@@ -2586,7 +2326,7 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
 
     fit$nvarEnd <- nvarT
     fit$nvarY <- nvarY
-    fit$nvarB <- nvarB-1 # add TwoPart
+    fit$nvarB <- nvarB # add TwoPart
     fit$istop <- ans$ier_istop[2]
 
     fit$shape.weib <- ans$paraweib[2]#ans$shape.weib
@@ -2646,14 +2386,16 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
     fit$netadc<-netadc
 
 
+
 #================================> For the Binary
 #========================= Test de Wald
 if(TwoPart){
         if ((length(vec.factorB) > 0)){
-                Beta <- ans$b[(np-nvar-nparammed + 1):(np-nparammed)]
+                Beta <- ans$b[(np-nvar + 1):np]
                 VarBeta <- fit$varH
                 nfactorB <- length(vec.factorB)
                 p.waldB <- rep(0,nfactorB)
+
                 if(fit$istop == 1) fit$global_chisq_B <- waldtest(N=nvarB,nfact=nfactorB,place=ind.placeB,
                 modality=occurB,b=Beta,Varb=VarBeta,Lfirts=(nvarT+nvarY),Ntot=nvar)# modif TwoPart
                 else fit$global_chisq_B <- 0
@@ -2670,72 +2412,16 @@ if(TwoPart){
                 fit$global_chisq.test_B <- 0
 
         }
-} 
-#return(list(ans$res.rt,pte.nboot,pte.ntimes))
-if(mediation){
-    ##
-    res.rt<-array(NA,dim=c(pte.ntimes,4,pte.nboot+1))
-    for(i in 1:(pte.nboot+1)){
-      pos<-(1+(i-1)*(4*pte.ntimes)):((4*pte.ntimes)*i)
-      vect<-ans$res.rt[pos]
-      res.rt[,,i]<-matrix(vect,ncol=4,nrow=pte.ntimes)
-    }
-    dat.rt<-as.data.frame(res.rt[,,1])
-    names(dat.rt)<-c("Time","S11","S01","S00")
-    dat.rt$Rt<-(dat.rt$S11-dat.rt$S01)/(dat.rt$S11-dat.rt$S00)
-    dat.rt$NDE<-dat.rt$S01 - dat.rt$S00
-    dat.rt$NIE<-dat.rt$S11 - dat.rt$S01
-    dat.rt$TE<-dat.rt$S11 - dat.rt$S00
-    if(pte.boot){
-      dat.rt$Rt<-sapply(1:pte.ntimes,function(i){
-        return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          (res.rt[i,2,k]-res.rt[i,3,k])/(res.rt[i,2,k]-res.rt[i,4,k])
-        }),probs=0.5,na.rm=TRUE)))
-      })
-      Rtconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
-        return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          (res.rt[i,2,k]-res.rt[i,3,k])/(res.rt[i,2,k]-res.rt[i,4,k])
-        }),probs=c(.025,.975),na.rm=TRUE)))
-      })))
-      names(Rtconf)<-c("lower","upper")
-      NDEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
-        return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          res.rt[i,3,k]-res.rt[i,4,k]
-        }),probs=c(.025,.975),na.rm=TRUE)))
-      })))
-      names(NDEconf)<-c("lower","upper")
-      NIEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
-        return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          res.rt[i,2,k]-res.rt[i,3,k]
-        }),probs=c(.025,.975),na.rm=TRUE)))
-      })))
-      names(NIEconf)<-c("lower","upper")
-      TEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
-        return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          res.rt[i,2,k]-res.rt[i,4,k]
-        }),probs=c(.025,.975),na.rm=TRUE)))
-      })))
-      names(TEconf)<-c("lower","upper")
-    }
-    dat.rt$S00<-NULL
-    dat.rt$S11<-NULL
-    dat.rt$S01<-NULL
-    if(pte.boot){
-      result.mediation<-list(data.rt=dat.rt,Rt.ci=Rtconf,NIE.ci=NIEconf,
-                             NDE.ci=NDEconf,TE.ci=TEconf)
-    }else{
-      result.mediation<-list(data.rt=dat.rt)
-    }
-    fit$mediation = result.mediation
-  }
-
+}
     #================================> For the longitudinal
     #========================= Test de Wald
+
     if ((length(vec.factorY) > 0)){
-      Beta <- ans$b[(np-nvar-nparammed + 1):(np-nparammed)]
+      Beta <- ans$b[(np-nvar + 1):np]
       VarBeta <- fit$varH
       nfactor <- length(vec.factorY)
       p.wald <- rep(0,nfactor)
+
     if(fit$istop == 1) fit$global_chisq <- waldtest(N=nvarY,nfact=nfactor,place=ind.placeY,
     modality=occurY,b=Beta,Varb=VarBeta,Lfirts=nvarT, Llast=nvarB,Ntot=nvar)# modif TwoPart
     else fit$global_chisq <- 0
@@ -2752,12 +2438,13 @@ if(mediation){
       fit$global_chisq.test <- 0
 
     }
+
     #================================> For the death
     #========================= Test de Wald
 
 
     if ((length(vec.factorT) > 0) ){
-      Beta <- ans$b[(np - nvar -nparammed + 1):(np-nparammed)]
+      Beta <- ans$b[(np - nvar + 1):(np)]
 
       # if(npbetatps>0){VarBeta <- diag(diag(fit$varH)[-c((np-npbetatps):np)])
       # }else{
@@ -2799,11 +2486,12 @@ if(mediation){
 
     if(GLMloglink==1) fit$GLMlog <- TRUE else fit$GLMlog <- FALSE
      if(MTP==1) fit$MTP <- TRUE else fit$MTP <- FALSE
-    class(fit) <- "longiPenal"
+   class(fit) <- "longiPenal"
     if (print.times){
       cost<-proc.time()-ptm
       cat("The program took", round(cost[3],2), "seconds \n")
     }
-   if(fit$istop != 1) fit<-NULL
     fit
+
   }
+

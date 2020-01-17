@@ -32,7 +32,7 @@ This function returns hazard ratios (HR) and its confidence intervals
 \examples{
 
 
-\donttest{
+\dontrun{
 
 data(dataAdditive)
 

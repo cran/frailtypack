@@ -20,9 +20,6 @@ reason).}
 
 \item{event}{Status indicator 0=right-censored, 1=interval-censored}
 }
-\value{
-No return value
-}
 \description{
 This is a function used in case of interval-censoring as a response variable
 in a model formula only for Cox proportional hazard or shared frailty model.
@@ -39,7 +36,7 @@ Typical usages are \code{SurvIC(lower,upper,event)} or
 \examples{
 
 
-\donttest{
+\dontrun{
 
 data(bcos)
 bcos$event <- ifelse(bcos$left!=bcos$right,1,0)

@@ -12,7 +12,7 @@
 #' @examples
 #' 
 #' 
-#' \donttest{
+#' \dontrun{
 #' 
 #' #-- a fit Shared
 #' data(readmission)
@@ -35,7 +35,7 @@ survival <- function(t,ObjFrailty){
 		zi <- ObjFrailty$zi
 
 		res <- NULL
-		if(inherits(ObjFrailty, "jointPenal")){
+		if(class(ObjFrailty) == "jointPenal"){
 			nst <- ObjFrailty$n.strat + 1 # deces
 			if((ObjFrailty$xR[,1] > t) || ((max(ObjFrailty$xR[,1])+0.00001) < t)) stop(" Time exceeds the range allowed ")
 			if(ObjFrailty$n.strat > 1){
@@ -69,7 +69,7 @@ survival <- function(t,ObjFrailty){
 	if (ObjFrailty$typeof == 1){
 		res <- NULL
 		nst <- ObjFrailty$n.strat
-		if(inherits(ObjFrailty, "jointPenal")){
+		if(class(ObjFrailty) == "jointPenal"){
 			m <- nst*ObjFrailty$nbintervR + ObjFrailty$nbintervDC
 			b <- ObjFrailty$b[1:m]
 			time <- ObjFrailty$time
@@ -103,7 +103,7 @@ survival <- function(t,ObjFrailty){
 		sh1 <- ObjFrailty$shape.weib[1]
 		sc1 <- ObjFrailty$scale.weib[1]
 		res <- c(res,exp(-(t/sc1)^sh1))
-		if(inherits(ObjFrailty, "jointPenal")){
+		if(class(ObjFrailty) == "jointPenal"){
 			if(ObjFrailty$n.strat > 1){
 				for (i in 2:ObjFrailty$n.strat){
 					if((ObjFrailty$xR[,i] > t) || (max(ObjFrailty$xSuR[,i]) < t)) stop(" Time exceeds the range allowed ")

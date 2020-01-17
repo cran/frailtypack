@@ -64,7 +64,7 @@ the LR statistic has a \eqn{\chi^2} distribution of degree \eqn{m+q}.
 \examples{
 
 
-\donttest{
+\dontrun{
 
 data(readmission)
 

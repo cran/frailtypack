@@ -24,7 +24,7 @@ a nested or a joint nested frailty model is estimated.
 \examples{
 
 
-\donttest{
+\dontrun{
 
 data(dataNested)
 modClu <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+

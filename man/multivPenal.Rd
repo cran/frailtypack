@@ -228,13 +228,13 @@ terminal event is (in the calendar or time-to-event timescale):
 
 {\figure{multivmodel1.png}{options: width="100\%"}}
 
-where \eqn{r}\out{<sub>0</sub>}\out{<sup>l</sup>}(t), (l\out{&isin;}\{1,3\}) and \eqn{r}\out{<sub>0</sub>}(t) are
+where \eqn{r}\out{<sub>0</sub>}\out{<sup>l</sup>}(t), (l\out{&isin;}{1,2}) and \eqn{r}\out{<sub>0</sub>}(t) are
 respectively the recurrent and terminal event baseline hazard functions, and
 \eqn{\beta}\out{<sub>1</sub>},\eqn{\beta}\out{<sub>2</sub>},\eqn{\beta}\out{<sub>3</sub>} the regression coefficient vectors associated
 with \eqn{Z}\out{<sub>i</sub>}(t) the covariate vector. The covariates could be different
 for the different event hazard functions and may be time-dependent. We
 consider that death stops new occurrences of recurrent events of any type,
-hence given \eqn{t>D}, \eqn{dN}\out{<sup>R(l)*</sup>}(t), (l\out{&isin;}\{1,2\}) takes the value 0.
+hence given \eqn{t>D}, \eqn{dN}\out{<sup>R(l)*</sup>}(t), (l\out{&isin;}{1,2}) takes the value 0.
 Thus, the terminal and the two recurrent event processes are not independent
 or even conditional upon frailties and covariates. We consider the hazard
 functions of recurrent events among individuals still alive.  % The three
@@ -281,13 +281,13 @@ r_0^{(2)}(t)\exp({{\beta_2^{'}}}Z_{i}(t)+v_i) &\quad \mbox{(rec. of type
 \lambda_0(t)\exp({{\beta_3^{'}}}Z_{i}(t)+\alpha_1u_i+\alpha_2v_i) &\quad
 \mbox{(death)}\\ \end{array} \right. }
 
-where \eqn{r_0^{(l)}(t)}, \eqn{l\in{\{1,2\}}} and \eqn{\lambda_0(t)} are
+where \eqn{r_0^{(l)}(t)}, \eqn{l\in{1,2}} and \eqn{\lambda_0(t)} are
 respectively the recurrent and terminal event baseline hazard functions, and
 \eqn{\beta_1,\beta_2,\beta_3} the regression coefficient vectors associated
 with \eqn{Z_{i}(t)} the covariate vector. The covariates could be different
 for the different event hazard functions and may be time-dependent. We
 consider that death stops new occurrences of recurrent events of any type,
-hence given \eqn{t>D}, \eqn{dN^{R(l)*}(t), l\in{\{1,3\}}} takes the value 0.
+hence given \eqn{t>D}, \eqn{dN^{R(l)*}(t), l\in{1,2}} takes the value 0.
 Thus, the terminal and the two recurrent event processes are not independent
 or even conditional upon frailties and covariates. We consider the hazard
 functions of recurrent events among individuals still alive.  % The three
@@ -330,7 +330,7 @@ change the value of the initialize argument.
 \examples{
 
 
-\donttest{
+\dontrun{
 
 ###--- Multivariate Frailty model ---###
 

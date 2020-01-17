@@ -1,11 +1,9 @@
 #' Short summary of fixed covariates estimates of a joint model for
-#' longitudinal data and a terminal event. 
+#' longitudinal data and a terminal event
 #' 
 #' This function returns coefficients estimates and their standard error with
 #' p-values of the Wald test for the longitudinal outcome and hazard ratios
-#' (HR) and their confidence intervals for the terminal event.  If a mediation analysis 
-#' was performed (option \code{mediation} set to \code{TRUE} in \code{\link{longiPenal}}) 
-#' this function displays estimations of the related quantities.
+#' (HR) and their confidence intervals for the terminal event.
 #' 
 #' 
 #' @aliases summary.longiPenal print.summary.longiPenal
@@ -29,7 +27,7 @@
 #' @examples
 #' 
 #' 
-#' \donttest{
+#' \dontrun{
 #' ###--- Joint model for longitudinal data and a terminal event ---###
 #' 
 #' data(colorectal)
@@ -180,29 +178,4 @@
     }
 
 
-    if(!is.null(x$mediation)){
-      cat("\n")
-      cat("Mediation analysis:\n")
-      cat("--------------- \n")
-      mediation<-x$mediation
-      n<-min(length(mediation$data.rt$Time),5)
-      ## PTE and NEFF ......
-      times<-round(mediation$data.rt$Time,min(4,d))
-      rt<-round(mediation$data.rt$Rt,min(4,d))
-      nie<-round(mediation$data.rt$NIE,min(4,d))
-      nde<-round(mediation$data.rt$NDE,min(4,d))
-      te<-round(mediation$data.rt$TE,min(4,d))
-      pos<-(1:n)*floor((length(times)/n))
-      times<-times[pos]
-      rt<-rt[pos]
-      nie<-nie[pos]
-      nde<-nde[pos]
-      te<-te[pos]
-      cat(" ", "\n")
-      cat("Estimated PTE, natural direct, indirect and total effect at",
-          n, "time points \n \n")
-        #no confidence bands available
-        print(data.frame("Time"=times,"Total effect"=te,
-                         "Direct effect"=nde,"Indirect effect"=nie,"PTE"=rt))
-    }
   }

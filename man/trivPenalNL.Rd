@@ -462,7 +462,7 @@ Estimations of models with more than three random effects can be very long.
 \examples{
 
 
-\donttest{
+\dontrun{
 
 ###--- Non-linear trivariate joint model for longitudinal data, ---###
 ###--- recurrent events and a terminal event ---###

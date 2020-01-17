@@ -279,7 +279,7 @@ NULL
 ##' @usage data(dataOvarian)
 ##' @format This data frame contains the following columns: 
 ##' \describe{
-##' \item{patientID}{The identification number of a patient} 
+##' \item{patienID}{The identification number of a patient} 
 ##' \item{trialID}{The center in which a patient was treated}
 ##' \item{trt}{The treatment indicator, coded as 0 = cyclophosphamide plus cisplatin (CP)
 ##' and 1 = cyclophosphamide plus adriamycin plus cisplatin(CAP)}
@@ -315,7 +315,7 @@ NULL
 ##' @format This data frame contains the following columns: 
 ##' \describe{
 ##' \item{trialID}{The trial in which the patient was treated}
-##' \item{patientID}{The identification number of a patient} 
+##' \item{patienID}{The identification number of a patient} 
 ##' \item{trt}{The treatment indicator, coded as 0 = Control and 1 = Experimental}
 ##' \item{timeS}{The candidate surrogate (progression-free survival in days) }
 ##' \item{statusS}{Censoring indicator for for Progression-free survival 
@@ -366,35 +366,4 @@ NULL
 ##' \item{d}{Censoring indicator}
 ##' \item{trt}{Treatment covariate}
 ##' }
-NULL
-
-##' Delirium in critically ill ICU patients dataset: the REDUCE clinical trial
-##' 
-##' This dataset contains an extract of 500 randomly selected patients from the randomized, 
-##' double-blind, placebo-controlled REDUCE trial for critically ill patient admited to ICU. 
-##' This trial investigated whether Haloperidol (1 or 2 mg) administered as a prophylactic improved 
-##' 28-day survival compared to placebo. Recurrent episodes of delirium are 
-##' recorded and patients and patients can be censored by death or discharge from the ICU. 
-##' 
-##' @name reduce
-##' @docType data
-##' @usage data(reduce)
-##' @format This data frame contains the following columns: 
-##' \describe{
-##' \item{id}{Identification number of a patient} 
-##' \item{t.start}{Start time of the interval (0 or time of last recurrence)}
-##' \item{t.stop}{Stop time of the interval, either delirium recurrence time or censoring time.}
-##' \item{del}{Delirium status}
-##' \item{death}{Death status}
-##' \item{discharge}{Discharge status}
-##' \item{treatment}{Treatment indicator, 
-##' 1 if patient was randomized to receive 2mg of Haloperidol, 
-##' 0 for control }
-##' }
-##' @source
-##' Van Den Boogaard, M., Slooter, A. J., Bruggemann, R. J., 
-##' Schoonhoven, L., Beishuizen, A., Vermeijden, J. W., et al. (2018). 
-##' Effect of haloperidol on survival among critically ill adults with a 
-##' high risk of delirium: the REDUCE randomized clinical trial. \emph{Jama}, \bold{319(7)}, 680-690.
-##' @keywords datasets
 NULL

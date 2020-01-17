@@ -1048,7 +1048,7 @@
     !=========================
     ! Prediction  : 1 effet aleatoire
     !=========================
-        double precision function  func1pred_bivGH1(frail1)
+        double precision function  func1pred_bivGH1(frail)
         ! calcul de l integrant (numerateur de la fonction de prediction)
         use comon,only:etaydc,sigmae,s_cag_id,&
                 s_cag,ut,link,npp !nva3,vey,utt,etaydc2,netadc
@@ -1056,28 +1056,18 @@
         use prediction
         use optim
         implicit none    
-        
-		! ==modification SCL (frail --> frail1) 10/04/2020 pour correction Rank mismatch. 
-		! en effet, la subroutine integrationdc() qui appelle cette variable attend un 
-		! vecteur et pas un scalaire. du coup, je renomme la variable pour creer le vecteur 
-		! par la suite. ceci m'evite de modivier la definition de la subroutine ===
-         double precision,intent(in)::frail1 
+    
+         double precision,intent(in)::frail
         ! double precision,dimension(netadc):: xea,xea2,ui
         double precision ::prod_cag,alnorm
         integer :: k
         double precision::yscalar
         double precision,dimension(:),allocatable::mu1
-        double precision,dimension(:),allocatable::frail ! /* ajout scl 10/04/2020 pour correction Rank mismatch */
         logical :: upper
         double precision,external::survdcCM_pred
         double precision :: resultdc,abserr,resabs,resasc
         double precision,parameter::pi=3.141592653589793d0
-        
-		! =========== ajout scl 10/04/2020 pour correction Rank mismatch ========
-		allocate(frail(1))
-		frail(1) = frail1
-		! =========== Fin ajout scl ================
-		
+
         upper = .false.
     
         if(nmescur.gt.0) then
@@ -1094,7 +1084,7 @@
         end if  
 
         if(nmescur.gt.0) then
-            mu1(1:nmescur) = mu(1:nmescur,1) +frail(1)*Z2(1:nmescur,1) !scl
+            mu1(1:nmescur) = mu(1:nmescur,1) +frail*Z2(1:nmescur,1)
         else
             mu1(1:nmescur)  = mu(1:nmescur,1)
         end if
@@ -1117,19 +1107,19 @@
 
         yscalar = dsqrt(yscalar) 
         if(link.eq.1)  then    
-            func1pred_bivGH1 = (survDC(1)**(exp(XbetapredDCi+etaydc(1)*frail(1))) & 
-                - survDC(2)**(exp(XbetapredDCi+etaydc(1)*frail(1)))) &
+            func1pred_bivGH1 = (survDC(1)**(exp(XbetapredDCi+etaydc(1)*frail)) &
+                - survDC(2)**(exp(XbetapredDCi+etaydc(1)*frail))) &
                 * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*prod_cag &
-                *dexp( - (frail(1)**2.d0)/(2.d0*ut(1,1)**2))&
+                *dexp( - (frail**2.d0)/(2.d0*ut(1,1)**2))&
                 *1/dsqrt(ut(1,1)*2.d0*pi)
         else
             func1pred_bivGH1 = (dexp(-survDC(1))-dexp(- survDC(2))) &
                 * dexp(-(yscalar**2.d0)/(2.d0*sigmae))*prod_cag&
-                *dexp( - (frail(1)**2.d0)/(2.d0*ut(1,1)**2))&
+                *dexp( - (frail**2.d0)/(2.d0*ut(1,1)**2))&
                 *1/dsqrt(ut(1,1)*2.d0*pi)
         end if
         
-        deallocate(mu1, frail)
+        deallocate(mu1)
 
         return
     
@@ -1139,14 +1129,14 @@
         double precision function  func2pred_bivGH1(frail)
         ! calcul de l integrant (numerateur de la fonction de prediction)
         use comon,only:etaydc,sigmae,s_cag_id,s_cag,&
-               ut,link,npp,nb1!,nva3,vey,etaydc2,netadc,utt
+               ut,link,npp!,nva3,vey,etaydc2,netadc,utt
         use donnees_indiv,only:nmescur,mu,z2,ycurrent,b1!,x2cur,z1cur,it_cur
         use prediction
         use optim
         
         implicit none    
         
-        double precision,dimension(nb1),intent(in)::frail
+        double precision,intent(in)::frail
         integer :: k
         double precision::yscalar,prod_cag,alnorm
         double precision,dimension(:),allocatable::mu1
@@ -1169,7 +1159,7 @@
         end if
     
         if(nmescur.gt.0) then
-            mu1(1:nmescur) = mu(1:nmescur,1) +frail(1)*Z2(1:nmescur,1)
+            mu1(1:nmescur) = mu(1:nmescur,1) +frail*Z2(1:nmescur,1)
         else
             mu1(1:nmescur)  = mu(1:nmescur,1)
         end if
@@ -1192,13 +1182,13 @@
     
         yscalar = dsqrt(yscalar)    
         if(link.eq.1) then    
-            func2pred_bivGH1 = ((survDC(1)**(exp(XbetapredDCi+etaydc(1)*frail(1))) ) &
+            func2pred_bivGH1 = ((survDC(1)**(exp(XbetapredDCi+etaydc(1)*frail)) ) &
                 * exp(-(yscalar**2.d0)/(2.d0*sigmae)))*prod_cag&
-                *dexp( - (frail(1)**2.d0)/(2.d0*ut(1,1)**2))&
+                *dexp( - (frail**2.d0)/(2.d0*ut(1,1)**2))&
                 *1/dsqrt(ut(1,1)*2.d0*pi)
         else    
             func2pred_bivGH1 = dexp(-survDC(1)-(yscalar**2.d0)/(2.d0*sigmae))*prod_cag&
-                *dexp( - (frail(1)**2.d0)/(2.d0*ut(1,1)**2))&
+                *dexp( - (frail**2.d0)/(2.d0*ut(1,1)**2))&
                 *1/dsqrt(ut(1,1)*2.d0*pi)
         end if    
     

@@ -5,59 +5,48 @@
 \alias{frailtypack-package}
 \alias{frailtypack}
 \title{General Frailty models: shared, joint and nested frailty models with
-prediction; Evaluation of Failure-Time Surrogate Endpoints 
-\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}}
+prediction; Evaluation of Failure-Time Surrogate Endpoints}
 \description{
 Frailtypack fits several classes of frailty models using a penalized
 likelihood estimation on the hazard function but also a parametric
-estimation.
+estimation.  1) A shared frailty model and Cox proportional hazard model.
+Clustered and recurrent survival times can be studied.  2) Additive frailty
+models for proportional hazard models with two correlated random effects
+(intercept random effect with random slope).  3) Nested frailty models for
+hierarchically clustered data (with 2 levels of clustering) by including two
+iid gamma random effects.  4) Joint frailty models in the context of joint
+modelling for recurrent events with terminal event for clustered data or
+not. A joint frailty model for two semi-competing risks for clustered data
+is also proposed.  5) Joint General frailty models in the context of a joint
+modelling for recurrent events with terminal event data with two independent
+frailty terms.  6) Joint Nested frailty models in the context of joint
+modelling for recurrent events with terminal event, for hierarchically
+clustered data (with two levels of clustering) by including two iid gamma
+random effects.  7) Multivariate joint frailty models for two types of
+recurrent events and a terminal event.  8) Joint models for longitudinal
+data and a terminal event.  9) Trivariate joint models for longitudinal
+data, recurrent events and a terminal event.  Prediction values are
+available. Left truncated (not for the joint models), right-censored data,
+interval-censored data (only for Cox proportional hazard and shared frailty
+model) and strata are allowed. In each model, the random effects have the
+gamma or normal distribution. Now, you can also consider time-varying effect
+covariates in Cox, shared and joint frailty models. The package includes
+concordance measures for Cox proportional hazards models and for shared
+frailty models. 10) Joint frailty models for the validation of surrogate 
+endpoints in multiple randomized clinical trials with failure-time endpoints. 
+This model includes a shared individual-level random effect, a shared trial 
+random-effct associated with the hazard risks and a correlated random 
+effects-by-trial interaction.
 }
 \details{
-The following several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation can be fit using this R package:
-
-1) A shared frailty model (with gamma or log-normal frailty distribution) and Cox proportional hazard model. Clustered and recurrent survival times can be studied.
-
-2) Additive frailty models for proportional hazard models with two correlated random effects (intercept random effect with random slope).
-
-3) Nested frailty models for hierarchically clustered data (with 2 levels of clustering) by including two iid gamma random effects.
-
-4) Joint frailty models in the context of the joint modelling for recurrent events with terminal event for clustered data or not. A joint frailty model for two semi-competing risks and clustered data is also proposed.
-
-5) Joint general frailty models in the context of the joint modelling for recurrent events with terminal event data with two independent frailty terms.
-
-6) Joint Nested frailty models in the context of the joint modelling for recurrent events with terminal event, for hierarchically clustered data (with two levels of clustering) by including two iid gamma random effects.
-
-7) Multivariate joint frailty models for two types of recurrent events and a terminal event.
-
-8) Joint models for longitudinal data and a terminal event.
-
-9) Trivariate joint models for longitudinal data, recurrent events and a terminal event.
-
-10) Joint frailty models for the validation of surrogate endpoints in multiple randomized clinical trials with failure-time and/or longitudinal endpoints
-with the possibility to use a mediation analysis model.
-
-11) Conditional and Marginal two-part joint models for longitudinal semicontinuous data and a terminal event.
-
-12) Joint frailty-copula models for the validation of surrogate endpoints in multiple randomized clinical trials with failure-time endpoints.
-
-13) Generalized shared and joint frailty models for recurrent and terminal events. Proportional hazards (PH), additive hazard (AH), proportional odds (PO) and probit models are available in a fully parametric framework. 
-
-14) Competing Joint Frailty Model: A single type of recurrent event and two terminal events. 
-
-The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
-Now, you can also consider time-varying covariates effects in Cox, shared and joint frailty models (1-5).
-Some of the Fortran routines in the package can speed-up computation time by making use
-of parallelization through OpenMP.  
-Moreover, the package can be used with its shiny application, in a local mode or by following the link below. 
-
 \tabular{ll}{ Package: \tab frailtypack\cr Type: \tab Package\cr Version:
-\tab 3.5.2 \cr Date: \tab 2024-02-13\cr License: \tab GPL (>= 2.0)\cr
+\tab 3.0.3.3 \cr Date: \tab 2019-08-31\cr License: \tab GPL (>= 2.0)\cr
 LazyLoad: \tab no\cr }
 }
 \examples{
 
 
-\donttest{
+\dontrun{
 
 ###--- Additive model with 1 covariate ---###
 
@@ -217,7 +206,7 @@ penalized likelihood estimation. \emph{Statistics in Medecine}, \bold{25},
 }
 \author{
 Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen, 
-Amadou Diakite, Alexandre Laurent, Myriam Lopez, Agnieszka Krol, 
-Casimir L. Sofeu, Denis Rustand, Quentin Le Coent, Lacey Etzkorn and Romain Pierlot
+Amadou Diakite, Alexandre Laurent, Myriam Lopez, Agnieszka Krol and 
+Casimir L. Sofeu
 }
 \keyword{package}

@@ -27,7 +27,7 @@ model.
 \examples{
 
 
-\donttest{
+\dontrun{
 
 data(dataAdditive)
 

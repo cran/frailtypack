@@ -16,15 +16,12 @@ data and a terminal event}
 }
 \value{
 Print, separately for each part of the model (longitudinal and terminal) the
-parameter estimates and details on the estimation. Also print in a separate part the
-results of the mediation analysis if one was performed
+parameter estimates and details on the estimation.
 }
 \description{
 Prints a short summary of parameter estimates of a joint model for
 longitudinal data and a terminal event, an object inheriting from class
-'longiPenal'. If a mediation analysis was performed (option \code{mediation} set to
-\code{TRUE} in \code{\link{longiPenal}}) this function displays estimations of the related 
-quantities.
+'longiPenal'.
 }
 \seealso{
 \code{\link{longiPenal}}

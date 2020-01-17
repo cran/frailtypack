@@ -1,5 +1,5 @@
     module tailles
-    integer :: npmax,NSUJETMAX,nvarmax,nsujetymax
+    integer :: npmax,NSUJETMAX,nvarmax,nsujetymax  
     integer :: ngmax                    !AD:,maxiter
     integer :: ndatemax,ndatemaxdc,nzmax
     integer :: nssgbyg,nssgmax
@@ -77,9 +77,8 @@
                 double precision,dimension(:),allocatable,save :: res1cur,res3cur,res2cur
     double precision,dimension(:,:),allocatable,save::Z1B, muB,XB,mu1B,x2Bcur,z1Bcur ! add TwoPart
     double precision,dimension(:),allocatable,save :: Bcurrent, current_meanRaw ! add TwoPart
-    integer,save::nmescurB, it_curB, interceptBin !add TwoPart
-    double precision,save::fixed_Binary
-    integer, save::GLMloglink0,MTP0 ! glm log lionk + marginal two part
+    integer,save::nmescurB, it_curB !add TwoPart
+    integer, save::GLMloglink0,MTP0 ! glm log lionk + marginal two part                                                           
     end module donnees_indiv
 
 
@@ -96,15 +95,15 @@
 
         module choix_epoce
                 integer:: choix_e
-        end module choix_epoce
-
+        end module choix_epoce    
+    
 !=====================================================================================
     module comon
     implicit none
 !*****************************************************************
     double precision,save :: K_G0, K_D0, lambda,y0
     double precision,dimension(:,:),allocatable:: nodes,weights
-      integer,dimension(2),save::genz,famillerisque
+      integer,dimension(2),save::genz
       integer,save::npp,ni_cur, which_random
         double precision,save::vals
         integer ,save:: all, nnodes_all
@@ -222,7 +221,7 @@
 ! distribution des frailty par une log-normale
     integer::logNormal,timedep
     double precision,save::sig2, det
-
+    
      double precision,dimension(:),allocatable,save::b_e
         integer,save::nea,nb1
         double precision,dimension(:),allocatable,save::timecur,timecur2
@@ -238,14 +237,14 @@
         !add current-level association - interaction with time
         integer,save :: numInter, numInterB
         integer,dimension(:),allocatable,save::positionVarT
-
+        
     ! add TwoPart
         integer,save :: TwoPart, nsujetB, nbB,nby, maxmesB, nvaB
         double precision,dimension(:),allocatable,save::bb ! add TwoPart
         double precision,dimension(:,:),allocatable,save :: ziB,varcov_margB, sum_matB
     double precision,dimension(:,:),allocatable,save::veB
         integer,dimension(:),allocatable,save:: nmesB,nmes_oB,groupeeB !add TwoPart
-        integer :: itB
+        integer :: itB             
     end module comon
 !=====================================================================================
 
@@ -339,15 +338,15 @@
     double precision,dimension(:),allocatable,save:: vax,vaxdc,vaxmeta,vaxy
     double precision,dimension(:),allocatable,save:: vaxB ! add TwoPart
     integer,dimension(:),allocatable,save::filtre,filtre2,filtre3, filtre4
-    integer,dimension(:),allocatable,save::filtreB ! add TwoPart
+    integer,dimension(:),allocatable,save::filtreB ! add TwoPart                                                  
     integer,save::ver
 
     end module splines
 
     module var_surrogate
-
+    
     implicit none
-
+    
 ! scl nouvelles variables pour surrogacy
         integer, save::Nmax, nsim,ntrials,posind_i,cpteu,position_i, affiche_itteration !Nmax= nombre total de sujet, nsim= nombre de simulation pour le montecarlo aumoins 10000,posind_i=position de l'individu courant pour l'integrant
         integer, save::methodInt ! methode d'integration,0= MC,1=MC+quadrature,2=quadrature guaussienne
@@ -369,8 +368,8 @@
         double precision,dimension(:),allocatable,save:: mu,mui,xx1,ww1 !mu= vecteur des mu pour monte carlo et mui=vecteur des bi chapeau pour l'adaptative, xx1,ww1 points et poids de quadrature
         double precision,dimension(:,:),allocatable,save:: vc,vcinv !vc= matrice de var-cov des enffet aleatoires MC, invBi_chol=inverse de la matrice de cholesky pour l'adaptative,vcinv=matrice inverse des vc
         double precision,dimension(:),allocatable,save:: invBi_chol_Essai,invBi_chol_Individuel! contient les element de la cholesky du determinant de la hessienne, niveau essai et individuel
-        double precision,dimension(:,:),allocatable,save:: ui_chap,ui_chap_Essai, IhessLaplace,H_hess_laplace,hess_laplace ! ui_chap=matrice des effets aleatoires estimes pour l'adaptative, ui_chap_Essai pour les estimation au niveau essai
-        double precision,dimension(:),allocatable,save:: invBi_cholDet_Essai,vvv_laplace,b_i_laplace,v_i_laplace ! invBi_cholDet racine carree du determinant de l'inverse de  la matrice de choloesky au niveau essa
+        double precision,dimension(:,:),allocatable,save:: ui_chap,ui_chap_Essai ! ui_chap=matrice des effets aleatoires estimes pour l'adaptative, ui_chap_Essai pour les estimation au niveau essai
+        double precision,dimension(:),allocatable,save:: invBi_cholDet_Essai ! invBi_cholDet racine carree du determinant de l'inverse de  la matrice de choloesky au niveau essa
         !double precision,dimension(:),allocatable,save:: invBi_cholDet ! invBi_cholDet racine carree du determinant de l'inverse de  la matrice de choloesky: utiliser la subroutine dmfsd pour le calcul de la matrice de cholesky, niveau individuel
         integer,save::a_deja_simul! dit si on a deja simule une fois les donnees pour le calcul integrale par MC
         integer,save::sujet_essai_max,vectorisation,individu_j ! taille du plus grand essai, vectorisation= indique si l'on fait de la vectorisation dans le calcul integral pour reduire les temps de calcul ou pas
@@ -391,32 +390,8 @@
         integer, save::switch_adaptative ! variable qui prend la valeur 0 si on veut ommetre la pseudo adaptative (cas typique lorsqu'echou l'estimation des effets aleatoires a posteriori) ou 1 si tout se passe bien
         integer, save::nbre_itter_PGH ! nombre d'itteration aubout desquelles reestimer les effects aleatoires a posteriori pour la pseude adaptative. si 0 pas de resestimation
         integer,save::random_generator ! generateur des nombre aleatoire, (1) si Random_number() et (2) si uniran(). Random_number() me permet de gerer le seed
-        ! Add for the joint frailty-copula model -scl - 05-04-2019
-        integer,save:: copula_function, control_affichage, control_adaptative_laplace ! the copula function, can be 1 for clayton or 2 for Gumbel-Hougaard
-        double precision, save:: theta_copule ! copula parameters
-        logical,save::mediation
     end module var_surrogate
-    module var_mediation
-        integer,save::nmc,nmcboot,nboot,ntimes
-        integer,save::nknots,splines_ord,nsplines
-        double precision,dimension(:),allocatable,save::innerknotsurro,basissplines
-        double precision,dimension(2),save::boundaryknotsurro
-        double precision,dimension(:),allocatable,save::zmed,zdcmed
-        double precision,save::nuzm,nuzt,initvar
-        double precision,save::betazm,betazt,ma_link,betaztime
-        integer,dimension(:),allocatable,save::treat_ind,center_ind
-        double precision,dimension(:,:),allocatable,save::matmc
-        integer::nparammed,ncenters,nmcmed
-        integer,save::niter,method_int,nquad,type_ma,timetype
-        integer,save::Cmult 
-        integer,save::nmcfrail
-        integer,dimension(4)::rt_sizes 
-        integer,dimension(9)::rt_nparams
-        integer,save::rank_trtM,rank_trtT,rank_trtMt,rank_time
-        double precision,dimension(:,:),allocatable,save::matmc_frail 
-        double precision,dimension(:),allocatable,save::QMC1,QMC2
-        !$OMP THREADPRIVATE(nuzm,nuzt)
-    end module
+    
     !gestion de la double precision
     module double_precision
     implicit none

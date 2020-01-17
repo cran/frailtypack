@@ -1,7 +1,7 @@
 ##' @export
 print.predLongi <- function(x, digits = 3, ...)
 {
-        if(!inherits(x, "predLongi")){
+        if(class(x)!="predLongi"){
                 stop("The object x must be a class predLongi.")
         }else{
                 if (!is.null(cl <- x$call)){

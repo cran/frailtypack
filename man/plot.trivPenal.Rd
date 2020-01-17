@@ -56,7 +56,7 @@ Plots estimated baseline survival and hazard functions of a joint model
 }
 \examples{
 
-\donttest{
+\dontrun{
 ###--- Trivariate joint model for longitudinal data, ---###
 ###--- recurrent events and a terminal event ---###
 

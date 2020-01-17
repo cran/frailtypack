@@ -4,19 +4,17 @@
 \name{gastadj}
 \alias{gastadj}
 \title{Advanced Gastric Cancer dataset}
-\format{
-This data frame contains the following columns: 
+\format{This data frame contains the following columns: 
 \describe{
 \item{trialID}{The trial in which the patient was treated}
-\item{patientID}{The identification number of a patient} 
+\item{patienID}{The identification number of a patient} 
 \item{trt}{The treatment indicator, coded as 0 = Control and 1 = Experimental}
 \item{timeS}{The candidate surrogate (progression-free survival in days) }
 \item{statusS}{Censoring indicator for for Progression-free survival 
 (0 = alive and progression-free, 1 = with progression or dead)}
 \item{timeT}{The true endpoint (overall survival time in days)}
 \item{statusT}{Censoring indicator for survival time (0 = alive, 1 = dead)}
-}
-}
+}}
 \source{
 Oba K, Paoletti X, Alberts S, Bang YJ, Benedetti J, Bleiberg H, Catalona P, 
 Lordick F, Michiels S, Morita A, Okashi Y, Pignon JP, Rougier P, Sasako M, 

@@ -19,7 +19,7 @@ cat("frailtypack test for the simulation studies of the one-step joint surrogate
  joint.simul <- jointSurroPenalSimul(nb.dataset = 10, nbSubSimul=600, 
                     ntrialSimul=30, LIMparam = 0.001, LIMlogl = 0.001, 
                     LIMderiv = 0.001, nb.mc = 200, nb.gh = 20, 
-                    nb.gh2 = 32, true.init.val = 1)
+                    nb.gh2 = 32, true.init.val = 1, print.itter=F)
 
 # ========================Results summaries=============================
 

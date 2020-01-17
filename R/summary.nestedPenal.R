@@ -22,7 +22,7 @@
 #' @examples
 #' 
 #' 
-#' \donttest{
+#' \dontrun{
 #' 
 #' data(dataNested)
 #' 

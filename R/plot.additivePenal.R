@@ -38,7 +38,7 @@
 #' @examples
 #' 
 #' 
-#' \donttest{
+#' \dontrun{
 #' 
 #' data(dataAdditive)
 #' 
