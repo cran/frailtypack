@@ -33,7 +33,7 @@
 #' effects-by-trial interaction.
 #' 
 #' \tabular{ll}{ Package: \tab frailtypack\cr Type: \tab Package\cr Version:
-#' \tab 3.0.3.2 \cr Date: \tab 2019-05-16 \cr License: \tab GPL (>= 2.0)\cr
+#' \tab 3.0.3.3 \cr Date: \tab 2019-08-31\cr License: \tab GPL (>= 2.0)\cr
 #' LazyLoad: \tab no\cr }
 #' 
 #' @name frailtypack-package
@@ -79,6 +79,7 @@
 #' 4036-4052.
 #' @useDynLib "frailtypack", .registration = TRUE, .fixes = "C_"
 ##' @import survival boot MASS survC1 nlme doBy
+## @import shiny shinyjs shinyBS shinydashboard rhandsontable shinythemes jsonlite
 ##' @importFrom graphics abline legend lines matlines matplot par plot
 ##' @importFrom stats .getXlevels aggregate as.formula complete.cases
 ##' contrasts get_all_vars is.empty.model model.extract model.matrix 

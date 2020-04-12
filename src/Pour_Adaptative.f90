@@ -23,9 +23,9 @@ module mod_Adaptative
     double precision,dimension(2),intent(in)::k0
     double precision,intent(in)::thi,thj
     
-    integer::n,i,j,k,vj,ig,choix,l,vcdiag,nsujet_trial,dimint
+    integer::n,i,j,k,vj,ig,choix,l,nsujet_trial,dimint !vcdiag
     integer,dimension(ngmax)::cpt
-    double precision::pe1,pe2,som,inv,som1,som2,res,vet,vet2,h1,inc,varS1,varT1,covST1
+    double precision::inv,som1,som2,res,vet,vet2,h1,varS1,varT1,covST1 !pe1,pe2,som,inc
     double precision,dimension(3):: resultatInt
     
     double precision,dimension(-2:npmax):: the1,the2
@@ -38,8 +38,8 @@ module mod_Adaptative
 !AD:end
     double precision,dimension(0:ndatemax)::ut1
     double precision,dimension(0:ndatemaxdc)::ut2
-    double precision,dimension(:),allocatable::frail
-    double precision::int,logGammaJ,c3,c4,pourgam
+    !double precision,dimension(:),allocatable::frail
+    !double precision::int,logGammaJ,c3,c4,pourgam
     double precision,dimension(ntrials)::integrale3
     double precision,dimension(2,2):: mat_A
 
@@ -53,7 +53,10 @@ module mod_Adaptative
     ut1=0.d0
     ut2=0.d0
     dut2=0.d0
-    dut1=0.d0        
+    dut1=0.d0    
+    varS1=0.d0
+    varT1=0.d0
+    covST1=0.d0    
     do i=1,np
         bh(i)=b(i)
     end do 
@@ -76,6 +79,7 @@ module mod_Adaptative
     !!print*,indice_eta+indice_theta+indice_varS+indice_varT+indice_covST
     !stop
 !!print*,"bh=",bh
+    
     if(effet.eq.1) then
         if(logNormal==1)then
             theta2 = bh(np-nva-nparamfrail+indice_eta+indice_theta)**2.d0 ! scl on recupere theta du vecteur des parametre, au carree car c'est bien la variance
@@ -99,7 +103,7 @@ module mod_Adaptative
         if(indice_covST==1)then
             covST1 =bh(np-nva-nparamfrail+indice_eta+indice_theta+indice_varS+indice_varT+indice_covST)
         else
-            covST1=0
+            covST1=0.d0
         endif
     endif
     !!print*,np,nva,nparamfrail,indice_eta,indice_theta,indice_varS,indice_varT,indice_covST

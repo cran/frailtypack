@@ -53,18 +53,6 @@ module func_laplace
             - const_res4(individu_j)*dexp(wij + ui + vsi*dble(ve(individu_j,1)))&
             - const_res5(individu_j)*dexp(zeta*wij + alpha_ui*ui + vti*dble(ve(individu_j,1)))
             
-        ! !print*,"res2s_sujet(individu_j)",res2s_sujet(individu_j)
-        ! !print*,"delta(individu_j)",delta(individu_j)
-        ! !print*,"deltastar(individu_j)",deltastar(individu_j)
-        ! !print*,"ui",ui
-        ! !print*,"alpha_ui",alpha_ui
-        ! !print*,"vsi",vsi
-        ! !print*,"vti",vti
-        ! !print*,"res2_dcs_sujet(individu_j)",res2_dcs_sujet(individu_j)
-        ! !print*,"dble(ve(individu_j,1))",dble(ve(individu_j,1))
-        ! !print*,"theta2",theta2
-        ! !print*,"res",res
-        !stop
         if(Test==1)then ! je fais ceci pour evaluer le calcul integral par laplace
             res=-bh(1) + 5.d0*dlog(bh(1))
         endif
@@ -89,15 +77,15 @@ module func_laplace
         !individu_essai: individu courant dans l'essai
         !vsi,vti,ui : effets aleatoires au niveau essai
         !wij_chap : contient des w_ij_chapeau
-        use var_surrogate, only:theta2,const_res5,const_res4,vs_i,vt_i,u_i,nsujeti,wij_chap,&
-            deltastar,delta,pi,alpha_ui,control_wij_chap,res2s_sujet,res2_dcs_sujet,Test!,individu_j
+        use var_surrogate, only:theta2,const_res5,const_res4,vs_i,vt_i,u_i,wij_chap,& !nsujeti
+            deltastar,delta,pi,alpha_ui,Test!,individu_j !res2s_sujet,res2_dcs_sujet,control_wij_chap
         use comon, only: eta,ve,model
         use optim_scl, only:marq98j_scl  ! pour faire appel a marquard 
         
         implicit none
          
         integer,intent(in)::position_i,individu_essai
-        integer::i,model_save,individu
+        integer::model_save,individu !i
 
         double precision,intent(in)::vsi,vti,ui
         double precision::res
@@ -257,7 +245,7 @@ module func_laplace
     double precision function funcpaXi_chapeau(b,np,id,thi,jd,thj,k0)
         !wij_chap: contient les valeur estimees de w_ij_chapeau
         use var_surrogate, only:pi,essai_courant,position_i,nsujeti,&
-            determinant,gamma_ui,varcov,rho,wij_chap,Test
+            gamma_ui,varcov,rho,Test !determinant,wij_chap
         !use comon, only: ve
         !use optim_scl, only:marq98j_scl  ! pour faire appel a marquard 
         !use fonction_A_integrer, only:Int_Laplace_ind
@@ -270,7 +258,7 @@ module func_laplace
         double precision,dimension(np),intent(in)::b
         double precision,dimension(2),intent(in)::k0
         double precision,intent(in)::thi,thj
-        double precision::res,vs_i,vt_i,u_i,h,h1,h2,B_Lap,control
+        double precision::res,vs_i,vt_i,u_i,h,h2,B_Lap,control !h1
         double precision,dimension(np)::bh
 
         
@@ -370,7 +358,55 @@ module func_laplace
     return
     endfunction funcpaXi_chapeau
     
+    ! joint frailty_copula
+    double precision function funcpaLaplace_copula(b,np,id,thi,jd,thj,k0)
+        use var_surrogate, only:essai_courant,nsujeti,frailt_base
+        use fonction_A_integrer,only:Integrant_Copula
+        
+        implicit none
+         
+        integer,intent(in)::id,jd,np
+        integer::i
+        double precision,dimension(np),intent(in)::b
+        double precision,dimension(2),intent(in)::k0
+        double precision,intent(in)::thi,thj
+        double precision::vsi,vti,res,ui
+        double precision,dimension(np)::bh
+         
+        do i=1,np
+            bh(i)=b(i)
+        end do
+        
+        if (id.ne.0) bh(id)=bh(id)+thi
+        if (jd.ne.0) bh(jd)=bh(jd)+thj
+        
+        vsi=bh(1)
+        vti=bh(2)
+        if(frailt_base==0) then! on annule simplement le terme avec ui si on ne doit pas tenir compte de
+            ui=0.d0
+        else
+            ui=bh(3)
+        endif
+        res = Integrant_Copula(vsi,vti,ui,essai_courant,nsujeti(essai_courant))
+        if(res == 0.d0) res = 1.d-299
+        ! call dblepr("res funcpaadaptativ = ", -1, res, 1)
+        res = -(- dlog(res))
+        ! call dblepr("log res funcpaadaptativ = ", -1, res, 1)
+        
+        if ((res.ne.res).or.(abs(res).ge. 1.d30)) then ! pour test infini et NaN
+            funcpaLaplace_copula =-1.d9
+            !call dblepr("log res funcpaadaptativ = ", -1, res, 1)
+            goto 126
+        else
+            funcpaLaplace_copula = res
+        end if
     
-
+        126    continue
+        
+        !funcpaLaplace_copula = -((bh(1)+1.d0) ** 2.d0 + (bh(2)+2.d0) ** 2.d0 + (bh(3)-6.d0) ** 2.d0 )
+        return
+    
+    endfunction funcpaLaplace_copula
+    
 endmodule func_laplace
     
