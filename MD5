@@ -1,4 +1,4 @@
-b05bc2e5495c49cc22aa021406c8c127 *DESCRIPTION
+5099ca6394f9f918c2579647434c2209 *DESCRIPTION
 95a7c2598e7774e77de20aae17a9973c *NAMESPACE
 1ac3a11a14666e3dbafec2dcc5b8d37b *NEWS
 2c53a6009c881f67f79f818bef6d123a *R/Cmeasures.R
@@ -299,7 +299,7 @@ f3615fd41b9652f241d6eebb6f633c94 *src/epoce_log.f90
 719f803222c0493b701318336d726f9c *src/epoce_long.f90
 b10af2046182f34c28ec00be13f2558b *src/epoce_long_nl.f90
 ecb90903e67b8f9145261e58c75750b7 *src/frailtypack.f90
-542abce98a3584f415ebdc29a0e55800 *src/frailtypack.h
+96ade3c35329c985e87252a2dec7794c *src/frailtypack.h
 067f44efa0c46060528c86c89af9f2b1 *src/funcpaG_tps.f90
 79f4be1c290ba2f2473892f530ef8397 *src/funcpaGcpm.f90
 62af302c686293394ab8525350c9daf9 *src/funcpaGcpm_intcens.f90
