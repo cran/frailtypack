@@ -98,7 +98,7 @@ F77_SUB(joint_longi)(const int *vectnsujet, const int *ngnzag, double *k0,
                      double *tt00, double *tt10, const int *ic0, const int *groupe0, 
                      double *tt0dc0, double *tt1dc0, const int *icdc0, const int *link0, 
                      double *yy0, double *bb0, const int *groupey0, const int *groupeb0, 
-                     const int *vectnb0, double *matzy0, double *matzb0, const double *cag0, 
+                     const int *vectnb0, double *fixed_binary0, double *matzy0, double *matzb0, const double *cag0, 
                      const int *vectnvar, const double *vax0, const double *vaxdc0, 
                      const double *vaxy0, const double *vaxb0, const int *novar, int *maxit0, 
                      int *np, const int *neta0, double *b, double *h_hessout, double *hihout, 
@@ -273,19 +273,19 @@ F77_SUB(jointsurrogate)(int *nsujet1, int *ng, int *ntrials1, int *maxiter, int 
              double *vbetast, double *vbetastinit);
 
 void
-F77_SUB(surrosim) (double *don_simul, double *don_simuls1, int *n_obs,
+F77_SUB(surrosim) (double *don_simul, double *don_simulS1, int *n_obs, 
 		  int *n_col, int *lognormal, int *affiche_stat,
-		  double *vrai_theta, int *ng, int *ver, double *truealpha,
-		  double *propc, double *cens_a, double *gamma1,
-		  double *gamma2, double *theta2, double *lambda_s,
-		  double *nu_s, double *lambda_t, double *nu_t,
-		  double *betas, double *betat, int *n_essai,
-		  double *rsqrt, double *sigma_s, double *sigma_t,
+		  double *vrai_theta, int *ng, int *ver, double *truealpha, 
+		  double *propC, double *cens_A, double *gamma1, 
+		  double *gamma2, double *theta2, double *lambda_S, 
+		  double *nu_S, double *lambda_T, double *nu_T,
+          double *betas, double *betat, int *n_essai, 
+		  double *rsqrt, double *sigma_s, double *sigma_t, 
 		  double *p, double *prop_i, double *gamma, double *alpha,
-		  int *frailt_base, int *random_generator0, int *aleatoire,
-		  int *nbre_sim, int *graine, int *nbre_don_non_cons,
-		  int *param_weibull0, double *thetacopule, int *filtre,
-		  int *filtre2, int *type_joint_simul, int *pfs);
+          int *frailt_base, int *random_generator0, int *aleatoire, 
+		  int *nbre_sim, int *graine, int *nbre_don_non_cons, 
+		  int *param_weibull0, int *thetacopule, int *filtre, 
+          int *filtre2, int *type_joint_simul, int *pfs);
 
 void
 F77_SUB(jointsurrokendall)(

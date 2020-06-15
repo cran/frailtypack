@@ -2,11 +2,13 @@
 % Please edit documentation in R/plot.jointSurroPenalloocv.R
 \name{plot.jointSurroPenalloocv}
 \alias{plot.jointSurroPenalloocv}
-\title{Plot of leave-one-out crossvalidation Outputs from the one-step Joint surrogate model for evaluating a 
+\title{Plot of trials leave-one-out crossvalidation Outputs from the one-step Joint surrogate model for evaluating a 
 canditate surrogate endpoint.}
 \usage{
 \method{plot}{jointSurroPenalloocv}(x, unusedtrial = NULL, xleg = "bottomleft", 
-yleg = NULL, main = NULL, ...)
+yleg = NULL, main = NULL, xlab = "Trials", 
+ylab = "Log Hazard ratio of the true endpoint", 
+legend = c("Beta observed", "Beta predict"), ...)
 }
 \arguments{
 \item{x}{An object inherent from the \code{jointSurroPenalloocv} Class}
@@ -15,44 +17,54 @@ yleg = NULL, main = NULL, ...)
 predicted treatment effects on true endpoint have an outlier. In this case, 
 one can drop from the data the trials with very hight absolute predicted value}
 
-\item{xleg}{X-coordinate for the location of the legend}
+\item{xleg}{X-coordinate for the location of the legend.}
 
 \item{yleg}{Y-coordinate for the location of the legend, the default is \code{NULL}}
 
-\item{main}{The desired main}
+\item{main}{An overall title for the plot: see \link{title}.}
+
+\item{xlab}{A title for the x axis: see \link{title}.}
+
+\item{ylab}{A title for the y axis: see \link{title}.}
+
+\item{legend}{A vector of characters string of length >= 1 to appear in the legend}
 
 \item{...}{other unused arguments.}
 }
 \value{
 This function displays the boxplots corresponding to the number of trials in the 
-dataset. Each boxplot includes 3 elements correnponding to the predicted treatment effect on true endpoint
-with the prediction interval. The circle inside or outside the boxplot represents the observed
-treatment effect on true endpoint. For all trials with convergence issues or outliers, the boxplot is just represented
-by a dash. In the last case, we display in the main of the figure a vector of these trials, if argument \code{main} 
+dataset. Each boxplot includes 3 elements corresponding to the predicted treatment effect on true endpoint
+with the prediction interval. The circles inside or outside the boxplot represent the observed
+treatment effects on true endpoint. For each trial with convergence issues or outliers, the boxplot is replaced
+by a dash. In this case, we display in the title of the figure a vector of these trials, if argument \code{main} 
 is set to \code{NULL}. The function returns the list of unused trials.
 }
 \description{
 {
-Plot of leave-one-out crossvalidation Outputs for evaluating the joint surrogate model 
+Plot of trials leave-one-out crossvalidation Outputs for evaluating the joint surrogate model 
 }
 }
 \examples{
 
 
 \dontrun{
-library(frailtypack)
-data(dataOvarian)
+# Generation of data to use 
+ data.sim <- jointSurrSimul(n.obs=300, n.trial = 10,cens.adm=549.24,
+             alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1, sigma.s = 0.7,
+             sigma.t = 0.7, cor = 0.8, betas = -1.25, betat = -1.25,
+             full.data = 0, random.generator = 1, seed = 0,
+             nb.reject.data = 0)
 
-joint.surro.Gumbel <- jointSurroCopPenal(data = dataOvarian, int.method = 0, 
-                      n.knots = 8, maxit=50, kappa.use = 4, nb.mc = 1000, 
-                      typecopula = 2, print.iter = T, scale = 1/365)
-summary(joint.surro.Gumbel)
+###--- Joint surrogate model ---###
+ 
+joint.surro.sim.MCGH <- jointSurroPenal(data = data.sim, int.method = 2,
+                        nb.mc = 300, nb.gh = 20, print.iter = T)
+        
+# Example of loocv taking into accountn ony trial 2 trials (1 and 3)
+dloocv <- loocv(joint.surro.sim.MCGH, unusedtrial = c(2,4:10))
 
-loocv.result <- loocv(joint.surro.Gumbel)
-loocv.result
+plot(x = dloocv, xleg = "topright", bty = "n")
 
-plot(x = loocv.result, unusedtrial = c(22, 30, 33, 38, 42, 47, 49), 
-                          xleg = "bottomleft", y = NULL)
 }
 
 }

@@ -489,6 +489,8 @@
 #' # results
 #' summary(joint.surro.ovar)
 #' 
+#' print(joint.surro.ovar)
+#' 
 #' # data from the adjuvant chemotherapy and resectable gastric cancer 
 #' # meta-analyses :
 #' # Joint surrogate model with initial values for the parameters and the 
@@ -502,7 +504,7 @@
 #'                 random.generator = 2, init.kappa = c(367700100,10025184521))
 #'
 #' # results
-#' summary(joint.surro.gast)
+#' print(joint.surro.gast)
 #' 
 #' }
 #' 
@@ -1035,7 +1037,7 @@ jointSurroPenal = function(data, maxit = 40, indicator.zeta = 1, indicator.alpha
                   as.double(prop_i),
                   as.integer(n_sim1),
                   EPS2 = as.double(c(LIMparam, LIMlogl, LIMderiv)),
-                  as.double(kappa0),
+                  kappa0 = as.double(kappa0),
                   as.double(vect_kappa),
                   as.integer(logNormal),
                   nsim_node = as.integer(nsim_node),
@@ -1160,7 +1162,7 @@ jointSurroPenal = function(data, maxit = 40, indicator.zeta = 1, indicator.alpha
   result$ktau <- ans$ktau
   result$R2.boot <- ans$R2.boot
   result$Coefficients <- ans$Coefficients
-  result$kappa  <- kappa0
+  result$kappa  <- ans$kappa0
   result$scale <- scale
   result$data <- dataUse
   result$varcov.Sigma <- ans$Varcov

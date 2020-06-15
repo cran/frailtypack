@@ -497,15 +497,15 @@
 #' data(dataOvarian)
 #' joint.surro.Gumbel <- jointSurroCopPenal(data = dataOvarian, int.method = 0, 
 #'       n.knots = 8, maxit = 50, kappa.use = 4, nb.mc = 1000, typecopula = 2, 
-#'       print.iter = T, scale = 1/365)
+#'       print.iter = F, scale = 1/365)
 #'       
-#' summary(joint.surro.Gumbel)
+#' print(joint.surro.Gumbel)
 #'
 #' joint.surro.Clayton <- jointSurroCopPenal(data = dataOvarian, int.method = 0, 
 #'       n.knots = 8, maxit = 50, kappa.use = 4, nb.mc = 1000, typecopula = 1, 
-#'       print.iter = T, scale = 1/365) 
+#'       print.iter = F, scale = 1/365) 
 #' 
-#' summary(joint.surro.Clayton)
+#' print(joint.surro.Clayton)
 #' }
 #' 
 jointSurroCopPenal = function(data, maxit = 40, indicator.alpha = 1, frail.base = 1, 
@@ -1045,7 +1045,7 @@ jointSurroCopPenal = function(data, maxit = 40, indicator.alpha = 1, frail.base 
                   as.double(prop_i),
                   as.integer(n_sim1),
                   EPS2 = as.double(c(LIMparam, LIMlogl, LIMderiv)),
-                  as.double(kappa0),
+                  kappa0 = as.double(kappa0),
                   as.double(vect_kappa),
                   as.integer(logNormal),
                   nsim_node = as.integer(nsim_node),
@@ -1170,7 +1170,7 @@ jointSurroCopPenal = function(data, maxit = 40, indicator.alpha = 1, frail.base 
   result$ktau <- ans$ktau
   result$R2.boot <- ans$R2.boot
   result$Coefficients <- ans$Coefficients
-  result$kappa  <- kappa0
+  result$kappa  <- ans$kappa0
   result$scale <- scale
   result$data <- dataUse
   result$varcov.Sigma <- ans$Varcov

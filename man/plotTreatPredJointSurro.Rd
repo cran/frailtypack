@@ -2,12 +2,18 @@
 % Please edit documentation in R/plotTreatPredJointSurro.R
 \name{plotTreatPredJointSurro}
 \alias{plotTreatPredJointSurro}
-\title{Plot of the prediction of the treatment effect on the true endpoint}
+\title{Plot of the prediction of the treatment effect on the true endpoint and the STE}
 \usage{
-plotTreatPredJointSurro(object, from = -2, to = 2, type = "Coef", 
-   var.used = "error.estim", alpha. = 0.05, n = 1000, lty = 2, d = 3, 
-   colCI = "blue", xlab = "beta.S", ylab = "beta.T.predict", 
-   pred.int.use = "up")
+plotTreatPredJointSurro(object, from = -3, to = 2, type = "Coef",
+  var.used = "error.estim", alpha. = 0.05, n = 1000, lty = 2, d = 3,
+  colCI = "blue", xlab = "beta.S", ylab = "beta.T.predict",
+  pred.int.use = "up", main = NULL, add.accept.area.betaS = TRUE,
+  ybottom = -0.05, ytop = 0.05, density = 20, angle = 45,
+  legend.show = TRUE, leg.x = NULL, leg.y = 2,
+  legend = c("Prediction model", "95\% prediction Interval",
+  "Beta.S for nonzero beta.T", "STE"), leg.text.col = "black",
+  leg.lty = c(1, 2, 4, NA), leg.pch = c(NA, NA, 7, 1), leg.bg = "white",
+  leg.bty = "n", leg.cex = 0.85, ...)
 }
 \arguments{
 \item{object}{An object inheriting from \code{jointSurroPenal} class
@@ -28,12 +34,11 @@ and indicates if the prediction error take into account
 the estimation error of the estimates of the parameters. If the estimates 
 are supposed to be known or if the dataset includes a high number of trials with 
 a high number of subject per trial, value \code{No.error} can be used. 
-The default is \code{error.estim}.}
+The default is \code{error.estim} (highly recommended).}
 
 \item{alpha.}{The confidence level for the prediction interval. The default is \code{0.05}}
 
-\item{n}{Integer; the number of \if{latex}{\eqn{\beta_S}} \if{html}{\eqn{\beta}\out{<sub>S</sub>}} 
-values at which to evaluate. The default is \code{1000}.}
+\item{n}{An integer that indicates the number of values for \if{latex}{\eqn{\beta_S}} \if{html}{\eqn{\beta}\out{<sub>S</sub>}}. The default is \code{1000}.}
 
 \item{lty}{The line type. Line types can either be specified as an integer 
 (0=blank, 1=solid (default), 2=dashed, 3=dotted, 4=dotdash, 5=longdash, 6=twodash) or as one 
@@ -52,8 +57,55 @@ and confidence intervals. Default of 3 digits is used.}
 
 \item{pred.int.use}{A character string that indicates the bound of the prediction interval 
 to use to compute the STE. Possible values are \code{up} for the upper bound (the default)
-or \code{lw} for the lower bound. \code{up} induces protective treatment effects and \code{lw}
-induces risk factors.}
+or \code{lw} for the lower bound. \code{up} when we have a protective treatment effect and \code{lw} 
+when we have a deleterious treatment effect.}
+
+\item{main}{Title of the graphics}
+
+\item{add.accept.area.betaS}{A boolean that indicates if the plot should add acceptance area for 
+\if{latex}{\eqn{\beta_S}} \if{html}{\eqn{\beta}\out{<sub>S</sub>}}
+that predict a nonzero \if{latex}{\eqn{\beta_T}} \if{html}{\eqn{\beta}\out{<sub>T</sub>}}. The default is TRUE}
+
+\item{ybottom}{A scalar for the left y bottom position of the rectangle on the x-axis associated with acceptable 
+value for \if{latex}{\eqn{\beta_S}} \if{html}{\eqn{\beta}\out{<sub>S</sub>}} to predict a 
+non zero \if{latex}{\eqn{\beta_T}} \if{html}{\eqn{\beta}\out{<sub>T</sub>}}. The default is \code{-0.05}.}
+
+\item{ytop}{A scalar for the top right y position of the rectangle on the x-axis associated with acceptable 
+value for \if{latex}{\eqn{\beta_S}} \if{html}{\eqn{\beta}\out{<sub>S</sub>}} to predict a 
+non zero \if{latex}{\eqn{\beta_T}} \if{html}{\eqn{\beta}\out{<sub>T</sub>}}. The default is \code{0.05}.}
+
+\item{density}{The density of shading lines, in lines per inch.  The default 
+value of 'NULL' means that no shading lines are drawn.  A 
+zero value of 'density' means no shading lines whereas
+negative values (and 'NA') suppress shading (and so allow color filling). The default is \code{20}}
+
+\item{angle}{Angle (in degrees) of the shading lines. The default is \code{45}}
+
+\item{legend.show}{A boolean that indicates if the legend should be displayed}
+
+\item{leg.x}{The x co-ordinate to be used to position the legend.}
+
+\item{leg.y}{The y co-ordinate to be used to position the legend. The default is \code{4}}
+
+\item{legend}{A character or expression vector of length >= 1 to appear in the legend}
+
+\item{leg.text.col}{The color used for the legend text. The default is \code{black}.}
+
+\item{leg.lty}{The line type, width and color for the legend box (if bty = "o").}
+
+\item{leg.pch}{= The plotting symbols appearing in the legend, as numeric vector or a 
+vector of 1-character strings (see \link{points}). Unlike \code{points}, this can all be 
+specified as a single multi-character string. Must be specified for symbol drawing.}
+
+\item{leg.bg}{The background color for the legend box. (Note that this is only used if bty \code{!= "n"}.)}
+
+\item{leg.bty}{The type of box to be drawn around the legend. The allowed values are \code{"o"} 
+(the default) and \code{"n"}.}
+
+\item{leg.cex}{Character expansion factor relative to current par(\code{"cex"}). Used 
+for text as defined in \link{legend}.}
+
+\item{\dots}{other unused arguments}
 }
 \value{
 For a considered treatment effects on the surrogate enpoint, plot the
@@ -63,8 +115,11 @@ with the prediction interval.
 \description{
 Plot the prediction of the treatment effect on the true endpoint based on the observed treatment effect
 on the surrogate endpoint, with the prediction interval: results from the one-step Joint surrogate model  
-for evaluating a canditate surrogate endpoint. The graphic also includes a vertical line that cut 
-the x axis to the value of \link{ste}.
+for evaluating a canditate surrogate endpoint. The graphic also includes vertical lines that cut 
+the x axis to the values of \link{ste}. A hatched rectagle/zone indicates the values of 
+\if{latex}{\eqn{\beta_S}} \if{html}{\eqn{\beta}\out{<sub>S</sub>}} that predict a non zeto 
+\if{latex}{\eqn{\beta_T}} \if{html}{\eqn{\beta}\out{<sub>T</sub>}}, according to the number of value 
+for \code{STE} and the shape of the upper confidence limit for the prediction model.
 }
 \examples{
 
@@ -81,17 +136,22 @@ joint.surro.ovar <- jointSurroPenal(data = dataOvarian, n.knots = 8,
 
 ## "HR"
 plotTreatPredJointSurro(joint.surro.ovar, from = 0, to = 4, 
-                type = "HR", var.used = "error.estim", lty = 2)
+                type = "HR", lty = 2, leg.y = 13)
+                
+## or without acceptance area for betaS:
+plotTreatPredJointSurro(joint.surro.ovar, from = 0, to = 4, 
+                type = "HR", lty = 2, leg.y = 13, 
+                add.accept.area.betaS = FALSE)
              
 ## "log HR"
 plotTreatPredJointSurro(joint.surro.ovar, from = -2, to = 2, 
-                type = "Coef", var.used = "error.estim", lty = 2)
+                type = "Coef", lty = 2, leg.y = 3.5)
                 
 ### For a value of ste greater than 0 (HR > 1), which induces deleterious
 ### treatment effet, argument "pred.int.use" can be set to "lw"  
 
 plotTreatPredJointSurro(joint.surro.ovar, from = 0, to = 2, 
-                type = "HR", var.used = "error.estim", lty = 2,
+                type = "HR", lty = 2, leg.y = 4,
                 pred.int.use = "lw")
 
 }

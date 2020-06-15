@@ -1,4 +1,4 @@
-##' Predict Method for the one-step Joint surrogate models for the evaluation of a 
+##' S3method predict for the one-step Joint surrogate models for the evaluation of a 
 ##' canditate surrogate endpoint.
 ##' 
 ##' @description{
@@ -16,15 +16,16 @@
 ##' 
 ##' \method{predict}{jointSurroPenal}(object, datapred = NULL, betaS.obs = NULL, 
 ##' betaT.obs = NULL, ntrial0 = NULL, var.used = "error.estim", alpha. = 0.05, 
-##' dec = 3, colCI = "red", from = -2, to = 2, ...)
+##' dec = 3, colCI = "red", from = -2, to = 2, type = "Coef", ...)
 ##' @param object An object inheriting from \code{jointSurroPenal} class
 ##' (output from calling the function \code{jointSurroPenal} or \code{jointSurroCopPenal}).
 ##' @param datapred Dataset to use for the prediction. If this argument is specified,
 ##' the data structure must be the same as the parameter \code{data} in the 
-##' function \link{jointSurroPenal} or \link{jointSurroCopPenal}. However, if observation on te true endpoint are
-##' not available, columns timeT and \code{statusT} can be absent.
+##' function \link{jointSurroPenal} or \link{jointSurroCopPenal}. However, if observation on the true endpoint are
+##' not available, columns timeT and \code{statusT} can be absent. In this case, the \if{latex}{\eqn{\beta_S}} \if{html}{\eqn{\beta}\out{<sub>S</sub>}}
+##' are calculated using Cox proportional hazards models.
 ##' @param betaS.obs Observed treatment effect on the surrogate endpoint, to use for the prediction of
-##' the treatment effect on the true endpoint. If not null, this value is used for prediction insted of
+##' the treatment effect on the true endpoint. If not null, this value is used for prediction instead of
 ##' \code{datapred}. The default is \code{NULL}.
 ##' @param betaT.obs Observed treatment effect on the true endpoint. Used to assess the prediction if not null.
 ##' The defaut is \code{NULL}.
@@ -33,7 +34,7 @@
 ##' the estimation error of the estimates of the parameters. If the estimates 
 ##' are supposed to be known or if the dataset includes a high number of trials with 
 ##' a high number of subject per trial, value \code{No.error} can be used. 
-##' The default is \code{error.estim}.
+##' The default is \code{error.estim} (highly recommended).
 ##' @param ntrial0 Number of subjects include in the new trial. Required if \code{betaS.obs} is not null.
 ##' The default is \code{NULL}.
 ##' @param alpha. The confidence level for the prediction interval. The default is \code{0.05}
@@ -44,7 +45,10 @@
 ##' \code{from -2 to 2}
 ##' @param to The range (with \code{from}) over which the function will be plotted. The default is 
 ##' \code{from -2 to 2} 
-##' @param ... other unused arguments.
+##' @param type The type of graphic, \code{"Coef"} for the \code{log HR} or \code{"HR"} for hazard ratio.
+#'  If set to \code{HR}, the arguments \code{from} and \code{to} must take positive values.
+#'  The default is \code{"Coef"}.
+##' @param ... other unused arguments. See the function (\link{plotTreatPredJointSurro})
 ##' 
 ##' @return Returns and display a dataframe including for each trial the number of included subjects 
 ##' (if available), the observed 
@@ -93,13 +97,22 @@
 ##' 
 ##' # prediction of the treatment effect on the true endpoint from an observed 
 ##' # treatment effect on the surrogate endpoint in a given trial
+##' 
+##' # in log HR
 ##' predict(joint.surro.ovar, betaS.obs = -0.797, betaT.obs = -1.018)
+##' predict(joint.surro.ovar, type = "Coef", betaS.obs = -1, leg.y = 0, leg.x = 0.3, to = 2.3)
+##' predict(joint.surro.ovar, type = "Coef", leg.y = 3.5, add.accept.area.betaS = F, to = 2.3)
+##' 
+##' # in HR
+##' predict(joint.surro.ovar, betaS.obs = exp(-0.797), betaT.obs = exp(-1.018))
+##' predict(joint.surro.ovar, type = "HR", betaS.obs = log(0.65), leg.y = 5, to = 2.3)
+##' predict(joint.surro.ovar, type = "HR", leg.y = 5, add.accept.area.betaS = F, to = 2.3)
 ##' }
 ##' 
 ##' 
 "predict.jointSurroPenal" <- function (object, datapred = NULL, betaS.obs = NULL, betaT.obs = NULL, 
                                        ntrial0 = NULL, var.used = "error.estim", alpha. = 0.05, 
-                                       dec = 3, colCI = "red", from = -2, to = 2, ...)
+                                       dec = 3, colCI = "red", from = -2, to = 2, type = "Coef", ...)
 {
   if (!inherits(object, "jointSurroPenal"))
     stop("object must be of class 'jointSurroPenal'")
@@ -185,9 +198,15 @@
   if(is.null(betaS.obs)){
     for(i in 1:length(trial)){
       beta  <- object$beta.t
-      dab   <- object$Coefficients$Estimate[nrow(object$Coefficients)-4]
-      daa   <- object$Coefficients$Estimate[nrow(object$Coefficients)-6]
-      dbb   <- object$Coefficients$Estimate[nrow(object$Coefficients)-5]
+      #===proble dans l'indexation de la matrice des coefficient. scl: 11/04/2020
+      # dab   <- object$Coefficients$Estimate[nrow(object$Coefficients)-4]
+      # daa   <- object$Coefficients$Estimate[nrow(object$Coefficients)-6]
+      # dbb   <- object$Coefficients$Estimate[nrow(object$Coefficients)-5]
+      dab   <- object$Coefficients[rownames(object$Coefficients)=="sigma_sT",1]
+      daa   <- object$Coefficients[rownames(object$Coefficients)=="sigma_s",1]
+      dbb   <- object$Coefficients[rownames(object$Coefficients)=="sigma_t",1]
+      #====
+      
       alpha <- object$beta.s
       alpha0 <- matrixPred$beta.S[i]
       x     <- t(matrix(c(1, -dab/daa),1,2))
@@ -200,7 +219,7 @@
       # VD (bete_T, beta_S). on utilise la hesienne directement car pas de changement de variable
       VD     <- matrix(c(object$varH[nparam,nparam], object$varH[nparam,nparam-1],
                          object$varH[nparam-1,nparam], object$varH[nparam -1,nparam - 1]),2,2)
-      R2trial <- object$Coefficients$Estimate[nrow(object$Coefficients)-1] 
+      R2trial <- object$Coefficients[rownames(object$Coefficients)=="R2trial",1] # scl: 11/04/2020
       matrixPred$beta.T.i[i] <- beta + (dab/daa) * (alpha0 - alpha)
       variance.inf <- dbb * (1 - R2trial) 
       variance.N <- t(x) %*% (Vmu + (((alpha0 - alpha)/daa)**2) * VD) %*% x
@@ -230,9 +249,14 @@
   }else{# Here, the observe treatment effect on surrogate is provided
       i <- 1
       beta  <- object$beta.t
-      dab   <- object$Coefficients$Estimate[nrow(object$Coefficients)-4]
-      daa   <- object$Coefficients$Estimate[nrow(object$Coefficients)-6]
-      dbb   <- object$Coefficients$Estimate[nrow(object$Coefficients)-5]
+      #===proble dans l'indexation de la matrice des coefficient. scl: 11/04/2020
+      # dab   <- object$Coefficients$Estimate[nrow(object$Coefficients)-4]
+      # daa   <- object$Coefficients$Estimate[nrow(object$Coefficients)-6]
+      # dbb   <- object$Coefficients$Estimate[nrow(object$Coefficients)-5]
+      dab   <- object$Coefficients[rownames(object$Coefficients)=="sigma_sT",1]
+      daa   <- object$Coefficients[rownames(object$Coefficients)=="sigma_s",1]
+      dbb   <- object$Coefficients[rownames(object$Coefficients)=="sigma_t",1]
+      #====
       alpha <- object$beta.s
       alpha0 <- matrixPred$beta.S[i]
       x     <- t(matrix(c(1, -dab/daa),1,2))
@@ -245,7 +269,7 @@
       # VD (bete_T, beta_S). on utilise la hesienne directement car pas de changement de variable
       VD     <- matrix(c(object$varH[nparam,nparam], object$varH[nparam,nparam-1],
                          object$varH[nparam-1,nparam], object$varH[nparam -1,nparam - 1]),2,2)
-      R2trial <- object$Coefficients$Estimate[nrow(object$Coefficients)-1] 
+      R2trial <- object$Coefficients[rownames(object$Coefficients)=="R2trial",1] # scl: 11/04/2020
       matrixPred$beta.T.i[i] <- beta + (dab/daa) * (alpha0 - alpha)
       variance.inf <- dbb * (1 - R2trial) 
       variance.N <- t(x) %*% (Vmu + (((alpha0 - alpha)/daa)**2) * VD) %*% x
@@ -274,12 +298,23 @@
 
   }
   matrixPred[,-c(1,2,8)] <- round(matrixPred[,-c(1,2,8)],dec)
-  plotTreatPredJointSurro(object, from = from, to = to)
+  plotTreatPredJointSurro(object, from = from, to = to, type = type, ...)
   for(k in 1:nrow(matrixPred)){
-    points(matrixPred$beta.S[k],matrixPred$beta.T.i[k])
-    points(matrixPred$beta.S[k],matrixPred$Inf.95.CI[k], col = colCI)
-    points(matrixPred$beta.S[k],matrixPred$Sup.95.CI[k], col = colCI)
-    if(nrow(matrixPred)==1) abline(v = matrixPred$beta.S, col = "red", lty = 4)
+    if(type == "Coef"){ # log HR
+      points(matrixPred$beta.S[k],matrixPred$beta.T.i[k], col = colCI)
+      if(nrow(matrixPred)==1){ # si on a un seul point a predire, on met l'intervalle de confiance et le segment
+        points(matrixPred$beta.S[k],matrixPred$Inf.95.CI[k], col = colCI)
+        points(matrixPred$beta.S[k],matrixPred$Sup.95.CI[k], col = colCI)
+        segments(x0 = matrixPred$beta.S, y0 = -6, x1 = matrixPred$beta.S, y1 = matrixPred$Sup.95.CI[k], col = "red", lty = 4)
+      }
+    }else{ # HR
+      points(exp(matrixPred$beta.S[k]),exp(matrixPred$beta.T.i[k]), col = colCI)
+      if(nrow(matrixPred)==1){  # si on a un seul point a predire, on met l'intervalle de confiance et le segment
+        points(exp(matrixPred$beta.S[k]),exp(matrixPred$Inf.95.CI[k]), col = colCI)
+        points(exp(matrixPred$beta.S[k]),exp(matrixPred$Sup.95.CI[k]), col = colCI)
+        segments(x0 = exp(matrixPred$beta.S), y0 = -6, x1 = exp(matrixPred$beta.S), y1 = exp(matrixPred$Sup.95.CI[k]), col = "red", lty = 4)
+      }
+    }
   }
   
  # print(matrixPred)
