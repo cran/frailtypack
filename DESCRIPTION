@@ -1,15 +1,14 @@
 Package: frailtypack
-Version: 3.3.0
-Date: 2020-06-08
+Version: 3.3.2
+Date: 2020-10-07
 Title: General Frailty Models: Shared, Joint and Nested Frailty Models
         with Prediction; Evaluation of Failure-Time Surrogate Endpoints
 Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
         Mauguen, Amadou Diakite, Alexandre Laurent, Myriam Lopez, 
         Agnieszka Krol, Casimir L. Sofeu, Julien Dumerc, Denis Rustand
-Maintainer: Virginie Rondeau <Virginie.Rondeau@inserm.fr>
+Maintainer: Virginie Rondeau <virginie.rondeau@u-bordeaux.fr>
 Depends: R (>= 2.10.0), survival, boot, MASS, survC1, doBy
-Imports: statmod, nlme, shiny,
-        shinyjs,shinyBS,shinydashboard,rhandsontable,shinythemes,jsonlite,rootSolve
+Imports: statmod, nlme,rootSolve, shiny
 LazyLoad: no
 Description: The following several classes of frailty models using a penalized likelihood estimation on the hazard function but also a parametric estimation can be fit using this R package:
         1) A shared frailty model (with gamma or log-normal frailty distribution) and Cox proportional hazard model. Clustered and recurrent survival times can be studied.
@@ -33,7 +32,7 @@ URL:
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 Repository: CRAN
-Date/Publication: 2020-06-15 06:00:12 UTC
-Packaged: 2020-06-13 10:24:11 UTC; dr
+Date/Publication: 2020-10-14 09:00:02 UTC
+Packaged: 2020-10-07 11:44:19 UTC; cs10
 NeedsCompilation: yes
 RoxygenNote: 6.0.1
