@@ -1,5 +1,5 @@
     module tailles
-    integer :: npmax,NSUJETMAX,nvarmax,nsujetymax  
+    integer :: npmax,NSUJETMAX,nvarmax,nsujetymax
     integer :: ngmax                    !AD:,maxiter
     integer :: ndatemax,ndatemaxdc,nzmax
     integer :: nssgbyg,nssgmax
@@ -79,7 +79,7 @@
     double precision,dimension(:),allocatable,save :: Bcurrent, current_meanRaw ! add TwoPart
     integer,save::nmescurB, it_curB, interceptBin !add TwoPart
     double precision,save::fixed_Binary
-    integer, save::GLMloglink0,MTP0 ! glm log lionk + marginal two part                                                           
+    integer, save::GLMloglink0,MTP0 ! glm log lionk + marginal two part
     end module donnees_indiv
 
 
@@ -96,8 +96,8 @@
 
         module choix_epoce
                 integer:: choix_e
-        end module choix_epoce    
-    
+        end module choix_epoce
+
 !=====================================================================================
     module comon
     implicit none
@@ -222,7 +222,7 @@
 ! distribution des frailty par une log-normale
     integer::logNormal,timedep
     double precision,save::sig2, det
-    
+
      double precision,dimension(:),allocatable,save::b_e
         integer,save::nea,nb1
         double precision,dimension(:),allocatable,save::timecur,timecur2
@@ -238,14 +238,14 @@
         !add current-level association - interaction with time
         integer,save :: numInter, numInterB
         integer,dimension(:),allocatable,save::positionVarT
-        
+
     ! add TwoPart
         integer,save :: TwoPart, nsujetB, nbB,nby, maxmesB, nvaB
         double precision,dimension(:),allocatable,save::bb ! add TwoPart
         double precision,dimension(:,:),allocatable,save :: ziB,varcov_margB, sum_matB
     double precision,dimension(:,:),allocatable,save::veB
         integer,dimension(:),allocatable,save:: nmesB,nmes_oB,groupeeB !add TwoPart
-        integer :: itB             
+        integer :: itB
     end module comon
 !=====================================================================================
 
@@ -339,15 +339,15 @@
     double precision,dimension(:),allocatable,save:: vax,vaxdc,vaxmeta,vaxy
     double precision,dimension(:),allocatable,save:: vaxB ! add TwoPart
     integer,dimension(:),allocatable,save::filtre,filtre2,filtre3, filtre4
-    integer,dimension(:),allocatable,save::filtreB ! add TwoPart                                                  
+    integer,dimension(:),allocatable,save::filtreB ! add TwoPart
     integer,save::ver
 
     end module splines
 
     module var_surrogate
-    
+
     implicit none
-    
+
 ! scl nouvelles variables pour surrogacy
         integer, save::Nmax, nsim,ntrials,posind_i,cpteu,position_i, affiche_itteration !Nmax= nombre total de sujet, nsim= nombre de simulation pour le montecarlo aumoins 10000,posind_i=position de l'individu courant pour l'integrant
         integer, save::methodInt ! methode d'integration,0= MC,1=MC+quadrature,2=quadrature guaussienne
@@ -394,8 +394,15 @@
         ! Add for the joint frailty-copula model -scl - 05-04-2019
         integer,save:: copula_function, control_affichage, control_adaptative_laplace ! the copula function, can be 1 for clayton or 2 for Gumbel-Hougaard
         double precision, save:: theta_copule ! copula parameters
+        logical,save::mediation
     end module var_surrogate
-    
+    module var_mediation
+        integer,save::nmc,nmcboot,nboot,ntimes
+        integer,save::nknots,splines_ord,nsplines
+        double precision,dimension(:),allocatable,save::innerknotsurro,basissplines
+        double precision,dimension(2),save::boundaryknotsurro
+        double precision,dimension(:),allocatable,save::zmed,zdcmed
+    end module
     !gestion de la double precision
     module double_precision
     implicit none

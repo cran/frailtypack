@@ -1,6 +1,10 @@
+Changes in Version 3.5.0 december 2021
+o New model based on a mediation analysis approach added in the jointSurroPenal() function.
+  Added two functions (plot.jointSurroMed and summary.jointSurroMed) associated with this model.
+
 Changes in Version 3.4.0 may 2021
-o New generalized shared and joint frailty models for recurrent and terminal events. 
-  (Proportional and additive hazard, proportional odds and probit models) 
+o New generalized shared and joint frailty models for recurrent and terminal events.
+  (Proportional and additive hazard, proportional odds and probit models)
 o In the jointSurroPenal() function, removing the example based on the adjuvant chemotherapy and resectable gastric cancer meta-analysesovarian, due to the high computing time it needs.
 
 Changes in Version 3.3.2 october 2020
@@ -12,10 +16,10 @@ o Bugg fixed in the function loocv.summary(). This corrects the wrong results di
 
 Changes in Version 3.3.0 June 2020
 o New model added:  marginal two-part joint model (part of longiPenal function) for a longitudinal semicontinuous marker and a terminal event.
-o Lognormal distribution is now available for the continuous part of the conditional two-part joint model (semicontinuous biomarker) and the standard one-part joint model (continuous biomarker). 
+o Lognormal distribution is now available for the continuous part of the conditional two-part joint model (semicontinuous biomarker) and the standard one-part joint model (continuous biomarker).
 o Add the possibility to fix the intercept in the binary part of the two-part joint models.
 
-o Bug fixed in the computation of ste. Actually, by solving the equation representing the upper limit of the prediction interval of the treatment effects on T based on the observed treatment effects on S equals to 0 [u(beta_So = 0)], it is possible to find 2 solutions and then two potential values for STE. Depending on the shape of the function, different interpretations of possible values can be considered. We update the R functions ste(), plotTreatPredJointSurro() and the S3method summary.jointSurroPenal() in order to take into account this remark. 
+o Bug fixed in the computation of ste. Actually, by solving the equation representing the upper limit of the prediction interval of the treatment effects on T based on the observed treatment effects on S equals to 0 [u(beta_So = 0)], it is possible to find 2 solutions and then two potential values for STE. Depending on the shape of the function, different interpretations of possible values can be considered. We update the R functions ste(), plotTreatPredJointSurro() and the S3method summary.jointSurroPenal() in order to take into account this remark.
 
 o We have limited the display of the S3method summary.jointSurroPenal() to the  estimate of the treatment effects and the surrogacy evaluation crieria. We defined the S3method print.jointSurroPenal() to allow a complete display of the model outputs. The outputs included smoothing parameters and the number of spline nodes used to reach convergence.
 
@@ -25,18 +29,18 @@ o Update of the arguments of the S3methods plot.jointSurroPenalloocv() and predi
 
 o Bug fixed in the S3method summary.jointSurroPenal(). It is no more possible to change the integration method during the call of the function.
 
-o Bug fixed in the value of kappa return in the object of class "jointSurroPenal". The current value is that used for the convergence of the model if applicable. 
+o Bug fixed in the value of kappa return in the object of class "jointSurroPenal". The current value is that used for the convergence of the model if applicable.
 
 Changes in Version 3.2.0 March 2020
 o Update of the S3method predict.jointSurroPena(). We have included a plot of the predicted treatment effects on the true endpoint (with the prediction intervals) given the observed treatment effects on the surrogate endpoint and an object from the joint surrogate model. We have included the function plot.predict.jointSurroPenal()
-o Update of the S3method predict.jointSurroPenal(). Allows the possibility of prediction based on the observed treatment effect on the surrogate endpoint. This means, no need for individual patient data in the new trial. In addition, bug fixed on the outputs of this function when the new dataset is provided.  
+o Update of the S3method predict.jointSurroPenal(). Allows the possibility of prediction based on the observed treatment effect on the surrogate endpoint. This means, no need for individual patient data in the new trial. In addition, bug fixed on the outputs of this function when the new dataset is provided.
 o We rewrote the column name patienID in the argument data for jointSurroPenal() function as patientID
-o By default, in the data generation, the progression times are consored by the death time. This update allow to consider as surrogate endpoint the progression free survival (PFS) or Desease free survivall (DFS), or time-to- progression (TTP). This update is motivated by the surrogacy framework. 
+o By default, in the data generation, the progression times are consored by the death time. This update allow to consider as surrogate endpoint the progression free survival (PFS) or Desease free survivall (DFS), or time-to- progression (TTP). This update is motivated by the surrogacy framework.
 o Update of the threshold for the classification of R2_trial. the previous classification was for the coefficient of correlation (R)
-o Added the possibility when summarizing the results of the simulation studies, to display the bias and the MSE for kendall Tau and R2 
-o Inclusion of the nb.reject.dataset argument in the jointSurroPenalSimul() R function to allow simulations to be performed by considering multiple data packets. 
+o Added the possibility when summarizing the results of the simulation studies, to display the bias and the MSE for kendall Tau and R2
+o Inclusion of the nb.reject.dataset argument in the jointSurroPenalSimul() R function to allow simulations to be performed by considering multiple data packets.
 o Add of the argument printResult in the S3 method summary.jointSurroPenal.simul() to manage the display of the results after the summary. This function currently returns a dataframe of the simulations results
-o Bug fixed in the jointSurroPenalSimul() R function for the parameters of the jointSurrSimul() function, when one generate data to estimate kappas by cross validation. Some parameters were taken let fixed by default. Argument "cor" is set to "sqrt(R2)" 
+o Bug fixed in the jointSurroPenalSimul() R function for the parameters of the jointSurrSimul() function, when one generate data to estimate kappas by cross validation. Some parameters were taken let fixed by default. Argument "cor" is set to "sqrt(R2)"
 o New model added: Joint frailty-copula models for the validation of surrogate endpoints in multiple randomized clinical trials with failure-time endpoints (vignettes file updated)
 o Rename of the argument "rsqrt" in the jointSurrSimul() function by "cor".
 
@@ -71,14 +75,14 @@ o Add of the function to use to compute the surrogate threshold effect (STE)
 
 o Upadate of the values of the function jointSurroPenal() and jointSurroPenalSimul(). Several other values are returned to these function.
 
-o Update of the subroutine Fortran jointsurrogate(). Computation of the variance-covariance matrix for the estimates of the variance-covariance parameters of the random effect treatment-by-trial interaction using the delta-method. we also return in this function the dataframes for the estimates and their variance-covariance matrices. 
+o Update of the subroutine Fortran jointsurrogate(). Computation of the variance-covariance matrix for the estimates of the variance-covariance parameters of the random effect treatment-by-trial interaction using the delta-method. we also return in this function the dataframes for the estimates and their variance-covariance matrices.
 
 o Update of the output of the R function summary.jointSurroPenal(). Categorization of the Correlation strength at trial level. We also compute and display the STE in this function.
 
 o Parameters "indice.zeta and "indice.alpha" in the R functions jointSurroPenal and jointSurrPenalSimul are renamed by "indicator.zeta" and "indicator.alpha"
 
 Changes in Version 3.0.2 December 2018
-o Bug fixed in the file aaOptim_New_scl.o, aaOptim_New_scl2.o and aaOptim_SCL_0.o: module type definition remove, already defined in the file aaOptim.o 
+o Bug fixed in the file aaOptim_New_scl.o, aaOptim_New_scl2.o and aaOptim_SCL_0.o: module type definition remove, already defined in the file aaOptim.o
 
 o Bug fixed in function jointSurroPenal: an error occurs in case of convergence issue. it is corrected  now
 
@@ -91,11 +95,11 @@ o New model added: Joint frailty models for the validation of surrogate endpoint
 o Parsing all the Rd files under the man directory and updating the corresponding R source code by inserting roxygen documentation into the R scripts
 
 o Bug fixed in summary function for jointNestedPenal when alpha or ksi is not included in the model and JointPenal when alpha is not included in the model
- 
+
 o Bug fixed for predictions from joint nested frailty models with data with different values of covariates for a given individuals
- 
+
 o Bug fixed for confidence intervals of predictions from joint nested frailty models without one or two power parameters (alpha, ksi) included in the model
- 
+
 o Bug fixed for displaying for baseline hazard function (lam) for Piecewise hazard functions in frailtyPenal
 
 o Bug fixed for trivPenalNL: missing parenthesis was leading to an error when adjusting on covariates in KG part
@@ -115,7 +119,7 @@ Changes in Version 2.13.1 September 2018
 
 o  NEW: Weighted penalized maximum likelihood approach for joint frailty models for data from nested case-control studies
 
-o  Bug corrected in predictions with joint nested frailty models that do not include power parameters 
+o  Bug corrected in predictions with joint nested frailty models that do not include power parameters
 
 
 Changes in Version 2.12.7 July 2018
@@ -132,7 +136,7 @@ Changes in Version 2.12.6 October 2017
 o For joint nested and nested models martingale residuals are calculated at the lower level of clustering (individual level)
 
 
-Changes in Version 2.12.3 July 2017 
+Changes in Version 2.12.3 July 2017
 
 o Bug fixed in predictions for trivariate joint models.
 
@@ -145,48 +149,48 @@ o Bug fixed in predictions for joint nested frailty models.
 Changes in Version 2.12.0 June 2017
 
  o New model added: trivariate joint model for a longitudinal biomarker, recurrent events and a terminal event using a mechanistic approach for the biomarker (with analytical solution)
- 
+
  o Extension for functions longiPenal and trivPenal: up to three random effects for the biomarker can be applied
- 
+
  o Bug fixed : Estimation error in joint, joint general, joint nested, trivPenal and longiPenal models when data are unordered.
- 
+
  o Bug fixed for predictions using joint nested models - application of Gamma function
- 
- 
+
+
 Changes in Version 2.11.1 March 2017
 
  o Warnings about native subroutine registry fixed
 
- 
+
 Changes in Version 2.11.0 March 2017
 
  o NEW : Marginal prediction method in the Joint Nested Frailty model, only for terminal event.
 
- 
+
 Changes in Version 2.10.6 March 2017
 
- o Bug fixed in the conditional prediction for shared frailty model. 
- 
+ o Bug fixed in the conditional prediction for shared frailty model.
+
  o New warning for the prediction in joint general model.
- 
- 
+
+
 Changes in Version 2.10.5 February 2017
 
- o Bug fixed : use of a subcluster/cluster covariate named with upper case in joint and joint nested models 
- 
- o Bug fixed : Joint nested model estimation 
- 
+ o Bug fixed : use of a subcluster/cluster covariate named with upper case in joint and joint nested models
+
+ o Bug fixed : Joint nested model estimation
+
  o Bug fixed : Conditional prediction for recurrent events from a shared model.
- 
+
  o Bug fixed : examples of the documentation (plot of epoce, additive model, trivariate and joint nested model)
 
- 
+
 Changes in Version 2.10.4 January 2017
 
  o Changes in the joint nested frailty model : add calculation of the bayesian frailties estimates (for families and for individuals)
 
  o Problem fixed : survival() function in frailtypack can now be computed with a gamma shared frailty model with a piecewise baseline hazard function
- 
+
  o Changes in the prediction() function : 'group' argument removed and 'conditional' boolean argument added
 
  o Changes in the conditional prediction method for shared modelling : possibility to compute prediction for more than one group
@@ -195,37 +199,37 @@ Changes in Version 2.10.4 January 2017
 
  o Problem fixed : prediction() function is now able to compute with disorderly individuals
 
- o Changes in the prediction method : you can now use the prediction methods with time-dependant covariates 
-    
+ o Changes in the prediction method : you can now use the prediction methods with time-dependant covariates
+
  o NEW: Marginal prediction method in the shared modelling, for a recurrent event.
- 
+
  o Correction applied on the mathematical expression of prediction method from shared model
 
- 
+
 Changes in Version 2.10.3 October 2016
 
  o "na.pass" global function defined in the NAMESPACE file
- 
- o Update of the vignettes 'Package_summary.Rmd' in the 'inst/doc' directory  
- 
- 
+
+ o Update of the vignettes 'Package_summary.Rmd' in the 'inst/doc' directory
+
+
 Changes in Version 2.10.2 October 2016
 
  o Vignettes modified (legend in the title)
- 
+
  o 'event' legend deleted in the plot of a shared model
- 
+
  o Compiling warnings fixed
- 
+
  o Plot bug fixed in the plot of a shared model
- 
+
 
 Changes in Version 2.10.1 July 2016
- 
+
  o New prediction option for a new recurrent event.
- 
+
  o Bug fixed for the gfortran compilation
- 
+
 
 Changes in Version 2.9.4 July 2016
 
@@ -235,22 +239,22 @@ Changes in Version 2.9.4 July 2016
 Changes in Version 2.9.3 July 2016
 
  o New model added : Joint Nested frailty model for recurrent (with two clustering levels) and terminal events, accounts for two frailty terms.
- 
+
  o For all the plot methods of frailtypack : addition of 'Xlab' and 'Ylab' (labels for the X-axis and Y-axis)
- 
+
  o Warning added if left truncation with joint frailty model
- 
+
  o Warning added for the use of interval-censored data in joint frailty model, the option is not available for the model
- 
- o New option "initialize = TRUE" for fitting a joint frailty model to provide new initial values, before fitting the joint nested model. 
- 
+
+ o New option "initialize = TRUE" for fitting a joint frailty model to provide new initial values, before fitting the joint nested model.
+
  o Bug fixed in models prediction with formulas defined separately
 
  o Bug fixed for trivPenal and longiPenal for definition of individuals identificators
- 
+
  o Bug fixed for global Wald test for qualitative covariates in the nested and the joint frailty model
- 
- 
+
+
 Changes in version 2.8.3 January 2016
 
  o Bug fixed for predictions for frailty models
@@ -267,12 +271,12 @@ Changes in version 2.8 November 2015
 
  o New models added: joint model for longitudinal data and a terminal event (longiPenal function) and trivariate joint model for longitudinal data, recurrent events and a terminal event (trivPenal function)
 
- o For these models summary, print and plot methods are available as well as functions epoce, Diffepoce and predictions were adapted 
+ o For these models summary, print and plot methods are available as well as functions epoce, Diffepoce and predictions were adapted
 
  o Functions form altered: all the character options start with a capital letter, eg. was: plot(x, type.plot = "hazard") is now plot(x, type.plot = "Hazard")
- 
+
  o Joint frailty models for clustered data now are modelled in a framework of semi-competing risks (the parameter alpha is not recommended in these semi-competing models)
- 
+
  o Interactions are now available for all the models (using "*" or ":")
 
 
@@ -446,5 +450,5 @@ Changes in Version 2.2-22        March 2012
 Changes in Version 2.2-10
 
   o NEW VERSION OF FRAILTYPACK including Additive, Nested and Joint Frailty models
-  
+
   o Paper submitted to Journal of Stat Software

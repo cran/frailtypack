@@ -9,10 +9,10 @@
 \arguments{
 \item{object}{An object inheriting from \code{jointSurroPenal} class.}
 
-\item{d}{The desired number of digits after the decimal point for parameters. 
+\item{d}{The desired number of digits after the decimal point for parameters.
 The maximum of 4 digits is required for the estimates. Default of 3 digits is used.}
 
-\item{len}{The desired number of digits after the decimal point for p-value and convergence 
+\item{len}{The desired number of digits after the decimal point for p-value and convergence
 criteria. Default of 4 digits is used.}
 
 \item{nb.gh}{Number of nodes for the Gaussian-Hermite quadrature.  The default is \code{32}
@@ -22,24 +22,24 @@ criteria. Default of 4 digits is used.}
 }
 \value{
 For the fixed treatment effects, it also prints HR and its confidence
-intervals for each covariate. For the surrogacy evaluation criteria, its prints the estimated 
+intervals for each covariate. For the surrogacy evaluation criteria, its prints the estimated
 Kendall's \eqn{\tau} with its 95\% Confidence interval obtained by the parametric bootstrap
- or Delta-method, 
+ or Delta-method,
 the estimated \if{latex}{\eqn{R^2_{trial}}}
-   \if{html}{\code{R}\out{<sup>2</sup><sub>trial</sub>}}(R2trial) with standard error and the 95\% Confidence interval 
+   \if{html}{\code{R}\out{<sup>2</sup><sub>trial</sub>}}(R2trial) with standard error and the 95\% Confidence interval
 obtained by Delta-method (Dowd \emph{et al.}, 2014), \if{latex}{\eqn{R^2_{trial}}}
-   \if{html}{\code{R}\out{<sup>2</sup><sub>trial</sub>}}(R2.boot) and its 95\% 
-Confidence interval obtained by the parametric bootstrap. 
-We notice that, using bootstrap, 
+   \if{html}{\code{R}\out{<sup>2</sup><sub>trial</sub>}}(R2.boot) and its 95\%
+Confidence interval obtained by the parametric bootstrap.
+We notice that, using bootstrap,
 the standard error of the point estimate is not available. We propose a classification of \if{latex}{\eqn{R^2_{trial}}}
-   \if{html}{\code{R}\out{<sup>2</sup><sub>trial</sub>}} according to 
-the suggestion of the Institute of Quality and Efficiency in Health Care 
-(Prasad \emph{et al.}, 2015). 
+   \if{html}{\code{R}\out{<sup>2</sup><sub>trial</sub>}} according to
+the suggestion of the Institute of Quality and Efficiency in Health Care
+(Prasad \emph{et al.}, 2015).
 We also display the surrogate threshold effect (\code{\link[=ste]{ste}}) with the associated hazard risk.
 }
 \description{
-This function returns the estimate of the coefficient, the hazard ratios (HR) and their 
-confidence intervals for the fixed treatment effects. Also, an estimate of the 
+This function returns the estimate of the coefficient, the hazard ratios (HR) and their
+confidence intervals for the fixed treatment effects. Also, an estimate of the
 surrogacy evaluation criteria (Kendall's \eqn{\tau}, \if{latex}{\eqn{R^2_{trial}}}
    \if{html}{\code{R}\out{<sup>2</sup><sub>trial</sub>}} and STE)
 }
@@ -48,16 +48,16 @@ surrogacy evaluation criteria (Kendall's \eqn{\tau}, \if{latex}{\eqn{R^2_{trial}
 \dontrun{
 
 ###---Data generation---###
-data.sim <-jointSurrSimul(n.obs=400, n.trial = 20,cens.adm=549, 
-          alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1, 
-          sigma.s = 0.7, sigma.t = 0.7, cor = 0.8, betas = -1.25, 
-          betat = -1.25, full.data = 0, random.generator = 1, 
+data.sim <-jointSurrSimul(n.obs=400, n.trial = 20,cens.adm=549,
+          alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1,
+          sigma.s = 0.7, sigma.t = 0.7, cor = 0.8, betas = -1.25,
+          betat = -1.25, full.data = 0, random.generator = 1,
           seed = 0, nb.reject.data = 0)
 
 ###---Estimation---###
-joint.surrogate <- jointSurroPenal(data = data.sim, nb.mc = 300, 
+joint.surrogate <- jointSurroPenal(data = data.sim, nb.mc = 300,
                    nb.gh = 20, indicator.alpha = 1, n.knots = 6)
-                            
+
 summary(joint.surrogate)
 }
 
@@ -75,7 +75,7 @@ alyses." JAMA Internal Medicine, 175(8), 1389-1398.
 \code{\link{jointSurroPenal}, \link{jointSurroCopPenal}, \link{jointSurroTKendall}, \link{print.jointSurroPenal}}
 }
 \author{
-Casimir Ledoux Sofeu \email{casimir.sofeu@u-bordeaux.fr}, \email{scl.ledoux@gmail.com} and 
+Casimir Ledoux Sofeu \email{casimir.sofeu@u-bordeaux.fr}, \email{scl.ledoux@gmail.com} and
 Virginie Rondeau \email{virginie.rondeau@inserm.fr}
 }
 \keyword{methods}

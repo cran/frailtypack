@@ -12,7 +12,7 @@
          ! double precision,dimension(m*(m+3)/2),intent(out)::v
      ! double precision,dimension(2)::k0
          ! double precision,intent(out)::rl
-         ! double precision,dimension(m),intent(inout)::b    
+         ! double precision,dimension(m),intent(inout)::b
      ! double precision,intent(out)::ca,cb,dd
      ! external::fctnames
      ! double precision::fctnames
@@ -40,7 +40,7 @@
       ! subroutine dmfsdj(a,n,eps,ier)
         ! integer,intent(in)::n
         ! integer,intent(inout)::ier
-        ! double precision,intent(inout)::eps 
+        ! double precision,intent(inout)::eps
         ! double precision,dimension(n*(n+1)/2),intent(inout)::A
       ! end subroutine dmfsdj
 
@@ -56,7 +56,7 @@
 
       ! subroutine dmaxt(maxt,delta,m)
         ! integer,intent(in)::m
-        ! double precision,dimension(m),intent(in)::delta 
+        ! double precision,dimension(m),intent(in)::delta
         ! double precision,intent(out)::maxt
       ! end subroutine dmaxt
       ! end interface verif1
@@ -120,7 +120,9 @@
 
 !add additive
     !use additiv,only:correl
-    use var_surrogate, only:nparamfrail,nbre_itter_PGH,control_adaptative, affiche_itteration
+    use var_surrogate, only:nparamfrail,nbre_itter_PGH,&
+                            control_adaptative, affiche_itteration
+    use var_mediation,only:nsplines
 
     IMPLICIT NONE
 !   variables globales
@@ -144,10 +146,10 @@
 !---------- ajout
     integer::kkk
     double precision, dimension(5)::convcrit
-    
+
     rang=0 ! utile en cas de programmation MPI pour gerer l'affichage
     !call MPI_COMM_RANK(MPI_COMM_WORLD,rang,comm) !pour chaque processus associe a l'identificateur code retourne son rang
-    
+
     convcrit = 0.d0
     zero=0.d0
     id=0
@@ -158,7 +160,7 @@
     nfmax=m*(m+1)/2
     ca=epsa+1.d0
     cb=epsb+1.d0
-    ! ----nouveau SCL 22/04/2019------ 
+    ! ----nouveau SCL 22/04/2019------
     dd=epsd+1.d0
     rl = -1.d+10
     ! -----Fin nouveau SCL 22/04/2019 ------
@@ -179,7 +181,7 @@
     convcrit(3) = ca
     convcrit(4) = cb
     convcrit(5) = dd
-    
+
     if(rang==0)then
         ! !write(*,*)"ligne 225 Optim, critère sur les coefficients: ca=",ca
         ! !write(*,*)"ligne 226 Optim, critère sur la vraisemblance: cb=",cb
@@ -190,7 +192,7 @@
         ! !print*,b
 
     if (ni==nbre_itter_PGH) control_adaptative=1 ! on predit de nouveau les effets aleatoires pour la pseudo-adaptative
-    
+
     call derivaj(b,m,v,rl,k0,fctnames)
 
     rl1=rl
@@ -200,8 +202,8 @@
     end if
     if(model.ne.9) then ! on ne fait pas d'affichage pour l'estimation des frailties individuelles
         if(rang==0)then ! on affiche que pour le processus maître
-            !write(*,*)'iteration***',ni,'vrais',rl 
-            if(affiche_itteration==1) then 
+            !write(*,*)'iteration***',ni,'vrais',rl
+            if(affiche_itteration==1) then
               call dblepr("convergence parameters: ni, log-likelihood, coef (ca), log_lik (cb),grad (dd)", -1, convcrit, 5)
               call dblepr("b: nparamfrail + betas + betat", -1, b((m-nparamfrail-nva+1):m), nparamfrail+nva)
             endif
@@ -211,16 +213,16 @@
         dd = 0.d0
 
         fu=0.D0
-    
+
     do i=1,m
         do j=i,m
             ij=(j-1)*j/2+i
             fu(ij)=v(ij)
         end do
     end do
-    
+
         call dsinvj(fu,m,ep,ier)
-    
+
     if (ier.eq.-1) then ! hessienne non inversible
         !!print*,"here"
         dd=epsd+1.d0
@@ -271,7 +273,7 @@
             tr=tr+dabs(v(ii))
         end do
         tr=tr/dble(m)
-        
+
         ncount=0
         ga=0.01d0
 
@@ -287,7 +289,7 @@
                 fu(ii)=da*ga*tr
             endif
         end do
-        
+
         call dcholej(fu,m,nql,idpos)
 
         if (idpos.ne.0) then
@@ -306,7 +308,7 @@
                 delta(i)=fu(nfmax+i)
                 b1(i)=b(i)+delta(i)
             end do
-            
+
             rl=fctnames(b1,m,id,z,jd,z,k0)
             if(rl.eq.-1.D9) then
                 istop=4
@@ -329,7 +331,7 @@
         else
             !call dmaxt(maxt,delta,m)
             vw=th/maxt
-            
+
         endif
         step=dlog(1.5d0)
 !      !write(*,*) 'searpas'
@@ -346,7 +348,7 @@
         da=(dm-3.d0)*da
 
  800     cb=dabs(rl1-rl)
- 
+
         ca=0.d0
         do i=1,m
             ca=ca+delta(i)*delta(i)
@@ -364,7 +366,7 @@
         do i=1,m
             b(i)=b(i)+delta(i)
         end do
-        
+
         ni=ni+1
         if (ni.ge.maxiter) then
             istop=2
@@ -374,11 +376,11 @@
     End do Main
 
     v=0.D0
-    
+
     v(1:m*(m+1)/2)=fu(1:m*(m+1)/2)
-    
+
     istop=1
-    
+
 !================ pour les bandes de confiance
 !==== on ne retient que les para des splines
 
@@ -398,13 +400,13 @@
         case(1)
             m1=m-nva-effet-indic_alpha !joint
         case(2)
-            m1=m-nva-effet*2 !additive    
+            m1=m-nva-effet*2 !additive
         case(3)
             m1=m-nva-effet !nested
         case(4)
             m1=m-nva-effet !shared
         case(8)
-            m1=m-nva-nparamfrail !surrogate
+            m1=m-nva-nparamfrail-nsplines !surrogate
         case(9)
             m1=0 !estimation des wij_chap
     end select
@@ -418,7 +420,7 @@
                 v1(k)=v(k)/(4.d0*b(i)*b(j))
             end do
             v1(kkk)=v1(kkk)+(v(kkk)/(4.d0*b(i)*b(i)*b(i)))
-        end do 
+        end do
 
         ep=10.d-10
         !!print*,"v1=",v1,"m1=",m1,"ep=",ep,"ier=",ier,"istop=",istop !scl 22-09-2017
@@ -444,14 +446,14 @@
         end do
     endif    !Fin if. j'ai juste introduis le if pour le contrôle
 
-    
+
     ep=10.d-10
     call dsinvJ(v,m,ep,ier)
-    
+
     if (ier.eq.-1) then
         !write(*,*)   'echec inversion matrice information pur m'
         istop=3
-        
+
 !AD:
 !        call dsinvj(v1,m1,ep,ier)
 !        if (ier.eq.-1) then
@@ -462,20 +464,20 @@
 !            DO k=1,m1*(m1+1)/2
 !                v(k)=v1(k)
 !            END DO
-!        end if    
+!        end if
 ! fin ajout amadou
     endif
 
 
     ep=10.d-10
     call derivaJ(b,m,vnonpen,rl,zero,fctnames)
-    
+
     do i=1,m
         do j=i,m
             I_hess(i,j)=vnonpen((j-1)*j/2+i)
         end do
     end do
-   
+
     do i=2,m
         do j=1,i-1
             I_hess(i,j)=I_hess(j,i)
@@ -496,7 +498,7 @@
         do j=1,i-1
             H_hess(i,j)=H_hess(j,i)
         end do
-    end do      
+    end do
 
  !AD:
     if (typeof .ne. 0) then
@@ -504,10 +506,10 @@
             vvv(i)=v(i)
         end do
     end if
-       
+
  110   continue
 
-       return    
+       return
        end subroutine marq98j_SCL_0
 
 !------------------------------------------------------------
@@ -517,7 +519,7 @@
     subroutine derivaj(b,m,v,rl,k0,fctnames)
     use comon,only:model
     implicit none
-    
+
     integer,intent(in)::m
     double precision,intent(inout)::rl
     double precision,dimension(2)::k0
@@ -527,7 +529,7 @@
     integer ::i0,m1,ll,i,k,j,iun
     double precision::fctnames,thn,th,z,vl,th2,vaux
     external::fctnames
-    
+
     ! !print*,"suis dans derivaJ, model=",model,"th=",th
     !stop
     select case(model)
@@ -548,7 +550,7 @@
     end select
 
     ! !print*,"suis dans derivaJ, model=",model,"th=",th
-    
+
     thn=-th
     th2=th*th
     z=0.d0
@@ -558,7 +560,7 @@
     rl=fctnames(b,m,iun,z,iun,z,k0)
     ! !print*,"fin appel de la vraisamblance rl=",rl
     ! stop
-    
+
     if(rl.eq.-1.d9) then
         rl=-1.d9
         goto 123
@@ -575,14 +577,14 @@
     k=0
     m1=m*(m+1)/2
     ll=m1
-    
+
     do i=1,m
         ll=ll+1
         vaux=fctnames(b,m,i,thn,i0,z,k0)
                 if(vaux.eq.-1.d9) then
                     rl=-1.d9
                     goto 123
-                end if    
+                end if
         vl=(fcith(i)-vaux)/(2.d0*th)
         v(ll)=vl
         do j=1,i
@@ -591,9 +593,9 @@
         end do
     end do
 
-123   continue    
+123   continue
     return
-    
+
     end subroutine derivaj
 !------------------------------------------------------------
 !                        SEARPAS
@@ -632,7 +634,7 @@
           vlw1=vlw2+step
           call valfpaj(vlw1,fi1,b,bh,m,delta,k0,fctnames)
           if(fi1.gt.fi2) goto 50
-       else 
+       else
           vlw=vlw1
           vlw1=vlw2
           vlw2=vlw
@@ -652,7 +654,7 @@
           if(fi1.gt.fi2) goto 50
           if(fi1.eq.fi2) then
              fim=fi2
-             vm=vlw2 
+             vm=vlw2
              goto 100
           end if
        end do
@@ -663,14 +665,14 @@
 !
 !  CALCUL MINIMUM QUADRIQUE
 !
-      vm=vlw2-step*(fi1-fi3)/(2.d0*(fi1-2.d0*fi2+fi3))   
-      call valfpaj(vm,fim,b,bh,m,delta,k0,fctnames)    
+      vm=vlw2-step*(fi1-fi3)/(2.d0*(fi1-2.d0*fi2+fi3))
+      call valfpaj(vm,fim,b,bh,m,delta,k0,fctnames)
       if(fim.le.fi2) goto 100
       vm=vlw2
       fim=fi2
 100   continue
       vw=dexp(vm)
-      
+
       return
 
       end subroutine searpasj
@@ -682,18 +684,18 @@
       subroutine dcholej(a,k,nq,idpos)
 
       implicit none
-      
+
       integer,intent(in)::k,nq
       integer,intent(inout)::idpos
       double precision,dimension(k*(k+3)/2),intent(inout)::a
-        
+
       integer::i,ii,i1,i2,i3,m,j,k2,jmk
       integer::ijm,irm,jji,jjj,l,jj,iil,jjl,il
-      integer,dimension(k)::is    
+      integer,dimension(k)::is
       double precision ::term,xn,diag,p
       equivalence (term,xn)
-      
-       
+
+
 !      ss programme de resolution d'un systeme lineaire symetrique
 !
 !       k ordre du systeme /
@@ -708,7 +710,7 @@
       idpos=0
       k2=k+nq
 !     calcul des elements de la matrice
-      do i=1,k   
+      do i=1,k
          ii=i*(i+1)/2
 !       elements diagonaux
          diag=a(ii)
@@ -724,8 +726,8 @@
              if(is(l).ge.0) goto 3
 2            p=-p
 3            diag=diag-p
-         end do     
-         
+         end do
+
 4        if(diag.lt.0) goto 5
          if(diag.eq.0) goto 50
          if(diag.gt.0) goto 6
@@ -747,7 +749,7 @@
 8           jj=jj-jmk*(jmk+1)/2
 9           term=a(jj)
             if(i-1.ne.0) goto 10
-            if(i-1.eq.0) goto 13 
+            if(i-1.eq.0) goto 13
 10          do l=1,i2
                iil=ii-l
                jjl=jj-l
@@ -759,9 +761,9 @@
 12             term=term-p
             end do
 13            a(jj)=term/diag
-       end do  
-      end do   
-      
+       end do
+      end do
+
 !       calcul des solutions
       jj=ii-k+1
       do l=1,nq
@@ -808,10 +810,10 @@
 !   IER = K COMPRIS ENTRE 1 ET N, WARNING, LE CALCUL CONTINUE
 !
       implicit none
-      
+
       integer,intent(in)::n
       integer,intent(inout)::ier
-      double precision,intent(inout)::eps 
+      double precision,intent(inout)::eps
       double precision,dimension(n*(n+1)/2),intent(inout)::A
       double precision :: dpiv,dsum,tol
       integer::i,k,l,kpiv,ind,lend,lanf,lind
@@ -849,22 +851,22 @@
                lanf=kpiv-l
                lind=ind-l
            dsum=dsum+A(lanf)*A(lind)
-            end do 
-          
-!     
+            end do
+
+!
 !   END OF INNEF LOOP
 !
 !   TRANSFORM ELEMENT A(IND)
-!     
+!
 4           dsum=A(ind)-dsum
             if (i-k.ne.0) goto 10
             if (i-k.eq.0) goto 5
 !
 !   TEST FOR NEGATIVE PIVOT ELEMENT AND FOR LOSS OF SIGNIFICANCE
-!    
+!
 5           if (sngl(dsum)-tol.le.0) goto 6
             if (sngl(dsum)-tol.gt.0) goto 9
-6           if (dsum.le.0) goto 12  
+6           if (dsum.le.0) goto 12
             if (dsum.gt.0) goto 7
 7           if (ier.le.0) goto 8
             if (ier.gt.0) goto 9
@@ -883,7 +885,7 @@
 11          ind=ind+i
          end do
       end do
-      
+
 !
 !   END OF DIAGONAL-LOOP
 !
@@ -921,21 +923,21 @@
 !         IER=1 PERTE DE SIGNIFICANCE, LE CALCUL CONTINUE
 !
     implicit none
-    
+
     integer,intent(in)::n
     integer,intent(inout)::ier
-    double precision,intent(inout)::eps        
-    double precision,dimension(n*(n+1)/2),intent(inout)::A     
+    double precision,intent(inout)::eps
+    double precision,dimension(n*(n+1)/2),intent(inout)::A
     double precision::din,work
     integer::ind,ipiv,i,j,k,l,min,kend,lhor,lver,lanf
-    
+
 !
 !     FACTORIZE GIVEN MATRIX BY MEANS OF SUBROUTINE DMFSD
 !     A=TRANSPOSE(T) * T
 !
 
     call dmfsdj(A,n,eps,ier)
-      
+
 
 
     if (ier.lt.0) goto 9
@@ -945,7 +947,7 @@
 !     PREPARE INVERSION-LOOP
 !
 !
-! calcul du log du determinant    
+! calcul du log du determinant
 
 !      do i=1,n
 !         det=det+dlog(A(i*(i+1)/2))
@@ -975,25 +977,25 @@
 !
 !     START INNER LOOP
 !
-            do l=lanf,min 
+            do l=lanf,min
                 lver=lver+1
                 lhor=lhor+l
                 work=work+A(lver)*A(lhor)
-            end do        
+            end do
 !
 !     END OF INNER LOOP
 !
             A(j)=-work*din
             j=j-min
         end do
-     
+
 !
 !     END OF ROW-LOOP
 !
-5        ipiv=ipiv-min 
+5        ipiv=ipiv-min
         ind=ind-1
     end do
-      
+
 !
 !     END OF INVERSION-LOOP
 !
@@ -1017,15 +1019,15 @@
                 lver=lhor+k-i
                 work=work+A(lhor)*A(lver)
                 lhor=lhor+l
-            end do        
+            end do
 !
 !     END OF INNER LOOP
-!       
+!
             A(j)=work
             j=j+k
         end do
     end do
-      
+
 !
 !     END OF ROW-AND MULTIPLICATION-LOOP
 !
@@ -1037,18 +1039,18 @@
 !------------------------------------------------------------
 
     subroutine valfpaj(vw,fi,b,bk,m,delta,k0,fctnames)
-    
+
     implicit none
-    
-    integer,intent(in)::m  
-    double precision,dimension(m),intent(in)::b,delta  
-    double precision,dimension(m),intent(out)::bk 
-    double precision,intent(out)::fi 
-    double precision::vw,fctnames,z    
+
+    integer,intent(in)::m
+    double precision,dimension(m),intent(in)::b,delta
+    double precision,dimension(m),intent(out)::bk
+    double precision,intent(out)::fi
+    double precision::vw,fctnames,z
     double precision,dimension(2)::k0
     integer::i0,i
     external::fctnames
-    
+
     z=0.d0
     i0=1
     do i=1,m
@@ -1060,21 +1062,21 @@
     end if
 1       continue
     return
-    
+
     end subroutine valfpaj
 
 !------------------------------------------------------------
 !                            MAXT
 !------------------------------------------------------------
     subroutine dmaxt(maxt,delta,m)
-    
+
     implicit none
-    
+
     integer,intent(in)::m
     double precision,dimension(m),intent(in)::delta
     double precision,intent(out)::maxt
-    integer::i 
-    
+    integer::i
+
     maxt=Dabs(delta(1))
 
     do i=2,m
@@ -1082,12 +1084,10 @@
             maxt=Dabs(delta(i))
         end if
 
-    end do 
-        
+    end do
+
     return
     end subroutine dmaxt
 
 
     end module optim_scl_0
-
-        

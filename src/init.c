@@ -1,4 +1,4 @@
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <R_ext/Rdynload.h>
 #include <R_ext/Visibility.h>
 
@@ -34,15 +34,15 @@ static const R_FortranMethodDef FortEntries[] = {
     {"survival2",            (DL_FUNC) &F77_SUB(survival2),             6},
     {"survivalj_cpm2",       (DL_FUNC) &F77_SUB(survivalj_cpm2),        8},
 	{"somme",                (DL_FUNC) &F77_SUB(somme),                 5},
-    {"jointsurrogate",       (DL_FUNC) &F77_SUB(jointsurrogate),       57},
+    {"jointsurrogate",       (DL_FUNC) &F77_SUB(jointsurrogate),       60},
     {"test",                 (DL_FUNC) &F77_SUB(test),       3},
     {"surrosim",             (DL_FUNC) &F77_SUB(surrosim), 41},
     {"jointsurrokendall",    (DL_FUNC) &F77_SUB(jointsurrokendall), 24},
     {NULL, NULL, 0}
 };
 
-void 
-attribute_visible 
+void
+attribute_visible
 R_init_frailtypack(DllInfo *dll)
 {
     R_registerRoutines(dll, NULL, NULL, FortEntries, NULL);
