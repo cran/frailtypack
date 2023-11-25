@@ -784,7 +784,7 @@ double precision function MC_Copula_Essai(func,ndim,nsujet_trial,i)
       use var_surrogate, only: random_generator
       
       implicit none
-      double precision ::RO,SX
+      double precision ::RO,SX,unifrand
       integer ::ID
       double precision ::F,V1,V2,S,DLS,RO2
       double precision ::X1,X2!,UNIRAN
@@ -802,8 +802,10 @@ double precision function MC_Copula_Essai(func,ndim,nsujet_trial,i)
           X1=UNIRAN()
           X2=UNIRAN()
       else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-          CALL RANDOM_NUMBER(X1)
-          CALL RANDOM_NUMBER(X2)
+          call rndstart()
+          x1 = unifrand()
+          x2 = unifrand()
+          call rndend()
       endif
 
       IF(ID.NE.1) GO TO 10
@@ -1660,6 +1662,7 @@ double precision function MC_Copula_Essai(func,ndim,nsujet_trial,i)
     integer,intent(in):: ndim,nsujet_trial,i,ndim_Ind
     !double precision,dimension(1:nnodes) ::xx1,ww1
     double precision::auxfunca,ss
+    double precision::ss2, ss3_1, ss3_2, ss4  !! Sous variables pour éviter OpenMP reduction problem
     double precision,dimension(:,:),allocatable::vc
     double precision,dimension(:,:),allocatable::fraili
     double precision,dimension(:),allocatable::usim
@@ -1772,15 +1775,21 @@ double precision function MC_Copula_Essai(func,ndim,nsujet_trial,i)
     !integration sur usi, uti, vsi et vti
     auxfunca=0.d0
     ss=0.d0
+    ss2 = 0.d0 
+    ss3_1 = 0.d0
+    ss3_2 = 0.d0
+    ss4 = 0.d0
+    
     select case(ndim)
     case(2)
       !!print*,'je suis la'
         !ii=0
         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,nsujet_trial,i,fraili,npoint,ndim_Ind)&
-        !$OMP    REDUCTION(+:ss) SCHEDULE(Dynamic,1)
+        !$OMP    REDUCTION(+:ss2) SCHEDULE(Dynamic,1)
+             !! Une variable par cas, pour contourner l'erreur de OpenMP
             do ii=1,nsimu
                 auxfunca=func2(func,fraili(ii,1),fraili(ii,2),0.d0,0.d0,npoint,ndim_Ind,nsujet_trial,i)
-                ss=ss+auxfunca
+                ss2=ss2+auxfunca
                 !!print*,"ss",ss
             end do
         !$OMP END PARALLEL DO
@@ -1789,40 +1798,45 @@ double precision function MC_Copula_Essai(func,ndim,nsujet_trial,i)
         if(nb_procs==1) then !on fait du open MP car un seul processus
             rang=0
             !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,nsujet_trial,i,fraili,npoint,ndim_Ind)&
-            !$OMP    REDUCTION(+:ss) SCHEDULE(Dynamic,1)
+            !$OMP    REDUCTION(+:ss3_1) SCHEDULE(Dynamic,1)
+                
                 do ii=1,nsimu
                     auxfunca=func2(func,fraili(ii,2),fraili(ii,3),fraili(ii,1),0.d0,npoint,ndim_Ind,nsujet_trial,i)
-                    ss=ss+auxfunca
+                    ss3_1=ss3_1+auxfunca
                     !!print*,"ss",ss
                 end do
             !$OMP END PARALLEL DO
         else ! dans ce cas on va faire du MPI
             ! rang du processus courang
             !call MPI_COMM_RANK(MPI_COMM_WORLD,rang,code)
-            ! on cherche les position initiale et finale pour le processus courant
+            ! on cherche les positions initiales et finales pour le processus courant
             call pos_proc_domaine(nsimu,nb_procs,rang,init_i,max_i)
+            
             do ii=1,nsimu
                 if((ii<init_i).or.ii>max_i) then 
-                    goto 1002 ! pour dire le processus ne considere pas cet itteration car n'appartient pas a son domaine
+                    goto 1002 ! pour dire le processus ne considere pas cette iteration car n'appartient pas a son domaine
                 endif
                 auxfunca=func2(func,fraili(ii,2),fraili(ii,3),fraili(ii,1),0.d0,npoint,ndim_Ind,nsujet_trial,i)
-                ss=ss+auxfunca
+                ss3_2=ss3_2+auxfunca
                 1002 continue
             end do
-            ! on fait la reduction et redistribu le resultat a tous les procesus
+            ! on fait la reduction et redistribue le resultat a tous les procesus
             !call MPI_ALLREDUCE(ss,ss,1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,code)
         endif
         
     case(4)! vsi vti usi uti, 
         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,nsujet_trial,i,fraili,npoint,ndim_Ind)&
-        !$OMP    REDUCTION(+:ss) SCHEDULE(Dynamic,1)
+        !$OMP    REDUCTION(+:ss4) SCHEDULE(Dynamic,1)
+            
             do ii=1,nsimu
                 auxfunca=func2(func,fraili(ii,3),fraili(ii,4),fraili(ii,1),fraili(ii,2),npoint,ndim_Ind,nsujet_trial,i)
-                ss=ss+auxfunca
+                ss4=ss4+auxfunca
                 !!print*,"ss",ss
             end do
         !$OMP END PARALLEL DO
     end select
+    
+    ss = ss2 + ss3_1 + ss3_2 + ss4
     
     MC_Gauss_MultInd_Essai_Cor=ss/dble(nsimu)
     !!print*,"ss",ss,"dble(nsimu)",dble(nsimu),"MC_MultInd_Essai",MC_MultInd_Essaii

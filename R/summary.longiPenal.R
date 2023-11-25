@@ -27,7 +27,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' ###--- Joint model for longitudinal data and a terminal event ---###
 #' 
 #' data(colorectal)

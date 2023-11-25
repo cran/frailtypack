@@ -17,7 +17,7 @@ print.Cmeasures <- function(x, ...)
 {
 	cl <- x$call
 
-	if(class(x)!="Cmeasures"){
+	if(!inherits(x, "Cmeasures")){
 		stop("The object x must be a class Cmeasures.")
 	}else{
 		cat("\n")

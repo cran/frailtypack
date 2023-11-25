@@ -637,7 +637,7 @@ contains
     double precision, dimension(:,:),allocatable::m1,m3
     double precision, dimension(:,:),allocatable::m
     integer ::ii,jj,npg
-    double precision::ss1,auxfunca,ss,wsij,wtij,test,rho
+    double precision::ss1,auxfunca,ss,wsij,wtij,test,rho,ss2
     double precision, dimension(ndim)::xxl !vecteur qui contiendra à chaque fois les points de quadrature
     double precision,dimension(ndim,ndim)::invBi_chol_Essai_k ! pour recuperer les matrice B_k dans le vecteur des matrices B des essais K
 
@@ -685,10 +685,11 @@ contains
     auxfunca=0.d0
     ss=0.d0
     ss1=0.d0
+    ss2=0.d0
     !$OMP PARALLEL DO default(none) PRIVATE (ii,jj,xxl,wsij,wtij,m1,m3,m) firstprivate(ss1,auxfunca,vsi,vti,ui,uti)& 
     !$OMP SHARED(npg,varcovinv,nnodes,xx1,ww1,invBi_chol_Essai_k,ndim,adaptative,posind_i,test,rho,varcov,&
     !$OMP delta,j,deltastar,const_res4,ve,const_res5)&
-    !$OMPREDUCTION(+:ss) SCHEDULE(Dynamic,1)
+    !$OMPREDUCTION(+:ss2) SCHEDULE(Dynamic,1)
         do ii=1,npg
             ss1=0.d0
             do jj=1,npg
@@ -726,9 +727,11 @@ contains
                 ! !print*,"Integrant niveau Individuel=",auxfunca
                 ! stop
             end do
-            ss = ss+ww1(ii)*ss1
+            ss2 = ss2+ww1(ii)*ss1
         end do
     !$OMP END PARALLEL DO
+    
+    ss = ss2
     
     if(adaptative) then
         ! if(frailt_base==0) ss=ss*2.d0**(dble(ndim)/2.d0)*invBi_cholDet_Essai(i)  ! en admettant que "invBi_cholDet_Essai" c'est bien pour les individus

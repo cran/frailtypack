@@ -66,7 +66,7 @@ Confidence bands are allowed.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 
 ###--- Joint surrogate model ---###

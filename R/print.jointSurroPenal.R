@@ -58,7 +58,7 @@
 ##' @examples
 ##' 
 ##' 
-##' \dontrun{
+##' \donttest{
 ##' 
 ##' ###---Data generation---###
 ##' data.sim <-jointSurrSimul(n.obs=400, n.trial = 20,cens.adm=549, 

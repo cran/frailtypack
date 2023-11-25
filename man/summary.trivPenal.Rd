@@ -38,7 +38,7 @@ p-values of the Wald test for the longitudinal outcome and hazard ratios
 \examples{
 
 
-\dontrun{
+\donttest{
 
 ###--- Trivariate joint model for longitudinal data, ---###
 ###--- recurrent events and a terminal event ---###

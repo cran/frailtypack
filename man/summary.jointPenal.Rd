@@ -32,7 +32,7 @@ This function returns hazard rations (HR) and its confidence intervals.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 data(readmission)
 

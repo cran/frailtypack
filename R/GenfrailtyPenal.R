@@ -1069,13 +1069,12 @@
 #' 
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'
 #' #############################################################################
 #' # -----        GENERALIZED SURVIVAL MODELS (without frailties)       -----  #
 #' #############################################################################
 #' 
-#' library(timereg)
 #' adult.retino = retinopathy[retinopathy$type == "adult", ]
 #' adult.retino[adult.retino$futime >= 50, "status"] = 0
 #' adult.retino[adult.retino$futime >= 50, "futime"] = 50
@@ -1104,7 +1103,6 @@
 #' # -----          SHARED FRAILTY GENERALIZED SURVIVAL MODELS          -----  #
 #' #############################################################################
 #' 
-#' library(timereg)
 #' adult.retino = retinopathy[retinopathy$type == "adult", ]
 #' adult.retino[adult.retino$futime >= 50, "status"] = 0
 #' adult.retino[adult.retino$futime >= 50, "futime"] = 50
@@ -1331,7 +1329,7 @@
 
     #AD:
     if (missing(formula))stop("The argument formula must be specified in any model")
-    if(class(formula)!="formula")stop("The argument formula must be a formula")
+    if (!inherits(formula, "formula"))stop("The argument formula must be a formula")
 
     if(typeof == 0){
       #AD:
@@ -1914,7 +1912,7 @@
       if((equidistant %in% c(0,1)) & (typeof == 1)){
         if (missing(nb.int)) stop("Number of time interval 'nb.int' is required")
         if (length(nb.int) != 1) stop("Wrong length of number of time interval argument 'nb.int'")
-        if (class(nb.int) != "numeric") stop("The argument 'nb.int' must be a numeric")
+        if (!inherits(nb.int, "numeric"))stop("The argument 'nb.int' must be a numeric")
         if ((nb.int < 1)) stop("Number of time interval 'nb.int' must be between 1 and 20")
         if (nb.int > 20){
           nb.int <- 20
@@ -2663,7 +2661,7 @@
       if((equidistant %in% c(0,1)) & (typeof == 1)){
         if (missing(nb.int)) stop("Number of time interval for recurrences and terminal event 'nb.int' is required")
         if (length(nb.int) != 2) stop("The length of argument 'nb.int' should be 2. Must indicate for both recurrent events and terminal event.")
-        if (class(nb.int) != "numeric") stop("The argument 'nb.int' must be a numeric")
+        if (!inherits(nb.int, "numeric"))stop("The argument 'nb.int' must be a numeric")
         if (nb.int[1] < 1) stop("Number of time interval 'nb.int' must be between 1 and 20")
         if (nb.int[2] < 1) stop("Number of time interval 'nb.int' must be between 1 and 20")
 
@@ -3149,7 +3147,7 @@
       if((equidistant %in% c(0,1)) & (typeof == 1)){
         if (missing(nb.int)) stop("Number of time interval 'nb.int' is required")
         if (length(nb.int) != 1) stop("Wrong length of number of time interval argument 'nb.int'")
-        if (class(nb.int) != "numeric") stop("The argument 'nb.int' must be a numeric")
+        if (!inherits(nb.int, "numeric"))stop("The argument 'nb.int' must be a numeric")
         if (nb.int < 1) stop("Number of time interval 'nb.int' must be between 1 and 20")
         if (nb.int > 20){
           nb.int <-20

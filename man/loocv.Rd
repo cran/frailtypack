@@ -53,7 +53,7 @@ The trials leave-one-out crossvalidation for evaluating the joint surrogate mode
 \examples{
 
 
-\dontrun{
+\donttest{
 # Generation of data to use 
  data.sim <- jointSurrSimul(n.obs=300, n.trial = 10,cens.adm=549.24,
              alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1, sigma.s = 0.7,

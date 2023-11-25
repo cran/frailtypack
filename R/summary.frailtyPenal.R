@@ -21,7 +21,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' data(kidney)
 #' 

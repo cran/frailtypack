@@ -223,7 +223,7 @@ for a varying prediction time t, but for a fixed window of prediction). See
 Details.
 
 With Gaussian frailties (\eqn{\eta}), the same expressions are used but with
-u\out{<sub>i</sub>}\out{<sup>J</sup>} replaced by \eqn{exp}(J\\eqn{eta}\out{<sub>i</sub>}) and \eqn{g(\eta)}
+u\out{<sub>i</sub>}\out{<sup>J</sup>} replaced by \eqn{exp}(J\eqn{\eta}\out{<sub>i</sub>}) and \eqn{g(\eta)}
 corresponds to the Gaussian distribution.
 
 \bold{For Joint Nested Frailty models}
@@ -611,7 +611,7 @@ datapredj_longi[10,] <- c(2,0.9,0.1,2,1,1,1) }
 \examples{
 
 
-\dontrun{
+\donttest{
 
 #####################################################
 #### prediction on a COX or SHARED frailty model ####

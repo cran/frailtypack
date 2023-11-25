@@ -360,7 +360,7 @@
 #' @examples
 #'
 #'
-#' \dontrun{
+#' \donttest{
 #'
 #' ###--- Joint model for longitudinal data and a terminal event ---###
 #'
@@ -606,8 +606,8 @@
     if (missing(formula))stop("The argument formula must be specified in every model")
     if (missing(formula.LongitudinalData))stop("The argument formula.LongitudinalData must be specified in every model") #AK
 
-    if(class(formula)!="formula")stop("The argument formula must be a formula")
-    if(TwoPart) if(formula.Binary!=FALSE) if(class(formula.Binary)!="formula")stop("The argument formula.Binary must be a formula")
+    if(!inherits(formula, "formula"))stop("The argument formula must be a formula")
+    if(TwoPart) if(formula.Binary!=FALSE) if(!inherits(formula.Binary, "formula"))stop("The argument formula.Binary must be a formula")
     if(typeof == 0){
       if (missing(n.knots))stop("number of knots are required")
       n.knots.temp <- n.knots

@@ -19,7 +19,7 @@
 # @seealso \code{\link{evalOpenMPFortran}}
 # @examples 
 # 
-# \dontrun{
+# \donttest{
 # frailtypack:::testOpenMPFortran(2,4,10000,10,stat=T)
 # 
 # }

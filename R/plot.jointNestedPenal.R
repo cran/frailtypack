@@ -43,7 +43,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' #-- here is generated cluster (30 clusters)
 #' readmissionNested <- transform(readmission,group=id%%30+1)

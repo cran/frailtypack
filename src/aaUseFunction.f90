@@ -108,7 +108,7 @@
     b = a - int(a) ! scl: 23/11/2018
     c=a-b
     ib=int(c)
-    
+
     !out= (1-b)*t(ib+1)+b*t(ib+2) ! scl: 23/11/2018
     if(ib <= n-2)then ! scl: 23/11/2018
     out = (1-b)*t(ib+1)+b*t(ib+2)
@@ -182,7 +182,7 @@
             end if
         end do
     end do
-    
+
         !t25=t(25) ! scl: 23/11/2018
         t25 = 0.25d0*t(250)+0.75d0*t(251) ! scl: 23/11/2018
         !t975=t(975) ! scl: 23/11/2018
@@ -196,7 +196,7 @@
     ! This subroutine calculates i2 th basis of spline of
     ! degree (i3-1).
     IMPLICIT NONE
-    integer(kind=4) i1, i2, i3
+    integer(kind = kind(1.0)) i1, i2, i3
     double precision y, newknots(i1), temp1, temp2, result, result1, result2
     external dumsub
 
@@ -238,11 +238,11 @@
 ! where d is the degree of the splines.
 ! k=number of spline basis=m1+d+1
     IMPLICIT NONE
-    integer(kind=4) d, k, m, m1
+    integer(kind = kind(1.0)) d, k, m, m1
     double precision x, innerknots(m1), boundaryknots(2)
     double precision newknots(m), basis(k), result
     external bb
-    integer(kind=4) i1, j
+    integer(kind = kind(1.0)) i1, j
 
     do i1=1, (d+1)
         newknots(i1)=boundaryknots(1)
@@ -357,11 +357,11 @@
     ! where d is the degree of the splines.
     ! k=number of spline basis=m1+d+1
     IMPLICIT NONE
-    integer(kind=4) d, k, m, m1, n
+    integer(kind = kind(1.0)) d, k, m, m1, n
     double precision x(n), innerknots(m1), boundaryknots(2)
     double precision newknots(m), basis(n, k), result
     external bb
-    integer(kind=4) i1, i, j
+    integer(kind = kind(1.0)) i1, i, j
 
     do i1=1, (d+1)
         newknots(i1)=boundaryknots(1)
@@ -1084,7 +1084,7 @@
 !
 !  Parameters:
 !
-!    Input, real ( kind = 8 ) X, is one endpoint of the semi-infinite interval
+!    Input, real ( kind = kind(1.0d0) ) X, is one endpoint of the semi-infinite interval
 !    over which the integration takes place.
 !
 !    Input, logical UPPER, determines whether the upper or lower
@@ -1092,38 +1092,38 @@
 !    .TRUE.  => integrate from X to + Infinity;
 !    .FALSE. => integrate from - Infinity to X.
 !
-!    Output, real ( kind = 8 ) ALNORM, the integral of the standard normal
+!    Output, real ( kind = kind(1.0d0) ) ALNORM, the integral of the standard normal
 !    distribution over the desired interval.
 !
       implicit none
 
-      real ( kind = 8 ), parameter :: a1 = 5.75885480458D+00
-      real ( kind = 8 ), parameter :: a2 = 2.62433121679D+00
-      real ( kind = 8 ), parameter :: a3 = 5.92885724438D+00
-      real ( kind = 8 ), parameter :: b1 = -29.8213557807D+00
-      real ( kind = 8 ), parameter :: b2 = 48.6959930692D+00
-      real ( kind = 8 ), parameter :: c1 = -0.000000038052D+00
-      real ( kind = 8 ), parameter :: c2 = 0.000398064794D+00
-      real ( kind = 8 ), parameter :: c3 = -0.151679116635D+00
-      real ( kind = 8 ), parameter :: c4 = 4.8385912808D+00
-      real ( kind = 8 ), parameter :: c5 = 0.742380924027D+00
-      real ( kind = 8 ), parameter :: c6 = 3.99019417011D+00
-      real ( kind = 8 ), parameter :: con = 1.28D+00
-      real ( kind = 8 ), parameter :: d1 = 1.00000615302D+00
-      real ( kind = 8 ), parameter :: d2 = 1.98615381364D+00
-      real ( kind = 8 ), parameter :: d3 = 5.29330324926D+00
-      real ( kind = 8 ), parameter :: d4 = -15.1508972451D+00
-      real ( kind = 8 ), parameter :: d5 = 30.789933034D+00
-      real ( kind = 8 ), parameter :: ltone = 7.0D+00
-      real ( kind = 8 ), parameter :: p = 0.398942280444D+00
-      real ( kind = 8 ), parameter :: q = 0.39990348504D+00
-      real ( kind = 8 ), parameter :: r = 0.398942280385D+00
+      real ( kind = kind(1.0d0) ), parameter :: a1 = 5.75885480458D+00
+      real ( kind = kind(1.0d0) ), parameter :: a2 = 2.62433121679D+00
+      real ( kind = kind(1.0d0) ), parameter :: a3 = 5.92885724438D+00
+      real ( kind = kind(1.0d0) ), parameter :: b1 = -29.8213557807D+00
+      real ( kind = kind(1.0d0) ), parameter :: b2 = 48.6959930692D+00
+      real ( kind = kind(1.0d0) ), parameter :: c1 = -0.000000038052D+00
+      real ( kind = kind(1.0d0) ), parameter :: c2 = 0.000398064794D+00
+      real ( kind = kind(1.0d0) ), parameter :: c3 = -0.151679116635D+00
+      real ( kind = kind(1.0d0) ), parameter :: c4 = 4.8385912808D+00
+      real ( kind = kind(1.0d0) ), parameter :: c5 = 0.742380924027D+00
+      real ( kind = kind(1.0d0) ), parameter :: c6 = 3.99019417011D+00
+      real ( kind = kind(1.0d0) ), parameter :: con = 1.28D+00
+      real ( kind = kind(1.0d0) ), parameter :: d1 = 1.00000615302D+00
+      real ( kind = kind(1.0d0) ), parameter :: d2 = 1.98615381364D+00
+      real ( kind = kind(1.0d0) ), parameter :: d3 = 5.29330324926D+00
+      real ( kind = kind(1.0d0) ), parameter :: d4 = -15.1508972451D+00
+      real ( kind = kind(1.0d0) ), parameter :: d5 = 30.789933034D+00
+      real ( kind = kind(1.0d0) ), parameter :: ltone = 7.0D+00
+      real ( kind = kind(1.0d0) ), parameter :: p = 0.398942280444D+00
+      real ( kind = kind(1.0d0) ), parameter :: q = 0.39990348504D+00
+      real ( kind = kind(1.0d0) ), parameter :: r = 0.398942280385D+00
       logical up
       logical upper
-      real ( kind = 8 ), parameter :: utzero = 18.66D+00
-      real ( kind = 8 ) x
-      real ( kind = 8 ) y
-      real ( kind = 8 ) z
+      real ( kind = kind(1.0d0) ), parameter :: utzero = 18.66D+00
+      real ( kind = kind(1.0d0) ) x
+      real ( kind = kind(1.0d0) ) y
+      real ( kind = kind(1.0d0) ) z
 
       up = upper
       z = x
@@ -1227,21 +1227,21 @@ subroutine log_normal_cdf ( x, mu, sigma, cdf )
 !
 !  Parameters:
 !
-!    Input, real ( kind = 8 ) X, the argument of the PDF.
+!    Input, real ( kind = kind(1.0d0) ) X, the argument of the PDF.
 !    0.0 < X.
 !
-!    Input, real ( kind = 8 ) MU, SIGMA, the parameters of the PDF.
+!    Input, real ( kind = kind(1.0d0) ) MU, SIGMA, the parameters of the PDF.
 !    0.0 < SIGMA.
 !
-!    Output, real ( kind = 8 ) CDF, the value of the CDF.
+!    Output, real ( kind = kind(1.0d0) ) CDF, the value of the CDF.
 !
   implicit none
 
-  real ( kind = 8 ) cdf
-  real ( kind = 8 ) logx
-  real ( kind = 8 ) mu
-  real ( kind = 8 ) sigma
-  real ( kind = 8 ) x
+  real ( kind = kind(1.0d0) ) cdf
+  real ( kind = kind(1.0d0) ) logx
+  real ( kind = kind(1.0d0) ) mu
+  real ( kind = kind(1.0d0) ) sigma
+  real ( kind = kind(1.0d0) ) x
 
   if ( x <= 0.0D+00 ) then
 
@@ -1278,20 +1278,20 @@ subroutine normal_cdf ( x, mu, sigma, cdf )
 !
 !  Parameters:
 !
-!    Input, real ( kind = 8 ) X, the argument of the CDF.
+!    Input, real ( kind = kind(1.0d0) ) X, the argument of the CDF.
 !
-!    Input, real ( kind = 8 ) MU, SIGMA, the parameters of the PDF.
+!    Input, real ( kind = kind(1.0d0) ) MU, SIGMA, the parameters of the PDF.
 !    0.0 < SIGMA.
 !
-!    Output, real ( kind = 8 ) CDF, the value of the CDF.
+!    Output, real ( kind = kind(1.0d0) ) CDF, the value of the CDF.
 !
   implicit none
 
-  real ( kind = 8 ) cdf
-  real ( kind = 8 ) mu
-  real ( kind = 8 ) sigma
-  real ( kind = 8 ) x
-  real ( kind = 8 ) y
+  real ( kind = kind(1.0d0) ) cdf
+  real ( kind = kind(1.0d0) ) mu
+  real ( kind = kind(1.0d0) ) sigma
+  real ( kind = kind(1.0d0) ) x
+  real ( kind = kind(1.0d0) ) y
 
   y = ( x - mu ) / sigma
 
@@ -1328,35 +1328,35 @@ subroutine normal_01_cdf ( x, cdf )
 !
 !  Parameters:
 !
-!    Input, real ( kind = 8 ) X, the argument of the CDF.
+!    Input, real ( kind = kind(1.0d0) ) X, the argument of the CDF.
 !
-!    Output, real ( kind = 8 ) CDF, the value of the CDF.
+!    Output, real ( kind = kind(1.0d0) ) CDF, the value of the CDF.
 !
   implicit none
 
-  real ( kind = 8 ), parameter :: a1 = 0.398942280444D+00
-  real ( kind = 8 ), parameter :: a2 = 0.399903438504D+00
-  real ( kind = 8 ), parameter :: a3 = 5.75885480458D+00
-  real ( kind = 8 ), parameter :: a4 = 29.8213557808D+00
-  real ( kind = 8 ), parameter :: a5 = 2.62433121679D+00
-  real ( kind = 8 ), parameter :: a6 = 48.6959930692D+00
-  real ( kind = 8 ), parameter :: a7 = 5.92885724438D+00
-  real ( kind = 8 ), parameter :: b0 = 0.398942280385D+00
-  real ( kind = 8 ), parameter :: b1 = 3.8052D-08
-  real ( kind = 8 ), parameter :: b2 = 1.00000615302D+00
-  real ( kind = 8 ), parameter :: b3 = 3.98064794D-04
-  real ( kind = 8 ), parameter :: b4 = 1.98615381364D+00
-  real ( kind = 8 ), parameter :: b5 = 0.151679116635D+00
-  real ( kind = 8 ), parameter :: b6 = 5.29330324926D+00
-  real ( kind = 8 ), parameter :: b7 = 4.8385912808D+00
-  real ( kind = 8 ), parameter :: b8 = 15.1508972451D+00
-  real ( kind = 8 ), parameter :: b9 = 0.742380924027D+00
-  real ( kind = 8 ), parameter :: b10 = 30.789933034D+00
-  real ( kind = 8 ), parameter :: b11 = 3.99019417011D+00
-  real ( kind = 8 ) cdf
-  real ( kind = 8 ) q
-  real ( kind = 8 ) x
-  real ( kind = 8 ) y
+  real ( kind = kind(1.0d0) ), parameter :: a1 = 0.398942280444D+00
+  real ( kind = kind(1.0d0) ), parameter :: a2 = 0.399903438504D+00
+  real ( kind = kind(1.0d0) ), parameter :: a3 = 5.75885480458D+00
+  real ( kind = kind(1.0d0) ), parameter :: a4 = 29.8213557808D+00
+  real ( kind = kind(1.0d0) ), parameter :: a5 = 2.62433121679D+00
+  real ( kind = kind(1.0d0) ), parameter :: a6 = 48.6959930692D+00
+  real ( kind = kind(1.0d0) ), parameter :: a7 = 5.92885724438D+00
+  real ( kind = kind(1.0d0) ), parameter :: b0 = 0.398942280385D+00
+  real ( kind = kind(1.0d0) ), parameter :: b1 = 3.8052D-08
+  real ( kind = kind(1.0d0) ), parameter :: b2 = 1.00000615302D+00
+  real ( kind = kind(1.0d0) ), parameter :: b3 = 3.98064794D-04
+  real ( kind = kind(1.0d0) ), parameter :: b4 = 1.98615381364D+00
+  real ( kind = kind(1.0d0) ), parameter :: b5 = 0.151679116635D+00
+  real ( kind = kind(1.0d0) ), parameter :: b6 = 5.29330324926D+00
+  real ( kind = kind(1.0d0) ), parameter :: b7 = 4.8385912808D+00
+  real ( kind = kind(1.0d0) ), parameter :: b8 = 15.1508972451D+00
+  real ( kind = kind(1.0d0) ), parameter :: b9 = 0.742380924027D+00
+  real ( kind = kind(1.0d0) ), parameter :: b10 = 30.789933034D+00
+  real ( kind = kind(1.0d0) ), parameter :: b11 = 3.99019417011D+00
+  real ( kind = kind(1.0d0) ) cdf
+  real ( kind = kind(1.0d0) ) q
+  real ( kind = kind(1.0d0) ) x
+  real ( kind = kind(1.0d0) ) y
 !
 !  |X| <= 1.28.
 !

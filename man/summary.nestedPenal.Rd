@@ -33,7 +33,7 @@ each regression coefficient.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 data(dataNested)
 

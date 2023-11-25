@@ -8,7 +8,7 @@ print.predJoint <- function(x, digits = 3, ...)
 # 		dput(cl)
 # 		cat("\n")
 # 	}
-	if(class(x)!="predJoint"){
+	if(!inherits(x, "predJoint")){
 		stop("The object x must be a class predJoint.")
 	}else{
 		if (!is.null(cl <- x$call)){

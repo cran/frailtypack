@@ -61,7 +61,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' data(readmission)
 #' 

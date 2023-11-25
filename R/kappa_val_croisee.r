@@ -55,7 +55,7 @@ kappa_val_croisee <- function(don_S, don_T, njeu, n_obs, n_node = 6, adjust_S = 
     cox_true <- try(frailtyPenal(Surv(timeT,statusT)~1, data = done_T[k:j,], cross.validation = T,
                               n.knots = n_node, kappa=kappa_2, print.times = print.times), silent = TRUE)
     
-    if((class(cox_surr)=="try-error") | (class(cox_true)=="try-error")){
+    if((inherits(cox_surr, "try-error")) | (inherits(cox_true, "try-error"))){
       if(i==1){
         #cat("probleme d'etimiation avec ce jeu de donnee, affectation du kappa par defaut")
         kapa[i,1] <- kappa_1

@@ -24,7 +24,7 @@ mergeJointSurroSimul = function(nb.packet = 2, envir.name = "joint.simul2_", env
     for(i in 2:(nb.packet)){
       filename <- paste(envir.name, envir.num.base, i , ".RData", sep = "")
       loadwd = try(load(filename),silent=TRUE)
-      if(class(loadwd)=="try-error"){
+      if(inherits(loadwd, "try-error")){
         cat(paste("packet",i,"is missing", sep = " "), fill = T)
       }
       else{

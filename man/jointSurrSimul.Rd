@@ -160,7 +160,7 @@ the desired individual level correlation (Kendall's \eqn{\tau}) depend on the va
 }
 \examples{
 
-\dontrun{
+\donttest{
 data.sim <- jointSurrSimul(n.obs=600, n.trial = 30,cens.adm=549.24, 
             alpha = 1.5, theta = 3.5, gamma = 2.5, sigma.s = 0.7, 
             zeta = 1, sigma.t = 0.7, cor = 0.8, betas = -1.25, 

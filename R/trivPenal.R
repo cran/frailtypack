@@ -393,7 +393,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' ###--- Trivariate joint model for longitudinal data, ---###
 #' ###--- recurrent events and a terminal event ---###
@@ -559,7 +559,7 @@
   if (missing(formula.LongitudinalData))stop("The argument formula.LongitudinalData must be specified in every model") #AK
   if (missing(formula.terminalEvent))stop("The argument formula.terminalEvent must be specified in every model") #AK
   
-  if(class(formula)!="formula")stop("The argument formula must be a formula")
+  if(!inherits(formula, "formula"))stop("The argument formula must be a formula")
   
   if(typeof == 0){
     if (missing(n.knots))stop("number of knots are required")

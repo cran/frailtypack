@@ -13,7 +13,7 @@ No value returned.
 This function loads the shiny package and runs the application for modelisation and prediction of several frailty models using package frailtypack.
 }
 \examples{
-\dontrun{
+\donttest{
 
 runShiny()
 

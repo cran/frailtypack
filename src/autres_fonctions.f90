@@ -424,6 +424,7 @@ module InverseMatrix
         ! rgener : nombre aleatoire genere
         use var_surrogate, only: random_generator
         implicit none
+        double precision unifrand
         double precision, intent(in)::a,b
         double precision, intent(out)::rgener
         double precision::u
@@ -437,7 +438,9 @@ module InverseMatrix
                 if(random_generator==2)then ! on generer avec uniran(mais gestion du seed pas garanti)
                     u = UNIRAN()
                 else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-                    CALL RANDOM_NUMBER(u)
+                    call rndstart()
+                    u = unifrand()
+                    call rndend()
                 endif
                 rgener = a + (b - a) * u
             endif
@@ -457,7 +460,7 @@ module InverseMatrix
       use var_surrogate, only: random_generator
 
       implicit none
-      double precision ::RO,SX
+      double precision ::RO,SX,unifrand
       integer ::ID
       double precision ::F,V1,V2,S,DLS,RO2
       double precision ::X1,X2!,UNIRAN
@@ -475,8 +478,10 @@ module InverseMatrix
           X1=UNIRAN()
           X2=UNIRAN()
       else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-          CALL RANDOM_NUMBER(X1)
-          CALL RANDOM_NUMBER(X2)
+          call rndstart()
+          x1 = unifrand()
+          x2 = unifrand()
+          call rndend()
       endif
 
       IF(ID.NE.1) GO TO 10
@@ -578,6 +583,7 @@ module InverseMatrix
 
   Implicit none
 
+  double precision unifrand
   integer, intent(in)::mode_cens,n_essai,n_obs,weib,frailty_cor,n_col,affiche_stat
   double precision,intent(in)::theta,ksi,betas,alpha,betat,lambdas,nus,lambdat,nut,temps_cens,cens0,rsqrt,sigma_s,sigma_t
   double precision,dimension(n_essai),intent(in)::prop_i,p
@@ -632,11 +638,14 @@ module InverseMatrix
 ! ============fin randomisation par essai======
     ! ici on randomise sans tenir compte des essai
     k=1
+    if(random_generator/=2)then
+        call rndstart()
+    endif
     do i=1,n_obs
         if(random_generator==2)then ! on generer avec uniran(mais gestion du seed pas garanti)
             n_rand=uniran()
         else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-            CALL RANDOM_NUMBER(n_rand)
+            n_rand = unifrand()
         endif
         if(n_rand<=p(1)) then  !on suppose que p(1) contient la prportion des traitees
             donnee(i,trt1)=1.d0 ! attention au sens ici car si on est <p alors on est traite et pas le contraire.
@@ -648,7 +657,9 @@ module InverseMatrix
         !donnee(k:n1,trialref1)=i
         !k=k+n_i(i)
     end do
-
+    if(random_generator/=2)then
+        call rndend()
+    endif
 
     ! fragilites specifiques aux sujets
     x22=0.d0
@@ -662,13 +673,19 @@ module InverseMatrix
     !stop
     ! Generation des temps de suivi (S et T) (voir Austin P.C., statist. Med., 2012, page 3)
     ! nous simulons le risque de base par une loi de weibull (lambda > 0 et nu > 0)
+    if(random_generator/=2)then
+        call rndstart()
+    endif
     do i=1,n_obs
         if(random_generator==2)then ! on generer avec uniran(mais gestion du seed pas garanti)
             u(i)=uniran()
         else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-            call RANDOM_NUMBER(u(i))
+            u(i) = unifrand()
         endif
     end do
+    if(random_generator/=2)then
+        call rndend()
+    endif
     donnee(:,timeS1)=0.d0 !timeS
     donnee(:,timeT1)=0.d0 !timeT
     if(weib==1)then
@@ -916,7 +933,7 @@ end function table_essai
 
     subroutine gamgui(a,x)
         use var_surrogate, only: random_generator
-        double precision :: a,b,c,u,v,w,x,y,z
+        double precision :: a,b,c,u,v,w,x,y,z,unifrand
         double precision ::uniran
         !real ::ran2
         integer ::accept
@@ -929,8 +946,10 @@ end function table_essai
                 u = uniran()!dble(rand())
                 v = uniran()!dble(rand())
             else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-                CALL RANDOM_NUMBER(u)
-                CALL RANDOM_NUMBER(v)
+                call rndstart()
+                u = unifrand()
+                v = unifrand()
+                call rndend()
             endif
            w = u*(1.-u)
            y = sqrt(c/w)*(u-0.5)
@@ -955,13 +974,15 @@ end function table_essai
 !c fonction de densité de la loi de weibull = f(x)=b**a . a . x**(a-1) . exp(-(bx)**a) (voir cours de Piere Jolie page 41)
         use var_surrogate, only:param_weibull
         use var_surrogate, only: random_generator
-        double precision ::a,b,x,u,v,betau
+        double precision ::a,b,x,u,v,betau,unifrand
         double precision ::uniran
         !real ::ran2
         if(random_generator==2)then ! on generer avec uniran(mais gestion du seed pas garanti)
             u = uniran()!dble(rand())
         else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-            CALL RANDOM_NUMBER(u)
+            call rndstart()
+            u = unifrand()
+            call rndend()
         endif
         v = (1.d0-u)
         if(param_weibull==0)then !parametrisation de weibull par defaut dans le programme de Virginie: fonction de densite differente de celle donnee ci-dessus
@@ -983,14 +1004,16 @@ end function table_essai
         use var_surrogate, only:param_weibull
         use var_surrogate, only: random_generator
         double precision ::a,b,at,bt,Sij,Tij,u,ut,v,betau,betaut,vt,utij,vtij,theta,wij
-        double precision ::uniran
+        double precision ::uniran,unifrand
         real ::ran2
         if(random_generator==2)then ! on generer avec uniran(mais gestion du seed pas garanti)
             u = uniran()
             ut = uniran()
         else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-            CALL RANDOM_NUMBER(u)
-            CALL RANDOM_NUMBER(ut)
+            call rndstart()
+            u = unifrand()
+            ut = unifrand()
+            call rndend()
         endif
         v = (1.d0-u)
         vt = (1.d0-ut)
@@ -1026,6 +1049,7 @@ end function table_essai
       double precision,dimension(n_obs,n_col),intent(out)::don_simulS1,don_simul
       integer, parameter::npmax=70,NOBSMAX=15000,nvarmax=45,ngmax=5000
       integer,parameter::nboumax=1000,NSIMAX=5000,ndatemax=30000
+      double precision unifrand
 
       integer  j,k,nz,cpt,cpt_dc,ii,iii,iii2
       integer  cptstr1,cptstr2
@@ -1469,11 +1493,14 @@ end function table_essai
 
 
 !!c---  variables explicatives par sujet
+        if (random_generator/=2)then
+            call rndstart()
+        endif
             do 111 j=1,ver
                 if(random_generator==2)then ! on generer avec uniran(mais gestion du seed pas garanti)
                     tempon= uniran()
                 else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-                    CALL RANDOM_NUMBER(tempon)
+                    tempon = unifrand()
                 endif
                piece=real(tempon) !rand()
                 !piece=real(uniran()) !rand()
@@ -1483,7 +1510,11 @@ end function table_essai
                   v1(j) = 1.
                endif
  111        continue
-
+        if (random_generator/=2)then
+            call rndend()
+        endif
+        
+         
                x=0.d0
                xdc=0.d0
                cens=0.d0
@@ -1759,7 +1790,7 @@ subroutine Generation_surrogate(don_simul,don_simulS1,n_obs,n_col,lognormal,affi
                       timeC1=8,statusS1=9,statusT1=10,initTime1=11,Patienref1=12,u_i1=13 ! definissent les indices du tableau de donnee simulees
       double precision,dimension(n_essai)::n_i
       double precision,dimension(:,:),allocatable::sigma,x_
-
+      double precision unifrand
 
 !CCCCCCCCCCCCCCCCChosur9.f CCCCCCCCCCCCCCCCCCCCCCCC
       don_simulS1 = 0.d0
@@ -1919,11 +1950,14 @@ subroutine Generation_surrogate(don_simul,don_simulS1,n_obs,n_col,lognormal,affi
         endif
 
 !!c---  variables explicatives par sujet
+        if(random_generator/=2)then
+            call rndstart()
+        endif
          do 111 j=1,ver
                 if(random_generator==2)then ! on generer avec uniran(mais gestion du seed pas garanti)
                     tempon= uniran()
                 else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-                    CALL RANDOM_NUMBER(tempon)
+                    tempon = unifrand()
                 endif
                piece=real(tempon)
                if (piece.le.demi) then
@@ -1931,7 +1965,10 @@ subroutine Generation_surrogate(don_simul,don_simulS1,n_obs,n_col,lognormal,affi
                 else
                   v1(j) = 1.
                endif
-         111        continue
+111            continue
+               if (random_generator/=2)then
+                   call rndend()
+               endif
          x=0.d0
          xdc=0.d0
          cens=0.d0
@@ -2156,7 +2193,8 @@ subroutine Generation_surrogate_copula(don_simul,don_simulS1,n_obs,n_col,lognorm
                       timeC1=7,statusS1=8,statusT1=9,initTime1=10,Patienref1=11,u_i1=12 ! definissent les indices du tableau de donnee simulees
       double precision,dimension(n_essai)::n_i
       double precision,dimension(:,:),allocatable::sigma,x_
-
+      double precision unifrand
+      
      ! ! some print
       ! call intpr("n_obs", -1,n_obs , 1)
       ! call intpr("n_col", -1,n_col , 1)
@@ -2309,13 +2347,16 @@ subroutine Generation_surrogate_copula(don_simul,don_simulS1,n_obs,n_col,lognorm
          x = 0.d0
          xdc = 0.d0
         !close(10)
+        if (random_generator/=2) then
+            call rndstart()
+        endif
     do ig=1,ng ! sur les groupes
 !!c---  variables explicatives par sujet
         do 111 j=1,ver
         if(random_generator==2)then ! on generer avec uniran(mais gestion du seed pas garanti)
             tempon= uniran()
         else !on generer avec RANDOM_NUMBER(avec gestion du seed garanti)
-            CALL RANDOM_NUMBER(tempon)
+            tempon = unifrand()
         endif
 
         piece = real(tempon)
@@ -2388,6 +2429,9 @@ subroutine Generation_surrogate_copula(don_simul,don_simulS1,n_obs,n_col,lognorm
             endif
         enddo
     enddo
+    if (random_generator/=2) then
+        call rndend()
+    endif
 
     nobs = 0
     ! recherche des quantiles par essai sur lequel on s'appuie pour la generation uniforme des temps de censures. Exp: 75ieme percentile = 0.75 dans propC
@@ -3709,23 +3753,25 @@ END FUNCTION Determinant_2
         ! En cas de generation differente, on utilise l'horloge (heure) de l'ordinateur comme graine. Dans ce cas, il n'est pas possible de reproduire les donnees simulees
         ! nbre_sim: dans le cas ou aleatoire=1, cette variable indique le nombre de generation a faire
         ! graine: dans le cas ou l'on voudrait avoir la possibilite de reproduire les donnees generees alors on met la variable aleatoire=0 et on donne dans cette variable la graine a utiliser pour la generation
-        INTEGER :: i, n, clock
-        INTEGER, DIMENSION(:), ALLOCATABLE :: seed
+        INTEGER :: clock, seed
         integer, intent(in)::graine,nbre_sim,aleatoire
 
-        CALL RANDOM_SEED(size = n)
-        ALLOCATE(seed(n))
+        interface
+            subroutine updaterandomseed(seed)
+              integer, intent(in)::seed
+            end subroutine updaterandomseed
+        end interface
 
         CALL SYSTEM_CLOCK(COUNT=clock)
 
         if(aleatoire==1)then
-            seed = clock + nbre_sim * (/ (i - 1, i = 1, n) /)
+            seed = clock + nbre_sim
         else
             seed=graine
         endif
-        CALL RANDOM_SEED(PUT = seed)
+        CALL updaterandomseed(seed)
 
-        DEALLOCATE(seed)
+        
     END SUBROUTINE init_random_seed
 
     subroutine pos_proc_domaine(taille_domaine,nb_procs,rang,init_i,max_i)

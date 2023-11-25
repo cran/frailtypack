@@ -88,7 +88,7 @@ Burzykowski \emph{et al.} (2006).
 \examples{
 
 
-\dontrun{
+\donttest{
 
 
 ###--- Joint surrogate model ---###

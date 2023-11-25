@@ -21,7 +21,7 @@ function to t after run fit.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 #-- a fit Shared
 data(readmission)

@@ -38,6 +38,10 @@ static const R_FortranMethodDef FortEntries[] = {
     {"test",                 (DL_FUNC) &F77_SUB(test),       3},
     {"surrosim",             (DL_FUNC) &F77_SUB(surrosim), 41},
     {"jointsurrokendall",    (DL_FUNC) &F77_SUB(jointsurrokendall), 24},
+    {"rndstart",             (DL_FUNC) &F77_SUB(rndstart), 0},
+    {"rndend",               (DL_FUNC) &F77_SUB(rndend), 0},
+    {"unifrand",             (DL_FUNC) &F77_SUB(unifrand), 0},
+    {"updaterandomseed",     (DL_FUNC) &F77_SUB(updaterandomseed), 1},
     {NULL, NULL, 0}
 };
 

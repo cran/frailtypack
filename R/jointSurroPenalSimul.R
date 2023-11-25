@@ -341,7 +341,7 @@
 #'
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #' # Surrogacy model evaluation performance study based on 10 generated data
 #' # (Computation takes around 20 minutes using a processor including 40
 #' # cores and a read only memory of 378 Go)

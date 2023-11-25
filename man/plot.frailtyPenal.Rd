@@ -50,7 +50,7 @@ class 'frailtyPenal'. Confidence bands are allowed.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 data(readmission)
 

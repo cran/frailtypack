@@ -335,3 +335,8 @@ F77_SUB(jointgen)(int *nsujet0, int *ngrp, int *strAux, int *lignedc0, int *nz0,
 						int *paratps, int *filtretps0, double *BetaTpsMat,
 						double *BetaTpsMatDc, double *EPS, int *nbgauss,
 						int*familyrisk);
+
+void F77_SUB(rndstart)(void);
+void F77_SUB(rndend)(void);
+double F77_SUB(unifrand)(void);
+void F77_SUB(updaterandomseed)(int);						

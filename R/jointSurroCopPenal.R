@@ -492,7 +492,7 @@
 #'
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #' # Data from the advanced ovarian cancer randomized clinical trials.
 #' data(dataOvarian)
 #' joint.surro.Gumbel <- jointSurroCopPenal(data = dataOvarian, int.method = 0,
@@ -849,7 +849,7 @@ jointSurroCopPenal = function(data, maxit = 40, indicator.alpha = 1, frail.base 
                                   formula.terminalEvent = ~ trt, RandDist = "LogN",
                                   data = dataUse, n.knots = nz, kappa = kappa0, print.times = F), silent = TRUE)
 
-      if(class(cox_surr_sigmaS)=="try-error"){
+      if(inherits(cox_surr_sigmaS, "try-error")){
         if(print.iter) cat("Estimation problem with the shared frailty model:
               initialization of gamma using the given default value",fill=T)
       }else{
@@ -857,31 +857,31 @@ jointSurroCopPenal = function(data, maxit = 40, indicator.alpha = 1, frail.base 
 #        betas.init <- cox_surr_sigmaS$b[length(cox_surr_sigmaS$b)]
       }
 
-      if(class(cox_true_sigmaT)=="try-error"){
+      if(inherits(cox_true_sigmaT, "try-error")){
 #        cat("Estimation problem with the additive gaussian random effects cox model:
 #              initialization of sigma.t using the given default value",fill=T)
       }else{
 #        betat.init <- cox_true_sigmaT$b[length(cox_true_sigmaT$b)]
       }
 
-      if((class(cox_surr_sigmaS)=="try-error") | (class(cox_true_sigmaT)=="try-error")){
+      if(inherits(cox_surr_sigmaS, "try-error") | inherits(cox_true_sigmaT, "try-error")){
         if(print.iter) cat("initialization of alpha using the given default value",fill=T)
       }else{
         alpha.init <- cox_surr_sigmaS$sigma2/cox_true_sigmaT$sigma2
       }
 
-      if(class(joint_w)=="try-error"){
-        if((class(cox_surr_sigmaS)=="try-error") & (class(cox_true_sigmaT)=="try-error")){
+      if(inherits(joint_w, "try-error")){
+        if((inherits(cox_surr_sigmaS, "try-error")) & (inherits(cox_true_sigmaT, "try-error"))){
           if(print.iter) cat("Estimation problem with the joint frailty model:
               initialization of eta, theta, beta_S and beta_T using the given default values",fill=T)
         }else{
-            if((class(cox_surr_sigmaS)!="try-error") & (class(cox_true_sigmaT)!="try-error")){
+            if((!inherits(cox_surr_sigmaS, "try-error")) & (!inherits(cox_true_sigmaT, "try-error"))){
               if(print.iter) cat("Estimation problem with the joint frailty model:
                 initialization of eta and theta using the given default values",fill=T)
               betas.init <- cox_surr_sigmaS$b[length(cox_surr_sigmaS$b)]
               betat.init <- cox_true_sigmaT$b[length(cox_true_sigmaT$b)]
             }else{
-              if(class(cox_surr_sigmaS)=="try-error"){
+              if(inherits(cox_surr_sigmaS, "try-error")){
                 if(print.iter) cat("Estimation problem with the joint frailty model:
                 initialization of eta, theta and beta_S using the given default values",fill=T)
                 betat.init <- cox_true_sigmaT$b[length(cox_true_sigmaT$b)]

@@ -58,7 +58,7 @@ allowed.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 data(readmission)
 

@@ -53,7 +53,7 @@ Confidence bands are allowed.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 data(dataNested)
 modNested <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+

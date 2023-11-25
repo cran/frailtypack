@@ -212,7 +212,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' ###--- Additive model with 1 covariate ---###
 #' 
@@ -301,7 +301,7 @@
     
     #AD:
     if (missing(formula))stop("The argument formula must be specified in any model")
-    if(class(formula)!="formula")stop("The argument formula must be a formula")
+    if(!inherits(formula, "formula"))stop("The argument formula must be a formula")
     #AD:  
     if(typeof == 0){ 
       if (missing(n.knots)) stop("number of knots are required")
@@ -618,7 +618,7 @@
     
     if(equidistant %in% c(0,1)){
       if (missing(nb.int)) stop("Time interval 'nb.int' is required")
-      if (class(nb.int) != "numeric") stop("The argument 'nb.int' must be a numeric")	
+      if (!inherits(nb.int, "numeric")) stop("The argument 'nb.int' must be a numeric")	
       if (nb.int < 1) stop("Number of time interval 'nb.int' must be between 1 and 20")
       if (nb.int > 20){
         nb.int <-20

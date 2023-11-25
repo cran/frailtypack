@@ -52,7 +52,7 @@ surrogacy evaluation criterian (Kendall's \eqn{\tau} and \if{latex}{\eqn{R^2_{tr
 \examples{
 
 
-\dontrun{
+\donttest{
 
 ###---Data generation---###
 data.sim <-jointSurrSimul(n.obs=400, n.trial = 20,cens.adm=549, 

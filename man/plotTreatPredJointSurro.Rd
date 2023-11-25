@@ -27,8 +27,8 @@ plotTreatPredJointSurro(
   legend.show = TRUE,
   leg.x = NULL,
   leg.y = 2,
-  legend = c("Prediction model", "95\% prediction Interval",
-    "Beta.S for nonzero beta.T", "STE"),
+  legend = c("Prediction model", "95\% prediction Interval", "Beta.S for nonzero beta.T",
+    "STE"),
   leg.text.col = "black",
   leg.lty = c(1, 2, 4, NA),
   leg.pch = c(NA, NA, 7, 1),
@@ -146,7 +146,7 @@ for \code{STE} and the shape of the upper confidence limit for the prediction mo
 }
 \examples{
 
-\dontrun{
+\donttest{
 
 
 ###--- Joint surrogate model ---###

@@ -106,7 +106,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' #-- load data
 #' data(readmission)
@@ -134,11 +134,11 @@
 Cmeasures <- function(fitc, ties=1, marginal=0, cindex=0, Nboot=0, tau=0, data.val){
 
 	if (missing(fitc)) stop("Need a fit")
-	if (class(fitc)!="frailtyPenal") stop("The argument fitc must be a frailtyPenal object")
+	if (!inherits(fitc, "frailtyPenal")) stop("The argument fitc must be a frailtyPenal object")
 	if(!(ties %in% c(0,1)))stop("Argument ties must be binary variable")
 	if(!(marginal %in% c(0,1)))stop("Argument marginal must be binary variable")	
 	if(!(cindex %in% c(0,1)))stop("Argument cindex must be binary variable")
-	if((class(Nboot)!="numeric")||(Nboot < 0)||(Nboot > 1000)) stop("Argument Nboot must be a positive integer up to 1000")
+	if(!inherits(Nboot, "numeric")||(Nboot < 0)||(Nboot > 1000)) stop("Argument Nboot must be a positive integer up to 1000")
 	if(Nboot == 1)stop("More than one iteration is needed for bootstrap.")
 
 	if (!missing(data.val)) data <- data.val

@@ -106,7 +106,7 @@ exclude tied pairs from concordance estimation (otherwise, account for 1/2).
 \examples{
 
 
-\dontrun{
+\donttest{
 
 #-- load data
 data(readmission)

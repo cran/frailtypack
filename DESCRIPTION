@@ -1,12 +1,25 @@
 Package: frailtypack
-Version: 3.5.0
-Date: 2021-12-08
+Version: 3.5.1
+Date: 2023-11-23
 Title: Shared, Joint (Generalized) Frailty Models; Surrogate Endpoints
-Author: Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey
-        Mauguen, Amadou Diakite, Alexandre Laurent, Myriam Lopez,
-        Agnieszka Krol, Casimir L. Sofeu, Julien Dumerc, Denis Rustand,
-				Jocelyn Chauvet, Quentin Le Coent
-Maintainer: Virginie Rondeau <virginie.rondeau@u-bordeaux.fr>
+Authors@R: c(person("Virginie", "Rondeau", email = "virginie.rondeau@u-bordeaux.fr", role = c("aut", "cre"), comment = c(ORCID = '0000-0001-7109-4831')),
+              person("Juan R.", "Gonzalez", role = "aut"),
+              person("Yassin", "Mazroui", role = "aut"),
+              person("Audrey", "Mauguen", role = "aut"),
+              person("Amadou", "Diakite", role = "aut"),
+              person("Alexandre", "Laurent", role = "aut"), 
+              person("Myriam", "Lopez", role = "aut"),
+              person("Agnieszka", "Krol", role = "aut"),
+              person("Casimir L.", "Sofeu", role = "aut"),
+              person("Julien", "Dumerc", role = "aut"),
+              person("Denis", "Rustand", role = "aut"),
+              person("Jocelyn", "Chauvet", role = "aut"),
+              person("Quentin", "Le Coent", role = "aut"),
+              person("Romain", "Pierlot", role = "aut"),
+              person("David", "Hill", role = "cph"),
+              person("John", "Burkardt", role = "cph"),
+              person("Alan", "Genz", role = "cph"),
+              person("Ashwith J.", "Rego", role = "cph"))
 Depends: R (>= 2.10.0), survival, boot, MASS, survC1, doBy
 Imports: statmod, nlme, shiny, rootSolve, splines
 LazyLoad: no
@@ -34,7 +47,26 @@ URL:
 Suggests: knitr, testthat, rmarkdown, markdown
 VignetteBuilder: knitr
 Repository: CRAN
-Date/Publication: 2021-12-20 10:30:02 UTC
-Packaged: 2021-12-17 15:50:28 UTC; qlecoent
+Date/Publication: 2023-11-25 05:20:02 UTC
+Packaged: 2023-11-24 14:09:42 UTC; Romain
 NeedsCompilation: yes
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
+Author: Virginie Rondeau [aut, cre] (<https://orcid.org/0000-0001-7109-4831>),
+  Juan R. Gonzalez [aut],
+  Yassin Mazroui [aut],
+  Audrey Mauguen [aut],
+  Amadou Diakite [aut],
+  Alexandre Laurent [aut],
+  Myriam Lopez [aut],
+  Agnieszka Krol [aut],
+  Casimir L. Sofeu [aut],
+  Julien Dumerc [aut],
+  Denis Rustand [aut],
+  Jocelyn Chauvet [aut],
+  Quentin Le Coent [aut],
+  Romain Pierlot [aut],
+  David Hill [cph],
+  John Burkardt [cph],
+  Alan Genz [cph],
+  Ashwith J. Rego [cph]
+Maintainer: Virginie Rondeau <virginie.rondeau@u-bordeaux.fr>

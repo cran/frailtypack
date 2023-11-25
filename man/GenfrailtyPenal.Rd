@@ -810,13 +810,12 @@ instance 10000), and if it does not converge, multiply or divide this value
 by 10 or 5 until it converges.
 }
 \examples{
-\dontrun{
+\donttest{
 
 #############################################################################
 # -----        GENERALIZED SURVIVAL MODELS (without frailties)       -----  #
 #############################################################################
 
-library(timereg)
 adult.retino = retinopathy[retinopathy$type == "adult", ]
 adult.retino[adult.retino$futime >= 50, "status"] = 0
 adult.retino[adult.retino$futime >= 50, "futime"] = 50
@@ -845,7 +844,6 @@ family="AH", hazard="Splines", n.knots=8, kappa=10^10, betaknots=1, betaorder=2)
 # -----          SHARED FRAILTY GENERALIZED SURVIVAL MODELS          -----  #
 #############################################################################
 
-library(timereg)
 adult.retino = retinopathy[retinopathy$type == "adult", ]
 adult.retino[adult.retino$futime >= 50, "status"] = 0
 adult.retino[adult.retino$futime >= 50, "futime"] = 50

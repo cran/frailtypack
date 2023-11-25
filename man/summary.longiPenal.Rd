@@ -38,7 +38,7 @@ p-values of the Wald test for the longitudinal outcome and hazard ratios
 \examples{
 
 
-\dontrun{
+\donttest{
 ###--- Joint model for longitudinal data and a terminal event ---###
 
 data(colorectal)

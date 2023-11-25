@@ -385,7 +385,7 @@
 #' is set to \code{0} or \code{2}. The default is \code{0.5}.
 #' @param scale A numeric that allows to rescale (multiplication) the survival times, to avoid numerical
 #' problems in the event of some convergence issues. If no change is needed the argument is set to 1, the default value.
-#' eg: code{1/365} aims to convert days to years ".
+#' eg: \code{1/365} aims to convert days to years ".
 #' @param random.generator Random number generator used by the Fortran compiler,
 #' \code{1} for the intrinsec subroutine \code{Random_number} and \code{2} for the
 #' subroutine \code{uniran()}. The default is \code{1}. in the event of convergence problem
@@ -551,7 +551,7 @@
 #' @importFrom splines splineDesign
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #' # Generation of data to use
 #' data.sim <- jointSurrSimul(n.obs=600, n.trial = 30,cens.adm=549.24,
 #'          alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1, sigma.s = 0.7,
@@ -1045,7 +1045,7 @@ jointSurroPenal = function(data,maxit = 50, indicator.zeta = 1, indicator.alpha 
                                formula.terminalEvent = ~ trt, RandDist = "LogN",
                                data = dataUse, n.knots = nz, kappa = kappa0, print.times = F), silent = TRUE)
 
-      if(class(cox_surr_sigmaS)=="try-error"){
+      if(inherits(cox_surr_sigmaS, "try-error")){
         if(print.iter) cat("Estimation problem with the shared frailty model:
               initialization of gamma using the given default value",fill=T)
       }else{
@@ -1053,31 +1053,31 @@ jointSurroPenal = function(data,maxit = 50, indicator.zeta = 1, indicator.alpha 
         #        betas.init <- cox_surr_sigmaS$b[length(cox_surr_sigmaS$b)]
       }
 
-      if(class(cox_true_sigmaT)=="try-error"){
+      if(inherits(cox_true_sigmaT, "try-error")){
         #        cat("Estimation problem with the additive gaussian random effects cox model:
         #              initialization of sigma.t using the given default value",fill=T)
       }else{
         #        betat.init <- cox_true_sigmaT$b[length(cox_true_sigmaT$b)]
       }
 
-      if((class(cox_surr_sigmaS)=="try-error") | (class(cox_true_sigmaT)=="try-error")){
+      if((inherits(cox_surr_sigmaS, "try-error")) | (inherits(cox_true_sigmaT, "try-error"))){
         if(print.iter) cat("initialization of alpha using the given default value",fill=T)
       }else{
         alpha.init <- cox_surr_sigmaS$sigma2/cox_true_sigmaT$sigma2
       }
 
-      if(class(joint_w)=="try-error"){
-        if((class(cox_surr_sigmaS)=="try-error") & (class(cox_true_sigmaT)=="try-error")){
+      if(inherits(joint_w, "try-error")){
+        if((inherits(cox_surr_sigmaS, "try-error")) & (inherits(cox_true_sigmaT, "try-error"))){
           if(print.iter) cat("Estimation problem with the joint frailty model:
               initialization of eta, theta, beta_S and beta_T using the given default values",fill=T)
         }else{
-          if((class(cox_surr_sigmaS)!="try-error") & (class(cox_true_sigmaT)!="try-error")){
+          if((!inherits(cox_surr_sigmaS, "try-error")) & (!inherits(cox_true_sigmaT, "try-error"))){
             if(print.iter) cat("Estimation problem with the joint frailty model:
                 initialization of eta and theta using the given default values",fill=T)
             betas.init <- cox_surr_sigmaS$b[length(cox_surr_sigmaS$b)]
             betat.init <- cox_true_sigmaT$b[length(cox_true_sigmaT$b)]
           }else{
-            if(class(cox_surr_sigmaS)=="try-error"){
+            if(inherits(cox_surr_sigmaS, "try-error")){
               if(print.iter) cat("Estimation problem with the joint frailty model:
                 initialization of eta, theta and beta_S using the given default values",fill=T)
               betat.init <- cox_true_sigmaT$b[length(cox_true_sigmaT$b)]

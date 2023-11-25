@@ -500,7 +500,7 @@ with about a 23\% rejection rate.
 }
 \examples{
 
-\dontrun{
+\donttest{
 # Data from the advanced ovarian cancer randomized clinical trials.
 data(dataOvarian)
 joint.surro.Gumbel <- jointSurroCopPenal(data = dataOvarian, int.method = 0,

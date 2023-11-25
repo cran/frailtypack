@@ -82,7 +82,7 @@ the estimate of the treatment effect on the surrogate endpoint in the new trial.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 
 ###--- Joint surrogate model ---###

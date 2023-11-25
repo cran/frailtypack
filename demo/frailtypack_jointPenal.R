@@ -44,7 +44,7 @@ print(modJoint.str, digits = 4)
 modJoint.wa <- frailtyPenal(Surv(time, event) ~ cluster(id) +
                               dukes + charlson + sex + chemo + terminal(death),
                             formula.terminalEvent = ~ dukes + charlson + sex + chemo,
-                            data = readmission, n.knots = 8, kappa = c(2.11e+08,9.53e+11), Alpha = "none")
+                            data = readmission, n.knots = 8, kappa = c(2.11e+08,9.53e+11), Alpha = "None")
 
 print(modJoint.wa, digits = 4)
 
@@ -66,11 +66,11 @@ print(modJoint.clus, digits = 4)
 ########################################################################
 pdf(file="fig3.pdf", height = 3.6, width = 8.1)
 par(mfrow = c(1, 3))
-plot(modJoint.gap, type.plot = "survival", event = "recurrent", main = "Recurrent",
+plot(modJoint.gap, type.plot = "Survival", event = "Recurrent", main = "Recurrent",
      conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
-plot(modJoint.gap, type.plot = "survival", event = "terminal", main = "Terminal",
+plot(modJoint.gap, type.plot = "Survival", event = "Terminal", main = "Terminal",
      conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1.2, ylim = c(0, 1.2))
-plot(modJoint.gap, type.plot = "survival", event = "both", main = "Both",
+plot(modJoint.gap, type.plot = "Survival", event = "Both", main = "Both",
      conf.bands = TRUE, pos.legend = "topleft", cex.legend = 1, ylim = c(0, 1.2))
 
 

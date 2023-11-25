@@ -22,7 +22,7 @@
 # @seealso \code{\link{testOpenMPFortran}}
 # @examples 
 # 
-# \dontrun{
+# \donttest{
 # 
 # ###- with default parameters
 # evalOpenMPFortran()

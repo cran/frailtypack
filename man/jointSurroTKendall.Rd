@@ -78,7 +78,7 @@ Ktau2 <- jointSurroTKendall(theta = 1, gamma = 0.8, alpha = 1, zeta = 1,
 
 ###---Kendall's \eqn{\tau} from a joint surrogate model ---###
 
-\dontrun{
+\donttest{
 data.sim <-jointSurrSimul(n.obs=400, n.trial = 20,cens.adm=549, 
           alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1, 
           sigma.s = 0.7, sigma.t = 0.7,cor = 0.8, betas = -1.25, 

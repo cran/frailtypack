@@ -365,7 +365,7 @@ and identification of individuals. }
 \examples{
 
 
-\dontrun{
+\donttest{
 
 ###--- Joint model for longitudinal data and a terminal event ---###
 

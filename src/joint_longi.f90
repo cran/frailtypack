@@ -5567,7 +5567,7 @@ funcG=0.d0
     double precision,intent(out)::ss
     double precision,dimension(nodes_number,nb1),intent(in)::intpoints
     double precision::auxfunca !,mu1,vc1,ss2
-    double precision,dimension(nodes_number)::ss1
+    double precision::ss1, ss2, ss3, ss4, ss5    ! Sous variables pour ne pas faire un tableau qui bug avec flang-new et OpenMP
     double precision::x2222,somp !eps !ymarg contient le resultat de l'integrale
     double precision::func2
         
@@ -5579,24 +5579,29 @@ funcG=0.d0
     auxfunca=0.d0
     ss=0.d0
     ss1=0.d0
+    ss2=0.d0
+    ss3=0.d0
+    ss4=0.d0
+    ss5=0.d0
+    
    select case(ndim)
      case(1)
         ii=0
-         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,intpoints,ss1)&
-         !$OMP SCHEDULE(Static)
+         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,intpoints)&
+         !$OMP REDUCTION(+:ss1) SCHEDULE(Dynamic,1)
             do ii=1,nsimu
                 auxfunca=func2(0.d0,0.d0,0.d0,0.d0,intpoints(ii,1))
-                ss1(ii)=auxfunca
+                ss1=ss1+auxfunca
             end do
          !$OMP END PARALLEL DO
    case(2)
 
         ii=0
-         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,intpoints,ss1)&
-         !$OMP SCHEDULE(Static)
+         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,intpoints)&
+         !$OMP REDUCTION(+:ss2) SCHEDULE(Dynamic,1)
             do ii=1,nsimu
                 auxfunca=func2(0.d0,0.d0,0.d0,intpoints(ii,2),intpoints(ii,1))
-                ss1(ii)=auxfunca
+                ss2=ss2+auxfunca
             end do
          !$OMP END PARALLEL DO
          
@@ -5604,38 +5609,38 @@ funcG=0.d0
 
         ii=0
          !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,intpoints)&
-         !$OMP REDUCTION(+:ss1) SCHEDULE(Dynamic,1)
+         !$OMP REDUCTION(+:ss3) SCHEDULE(Dynamic,1)
             do ii=1,nsimu
                 auxfunca=func2(0.d0,0.d0,intpoints(ii,3),intpoints(ii,2),intpoints(ii,1))
-                ss1(ii)=auxfunca
+                ss3=ss3+auxfunca
             end do
          !$OMP END PARALLEL DO
          
-               case(4)
+       case(4)
 
         ii=0
-         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,intpoints,ss1)&
-         !$OMP SCHEDULE(Static)
+         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,intpoints)&
+         !$OMP REDUCTION(+:ss4) SCHEDULE(Dynamic,1)
             do ii=1,nsimu
                 auxfunca=func2(0.d0,intpoints(ii,4),intpoints(ii,3),intpoints(ii,2),intpoints(ii,1))
-                ss1(ii)=auxfunca
+                ss4=ss4+auxfunca
             end do
          !$OMP END PARALLEL DO
           
-                 case(5)
+       case(5)
 
         ii=0
-         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,intpoints,ss1)&
-         !$OMP SCHEDULE(Static)
+         !$OMP PARALLEL DO default(none) PRIVATE (ii,auxfunca) SHARED(nsimu,intpoints)&
+         !$OMP REDUCTION(+:ss5) SCHEDULE(Dynamic,1)
             do ii=1,nsimu
                 auxfunca=func2(intpoints(ii,5),intpoints(ii,4),intpoints(ii,3),intpoints(ii,2),intpoints(ii,1))
-                ss1(ii)=auxfunca
+                ss5=ss5+auxfunca
             end do
          !$OMP END PARALLEL DO
                   
     end select
 
-    ss=dble(SUM(ss1))/dble(nsimu) 
+    ss=dble(ss1+ss2+ss3+ss4+ss5)/dble(nsimu) 
 
     return 
   end subroutine MC_JointModels

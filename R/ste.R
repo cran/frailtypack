@@ -100,7 +100,7 @@
 ##' @examples
 ##' 
 ##' 
-##' \dontrun{
+##' \donttest{
 ##' 
 ##' 
 ##' ###--- Joint surrogate model ---###

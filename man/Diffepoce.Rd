@@ -48,7 +48,7 @@ computed on the same dataset and with the pred.times.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 #Example for joint frailty models
 data(readmission)

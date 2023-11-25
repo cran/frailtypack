@@ -1,10 +1,13 @@
 citHeader("To cite frailtypack in publications use:")
 
-citEntry(entry = "Article",
+bibentry(bibtype = "Article",
   title        = "{frailtypack}: An {{R}} Package for the Analysis of Correlated Survival Data with Frailty Models Using Penalized Likelihood Estimation or Parametrical Estimation",
-  author       = personList(as.person("Virginie Rondeau"),
-                   as.person("Yassin Mazroui"),
-                   as.person("Juan R. Gonzalez")),
+  author       = c(person(given = "Virginie",
+                          family = "Rondeau"),
+                   person(given = "Yassin",
+                          family = "Mazroui"),
+                   person(given = "Juan",
+                          family = "R. Gonzalez")),
   journal      = "Journal of Statistical Software",
   year         = "2012",
   volume       = "47",
@@ -19,10 +22,12 @@ citEntry(entry = "Article",
         "URL https://www.jstatsoft.org/v47/i04/")
 )
 
-citEntry(entry = "Article",
+bibentry(bibtype = "Article",
   title        = "Frailtypack: A computer program for the analysis of correlated failure time data using penalized likelihood estimation",
-  author       = personList(as.person("Virginie Rondeau"),
-                   as.person("Juan R. Gonzalez")),
+  author       = c(person(given = "Virginie",
+                          family = "Rondeau"),
+                   person(given = "Juan",
+                          family = "R. Gonzalez")),
   journal      = "Computer Methods and Programs in Biomedicine",
   year         = "2005",
   volume       = "80",

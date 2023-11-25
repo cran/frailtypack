@@ -146,7 +146,7 @@ is set to \code{0} or \code{2}. The default is \code{0.5}.}
 
 \item{scale}{A numeric that allows to rescale (multiplication) the survival times, to avoid numerical
 problems in the event of some convergence issues. If no change is needed the argument is set to 1, the default value.
-eg: code{1/365} aims to convert days to years ".}
+eg: \code{1/365} aims to convert days to years ".}
 
 \item{random.generator}{Random number generator used by the Fortran compiler,
 \code{1} for the intrinsec subroutine \code{Random_number} and \code{2} for the
@@ -346,8 +346,10 @@ becomes:
 
 {\figure{jointsurromed.png}{options: width="100\%"}}
 
-where the term \eqn{I(S\leq t)g(S)} allows for a direct effect of the surrogate
-time \eqn{S} on the risk of occurrence of the final endpoint \eqn{T}.
+where the term I(S\out{<sub>ij</sub>}\out{&le;} t)g(S\out{<sub>ij</sub>}) allows
+for a direct effect of the surrogate time \eqn{S} on the risk
+of occurrence of the final endpoint \eqn{T}.
+
 \bold{Surrogacy evaluation}
 
 We proposed new definitions of Kendall's \eqn{\tau} and coefficient of determination as
@@ -451,9 +453,8 @@ In the mediation analysis setting, the hazard function for the true endpoint
 becomes:
 \deqn{\lambda_{T,ij}(t|\omega_{ij},u_i,v_{T_i},{Z_{ij1}},S_{ij}) = \lambda_{0T}(t) \exp({\zeta}\omega_{ij}+
 \alpha u_i+v_{T_i} Z_{ij1} + \beta_TZ_{ij1} + I(S_{ij}\leq t)g(S_{ij}))  }
-where the term \eqn{I(S\leq t)g(S)} allows for a direct effect of the surrogate
+where the term \eqn{I(S_{ij}\leq t)g(S_{ij})} allows for a direct effect of the surrogate
 time \eqn{S} on the risk of occurrence of the final endpoint \eqn{T}.
-
 
 \bold{Surrogacy evaluation}
 
@@ -573,7 +574,7 @@ with about a 23\% rejection rate.
 }
 \examples{
 
-\dontrun{
+\donttest{
 # Generation of data to use
 data.sim <- jointSurrSimul(n.obs=600, n.trial = 30,cens.adm=549.24,
          alpha = 1.5, theta = 3.5, gamma = 2.5, zeta = 1, sigma.s = 0.7,

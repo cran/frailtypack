@@ -39,7 +39,7 @@ hazard ratios and their confidence intervals for the terminal event.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 ###--- Trivariate joint model for longitudinal data, ---###
 ###--- recurrent events and a terminal event ---###

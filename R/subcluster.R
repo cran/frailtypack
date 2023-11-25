@@ -18,7 +18,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' data(dataNested)
 #' modClu <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+

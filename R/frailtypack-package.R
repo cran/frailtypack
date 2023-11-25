@@ -91,7 +91,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' ###--- Additive model with 1 covariate ---###
 #' 

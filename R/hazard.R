@@ -12,7 +12,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' #-- a fit Shared
 #' data(readmission)
@@ -34,7 +34,7 @@
 		zi <- ObjFrailty$zi
 
 		res <- NULL
-		if(class(ObjFrailty) == "jointPenal"){
+		if(inherits(ObjFrailty, "jointPenal")){
 			nst <- ObjFrailty$n.strat + 1 # deces
 			if((ObjFrailty$xR[,1] > t) || ((max(ObjFrailty$xR[,1])+0.00001) <= t)) stop(" Time exceeds the range allowed ")
 			if(ObjFrailty$n.strat > 1){
@@ -62,7 +62,7 @@
 		out <- .Fortran(C_risque2,as.double(t),as.double(the),as.integer(nz+2),
 		as.double(zi),risque=as.double(rep(0,nst)),as.integer(nst)) #,PACKAGE = "frailtypack")
 		
-		if(class(ObjFrailty) == "jointPenal"){
+		if(inherits(ObjFrailty, "jointPenal")){
 			res <- c(res,out$risque)
 		}else{
 			res <- out$risque
@@ -72,7 +72,7 @@
 
 	if (ObjFrailty$typeof == 1){
 		res <- NULL
-		if(class(ObjFrailty) == "jointPenal"){
+		if(inherits(ObjFrailty, "jointPenal")){
 			if((ObjFrailty$xR[,1] > t) || (max(ObjFrailty$xR[,1]) < t)) stop(" Time exceeds the range allowed ")
 			x1 <- matrix(ObjFrailty$xR[,1],nrow=3,ncol=ObjFrailty$nbintervR)
 			x1 <- rbind(x1,rep(t,ObjFrailty$nbintervR))
@@ -116,7 +116,7 @@
 	if (ObjFrailty$typeof == 2){
 		if(!t)stop(" Use only for time greater than 0")
 		res <- NULL
-		if(class(ObjFrailty) == "jointPenal"){
+		if(inherits(ObjFrailty, "jointPenal")){
 			nst <- ObjFrailty$n.strat + 1 # deces
 			if((ObjFrailty$xR[,1] > t) || (max(ObjFrailty$xR[,1]) < t)) stop(" Time exceeds the range allowed ")
 			sc1 <- ObjFrailty$scale.weib[1]

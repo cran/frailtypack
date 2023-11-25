@@ -794,7 +794,7 @@ by 10 or 5 until it converges.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 ###---  COX proportional hazard model (SHARED without frailties) ---###
 ###---  estimated with penalized likelihood ---###
@@ -896,7 +896,7 @@ kappa=c(1.e+10,1.e+10) ,Alpha="None")
 
 
 ###--- General Joint model (recurrent and terminal events) 
-with 2 covariates ---###
+###--- with 2 covariates ---###
 
 data(readmission)
 modJoint.general <- frailtyPenal(Surv(time,event) ~ cluster(id) + dukes +

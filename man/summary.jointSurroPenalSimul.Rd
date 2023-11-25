@@ -53,7 +53,7 @@ the empirical standard error, the mean of the estimated standard errors
 \examples{
 
 # Studies simulation
-\dontrun{
+\donttest{
 # (Computation takes around 45 minutes using a processor including 40
 # cores and a read only memory of 378 Go)
 joint.simul <- jointSurroPenalSimul(nb.dataset = 10, nbSubSimul=600, 

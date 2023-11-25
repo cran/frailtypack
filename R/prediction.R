@@ -129,7 +129,7 @@
 #' Details.
 #' 
 #' With Gaussian frailties (\eqn{\eta}), the same expressions are used but with
-#' u\out{<sub>i</sub>}\out{<sup>J</sup>} replaced by \eqn{exp}(J\\eqn{eta}\out{<sub>i</sub>}) and \eqn{g(\eta)}
+#' u\out{<sub>i</sub>}\out{<sup>J</sup>} replaced by \eqn{exp}(J\eqn{\eta}\out{<sub>i</sub>}) and \eqn{g(\eta)}
 #' corresponds to the Gaussian distribution.
 #' 
 #' \bold{For Joint Nested Frailty models}
@@ -613,7 +613,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' #####################################################
 #' #### prediction on a COX or SHARED frailty model ####
@@ -946,26 +946,26 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
   # }
   
   if (missing(fit)) stop("Need a fit")
-  if ((class(fit)!="frailtyPenal")&(class(fit)!="jointPenal")&(class(fit)!='longiPenal')&(class(fit)!='trivPenal')&(class(fit)!='jointNestedPenal')&class(fit)!='trivPenalNL') stop("The argument fit must be one of these objects : frailtyPenal; jointPenal; longiPenal; trivPenal or jointNestedPenal")
+  if ((!inherits(fit, "frailtyPenal")) & (!inherits(fit, "jointPenal")) &(!inherits(fit, 'longiPenal')) & (!inherits(fit, 'trivPenal')) & (!inherits(fit, 'jointNestedPenal')) & !inherits(fit, 'trivPenalNL')) stop("The argument fit must be one of these objects : frailtyPenal; jointPenal; longiPenal; trivPenal or jointNestedPenal")
   if (fit$istop != 1) stop("Attempting to do predictions with a wrong model")
   
-  if (class(fit) == "jointPenal"){
+  if (inherits(fit, "jointPenal")){
     if (fit$joint.clust == 0) stop("Prediction method is not available for joint model for clustered data")
     else if (fit$joint.clust == 2) stop("Prediction method is not available for joint general model")
   }
   
-  if ((class(fit) != "jointNestedPenal") && (!missing(individual))) warning("No need for 'individual' option to predict anything other than a joint nested model.")
+  if ((!inherits(fit, "jointNestedPenal")) && (!missing(individual))) warning("No need for 'individual' option to predict anything other than a joint nested model.")
   
   if (missing(data)) stop("Need data to do some predictions")
   
-  if (missing(data.Longi) & (class(fit)=="longiPenal") & (class(fit)=="trivPenal") & (class(fit) == "trivPenalNL")) stop("Need data.Longi to do predictions")
+  if (missing(data.Longi) & (inherits(fit, "longiPenal")) & (inherits(fit, "trivPenal")) & (inherits(fit, "trivPenalNL"))) stop("Need data.Longi to do predictions")
   
   if (missing(t) | missing(window)) stop("Need times and a window to do predictions")
   if (length(t)!=1 & length(window)!=1) stop("t and window can not be vector both at the same time")
   if (is.unsorted(t)) stop("Last time of predictions must be greater than first one")
   if (any(t < 0)) stop("Be careful, negative time input")
   
-  if ((class(fit) == "frailtyPenal") && ((fit$Frailty==TRUE) & (!missing (event)) && (event != "Recurrent"))){ # Prediction modele shared pour evenement repete
+  if ((inherits(fit, "frailtyPenal")) && ((fit$Frailty==TRUE) & (!missing (event)) && (event != "Recurrent"))){ # Prediction modele shared pour evenement repete
     stop("Only 'Recurrent' event is allowed for a shared frailty modeling of parameters")
   }
   
@@ -975,24 +975,24 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
   if (event.type == 0) {
     stop("event must be 'Both', 'Terminal' or 'Recurrent'")
   }
-  if (class(fit) == "jointNestedPenal"){
+  if (inherits(fit, "jointNestedPenal")){
     if(!missing(event) && (event.type != 2)) stop ("Only 'Terminal' event is allowed for a joint nested frailty modeling of parameters")
   }	
   
   if ((MC.sample < 0) | (MC.sample > 1000))  stop("MC.sample needs to be positive integer up to 1000")
   
-  if ((class(fit)=="jointPenal" | class(fit)=='longiPenal' | class(fit)=='trivPenal' | class(fit)=='trivPenalNL') & (conditional)) stop("No conditional prediction available on a joint model")
+  if ((inherits(fit, "jointPenal") | inherits(fit, 'longiPenal') | inherits(fit, 'trivPenal') | inherits(fit, 'trivPenalNL')) & (conditional)) stop("No conditional prediction available on a joint model")
   
-  if(class(fit)=='jointPenal' | class(fit)=='trivPenal' | class(fit)=='trivPenalNL'){
+  if(inherits(fit, 'jointPenal') | inherits(fit, 'trivPenal') | inherits(fit, 'trivPenalNL')){
     if (max(t+window) > max(fit$xR)) stop("Prediction times cannot exceed maximum time of observation")
     if (max(t+window) > max(fit$xD)) stop("Prediction times cannot exceed maximum time of observation")
   }
   
-  if(class(fit)=='frailtyPenal'){
+  if(inherits(fit, 'frailtyPenal')){
     if (max(t+window) > max(fit$x)) stop("Prediction times cannot exceed maximum time of observation")
   }
   
-  if(class(fit)=='longiPenal'){
+  if(inherits(fit, 'longiPenal')){
     if (max(t+window) > max(fit$xD)) stop("Prediction times cannot exceed maximum time of observation")
   }
   # seulement dans le cas du shared
@@ -1021,7 +1021,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
   nva1 <- fit$nvarRec
   nva2 <- fit$nvarEnd
   nva3 <- fit$nvarY
-  if(class(fit) == "trivPenalNL"){
+  if(inherits(fit, "trivPenalNL")){
     nva3 <- fit$nvarKG
     nva4 <- fit$nvarKD
   }
@@ -1055,7 +1055,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
   if (moving.window){
     predTime <- t
     timeAll <- t+window #seq(predTime+window,predMax,by=window)
-    if (class(fit) == "jointPenal" | class(fit)== "trivPenal" | class(fit)== "trivPenalNL") window <- 0
+    if (inherits(fit, "jointPenal") | inherits(fit, "trivPenal") | inherits(fit, "trivPenalNL")) window <- 0
   }else{
     predTime <- t[1]
     timeAll <- t+window
@@ -1074,7 +1074,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
   m3$formula <- fit$formula
   m[[3]] <- as.name(m2$data)
   
-  if (class(fit) == "jointPenal" | class(fit)=="trivPenal" | class(fit)=="trivPenalNL" | class(fit) == "jointNestedPenal"){
+  if (inherits(fit, "jointPenal") | inherits(fit, "trivPenal") | inherits(fit, "trivPenalNL") | inherits(fit, "jointNestedPenal")){
     temp <- as.character(fit$formula[[2]])
     if (temp[1]=="Surv"){
       if (length(temp) == 4) fit$formula[[2]] <- paste(c("cbind(",temp[3],",",temp[4],")"),collapse=" ")
@@ -1128,7 +1128,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
         m$formula <- as.formula(paste(fit$formula,collapse=""))
         
       }
-    }else if(class(fit)=='longiPenal'){
+    }else if(inherits(fit, 'longiPenal')){
       fit$formula <- unlist(strsplit(deparse(fit$formula)," "))
       m$formula <- as.formula(paste(fit$formula,collapse=""))
     }else{#Cox
@@ -1138,13 +1138,13 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
     # m$formula[[2]] <- NULL # pas besoin du Surv dans formula		
   }
   
-  if(class(fit) == "jointPenal" | class(fit) == "jointNestedPenal"){
+  if(inherits(fit, "jointPenal") | inherits(fit, "jointNestedPenal")){
     if(is.null(fit$alpha))indic.alpha <- 0
     else indic.alpha <- 1 
     
   }
   indic.ksi <- 1
-  if(class(fit) == "jointNestedPenal"&& is.null(fit$ksi))indic.ksi <- 0
+  if(inherits(fit, "jointNestedPenal") && is.null(fit$ksi))indic.ksi <- 0
   dataset <- eval(m, sys.parent())
   dataset3 <- eval(m3, sys.parent())
   
@@ -1162,7 +1162,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
   fit$formula <- Terms
   dropx <- NULL	
   
-  if (class(fit) == 'jointPenal' | class(fit) == 'trivPenal' | class(fit) == 'trivPenalNL' | class(fit) == "jointNestedPenal"){	
+  if (inherits(fit, 'jointPenal') | inherits(fit, 'trivPenal') | inherits(fit, 'trivPenalNL') | inherits(fit, "jointNestedPenal")){	
     if (fit$joint.clust==1){ # joint classique	
       tempc <- untangle.specials(Terms, "cluster", 1:10)		
       nameGrup <- substr(tempc$vars,9,nchar(tempc$vars)-1)
@@ -1350,7 +1350,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
   #####-&-&-&-&-&-&-&-&-&-&-&-Prediction for joint frailty model-&-&-&-&-&-&-&-&-&-&#####
   #####-----------------------------------------------------------------------------#####	
   
-  if (class(fit) == "jointPenal"){	
+  if (inherits(fit, "jointPenal")){	
     #--------ML 30-11-16...
     
     predtimerec <- predtimerec[order(unique(cluster)),]
@@ -1617,11 +1617,11 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
     #####-&-&-&-&-&-&-		or longitudinal datas, recurrent events 		   -&-&-&#####
     #####-&-&-&-&-&-&-				and a terminal event					   -&-&-&#####
     #####----------------------------------------------------------------------------#####
-  }else if(class(fit)=="longiPenal" | class(fit)=="trivPenal" | class(fit)=="trivPenalNL"){
+  }else if(inherits(fit, "longiPenal") | inherits(fit, "trivPenal") | inherits(fit, "trivPenalNL")){
     cat("\n")
     cat("Calculating the probabilities ... \n")
     
-    if(class(fit)=="longiPenal"){	
+    if(inherits(fit, "longiPenal")){	
       expBX <- exp(X %*% fit$coef[1:fit$nvarEnd])
     }else{
       #-----------ML:07-12-16
@@ -1682,7 +1682,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
     }
     predMat <- NULL
     
-    if(class(fit)!= "trivPenalNL"){
+    if(!inherits(fit, "trivPenalNL")){
       m2 <- fit$call
       
       m2$formula <-  m2$data <- m2$random <- m2$id <- m2$link <- m2$n.knots <- m2$kappa <- m2$maxit <- m2$hazard <- m2$nb.int <- m2$betaorder <- m2$betaknots <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$left.censoring <- m2$init.Random <- m2$init.Eta <- m2$method.GH <- m2$init.Alpha <- m2$intercept <- m2$n.nodes  <- m2$... <- NULL
@@ -1698,7 +1698,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
       #=========================================================>
       name.Y <- as.character(attr(TermsY, "variables")[[2]])	       
       
-      if(class(fit)=="longiPenal") X <- X[order(unique(data.Longi$id)),]
+      if(inherits(fit, "longiPenal")) X <- X[order(unique(data.Longi$id)),]
       
       data.Longi <- data.Longi[order(data.Longi$id),]
       yy <- data.Longi[,which(names(data.Longi)==name.Y)]
@@ -2419,7 +2419,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
       s_cag = fit$leftCensoring.threshold
     }				
     
-    if(class(fit)=="longiPenal"){
+    if(inherits(fit, "longiPenal")){
       ans <- .Fortran(C_predict_biv,
                       as.integer(np),
                       as.double(b),
@@ -2490,7 +2490,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
       out$window <- window
       out$trivariate <- FALSE	
       
-    }else if(class(fit)=="trivPenal"){             
+    }else if(inherits(fit, "trivPenal")){             
       predtimerec <- predtimerec[order(unique(cluster)),]	
       if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = npred)
       ans <- .Fortran(C_predict_tri,
@@ -2562,7 +2562,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
         colnames(out$predHigh) <- c("times",rep(" ",ntimeAll-1))
       }
       out$trivariate <- TRUE
-    }else if(class(fit)=="trivPenalNL"){             
+    }else if(inherits(fit, "trivPenalNL")){             
       predtimerec <- predtimerec[order(unique(cluster)),]	
       if(!is.matrix(predtimerec)) predtimerec <- matrix(predtimerec, nrow = npred)
       box_cox <- c(0,1)
@@ -2652,7 +2652,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
     ####*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*####
     ####-*-*-*-*-Prediction pour un modele Shared -*-*-*-*-####
     ####*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*####
-  }else if(class(fit)=="frailtyPenal"){	
+  }else if(inherits(fit, "frailtyPenal")){	
     cat("\n")
     cat("Calculating the probabilities ... \n")		
     
@@ -3208,7 +3208,7 @@ prediction <- function(fit, data, data.Longi, t, window, event = "Both", conditi
     ####-*-*-*-*-Prediction pour un Joint Nested Model-*-*-*-*-*-####
     ####*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*####
     
-  }else if (class(fit) == "jointNestedPenal"){
+  }else if (inherits(fit, "jointNestedPenal")){
     if(!all(individual%in%subcluster))stop("The individual for whom you want to calculate predictions must be in the data for predictions")
     if(moving.window == FALSE){
       window <- rep(window, length(t))

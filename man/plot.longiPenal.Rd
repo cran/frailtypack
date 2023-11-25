@@ -52,7 +52,7 @@ outcome from an object of class 'longiPenal'. Confidence bands are allowed.
 \examples{
 
 
-\dontrun{
+\donttest{
 ###--- Joint model for longitudinal data and a terminal event ---###
 
 data(colorectal)
