@@ -182,6 +182,75 @@
 
 !=========================================================================================================
 !=========================================================================================================
+    subroutine distancessplinesV2(nz1,zi,nzi,nn,b,hess,effet,mt,xTOut,lamTOut,suTOut)
+        !use tailles,only:ndatemax,NSUJETMAX
+        use tailles,only:npmax
+    
+        use comon,only:nva!,nst!,hess,zi
+    
+        implicit none
+        
+        integer::nn,nzi,nst
+        integer::nz1,i,j,n,np,k,l,effet,mt,jj,nzT
+        double precision::h,su,bsup,binf,lam,lbinf, &
+        lbsup,x
+        double precision,dimension(npmax,npmax)::hesT !en plus
+        double precision,dimension(-2:npmax)::theT
+        double precision,dimension(nn)::b
+        double precision,dimension(nn,nn)::hess
+        double precision,dimension(mt,3)::lamTOut,suTOut
+        double precision,dimension(mt)::xTOut
+        double precision,dimension(-2:nzi)::zi
+
+    
+        nst=1
+        n  = nz1+2
+        nzT=nz1
+    
+        np=(nzT+2)*nst+effet+nva !en plus
+        k = 0
+        do i=1,(nzT+2)
+            k = k + 1
+            l = 0
+            do j=1,(nzT+2)
+                l = l + 1
+                hesT(k,l)=hess(i,j)
+            end do
+        end do
+        j=0
+        do i=1,nzT+2
+            j = j+1
+            theT(i-3)=(b(j))*(b(j))
+        end do
+        h = (zi(n)-zi(1))/(mt-1) ! Al modif : *0.01d0 ! attention depend de mt 
+        x = zi(1) !en plus
+        do i=1,mt        
+            if(i.ne.1)then
+                x = x + h!en plus
+            endif
+            call cosps(x,theT(:),nzT+2,hesT(:,:),zi,binf,su,bsup,lbinf,lam,lbsup)!en plus
+            if(bsup.lt.0.d0)then
+                bsup = 0.d0
+            endif
+            if(bsup.gt.1.d0)then
+                bsup = 1.d0
+            endif
+            if(binf.gt.1.d0)then
+                binf = 1.d0
+            endif
+            if(lbinf.lt.0.d0)then
+                lbinf = 0.d0
+            endif
+            xTOut(i)=x
+            lamTOut(i,1)=lam
+            lamTOut(i,2)=lbinf
+            lamTOut(i,3)=lbsup
+            suTOut(i,1)=su
+            suTOut(i,2)=binf
+            suTOut(i,3)=bsup
+        end do
+        return
+    end subroutine distancessplinesV2
 !=========================================================================================================
 !=========================================================================================================
 

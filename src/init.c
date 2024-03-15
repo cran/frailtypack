@@ -14,6 +14,7 @@ static const R_FortranMethodDef FortEntries[] = {
 	{"frailpenalgen",           (DL_FUNC) &F77_SUB(frailpenalgen),           60},
     {"frailpred_sha_nor_mc", (DL_FUNC) &F77_SUB(frailpred_sha_nor_mc),  5},
     {"joint",                (DL_FUNC) &F77_SUB(joint),                65},
+    {"joint_competing",         (DL_FUNC) &F77_SUB(joint_competing),         65},
 	{"jointgen",                (DL_FUNC) &F77_SUB(jointgen),                65},
     {"joint_longi",          (DL_FUNC) &F77_SUB(joint_longi),          65},
 	{"jointlonginl",          (DL_FUNC) &F77_SUB(jointlonginl),	       62},

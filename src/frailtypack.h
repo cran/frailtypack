@@ -335,6 +335,23 @@ F77_SUB(jointgen)(int *nsujet0, int *ngrp, int *strAux, int *lignedc0, int *nz0,
 						int *paratps, int *filtretps0, double *BetaTpsMat,
 						double *BetaTpsMatDc, double *EPS, int *nbgauss,
 						int*familyrisk);
+void
+F77_SUB(joint_competing)(int* controls, int *nobsEvent, double *k0, double *tt00, double *tt10, 
+                        double *tt0meta0,double *tt1meta0, int *ic0, int *icmeta0,
+                        int *groupe0, int *groupe0meta, int *groupe0dc, double *tt0dc0, 
+                        double *tt1dc0, int *icdc0, int *icdc20, int *nbvar, 
+                        double *vax0, double *vaxdc0, double *vaxmeta0, double *vaxdc20,
+                        int *noVarEvent, int* np, double *b,double *H_hessOut, double *HIHOut, 
+                        double *resOut, double *LCV, int *critCV, int *mtEven, int *mt1Even,
+                        double *x1Out, double *lamOut, double *xSu1,  double *suOut, 
+                        double *x2Out, double *lam2Out, double *xSu2, double *su2Out, 
+                        double *x3Out, double *lam3Out, double *xSu3, double *su3Out, 
+                        double *x4Out, double *lam4Out, double *xSu4, double *su4Out, 
+                        int *ni, int* constraintfrailty,int *cptEvent, double *ResMartingaleEvent, 
+                        double *frailtyEstimates,double *linearpred, double *linearpreddc, 
+                        double *linearpredM, double *linearpreddc2, double *ziOut1,
+                        double *ziOutdc, double *ziOutmeta, double *time, double *timedc,
+                        double *timeM, double *ghNodes0, double *ghWeights0, double *tolerance0);
 
 void F77_SUB(rndstart)(void);
 void F77_SUB(rndend)(void);

@@ -402,6 +402,20 @@
         double precision,dimension(:),allocatable,save::innerknotsurro,basissplines
         double precision,dimension(2),save::boundaryknotsurro
         double precision,dimension(:),allocatable,save::zmed,zdcmed
+        double precision,save::nuzm,nuzt,initvar
+        double precision,save::betazm,betazt,ma_link,betaztime
+        integer,dimension(:),allocatable,save::treat_ind,center_ind
+        double precision,dimension(:,:),allocatable,save::matmc
+        integer::nparammed,ncenters,nmcmed
+        integer,save::niter,method_int,nquad,type_ma,timetype
+        integer,save::Cmult 
+        integer,save::nmcfrail
+        integer,dimension(4)::rt_sizes 
+        integer,dimension(9)::rt_nparams
+        integer,save::rank_trtM,rank_trtT,rank_trtMt,rank_time
+        double precision,dimension(:,:),allocatable,save::matmc_frail 
+        double precision,dimension(:),allocatable,save::QMC1,QMC2
+        !$OMP THREADPRIVATE(nuzm,nuzt)
     end module
     !gestion de la double precision
     module double_precision

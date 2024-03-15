@@ -5,9 +5,9 @@
 \alias{lines.longiPenal}
 \title{Plot Method for a joint model for longitudinal data and a terminal event.}
 \usage{
-\method{plot}{longiPenal}(x, type.plot = "Hazard", conf.bands=TRUE,
-pos.legend= "topright", cex.legend=0.7, main, color, median=TRUE, Xlab = "Time", Ylab =
-"Hazard function", ...)
+\method{plot}{longiPenal}(x, type.plot = "Hazard",plot.mediation="All", 
+conf.bands=TRUE,pos.legend= "topright", cex.legend=0.7, main, color, 
+median=TRUE, Xlab = "Time", Ylab = "Hazard function", ...)
 }
 \arguments{
 \item{x}{A joint model for longitudinal outcome and a terminal event, i.e. a
@@ -17,6 +17,10 @@ function).}
 \item{type.plot}{a character string specifying the type of curve for the
 terminal event. Possible value are "Hazard", or "Survival". The default is
 "Hazard". Only the first words are required, e.g "Haz", "Su"}
+
+\item{plot.mediation}{A character string specifying the desired plot.
+ Possible values are "All", "PTE" or "Effects". The default is
+"All" which displays both plots.}
 
 \item{conf.bands}{Logical value. Determines whether confidence bands will be
 plotted.  The default is to do so.}
@@ -47,7 +51,8 @@ longitudinal and survival data.
 }
 \description{
 Plots estimated baseline survival and hazard functions for a terminal
-outcome from an object of class 'longiPenal'. Confidence bands are allowed.
+outcome from an object of class 'longiPenal'. If available, plot the estimated
+quantities related to a mediation analysis. Confidence bands are allowed.
 }
 \examples{
 

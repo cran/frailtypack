@@ -1,21 +1,25 @@
 #' Plot Method for a joint model for longitudinal data and a terminal event.
 #' 
 #' Plots estimated baseline survival and hazard functions for a terminal
-#' outcome from an object of class 'longiPenal'. Confidence bands are allowed.
+#' outcome from an object of class 'longiPenal'. If available, plot the estimated
+#' quantities related to a mediation analysis. Confidence bands are allowed.
 #' 
 #' 
 #' @aliases plot.longiPenal lines.longiPenal
 #' @usage
 #' 
-#' \method{plot}{longiPenal}(x, type.plot = "Hazard", conf.bands=TRUE,
-#' pos.legend= "topright", cex.legend=0.7, main, color, median=TRUE, Xlab = "Time", Ylab =
-#' "Hazard function", ...)
+#' \method{plot}{longiPenal}(x, type.plot = "Hazard",plot.mediation="All", 
+#' conf.bands=TRUE,pos.legend= "topright", cex.legend=0.7, main, color, 
+#' median=TRUE, Xlab = "Time", Ylab = "Hazard function", ...)
 #' @param x A joint model for longitudinal outcome and a terminal event, i.e. a
 #' \code{longiPenal} class object (output from calling \code{longiPenal}
 #' function).
 #' @param type.plot a character string specifying the type of curve for the
 #' terminal event. Possible value are "Hazard", or "Survival". The default is
 #' "Hazard". Only the first words are required, e.g "Haz", "Su"
+#' @param plot.mediation A character string specifying the desired plot.
+#'  Possible values are "All", "PTE" or "Effects". The default is
+#' "All" which displays both plots.
 #' @param conf.bands Logical value. Determines whether confidence bands will be
 #' plotted.  The default is to do so.
 #' @param pos.legend The location of the legend can be specified by setting
@@ -65,7 +69,10 @@
 #' }
 #' 
 #' 
-"plot.longiPenal" <- function (x, type.plot="Hazard", conf.bands=TRUE, pos.legend="topright", cex.legend=0.7, main, color=2, median=TRUE, Xlab = "Time", Ylab = "Hazard function", ...)
+"plot.longiPenal" <- function (x, type.plot="Hazard", plot.mediation='All',
+                               conf.bands=TRUE, pos.legend="topright", cex.legend=0.7,
+                               main, color=2, median=TRUE, Xlab = "Time", 
+                               Ylab = "Hazard function",...)
 {
   
   plot.type <- charmatch(type.plot, c("Hazard", "Survival"),nomatch = 0)
@@ -108,5 +115,196 @@
   
   legend(pos.legend, c("event"), lty=1, col=color, cex=cex.legend, ...)
   
+  
+  if(!is.null(x$mediation)){
+    if(plot.mediation=="Rt"){
+      x<-x$mediation
+      if(length(x)==9 & conf.bands){
+        data.rt<-x$data.rt
+        rt.ci=x$Rt.ci
+        nie.ci=x$NIE.ci
+        nde.ci = x$NDE.ci
+        te.ci =x$TE.ci
+        data.g=x$data.g
+        #plot r(t)
+        ymin<-ifelse(min(rt.ci$lower,na.rm=T)<0,
+                     1.2*min(rt.ci$lower,na.rm=T),
+                     0.8*min(rt.ci$yuppower,na.rm=T))
+        ymax<-ifelse(max(rt.ci$upper,na.rm = T)<0,
+                     0.8*max(rt.ci$upper,na.rm=T),
+                     1.2*max(rt.ci$upper,na.rm=T))
+        invisible(readline(prompt="Press [Enter] to continue:"))
+        plot(x<-data.rt$Time,y<-data.rt$Rt,type='l',col="black",
+             xlab="Time",ylab='PTE',main="Estimated PTE with its 95% confidence band",
+             ylim=c(ymin,ymax),...)
+        lines(x<-data.rt$Time,y<-rt.ci$upper,type='l',lty=2,col="black",...)
+        lines(x<-data.rt$Time,y<-rt.ci$lower,type='l',lty=2,col="black",...)
+      }else{
+        #plot without confidence bands
+        data.rt<-x$data.rt
+        data.g<-x$data.g
+        #plot r(t)
+        invisible(readline(prompt="Press [Enter] to continue:"))
+        plot(x<-data.rt$Time,y<-data.rt$Rt,type='l',col="black",
+             xlab="Time",ylab='PTE',main="Estimated PTE",...)
+      }
+    }
+    if(plot.mediation=="Effects"){
+      x<-x$mediation
+      if(length(x)==9 & conf.bands){
+        data.rt<-x$data.rt
+        rt.ci=x$Rt.ci
+        nie.ci=x$NIE.ci
+        nde.ci = x$NDE.ci
+        te.ci =x$TE.ci
+        data.g=x$data.g
+        #plot effects
+        invisible(readline(prompt="Press [Enter] to continue:"))
+        miny <- min(te.ci$lower,nie.ci$lower,nde.ci$lower,na.rm=T)
+        maxy <-max(te.ci$upper,nie.ci$upper,nde.ci$upper,na.rm=T)
+        ymin<-ifelse(miny<0,1.2*miny,0.8*miny)
+        ymax<-ifelse(maxy<0,0.8*maxy,1.2*maxy)
+        
+        plot(x<-data.rt$Time,y<-data.rt$TE,type='l',col="black",
+             xlab="Time",ylab='Effects',main="Estimated natural effects with their 95% confidence bands",
+             ylim=c(ymin,ymax),...)
+        lines(x<-data.rt$Time,y<-data.rt$NDE,type='l',col="green",...)
+        lines(x<-data.rt$Time,y<-data.rt$NIE,type='l',col="red",...)
+        
+        lines(x<-data.rt$Time,y<-te.ci$lower,type='l',lty=2,col="black",...)
+        lines(x<-data.rt$Time,y<-nde.ci$lower,type='l',lty=2,col="green",...)
+        lines(x<-data.rt$Time,y<-nie.ci$lower,type='l',lty=2,col="red",...)
+        
+        lines(x<-data.rt$Time,y<-te.ci$upper,type='l',lty=2,col="black",...)
+        lines(x<-data.rt$Time,y<-nde.ci$upper,type='l',lty=2,col="green",...)
+        lines(x<-data.rt$Time,y<-nie.ci$upper,type='l',lty=2,col="red",...)
+        
+        legend(pos.legend,legend=c("Total effect","Direct effect","Indirect effect"),
+               col=c("black","green","red"),lty=1)
+      }else{
+        #plot without confidence bands
+        data.rt<-x$data.rt
+        data.g<-x$data.g
+        #plot effect
+        invisible(readline(prompt="Press [Enter] to continue:"))
+        
+        ymin<-ifelse(min(data.rt$TE,data.rt$NIE,data.rt$TE)<0,
+                     1.2*min(data.rt$TE,data.rt$NIE,data.rt$TE),
+                     0.8*min(data.rt$TE,data.rt$NIE,data.rt$TE))
+        
+        ymax<-ifelse(max(data.rt$TE,data.rt$NIE,data.rt$TE)<0,
+                     0.8*max(data.rt$TE,data.rt$NIE,data.rt$TE),
+                     1.2*max(data.rt$TE,data.rt$NIE,data.rt$TE))
+        
+        plot(x<-data.rt$Time,y<-data.rt$TE,type='l',col="black",
+             xlab="Time",ylab='Effects',main="Estimated natural effects",
+             ylim=c(ymin,ymax),...)
+        lines(x<-data.rt$Time,y<-data.rt$NIE,type='l',col="green",...)
+        lines(x<-data.rt$Time,y<-data.rt$NDE,type='l',col="red",...)
+        legend(pos.legend,legend=c("Total effect","Direct effect","Indirect effect"),
+               col=c("black","green","red"),lty=1)
+        
+      }
+    }
+    if(plot.mediation=="All"){
+      x<-x$mediation
+      if(conf.bands & !is.null(x$Rt.ci)){
+        data.rt<-x$data.rt
+        rt.ci=x$Rt.ci
+        nie.ci=x$NIE.ci
+        nde.ci = x$NDE.ci
+        te.ci =x$TE.ci
+        #plot r(t)
+        ymin<-ifelse(min(rt.ci$lower,na.rm=T)<0,
+                     1.2*min(rt.ci$lower,na.rm=T),
+                     0.8*min(rt.ci$lower,na.rm=T))
+        ymax<-ifelse(max(rt.ci$upper,na.rm = T)<0,
+                     0.8*max(rt.ci$upper,na.rm=T),
+                     1.2*max(rt.ci$upper,na.rm=T))
+        invisible(readline(prompt="Press [Enter] to continue:"))
+        plot(x<-data.rt$Time,y<-data.rt$Rt,type='l',col="black",
+             xlab="Time",ylab='R(t)',main="Estimated PTE with its 95% confidence band",
+             ylim=c(ymin,ymax),...)
+        lines(x<-data.rt$Time,y<-rt.ci$upper,type='l',lty=2,col="black",...)
+        lines(x<-data.rt$Time,y<-rt.ci$lower,type='l',lty=2,col="black",...)
+        
+        #plot effects
+        invisible(readline(prompt="Press [Enter] to continue:"))
+        miny <- min(te.ci$lower,nie.ci$lower,nde.ci$lower,na.rm=T)
+        maxy <-max(te.ci$upper,nie.ci$upper,nde.ci$upper,na.rm=T)
+        ymin<-ifelse(miny<0,1.2*miny,0.8*miny)
+        ymax<-ifelse(maxy<0,0.8*maxy,1.2*maxy)
+        
+        plot(x<-data.rt$Time,y<-data.rt$TE,type='l',col="black",
+             xlab="Time",ylab='Effects',main="Estimated natural effects with their 95% confidence bands",
+             ylim=c(ymin,ymax),...)
+        lines(x<-data.rt$Time,y<-data.rt$NDE,type='l',col="green",...)
+        lines(x<-data.rt$Time,y<-data.rt$NIE,type='l',col="red",...)
+        
+        lines(x<-data.rt$Time,y<-te.ci$lower,type='l',lty=2,col="black",...)
+        lines(x<-data.rt$Time,y<-nde.ci$lower,type='l',lty=2,col="green",...)
+        lines(x<-data.rt$Time,y<-nie.ci$lower,type='l',lty=2,col="red",...)
+        
+        lines(x<-data.rt$Time,y<-te.ci$upper,type='l',lty=2,col="black",...)
+        lines(x<-data.rt$Time,y<-nde.ci$upper,type='l',lty=2,col="green",...)
+        lines(x<-data.rt$Time,y<-nie.ci$upper,type='l',lty=2,col="red",...)
+        
+        legend(pos.legend,legend=c("Total effect","Direct effect","Indirect effect"),
+               col=c("black","green","red"),lty=1)
+      }else if(conf.bands & is.null(x$Rt.ci)){
+        data.rt<-x$data.rt
+        plot(x<-data.rt$Time,y<-data.rt$Rt,type='l',col="black",
+             xlab="Time",ylab='R(t)',main="Estimated PTE",...)
+        
+        
+        #plot effect
+        invisible(readline(prompt="Press [Enter] to continue:"))
+        
+        ymin<-ifelse(min(data.rt$TE,data.rt$NIE,data.rt$NDE)<0,
+                     1.2*min(data.rt$TE,data.rt$NIE,data.rt$NDE),
+                     0.8*min(data.rt$TE,data.rt$NIE,data.rt$NDE))
+        
+        ymax<-ifelse(max(data.rt$TE,data.rt$NIE,data.rt$NDE)<0,
+                     0.8*max(data.rt$TE,data.rt$NIE,data.rt$NDE),
+                     1.2*max(data.rt$TE,data.rt$NIE,data.rt$NDE))
+        
+        plot(x<-data.rt$Time,y<-data.rt$TE,type='l',col="black",
+             xlab="Time",ylab='Effects',main="Estimated natural effects",
+             ylim=c(ymin,ymax),...)
+        lines(x<-data.rt$Time,y<-data.rt$NIE,type='l',col="green",...)
+        lines(x<-data.rt$Time,y<-data.rt$NDE,type='l',col="red",...)
+        legend(pos.legend,legend=c("Total effect","Direct effect","Indirect effect"),
+               col=c("black","green","red"),lty=1)
+        
+        
+      }else{
+        #plot without confidence bands
+        data.rt<-x$data.rt
+        #plot r(t)
+        invisible(readline(prompt="Press [Enter] to continue:"))
+        plot(x<-data.rt$Time,y<-data.rt$Rt,type='l',col="black",
+             xlab="Time",ylab='R(t)',main="Estimated PTE",...)
+        #plot effect
+        invisible(readline(prompt="Press [Enter] to continue:"))
+        
+        ymin<-ifelse(min(data.rt$TE,data.rt$NIE,data.rt$NDE)<0,
+                     1.2*min(data.rt$TE,data.rt$NIE,data.rt$NDE),
+                     0.8*min(data.rt$TE,data.rt$NIE,data.rt$NDE))
+        
+        ymax<-ifelse(max(data.rt$TE,data.rt$NIE,data.rt$NDE)<0,
+                     0.8*max(data.rt$TE,data.rt$NIE,data.rt$NDE),
+                     1.2*max(data.rt$TE,data.rt$NIE,data.rt$NDE))
+        
+        plot(x<-data.rt$Time,y<-data.rt$TE,type='l',col="black",
+             xlab="Time",ylab='Effects',main="Estimated natural effects",
+             ylim=c(ymin,ymax),...)
+        lines(x<-data.rt$Time,y<-data.rt$NIE,type='l',col="green",...)
+        lines(x<-data.rt$Time,y<-data.rt$NDE,type='l',col="red",...)
+        legend(pos.legend,legend=c("Total effect","Direct effect","Indirect effect"),
+               col=c("black","green","red"),lty=1)
+        
+      }
+    }
+  }
   return(invisible())
 }

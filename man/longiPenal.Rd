@@ -4,13 +4,14 @@
 \alias{longiPenal}
 \title{Fit a Joint Model for Longitudinal Data and a Terminal Event}
 \usage{
-longiPenal(formula, formula.LongitudinalData, data, data.Longi,
-  formula.Binary=FALSE, random, random.Binary=FALSE, fixed.Binary=FALSE, 
-  GLMlog=FALSE, MTP=FALSE, id, intercept = TRUE,
-  link = "Random-effects", timevar=FALSE, left.censoring =
-  FALSE, n.knots, kappa, maxit = 350, hazard = "Splines", init.B,
-  init.Random, init.Eta, method.GH = "Standard", seed.MC=1, n.nodes, LIMparam = 1e-3,
-  LIMlogl = 1e-3, LIMderiv = 1e-3, print.times = TRUE)
+longiPenal(formula, formula.LongitudinalData, data,  data.Longi,
+          formula.Binary=FALSE, random,random.Binary=FALSE, fixed.Binary=FALSE, 
+          GLMlog=FALSE, MTP=FALSE, id, intercept = TRUE,link="Random-effects",
+          timevar=FALSE,left.censoring=FALSE,n.knots, kappa,maxit=350,
+          hazard="Splines",mediation=FALSE,med.center=NULL,med.trt=NULL,init.B,
+          init.Random, init.Eta, method.GH = "Standard",seed.MC=1, n.nodes,
+          LIMparam=1e-3,LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE,med.nmc=500,
+          pte.times=NULL,pte.ntimes=NULL,pte.nmc=500,pte.boot=FALSE,pte.nboot=2000)
 }
 \arguments{
 \item{formula}{a formula object, with the response on the left of a
@@ -44,10 +45,10 @@ The random intercept is chosen using \code{"1"}.}
 
 \item{fixed.Binary}{Fix the value of the intercept in the binary part of a two-part model.}
 
-\item{GLMlog}{Logical value. Use a lognormal distribution for the biomarker 
+\item{GLMlog}{Logical value. Use a lognormal distribution for the biomarker
 (instead of the default normal distribution).}
 
-\item{MTP}{Logical value. Marginal two-part joint model instead of 
+\item{MTP}{Logical value. Marginal two-part joint model instead of
 conditional two-part joint model (only with two-part models).}
 
 \item{id}{Name of the variable representing the individuals.}
@@ -100,6 +101,14 @@ hazard functions using equidistant intervals or \code{"Splines-per"} using
 percentile with the penalized likelihood estimation, \code{"Weibull"} for
 the parametric Weibull functions. The default is \code{"Splines"}.}
 
+\item{mediation}{a logical value indicating if the mediation analysis method is used.
+Default is FALSE.}
+
+\item{med.center}{For mediation analysis, a vector containing the center indicator for each subject
+If no center then this argument should be \code{NULL}. Default is \code{NULL}.}
+
+\item{med.trt}{For mediation analysis, a vector containing the treatment indicator for each subject.}
+
 \item{init.B}{Vector of initial values for regression coefficients. This
 vector should be of the same size as the whole vector of covariates with
 the first elements for the covariates related to the terminal event and
@@ -139,6 +148,29 @@ default.}
 
 \item{print.times}{a logical parameter to print iteration process. The
 default is TRUE.}
+
+\item{med.nmc}{For mediation analysis, the number of Monte Carlo points used for computing the integral 
+over the random effects in the likelihood computation. Default is 500.}
+
+\item{pte.times}{For mediation analysis, a vector of times for which the
+funtion \eqn{PTE(t)} is evaluated. Specified time points must be in the range of
+the observed event times. The length of the vector should be less than 200.}
+
+\item{pte.ntimes}{For mediation analysis, if the argument \code{pte.times} is not specified
+the argument \code{pte.ntimes} allows the user to only specify a number of
+time points for which the function \eqn{PTE(t)} has to be computed. This argument
+is only to be used if \code{pte.times} is not specified. In that case
+the default value for \code{pte.ntimes} is 10. Should be less than 200.}
+
+\item{pte.nmc}{For mediation analysis, nn integer indicating how many Monte Carlo simulations are used
+to integrate over the random effects in the computation of the function \eqn{PTE(t)}. Should be less than
+10000. Default is 500.}
+
+\item{pte.boot}{For mediation analysis, a logical value indicating if bootstrapped confidence bands needs to be computed for the
+function \eqn{PTE(t)} in the mediation analysis setting. Default is FALSE.}
+
+\item{pte.nboot}{For mediation analysis, an integer indicating how many bootstrapped replicates of PTE(t) needs
+to be computed to derive confidence bands for PTE(t). Should be less than 10000. Default is 2000.}
 }
 \value{
 The following components are included in a 'longiPenal' object for each
@@ -293,10 +325,19 @@ s cannot be quantified (left-censoring).
 Alternatively, a two-part model is proposed to fit a semicontinuous biomarker.
 The two-part model decomposes the biomarker's distribution into a binary
 outcome (zero vs. positive values) and a continuous outcome (positive values). In the
-conditional form, the continuous part is conditional on a positive value while in the 
+conditional form, the continuous part is conditional on a positive value while in the
 marginal form, the continuous part corresponds to the marginal mean of the biomarker.
 A logistic mixed effects model fits the binary outcome and a linear or a lognormal mixed effects
-model fits the continuous outcome.
+model fits the continuous outcome. 
+
+A mediation analysis is possible to derive the proportion of the treatment effect on the survival
+outcome due to the treatment effect on the longitudinal outcome. The proportion of treatment 
+effect is derived as the ratio of the indirect effect over the total effect. This proportion is
+defined on the survival scale and the indirect effect is taken as the difference of survivals at a given time
+when the treatment is set to 1 for both the survival and longitudinal outcome and when the treatment
+is only set to 1 for the survival endpoint and 0 for the longitudinal outcome. The total effect is the difference
+of survivals when the treatment is set to 1 or 0 for both endpoints. 
+
 }
 \if{latex}{Fit a joint model for longitudinal data and a terminal event using a
 semiparametric penalized likelihood estimation or a parametric estimation on
@@ -365,7 +406,7 @@ and identification of individuals. }
 \examples{
 
 
-\donttest{
+\dontrun{
 
 ###--- Joint model for longitudinal data and a terminal event ---###
 
@@ -429,8 +470,8 @@ kap <- round(tte$kappa,2);kap # smoothing parameter
   n.nodes=500)
 
   print(CTPJM_cl)
-  
-  
+
+
 # Marginal two-part joint model - random-effects association structure (~10min)
 longDat$Yex <- exp(longDat$Y)-1
 MTPJM_re <- longiPenal(Surv(deathTimes, d)~trt, Yex~timej*trtY,
@@ -454,7 +495,25 @@ print(MTPJM_re)
 
 print(MTPJM_cl)
 
-  
+###--- Mediation analysis  
+#Takes ~ 10 minutes to run
+data(colorectal)
+data(colorectalLongi)
+colorectalSurv <- subset(colorectal, new.lesions == 0)
+
+colorectalSurv$treatment<-sapply(colorectalSurv$treatment,function(t) ifelse(t=="S",1,0))
+colorectalLongi$treatment<-sapply(colorectalLongi$treatment,function(t) ifelse(t=="S",1,0))
+
+mod.col=longiPenal(Surv(time1, state) ~ age+treatment, 
+  	       tumor.size ~ age+year*treatment,
+           data=colorectalSurv,	data.Longi = colorectalLongi, random = c("1", "year"),
+           id = "id", link = "Current-level",timevar="year",method.GH = "Pseudo-adaptive",
+           mediation = TRUE,med.trt = colorectalSurv$treatment,
+           med.center = NULL,med.nmc = 50,n.knots = 7, kappa = 2,
+  	        pte.ntimes = 30,pte.boot = T,pte.nmc = 1000,pte.nboot = 1000)
+
+print(mod.col)
+plot(mod.col,plot.mediation='All')
 }
 }
 \references{
@@ -480,9 +539,9 @@ A. Genz and B. Keister (1996). Fully symmetric interpolatory rules for
 multiple integrals over infinite regions with Gaussian weight. \emph{Journal
 of Computational and Applied Mathematics} \bold{71}, 299-309.
 
-D. Rustand, L. Briollais, C. Tournigand and V. Rondeau (2020). 
-Two-part joint model for a longitudinal semicontinuous marker 
-and a terminal event with application to metastatic colorectal 
+D. Rustand, L. Briollais, C. Tournigand and V. Rondeau (2020).
+Two-part joint model for a longitudinal semicontinuous marker
+and a terminal event with application to metastatic colorectal
 cancer data. \emph{Biostatistics}.
 }
 \seealso{

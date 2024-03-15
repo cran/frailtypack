@@ -92,7 +92,6 @@ if (ng==1){
 	attr(ss,"type") <- "intervaltronc"
 }
 
-if (is.R()) { class(ss) <- "SurvIC" }
-else { oldClass(ss) <- "SurvIC" }
+class(ss) <- "SurvIC"
 return(ss)
 }

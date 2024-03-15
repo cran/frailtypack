@@ -88,7 +88,7 @@ contains
                 h=2.d0*pi*dexp(b_2(1)**2.d0 + 2.d0*b_2(2)+dlog(h))*1.d0/dsqrt(8.d0)
                 !print*,"voila la valeur de int(exp(y^2 + 2z^2 + n!) pour n=5",h
                 !print*,"===========Pour annuler ce calcul, attribuer la valeur 0 à la variable Test dans Cont_Laplace_Essai() "
-                stop
+                !stop
             else
                 h=dexp(-wij_chap(1,1) + 5.d0*dlog(wij_chap(1,1)))*dsqrt(2*pi*wij_chap(1,1)**2.d0/5.d0)
                 !print*,"x_0 pour vaut:",wij_chap(1,1)
@@ -98,7 +98,7 @@ contains
                  !   Int_Laplace_ind(position_i,i,vs_i,vt_i,u_i)
                 !print*,"probleme de convergence essai"
                 !print*,"===========Pour annuler ce calcul, attribuer la valeur 0 à la variable Test dans Cont_Laplace_Essai() "
-                stop
+                !stop
             endif
             !goto 125
             

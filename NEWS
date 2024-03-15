@@ -1,3 +1,8 @@
+Changes in Version 3.6.0 March 2024
+o New function (jointRecCompet) to fit a frailty model with one recurrent event and two terminal events.
+o New mediation analysis approach (using proportion of treatment effect) implemented in the longiPenal function.
+o Modifications for the functions print.longiPenal, plot.longiPenal and summary.longiPenal to accommodate this new approach.
+
 Changes in Version 3.5.1 November 2023
 o Minor syntax updates in man files.
 o Minor bugs in demo scripts fixed: problems with capital letters.
