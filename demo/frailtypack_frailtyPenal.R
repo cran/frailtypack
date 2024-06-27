@@ -79,9 +79,9 @@ print(mod.sha.ic, digits = 4)
 ### Figures
 ########################################################################
 
-pdf(file = "fig1.pdf")
+#pdf(file = "fig1.pdf")
 par(mfrow = c(1, 3))
-plot(mod.cox.gap, type.plot = "survival", main = "Cox model", conf.bands = TRUE)
-plot(mod.sha.gap, type.plot = "survival", main = "Shared", conf.bands = TRUE)
-plot(mod.sha.str.gap, type.plot = "survival", main = "Shared + Stratification",
+plot(mod.cox.gap, type.plot = "Survival", main = "Cox model", conf.bands = TRUE)
+plot(mod.sha.gap, type.plot = "Survival", main = "Shared", conf.bands = TRUE)
+plot(mod.sha.str.gap, type.plot = "Survival", main = "Shared + Stratification",
   conf.bands = TRUE, pos.legend = "bottomleft", cex.legend = 1)

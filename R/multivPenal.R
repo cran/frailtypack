@@ -18,13 +18,13 @@
 #' 
 #' {\figure{multivmodel1.png}{options: width="100\%"}}
 #' 
-#' where \eqn{r}\out{<sub>0</sub>}\out{<sup>l</sup>}(t), (l\out{&isin;}{1,2}) and \eqn{r}\out{<sub>0</sub>}(t) are
+#' where \eqn{r}\out{<sub>0</sub>}\out{<sup>l</sup>}(t), (l\out{&isin;}\{1,3\}) and \eqn{r}\out{<sub>0</sub>}(t) are
 #' respectively the recurrent and terminal event baseline hazard functions, and
 #' \eqn{\beta}\out{<sub>1</sub>},\eqn{\beta}\out{<sub>2</sub>},\eqn{\beta}\out{<sub>3</sub>} the regression coefficient vectors associated
 #' with \eqn{Z}\out{<sub>i</sub>}(t) the covariate vector. The covariates could be different
 #' for the different event hazard functions and may be time-dependent. We
 #' consider that death stops new occurrences of recurrent events of any type,
-#' hence given \eqn{t>D}, \eqn{dN}\out{<sup>R(l)*</sup>}(t), (l\out{&isin;}{1,2}) takes the value 0.
+#' hence given \eqn{t>D}, \eqn{dN}\out{<sup>R(l)*</sup>}(t), (l\out{&isin;}\{1,2\}) takes the value 0.
 #' Thus, the terminal and the two recurrent event processes are not independent
 #' or even conditional upon frailties and covariates. We consider the hazard
 #' functions of recurrent events among individuals still alive.  % The three
@@ -71,13 +71,13 @@
 #' \lambda_0(t)\exp({{\beta_3^{'}}}Z_{i}(t)+\alpha_1u_i+\alpha_2v_i) &\quad
 #' \mbox{(death)}\\ \end{array} \right. }
 #' 
-#' where \eqn{r_0^{(l)}(t)}, \eqn{l\in{1,2}} and \eqn{\lambda_0(t)} are
+#' where \eqn{r_0^{(l)}(t)}, \eqn{l\in{\{1,2\}}} and \eqn{\lambda_0(t)} are
 #' respectively the recurrent and terminal event baseline hazard functions, and
 #' \eqn{\beta_1,\beta_2,\beta_3} the regression coefficient vectors associated
 #' with \eqn{Z_{i}(t)} the covariate vector. The covariates could be different
 #' for the different event hazard functions and may be time-dependent. We
 #' consider that death stops new occurrences of recurrent events of any type,
-#' hence given \eqn{t>D}, \eqn{dN^{R(l)*}(t), l\in{1,2}} takes the value 0.
+#' hence given \eqn{t>D}, \eqn{dN^{R(l)*}(t), l\in{\{1,3\}}} takes the value 0.
 #' Thus, the terminal and the two recurrent event processes are not independent
 #' or even conditional upon frailties and covariates. We consider the hazard
 #' functions of recurrent events among individuals still alive.  % The three
@@ -315,7 +315,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' ###--- Multivariate Frailty model ---###
 #' 
@@ -476,7 +476,7 @@
     
     #AD:
     if (missing(formula))stop("The argument formula must be specified in any model")
-    if(class(formula)!="formula")stop("The argument formula must be a formula")
+    if(!inherits(formula, "formula"))stop("The argument formula must be a formula")
     
     if(typeof == 0){
       #AD:   
@@ -494,7 +494,7 @@
       n.knots[n.knots>20] <- 20
       
       if (missing(kappa))stop("smoothing parameter (kappa1) is required")
-      if(class(kappa)!="numeric")stop("The argument kappa must be a numeric")
+      if(!inherits(kappa, "numeric"))stop("The argument kappa must be a numeric")
       if(length(kappa)==1)stop("length of smoothing parameter (kappa) must greater than 2")
       
       # permettre a l'utilisateur de rentrer les kappa dans cet ordre : loco, meta, deces
@@ -1309,7 +1309,7 @@
       nb.int[2] <- nb.int.temp[3]
       nb.int[3] <- nb.int.temp[2]
       if (missing(nb.int)) stop("Time interval 'nb.int' is required")
-      if (class(nb.int) != "numeric") stop("The argument 'nb.int' must be a numeric")
+      if (!inherits(nb.int, "numeric")) stop("The argument 'nb.int' must be a numeric")
       if (length(nb.int) != 3) stop("The argument 'nb.int' must be a numeric vector of length 3")
       if (nb.int[1] < 1) stop("Number of Time interval 'nb.int[1]' must be between 1 and 20")
       if (nb.int[2] < 1) stop("Number of Time interval 'nb.int[2]' must be between 1 and 20")

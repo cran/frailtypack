@@ -21,7 +21,7 @@
     double precision::ht,ht2,h2,som,htm,h2t,h3,h2n,hn,im,im1,&
     im2,mm1,mm3,ht3,hht,h4,h3m,hh3,hh2,mm,im3,mm2,h,hh,gl,som1,gl1
 
-
+    zi  = 0.0d0 
     the=the_s
     zi=zi_s
     the1=the1_s

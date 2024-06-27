@@ -10,6 +10,9 @@ num.id(x)
 \item{x}{A character or numeric variable which is supposed to indicate the
 variable identifying individuals}
 }
+\value{
+No return value
+}
 \description{
 This is a special function used in addition to the \code{cluster()} function
 in the context of survival joint models for clustered data. This function
@@ -20,7 +23,7 @@ joint frailty model for clustered data is fitted (Rondeau et al. 2011).
 \examples{
 
 
-\dontrun{
+\donttest{
 
 data(readmission)
 #-- here is generated cluster (5 clusters)

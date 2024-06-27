@@ -5,11 +5,10 @@ $(SHLIB): $(OBJECTS)
 
 # nouvel ajout pour OpenMP: scl_20-06-2018
 # pour Fortran 90/95: see Writing R Extensions (Version 3.5.0 Patched (2018-06-18)), page 24
-PKG_FFLAGS = $(SHLIB_OPENMP_FFLAGS)
+#PKG_FFLAGS = $(SHLIB_OPENMP_FFLAGS) # denis
+PKG_FCFLAGS = $(SHLIB_OPENMP_FFLAGS) # scl pour OpenMP
 PKG_LIBS = $(SHLIB_OPENMP_CFLAGS)
 #PKG_FCFLAGS = $(SHLIB_OPENMP_FCFLAGS) # openmp falg /windows
-# Uses Fortran OpenMP (only)
-USE_FC_TO_LINK=
 
 # Setup dependencies for parallel make
 prediction.o: Aparameters.o
@@ -21,7 +20,7 @@ prediction_biv.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_tri.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_tri_nl.o: aaOptim.o aaOptimres.o Aparameters.o
 aamarq98o.o: aaOptim.o aaOptimres.o Aparameters.o
-aaOptim.o: Aparameters.o 
+aaOptim.o: Aparameters.o
 afuncpasres.o: aaOptim.o aaOptimres.o Aparameters.o
 aresidusMartingale.o: aaOptim.o aaOptimres.o Aparameters.o
 aaUseFunction.o: aaOptim.o aaOptimres.o Aparameters.o
@@ -46,6 +45,17 @@ funcpascpm_log.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpasweib_log.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpas_tps.o: aaOptim.o aaOptimres.o Aparameters.o
 
+# Nouvel ajout pour la généralisation
+frailtypackgen.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpasgenweib.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpasgenloglogistic.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpasgenlognormal.o: aaUseFunction.o aaOptim.o aaOptimres.o Aparameters.o
+funcpasgenadditif_pen.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpasgenadditif_tps.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpasgenadditif_alternatif.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpasgenadditifalternatif_tps.o: aaOptim.o aaOptimres.o Aparameters.o
+
+
 joint.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajgeneral.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajsplines.o: aaOptim.o aaOptimres.o Aparameters.o
@@ -60,6 +70,13 @@ funcpajsplines_logIndiv.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajcpm_log.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpajweib_log.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpaj_tps.o: aaOptim.o aaOptimres.o Aparameters.o
+
+# Nouvel ajout pour la généralisation
+jointgen.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpajgenparam.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpajgen_tps.o: aaOptim.o aaOptimres.o Aparameters.o
+
+
 funcpaGsplines.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpaGcpm.o: aaOptim.o aaOptimres.o Aparameters.o
 funcpaGweib.o: aaOptim.o aaOptimres.o Aparameters.o
@@ -81,8 +98,15 @@ funcpaMultivSplines.o: aaOptim.o aaOptimres.o AparamMultive.o
 funcpaMultivCpm.o: aaOptim.o aaOptimres.o AparamMultive.o
 funcpaMultivWeib.o: aaOptim.o aaOptimres.o AparamMultive.o
 
-joint_longi.o: aaOptim.o aaOptimres.o Aparameters.o
-funcpajlongisplines.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o
+joint_competing.o: aaOptim.o aaOptimres.o Aparameters.o
+funcpajcompetingsplines.o: aaOptim.o aaOptimres.o AparamMultive.o
+funcpajcompetingweib.o: aaOptim.o aaOptimres.o AparamMultive.o
+
+autres_fonctions.o: Adonnees.o Aparameters.o
+
+joint_longi.o: aaOptim.o aaOptimres.o Aparameters.o autres_fonctions.o
+funcpajlongisplines.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o autres_fonctions.o
+funcpajlongisplines2.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o autres_fonctions.o
 funcpajlongiweib.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o
 
 joint_longi_nl.o: aaOptim.o aaOptimres.o Aparameters.o
@@ -103,15 +127,15 @@ survival.o: aaOptim.o aaOptimres.o Aparameters.o
 aaOptim_SCL_0.o: Aparameters.o
 aaOptim_New_scl.o: Aparameters.o
 aaOptim_New_scl2.o: Aparameters.o
-autres_fonctions.o: Adonnees.o Aparameters.o
 Integrant_scl.o: Aparameters.o Adonnees.o autres_fonctions.o
 funcpa_adaptative.o: Aparameters.o aaOptim_New_scl.o Integrant_scl.o
-funcpa_laplace.o: Aparameters.o aaOptim_New_scl.o
+funcpa_laplace.o: Aparameters.o aaOptim_New_scl.o Integrant_scl.o
 Integrale_mult_scl.o: Aparameters.o autres_fonctions.o aaOptim_New_scl2.o funcpa_laplace.o funcpa_adaptative.o Adonnees.o Integrant_scl.o
 funcpajsplines_surrogate_scl_1.o: Aparameters.o Integrant_scl.o Integrale_mult_scl.o
 funcpajsplines_surrogate_scl_2.o: Aparameters.o Integrant_scl.o Integrale_mult_scl.o autres_fonctions.o aaOptim_New_scl2.o
+funcpajsplines_copule_surrogate_scl_2.o: Aparameters.o Integrant_scl.o Integrale_mult_scl.o autres_fonctions.o aaOptim_New_scl2.o
 Pour_Adaptative.o: Aparameters.o Integrant_scl.o Integrale_mult_scl.o
 joint_surrogate.o: Aparameters.o aaOptim_SCL_0.o Adonnees.o
-jointSurrogate.o: Aparameters.o autres_fonctions.o
+jointSurrogate.o: Aparameters.o autres_fonctions.o natural_effects.o
 surrosim.o: Aparameters.o autres_fonctions.o
 jointsurrokendall.o: Integrant_scl.o

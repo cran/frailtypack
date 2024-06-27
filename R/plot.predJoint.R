@@ -28,6 +28,9 @@
 "plot.predJoint" <- function (x, conf.bands=FALSE, relapses=TRUE, pos.legend="topright", cex.legend=0.7, ylim=c(0,1), Xlab = "Time t", Ylab = "Prediction probability of event", ...){	
 	event.type <- x$event
 	
+	oldpar <- par(no.readonly = TRUE) 
+	on.exit(par(oldpar))
+
 	if ((conf.bands) & (!x$icproba)) stop("Confidence intervals were not calculated. Use the MC.sample argument in the 'prediction' function")
 	
 	if (event.type == 1){

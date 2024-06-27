@@ -13,43 +13,17 @@
     double precision::h,su,bsup,binf,lam,lbinf, &
     lbsup,x
     double precision,dimension(npmax,npmax,nst)::hesT !en plus
-!     double precision,dimension(npmax,npmax)::hes1,hes2
-!     double precision,dimension(-2:npmax)::the1,the2
-    double precision,dimension(-2:npmax,nst)::theT
+    double precision,dimension(-2:npmax,nst)::theT 
+    double precision,dimension(-2:npmax)::the_temp
     double precision,dimension(npmax)::b
-!     double precision,dimension(mt,3)::lamOut,suOut,lam2Out,su2Out
     double precision,dimension(mt,3,nst)::lamTOut,suTOut
-    !double precision,dimension(mt)::x1Out,x2Out
     double precision,dimension(mt,nst)::xTOut
-
 
 
     n  = nz1+2
     nzT=nz1
-!     if(nst.eq.2)then 
-!         np  = nz1+2+nz2+2+effet+nva
-!     else
-!         np  = nz1+2+effet+nva
-!     endif
-    np=(nzT+2)*nst+effet+nva !en plus
 
-!     do i=1,nz1+2
-!         do j=1,nz1+2
-!             hes1(i,j)=hess(i,j)
-!         end do
-!     end do 
-! 
-!     if(nst.eq.2)then
-!         k = 0
-!         do i=nz1+3,nz1+2+nz2+2
-!             k = k + 1 
-!             l = 0
-!             do j=nz1+3,nz1+2+nz2+2
-!                 l = l + 1
-!                 hes2(k,l)=hess(i,j)
-!             end do
-!         end do
-!     endif
+    np=(nzT+2)*nst+effet+nva !en plus
 
     do  jj=1,nst!en plus
         k = 0
@@ -63,15 +37,7 @@
         end do
     end do
 
-!     do i=1,nz1+2
-!         the1(i-3)=(b(i))*(b(i))
-!     end do
-!     if(nst.eq.2)then
-!         do i=1,nz2+2
-!             j = nz1+2+i
-!             the2(i-3)=(b(j))*(b(j))
-!         end do
-!     endif
+
     j=0
     do  jj=1,nst!en plus
         do i=1,nzT+2
@@ -80,63 +46,6 @@
         end do
     end do
 
-!     h = (zi(n)-zi(1))/(mt-1) ! Al modif : *0.01d0 ! attention depend de mt 
-!     x1 = zi(1)
-!     x2 = zi(1)
-! 
-!     do i=1,mt
-!         
-!         if(i.ne.1)then
-!             x1 = x1 + h
-!         end if
-!         call cosps(x1,the1,nz1+2,hes1,zi,binf,su,bsup,lbinf,lam,lbsup)
-!         if(bsup.lt.0.d0)then
-!             bsup = 0.d0
-!         endif
-!         if(binf.gt.1.d0)then
-!             binf = 1.d0
-!         endif
-!         if(lbinf.lt.0.d0)then
-!             lbinf = 0.d0
-!         endif
-! 
-! !   Replaced by next sentences and add new ones JRG January 05
-! !
-! !
-!         x1Out(i)=x1
-!         lamOut(i,1)=lam
-!         lamOut(i,2)=lbinf
-!         lamOut(i,3)=lbsup
-!         suOut(i,1)=su
-! 
-!         suOut(i,2)=binf
-!         suOut(i,3)=bsup
-! 
-! 
-!         if(nst.eq.2)then
-!             if(i.ne.1)then
-!                 x2 = x2 + h
-!             endif
-!             call cosps(x2,the2,nz2+2,hes2,zi,binf,su,bsup,lbinf,lam,lbsup)
-!             if(bsup.lt.0.d0)then
-!                 bsup = 0.d0
-!             endif
-!             if(binf.gt.1.d0)then
-!                 binf = 1.d0
-!             endif
-!             if(lbinf.lt.0.d0)then
-!                 lbinf = 0.d0
-!             endif
-! 
-!             x2Out(i)=x2
-!             lam2Out(i,1)=lam
-!             lam2Out(i,2)=lbinf
-!             lam2Out(i,3)=lbsup
-!             su2Out(i,1)=su
-!             su2Out(i,2)=binf
-!             su2Out(i,3)=bsup
-!         endif
-!     end do
 
     do  jj=1,nst!en plus
 
@@ -148,9 +57,9 @@
             if(i.ne.1)then
                 x = x + h!en plus
             endif
-            call cosps(x,theT(:,jj),nzT+2,hesT(:,:,jj),zi,binf,su,bsup,lbinf,lam,lbsup)!en plus
-
-
+            !call cosps(x,theT(:,jj),nzT+2,hesT(:,:,jj),zi,binf,su,bsup,lbinf,lam,lbsup)!en plus
+            the_temp=theT(:,jj)
+            call cosps(x,the_temp,nzT+2,hesT(:,:,jj),zi,binf,su,bsup,lbinf,lam,lbsup)!en plus
             if(bsup.lt.0.d0)then
                 bsup = 0.d0
             endif
@@ -182,6 +91,80 @@
 
 !=========================================================================================================
 !=========================================================================================================
+    subroutine distancessplinesV2(nz1,zi,nn,b,hess,effet,mt,xTOut,lamTOut,suTOut)
+        !use tailles,only:ndatemax,NSUJETMAX
+        use tailles,only:npmax
+    
+        use comon,only:nva!,nst!,hess,zi
+    
+        implicit none
+        
+        integer::nn,nst
+        integer::nz1,i,j,n,np,k,l,effet,mt,nzT
+        double precision::h,su,bsup,binf,lam,lbinf, &
+        lbsup,x
+        double precision,dimension(npmax,npmax)::hesT !en plus
+        double precision,dimension(-2:npmax)::theT
+        double precision,dimension(nn)::b
+        double precision,dimension(nn,nn)::hess
+        double precision,dimension(mt,3)::lamTOut,suTOut
+        double precision,dimension(mt)::xTOut
+        double precision,dimension(-2:npmax)::zi
+        double precision,dimension(:),allocatable::zi_2 
+
+        allocate(zi_2(-2:npmax))
+
+        zi_2 = zi 
+    
+        nst=1
+        n  = nz1+2
+        nzT=nz1
+    
+        np=(nzT+2)*nst+effet+nva !en plus
+        k = 0
+        do i=1,(nzT+2)
+            k = k + 1
+            l = 0
+            do j=1,(nzT+2)
+                l = l + 1
+                hesT(k,l)=hess(i,j)
+            end do
+        end do
+        j=0
+        do i=1,nzT+2
+            j = j+1
+            theT(i-3)=(b(j))*(b(j))
+        end do
+        h = (zi(n)-zi(1))/(mt-1) ! Al modif : *0.01d0 ! attention depend de mt 
+        x = zi(1) !en plus
+        do i=1,mt        
+            if(i.ne.1)then
+                x = x + h!en plus
+            endif
+            call cosps(x,theT,nzT+2,hesT(:,:),zi_2,binf,su,bsup,lbinf,lam,lbsup)!en plus
+            if(bsup.lt.0.d0)then
+                bsup = 0.d0
+            endif
+            if(bsup.gt.1.d0)then
+                bsup = 1.d0
+            endif
+            if(binf.gt.1.d0)then
+                binf = 1.d0
+            endif
+            if(lbinf.lt.0.d0)then
+                lbinf = 0.d0
+            endif
+            xTOut(i)=x
+            lamTOut(i,1)=lam
+            lamTOut(i,2)=lbinf
+            lamTOut(i,3)=lbsup
+            suTOut(i,1)=su
+            suTOut(i,2)=binf
+            suTOut(i,3)=bsup
+        end do
+        deallocate(zi_2)
+        return
+    end subroutine distancessplinesV2
 !=========================================================================================================
 !=========================================================================================================
 
@@ -1122,6 +1105,442 @@
     end do
     end subroutine distanceSweib
 
+
+    subroutine distanceSloglogistic(b,m,mt,xT,moyLamT,xSuT,moysuT)
+
+    use tailles
+    !use comon,only: c,nsujet,t0,t1,nva1,nva2,typeof2,date,nva,betaD,betaR,etaD,etaR
+    use comon,only:cens,vvv,nst,mint,betaT,etaT ! en plus
+    use optim
+
+    implicit none
+
+    integer,intent(in)::m,mt
+    integer::i,j,ier,t,k,ns,ii,jj! en plus
+    double precision,dimension(nst)::lamTW, lamT25,lamT975,suTW,suT25,suT975!en plus
+    double precision,dimension(m*(m+1)/2)::vv
+    double precision,dimension(m)::b,bgen
+    double precision,dimension(1000,m)::u
+    double precision::sx,som,x,zz,zy 
+    double precision,dimension(1000,nst):: lamT,suT,glT ! en plus
+! theorique - estimés après Max de Vrais
+    double precision,dimension(nst)::glTW
+    double precision,dimension(mt,nst)::xT !en plus
+    double precision,dimension(mt,3,nst)::moyLamT ! en plus
+    double precision,dimension(100,3,nst)::moysuT !en plus
+    double precision,dimension(100,nst)::xSuT! en plus
+    double precision::ep
+
+    glTW=0.d0
+    ier=0
+    t=0
+    k=0
+    ns=0
+    sx=1.d0 ! ecart-type ou variance des réalisations gaussiennes générées
+!    ns=m-nva-1 !non marche pas pour le COX : VR 20 fev 2015
+!    write(*,*)'=====ns dans distance',ns
+    ns=2
+    
+    do i=1,ns*(ns+1)/2
+        vv(i)=vvv(i)
+    end do
+    
+    ep=10.d-10
+    call dmfsdj(vv,m,ep,ier)
+
+    do k=1,1000!0
+        do j=1,ns
+            call bgos(SX,0,zz,zy,0.d0)
+            u(k,j)=zz
+        end do
+    end do
+     
+!     Pour chaque temps de 0 à la censure du décès par pas cens/100
+
+ !     commencer à 0 dans la boucle
+  
+!    x= mint
+    x= mint + 0.000001 !new 20 fev 2015
+!       shape et scale
+    
+    ii=1
+    do jj=1,nst!rempli tableaux etaT et betaT
+        betaT(jj)=b(ii)**2
+        etaT(jj)=b(ii+1)**2
+        ii=ii+2
+    end do
+    
+    do t=1,mt
+        lamT=0.d0 ! en plus
+!         n=n+1 ! compteur sur nième temps
+        if(t.ne.1) then
+            x=x+(cens-mint)/(mt-1)         
+        end if
+! On simule 1000 réalisations gaussienne par paramètre
+        do k=1,1000
+!     Pour chaque paramètre estimé
+            do i=1,ns
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                   som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                bgen(i)=(b(i)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+
+
+!            Moybgen(k)=Moybgen(k)+bgen(i)/1000
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR
+!     fct de survie           : su  = dexp(-gl)
+
+            ii=1 !en plus
+            do jj=1,nst
+                lamT(k,jj) = ( (bgen(ii)/bgen(ii+1))*(x/bgen(ii+1))**(bgen(ii)-1.d0) ) / &
+                ( 1.d0 + (x/bgen(ii+1))**(bgen(ii)) )
+                lamTW(jj)  = ( ((b(ii)**2)/(b(ii+1)**2)) * (x/(b(ii+1)**2))**((b(ii)**2)-1.d0) ) / &
+                ( 1.d0 + (x/(b(ii+1)**2))**(b(ii)**2) )
+						   
+                !lamT(k,jj)=(bgen(ii)*(x**(bgen(ii)-1.d0)))/(bgen(ii+1)**bgen(ii))
+                !lamTW(jj)=((b(ii)**2)*(x**((b(ii)**2)-1.d0)))/((b(ii+1)**2)**(b(ii)**2))
+                ii=ii+2
+            end do          
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+
+        do jj=1,nst!en plus
+            call percentile(lamT(:,jj),lamT25(jj),lamT975(jj)) !de 1a1000  1001a2000
+        end do
+
+!----- strate 1
+        if(t == 1) then
+            xT(t,1)= mint
+        else
+            xT(t,1)=real(x) !en plus
+        end if
+
+        do jj=1,nst!en plus
+            xT(t,jj) = xT(t,1)!real(x)
+            moyLamT(t,1,jj) = real(lamTW(jj))
+            moyLamT(t,2,jj) = real(lamT25(jj))
+            moyLamT(t,3,jj) = real(lamT975(jj))
+        end do
+                
+    end do    
+        
+    x=mint
+
+    do t=1,100
+        glT= 0.d0! en plus
+        suT= 0.d0
+!         n=n+1 ! compteur sur nième temps
+        if(t.ne.1) then
+            x=x+(cens-mint)/99 !100
+        end if
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Pour chaque paramètre estimé
+            do i=1,ns
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                    som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                bgen(i)=(b(i)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+
+
+
+!            Moybgen(k)=Moybgen(k)+bgen(i)/1000
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR
+!     fct de survie           : su  = dexp(-gl)
+
+            ii=1 !en plus
+            do jj=1,nst
+                glT(k,jj)  =  dlog( 1.d0 + (x/bgen(ii+1))**(bgen(ii)) )
+                !glT(k,jj)  =  (x/bgen(ii+1))**bgen(ii)
+                suT(k,jj)  = dexp(-glT(k,jj))
+                glTW(jj)  =  dlog( 1.d0 + (x/(b(ii+1)**2))**(b(ii)**2) )
+                !glTW(jj)  =  (x/(b(ii+1)**2))**(b(ii)**2)
+                suTW (jj) = dexp(-glTW(jj))
+                ii=ii+2
+            end do
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+
+        do jj=1,nst!en plus
+            call percentile(suT(:,jj),suT25(jj),suT975(jj)) !de 1à1000 | 1001à2000
+        end do
+
+        if(t==1) then
+            !xSu1(t) = mint !date(1)
+            xSuT(t,1)= mint        
+        else
+            !xSu1(t) = real(x)
+            xSuT(t,1)=real(x)
+        end if
+
+        do jj=1,nst!en plus
+            xSuT(t,jj) = xSuT(t,1)!real(x)
+            moysuT(t,1,jj) = real(suTW(jj))
+            moysuT(t,2,jj) = real(suT25(jj))
+            moysuT(t,3,jj) = real(suT975(jj))
+            if(moysuT(t,1,jj).lt.0.d0)then
+                moysuT(t,1,jj) = 0.d0
+            endif
+            if(moysuT(t,1,jj).gt.1.d0)then
+                moysuT(t,1,jj) = 1.d0
+            endif
+
+            if(moysuT(t,2,jj).lt.0.d0)then
+                moysuT(t,2,jj) = 0.d0
+            endif
+            if(moysuT(t,2,jj).gt.1.d0)then
+                moysuT(t,2,jj) = 1.d0
+            endif
+            if(moysuT(t,3,jj).lt.0.d0)then
+                moysuT(t,3,jj) = 0.d0
+            endif
+            if(moysuT(t,3,jj).gt.1.d0)then
+                moysuT(t,3,jj) = 1.d0
+           endif
+        end do
+    end do
+    end subroutine distanceSloglogistic
+	
+	
+    subroutine distanceSlognormal(b,m,mt,xT,moyLamT,xSuT,moysuT)
+
+    use tailles
+    !use comon,only: c,nsujet,t0,t1,nva1,nva2,typeof2,date,nva,betaD,betaR,etaD,etaR
+    use comon,only:cens,vvv,nst,mint,betaT,etaT ! en plus
+    use optim
+
+    implicit none
+
+    integer,intent(in)::m,mt
+    integer::i,j,ier,t,k,ns,ii,jj! en plus
+    double precision,dimension(nst)::lamTW, lamT25,lamT975,suTW,suT25,suT975!en plus
+    double precision,dimension(m*(m+1)/2)::vv
+    double precision,dimension(m)::b,bgen
+    double precision,dimension(1000,m)::u
+    double precision::sx,som,x,zz,zy 
+    double precision,dimension(1000,nst):: lamT,suT,glT ! en plus
+! theorique - estimés après Max de Vrais
+    double precision,dimension(nst)::glTW
+    double precision,dimension(mt,nst)::xT !en plus
+    double precision,dimension(mt,3,nst)::moyLamT ! en plus
+    double precision,dimension(100,3,nst)::moysuT !en plus
+    double precision,dimension(100,nst)::xSuT! en plus
+    double precision::ep
+    double precision, external::PHI,alnorm
+
+    glTW=0.d0
+    ier=0
+    t=0
+    k=0
+    ns=0
+    sx=1.d0 ! ecart-type ou variance des réalisations gaussiennes générées
+!    ns=m-nva-1 !non marche pas pour le COX : VR 20 fev 2015
+!    write(*,*)'=====ns dans distance',ns
+    ns=2
+    
+    do i=1,ns*(ns+1)/2
+        vv(i)=vvv(i)
+    end do
+    
+    ep=10.d-10
+    call dmfsdj(vv,m,ep,ier)
+
+    do k=1,1000!0
+        do j=1,ns
+            call bgos(SX,0,zz,zy,0.d0)
+            u(k,j)=zz
+        end do
+    end do
+     
+!     Pour chaque temps de 0 à la censure du décès par pas cens/100
+
+ !     commencer à 0 dans la boucle
+  
+!    x= mint
+    x= mint + 0.000001 !new 20 fev 2015
+!       shape et scale
+    
+    ii=1
+    do jj=1,nst!rempli tableaux etaT et betaT
+        betaT(jj)=b(ii)**2
+        etaT(jj)=b(ii+1)**2
+        ii=ii+2
+    end do
+    
+    do t=1,mt
+        lamT=0.d0 ! en plus
+!         n=n+1 ! compteur sur nième temps
+        if(t.ne.1) then
+            x=x+(cens-mint)/(mt-1)         
+        end if
+! On simule 1000 réalisations gaussienne par paramètre
+        do k=1,1000
+!     Pour chaque paramètre estimé
+            do i=1,ns
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                   som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                bgen(i)=(b(i)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+
+
+!            Moybgen(k)=Moybgen(k)+bgen(i)/1000
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR
+!     fct de survie           : su  = dexp(-gl)
+
+            ii=1 !en plus
+            do jj=1,nst
+                lamT(k,jj) = (bgen(ii)/x) * &
+                PHI(     -bgen(ii)*dlog(x) + bgen(ii)*dlog(bgen(ii+1))           ) / &
+                alnorm(  -bgen(ii)*dlog(x) + bgen(ii)*dlog(bgen(ii+1)),  .false. )
+                lamTW(jj)  = ((b(ii)**2)/x) * &
+                PHI(     -(b(ii)**2)*dlog(x) + (b(ii)**2)*dlog(b(ii+1)**2)           ) / &
+                alnorm(  -(b(ii)**2)*dlog(x) + (b(ii)**2)*dlog(b(ii+1)**2),  .false. )
+                !lamT(k,jj)=(bgen(ii)*(x**(bgen(ii)-1.d0)))/(bgen(ii+1)**bgen(ii))
+                !lamTW(jj)=((b(ii)**2)*(x**((b(ii)**2)-1.d0)))/((b(ii+1)**2)**(b(ii)**2))
+                ii=ii+2
+            end do          
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+
+        do jj=1,nst!en plus
+            call percentile(lamT(:,jj),lamT25(jj),lamT975(jj)) !de 1a1000  1001a2000
+        end do
+
+!----- strate 1
+        if(t == 1) then
+            xT(t,1)= mint
+        else
+            xT(t,1)=real(x) !en plus
+        end if
+
+        do jj=1,nst!en plus
+            xT(t,jj) = xT(t,1)!real(x)
+            moyLamT(t,1,jj) = real(lamTW(jj))
+            moyLamT(t,2,jj) = real(lamT25(jj))
+            moyLamT(t,3,jj) = real(lamT975(jj))
+        end do
+                
+    end do    
+        
+    x=mint
+
+    do t=1,100
+        glT= 0.d0! en plus
+        suT= 0.d0
+!         n=n+1 ! compteur sur nième temps
+        if(t.ne.1) then
+            x=x+(cens-mint)/99 !100
+        end if
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Pour chaque paramètre estimé
+            do i=1,ns
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                    som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+                bgen(i)=(b(i)+som)**2
+            end do              ! en sortie on récupère le nouveau vecteur b
+
+
+
+!            Moybgen(k)=Moybgen(k)+bgen(i)/1000
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR
+!     fct de survie           : su  = dexp(-gl)
+
+            ii=1 !en plus
+            do jj=1,nst
+                glT(k,jj)  =  -dlog(alnorm( -bgen(ii)*dlog(x) + bgen(ii)*dlog(bgen(ii+1)),  .false. ))
+                !glT(k,jj) =  (x/bgen(ii+1))**bgen(ii)
+                suT(k,jj)  =  dexp(-glT(k,jj))
+                glTW(jj)   =  -dlog(alnorm( -(b(ii)**2)*dlog(x) + (b(ii)**2)*dlog(b(ii+1)**2),  .false. ))
+                !glTW(jj)  =  (x/(b(ii+1)**2))**(b(ii)**2)
+                suTW (jj)  =  dexp(-glTW(jj))
+                ii=ii+2
+            end do
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+
+        do jj=1,nst!en plus
+            call percentile(suT(:,jj),suT25(jj),suT975(jj)) !de 1à1000 | 1001à2000
+        end do
+
+        if(t==1) then
+            !xSu1(t) = mint !date(1)
+            xSuT(t,1)= mint        
+        else
+            !xSu1(t) = real(x)
+            xSuT(t,1)=real(x)
+        end if
+
+        do jj=1,nst!en plus
+            xSuT(t,jj) = xSuT(t,1)!real(x)
+            moysuT(t,1,jj) = real(suTW(jj))
+            moysuT(t,2,jj) = real(suT25(jj))
+            moysuT(t,3,jj) = real(suT975(jj))
+            if(moysuT(t,1,jj).lt.0.d0)then
+                moysuT(t,1,jj) = 0.d0
+            endif
+            if(moysuT(t,1,jj).gt.1.d0)then
+                moysuT(t,1,jj) = 1.d0
+            endif
+
+            if(moysuT(t,2,jj).lt.0.d0)then
+                moysuT(t,2,jj) = 0.d0
+            endif
+            if(moysuT(t,2,jj).gt.1.d0)then
+                moysuT(t,2,jj) = 1.d0
+            endif
+            if(moysuT(t,3,jj).lt.0.d0)then
+                moysuT(t,3,jj) = 0.d0
+            endif
+            if(moysuT(t,3,jj).gt.1.d0)then
+                moysuT(t,3,jj) = 1.d0
+           endif
+        end do
+    end do
+    end subroutine distanceSlognormal
+	
+	
+	
 !=========================================================================================================
 !=========================================================================================================
 !=========================================================================================================
@@ -1394,6 +1813,7 @@
     double precision ,dimension(npmax,npmax,nstRec)::hes1T
     double precision ,dimension(-2:npmax)::the2
     double precision ,dimension(-2:npmax,nstRec)::the1T
+    double precision ,dimension(-2:npmax)::the_temp
     double precision,dimension(mt1,nstRec)::x1Out
     double precision,dimension(mt2)::x2Out
     double precision,dimension(mt1,3,nstRec)::lamOut,suOut
@@ -1444,63 +1864,7 @@
     endif
 
     h = (zi(n)-zi(1))*0.01d0
-!     x1 = zi(1)
-!     x2 = zi(1)     
-  
-! Recurrent          
-!     do i=1,mt1
-!         if(i .ne.1)then
-!             x1 = x1 + h 
-!         end if
-!         call cospJ(x1,the1,nz1+2,hes1,zi,binf,su,bsup,lbinf,lam,lbsup)
-!                 
-!         if(bsup.lt.0.d0)then
-!             bsup = 0.d0
-!         endif
-!         if(binf.gt.1.d0)then
-!             binf = 1.d0 
-!         endif
-!         if(lbinf.lt.0.d0)then
-!             lbinf = 0.d0
-!         endif 
-! !!!   Replaced by next sentences and add new ones JRG January 05
-! 
-!         x1Out(i)=x1
-!         lamOut(i,1)=lam
-!         lamOut(i,2)=lbinf
-!         lamOut(i,3)=lbsup 
-!         suOut(i,1)=su
-!         suOut(i,2)=bsup
-!         suOut(i,3)=binf
-!     end do   
-! 
-! ! Death  
-!     if(nst.eq.2)then        
-!         do i=1,mt2
-! !!!   Replaced by next sentences and add new ones JRG January 05    
-!             if(i.ne.1)then
-!                 x2 = x2 + h 
-!             endif    
-!             call cospJ(x2,the2,nz2+2,hes2,zi,binf,su,bsup,lbinf,lam,lbsup)
-!             if(bsup.lt.0.d0)then
-!                 bsup = 0.d0
-!             endif
-!             if(binf.gt.1.d0)then
-!                 binf = 1.d0 
-!             endif
-!             if(lbinf.lt.0.d0)then
-!                 lbinf = 0.d0
-!             endif 
-! 
-!             x2Out(i)=x2
-!             lam2Out(i,1)=lam
-!             lam2Out(i,2)=lbinf
-!             lam2Out(i,3)=lbsup 
-!             su2Out(i,1)=su
-!             su2Out(i,2)=binf
-!             su2Out(i,3)=bsup 
-!         end do  
-!     endif
+
 
     do jj=1,nstRec
         x1 = zi(1)
@@ -1508,8 +1872,10 @@
             if(i .ne.1)then
                 x1 = x1 + h 
             end if
-            call cospJ(x1,the1T(:,jj),nz1+2,hes1T(:,:,jj),zi,binf,su,bsup,lbinf,lam,lbsup) ! a.laf
-
+            
+            !call cospJ(x1,the1T(:,jj),nz1+2,hes1T(:,:,jj),zi,binf,su,bsup,lbinf,lam,lbsup) ! a.laf
+            the_temp = the1T(:,jj) 
+            call cospJ(x1,the_temp,nz1+2,hes1T(:,:,jj),zi,binf,su,bsup,lbinf,lam,lbsup) ! a.laf
             if(bsup.lt.0.d0)then
                 bsup = 0.d0
             endif
@@ -1522,7 +1888,7 @@
             if(lbinf.lt.0.d0)then
                 lbinf = 0.d0
             endif 
-!!!   Replaced by next sentences and add new ones JRG January 05
+        !!!   Replaced by next sentences and add new ones JRG January 05
 
             x1Out(i,jj)=x1
             lamOut(i,1,jj)=lam
@@ -1533,16 +1899,17 @@
             suOut(i,3,jj)=binf
         end do
     end do
-! Death
+    ! Death
     x2 = zi(1) 
     if(nst.eq.2)then
         do i=1,mt2
-!!!   Replaced by next sentences and add new ones JRG January 05
+            !!!   Replaced by next sentences and add new ones JRG January 05
             if(i.ne.1)then
                 x2 = x2 + h 
-            endif
-            call cospJ(x2,the2,nz2+2,hes2,zi,binf,su,bsup,lbinf,lam,lbsup)
-
+            endif 
+            !call cospJ(x2,the2,nz2+2,hes2,zi,binf,su,bsup,lbinf,lam,lbsup)
+            the_temp=the2 
+            call cospJ(x2,the_temp,nz2+2,hes2,zi,binf,su,bsup,lbinf,lam,lbsup)
             if(bsup.lt.0.d0)then
                 bsup = 0.d0
             endif
@@ -2263,6 +2630,314 @@
         moysuDC = 0.d0
     end if
     end subroutine distanceJweib
+
+
+
+subroutine distanceJgenparam(b,m,mt1,x1R,moyLamR,xSu1,moysuR,x2DC,moyLamDC,xSu2,moysuDC)
+
+    use tailles
+    !use comon,only:c,nsujet,t0,t1,cdc,t0dc,t1dc,nva1,nva2,betaR,etaR,datedc
+    use comon,only:cens,vvv,nva,nst,etaD,&
+    betaD,date,mint,betaT,etaT,nstRec, famillerisque
+    use optim
+
+    implicit none
+
+    integer::m,i,j,ier,t,k,ns,mt1,jj,ii
+    double precision::lamDC25,suDC25,lamDC975,suDC975,LamDCW,suDCW
+    double precision,dimension(nstRec):: lamR25, suR25,lamR975,suR975,LamRW,suRW
+    double precision,dimension(m*(m+1)/2)::vv
+    double precision,dimension(m)::b,bgen
+    double precision,dimension(1000,m)::u
+    double precision::sx,som,x,zz,zy
+    double precision,dimension(1000)::lamDC,suDC,glDC
+    double precision,dimension(1000,nstRec)::lamR,suR,glR
+
+! theorique - estimés après Max de Vrais
+    double precision::glDCW
+    double precision,dimension(nstRec)::glRW
+
+    double precision,dimension(mt1)::x2DC
+    double precision,dimension(mt1,nstRec)::x1R
+    double precision,dimension(mt1,3)::moyLamDC
+    double precision,dimension(mt1,3,nstRec)::moyLamR
+    double precision,dimension(mt1,3)::moysuDC
+    double precision,dimension(mt1,3,nstRec)::moysuR
+    double precision,dimension(mt1)::xSu2
+    double precision,dimension(mt1,nstRec)::xSu1
+    double precision::ep
+    integer::famillerisquedc,famillerisquerec
+    double precision, external::PHI,alnorm
+    famillerisquedc  = famillerisque(1)
+    famillerisquerec = famillerisque(2)
+
+
+    lamR25=0.d0
+    lamDC25=0.d0
+    suR25=0.d0
+    suDC25=0.d0
+    lamR975=0.d0
+    lamDC975=0.d0
+    suR975=0.d0
+    suDC975=0.d0
+    LamRW=0.d0
+    LamDCW=0.d0
+    suRW=0.d0
+    suDCW=0.d0
+    sx=1.d0 ! ecart-type ou variance des réalisations gaussiennes générées
+    ns=m-nva-2
+   
+    do i=1,ns*(ns+1)/2
+        vv(i)=vvv(i)
+    end do
+
+    ep=10.d-10
+    call dmfsdj(vv,m,ep,ier)
+
+    do k=1,1000
+        do j=1,ns
+            call bgos(SX,0,zz,zy,0.d0)
+            u(k,j)=zz
+        end do
+    end do
+
+    ii=1
+    do jj=1,nstRec !en plus strates A.Lafourcade 07/2014 
+        betaT(jj)=b(ii)**2
+        etaT(jj)=b(ii+1)**2
+        ii=ii+2
+    end do
+
+!     betaR = b(1)**2
+!     etaR =  b(2)**2
+
+    if (nst == 2) then
+!         betaD = b(3)**2
+!         etaD = b(4)**2
+        betaD = b(nstRec*2+1)**2
+        etaD = b(nstRec*2+2)**2
+    else
+        etaD = 0.d0
+        betaD = 0.d0
+    end if
+
+
+!============================ Surv strat 1
+!------------------- Pour les recurents
+!     Pour chaque temps de 0 à la censure du décès par pas cens/100
+!    x=-cens/100 !permet de commencer à 0 dans la boucle
+
+!    x=date(1)
+    x=mint + 0.000001  !new vr 20 fev 2015
+    do t=1,mt1
+
+        glR=0.d0
+        suR=0.d0
+!         n=n+1 ! compteur sur nième temps
+        if (t.ne.1) then
+!            x=x+cens/100 
+            x=x+(cens-mint)/(mt1-1)!new 20 fev 2015
+        end if
+
+! On simule 1000 réalisations gaussienne par paramètres
+        do k=1,1000
+!     Rappel des notations:
+!     Ce sont les paramètres des fcts de type weibull
+!     betaR= b(1)**2
+!     etaR= b(2)**2
+!     betaD= b(3)**2
+!     etaD= b(4)**2
+!     fct de risque ou hazard : lam=(betaR*(x**(betaR-1.d0)))/(etaR**betaR)
+!     fct de risque cumulée   : gl  =  (x/etaR)**betaR
+!     fct de survie           : su  = dexp(-gl)
+            do i=1,ns
+                som=0.d0
+                do j=1,i         ! cela correspond au produit trp(L)%*%U
+                som=som+vv(i*(i-1)/2+j)*u(k,j)
+                end do
+
+                bgen(i)=(b(i)+som)**2
+            end do
+            ii=1
+            do jj=1,nstRec!en plus strates A.Lafourcade 07/2014 
+                if (famillerisquerec .eq. 0) then
+                    lamR(k,jj)=(bgen(ii)*(x**(bgen(ii)-1.d0)))/(bgen(ii+1)**bgen(ii))
+                    lamRW(jj)=((b(ii)**2)*(x**((b(ii)**2)-1.d0)))/((b(ii+1)**2)**(b(ii)**2))
+                else if (famillerisquerec .eq. 1) then
+                    lamR(k,jj) = ( (bgen(ii)/bgen(ii+1))*(x/bgen(ii+1))**(bgen(ii)-1.d0) ) / &
+                    ( 1.d0 + (x/bgen(ii+1))**(bgen(ii)) )
+                    lamRW(jj)  = ( ((b(ii)**2)/(b(ii+1)**2)) * (x/(b(ii+1)**2))**((b(ii)**2)-1.d0) ) / &
+                    ( 1.d0 + (x/(b(ii+1)**2))**(b(ii)**2) )
+                else if (famillerisquerec .eq. 2) then
+                    lamR(k,jj) = (bgen(ii)/x) * &
+                    PHI(     -bgen(ii)*dlog(x) + bgen(ii)*dlog(bgen(ii+1))           ) / &
+                    alnorm(  -bgen(ii)*dlog(x) + bgen(ii)*dlog(bgen(ii+1)),  .false. )
+                    lamRW(jj)  = ((b(ii)**2)/x) * &
+                    PHI(     -(b(ii)**2)*dlog(x) + (b(ii)**2)*dlog(b(ii+1)**2)           ) / &
+                    alnorm(  -(b(ii)**2)*dlog(x) + (b(ii)**2)*dlog(b(ii+1)**2),  .false. )
+                else if ((famillerisquerec .eq. 3) .or. (famillerisquerec .eq. 4)) then
+                    lamR(k,jj)=(bgen(ii)*(x**(bgen(ii)-1.d0)))/(bgen(ii+1)**bgen(ii))
+                    lamRW(jj)=((b(ii)**2)*(x**((b(ii)**2)-1.d0)))/((b(ii+1)**2)**(b(ii)**2))
+                end if
+                ii=ii+2
+            end do
+!             lamR(k)=(bgen(1)*(x**(bgen(1)-1.d0)))/(bgen(2)**bgen(1))
+!             lamRW=((b(1)**2)*(x**((b(1)**2)-1.d0)))/((b(2)**2)**(b(1)**2))
+
+            if(nst == 2) then!en plus strates A.Lafourcade 07/2014 
+                if (famillerisquedc .eq. 0) then
+                    lamDC(k)=(bgen(nstRec*2+1)*(x**(bgen(nstRec*2+1)-1.d0)))/(bgen(nstRec*2+2)**bgen(nstRec*2+1))
+                    lamDCW=((b(nstRec*2+1)**2)*(x**((b(nstRec*2+1)**2)-1.d0)))/((b(nstRec*2+2)**2)**(b(nstRec*2+1)**2))
+                else if (famillerisquedc .eq. 1) then
+                    lamDC(k) = ( (bgen(nstRec*2+1)/bgen(nstRec*2+1+1))*(x/bgen(nstRec*2+1+1))**(bgen(nstRec*2+1)-1.d0) ) / &
+                    ( 1.d0 + (x/bgen(nstRec*2+1+1))**(bgen(nstRec*2+1)) )
+                    lamDCW   = ( ((b(nstRec*2+1)**2)/(b(nstRec*2+1+1)**2)) * &
+                    (x/(b(nstRec*2+1+1)**2))**((b(nstRec*2+1)**2)-1.d0) ) / &
+                    ( 1.d0 + (x/(b(nstRec*2+1+1)**2))**(b(nstRec*2+1)**2) )
+                    else if (famillerisquedc .eq. 2) then
+                    lamDC(k) = (bgen(nstRec*2+1)/x) * &
+                    PHI(     -bgen(nstRec*2+1)*dlog(x) + bgen(nstRec*2+1)*dlog(bgen(nstRec*2+1+1))           ) / &
+                    alnorm(  -bgen(nstRec*2+1)*dlog(x) + bgen(nstRec*2+1)*dlog(bgen(nstRec*2+1+1)),  .false. )
+                    lamDCW  =  ((b(nstRec*2+1)**2)/x) * &
+                    PHI(     -(b(nstRec*2+1)**2)*dlog(x) + (b(nstRec*2+1)**2)*dlog(b(nstRec*2+1+1)**2)           ) / &
+                    alnorm(  -(b(nstRec*2+1)**2)*dlog(x) + (b(nstRec*2+1)**2)*dlog(b(nstRec*2+1+1)**2),  .false. )
+                else if ((famillerisquedc .eq. 3) .or. (famillerisquedc .eq. 4)) then
+                    lamDC(k)=(bgen(nstRec*2+1)*(x**(bgen(nstRec*2+1)-1.d0)))/(bgen(nstRec*2+2)**bgen(nstRec*2+1))
+                    lamDCW=((b(nstRec*2+1)**2)*(x**((b(nstRec*2+1)**2)-1.d0)))/((b(nstRec*2+2)**2)**(b(nstRec*2+1)**2))
+                end if
+            end if
+
+!             if(nst == 2) then
+!                 lamDC(k)=(bgen(3)*(x**(bgen(3)-1.d0)))/(bgen(4)**bgen(3))
+!                 lamDCW=((b(3)**2)*(x**((b(3)**2)-1.d0)))/((b(4)**2)**(b(3)**2))
+!             end if
+
+            ii=1
+            do jj=1,nstRec!en plus strates A.Lafourcade 07/2014 
+                if (famillerisquerec .eq. 0) then
+                    glR(k,jj)  =  (x/bgen(ii+1))**bgen(ii)
+                    suR(k,jj)  =  dexp(-glR(k,jj))
+                    glRW(jj)   =  (x/(b(ii+1)**2))**(b(ii)**2)
+                    suRW(jj)   =  dexp(-glRW(jj))
+                else if (famillerisquerec .eq. 1) then
+                    glR(k,jj)  =  dlog( 1.d0 + (x/bgen(ii+1))**(bgen(ii)) )
+                    suR(k,jj)  =  dexp(-glR(k,jj))
+                    glRW(jj)   =  dlog( 1.d0 + (x/(b(ii+1)**2))**(b(ii)**2) )
+                    suRW(jj)   =  dexp(-glRW(jj))
+                else if (famillerisquerec .eq. 2) then
+                    glR(k,jj)  =  -dlog(alnorm( -bgen(ii)*dlog(x) + bgen(ii)*dlog(bgen(ii+1)),  .false. ))
+                    suR(k,jj)  =  dexp(-glR(k,jj))
+                    glRW(jj)   =  -dlog(alnorm( -(b(ii)**2)*dlog(x) + (b(ii)**2)*dlog(b(ii+1)**2),  .false. ))
+                    suRW(jj)   =  dexp(-glRW(jj))
+                else if ((famillerisquerec .eq. 3) .or. (famillerisquerec .eq. 4)) then
+                    glR(k,jj)  =  (x/bgen(ii+1))**bgen(ii)
+                    suR(k,jj)  =  dexp(-glR(k,jj))
+                    glRW(jj)   =  (x/(b(ii+1)**2))**(b(ii)**2)
+                    suRW(jj)   =  dexp(-glRW(jj))
+                end if
+                ii=ii+2
+            end do
+
+!             glR(k)  =  (x/bgen(2))**bgen(1)
+!             suR(k)  = dexp(-glR(k))
+!             glRW  =  (x/(b(2)**2))**(b(1)**2)
+!             suRW  = dexp(-glRW)
+
+            if(nst == 2) then!en plus strates A.Lafourcade 07/2014 
+                if (famillerisquedc .eq. 0) then
+                    glDC(k)  =  (x/bgen(nstRec*2+2))**bgen(nstRec*2+1)
+                    suDC(k)  =  dexp(-glDC(k))
+                    glDCW    =  (x/(b(nstRec*2+2)**2))**(b(nstRec*2+1)**2)
+                    suDCW    =  dexp(-glDCW)
+                else if (famillerisquedc .eq. 1) then
+                    glDC(k)  =  dlog( 1.d0 + (x/bgen(nstRec*2+1+1))**(bgen(nstRec*2+1)) )
+                    suDC(k)  =  dexp(-glDC(k))
+                    glDCW    =  dlog( 1.d0 + (x/(b(nstRec*2+1+1)**2))**(b(nstRec*2+1)**2) )
+                    suDCW    =  dexp(-glDCW)
+                else if (famillerisquedc .eq. 2) then
+                    glDC(k)  =  -dlog(alnorm( -bgen(nstRec*2+1)*dlog(x) + bgen(nstRec*2+1)*dlog(bgen(nstRec*2+1+1)),  .false. ))
+                    suDC(k)  =  dexp(-glDC(k))
+                    glDCW    =  -dlog(alnorm( -(b(nstRec*2+1)**2)*dlog(x) + (b(nstRec*2+1)**2)*dlog(b(nstRec*2+1+1)**2),  .false. ))
+                    suDCW    =  dexp(-glDCW)
+                else if ((famillerisquedc .eq. 3) .or. (famillerisquedc .eq. 4)) then
+                    glDC(k)  =  (x/bgen(nstRec*2+2))**bgen(nstRec*2+1)
+                    suDC(k)  =  dexp(-glDC(k))
+                    glDCW    =  (x/(b(nstRec*2+2)**2))**(b(nstRec*2+1)**2)
+                    suDCW    =  dexp(-glDCW)
+                end if
+            end if
+
+!             if(nst == 2) then
+!                 glDC(k)  =  (x/bgen(4))**bgen(3)
+!                 suDC(k)  = dexp(-glDC(k))
+!                 glDCW  =  (x/(b(4)**2))**(b(3)**2)
+!                 suDCW  = dexp(-glDCW)
+!             end if
+        end do
+
+! Classer les différent vecteur et en sortir les 2.5 et 97.5 percentiles
+        do jj=1,nstRec !en plus strates A.Lafourcade 07/2014
+            call percentile(lamR(:,jj),lamR25(jj),lamR975(jj))
+        end do
+
+        if(nst == 2) then
+            call percentile(lamDC,lamDC25,lamDC975)
+        end if
+
+        do jj=1,nstRec !en plus strates A.Lafourcade 07/2014 
+            call percentile(suR(:,jj),suR25(jj),suR975(jj))
+        end do
+
+        if(nst == 2) then
+            call percentile(suDC,suDC25,suDC975)
+        end if
+
+        if(t == 1) then
+            x1R(t,1) = date(1)
+        else
+            x1R(t,1) = real(x)
+        end if
+
+        do jj=1,nstRec
+            x1R(t,jj)=x1R(t,1) !en plus strates A.Lafourcade 07/2014 
+            moyLamR(t,1,jj) = real(LamRW(jj))
+            moyLamR(t,2,jj) = real(lamR25(jj))
+            moyLamR(t,3,jj) = real(lamR975(jj))
+        end do
+
+        if(nst == 2) then
+            x2DC(t) = x1R(t,1)
+            moyLamDC(t,1) = real(lamDCW)
+            moyLamDC(t,2) = real(lamDC25)
+            moyLamDC(t,3) = real(lamDC975)
+        end if
+
+        if(t == 1) then
+            xSu1(t,1) = date(1)
+        else
+            xSu1(t,1) = real(x)
+        end if
+
+        do jj=1,nstRec !en plus strates A.Lafourcade 07/2014 
+            xSu1(t,jj)=xSu1(t,1)
+            moysuR(t,1,jj) = real(suRW(jj))
+            moysuR(t,2,jj) = real(suR25(jj))
+            moysuR(t,3,jj) = real(suR975(jj))
+        end do
+
+        if(nst == 2) then
+            xSu2(t) = xSu1(t,1)
+            moysuDC(t,1) = real(suDCW)
+            moysuDC(t,2) = real(suDC25)
+            moysuDC(t,3) = real(suDC975)
+        end if
+
+    end do
+    if (nst == 1) then
+        moyLamDC = 0.d0
+        moysuDC = 0.d0
+    end if
+    end subroutine distanceJgenparam
 
 
 

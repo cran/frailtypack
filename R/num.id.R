@@ -15,12 +15,13 @@
 #' the dependence between clustered times to tumour progression and deaths: A
 #' meta-analysis of chemotherapy in head and neck cancer. \emph{Statistical
 #' methods in medical research} \bold{897}, 1-19.
+#' @return No return value
 #' @keywords misc
 #' @export
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' data(readmission)
 #' #-- here is generated cluster (5 clusters)

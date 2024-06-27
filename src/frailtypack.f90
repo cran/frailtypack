@@ -2488,6 +2488,30 @@
 
     end subroutine multis
 
+    subroutine multis2(A,B,IrowA,JcolA,JcolB,C,nn)
+
+        !use tailles,only:npmax
+    
+        implicit none
+    
+        integer::nn,IrowA,JcolA,JcolB,i,j,k
+        double precision::sum
+        double precision,dimension(nn,nn) ::A,B,C
+    
+        do I=1,IrowA
+            do J=1,JcolB
+                sum=0
+                do K=1,JcolA
+                    sum=sum+A(I,K)*B(K,J)
+                end do
+                C(I,J)=sum
+            end do
+        end do
+    
+        return
+    
+        end subroutine multis2
+
 !======================  LUBKSB  ======================================
     subroutine lubksbs(a,n,indx,b)
 
@@ -2616,7 +2640,7 @@
     use tailles
     use donnees
     !use comon,only:auxig
-    use comon,only:typeof
+    !use comon,only:typeof
 
     Implicit none
 

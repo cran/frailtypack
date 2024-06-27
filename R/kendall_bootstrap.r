@@ -15,7 +15,7 @@ kendall_bootstrap=function(fichierTau, nsim=500,nboot=1000){
       result[i,1]=mean(d)
       result[i,2:3]=quantile(d,probs=c(0.025,0.975)) 
     }
-    utils::write.table(result,fichierTau,sep=" ",row.names = F,col.names = F)
+    #utils::write.table(result,fichierTau,sep=" ",row.names = F,col.names = F)
     return(result)
   }
   else return(a)

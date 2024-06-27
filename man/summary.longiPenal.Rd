@@ -4,7 +4,7 @@
 \alias{summary.longiPenal}
 \alias{print.summary.longiPenal}
 \title{Short summary of fixed covariates estimates of a joint model for
-longitudinal data and a terminal event}
+longitudinal data and a terminal event.}
 \usage{
 \method{summary}{longiPenal}(object, level = 0.95, len = 6, d = 2,
 lab=c("coef","hr"), ...)
@@ -33,7 +33,9 @@ each covariate. Confidence level is allowed (level argument).
 \description{
 This function returns coefficients estimates and their standard error with
 p-values of the Wald test for the longitudinal outcome and hazard ratios
-(HR) and their confidence intervals for the terminal event.
+(HR) and their confidence intervals for the terminal event.  If a mediation analysis 
+was performed (option \code{mediation} set to \code{TRUE} in \code{\link{longiPenal}}) 
+this function displays estimations of the related quantities.
 }
 \examples{
 

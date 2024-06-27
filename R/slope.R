@@ -19,7 +19,7 @@
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' data(dataAdditive)
 #' 

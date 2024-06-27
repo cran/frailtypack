@@ -190,7 +190,9 @@
 
 
 !!!!!   INITIALISATION DES B A PARTIR DES SHARED 
-
+    np1 = 0 
+    np2 = 0
+    np3 = 0
     select case(typeof)
         case(0)
             np1 = nz0(1) + 2 + nva10 + 1 

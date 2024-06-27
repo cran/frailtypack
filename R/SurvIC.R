@@ -21,11 +21,12 @@
 #' right-censored data, lower and upper time must be equal (for numerical
 #' reason).
 #' @param event Status indicator 0=right-censored, 1=interval-censored
+#' @return No return value
 #' @export
 #' @examples
 #' 
 #' 
-#' \dontrun{
+#' \donttest{
 #' 
 #' data(bcos)
 #' bcos$event <- ifelse(bcos$left!=bcos$right,1,0)
@@ -91,7 +92,6 @@ if (ng==1){
 	attr(ss,"type") <- "intervaltronc"
 }
 
-if (is.R()) { class(ss) <- "SurvIC" }
-else { oldClass(ss) <- "SurvIC" }
+class(ss) <- "SurvIC"
 return(ss)
 }

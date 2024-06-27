@@ -45,7 +45,7 @@ summary(joint.surro.ovar, int.method.kt = 1)
 
 # ==============================Figures=================================
 
-pdf(file="fig_jointSurroPenal.pdf")
+#pdf(file="fig_jointSurroPenal.pdf")
 plot(joint.surro.sim, type.plot = "Su", main = "Generated data", conf.bands=TRUE, 
      pos.legend="topright", cex.legend=0.7, main, color=2, endpoint = 2)
 plot(joint.surro.sim, type.plot = "Haz", main = "Generated data", conf.bands=TRUE, 

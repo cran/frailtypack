@@ -119,8 +119,8 @@
 #' 
 Diffepoce <- function(epoce1, epoce2){
 
-	if (class(epoce1)!="epoce") stop("Diffepoce allows only arguments of classe 'epoce'")
-	if (class(epoce2)!="epoce") stop("Diffepoce allows only arguments of classe 'epoce'")
+	if (!inherits(epoce1, "epoce")) stop("Diffepoce allows only arguments of classe 'epoce'")
+	if (!inherits(epoce2, "epoce")) stop("Diffepoce allows only arguments of classe 'epoce'")  
 	if (!(all.equal(epoce1$pred.times,epoce2$pred.times))) stop("The two epoce objects should have the same prediction times")
 	if (!(all.equal(epoce1$data,epoce2$data))) stop("The two epoce objects should be derived from the same dataset")
 

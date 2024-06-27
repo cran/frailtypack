@@ -611,11 +611,13 @@
     
     ! *** NOUVELLLE DECLARATION F90 :
     
-        integer,intent(in)::id,jd,np
+        integer,intent(in)::id,jd,np 
+        integer::id2,jd2
         double precision,dimension(np),intent(in)::b
         double precision,dimension(2),intent(in)::k0
         double precision,intent(in)::thi,thj
-    
+        double precision::thi2,thj2 
+        double precision,dimension(2)::k02
         ! for the numerical integral hrmsym
         integer :: jj,ier
         !double precision:: epsabs,epsrel
@@ -648,10 +650,15 @@
        double precision,dimension(nea*(nea+1)/2)::matv
        !double precision,dimension(nsujety,1)::vey_bh
         
-
-            npp = np
+        if(.false.) then
+            id2=id
+            jd2=jd 
+            thi2=thi
+            thj2=thj 
+            k02=k0
+        end if 
+        npp = np
         eps_s = 1.d-7
-    !    print*,'debut funcpa'
         choix=0
         ig=0
         k=0
@@ -944,7 +951,7 @@
             end do
 
     !Ad:
-        123     continue
+        !123     continue
     
         return
     

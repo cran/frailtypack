@@ -396,9 +396,14 @@
     double precision::betaR,etaR,betaD,etaD
     double precision::vet,vet2,alpha,theta
     double precision,dimension(2)::su,sut1,sut0,sudc
-    double precision::lam,lamdc,temp
+    double precision::lam,lamdc,temp, tempscl
     double precision::logGammaJ
 
+    
+    su = 0.d0 
+    sut1 = 0.0d0 
+    sut0 = 0.d0 
+    sudc = 0.d0 
     n = 0
     betaR = 0.d0
     etaR = 0.d0
@@ -476,7 +481,8 @@
             if (c(k).eq.1) then
                 select case(typeof)
                     case(0)
-                        call susps(t1(k),the1,nz1,su,lam,zi)
+                        call susps(t1(k),the1,nz1,tempscl,lam,zi)
+                        su = tempscl
                         if (t1(k).eq.date(ndate)) then
                             lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                         endif
@@ -544,7 +550,8 @@
     if (cdc(i).eq.1) then
         select case(typeof)
             case(0)
-                call susps(t1dc(i),the2,nz2,sudc,lamdc,zi)
+                call susps(t1dc(i),the2,nz2,tempscl,lamdc,zi)
+                sudc = tempscl
                 if (t1dc(i).eq.datedc(ndatedc)) then
                     lamdc = 4.d0*the2(n-2-1)/(zi(n-2)-zi(n-2-1))
                 endif
@@ -600,7 +607,7 @@
     double precision::betaR,etaR,betaD,etaD
     double precision::vet,vet2,alpha,theta
     double precision,dimension(2)::su,sut1,sut0,sudc
-    double precision::lam,lamdc,temp
+    double precision::lam,lamdc,temp, tempscl
     double precision::logGammaJ
 
     n = 0
@@ -608,7 +615,10 @@
     etaR = 0.d0
     betaD = 0.d0
     etaD = 0.d0
-
+    sudc = 0.d0 
+    su = 0.0d0 
+    sut1 = 0.0d0 
+    sut0 = 0.0d0 
     theta = bh(np-nva-1)*bh(np-nva-1)
     alpha = bh(np-nva)
 
@@ -676,7 +686,8 @@
             if (c(k).eq.1) then
                 select case(typeof)
                     case(0)
-                        call susps(t1(k),the1,nz1,su,lam,zi)
+                        call susps(t1(k),the1,nz1,tempscl,lam,zi)
+                            su = tempscl
                         if (t1(k).eq.date(ndate)) then
                             lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                         endif

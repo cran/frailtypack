@@ -57,8 +57,8 @@
         integer::groupey,j,ii,iii,   &
         i, &
         ier,istop
-        double precision::res,max, &
-        rl_temp !! rajout
+        double precision::res, &
+        rl_temp!,max !! rajout
     !AD: add for new marq
         double precision::ca,cb,dd
         double precision,external::funcpalongi_uni
@@ -81,7 +81,9 @@
  
 
     allocate(nodes(nnodes_all0,nb0),weights(nnodes_all0,nb0))!,b_lme_nnodes(GH(2)**(nb0+effet0),ng0,nb0))
-        
+    cpt = 0
+    cpt_dc = 0
+    ni = 0
     nodes = nodes0
 
     weights= weights0
@@ -528,7 +530,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -646,7 +648,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0     
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -769,7 +771,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -893,7 +895,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0    
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -1015,7 +1017,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -1137,7 +1139,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0     
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -1259,7 +1261,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0 
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -1382,7 +1384,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -1505,7 +1507,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0 
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -1629,7 +1631,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0   
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -1752,7 +1754,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0    
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -1874,7 +1876,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0 
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -1997,7 +1999,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -2120,7 +2122,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0    
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all
@@ -2243,7 +2245,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0   
     !        if(numpat.eq.2)write(*,*)'stad',nnodes_all
             
             do n=1,nnodes_all

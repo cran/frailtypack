@@ -83,7 +83,7 @@ s <- readmission[1:100,]
 epoce <- epoce(modJoint.gap,temps,newdata=s)
 
 print(epoce)
-plot(epoce,type = "cvpol")
+plot(epoce,type = "mpol")
 
 #################################################
 #### EPOCE on a joint  model for a biomarker ####
@@ -117,7 +117,7 @@ s.Longi <- subset(colorectalLongi, id\%in\%1:50)
 epoce <- epoce(modLongi, time, newdata = s, newdata.Longi = s.Longi)
 
 print(epoce)
-plot(epoce, type = "cvpol")
+plot(epoce, type = "mpol")
 
 
 ###################################################
@@ -154,7 +154,7 @@ s.Longi <- subset(colorectalLongi, id\%in\%1:100)
 epoce <- epoce(model.trivPenalNL, time, newdata = s, newdata.Longi = s.Longi)
 
 print(epoce)
-plot(epoce, type = "cvpol")
+plot(epoce, type = "mpol")
 
 
 

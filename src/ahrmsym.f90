@@ -657,79 +657,79 @@
 
         implicit none
 
-!***BEGIN PROLOGUE HERMIT
-!***CATEGORY NO. H2B1A1
-!***AUTHOR
-!
-!     Alan Genz
-!     Department of Mathematics
-!     Washington State University
-!     Pullman, Washington 99164-3113  USA
-!     Telephone: 509-335-2131
-!     Electronic Mail: alangenz@wsu.edu
-!     Fax: 509-335-1188
-!
-!***KEYWORDS automatic multidimensional integrator, Gaussian weight
-!            n-dimensional region (-infin, infin)^n
-!***PURPOSE  The routine calculates an approximation to a vector of
-!            definite integrals using Gauss-Hermite product rules.
-!
-!      infin     infin
-!     I    ...  I       w(X) (F ,F ,...,F      ) DX(NDIM)...DX(2)DX(1),
-!     -infin    -infin         1  2      NUMFUN
-!
-!       where F = F (X ,X ,...,X    ), I = 1,2,...,NUMFUN,
-!              I   I  1  2      NDIM
-!
-!       w(X) = EXP(-( X(1)**2 + ... + X(NDIM)**2 )/2)/SQRT(2*PI)**NDIM.
-!
-!***DESCRIPTION Computation of integrals over infinite regions with
-!               Gaussian weight using Gauss-Hermite product rules.
-!
-!   ON ENTRY
-!
-!     NDIM   Integer, number of variables.
-!     NUMFUN Integer, number of components of the integral.
-!     MINPTS Integer, minimum number of function evaluations.
-!     MAXPTS Integer, maximum number of function evaluations.
-!     FUNSUB Externally declared subroutine for computing components of
-!            the integrand at the given evaluation point.
-!            It must have parameters (NDIM,X,NUMFUN,FUNVLS)
-!            Input parameters:
-!              NDIM   Integer, number of dimensions for the integral.
-!              X      Real NDIM-array for the evaluation point.
-!              NUMFUN Integer, number of components of I.
-!            Output parameter:
-!              FUNVLS Real NUMFUN-array for integrand components.
-!
-!     EPSABS Real, requested absolute accuracy.
-!     EPSREL Real, requested relative accuracy.
-!     RESTAR Integer.
-!            If RESTAR = 0, this is the first attempt to compute
-!            the integral.
-!            If RESTAR = 1, then we restart a previous attempt.
-!     WORK   Real array of working storage, must have dimensions at
-!            least 2*NUMFUN+2*NDIM
-!
-!   ON RETURN
-!
-!     RESULT Real NUMFUN-array of approximations to all components
-!            of the integral.
-!     ABSERR Real NUMFUN-array of estimates of absolute accuracies.
-!     NEVAL  Integer, number of function evaluations used.
-!     IFAIL  Integer.
-!            IFAIL = 0 for normal exit, when
-!              ABSERR(K) <= MAX( EPSABS, ABS(RESULT(K))*EPSREL ) for
-!              all K, 0 < K <= NUMFUN, with <= MAXPTS function values.
-!            IFAIL = 1 if MAXPTS was too small to obtain the required
-!              accuracy. In this case values of RESULT are returned
-!              with estimated absolute accuracies ABSERR.
-!
-!***ROUTINES CALLED MLTRUL
-!***END PROLOGUE HERMIT
-!
-!   Global variables.
-!
+        !***BEGIN PROLOGUE HERMIT
+        !***CATEGORY NO. H2B1A1
+        !***AUTHOR
+        !
+        !     Alan Genz
+        !     Department of Mathematics
+        !     Washington State University
+        !     Pullman, Washington 99164-3113  USA
+        !     Telephone: 509-335-2131
+        !     Electronic Mail: alangenz@wsu.edu
+        !     Fax: 509-335-1188
+        !
+        !***KEYWORDS automatic multidimensional integrator, Gaussian weight
+        !            n-dimensional region (-infin, infin)^n
+        !***PURPOSE  The routine calculates an approximation to a vector of
+        !            definite integrals using Gauss-Hermite product rules.
+        !
+        !      infin     infin
+        !     I    ...  I       w(X) (F ,F ,...,F      ) DX(NDIM)...DX(2)DX(1),
+        !     -infin    -infin         1  2      NUMFUN
+        !
+        !       where F = F (X ,X ,...,X    ), I = 1,2,...,NUMFUN,
+        !              I   I  1  2      NDIM
+        !
+        !       w(X) = EXP(-( X(1)**2 + ... + X(NDIM)**2 )/2)/SQRT(2*PI)**NDIM.
+        !
+        !***DESCRIPTION Computation of integrals over infinite regions with
+        !               Gaussian weight using Gauss-Hermite product rules.
+        !
+        !   ON ENTRY
+        !
+        !     NDIM   Integer, number of variables.
+        !     NUMFUN Integer, number of components of the integral.
+        !     MINPTS Integer, minimum number of function evaluations.
+        !     MAXPTS Integer, maximum number of function evaluations.
+        !     FUNSUB Externally declared subroutine for computing components of
+        !            the integrand at the given evaluation point.
+        !            It must have parameters (NDIM,X,NUMFUN,FUNVLS)
+        !            Input parameters:
+        !              NDIM   Integer, number of dimensions for the integral.
+        !              X      Real NDIM-array for the evaluation point.
+        !              NUMFUN Integer, number of components of I.
+        !            Output parameter:
+        !              FUNVLS Real NUMFUN-array for integrand components.
+        !
+        !     EPSABS Real, requested absolute accuracy.
+        !     EPSREL Real, requested relative accuracy.
+        !     RESTAR Integer.
+        !            If RESTAR = 0, this is the first attempt to compute
+        !            the integral.
+        !            If RESTAR = 1, then we restart a previous attempt.
+        !     WORK   Real array of working storage, must have dimensions at
+        !            least 2*NUMFUN+2*NDIM
+        !
+        !   ON RETURN
+        !
+        !     RESULT Real NUMFUN-array of approximations to all components
+        !            of the integral.
+        !     ABSERR Real NUMFUN-array of estimates of absolute accuracies.
+        !     NEVAL  Integer, number of function evaluations used.
+        !     IFAIL  Integer.
+        !            IFAIL = 0 for normal exit, when
+        !              ABSERR(K) <= MAX( EPSABS, ABS(RESULT(K))*EPSREL ) for
+        !              all K, 0 < K <= NUMFUN, with <= MAXPTS function values.
+        !            IFAIL = 1 if MAXPTS was too small to obtain the required
+        !              accuracy. In this case values of RESULT are returned
+        !              with estimated absolute accuracies ABSERR.
+        !
+        !***ROUTINES CALLED MLTRUL
+        !***END PROLOGUE HERMIT
+        !
+        !   Global variables.
+        !
         external::funsub
         integer::ndim,numfun,minpts,maxpts,restar,neval,ifail,i
         integer,save::rule
@@ -738,55 +738,9 @@
         double precision,dimension(*)::result,abserr,work
         double precision,dimension(maxrul)::point,weight
         double precision,dimension(25,50),save::w,t
-!
-!   Local variables.
-!
-
-
-
-      if (restar .eq. 0) rule = 1
-      neval= 0
-
- 10   if (neval + rule**ndim .le. maxpts .and. rule .lt. maxrul) then
-                do i = 1,rule/2
-                        point(i) = -t(i,rule)
-                        weight(i) =  w(i,rule)
-                        point(rule-i+1) = t(i,rule)
-                        weight(rule-i+1) = w(i,rule)
-                end do
-
-                if (mod(rule, 2) .eq. 1) then
-                        point(rule/2 + 1 ) = 0
-                        weight(rule/2 + 1 ) = w(rule/2 + 1,rule)
-                end if
-
-                call mltrul(ndim,numfun,funsub,rule,point,weight,result,work,&
-                work(numfun+1),work(numfun+ndim+1))
-
-                neval = neval + rule**ndim
-                ifail = 0
-
-                do i = 1,numfun
-
-                        if (rule .gt. 1) then
-                                abserr(i) = abs(result(i) - work(2*ndim+numfun+i))
-                        else
-                                abserr(i) = abs(result(i))
-                        end if
-        !       write(*,*)neval,rule,epsrel*abs(result(i)),abserr(i)
-                        work(2*ndim+numfun+i) = result(i)
-                        if (abserr(i) .gt. max(espabs,epsrel*abs(result(i)))) then
-                                 ifail = 1
-                        end if
-
-                end do
-
-                rule = rule + 1
-                if (ifail .gt. 0 .or. neval .lt. minpts) goto 10
-        end if
-!
-!     Gauss Hermite Weights and Points, N = 1,50
-!
+        !
+        !   Local variables.
+        !
         DATA   W(1, 1), T(1, 1) / 1D0, 0D0 /
         DATA ( W(I, 2), T(I, 2), I = 1, 1) /0.5000000000000001D+00, 0.1000000000000000D+01/
         DATA ( W(I, 3), T(I, 3), I = 1, 2) / &
@@ -1485,6 +1439,53 @@
         0.9593054035810168D-01, 0.1106299289397183D+01,&
         0.1416854132499443D+00, 0.6633496795082918D+00,&
         0.1721258519924433D+00, 0.2210451816445435D+00/
+
+
+
+      if (restar .eq. 0) rule = 1
+      neval= 0
+
+ 10   if (neval + rule**ndim .le. maxpts .and. rule .lt. maxrul) then
+                do i = 1,rule/2
+                        point(i) = -t(i,rule)
+                        weight(i) =  w(i,rule)
+                        point(rule-i+1) = t(i,rule)
+                        weight(rule-i+1) = w(i,rule)
+                end do
+
+                if (mod(rule, 2) .eq. 1) then
+                        point(rule/2 + 1 ) = 0
+                        weight(rule/2 + 1 ) = w(rule/2 + 1,rule)
+                end if
+
+                call mltrul(ndim,numfun,funsub,rule,point,weight,result,work,&
+                work(numfun+1),work(numfun+ndim+1))
+
+                neval = neval + rule**ndim
+                ifail = 0
+
+                do i = 1,numfun
+
+                        if (rule .gt. 1) then
+                                abserr(i) = abs(result(i) - work(2*ndim+numfun+i))
+                        else
+                                abserr(i) = abs(result(i))
+                        end if
+        !       write(*,*)neval,rule,epsrel*abs(result(i)),abserr(i)
+                        work(2*ndim+numfun+i) = result(i)
+                        if (abserr(i) .gt. max(espabs,epsrel*abs(result(i)))) then
+                                 ifail = 1
+                        end if
+
+                end do
+
+                rule = rule + 1
+                if (ifail .gt. 0 .or. neval .lt. minpts) goto 10
+        end if
+        !
+        !     Gauss Hermite Weights and Points, N = 1,50
+        !
+        
 !
 !
 !***END HERMIT

@@ -19,6 +19,7 @@
         integer,intent(in)::id,jd,np
         double precision,dimension(np),intent(in)::b
         double precision,dimension(2),intent(in)::k0
+        double precision,dimension(2)::k02
         double precision,intent(in)::thi,thj
     
         ! for the numerical integral hrmsym
@@ -53,7 +54,9 @@
        double precision,dimension(nea*(nea+1)/2)::matv
        !double precision,dimension(nsujety,1)::vey_bh
         
-
+        if(.false.) then
+            k02 = k0 
+        end if 
             npp = np
         eps_s = 1.d-7
     !    print*,'debut funcpa'

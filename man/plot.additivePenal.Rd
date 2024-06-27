@@ -52,7 +52,7 @@ Confidence bands are allowed.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 data(dataAdditive)
 

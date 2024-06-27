@@ -22,7 +22,7 @@ univariate and joint models.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 data(readmission)
 modSha <- frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),

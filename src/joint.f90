@@ -2962,16 +2962,16 @@ end if
     subroutine gaulagJ(ss,choix,nnodes)
 
     use tailles
-    use comon,only:typeof,typeJoint!auxig
+    use comon,only:typeJoint!auxig,typeof
     use donnees,only:w,x,w1,x1        !The abscissas-weights.
 
     implicit none
 
     integer,intent(in)::choix,nnodes
     double precision,intent(out):: ss
-    double precision :: auxfunca,func1J,func2J,func3J,func3bis
+    double precision :: auxfunca
     double precision :: func3Jyass, func4Jyass, func3Jgap
-    external :: func1J,func2J,func3J,func3bis
+    double precision,external :: func1J,func2J,func3J,func3bis
     integer :: j
     
     double precision,dimension(nnodes):: xx,ww
@@ -3024,19 +3024,19 @@ end if
     subroutine gaulagJf(ss3,nnodes)
 
     use tailles
-    use comon,only:auxig,typeof,fam,nfam,ng!,auxif,typeJoint
+    use comon,only:auxig,fam,nfam,ng!,auxif,typeJoint,typeof
     use donnees,only:w,x, w1, x1     !The abscissas-weights.
 
     implicit none
 
     integer,intent(in)::nnodes
     double precision,intent(out):: ss3
-    double precision :: ss, ss2, auxfunca,auxfuncb,func1J,func2J,func3Jf,func3Jf2,func3bis
+    double precision :: ss, ss2, auxfunca,auxfuncb
     double precision :: integrale3fam
     !suppression double precision :: func3Jgap, func3Jyass, func4Jyass,
     double precision, dimension(nfam):: integrale3f
     !double precision, dimension(20):: x1,w1
-    external :: func1J,func2J,func3Jf,func3Jf2, func3bis
+    double precision,external :: func1J,func2J,func3Jf,func3Jf2, func3bis
     integer :: j,i,k,jj
 
     double precision,dimension(nnodes):: xx,ww
@@ -3088,7 +3088,7 @@ end if
     subroutine gaulagJ_intcens(ss,choix,nnodes)
 
     use tailles
-    use comon,only:typeof!,auxig
+    !use comon,only:typeof!,auxig
     use donnees,only:w,x,w1,x1
 
     implicit none
@@ -3203,7 +3203,7 @@ end if
 
     use tailles
     use donnees
-    use comon,only:typeof!,auxig
+    !use comon,only:typeof!,auxig
 
     Implicit none
 

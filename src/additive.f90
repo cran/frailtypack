@@ -125,7 +125,7 @@
     nsujetmax=nsujet
     allocate(t0(nsujetmax),t1(nsujetmax),c(nsujetmax),nt0(nsujetmax),nt1(nsujetmax), &
     stra(nsujetmax),g(nsujetmax),stracross(nsujetmax),aux(2*nsujetmax))
-
+    aux=0.d0
     ndatemax=2*nsujet
     allocate(date(ndatemax))
     if (typeof == 0) then

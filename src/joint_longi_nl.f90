@@ -1741,7 +1741,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0   
         
             do n=1,nnodes_all
        
@@ -1884,7 +1884,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0   
         
             do n=1,nnodes_all
        
@@ -2026,7 +2026,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
         
             do n=1,nnodes_all
        
@@ -2168,6 +2168,7 @@
          
         upper = .false.
         ss=0.d0
+        i=0
             
         
             do n=1,nnodes_all
@@ -2312,7 +2313,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
         
             do n=1,nnodes_all
        
@@ -2454,7 +2455,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
         
             do n=1,nnodes_all
        
@@ -2596,7 +2597,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
         
             do n=1,nnodes_all
        
@@ -2739,7 +2740,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
         
             do n=1,nnodes_all
        
@@ -2882,7 +2883,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0  
         
             do n=1,nnodes_all
        
@@ -3025,7 +3026,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
         
             do n=1,nnodes_all
        
@@ -3168,7 +3169,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
         
             do n=1,nnodes_all
        
@@ -3311,6 +3312,7 @@
          
         upper = .false.
         ss=0.d0
+        i=0
             
         
             do n=1,nnodes_all
@@ -3454,6 +3456,7 @@
          
         upper = .false.
         ss=0.d0
+        i=0
             
         
             do n=1,nnodes_all
@@ -3597,6 +3600,7 @@
          
         upper = .false.
         ss=0.d0
+        i=0
             
         
             do n=1,nnodes_all
@@ -3740,7 +3744,7 @@
          
         upper = .false.
         ss=0.d0
-            
+        i=0
         
             do n=1,nnodes_all
        

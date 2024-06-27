@@ -7,6 +7,8 @@
 			warning("For a better overview only predictions for a maximum of 10 subjects are plotted (the 10 first ones)")
 			x$npred <- 10
 		}
+	oldpar <- par(no.readonly = TRUE) 
+	on.exit(par(oldpar))
 	if (x$npred <= 5) par(mfrow=c(1,x$npred))
 	else par(mfrow=c(2,ceiling(x$npred/2)))
 	

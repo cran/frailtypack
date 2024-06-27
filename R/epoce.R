@@ -85,7 +85,7 @@
 #' epoce <- epoce(modJoint.gap,temps,newdata=s)
 #' 
 #' print(epoce)
-#' plot(epoce,type = "cvpol")
+#' plot(epoce,type = "mpol")
 #' 
 #' #################################################
 #' #### EPOCE on a joint  model for a biomarker ####
@@ -119,7 +119,7 @@
 #' epoce <- epoce(modLongi, time, newdata = s, newdata.Longi = s.Longi)
 #' 
 #' print(epoce)
-#' plot(epoce, type = "cvpol")
+#' plot(epoce, type = "mpol")
 #' 
 #' 
 #' ###################################################
@@ -156,7 +156,7 @@
 #' epoce <- epoce(model.trivPenalNL, time, newdata = s, newdata.Longi = s.Longi)
 #' 
 #' print(epoce)
-#' plot(epoce, type = "cvpol")
+#' plot(epoce, type = "mpol")
 #' 
 #' 
 #' 
@@ -186,17 +186,17 @@
 epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
 
         if (missing(fit)) stop("The argument fit must be specified")
-        if (class(fit)!="jointPenal" & class(fit)!="longiPenal" & class(fit)!="trivPenal" & class(fit)!="trivPenalNL") stop("The argument fit must be a class 'jointPenal', 'longiPenal' or 'trivPenal'")
+        if (!inherits(fit, "jointPenal") & !inherits(fit, "longiPenal") & !inherits(fit, "trivPenal") & !inherits(fit, "trivPenalNL")) stop("The argument fit must be a class 'jointPenal', 'longiPenal' or 'trivPenal'")
         if (missing(pred.times)) stop("The argument pred.times must be specified")
-        if (class(pred.times)!="numeric") stop("pred.times must contain numerical values")
+        if (!inherits(pred.times, "numeric")) stop("pred.times must contain numerical values")
 
-        if(!missing(newdata) & (class(newdata)!="data.frame")) stop("The argument newdata must be a 'data.frame'")
-        if(!missing(newdata.Longi) & (class(newdata.Longi)!="data.frame")) stop("The argument newdata must be a 'data.frame'")
+        if(!missing(newdata) & (!inherits(newdata, "data.frame"))) stop("The argument newdata must be a 'data.frame'")
+        if(!missing(newdata.Longi) & (!inherits(newdata.Longi, "data.frame"))) stop("The argument newdata must be a 'data.frame'")
 
-  if(class(fit)== "jointPenal" & !missing(newdata.Longi))warning("The argument newdata.Longi is not required and thus ignored")
-        if(class(fit)== "longiPenal" & !missing(newdata.Longi) & missing(newdata))warning("For an object of class 'longiPenal' both datasets should be given")
-        if(class(fit)== "trivPenal" & !missing(newdata.Longi) & missing(newdata))warning("For an object of class 'trivPenal' both datasets should be given")
-        if(class(fit)== "trivPenalNL" & missing(newdata.Longi) & !missing(newdata))warning("For an object of class 'trivPenalNL' both datasets should be given")
+  if(inherits(fit, "jointPenal") & !missing(newdata.Longi))warning("The argument newdata.Longi is not required and thus ignored")
+        if(inherits(fit, "longiPenal") & !missing(newdata.Longi) & missing(newdata))warning("For an object of class 'longiPenal' both datasets should be given")
+        if(inherits(fit, "trivPenal") & !missing(newdata.Longi) & missing(newdata))warning("For an object of class 'trivPenal' both datasets should be given")
+        if(inherits(fit, "trivPenalNL") & missing(newdata.Longi) & !missing(newdata))warning("For an object of class 'trivPenalNL' both datasets should be given")
 
 
         nt <- length(pred.times)
@@ -244,7 +244,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
         if (is.null(m$recurrentAG)) recurrentAG <- FALSE
         else recurrentAG <- TRUE
 
-  if(class(fit)=="jointPenal" | class(fit)=="trivPenal" | class(fit) == "trivPenalNL"){
+  if(inherits(fit, "jointPenal") | inherits(fit, "trivPenal") | inherits(fit, "trivPenalNL")){
         #m$formula.terminalEvent <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$Alpha <- m$... <- NULL
         m$formula.LongitudinalData <- m$formula.terminalEvent <- m$recurrentAG <- m$data.Longi <- m$n.knots <- m$random <- m$link  <- m$id <- m$kappa <- m$maxit <- m$hazard <- m$nb.int  <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$left.censoring <- m$print.times <- m$init.Random <- m$init.Eta <- m$init.Alpha <- m$method.GH <- m$intercept <- m$n.nodes <- m$biomarker <- m$formula.KG <- m$formula.KD <- m$dose <- m$time.biomarker <- m$BoxCox  <-  m$init.Biomarker <- m$... <- m$RandDist <- NULL
 
@@ -348,7 +348,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
 
         if (!missing(newdata) & length(fit$coef[1:(fit$nvarEnd+fit$nvarRec)])!=(ncol(X)+ncol(X2))) stop("Different covariates in model and newdata. Verify your dataset, be careful to the factor variables.")
   }
-    if(class(fit) == "trivPenal" | class(fit) == "longiPenal"){
+    if(inherits(fit, "trivPenal") | inherits(fit, "longiPenal")){
 
       m2 <- fit$call
       m2$formula <- m2$formula.terminalEvent <- m2$data <- m2$random <- m2$id <- m2$link <- m2$n.knots <- m2$kappa <- m2$maxit <- m2$hazard <- m2$nb.int <- m2$betaorder <- m2$betaknots <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$left.censoring <- m2$init.Random <- m2$init.Eta <- m2$method.GH <- m2$intercept <- m2$... <- NULL
@@ -496,7 +496,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                                    }
 
     }
-  if(class(fit)== "longiPenal"){
+  if(inherits(fit, "longiPenal")){
     #m$formula.terminalEvent <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int1 <-m$nb.int2 <- m$RandDist <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$init.Theta <- m$init.Alpha <- m$Alpha <- m$... <- NULL
     m$formula.LongitudinalData <- m$formula.terminalEvent <- m$recurrentAG <- m$data.Longi <- m$n.knots <- m$random <- m$link  <- m$id <- m$kappa <- m$maxit <- m$hazard <- m$nb.int  <- m$betaorder <- m$betaknots <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$left.censoring <- m$print.times <- m$init.Random <- m$init.Eta <- m$init.Alpha <- m$method.GH <- m$intercept <- m$n.nodes <- m$... <- NULL
 
@@ -547,7 +547,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
     }
 
   }
-  if(class(fit) == "trivPenalNL"){
+  if(inherits(fit, "trivPenalNL")){
     
     
       nva3 <- fit$nvarKG
@@ -1185,7 +1185,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
   
         cat("\n")
         cat("Calculating ... \n")
-  if(class(fit)== 'jointPenal'){
+  if(inherits(fit, 'jointPenal')){
         if(fit$logNormal==0){
         ans <- .Fortran(C_cvpl,
                         as.integer(nobs),
@@ -1252,7 +1252,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                   atrisk=as.double(rep(0,nt))
 	         )
 				  
-  }}else if(class(fit) == "longiPenal"){
+  }}else if(inherits(fit, "longiPenal")){
 
     ans <- .Fortran(C_cvpl_long,
                     as.integer(nsujet),
@@ -1295,7 +1295,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                     atrisk=as.double(rep(0,nt))
 		   )
 
-  }else if(class(fit) == "trivPenal"){
+  }else if(inherits(fit, "trivPenal")){
 
 
     ans <- .Fortran(C_cvpl_long,
@@ -1339,7 +1339,7 @@ epoce <- function(fit, pred.times, newdata = NULL, newdata.Longi = NULL){
                     atrisk=as.double(rep(0,nt))
 		   )
 
-  }else if(class(fit) == "trivPenalNL"){
+  }else if(inherits(fit, "trivPenalNL")){
     
     GH <- c(0,0)
     GH[1] <- ifelse(fit$methodGH == "Standard", 0, 1)

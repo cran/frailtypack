@@ -124,10 +124,17 @@
 !  2: nb max d'iterations atteints
 !  4: Erreur
     !use residusM,only:indg
-    use parameters
-    use comon,only: nva, & !t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc
-    model, & !nt1dc,nsujet,nva1,nva2,ndate,ndatedc,nst
-    indic_ALPHA,typeof !PEN_deri,Hspl_hess,indic_eta
+    ! use parameters
+    ! use comon,only:t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc, &
+    ! nt1dc,nsujet,nva,nva1,nva2,ndate,ndatedc,nst,model, &
+    ! PEN_deri,Hspl_hess,indic_ALPHA,typeof,indic_eta
+    use parameters,only:epsa,epsb,epsd,maxiter
+    use comon,only:nva,model,indic_ALPHA,typeof
+    !use residusM,only:indg
+    !use parameters
+    !use comon,only: nva, & !t0,t1,t0dc,t1dc,c,cdc,nt0,nt1,nt0dc
+    !model, & !nt1dc,nsujet,nva1,nva2,ndate,ndatedc,nst
+    !indic_ALPHA,typeof !PEN_deri,Hspl_hess,indic_eta
 
 !add additive
     !use additiv,only:correl
@@ -143,12 +150,12 @@
     ! double precision,dimension(size(vvv)),intent(out)::vvv
     
     !double precision,dimension(:,:),intent(inout)::wij_chap
-    double precision,dimension(:,:),intent(inout)::I_hess
-    double precision,dimension(:,:),intent(inout)::H_hess
-    double precision,dimension(:,:),intent(inout)::hess
-    double precision,dimension(:),intent(inout)::vvv
-
     integer,intent(in) :: m,effet
+    double precision,dimension(m,m),intent(inout)::I_hess
+    double precision,dimension(m,m),intent(inout)::H_hess
+    double precision,dimension(m,m),intent(inout)::hess
+    double precision,dimension(m*(m+1)/2),intent(inout)::vvv
+
     integer,intent(inout)::ni,ier,istop
     double precision,dimension(m*(m+3)/2),intent(out)::v
     double precision,intent(out)::rl
@@ -531,13 +538,14 @@
     double precision,dimension((m*(m+3)/2)),intent(out)::v
     double precision,dimension(m)::fcith
     integer ::i0,m1,ll,i,k,j,iun
-    double precision::fctnames,thn,th,z,vl,th2,vaux
-    external::fctnames
+    double precision::thn,th,z,vl,th2,vaux
+    double precision,external::fctnames
     
     !!print*,"suis dans derivaj_scl, model=",model
     !stop
     ! !print*,"suis la 1",size(wij_chap),size(wij_chap,1),size(wij_chap,2)
 ! stop
+    th = 0.d0 
     select case(model)
     case(1)
         th=1.d-3 !joint
@@ -623,8 +631,8 @@
       double precision,intent(inout)::fim,step
       double precision::vlw,vlw1,vlw2,vlw3,vm,fi1,fi2,fi3
       double precision,dimension(2)::k0
-      double precision::fctnames
-      external::fctnames
+      !double precision::fctnames
+      double precision,external::fctnames
       integer::i
 
        vlw1=dlog(vw)
@@ -1056,10 +1064,10 @@
     double precision,dimension(m),intent(in)::b,delta  
     double precision,dimension(m),intent(out)::bk 
     double precision,intent(out)::fi 
-    double precision::vw,fctnames,z    
+    double precision::vw,z    
     double precision,dimension(2)::k0
     integer::i0,i
-    external::fctnames
+    double precision,external::fctnames
     
     z=0.d0
     i0=1

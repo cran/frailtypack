@@ -300,7 +300,7 @@
              
                                 
                 predProba1(i) = ss11/ss12
-			
+            
                 it = it +nreci_all(i)
             end do
          
@@ -1094,8 +1094,8 @@
                 *dexp(-uiiui(1)/2.d0)/dsqrt(det)*(2.d0*pi)**(-3.d0/2.d0)    
         end if    
     
-	
-	
+    
+    
         return
     
       end function func2pred2GHtri    
@@ -1399,7 +1399,7 @@
                     ! the1(k-3)=(bh(k))**2.d0
                     the2(k-3)=(bh(k))**2.d0
                 end do    
-                call susps(tps,the2,nz,su,bbb,zi)   
+                call susps(tps,the2,nz1,su,bbb,zi)   
             case(2) ! calcul du risque weibull    
                 betaR = bh(1)**2
                 etaR = bh(2)**2    

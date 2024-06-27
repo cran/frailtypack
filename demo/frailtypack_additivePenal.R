@@ -39,9 +39,9 @@ plot(modAdd2cov.withCorr)
 ### Figures
 ########################################################################
 
-pdf(file = "fig2.pdf", height = 5.5, width = 9)
+#pdf(file = "fig2.pdf", height = 5.5, width = 9)
 par(mfrow = c(1,2))
-plot(modAdd2cov.withoutCorr, type.plot = "hazard", main = "Correlation=False",
+plot(modAdd2cov.withoutCorr, type.plot = "Hazard", main = "Correlation=False",
   conf.bands = TRUE)
-plot(modAdd2cov.withCorr, type.plot = "hazard", main = "Correlation=True",
+plot(modAdd2cov.withCorr, type.plot = "Hazard", main = "Correlation=True",
   conf.bands = TRUE)

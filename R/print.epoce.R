@@ -1,7 +1,7 @@
 ##' @export
 print.epoce <- function(x, digits = 3, ...)
 {
-        if(class(x)!="epoce"){
+        if(!inherits(x, "epoce")){
                 stop("The object x must be a class epoce.")
         }else{
 #               if (!is.null(cl <- x$call)){

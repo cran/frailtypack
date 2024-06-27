@@ -7,6 +7,263 @@ contains
 !=====================functions a integrer surrogacy===============
 !==================================================================
 
+     ! 1 effet aleatoire partage niveau individeul +2 effet aleatoire correles en interaction avec le traitement:
+     ! copula model
+ double precision function Integrant_Copula(vsi,vti,ui,ig,nsujet_trial)
+    ! vsi= frailtie niveau essai associe a s
+    ! vti= frailtie niveau essai associe a t
+    ! ui = random effect associated xith the baseline hazard
+    ! ig = current cluster
+    ! nsujet_trial = number of subjects in the current trial
+    
+    use var_surrogate, only: posind_i, alpha_ui, const_res4, const_res5, res2_dcs_sujet,res2s_sujet, &
+        theta_copule, delta, deltastar, copula_function, methodInt, pi, gamma_ui, determinant, &
+        varcovinv, adaptative!, control_affichage
+    use comon, only: ve
+    
+    IMPLICIT NONE
+    integer,intent(in):: ig, nsujet_trial 
+    double precision,intent(in)::vsi,vti,ui
+    integer::j,ig2!,n
+    double precision::integrant, f_Sij, f_Tij, fbar_Sij, fbar_Tij, C_theta, phimun_S, phimun_T,phiprim_ST,&
+                      sumphimun_ST, phisecond_ST, phiprimphimun_S, derivphi_ij, contri_indiv,phiprimphimun_T,&
+                      f_V, tempon, logfbar_Sij, logfbar_Tij
+    double precision, dimension(:,:),allocatable::m1,m3  
+    double precision, dimension(:,:),allocatable::m    
+    Integrant_Copula = 0.d0 
+    ig2=ig
+    C_theta = 0.d0
+    phimun_S = 0.d0
+    phimun_T = 0.d0
+    phiprim_ST = 0.d0
+    sumphimun_ST = 0.d0
+    phisecond_ST = 0.d0
+    phiprimphimun_S = 0.d0
+    phiprimphimun_T = 0.d0
+    logfbar_Sij = 0.d0
+    logfbar_Tij = 0.d0
+    integrant = 1.d0
+    do j = 1, nsujet_trial
+        ! Expression in the log-vraisamblance
+        f_Sij = res2s_sujet(posind_i-1+j) * dexp(ui + vsi*dble(ve(posind_i-1+j,1))) &
+                * dexp(- const_res4(posind_i-1+j) * dexp(ui + vsi*dble(ve(posind_i-1+j,1))))
+        f_Tij = res2_dcs_sujet(posind_i-1+j) * dexp(alpha_ui * ui + vti*dble(ve(posind_i-1+j,1)))&
+                * dexp(- const_res5(posind_i-1+j) * dexp(alpha_ui * ui + vti*dble(ve(posind_i-1+j,1))))
+        fbar_Sij = dexp(- const_res4(posind_i-1+j) * dexp(ui + vsi*dble(ve(posind_i-1+j,1))))
+        fbar_Tij = dexp(- const_res5(posind_i-1+j) * dexp(alpha_ui * ui + vti*dble(ve(posind_i-1+j,1))))
+        select case(copula_function)
+            case(1) ! clayton copula 
+                C_theta = (fbar_Sij**(-theta_copule) + fbar_Tij**(-theta_copule) - 1.d0)&
+                        **(-1.d0/theta_copule)
+                phimun_S = (fbar_Sij**(-theta_copule) - 1.d0) / theta_copule
+                phimun_T = (fbar_Tij**(-theta_copule) - 1.d0) / theta_copule
+                phiprim_ST = - (fbar_Sij**(-theta_copule) + fbar_Tij**(-theta_copule) - 1.d0)**&
+                          (-(1.d0+theta_copule)/theta_copule)
+                sumphimun_ST = phimun_S + phimun_T
+                phisecond_ST = (1.d0 + theta_copule) * (1.d0 + theta_copule * sumphimun_ST)**(- (1.d0 + &
+                             2.d0 * theta_copule)/theta_copule)
+                phiprimphimun_S = - fbar_Sij**(1.d0 + theta_copule)
+                phiprimphimun_T = - fbar_Tij**(1.d0 + theta_copule)
+            case(2) ! Gumbel copula
+                logfbar_Sij = - const_res4(posind_i-1+j) * dexp(ui + vsi*dble(ve(posind_i-1+j,1)))
+                logfbar_Tij = - const_res5(posind_i-1+j) * dexp(alpha_ui * ui + vti*dble(ve(posind_i-1+j,1)))
+                C_theta = dexp(-((-logfbar_Sij)**(theta_copule + 1.d0) + (- logfbar_Tij)**&
+                        (theta_copule + 1.d0))**(1.d0/(theta_copule + 1.d0)))
+                phimun_S = (-logfbar_Sij)**(1.d0 + theta_copule)
+                phimun_T = (-logfbar_Tij)**(1.d0 + theta_copule)
+                phiprim_ST = - 1.d0/(1.d0+theta_copule) * ((- logfbar_Sij)**(1.d0+theta_copule) + &
+                          (-logfbar_Tij)**(1.d0+theta_copule))**(-theta_copule/(1.d0+theta_copule)) &
+                          * C_theta
+                sumphimun_ST = phimun_S + phimun_T
+                phisecond_ST = (1.d0 / (1.d0 + theta_copule)**2.d0) * (theta_copule * sumphimun_ST**&
+                             (-(2.d0 * theta_copule + 1.d0)/(theta_copule + 1.d0)) + sumphimun_ST**&
+                             (-(2.d0 * theta_copule)/(theta_copule + 1.d0))) * dexp(- sumphimun_ST**&
+                             (1.d0/(1.d0 + theta_copule)))
+                phiprimphimun_S = (-fbar_Sij/(1.d0 + theta_copule)) * (- logfbar_Sij)**(- theta_copule)
+                phiprimphimun_T = (-fbar_Tij/(1.d0 + theta_copule)) * (- logfbar_Tij)**(- theta_copule)
+        end select
+        
+        ! expression with derrivatives
+        derivphi_ij = dble(delta(posind_i-1+j)) * dble(deltastar(posind_i-1+j)) * phisecond_ST + (dble(delta(posind_i-1+j))&
+                    * (1.d0 - dble(deltastar(posind_i-1+j))) + (1.d0 - dble(delta(posind_i-1+j))) * &
+                    dble(deltastar(posind_i-1+j))) *  phiprim_ST + (1.d0 - dble(delta(posind_i-1+j))) *&
+                    (1.d0 - dble(deltastar(posind_i-1+j))) * C_theta
+        
+        ! individual contributions
+        if(phiprimphimun_S > -1.d-299) phiprimphimun_S = -1.d-299
+        if(phiprimphimun_T > -1.d-299) phiprimphimun_T = -1.d-299
+        
+        contri_indiv = derivphi_ij * (f_Sij / phiprimphimun_S)**dble(delta(posind_i-1+j)) * &
+                       (f_Tij / phiprimphimun_T)&
+                       **dble(deltastar(posind_i-1+j))
+        
+        tempon = integrant
+        integrant = integrant * contri_indiv
+        
+        if(adaptative .and. integrant==0) then
+            ! call intpr("posind_i-1+j ", -1, posind_i-1+j, 1)
+            ! call dblepr("contri_indiv = ", -1, contri_indiv, 1)
+            ! call dblepr("integrant = ", -1, integrant, 1)
+        endif
+        !if((integrant .ne. integrant) .and. (control_affichage == 0)) then
+        ! ! if(control_affichage == 0) then
+            ! control_affichage = 1
+            ! call dblepr("vsi = ", -1, vsi, 1)
+            ! call dblepr("vti = ", -1, vti, 1)
+            ! call dblepr("ui = ", -1, ui, 1)
+            ! call intpr("ig = ", -1, ig, 1)
+            ! call intpr("nsujet_trial = ", -1, nsujet_trial, 1)
+            ! call intpr("posind_i = ", -1, posind_i, 1)
+            ! call dblepr("alpha_ui = ", -1, alpha_ui, 1)
+            ! call dblepr("const_res4 = ", -1, const_res4, 1)
+            ! call dblepr("const_res5 = ", -1, const_res5, 1)
+            ! call dblepr("res2_dcs_sujet = ", -1, res2_dcs_sujet, 1)
+            ! call dblepr("res2s_sujet = ", -1, res2s_sujet, 1)
+            ! call dblepr("theta_copule = ", -1, theta_copule, 1)
+            ! call intpr("delta(posind_i-1+1) = ", -1, delta(posind_i-1+1), 1)
+            ! call intpr("deltastar(posind_i-1+1) = ", -1, deltastar(posind_i-1+1), 1)
+            ! call intpr("delta(posind_i-1+2) = ", -1, delta(posind_i-1+2), 1)
+            ! call intpr("deltastar(posind_i-1+2) = ", -1, deltastar(posind_i-1+2), 1)
+            ! call intpr("copula_function = ", -1, copula_function, 1)
+            ! call intpr("methodInt = ", -1, methodInt, 1)
+            ! call dblepr("pi = ", -1, pi, 1)
+            ! call dblepr("gamma_ui = ", -1, gamma_ui, 1)
+            ! call dblepr("determinant = ", -1, determinant, 1)
+            ! if (methodInt == 1) call dblepr("varcovinv = ", -1, varcovinv, 9)
+            ! call intpr("adaptative = ", -1, adaptative, 1)
+            ! call dblepr("ve(posind_i-1+1,1) = ", -1, ve(posind_i-1+1,1), 1)
+            ! call dblepr("ve(posind_i-1+2,1) = ", -1, ve(posind_i-1+2,1), 1)
+            ! call dblepr("f_Sij = ", -1, f_Sij, 1)
+            ! call dblepr("f_Tij = ", -1, f_Tij, 1)
+            ! call dblepr("fbar_Sij = ", -1, fbar_Sij, 1)
+            ! call dblepr("fbar_Tij = ", -1, fbar_Tij, 1)
+            ! call dblepr("C_theta = ", -1, C_theta, 1)
+            ! call dblepr("phimun_S = ", -1, phimun_S, 1)
+            ! call dblepr("phimun_T = ", -1, phimun_T, 1)
+            ! call dblepr("phiprim_ST = ", -1, phiprim_ST, 1)
+            ! call dblepr("sumphimun_ST = ", -1, sumphimun_ST, 1)
+            ! call dblepr("phisecond_ST = ", -1, phisecond_ST, 1)
+            ! call dblepr("phiprimphimun_S = ", -1, phiprimphimun_S, 1)
+            ! call dblepr("phiprimphimun_T = ", -1, phiprimphimun_T, 1) 
+            ! call dblepr("f_Sij / phiprimphimun_S = ", -1, f_Sij / phiprimphimun_S, 1)
+            ! call dblepr("dble(delta(posind_i-1+j)) = ", -1, dble(delta(posind_i-1+j)), 1)
+            ! call dblepr("f_Tij /phiprimphimun_T = ", -1, f_Tij / phiprimphimun_T, 1)
+            ! call dblepr("dble(deltastar(posind_i-1+j)) = ", -1, dble(deltastar(posind_i-1+j)), 1)
+            ! call dblepr("derivphi_ij = ", -1, derivphi_ij, 1)
+            ! call dblepr("contri_indiv = ", -1, contri_indiv, 1)
+            ! call dblepr("tempon = ", -1, tempon, 1)
+            ! call dblepr("integrant = ", -1, integrant, 1)
+        ! endif
+        
+        ! if((integrant < 0.d0) .and. (control_affichage == 0)) then
+            ! control_affichage = 1
+            ! call dblepr("vsi = ", -1, vsi, 1)
+            ! call dblepr("vti = ", -1, vti, 1)
+            ! call dblepr("ui = ", -1, ui, 1)
+            ! call intpr("ig = ", -1, ig, 1)
+            ! call intpr("nsujet_trial = ", -1, nsujet_trial, 1)
+            ! call intpr("posind_i = ", -1, posind_i, 1)
+            ! call dblepr("alpha_ui = ", -1, alpha_ui, 1)
+            ! call dblepr("const_res4 = ", -1, const_res4, 1)
+            ! call dblepr("const_res5 = ", -1, const_res5, 1)
+            ! call dblepr("res2_dcs_sujet = ", -1, res2_dcs_sujet, 1)
+            ! call dblepr("res2s_sujet = ", -1, res2s_sujet, 1)
+            ! call dblepr("theta_copule = ", -1, theta_copule, 1)
+            ! call intpr("delta(posind_i-1+1) = ", -1, delta(posind_i-1+1), 1)
+            ! call intpr("deltastar(posind_i-1+1) = ", -1, deltastar(posind_i-1+1), 1)
+            ! call intpr("delta(posind_i-1+2) = ", -1, delta(posind_i-1+2), 1)
+            ! call intpr("deltastar(posind_i-1+2) = ", -1, deltastar(posind_i-1+2), 1)
+            ! call intpr("copula_function = ", -1, copula_function, 1)
+            ! call intpr("methodInt = ", -1, methodInt, 1)
+            ! call dblepr("pi = ", -1, pi, 1)
+            ! call dblepr("gamma_ui = ", -1, gamma_ui, 1)
+            ! call dblepr("determinant = ", -1, determinant, 1)
+            ! if (methodInt == 1) call dblepr("varcovinv = ", -1, varcovinv, 9)
+            ! call intpr("adaptative = ", -1, adaptative, 1)
+            ! call dblepr("ve(posind_i-1+1,1) = ", -1, ve(posind_i-1+1,1), 1)
+            ! call dblepr("ve(posind_i-1+2,1) = ", -1, ve(posind_i-1+2,1), 1)
+            ! call dblepr("f_Sij = ", -1, f_Sij, 1)
+            ! call dblepr("f_Tij = ", -1, f_Tij, 1)
+            ! call dblepr("fbar_Sij = ", -1, fbar_Sij, 1)
+            ! call dblepr("fbar_Tij = ", -1, fbar_Tij, 1)
+            ! call dblepr("C_theta = ", -1, C_theta, 1)
+            ! call dblepr("phimun_S = ", -1, phimun_S, 1)
+            ! call dblepr("phimun_T = ", -1, phimun_T, 1)
+            ! call dblepr("phiprim_ST = ", -1, phiprim_ST, 1)
+            ! call dblepr("sumphimun_ST = ", -1, sumphimun_ST, 1)
+            ! call dblepr("phisecond_ST = ", -1, phisecond_ST, 1)
+            ! call dblepr("phiprimphimun_S = ", -1, phiprimphimun_S, 1)
+            ! call dblepr("phiprimphimun_T = ", -1, phiprimphimun_T, 1)
+            ! call dblepr("f_Sij / phiprimphimun_S = ", -1, f_Sij / phiprimphimun_S, 1)
+            ! call dblepr("dble(delta(posind_i-1+j)) = ", -1, dble(delta(posind_i-1+j)), 1)
+            ! call dblepr("f_Tij /phiprimphimun_T = ", -1, f_Tij / phiprimphimun_T, 1)
+            ! call dblepr("dble(deltastar(posind_i-1+j)) = ", -1, dble(deltastar(posind_i-1+j)), 1)
+            ! call dblepr("derivphi_ij = ", -1, derivphi_ij, 1)
+            ! call dblepr("contri_indiv = ", -1, contri_indiv, 1)
+            ! call dblepr("tempon = ", -1, tempon, 1)
+            ! call dblepr("integrant = ", -1, integrant, 1)
+        ! endif
+    enddo
+    
+    if (methodInt == 1 .or. methodInt == 3)then
+        allocate(m(1,1),m1(1,2),m3(1,2))
+        m1(1,1)=vsi
+        m1(1,2)=vti
+        m3=MATMUL(m1,varcovinv)
+        m=MATMUL(m3,TRANSPOSE(m1))
+        f_V = 1.d0/(2.d0 * pi *  dsqrt(2.d0 * pi * gamma_ui * determinant)) * &
+        dexp(- 1.d0/2.d0 * m(1,1) - 1.d0/2.d0 * ui**2.d0 / gamma_ui)
+        Integrant_Copula = integrant * f_V
+        deallocate(m,m1,m3)
+    endif
+    
+    if (methodInt == 0) Integrant_Copula = integrant
+
+    ! if(control_affichage == 0)then
+        ! control_affichage = 1
+        ! call dblepr("vsi = ", -1, vsi, 1)
+        ! call dblepr("vti = ", -1, vti, 1)
+        ! call dblepr("ui = ", -1, ui, 1)
+        ! call intpr("ig = ", -1, ig, 1)
+        ! call intpr("nsujet_trial = ", -1, nsujet_trial, 1)
+        ! call intpr("posind_i = ", -1, posind_i, 1)
+        ! call dblepr("alpha_ui = ", -1, alpha_ui, 1)
+        ! call dblepr("const_res4 = ", -1, const_res4, 1)
+        ! call dblepr("const_res5 = ", -1, const_res5, 1)
+        ! call dblepr("res2_dcs_sujet = ", -1, res2_dcs_sujet, 1)
+        ! call dblepr("res2s_sujet = ", -1, res2s_sujet, 1)
+        ! call dblepr("theta_copule = ", -1, theta_copule, 1)
+        ! call intpr("delta(posind_i-1+1) = ", -1, delta(posind_i-1+1), 1)
+        ! call intpr("deltastar(posind_i-1+1) = ", -1, deltastar(posind_i-1+1), 1)
+        ! call intpr("delta(posind_i-1+2) = ", -1, delta(posind_i-1+2), 1)
+        ! call intpr("deltastar(posind_i-1+2) = ", -1, deltastar(posind_i-1+2), 1)
+        ! call intpr("copula_function = ", -1, copula_function, 1)
+        ! call intpr("methodInt = ", -1, methodInt, 1)
+        ! call dblepr("pi = ", -1, pi, 1)
+        ! call dblepr("gamma_ui = ", -1, gamma_ui, 1)
+        ! call dblepr("determinant = ", -1, determinant, 1)
+        ! if (methodInt == 1) call dblepr("varcovinv = ", -1, varcovinv, 9)
+        ! call intpr("adaptative = ", -1, adaptative, 1)
+        ! call dblepr("ve(posind_i-1+1,1) = ", -1, ve(posind_i-1+1,1), 1)
+        ! call dblepr("ve(posind_i-1+2,1) = ", -1, ve(posind_i-1+2,1), 1)
+        ! call dblepr("f_Sij = ", -1, f_Sij, 1)
+        ! call dblepr("f_Tij = ", -1, f_Tij, 1)
+        ! call dblepr("fbar_Sij = ", -1, fbar_Sij, 1)
+        ! call dblepr("fbar_Tij = ", -1, fbar_Tij, 1)
+        ! call dblepr("C_theta = ", -1, C_theta, 1)
+        ! call dblepr("phimun_S = ", -1, phimun_S, 1)
+        ! call dblepr("phimun_T = ", -1, phimun_T, 1)
+        ! call dblepr("phiprim_ST = ", -1, phiprim_ST, 1)
+        ! call dblepr("sumphimun_ST = ", -1, sumphimun_ST, 1)
+        ! call dblepr("phisecond_ST = ", -1, phisecond_ST, 1)
+        ! call dblepr("phiprimphimun_T = ", -1, phiprimphimun_T, 1)
+        ! call dblepr("derivphi_ij = ", -1, derivphi_ij, 1)
+        ! call dblepr("integrant = ", -1, integrant, 1)        
+    ! endif
+    return
+    end function Integrant_Copula
+    
+    
     double precision function funcSurrNN_MC(frail,n,i)
     ! fonction a integrer: cas des effets aleatoires niveau essai et individuel normalement distribues: ici on integre seulement par MC
     ! frail= vecteur des frailties de taille nombre d'individus dans le cluster ou on se trouve
@@ -288,11 +545,11 @@ contains
     !double precision::ca,cb,dd
     !double precision::res
     !double precision, dimension(2)::k0
-!    double precision, dimension(1)::v,b
+    !double precision, dimension(1)::v,b
     !double precision, dimension(2)::b_i      ! pour les 2 parametres des effets aleatoires a predire niveau essai
     !double precision, dimension(2,2)::v_i    ! pour les 2 parametres des effets aleatoires a predire niveau essai
     !double precision, allocatable, dimension(:,:)::H_hessOut,HIH,HIHOut,IH,invBi_chol
-
+    Integrale_Individuel = 0.d0 
     if(adaptative .and. switch_adaptative==1) then ! on effectue le changement de variable 
         xx=ui_chap(posind_i-1+j,1)+dsqrt(2.d0)*xx1*invBi_chol_Individuel(posind_i-1+j)            
         !!print*,"posind_i-1+j",posind_i-1+j
@@ -401,6 +658,13 @@ contains
     ! !print*,"vti",vti
     allocate(m(1,1))    
     allocate(m1(1,2),m3(1,2))
+
+    if(.false.) then 
+        varcov=varcov
+        test=test 
+        rho=rho  
+        invBi_chol_Essai_k = invBi_chol_Essai_k
+    end if 
     ! !print*,"matrice varcovinv=",varcovinv
     ! !print*,"matrice m1=",m1
     ! !print*,"matrice m3=",m3
@@ -627,12 +891,14 @@ contains
         IMPLICIT NONE
         integer,intent(in):: j,nsimu,ndim
         double precision,intent(in)::vsi,vti,ui,uti
-        double precision, intent(in)::mu1
+        double precision, intent(in)::mu1 
+        double precision::mu12
         double precision,dimension(nsimu,ndim),intent(in)::frailij
         !double precision,dimension(:,:),allocatable::usim
         integer::n !l
         
-        
+        mu12=mu1
+        Integrale_Individuel_MC_cor = 0.d0 
         ! Je calcule pour chaque individu du cluster par vectorisation son integrale par gaussHermite non adaptative
         if(ndim==2)then
             !allocate(usim(1:nsimu,ndim))
@@ -947,13 +1213,14 @@ contains
     double precision,dimension(:),allocatable ::xx1,ww1
     double precision::resultat,inc
     !double precision, external::gaussHermMultMC    
-    
+    npoint = npoint
     allocate(xx1(npoint))
     allocate(ww1(npoint))
-    
     nnodes=npoint
-    !!print*,"npoint=",npoint
-    
+    !!print*,"npoint=",npoint 
+    frailst = 0.d0 
+    xx1 = 0.d0 
+    ww1 = 0.d0 
     if(nnodes.eq.5) then
       xx1(1:nnodes) = x5(1:nnodes)
       ww1(1:nnodes) = w5(1:nnodes)
@@ -972,6 +1239,9 @@ contains
     else if (nnodes.eq.20) then
       xx1(1:nnodes) = x2(1:nnodes)
       ww1(1:nnodes) = w2(1:nnodes)
+    else 
+      xx1(1:nnodes) = 0.0d0 
+      ww1(1:nnodes) = 0.0d0
     end if
     
     !integration sur vsi et vti

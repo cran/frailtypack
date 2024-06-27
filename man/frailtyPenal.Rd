@@ -794,7 +794,7 @@ by 10 or 5 until it converges.
 \examples{
 
 
-\dontrun{
+\donttest{
 
 ###---  COX proportional hazard model (SHARED without frailties) ---###
 ###---  estimated with penalized likelihood ---###
@@ -896,7 +896,7 @@ kappa=c(1.e+10,1.e+10) ,Alpha="None")
 
 
 ###--- General Joint model (recurrent and terminal events) 
-with 2 covariates ---###
+###--- with 2 covariates ---###
 
 data(readmission)
 modJoint.general <- frailtyPenal(Surv(time,event) ~ cluster(id) + dukes +
@@ -920,6 +920,8 @@ modClu.str <- frailtyPenal(Surv(t1,t2,event)~cluster(group)+
 subcluster(subgroup)+cov1+strata(cov2),data=dataNested,
 n.knots=8,kappa=c(50000,50000))
 
+}
+\dontrun{
 ###--- Joint Nested Frailty model ---###
 
 #-- here is generated cluster (30 clusters)
@@ -934,12 +936,11 @@ modJointNested_Weib <- frailtyPenal(Surv(t.start,t.stop,event)~subcluster(id)
 +cluster(group)+dukes+ terminal(death),formula.terminalEvent=~dukes, 
 hazard = ('Weibull'), data=readmissionNested,recurrentAG=TRUE, initialize = FALSE)
 
-JoiNes_GapSpline <- frailtyPenal(formula = Surv(time, event) 
+JoiNesGapSpline <- frailtyPenal(formula = Surv(time, event) 
 ~ subcluster(id) + cluster(group) + dukes + terminal(death), 
 formula.terminalEvent = ~dukes, data = readmissionNested, 
 recurrentAG = FALSE, n.knots = 8, kappa = c(9.55e+9, 1.41e+12), 
 initialize = TRUE, init.Alpha = 1.091, Ksi = "None")
-
 }
 
 

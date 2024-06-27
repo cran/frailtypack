@@ -559,7 +559,7 @@
   if (missing(formula.LongitudinalData))stop("The argument formula.LongitudinalData must be specified in every model") #AK
   if (missing(formula.terminalEvent))stop("The argument formula.terminalEvent must be specified in every model") #AK
   
-  if(class(formula)!="formula")stop("The argument formula must be a formula")
+  if(!inherits(formula, "formula"))stop("The argument formula must be a formula")
   
   if(typeof == 0){
     if (missing(n.knots))stop("number of knots are required")
@@ -1774,12 +1774,23 @@
     nREB <- 0
     noVarB <- 1
   }
+  #no mediation
+  med.nmc = 0 
+  nparammed = 0 
+  pte.ntimes=1
+  pte.boot=FALSE
+  pte.nboot=0
+  rank_trtM = 0 
+  rank_time=0
+  rank_trtT = 0
+  rank_trtMt = 0
+  res.rt=array(as.double(rep(0.0,(1+pte.nboot)*(pte.ntimes)*4)),dim=c(pte.ntimes,4,1+pte.nboot))
+  param.res.rt =as.integer(rep(0,5))
+  
 
   ans <- .Fortran(C_joint_longi,
                   VectNsujet = as.integer(c(nsujet,nsujety, nsujetB)),
                   ngnzag=as.integer(c(ng, n.knots, AG)),
-                                 
-                                      
                   k0=as.double(kappa), # joint avec generalisation de strate
                   as.double(tt0),
                   as.double(tt1),
@@ -1794,25 +1805,22 @@
                   groupey0 = as.integer(clusterY),
                   groupeB0 = as.integer(clusterB),
                   Vectnb0 = as.integer(c(nRE, nREB)),
+				          fixed_Binary0 = as.double(99),
                   matzy0 =as.double(matzy),
                   matzB0 =as.double(matzB),
                   cag0 = as.double(cag),
                   VectNvar=as.integer(c(nvarR, nvarT, nvarY, nvarB)),
-                  as.double(var),
-                                    
-                  as.double(varT),
-                                            
+                  as.double(var), 
+                  as.double(varT),                 
                   vaxy0 = as.double(varY),
                   vaxB0 = as.double(varB),
-                  noVar = as.integer(c(noVarR,noVarT,noVarY, noVarB)),
-                                       
+                  noVar = as.integer(c(noVarR,noVarT,noVarY, noVarB)),                         
                   as.integer(maxit),
                   np=as.integer(np),
                   neta0 = as.integer(c(netadc,netar)),
                   b=as.double(Beta),
                   H=as.double(matrix(0,nrow=np,ncol=np)),
                   HIH=as.double(matrix(0,nrow=np,ncol=np)),
-                  
                   loglik=as.double(0),
                   LCV=as.double(rep(0,2)),
                   xR=as.double(matrix(0,nrow=size1,ncol=1)),
@@ -1823,33 +1831,38 @@
                   lamD=as.double(matrix(0,nrow=size2,ncol=3)),
                   xSuD=as.double(xSuT),
                   survD=as.double(matrix(0,nrow=mt2,ncol=3)),
-                  as.integer(typeof),
-                  as.integer(equidistant),
-                  as.integer(c(size1,size2,mt1,mt2)),###
+                  #as.integer(typeof),
+                  #as.integer(equidistant),
+                  #as.integer(c(size1,size2,mt1,mt2)),###
+                  as.integer(c(typeof,equidistant,1,size1,1,mt1)),
                   counts=as.integer(c(0,0,0)),
                   ier_istop=as.integer(c(0,0)),
                   paraweib=as.double(rep(0,4)),
                   MartinGale=as.double(matrix(0,nrow=ng,ncol=3+nRE)),###
                   ResLongi = as.double(matrix(0,nrow=nsujety,ncol=4)),
                   Pred_y  = as.double(matrix(0,nrow=nsujety,ncol=2)),
-                  
-            GLMlog0 = as.integer(c(0,0)), # glm with log link + marginal two-part
-			
-			positionVarTime = as.integer(c(404,0,0,0)),
-			numInterac = as.integer(c(1,0)),
-                  
+                  GLMlog0 = as.integer(c(0,0)), # glm with log link + marginal two-part
+                  positionVarTime = as.integer(c(404,0,0,0)),
+                  numInterac = as.integer(c(1,0)),
                   linear.pred=as.double(rep(0,nsujet)),
                   lineardc.pred=as.double(rep(0,as.integer(ng))),
                   zi=as.double(rep(0,(n.knots+6))),
-                  
                   paratps=as.integer(c(0,0,0)),# for future developments
-                  as.integer(c(0,0,0)),# for future developments
-                  BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*0)),# for future developments
-                  BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*0)),# for future developments
-                  BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),# for future developments
+                  #as.integer(c(0,0,0)),# for future developments
+                  #BetaTpsMat=as.double(matrix(0,nrow=101,ncol=1+4*0)),# for future developments
+                  #BetaTpsMatDc=as.double(matrix(0,nrow=101,ncol=1+4*0)),# for future developments
+                  #BetaTpsMatY = as.double(matrix(0,nrow=101,ncol=1+4*0)),# for future developments
+                  BetaTps=array(rep(as.double(matrix(0,nrow=101,ncol=1+4*0)),3),dim=c(101,1,3)),
                   EPS=as.double(c(LIMparam,LIMlogl,LIMderiv)),
                   GH = c(as.integer(GH),as.integer(n.nodes)),
-                  paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol)))
+                  paGH = data.matrix(cbind(b_lme,invBi_cholDet,as.data.frame(invBi_chol))),
+                  mediation=as.double(c(ifelse(FALSE,1,0),
+                            0,ifelse(TRUE,1,0),0,0,
+                            0,0,0,0)),
+                  med.center=rep(0,nsujet),
+                  med.trt=rep(0,nsujet),
+                  param.res.rt=as.integer(param.res.rt),
+                  res.rt=as.double(res.rt)
   )
   
   MartinGale <- matrix(ans$MartinGale,nrow=ng,ncol=3+nRE)

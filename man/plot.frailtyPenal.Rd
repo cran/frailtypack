@@ -59,7 +59,7 @@ data(readmission)
 modSha <- frailtyPenal(Surv(time,event)~as.factor(dukes)+cluster(id),
 n.knots=10,kappa=10000,data=readmission,hazard="Splines")
 
-plot(modSha,type="surv",conf=FALSE)
+plot(modSha,type="Survival",conf=FALSE)
 
 ###--- Cox proportional hazard model ---###
 

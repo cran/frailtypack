@@ -1,7 +1,7 @@
 ##' @export
 print.Diffepoce <- function(x, digits = 3, ...) 
 {
-	if(class(x)!="Diffepoce"){
+	if(!inherits(x, "Diffepoce")){
 		stop("The object x must be a class Diffepoce.")
 	}else{
 # 		if (!is.null(cl <- x$call)){

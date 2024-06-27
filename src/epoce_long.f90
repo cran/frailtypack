@@ -795,7 +795,7 @@
             double precision,dimension(-2:npp)::the1,the2
             double precision,dimension(2)::su,sut1,sut0
         double precision::lam
-            double precision::T
+            double precision::T, tempscl
             logical :: upper
             double precision,parameter::pi=3.141592653589793d0
             upper = .false.
@@ -907,7 +907,8 @@
                                     if (c(k).eq.1) then
                                             select case(typeof)
                                                     case(0)
-                                                            call susps(t1(k),the1,nz1,su,lam,zi)
+                                                            call susps(t1(k),the1,nz1,tempscl,lam,zi)
+                                                            su = tempscl
                                                             if (t1(k).eq.date(ndate)) then
                                                                     lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                                                             endif
@@ -1301,7 +1302,7 @@
             double precision,dimension(-2:npp)::the1,the2
             double precision,dimension(npp)::betacoef
             double precision,dimension(2)::su,sut1,sut0
-        double precision::lam
+        double precision::lam, tempscl
             logical::upper
             double precision,parameter::pi=3.141592653589793d0
     
@@ -1405,7 +1406,8 @@
                 if (c(k).eq.1) then
                     select case(typeof)
                         case(0)
-                            call susps(t1(k),the1,nz1,su,lam,zi)
+                            call susps(t1(k),the1,nz1,tempscl,lam,zi)
+                            su = tempscl
                             if (t1(k).eq.date(ndate)) then
                                 lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                             endif
@@ -1614,8 +1616,9 @@
     
         double precision,intent(out)::ss
         integer,intent(in)::choix
-        double precision::auxfunca,func6Jcvpl
-        external::func6Jcvpl,gauherJcvpl
+        double precision::auxfunca
+        double precision,external::func6Jcvpl
+        external::gauherJcvpl
         integer::j
     
         ss=0.d0
@@ -1651,8 +1654,9 @@
     
         double precision,intent(out)::ss
         integer,intent(in)::choix
-        double precision::auxfunca,func6Jcvpl
-        external::func6Jcvpl,gauherJcvpl
+        double precision::auxfunca
+        double precision,external::func6Jcvpl
+        external::gauherJcvpl
         integer::j
     
         ss=0.d0
@@ -1690,8 +1694,9 @@
     
         double precision,intent(out)::ss
         integer,intent(in)::choix
-        double precision::auxfunca,func6Jcvpl
-        external::func6Jcvpl,gauherJcvpl
+        double precision::auxfunca
+        double precision,external::func6Jcvpl
+        external::gauherJcvpl
         integer::j
     
         ss=0.d0
@@ -1719,69 +1724,65 @@
         use tailles
         use comongroup,only:vet2!,vet
         !use comon,only:nea,date,auxig,alpha,sig2,res1,res3,aux1,nig,netar,utt,
-        use comon,only:sigmae,&
+        use comon,only:sigmae,nea,&
             nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc,link,&
             vey,typeof,s_cag_id,s_cag,cdc,all,zi,ndatedc,nva,nz2,&
             datedc,ut,nb_re,t0dc,vals,nzdc
         use donnees_indiv
         IMPLICIT NONE
-    
-        double precision,intent(in)::frail
-            integer,intent(in)::choix
-            double precision :: yscalar,alnorm,prod_cag,vraisind
-            integer :: j,i,k,n
-            logical :: upper
-            double precision,dimension(nmescur)::mu11
-            double precision,dimension(-2:npp)::the2
-            double precision::sudc,T
+        double precision,dimension(nea),intent(in)::frail
+        integer,intent(in)::choix
+        double precision :: yscalar,alnorm,prod_cag,vraisind
+        integer :: j,i,k,n
+        logical :: upper
+        double precision,dimension(nmescur)::mu11
+        double precision,dimension(-2:npp)::the2
+        double precision::sudc,T
         double precision::lamdc,temp
-            double precision,parameter::pi=3.141592653589793d0
-            double precision,external::survdcCM
+        double precision,parameter::pi=3.141592653589793d0
+        double precision,external::survdcCM
         double precision :: abserr,resabs,resasc
-    
-    
-            upper = .false.
-            i = numpat
-            if(all.eq.1) then
-                    nmes = nmescur
-            else
-                    nmes = nmescur2
-            end if
-            n=0
-            if(choix.eq.2) nmes = nmescur2
-            mu11 = 0.d0
-    
-            select case(typeof)
-                    case(0)
-                            n = (npp-nva-nb_re-1-netadc)
-    
+        
+        sudc=  0.0d0 
+        upper = .false.
+        i = numpat
+        if(all.eq.1) then
+                nmes = nmescur
+        else
+                nmes = nmescur2
+        end if
+        n=0
+        if(choix.eq.2) nmes = nmescur2
+        mu11 = 0.d0
+        select case(typeof)
+        case(0)
+                n = (npp-nva-nb_re-1-netadc)
                 do k=1,n
-                    the2(k-3) = (b1(k))*(b1(k))
+                        the2(k-3) = (b1(k))*(b1(k))
                 end do
-                    case(2)
-                    betaD = b1(1)**2
-                            etaD = b1(2)**2
-            end select
-            vraisind = 1.d0
+        case(2)
+                betaD = b1(1)**2
+                etaD = b1(2)**2
+        end select
+        vraisind = 1.d0
+        if(choix.eq.1) then
+                T = t1dc(i)
+        else
+                T = vals
+        end if
     
-            if(choix.eq.1) then
-                    T = t1dc(i)
-                    else
-                    T = vals
-                    end if
-    
-    !ccccccccccccccccccccccccccccccccccccccccc
-    ! pour le deces
-    !ccccccccccccccccccccccccccccccccccccccccc
+        !ccccccccccccccccccccccccccccccccccccccccc
+        ! pour le deces
+        !ccccccccccccccccccccccccccccccccccccccccc
     
         if(nva2.gt.0)then
-                    vet2 = 0.d0
-            do j=1,nva2
-                            vet2 =vet2 + b1(npp-nva3-nva2+j)*dble(vedc(numpat,j))
-                    end do
+                vet2 = 0.d0
+                do j=1,nva2
+                        vet2 =vet2 + b1(npp-nva3-nva2+j)*dble(vedc(numpat,j))
+                end do
                 vet2 = dexp(vet2)
         else
-                    vet2=1.d0
+                vet2=1.d0
         endif
     
             ! CALCUL DE LA SURVIE
@@ -1796,7 +1797,7 @@
         end select
     
                     vraisind = vraisind*sudc**(vet2&
-                            *dexp(etaydc(1)*frail))
+                            *dexp(etaydc(1)*frail(1)))
     
             else !********** Current Mean ****************
     
@@ -1816,7 +1817,7 @@
             Z1cur(1,1) = 1.d0
             current_mean = 0.d0
     
-            current_mean(1) =dot_product(X2cur(1,1:nva3),b1((npp-nva3+1):npp))+Z1cur(1,1)*frail
+            current_mean(1) =dot_product(X2cur(1,1:nva3),b1((npp-nva3+1):npp))+Z1cur(1,1)*frail(1)
     
     
                     vraisind = vraisind*dexp(-sudc)!**(vet2&
@@ -1841,7 +1842,7 @@
                             end select
     
                             if(link.eq.1) then
-                                    vraisind = vraisind*lamdc*vet2*dexp(etaydc(1)*frail )
+                                    vraisind = vraisind*lamdc*vet2*dexp(etaydc(1)*frail(1) )
                             else
                                     vraisind =vraisind*lamdc*vet2*dexp(etaydc(1)*current_mean(1) )
                             end if
@@ -1854,12 +1855,12 @@
             if(all.eq.1) then
                     if(nmescur.gt.0) then
                             mu11 =MATMUL(X2(1:nmescur,1:nva3),b1((npp-nva3+1):npp))&
-                                    +Z2(1:nmescur,1)*frail
+                                    +Z2(1:nmescur,1)*frail(1)
                     end if
             else
                     if(nmescur2.gt.0) then
                             mu11 =MATMUL(X22(1:nmescur2,1:nva3),b1((npp-nva3+1):npp))&
-                                    +Z22(1:nmescur2,1)*frail
+                                    +Z22(1:nmescur2,1)*frail(1)
                     end if
             end if
     
@@ -1897,7 +1898,7 @@
             yscalar = dsqrt(yscalar)
     
             vraisind = vraisind*prod_cag*dexp( -(yscalar**2.d0)/(sigmae*2.d0)&
-                                    - (frail**2.d0)/(2.d0*ut(1,1)**2))*&
+                                    - (frail(1)**2.d0)/(2.d0*ut(1,1)**2))*&
                                             (1/ut(1,1))*(2.d0*pi)**(1.d0/2.d0)
     
     
@@ -1921,7 +1922,7 @@
             use comon,only:cdc,sigmae,&
                 nva2,npp,nva3,vedc,netadc,betaD,etaD,t1dc,etaydc,link,&
                 vey,typeof,s_cag_id,s_cag,all,zi,ndatedc,nva,nz2,&
-                datedc,vals,ut,utt,nb_re,t0dc,nb1,nzdc
+                datedc,vals,ut,utt,nb_re,t0dc,nb1,nzdc,nea
             use donnees_indiv
         IMPLICIT NONE
     
@@ -1931,7 +1932,9 @@
             integer :: j,i,jj,k,ier,n
     double precision,dimension(nb1*(nb1+1)/2)::matv
     double precision,dimension(2,1)::  Xea2
-    double precision,dimension(2):: uii, Xea22
+    !double precision,dimension(2):: uii, Xea22
+    double precision,dimension(2):: uii
+    double precision,dimension(nea)::Xea22
             double precision,dimension(1)::uiiui
             double precision,dimension(2,2)::mat
             double precision,dimension(nmescur)::mu11
@@ -2210,7 +2213,7 @@
             nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc,etayr,&
             t0,t1,betaR,etaR,effet,typeof,link,nva,vey,c,s_cag_id,s_cag,&
             all,zi,ndatedc,ndate,nb_re,nz1,nz2,&
-            date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc
+            date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc,nea
         use donnees_indiv
     
         IMPLICIT NONE
@@ -2221,7 +2224,9 @@
             integer :: j,i,jj,k,ier,n
             double precision,dimension((netar+effet)*(netar+effet+1)/2)::matv
             double precision,dimension((netar+effet),1)::  Xea2
-            double precision,dimension((netar+effet)):: uii, Xea22
+            !double precision,dimension((netar+effet)):: uii, Xea22 
+            double precision,dimension(netar+effet):: uii
+            double precision,dimension(nea)::Xea22 
             double precision,dimension(1)::uiiui
             double precision,dimension((netar+effet),(netar+effet))::mat
             double precision,dimension(nmescur)::mu11
@@ -2234,7 +2239,7 @@
             double precision :: resultR
             double precision,dimension(1):: current_meanR
                     double precision::sudc
-        double precision::lamdc,temp,lam
+        double precision::lamdc,temp,lam, tempscl
             double precision:: T
     
     
@@ -2356,7 +2361,8 @@
                                                             **(dexp(Xea22(2))*vet*dexp(etayr(1)*Xea22(1)))
                                     else
                                             resultR = 0.d0
-                                            call integrationdc(survRCM,t0(k),t1(k),resultR,abserr,resabs,resasc,k,b1,npp,xea22(1))
+                                            call integrationdc2(survRCM,t0(k),t1(k),resultR,&
+                                            abserr,resabs,resasc,k,b1,npp,xea22(1),1)
                                             vraisind = vraisind * dexp(-resultR*dexp(Xea22(2)))
                                     end if
     
@@ -2382,7 +2388,8 @@
                                     if (c(k).eq.1) then
                                             select case(typeof)
                                                     case(0)
-                                                            call susps(t1(k),the1,nz1,su,lam,zi)
+                                                            call susps(t1(k),the1,nz1,tempscl,lam,zi)
+                                                            su = tempscl
                                                             if (t1(k).eq.date(ndate)) then
                                                                     lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                                                             endif
@@ -2453,7 +2460,7 @@
             else !********** Current Mean ****************
     
             nzdc = nz2
-                        call integrationdc(survdcCM,t0dc(i),T,sudc,abserr,resabs,resasc,i,b1,npp,Xea22(1))
+                        call integrationdc2(survdcCM,t0dc(i),T,sudc,abserr,resabs,resasc,i,b1,npp,Xea22(1),1)
     
     
                     X2cur(1,1) = 1.d0
@@ -2581,7 +2588,7 @@
             nva2,nva1,npp,nva3,vedc,ve,netadc,netar,betaD,etaD,t1dc,etaydc,etayr,&
             t0,t1,betaR,etaR,effet,typeof,link,nva,vey,c,s_cag_id,s_cag,&
             all,zi,ndatedc,ndate,nb_re,nz1,nz2,&
-            date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc
+            date,datedc,vals,nsujet,g,ut,utt,nb1,t0dc,nzdc,nea
         use donnees_indiv
     
         IMPLICIT NONE
@@ -2594,14 +2601,15 @@
             !double precision,dimension(2) :: vec,vec2
             !double precision,dimension(2):: p2,p1
             double precision,dimension((netar+effet),1)::  Xea2
-            double precision,dimension((netar+effet)):: uii, Xea22
+            double precision,dimension((netar+effet)):: uii!, Xea22
+            double precision,dimension(nea)::Xea22
             double precision,dimension(1)::uiiui
             double precision,dimension((netar+effet),(netar+effet))::mat
             double precision,dimension(nmescur)::mu11
             double precision,dimension(2)::su,sut1,sut0
             double precision,dimension(-2:npp)::the1,the2
             double precision::sudc
-        double precision::lamdc,temp,lam
+        double precision::lamdc,temp,lam, tempscl
             double precision:: T
             logical :: upper
             double precision,parameter::pi=3.141592653589793d0
@@ -2748,7 +2756,8 @@
                                     if (c(k).eq.1) then
                                             select case(typeof)
                                                     case(0)
-                                                            call susps(t1(k),the1,nz1,su,lam,zi)
+                                                            call susps(t1(k),the1,nz1,tempscl,lam,zi)
+                                                            su = tempscl
                                                             if (t1(k).eq.date(ndate)) then
                                                                     lam = 4.d0*the1(n-2-1)/(zi(n-2)-zi(n-2-1))
                                                             endif
@@ -2820,7 +2829,7 @@
             else !********** Current Mean ****************
     
             nzdc = nz2
-                        call integrationdc(survdcCM,t0dc(i),T,sudc,abserr,resabs,resasc,i,b1,npp,Xea22(1:2))
+                        call integrationdc2(survdcCM,t0dc(i),T,sudc,abserr,resabs,resasc,i,b1,npp,Xea22(1:2),2)
     
     
                     X2cur(1,1) = 1.d0
