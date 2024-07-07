@@ -3377,7 +3377,43 @@ subroutine Cholesky_Factorisation(vc)
 
 end subroutine Cholesky_Factorisation
 
+subroutine Cholesky_Factorisation2(vc,nn)
+    ! VC: matrice de variance-covariance (symetrique) a factoriser
 
+    implicit none
+    integer :: nn, jj,j,k,ier,maxmes !maxmes= nombre de dimension ou encore dimension de X
+    double precision::eps
+    double precision,dimension(nn,nn),intent(inout)::vc
+    double precision,dimension(:),allocatable::vi
+
+    !=============debut de la fonction=============================
+
+    maxmes=size(vc,2)
+    allocate(vi(maxmes*(maxmes+1)/2))
+    jj=0
+    Vi=0.d0
+    do j=1,maxmes
+        do k=j,maxmes
+           jj=j+k*(k-1)/2
+           Vi(jj)=VC(j,k)
+        end do
+    end do
+
+    EPS=10.d-10
+    CALL DMFSD(Vi,maxmes,eps,ier)! fonction qui fait la factorisation de cholesky
+    VC=0.d0
+    if (ier.eq.-1) then
+        !print*,"Probleme dans la transformation de cholesky pour la generation multinormale"
+        ! stop
+    else ! on retourne un vecteur de 0 car pas possible de transformer
+        do j=1,maxmes
+            do k=1,j
+                VC(j,k)=Vi(k+j*(j-1)/2)
+            end do
+        end do
+    end if
+
+end subroutine Cholesky_Factorisation2
 !C ******************** DMFSD ********************************
 
 

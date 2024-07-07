@@ -1,6 +1,6 @@
-62fcd30618b225837005e5755217c16e *DESCRIPTION
+d0ded8578e31755ce30e50b4f6ebe1d6 *DESCRIPTION
 13ddbd0e49508f951d7b8c4989bfe90c *NAMESPACE
-47343ee0127a25096898571022383884 *NEWS
+713a26008b1fe4f31d591bf4135a3b45 *NEWS
 04a96eb3506e02ceebe313047b72cff6 *R/Cmeasures.R
 06a41d0e1395de2dd02648cea53d0f66 *R/Diffepoce.R
 8ac5f81fd69c8d23ed12c4545f3b5754 *R/GenfrailtyPenal.R
@@ -310,7 +310,7 @@ aecf38c5b87a19b2812019263d11321c *man/wts.Rd
 b23c8ef818eaa1cda8a43f5c02991b14 *src/Aparameters.f90
 dd7be53f3e7a34ff8023eee95354012f *src/Integrale_mult_scl.f90
 2a5f26e170848654cd0c7da4f7d0387a *src/Integrant_scl.f90
-109a93fbc78be80231102b59867e1050 *src/Makevars
+4996271943a81df060d2d9d81c1f706d *src/Makevars
 6db73c5d542a66ab336324992a5f3241 *src/Pour_Adaptative.f90
 ab7e582dbade391e78177abc40d3ad66 *src/aGhermite.f90
 d9cda44c2e90452df505525c65343840 *src/aaOptim.f90
@@ -318,18 +318,18 @@ d9cda44c2e90452df505525c65343840 *src/aaOptim.f90
 210c90d225aa4f3782eca4c5c09e0153 *src/aaOptim_New_scl2.f90
 cf7fd64cc7ba4105796fff0bf2c42f96 *src/aaOptim_SCL_0.f90
 7e446a9450941f583794639932697300 *src/aaOptimres.f90
-6a3c05ebe3c0a31956132f8bb86080e1 *src/aaUseFunction.f90
+2d14023555a48c2610d89a6f5bf8c18e *src/aaUseFunction.f90
 0b2485f36c27084befd204617786f442 *src/aaUseFunctionG.f90
 c0200cfce1d66474db0c4a65b110acea *src/aamarq98o.f90
 b7e1b9e3ddd516750f15bfc1d70ba744 *src/additive.f90
 7d5267298f6906e0f1d300ca2a02e08f *src/afuncpasres.f90
 845585a06dd9b18414f58f368ae5d9c7 *src/ahrmsym.f90
 bcf23a25a612d326798e25f8b74d0233 *src/aresidusMartingale.f90
-d3eb977394356c2cd608831aa95d81f2 *src/autres_fonctions.f90
+4c4a70f090c41b825275ba9015b399aa *src/autres_fonctions.f90
 1f80db264efac3a9ffafbeb169e688d2 *src/distance.f90
 41fee31606e389590fb3e186b6c50f05 *src/epoce.f90
 d29b1964bb75cd0239f35425681f6785 *src/epoce_log.f90
-47404b3caaf7f6fabe749235105066b7 *src/epoce_long.f90
+bb86818e9cef9127f1acc1cff3d881ed *src/epoce_long.f90
 81da79849fc847780992985c7c69f845 *src/epoce_long_nl.f90
 d781cf3762e3dd885493469badac6ba3 *src/fortran_random.c
 cec8bbb6e23e81cbcf93fc09876f3a9d *src/frailtypack.f90
@@ -362,7 +362,7 @@ dd68f6e0e522a90dbee3fb5c9d4fcf67 *src/funcpaj_tps.f90
 ce08bcf730210e004d96b74e92c90fa3 *src/funcpajgeneral.f90
 799157b67fbe71775ed1aa9a70f690fe *src/funcpajgenparam.f90
 a5d11e96d741fb63547b5cbdc9a8441d *src/funcpajlongisplines.f90
-c5b112705f18f4e16ebecc50ddcda647 *src/funcpajlongisplines2.f90
+b071ffd67e98b128718ad6c1a947257e *src/funcpajlongisplines2.f90
 035c6178ae523bb95c6f1fb100126bcc *src/funcpajlongisplines_nl.f90
 b6012a106c55361e7c878d770fca7c76 *src/funcpajlongiweib.f90
 d92f7ce71ba673bbce9d0f7321e78207 *src/funcpajlongiweib_nl.f90
@@ -411,7 +411,7 @@ d18cc6232ab4f906dfc32fa299a6c494 *src/jointgen.f90
 748049e43fd379e5cff2f622939e50f9 *src/jointsurrokendall.f90
 2ebb1f68e454445595e773768e4b0aac *src/longi_uni_nl.f90
 b4a3831de6902a483aa19aee272758ed *src/multiveJoint.f90
-afe563a58ea9da0e045a95a0958d559a *src/natural_effects.f90
+edfca7ea0baf98d7a3d9510cdb87db0d *src/natural_effects.f90
 87c5d496cd190c9c90ea074a7e7b8759 *src/nested.f90
 abefacb45db399dde893d1ea243054ed *src/prediction.f90
 b7bf3b327f9665d234e5794b136ca08a *src/prediction_Recurr_Sha.f90

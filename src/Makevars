@@ -11,11 +11,11 @@ PKG_LIBS = $(SHLIB_OPENMP_CFLAGS)
 #PKG_FCFLAGS = $(SHLIB_OPENMP_FCFLAGS) # openmp falg /windows
 
 # Setup dependencies for parallel make
-prediction.o: Aparameters.o
-predictionfam.o: Aparameters.o
-prediction_log.o: Aparameters.o
-prediction_sha_logn.o: aaOptim.o aaOptimres.o Aparameters.o
-prediction_Recurr_Sha.o: aaOptim.o aaOptimres.o Aparameters.o
+prediction.o: Aparameters.o Adonnees.o
+predictionfam.o: Aparameters.o Adonnees.o
+prediction_log.o: Aparameters.o 
+prediction_sha_logn.o: aaOptim.o aaOptimres.o Aparameters.o Adonnees.o
+prediction_Recurr_Sha.o: aaOptim.o aaOptimres.o Aparameters.o Adonnees.o
 prediction_biv.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_tri.o: aaOptim.o aaOptimres.o Aparameters.o
 prediction_tri_nl.o: aaOptim.o aaOptimres.o Aparameters.o
@@ -103,8 +103,9 @@ funcpajcompetingsplines.o: aaOptim.o aaOptimres.o AparamMultive.o
 funcpajcompetingweib.o: aaOptim.o aaOptimres.o AparamMultive.o
 
 autres_fonctions.o: Adonnees.o Aparameters.o
+natural_effects.o: Aparameters.o autres_fonctions.o 
 
-joint_longi.o: aaOptim.o aaOptimres.o Aparameters.o autres_fonctions.o
+joint_longi.o: aaOptim.o aaOptimres.o Aparameters.o autres_fonctions.o natural_effects.o
 funcpajlongisplines.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o autres_fonctions.o
 funcpajlongisplines2.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o autres_fonctions.o
 funcpajlongiweib.o: aaOptim.o aaOptimres.o Aparameters.o ahrmsym.o
@@ -139,3 +140,6 @@ joint_surrogate.o: Aparameters.o aaOptim_SCL_0.o Adonnees.o
 jointSurrogate.o: Aparameters.o autres_fonctions.o natural_effects.o
 surrosim.o: Aparameters.o autres_fonctions.o
 jointsurrokendall.o: Integrant_scl.o
+
+
+funcpajsplinesIndiv.o: Aparameters.o

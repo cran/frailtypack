@@ -1,7 +1,5 @@
-Changes in Version 3.6.1 June 2024
-o Corrections for the compilation of the package, regarding OMP specification in joint_longi.f90 and pointer variable declaration in fortran_random.c and frailtypack.h
-o Corrections of compilation warnings
-o Some examples with a long runtime have been placed within the \dontrun function. 
+Changes in Version 3.6.2 July 2024
+o Correction of warnings during compilation stage of the package.
 
 Changes in Version 3.6.0 March 2024
 o New function (jointRecCompet) to fit a frailty model with one recurrent event and two terminal events.

@@ -135,7 +135,7 @@ module natural_effects
        sigma(1,2)=eta_ind*sig_omega+alpha_ind*sig_u+zs*zt*sig_st
        sigma(2,1)=sigma(1,2)
 
-       call Cholesky_Factorisation(sigma)
+       call Cholesky_Factorisation2(sigma,2)
        allocate(x1(nsim,2))
        do i=1,nsim
          call bgos(1.0d0,2,x1(i,1),x1(i,2),0.d0)
@@ -348,7 +348,7 @@ module natural_effects
     end if
     if(ran) then
       cdummy=covar
-      call Cholesky_Factorisation(cdummy)
+      call Cholesky_Factorisation2(cdummy,np)
       do i=1,np
         call bgos(1.0d0,2,x1(i),dummy,0.d0)
       enddo

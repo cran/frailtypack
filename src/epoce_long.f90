@@ -2362,7 +2362,7 @@
                                     else
                                             resultR = 0.d0
                                             call integrationdc2(survRCM,t0(k),t1(k),resultR,&
-                                            abserr,resabs,resasc,k,b1,npp,xea22(1),1)
+                                            abserr,resabs,resasc,k,b1,npp,xea22(1:1),1)
                                             vraisind = vraisind * dexp(-resultR*dexp(Xea22(2)))
                                     end if
     

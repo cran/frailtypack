@@ -787,6 +787,7 @@ subroutine integrationdc(f,a,b,result,abserr,resabs,resasc,i,bh,np,frail)
 
 end
 subroutine integrationdc2(f,a,b,result,abserr,resabs,resasc,i,bh,np,frail,dfrail)
+    implicit none
     integer,intent(in)::dfrail
     double precision :: a,absc,abserr,b,centr,dabs,dhlgth,dmax1,dmin1,d1mach(5),epmach,fc,fsum,fval1,fval2,&
     fv1,fv2,hlgth,resabs,resasc,resg,resk,reskh,result,uflow,wg,wgk,xgk

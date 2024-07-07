@@ -109,7 +109,6 @@ double precision function funcpajlongisplines2(b,np,id,thi,jd,thj,k0)
   !real::tstart,tstop 
   !$ integer::nthreads 
   funcpajlongisplines2 = 0.d0 
-  
   method_int=1
   if(.false.) then 
     betazm = betazm 
