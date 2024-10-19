@@ -1,6 +1,6 @@
-d0ded8578e31755ce30e50b4f6ebe1d6 *DESCRIPTION
+9f6b42a78c8656e754209d72322f713d *DESCRIPTION
 13ddbd0e49508f951d7b8c4989bfe90c *NAMESPACE
-713a26008b1fe4f31d591bf4135a3b45 *NEWS
+e6083c5e711eb660e5a1d556cd5ddc9b *NEWS
 04a96eb3506e02ceebe313047b72cff6 *R/Cmeasures.R
 06a41d0e1395de2dd02648cea53d0f66 *R/Diffepoce.R
 8ac5f81fd69c8d23ed12c4545f3b5754 *R/GenfrailtyPenal.R
@@ -361,8 +361,8 @@ dd68f6e0e522a90dbee3fb5c9d4fcf67 *src/funcpaj_tps.f90
 8f69fc5e53b990513041fc038fe5a80e *src/funcpajgen_tps.f90
 ce08bcf730210e004d96b74e92c90fa3 *src/funcpajgeneral.f90
 799157b67fbe71775ed1aa9a70f690fe *src/funcpajgenparam.f90
-a5d11e96d741fb63547b5cbdc9a8441d *src/funcpajlongisplines.f90
-b071ffd67e98b128718ad6c1a947257e *src/funcpajlongisplines2.f90
+ceff7e3f4d4959f19f061e275b0bd55d *src/funcpajlongisplines.f90
+7ddcb89df0056487ca9c877968a1d2bf *src/funcpajlongisplines2.f90
 035c6178ae523bb95c6f1fb100126bcc *src/funcpajlongisplines_nl.f90
 b6012a106c55361e7c878d770fca7c76 *src/funcpajlongiweib.f90
 d92f7ce71ba673bbce9d0f7321e78207 *src/funcpajlongiweib_nl.f90

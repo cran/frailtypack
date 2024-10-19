@@ -1,6 +1,6 @@
 Package: frailtypack
-Version: 3.6.2
-Date: 2024-07-04
+Version: 3.6.3
+Date: 2024-10-17
 Title: Shared, Joint (Generalized) Frailty Models; Surrogate Endpoints
 Authors@R: c(person("Virginie", "Rondeau", email = "virginie.rondeau@u-bordeaux.fr", role = c("aut", "cre"), comment = c(ORCID = '0000-0001-7109-4831')),
               person("Juan R.", "Gonzalez", role = "aut"),
@@ -49,8 +49,8 @@ URL:
 Suggests: knitr, testthat, rmarkdown, markdown
 VignetteBuilder: knitr
 Repository: CRAN
-Date/Publication: 2024-07-07 16:10:02 UTC
-Packaged: 2024-07-05 18:00:27 UTC; Quent
+Date/Publication: 2024-10-19 22:50:03 UTC
+Packaged: 2024-10-18 15:02:36 UTC; Quent
 NeedsCompilation: yes
 RoxygenNote: 7.3.1
 Author: Virginie Rondeau [aut, cre] (<https://orcid.org/0000-0001-7109-4831>),

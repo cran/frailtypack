@@ -1,3 +1,6 @@
+Changes in Version 3.6.3 October 2024
+o Correction of an issue in likelihood for joint model with longitidunal outcome where penalization term was not applied
+
 Changes in Version 3.6.2 July 2024
 o Correction of warnings during compilation stage of the package.
 
