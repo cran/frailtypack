@@ -185,16 +185,16 @@
       cat("Mediation analysis:\n")
       cat("--------------- \n")
       mediation<-x$mediation
-      n<-min(length(mediation$data.rt$Time),5)
+      n<-min(length(mediation$data.pte$Time),5)
       ## PTE and NEFF ......
-      times<-round(mediation$data.rt$Time,min(4,d))
-      rt<-round(mediation$data.rt$Rt,min(4,d))
-      nie<-round(mediation$data.rt$NIE,min(4,d))
-      nde<-round(mediation$data.rt$NDE,min(4,d))
-      te<-round(mediation$data.rt$TE,min(4,d))
+      times<-round(mediation$data.pte$Time,min(4,d))
+      pte<-round(mediation$data.pte$PTE,min(4,d))
+      nie<-round(mediation$data.pte$NIE,min(4,d))
+      nde<-round(mediation$data.pte$NDE,min(4,d))
+      te<-round(mediation$data.pte$TE,min(4,d))
       pos<-(1:n)*floor((length(times)/n))
       times<-times[pos]
-      rt<-rt[pos]
+      pte<-pte[pos]
       nie<-nie[pos]
       nde<-nde[pos]
       te<-te[pos]
@@ -203,6 +203,6 @@
           n, "time points \n \n")
         #no confidence bands available
         print(data.frame("Time"=times,"Total effect"=te,
-                         "Direct effect"=nde,"Indirect effect"=nie,"PTE"=rt))
+                         "Direct effect"=nde,"Indirect effect"=nie,"PTE"=pte))
     }
   }

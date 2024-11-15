@@ -1,6 +1,6 @@
-9f6b42a78c8656e754209d72322f713d *DESCRIPTION
+8b453bfc3e46b75b96b1d7fdf4b49731 *DESCRIPTION
 13ddbd0e49508f951d7b8c4989bfe90c *NAMESPACE
-e6083c5e711eb660e5a1d556cd5ddc9b *NEWS
+4f64866cb325d1ac5bf04ccc5832d59a *NEWS
 04a96eb3506e02ceebe313047b72cff6 *R/Cmeasures.R
 06a41d0e1395de2dd02648cea53d0f66 *R/Diffepoce.R
 8ac5f81fd69c8d23ed12c4545f3b5754 *R/GenfrailtyPenal.R
@@ -32,7 +32,7 @@ db447b9b0efeaa129fcecdec477c8056 *R/jointSurroCopPenal.R
 9c9c264198175b20a0d8f11237f411dc *R/kappa_val_croisee.r
 cc13f3ede0b9f3eee6e6ca7335116f74 *R/kendall_bootstrap.r
 736204d2917572e63c39c441f8aa749e *R/lines.frailtyPenal.R
-04fa76ade4aca843e3f105b4111cab51 *R/longiPenal.R
+68251583964ecc88e28a98e2d89b0db6 *R/longiPenal.R
 973c521e64f913755fee6ec56b204da1 *R/loocv.R
 c3f91ef3b638773274287c9e67204fa5 *R/loocv.summary.R
 5691a9009fe2863dec4c3c2c64c9d846 *R/mergeJointSurroSimul.R
@@ -48,7 +48,7 @@ a978ddbc9cb55110200a19948782237a *R/multivPenal.R
 2d14e8c54349280dd13aeb713d0dbc1b *R/plot.jointSurroMed.R
 46034a30a99f607d8cd5916e417ac77e *R/plot.jointSurroPenal.R
 b5926ea64cf93b660d88eed6fdf0e3d8 *R/plot.jointSurroPenalloocv.R
-be5277239e4f5c35dd0dd7cb4f39c5a0 *R/plot.longiPenal.R
+30dcf9639a1be659b63198faa439d13f *R/plot.longiPenal.R
 b6d108477ce66f2b1bd38fbdca13c917 *R/plot.multivPenal.R
 c173b7ab04327ec0148e5ca99b7202d0 *R/plot.nestedPenal.additivePenal.R
 73eb091fef406d2b88ce48ca6a8e7938 *R/plot.predFrailty.R
@@ -69,7 +69,7 @@ f115498a5d12efc35fcca0c5f537718a *R/print.additivePenal.R
 a4bb7097477f77a50d12d4c5c7766f75 *R/print.jointPenal.R
 c9dd2b71b1ec4a88dabef8a59ff18ccf *R/print.jointRecCompet.R
 68f8f97c6d620751ea1999ef4c783cd6 *R/print.jointSurroPenal.R
-c164f496eb65ef1ed39f112a4b9d74ee *R/print.longiPenal.R
+eeba1cfd259429df3b0609a7f53a87ea *R/print.longiPenal.R
 9e029cc58455fdaaaf1d261636e20c35 *R/print.multivPenal.R
 e198e26f5d46aa1b549f361b56522a31 *R/print.nestedPenal.R
 c9744de0070c5a0216bac91d90a21544 *R/print.predFrailty.R
@@ -94,7 +94,7 @@ bc881561fd582a7c3b3f6ad87e14ec5c *R/summary.jointNestedPenal.R
 c9d0a0c13a6d7e9955ac73bf49bb4c9a *R/summary.jointSurroMed.R
 a38a51b817ebcd3dc5c87509beb758a4 *R/summary.jointSurroPenal.R
 023a3a51ded89930c84b8c0e0aac3bd3 *R/summary.jointSurroPenalSimul.R
-1df06e17155b5b2ce68de3ee46363869 *R/summary.longiPenal.R
+edb55a527785e94f84aeb97868eda338 *R/summary.longiPenal.R
 99563107f71b207c38f6aed5abfe9a62 *R/summary.multivPenal.R
 af8040df3bfb3d271f2995a3bdc5b867 *R/summary.nestedPenal.R
 bcae1f7bf1150f786cc68486ba737bfb *R/summary.trivPenal.R

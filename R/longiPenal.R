@@ -2299,6 +2299,8 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
   }
 
     if(mediation){
+          mint = min(tt1dc[cens==1])
+          maxt = max(tt1dc[cens==1])
         if(is.null(pte.times) & is.null(pte.ntimes)){
           #by default pte.times = pte.ntimes evenly distributed times between
           #min observed time death and max observed time death
@@ -2306,8 +2308,6 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
           pte.ntimes=10
           pte.times=sapply(0:(pte.ntimes-1),function(i) mint + (i/(pte.ntimes-1))*(maxt-mint))
           }else if(is.null(pte.times) & !(is.null(pte.ntimes))){
-            mint = min(tt1dc[cens==1])
-            maxt = max(tt1dc[cens==1])
             pte.times=sapply(0:(pte.ntimes-1),function(i) mint + (i/(pte.ntimes-1))*(maxt-mint))
           }else if(!(is.null(pte.times)) & is.null(pte.ntimes)){
             pte.ntimes=length(pte.times)
@@ -2345,9 +2345,9 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
       }
       rank_trtT=which(apply(varT,2,function(x) sum(x!=med.trt))==0)
       rank_time=which(apply(varY,2,function(x) sum(x!=varY[,timevar]))==0)
-      param.res.rt =as.integer(c(pte.ntimes,pte.nmc,pte.boot,pte.nboot))
-      res.rt = array(as.double(rep(0.0,(1+pte.nboot)*(pte.ntimes)*4)),dim=c(pte.ntimes,4,1+pte.nboot))
-      res.rt[,1,1]=pte.times
+      param.res.pte =as.integer(c(pte.ntimes,pte.nmc,pte.boot,pte.nboot))
+      res.pte = array(as.double(rep(0.0,(1+pte.nboot)*(pte.ntimes)*4)),dim=c(pte.ntimes,4,1+pte.nboot))
+      res.pte[,1,1]=pte.times
     }else{
       #todo
       med.nmc = 0 
@@ -2359,8 +2359,8 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
       rank_time=0
       rank_trtT = 0
       rank_trtMt = 0
-      res.rt=array(as.double(rep(0.0,(1+pte.nboot)*(pte.ntimes)*4)),dim=c(pte.ntimes,4,1+pte.nboot))
-      param.res.rt =as.integer(rep(0,5))
+      res.pte=array(as.double(rep(0.0,(1+pte.nboot)*(pte.ntimes)*4)),dim=c(pte.ntimes,4,1+pte.nboot))
+      param.res.pte =as.integer(rep(0,5))
     }
     # call joint_longi.f90
     ans <- .Fortran(C_joint_longi,
@@ -2436,8 +2436,8 @@ seed.MC=ifelse(seed.MC==F,0,seed.MC) # seed for Monte-carlo (0 if random / unspe
                             rank_trtMt,rank_time,med.nmc,nparammed)),
       med.center=as.integer(med.center),
       med.trt=as.integer(med.trt),
-      param.res.rt=as.integer(param.res.rt),
-      res.rt=as.double(res.rt)
+      param.res.pte=as.integer(param.res.pte),
+      res.pte=as.double(res.pte)
 			)#,
     #PACKAGE = "frailtypack") #65 arguments
     MartinGale <- matrix(ans$MartinGale,nrow=ng,ncol=3+nRE)
@@ -2671,60 +2671,59 @@ if(TwoPart){
 
         }
 } 
-#return(list(ans$res.rt,pte.nboot,pte.ntimes))
 if(mediation){
     ##
-    res.rt<-array(NA,dim=c(pte.ntimes,4,pte.nboot+1))
+    res.pte<-array(NA,dim=c(pte.ntimes,4,pte.nboot+1))
     for(i in 1:(pte.nboot+1)){
       pos<-(1+(i-1)*(4*pte.ntimes)):((4*pte.ntimes)*i)
-      vect<-ans$res.rt[pos]
-      res.rt[,,i]<-matrix(vect,ncol=4,nrow=pte.ntimes)
+      vect<-ans$res.pte[pos]
+      res.pte[,,i]<-matrix(vect,ncol=4,nrow=pte.ntimes)
     }
-    dat.rt<-as.data.frame(res.rt[,,1])
-    names(dat.rt)<-c("Time","S11","S01","S00")
-    dat.rt$Rt<-(dat.rt$S11-dat.rt$S01)/(dat.rt$S11-dat.rt$S00)
-    dat.rt$NDE<-dat.rt$S01 - dat.rt$S00
-    dat.rt$NIE<-dat.rt$S11 - dat.rt$S01
-    dat.rt$TE<-dat.rt$S11 - dat.rt$S00
+    data.pte<-as.data.frame(res.pte[,,1])
+    names(data.pte)<-c("Time","S11","S01","S00")
+    data.pte$PTE<-(data.pte$S11-data.pte$S01)/(data.pte$S11-data.pte$S00)
+    data.pte$NDE<-data.pte$S01 - data.pte$S00
+    data.pte$NIE<-data.pte$S11 - data.pte$S01
+    data.pte$TE<-data.pte$S11 - data.pte$S00
     if(pte.boot){
-      dat.rt$Rt<-sapply(1:pte.ntimes,function(i){
+      data.pte$PTE<-sapply(1:pte.ntimes,function(i){
         return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          (res.rt[i,2,k]-res.rt[i,3,k])/(res.rt[i,2,k]-res.rt[i,4,k])
+          (res.pte[i,2,k]-res.pte[i,3,k])/(res.pte[i,2,k]-res.pte[i,4,k])
         }),probs=0.5,na.rm=TRUE)))
       })
-      Rtconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
+      PTEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
         return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          (res.rt[i,2,k]-res.rt[i,3,k])/(res.rt[i,2,k]-res.rt[i,4,k])
+          (res.pte[i,2,k]-res.pte[i,3,k])/(res.pte[i,2,k]-res.pte[i,4,k])
         }),probs=c(.025,.975),na.rm=TRUE)))
       })))
-      names(Rtconf)<-c("lower","upper")
+      names(PTEconf)<-c("lower","upper")
       NDEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
         return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          res.rt[i,3,k]-res.rt[i,4,k]
+          res.pte[i,3,k]-res.pte[i,4,k]
         }),probs=c(.025,.975),na.rm=TRUE)))
       })))
       names(NDEconf)<-c("lower","upper")
       NIEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
         return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          res.rt[i,2,k]-res.rt[i,3,k]
+          res.pte[i,2,k]-res.pte[i,3,k]
         }),probs=c(.025,.975),na.rm=TRUE)))
       })))
       names(NIEconf)<-c("lower","upper")
       TEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
         return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
-          res.rt[i,2,k]-res.rt[i,4,k]
+          res.pte[i,2,k]-res.pte[i,4,k]
         }),probs=c(.025,.975),na.rm=TRUE)))
       })))
       names(TEconf)<-c("lower","upper")
     }
-    dat.rt$S00<-NULL
-    dat.rt$S11<-NULL
-    dat.rt$S01<-NULL
+    data.pte$S00<-NULL
+    data.pte$S11<-NULL
+    data.pte$S01<-NULL
     if(pte.boot){
-      result.mediation<-list(data.rt=dat.rt,Rt.ci=Rtconf,NIE.ci=NIEconf,
+      result.mediation<-list(data.pte=data.pte,PTE.ci=PTEconf,NIE.ci=NIEconf,
                              NDE.ci=NDEconf,TE.ci=TEconf)
     }else{
-      result.mediation<-list(data.rt=dat.rt)
+      result.mediation<-list(data.pte=data.pte)
     }
     fit$mediation = result.mediation
   }

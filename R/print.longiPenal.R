@@ -348,18 +348,18 @@
         cat("------------- \n")
         cat('\n')
       mediation<-x$mediation
-      n<-min(length(mediation$data.rt$Time),5)
+      n<-min(length(mediation$data.pte$Time),5)
       ## PTE and NEFF ......
-      times<-round(mediation$data.rt$Time,min(4,digits))
-      rt<-round(mediation$data.rt$Rt,min(4,digits))
-      nie<-round(mediation$data.rt$NIE,min(4,digits))
-      nde<-round(mediation$data.rt$NDE,min(4,digits))
-      te<-round(mediation$data.rt$TE,min(4,digits))
+      times<-round(mediation$data.pte$Time,min(4,digits))
+      pte<-round(mediation$data.pte$PTE,min(4,digits))
+      nie<-round(mediation$data.pte$NIE,min(4,digits))
+      nde<-round(mediation$data.pte$NDE,min(4,digits))
+      te<-round(mediation$data.pte$TE,min(4,digits))
       
       pos<-(1:n)*floor((length(times)/n))
       
       times<-times[pos]
-      rt<-rt[pos]
+      pte<-pte[pos]
       nie<-nie[pos]
       nde<-nde[pos]
       te<-te[pos]
@@ -367,20 +367,20 @@
       cat("Estimated PTE, natural direct, indirect and total effect at",
           n, "time points \n \n")
       
-      if(is.null(mediation$Rt.ci)){
+      if(is.null(mediation$PTE.ci)){
         #no confidence bands available
-        print(data.frame("Time"=times,"PTE"=rt,"Total"=te,
+        print(data.frame("Time"=times,"PTE"=pte,"Total"=te,
                          "Direct"=nde,"Indirect"=nie))
       }
-      if(!is.null(mediation$Rt.ci)){
+      if(!is.null(mediation$PTE.ci)){
         nie.upp<-round(mediation$NIE.ci$upper[pos],min(4,digits))
         nie.low<-round(mediation$NIE.ci$lower[pos],min(4,digits))
         nde.upp<-round(mediation$NDE.ci$upper[pos],min(4,digits))
         nde.low<-round(mediation$NDE.ci$lower[pos],min(4,digits))
         te.upp<-round(mediation$TE.ci$upper[pos],min(4,digits))
         te.low<-round(mediation$TE.ci$lower[pos],min(4,digits))
-        rt.upp<-round(mediation$Rt.ci$upper[pos],min(4,digits))
-        rt.low<-round(mediation$Rt.ci$low[pos],min(4,digits))
+        pte.upp<-round(mediation$PTE.ci$upper[pos],min(4,digits))
+        pte.low<-round(mediation$PTE.ci$low[pos],min(4,digits))
         
         nie.ci = sapply(seq_along(nie.upp),function(i){
           paste("[",nie.low[i],";",nie.upp[i],"]",sep="")
@@ -391,10 +391,10 @@
         te.ci = sapply(seq_along(te.upp),function(i){
           paste("[",te.low[i],";",te.upp[i],"]",sep="")
         })
-        rt.ci = sapply(seq_along(rt.upp),function(i){
-          paste("[",rt.low[i],";",rt.upp[i],"]",sep="")
+        pte.ci = sapply(seq_along(pte.upp),function(i){
+          paste("[",pte.low[i],";",pte.upp[i],"]",sep="")
         })
-        print(data.frame("Time"=times,"PTE"=rt,"CI 95 PTE"=rt.ci,
+        print(data.frame("Time"=times,"PTE"=pte,"CI 95 PTE"=pte.ci,
                          "TE"=te,"CI 95 TE"=te.ci,
                          "NDE"=nde,"CI 95 NDE"=nde.ci,
                          "NIE"=nie,"CI 95 NIE"=nie.ci))
