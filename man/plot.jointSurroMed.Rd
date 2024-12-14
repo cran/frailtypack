@@ -16,7 +16,7 @@ output from calling \code{jointSurroPenal} function with the option
 'mediation' set to TRUE.}
 
 \item{plot.mediation}{A character string specifying the desired plot.
- Possible values are "All", "g","Rt" or "Effects". The default is
+ Possible values are "All", "g","PTE" or "Effects". The default is
 "All" which displays all three plots.}
 
 \item{type.plot}{A character string specifying the type of curve
@@ -44,11 +44,11 @@ of a joint surrogate model
 }
 \description{
 Plots the estimated functions associated with the mediation analysis, i.e.
-\eqn{g(s)}, \eqn{R(t)}
+\eqn{g(s)}, \eqn{PTE(t)}
 as well as the natural direct, indirect and total effects.
 An option to plot the confidence bands of the function \eqn{g(s)} is available.
 This option is also implemented for the confidence bands of the functions
-\eqn{R(t)} and of the natural effects if these confidence bands are available.
+\eqn{PTE(t)} and of the natural effects if these confidence bands are available.
 }
 \seealso{
 \code{\link{jointSurroPenal}}

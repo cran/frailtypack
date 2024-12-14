@@ -18,7 +18,7 @@ The maximum of 4 digits is required for the estimates. Default of 3 digits is us
 criteria. Default of 4 digits is used.}
 
 \item{n}{The number of time points to be used in the results of the differents function
-related to the mediation analysis: \eqn{g(s)}, \eqn{R(t)} and the direct, indirect and total
+related to the mediation analysis: \eqn{g(s)}, \eqn{PTE(t)} and the direct, indirect and total
 effect. The provided value should be between 1 and 20. Default is 3.}
 
 \item{...}{other unused arguments.}
@@ -28,7 +28,7 @@ For the variances parameters of the random effects, it prints the estimate of
 the coefficients with their standard error, Z-statistics and p-values
 of the Wald test. For the fixed treatment effects, it also prints HR and its confidence
 intervals for each covariate.
-For the surrogacy assessment, prints \code{n} value of the estimation function \eqn{g(s)} and \eqn{R(t)}.
+For the surrogacy assessment, prints \code{n} value of the estimation function \eqn{g(s)} and \eqn{PTE(t)}.
 Also prints the values of the estimated direct, indirect and total effects.
 The remaining displayed information concern the convergence characteristics and
 include the penalized marginal log-likelihood, the number of iterations, the LCV and the convergence criteria.
@@ -36,7 +36,7 @@ include the penalized marginal log-likelihood, the number of iterations, the LCV
 \description{
 This function returns the estimate of the coefficients of the model, their standard error and the
 associated p-values of the Wald test for the joint surrogate model, also hazard ratios (HR) and their
-confidence intervals for the fixed treatment effects. It also displays summary of the surrogacy measure \eqn{R(t)}
+confidence intervals for the fixed treatment effects. It also displays summary of the surrogacy measure \eqn{PTE(t)}
 and of the natural direct, indirect and total effect.
 }
 \seealso{

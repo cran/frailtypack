@@ -3,7 +3,7 @@
 ##'
 ##' This function returns the estimate of the coefficients of the model, their standard error and the
 ##' associated p-values of the Wald test for the joint surrogate model, also hazard ratios (HR) and their
-##' confidence intervals for the fixed treatment effects. It also displays summary of the surrogacy measure \eqn{R(t)}
+##' confidence intervals for the fixed treatment effects. It also displays summary of the surrogacy measure \eqn{PTE(t)}
 ##' and of the natural direct, indirect and total effect.
 ##'
 ##' @aliases summary.jointSurroMed print.summary.jointSurroMed
@@ -15,7 +15,7 @@
 ##' @param len The desired number of digits after the decimal point for p-value and convergence
 ##' criteria. Default of 4 digits is used.
 ##' @param n The number of time points to be used in the results of the differents function
-##' related to the mediation analysis: \eqn{g(s)}, \eqn{R(t)} and the direct, indirect and total
+##' related to the mediation analysis: \eqn{g(s)}, \eqn{PTE(t)} and the direct, indirect and total
 ##' effect. The provided value should be between 1 and 20. Default is 3.
 ##' @param ... other unused arguments.
 ##'
@@ -23,7 +23,7 @@
 ##' the coefficients with their standard error, Z-statistics and p-values
 ##' of the Wald test. For the fixed treatment effects, it also prints HR and its confidence
 ##' intervals for each covariate.
-##' For the surrogacy assessment, prints \code{n} value of the estimation function \eqn{g(s)} and \eqn{R(t)}.
+##' For the surrogacy assessment, prints \code{n} value of the estimation function \eqn{g(s)} and \eqn{PTE(t)}.
 ##' Also prints the values of the estimated direct, indirect and total effects.
 
 ##' The remaining displayed information concern the convergence characteristics and
@@ -140,7 +140,7 @@ function(object, d = 4, len = 3,n=3,...){
 
   ## mediation ...
   mediation<-object$mediation
-  n<-min(10,n,length(mediation$data.rt$Time),length(mediation$data.g$s))
+  n<-min(10,n,length(mediation$data.pte$Time),length(mediation$data.g$s))
   ## Gamma
   times<-mediation$data.g$s
   g<-mediation$data.g$g
@@ -163,27 +163,27 @@ function(object, d = 4, len = 3,n=3,...){
   cat("Estimated function g at", n, "times of occurence of the surrogate\n")
   print(data.frame("Time"=times,"g"=g,"CI 95"=Ci))
 
-  ## R(t) and NEFF ......
-  times<-round(mediation$data.rt$Time,min(4,len))
-  rt<-round(mediation$data.rt$Rt,min(4,len))
-  nie<-round(mediation$data.rt$NIE,min(4,len))
-  nde<-round(mediation$data.rt$NDE,min(4,len))
-  te<-round(mediation$data.rt$TE,min(4,len))
+  ## PTE(t) and NEFF ......
+  times<-round(mediation$data.pte$Time,min(4,len))
+  pte<-round(mediation$data.pte$PTE,min(4,len))
+  nie<-round(mediation$data.pte$NIE,min(4,len))
+  nde<-round(mediation$data.pte$NDE,min(4,len))
+  te<-round(mediation$data.pte$TE,min(4,len))
 
   pos<-(1:n)*floor((length(times)/n))
 
   times<-times[pos]
-  rt<-rt[pos]
+  pte<-pte[pos]
   nie<-nie[pos]
   nde<-nde[pos]
   te<-te[pos]
   cat(" ", "\n")
-  cat("Estimated function R(t), natural direct, indirect and total effect at",
+  cat("Estimated function PTE(t), natural direct, indirect and total effect at",
       n, "time points \n")
 
   if(length(mediation)==5){
     #no confidence bands available
-    print(data.frame("Time"=times,"Rt"=rt,"Total"=te,
+    print(data.frame("Time"=times,"PTE"=pte,"Total"=te,
                      "Direct"=nde,"Indirect"=nie))
   }
   if(length(mediation)==9){
@@ -193,8 +193,8 @@ function(object, d = 4, len = 3,n=3,...){
     nde.low<-round(mediation$NDE.ci$lower[pos],min(4,len))
     te.upp<-round(mediation$TE.ci$upper[pos],min(4,len))
     te.low<-round(mediation$TE.ci$lower[pos],min(4,len))
-    rt.upp<-round(mediation$Rt.ci$upper[pos],min(4,len))
-    rt.low<-round(mediation$Rt.ci$low[pos],min(4,len))
+    pte.upp<-round(mediation$PTE.ci$upper[pos],min(4,len))
+    pte.low<-round(mediation$PTE.ci$low[pos],min(4,len))
 
     nie.ci = sapply(seq_along(nie.upp),function(i){
       paste("[",nie.low[i],";",nie.upp[i],"]",sep="")
@@ -205,10 +205,10 @@ function(object, d = 4, len = 3,n=3,...){
     te.ci = sapply(seq_along(te.upp),function(i){
       paste("[",te.low[i],";",te.upp[i],"]",sep="")
     })
-    rt.ci = sapply(seq_along(rt.upp),function(i){
-      paste("[",rt.low[i],";",rt.upp[i],"]",sep="")
+    pte.ci = sapply(seq_along(pte.upp),function(i){
+      paste("[",pte.low[i],";",pte.upp[i],"]",sep="")
     })
-    print(data.frame("Time"=times,"Rt"=rt,"CI 95 Rt"=rt.ci,
+    print(data.frame("Time"=times,"PTE"=pte,"CI 95 PTE"=pte.ci,
                      "TE"=te,"CI 95 TE"=te.ci,
                      "NDE"=nde,"CI 95 NDE"=nde.ci,
                      "NIE"=nie,"CI 95 NIE"=nie.ci))

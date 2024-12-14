@@ -51,7 +51,7 @@ of parallelization through OpenMP.
 Moreover, the package can be used with its shiny application, in a local mode or by following the link below. 
 
 \tabular{ll}{ Package: \tab frailtypack\cr Type: \tab Package\cr Version:
-\tab 3.5.2 \cr Date: \tab 2024-02-13\cr License: \tab GPL (>= 2.0)\cr
+\tab 3.6.5 \cr Date: \tab 2024-12-09\cr License: \tab GPL (>= 2.0)\cr
 LazyLoad: \tab no\cr }
 }
 \examples{

@@ -16,8 +16,8 @@ jointSurroPenal(data, maxit=50, indicator.zeta = 1,
    random.generator = 1, kappa.use = 4, random = 0,
    random.nb.sim = 0, seed = 0, init.kappa = NULL, ckappa = c(0,0),
    nb.decimal = 4, print.times = TRUE, print.iter=FALSE,mediation=FALSE,
-   g.nknots=1,rt.times=NULL,rt.ntimes=NULL,rt.nmc=500,rt.boot=FALSE,
-   rt.nboot=2000,rt.boot.nmc=500,rt.integ.type=2)
+   g.nknots=1,pte.times=NULL,pte.ntimes=NULL,pte.nmc=500,pte.boot=FALSE,
+   pte.nboot=2000,pte.boot.nmc=500,pte.integ.type=2)
 }
 \arguments{
 \item{data}{A \code{\link{data.frame}} containing at least seven variables entitled:
@@ -195,34 +195,34 @@ Default is FALSE.}
 are used in the splines basis for estimating the function \eqn{g(s)}.
 The value of \code{g.nknots} should be between 1 and 5. Default is 1.}
 
-\item{rt.times}{In the mediation analysis setting, a vector of times for which the
-funtion \eqn{R(t)} is evaluated. Specified time points must be in the range of
+\item{pte.times}{In the mediation analysis setting, a vector of times for which the
+funtion \eqn{PTE(t)} is evaluated. Specified time points must be in the range of
 the observed event times. The length of the vector should be less than 200.}
 
-\item{rt.ntimes}{In the mediation setting, if the argument \code{rt.times} is not specified
-the argument \code{rt.ntimes} allows the user to only specify a number of
-time points for which the function \eqn{R(t)} has to be computed. This argument
-is only to be used if \code{rt.times} is not specified. In that case
-the default value for \code{rt.ntimes} is 10. The value of \code{rt.ntimes}
+\item{pte.ntimes}{In the mediation setting, if the argument \code{pte.times} is not specified
+the argument \code{pte.ntimes} allows the user to only specify a number of
+time points for which the function \eqn{PTE(t)} has to be computed. This argument
+is only to be used if \code{pte.times} is not specified. In that case
+the default value for \code{pte.ntimes} is 10. The value of \code{pte.ntimes}
 should be less than 200.}
 
-\item{rt.nmc}{An integer indicating how many Monte Carlo simulations are used
-to integrate over the random effects in the computation of the function \eqn{R(t)}.
+\item{pte.nmc}{An integer indicating how many Monte Carlo simulations are used
+to integrate over the random effects in the computation of the function \eqn{PTE(t)}.
 in the mediation analysis setting. Default is 500.}
 
-\item{rt.boot}{A logical value indicating if bootstrapped confidence bands needs to be computed for the
-function \eqn{R(t)} in the mediation analysis setting. Default is FALSE.}
+\item{pte.boot}{A logical value indicating if bootstrapped confidence bands needs to be computed for the
+function \eqn{PTE(t)} in the mediation analysis setting. Default is FALSE.}
 
-\item{rt.nboot}{An integer indicating how many bootstrapped replicates of R(t) needs
-to be computed to derive confidence bands for R(t). Default is 2000.}
+\item{pte.nboot}{An integer indicating how many bootstrapped replicates of \eqn{PTE(t)} needs
+to be computed to derive confidence bands for \eqn{PTE(t)}. Default is 2000.}
 
-\item{rt.boot.nmc}{If \code{rt.boot} is TRUE, indicates how many Monte Carlo simulations are used
-to integrate over the random effects in the bootstrapped functions \eqn{R(t)}
+\item{pte.boot.nmc}{If \code{pte.boot} is TRUE, indicates how many Monte Carlo simulations are used
+to integrate over the random effects in the bootstrapped functions \eqn{PTE(t)}
 in the mediation analysis setting. Default is 500}
 
-\item{rt.integ.type}{An integer indicating which type of integration over the distribution of
+\item{pte.integ.type}{An integer indicating which type of integration over the distribution of
 \eqn{S} should be used in the computation of the function
-\eqn{R(t)}. If set to \code{1}, a simple trapezoidal rule is used with 300 integration points.
+\eqn{PTE(t)}. If set to \code{1}, a simple trapezoidal rule is used with 300 integration points.
 If set to \code{2} a Gauss-Laguerre quadrature is used with 30 knots. Default is \code{2}.}
 }
 \value{
@@ -255,7 +255,7 @@ This function return an object of class jointSurroPenal or jointSurroMed in the 
    \if{html}{
     {\figure{lcv.png}{options: width="50\%"}}}
     \if{latex}{\deqn{LCV = \frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))};}}
-   \item{xS}{vector of times for surrogate endpoint where both survirt.nmc.bootval and hazard function are estimated.
+   \item{xS}{vector of times for surrogate endpoint where both survipte.nmc.bootval and hazard function are estimated.
    By default seq(0,max(time),length=99), where time is the vector of survival times;}
    \item{lamS}{array (dim = 3) of hazard estimates and confidence bands, for surrogate endpoint;}
    \item{survS}{array (dim = 3) of baseline survival estimates and confidence bands, for surrogate endpoint;}
@@ -292,15 +292,15 @@ This function return an object of class jointSurroPenal or jointSurroMed in the 
    \item{parameter}{list of all arguments used in the model}
    \item{mediation}{List returned in the case where the option \code{mediation} is set to \code{TRUE} which contains:
    \itemize{
-     \item data.rt: A dataframe containing estimated values for the funtion R(t) and the natural effects for differents time points
+     \item data.pte: A dataframe containing estimated values for the funtion \eqn{PTE(t)} and the natural effects for differents time points
      \item g.knots: The vector of knots used in the spline basis for the function g.
      \item g.order: The order of the spline basis used to estimate the function g.
      \item g.coefficients: A vector containing the estimated coefficients associated with the splines in the estimation of the function g.
      \item data.g: A dataframe containing the values of the estimated function g computed at several time points and the associated 95% confidence bands.
-     \item Rt.ci: A dataframe containing the 95% confidences bands for the function R(t), returned only if the option \code{rt.boot} is set to TRUE
-     \item TE.ci: A dataframe containing the 95% confidences bands for the total effect, returned only if the option \code{rt.boot} is set to TRUE
-     \item NDE.ci: A dataframe containing the 95% confidences bands for the natural direct effect, returned only if the option \code{rt.boot} is set to TRUE
-     \item NIE.ci: A dataframe containing the 95% confidences bands for the natural indirect effect, returned only if the option \code{rt.boot} is set to TRUE
+     \item pte.ci: A dataframe containing the 95% confidences bands for the function \eqn{PTE(t)}, returned only if the option \code{pte.boot} is set to TRUE
+     \item TE.ci: A dataframe containing the 95% confidences bands for the total effect, returned only if the option \code{pte.boot} is set to TRUE
+     \item NDE.ci: A dataframe containing the 95% confidences bands for the natural direct effect, returned only if the option \code{pte.boot} is set to TRUE
+     \item NIE.ci: A dataframe containing the 95% confidences bands for the natural indirect effect, returned only if the option \code{pte.boot} is set to TRUE
    }}
 }
 \description{
@@ -396,9 +396,9 @@ Sofeu \emph{et al.}(2018), we use the Kendall's \eqn{\tau} define by :
 
 In the mediation analysis setting, the surrogacy measure is the proportion of treatment effect
 on the final endpoint \eqn{T} that goes through its effect on the surrogate \eqn{S}.
-This measure is a time-dependent function \eqn{R(t)} defined as:
+This measure is a time-dependent function \eqn{PTE(t)} defined as:
 
-{\figure{rt.png}{options: width="50\%"}}
+{\figure{pte.png}{options: width="50\%"}}
 
 where \eqn{NIE} and \eqn{TE} stand for "natual indirect effect" and "total effect"
 respectively. The numerator is the difference of the survival function of \eqn{T}
@@ -514,9 +514,9 @@ Sofeu \emph{et al.}(2018), we use the Kendall's \eqn{\tau} define by :
 
 In the mediation analysis setting, the surrogacy measure is the proportion of treatment effect
 on the final endpoint \eqn{T} that goes through its effect on the surrogate \eqn{S}.
-This measure is a time-dependent function \eqn{R(t)} defined as:
+This measure is a time-dependent function \eqn{PTE(t)} defined as:
 \deqn{
-   R(t)=\frac{S_{11}(t) - S_{10}(t)}{S_{11}(t) -  S_{00}(t)} = \frac{NIE(t)}{TE(t)}
+   PTE(t)=\frac{S_{11}(t) - S_{10}(t)}{S_{11}(t) -  S_{00}(t)} = \frac{NIE(t)}{TE(t)}
  }
 
 where \eqn{NIE} and \eqn{TE} stand for "natual indirect effect" and "total effect"
@@ -620,11 +620,11 @@ print(joint.surro.ovar)
 # dataset where the surrogate is a time-to-relapse and the final endpoint is death.
 # 4 knots are used to estimate the two baseline hazard functions.
 # The function g(s) is estimated using cubic b-splines with 1 interior
-# knot ('g.nkots=1'). The function R(t) is computed at 100 time points
+# knot ('g.nkots=1'). The function \eqn{PTE(t)} is computed at 100 time points
 # using 10.000 Monte Carlo simulations for integration over the random effects.
 # To reduce computation time in the provided example only one fifth of the
 # the original dataset is used and the confidence bands for the function
-# R(t) are not computed as well as the power parameters associated with
+# \eqn{PTE(t)} are not computed as well as the power parameters associated with
 # the random effects. Full example is commented thereafter.
 
 # We first need to change the variable "statusS" which in the dataset
@@ -650,15 +650,15 @@ subset<-gastadj[sort(sample(1:nrow(gastadj),round(n*0.2),replace = FALSE)),]
 # Mediation model ('mediation=TRUE'). Computation takes around 17 minutes
 mod.gast<-jointSurroPenal(subset,n.knots = 4,indicator.zeta = 0,
                          indicator.alpha = 0,mediation=TRUE,g.nknots=1,
-                         rt.ntimes=30,rt.nmc=10000,rt.boot=FALSE)
+                         pte.ntimes=30,pte.nmc=10000,pte.boot=FALSE)
 
 summary(mod.gast)
 plot(mod.gast)
 
 # Example on the full dataset, including estimation of the power parameters
 # mod.gast2<-jointSurroPenal(gastadj,n.knots = 4,mediation=TRUE,g.nknots=1,
-#                            rt.ntimes=30,rt.nmc=10000,rt.boot=TRUE,
-#                            rt.nboot=2000,rt.boot.nmc=10000)
+#                            pte.ntimes=30,pte.nmc=10000,pte.boot=TRUE,
+#                            pte.nboot=2000,pte.boot.nmc=10000)
 
 # results
 # plot(mod.gast2)

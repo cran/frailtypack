@@ -254,6 +254,7 @@
                col=c("black","green","red"),lty=1)
       }else if(conf.bands & length(x) != 5){
         data.pte<-x$data.pte
+        invisible(readline(prompt="Press [Enter] to continue:"))
         plot(x<-data.pte$Time,y<-data.pte$PTE,type='l',col="black",
              xlab="Time",ylab='PTE',main="Estimated PTE",...)
         

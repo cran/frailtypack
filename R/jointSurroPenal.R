@@ -93,9 +93,9 @@
 #'
 #' In the mediation analysis setting, the surrogacy measure is the proportion of treatment effect
 #' on the final endpoint \eqn{T} that goes through its effect on the surrogate \eqn{S}.
-#' This measure is a time-dependent function \eqn{R(t)} defined as:
+#' This measure is a time-dependent function \eqn{PTE(t)} defined as:
 #'
-#' {\figure{rt.png}{options: width="50\%"}}
+#' {\figure{pte.png}{options: width="50\%"}}
 #'
 #' where \eqn{NIE} and \eqn{TE} stand for "natual indirect effect" and "total effect"
 #' respectively. The numerator is the difference of the survival function of \eqn{T}
@@ -212,9 +212,9 @@
 #'
 #' In the mediation analysis setting, the surrogacy measure is the proportion of treatment effect
 #' on the final endpoint \eqn{T} that goes through its effect on the surrogate \eqn{S}.
-#' This measure is a time-dependent function \eqn{R(t)} defined as:
+#' This measure is a time-dependent function \eqn{PTE(t)} defined as:
 #' \deqn{
-#'    R(t)=\frac{S_{11}(t) - S_{10}(t)}{S_{11}(t) -  S_{00}(t)} = \frac{NIE(t)}{TE(t)}
+#'    PTE(t)=\frac{S_{11}(t) - S_{10}(t)}{S_{11}(t) -  S_{00}(t)} = \frac{NIE(t)}{TE(t)}
 #'  }
 #'
 #' where \eqn{NIE} and \eqn{TE} stand for "natual indirect effect" and "total effect"
@@ -283,8 +283,8 @@
 #'    random.generator = 1, kappa.use = 4, random = 0,
 #'    random.nb.sim = 0, seed = 0, init.kappa = NULL, ckappa = c(0,0),
 #'    nb.decimal = 4, print.times = TRUE, print.iter=FALSE,mediation=FALSE,
-#'    g.nknots=1,rt.times=NULL,rt.ntimes=NULL,rt.nmc=500,rt.boot=FALSE,
-#'    rt.nboot=2000,rt.boot.nmc=500,rt.integ.type=2)
+#'    g.nknots=1,pte.times=NULL,pte.ntimes=NULL,pte.nmc=500,pte.boot=FALSE,
+#'    pte.nboot=2000,pte.boot.nmc=500,pte.integ.type=2)
 #'
 #' @param data A \code{\link{data.frame}} containing at least seven variables entitled:
 #'    \itemize{
@@ -421,28 +421,28 @@
 #' @param g.nknots In the case of a mediation analysis, indicates how many inner knots
 #' are used in the splines basis for estimating the function \eqn{g(s)}.
 #' The value of \code{g.nknots} should be between 1 and 5. Default is 1.
-#' @param rt.times In the mediation analysis setting, a vector of times for which the
-#' funtion \eqn{R(t)} is evaluated. Specified time points must be in the range of
+#' @param pte.times In the mediation analysis setting, a vector of times for which the
+#' funtion \eqn{PTE(t)} is evaluated. Specified time points must be in the range of
 #' the observed event times. The length of the vector should be less than 200.
-#' @param rt.ntimes In the mediation setting, if the argument \code{rt.times} is not specified
-#' the argument \code{rt.ntimes} allows the user to only specify a number of
-#' time points for which the function \eqn{R(t)} has to be computed. This argument
-#' is only to be used if \code{rt.times} is not specified. In that case
-#' the default value for \code{rt.ntimes} is 10. The value of \code{rt.ntimes}
+#' @param pte.ntimes In the mediation setting, if the argument \code{pte.times} is not specified
+#' the argument \code{pte.ntimes} allows the user to only specify a number of
+#' time points for which the function \eqn{PTE(t)} has to be computed. This argument
+#' is only to be used if \code{pte.times} is not specified. In that case
+#' the default value for \code{pte.ntimes} is 10. The value of \code{pte.ntimes}
 #' should be less than 200.
-#' @param rt.nmc An integer indicating how many Monte Carlo simulations are used
-#' to integrate over the random effects in the computation of the function \eqn{R(t)}.
+#' @param pte.nmc An integer indicating how many Monte Carlo simulations are used
+#' to integrate over the random effects in the computation of the function \eqn{PTE(t)}.
 #' in the mediation analysis setting. Default is 500.
-#' @param rt.boot A logical value indicating if bootstrapped confidence bands needs to be computed for the
-#' function \eqn{R(t)} in the mediation analysis setting. Default is FALSE.
-#' @param rt.nboot An integer indicating how many bootstrapped replicates of R(t) needs
-#' to be computed to derive confidence bands for R(t). Default is 2000.
-#' @param rt.boot.nmc If \code{rt.boot} is TRUE, indicates how many Monte Carlo simulations are used
-#' to integrate over the random effects in the bootstrapped functions \eqn{R(t)}
+#' @param pte.boot A logical value indicating if bootstrapped confidence bands needs to be computed for the
+#' function \eqn{PTE(t)} in the mediation analysis setting. Default is FALSE.
+#' @param pte.nboot An integer indicating how many bootstrapped replicates of \eqn{PTE(t)} needs
+#' to be computed to derive confidence bands for \eqn{PTE(t)}. Default is 2000.
+#' @param pte.boot.nmc If \code{pte.boot} is TRUE, indicates how many Monte Carlo simulations are used
+#' to integrate over the random effects in the bootstrapped functions \eqn{PTE(t)}
 #' in the mediation analysis setting. Default is 500
-#' @param rt.integ.type An integer indicating which type of integration over the distribution of
+#' @param pte.integ.type An integer indicating which type of integration over the distribution of
 #' \eqn{S} should be used in the computation of the function
-#' \eqn{R(t)}. If set to \code{1}, a simple trapezoidal rule is used with 300 integration points.
+#' \eqn{PTE(t)}. If set to \code{1}, a simple trapezoidal rule is used with 300 integration points.
 #' If set to \code{2} a Gauss-Laguerre quadrature is used with 30 knots. Default is \code{2}.
 #' @return
 #' This function return an object of class jointSurroPenal or jointSurroMed in the mediation analysis setting with elements:
@@ -474,7 +474,7 @@
 #'    \if{html}{
 #'     {\figure{lcv.png}{options: width="50\%"}}}
 #'     \if{latex}{\deqn{LCV = \frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))};}}
-#'    \item{xS}{vector of times for surrogate endpoint where both survirt.nmc.bootval and hazard function are estimated.
+#'    \item{xS}{vector of times for surrogate endpoint where both survipte.nmc.bootval and hazard function are estimated.
 #'    By default seq(0,max(time),length=99), where time is the vector of survival times;}
 #'    \item{lamS}{array (dim = 3) of hazard estimates and confidence bands, for surrogate endpoint;}
 #'    \item{survS}{array (dim = 3) of baseline survival estimates and confidence bands, for surrogate endpoint;}
@@ -511,15 +511,15 @@
 #'    \item{parameter}{list of all arguments used in the model}
 #'    \item{mediation}{List returned in the case where the option \code{mediation} is set to \code{TRUE} which contains:
 #'    \itemize{
-#'      \item data.rt: A dataframe containing estimated values for the funtion R(t) and the natural effects for differents time points
+#'      \item data.pte: A dataframe containing estimated values for the funtion \eqn{PTE(t)} and the natural effects for differents time points
 #'      \item g.knots: The vector of knots used in the spline basis for the function g.
 #'      \item g.order: The order of the spline basis used to estimate the function g.
 #'      \item g.coefficients: A vector containing the estimated coefficients associated with the splines in the estimation of the function g.
 #'      \item data.g: A dataframe containing the values of the estimated function g computed at several time points and the associated 95% confidence bands.
-#'      \item Rt.ci: A dataframe containing the 95% confidences bands for the function R(t), returned only if the option \code{rt.boot} is set to TRUE
-#'      \item TE.ci: A dataframe containing the 95% confidences bands for the total effect, returned only if the option \code{rt.boot} is set to TRUE
-#'      \item NDE.ci: A dataframe containing the 95% confidences bands for the natural direct effect, returned only if the option \code{rt.boot} is set to TRUE
-#'      \item NIE.ci: A dataframe containing the 95% confidences bands for the natural indirect effect, returned only if the option \code{rt.boot} is set to TRUE
+#'      \item pte.ci: A dataframe containing the 95% confidences bands for the function \eqn{PTE(t)}, returned only if the option \code{pte.boot} is set to TRUE
+#'      \item TE.ci: A dataframe containing the 95% confidences bands for the total effect, returned only if the option \code{pte.boot} is set to TRUE
+#'      \item NDE.ci: A dataframe containing the 95% confidences bands for the natural direct effect, returned only if the option \code{pte.boot} is set to TRUE
+#'      \item NIE.ci: A dataframe containing the 95% confidences bands for the natural indirect effect, returned only if the option \code{pte.boot} is set to TRUE
 #'    }}
 #'
 #'
@@ -597,11 +597,11 @@
 #' # dataset where the surrogate is a time-to-relapse and the final endpoint is death.
 #' # 4 knots are used to estimate the two baseline hazard functions.
 #' # The function g(s) is estimated using cubic b-splines with 1 interior
-#' # knot ('g.nkots=1'). The function R(t) is computed at 100 time points
+#' # knot ('g.nkots=1'). The function \eqn{PTE(t)} is computed at 100 time points
 #' # using 10.000 Monte Carlo simulations for integration over the random effects.
 #' # To reduce computation time in the provided example only one fifth of the
 #' # the original dataset is used and the confidence bands for the function
-#' # R(t) are not computed as well as the power parameters associated with
+#' # \eqn{PTE(t)} are not computed as well as the power parameters associated with
 #' # the random effects. Full example is commented thereafter.
 #'
 #' # We first need to change the variable "statusS" which in the dataset
@@ -627,17 +627,17 @@
 #' # Mediation model ('mediation=TRUE'). Computation takes around 17 minutes
 #' mod.gast<-jointSurroPenal(subset,n.knots = 4,indicator.zeta = 0,
 #'                          indicator.alpha = 0,mediation=TRUE,g.nknots=1,
-#'                          rt.ntimes=30,rt.nmc=10000,rt.boot=FALSE)
+#'                          pte.ntimes=30,pte.nmc=10000,pte.boot=FALSE)
 #'
 #' summary(mod.gast)
 #' plot(mod.gast)
 #'
 #' # Example on the full dataset, including estimation of the power parameters
-#  # and computation of the confidence bands computed for the function R(t)
+#  # and computation of the confidence bands computed for the function \eqn{PTE(t)}
 #  # and the natural effects. Computation may take more than 40 minutes.
 #' # mod.gast2<-jointSurroPenal(gastadj,n.knots = 4,mediation=TRUE,g.nknots=1,
-#' #                            rt.ntimes=30,rt.nmc=10000,rt.boot=TRUE,
-#' #                            rt.nboot=2000,rt.boot.nmc=10000)
+#' #                            pte.ntimes=30,pte.nmc=10000,pte.boot=TRUE,
+#' #                            pte.nboot=2000,pte.boot.nmc=10000)
 #'
 #' # results
 #' # plot(mod.gast2)
@@ -651,8 +651,8 @@ jointSurroPenal = function(data,maxit = 50, indicator.zeta = 1, indicator.alpha 
                               alpha.init = 1, zeta.init = 1, betas.init = 0.5, betat.init = 0.5, scale = 1,
                               random.generator = 1, kappa.use = 4, random = 0, random.nb.sim = 0, seed = 0,
                               init.kappa = NULL, ckappa = c(0,0), nb.decimal = 4, print.times = TRUE,
-                              print.iter = FALSE,mediation=FALSE,g.nknots=1,rt.times=NULL,rt.ntimes=NULL,
-                              rt.nmc=500,rt.boot=FALSE,rt.nboot=2000,rt.boot.nmc=500,rt.integ.type=2){
+                              print.iter = FALSE,mediation=FALSE,g.nknots=1,pte.times=NULL,pte.ntimes=NULL,
+                              pte.nmc=500,pte.boot=FALSE,pte.nboot=2000,pte.boot.nmc=500,pte.integ.type=2){
 
   # The initial followup time. The default value is 0
   data$initTime <- 0
@@ -743,66 +743,66 @@ jointSurroPenal = function(data,maxit = 50, indicator.zeta = 1, indicator.alpha 
         stop("The argument 'g.nknots' must be between 1 and 5.")
       }
       }
-  if(!is.null(rt.times)){
-      if(!is.numeric(rt.times)){
-        stop("The argument 'rt.times' must be a vector of positive values")
+  if(!is.null(pte.times)){
+      if(!is.numeric(pte.times)){
+        stop("The argument 'pte.times' must be a vector of positive values")
       }else{
-        if(sum(rt.times<0)>0){
-          stop("The argument 'rt.times' must be a vector of positive values")
+        if(sum(pte.times<0)>0){
+          stop("The argument 'pte.times' must be a vector of positive values")
         }
     }
     }
-    if(!is.null(rt.ntimes) & !is.numeric(rt.ntimes)){
-      stop("The argument 'rt.ntimes' must be an integer.")
+    if(!is.null(pte.ntimes) & !is.numeric(pte.ntimes)){
+      stop("The argument 'pte.ntimes' must be an integer.")
     }
-    if(!is.null(rt.ntimes) & is.numeric(rt.ntimes)){
-      if(rt.ntimes>200){
-        stop("The argument 'rt.ntimes' should be less than 200.")
+    if(!is.null(pte.ntimes) & is.numeric(pte.ntimes)){
+      if(pte.ntimes>200){
+        stop("The argument 'pte.ntimes' should be less than 200.")
       }
     }
-    if(!is.null(rt.times) & !is.null(rt.ntimes)){
-      if(length(rt.times) != rt.ntimes){
-        stop("The argument 'rt.times' must have length equal to 'rt.ntimes'.")
+    if(!is.null(pte.times) & !is.null(pte.ntimes)){
+      if(length(pte.times) != pte.ntimes){
+        stop("The argument 'pte.times' must have length equal to 'pte.ntimes'.")
       }
     }
-    if(!is.numeric(rt.nmc)){
-      stop("The argument 'rt.nmc' must be an integer.")
+    if(!is.numeric(pte.nmc)){
+      stop("The argument 'pte.nmc' must be an integer.")
     }else{
-      if(rt.nmc<0){
-        stop("The argument 'rt.nmc' must be positive.")
+      if(pte.nmc<0){
+        stop("The argument 'pte.nmc' must be positive.")
       }
-      if(length(rt.nmc)>1){
-        stop("The argument 'rt.nmc' must be an integer.")
+      if(length(pte.nmc)>1){
+        stop("The argument 'pte.nmc' must be an integer.")
       }
     }
-    if(!is.logical(rt.boot)){
-      stop("The argument 'rt.boot' must be either TRUE of FALSE.")
+    if(!is.logical(pte.boot)){
+      stop("The argument 'pte.boot' must be either TRUE of FALSE.")
     }
-    if(rt.boot){
-      if(!is.numeric(rt.nboot)){
-        stop("The argument 'rt.nboot' must be an integer.")
+    if(pte.boot){
+      if(!is.numeric(pte.nboot)){
+        stop("The argument 'pte.nboot' must be an integer.")
       }else{
-        if(rt.nboot<0){
-          stop("The argument 'rt.nboot' must be positive.")
+        if(pte.nboot<0){
+          stop("The argument 'pte.nboot' must be positive.")
         }
-        if(length(rt.nboot)>1){
-          stop("The argument 'rt.nboot' must be an integer.")
+        if(length(pte.nboot)>1){
+          stop("The argument 'pte.nboot' must be an integer.")
         }
       }
-      if(!is.numeric(rt.boot.nmc)){
-        stop("The argument 'rt.boot.nmc' must be an integer.")
+      if(!is.numeric(pte.boot.nmc)){
+        stop("The argument 'pte.boot.nmc' must be an integer.")
       }else{
-        if(rt.boot.nmc<0){
-          stop("The argument 'rt.boot.nmc' must be positive.")
+        if(pte.boot.nmc<0){
+          stop("The argument 'pte.boot.nmc' must be positive.")
         }
-        if(length(rt.boot.nmc)>1){
-          stop("The argument 'rt.boot.nmc' must be an integer.")
+        if(length(pte.boot.nmc)>1){
+          stop("The argument 'pte.boot.nmc' must be an integer.")
         }
 
       }
     }
-    if(!(rt.integ.type %in% c(1,2))){
-      stop("The argument 'rt.integ.type' must be either 1 or 2.")
+    if(!(pte.integ.type %in% c(1,2))){
+      stop("The argument 'pte.integ.type' must be either 1 or 2.")
     }
   }
   # ============End parameters checking====================
@@ -1231,36 +1231,36 @@ jointSurroPenal = function(data,maxit = 50, indicator.zeta = 1, indicator.alpha 
   param_estimes <- NULL
   mint = min(death[death$statusT==1,"timeT"])
   maxt = max(death[death$statusT==1,"timeT"])
-  if(is.null(rt.times) & is.null(rt.ntimes)){
-   #by default rt.times = rt.ntimes evenly distributed times between
+  if(is.null(pte.times) & is.null(pte.ntimes)){
+   #by default pte.times = pte.ntimes evenly distributed times between
    #min observed time death and max observed time death
-   #rt.ntimes = 10
-   rt.ntimes=10
-   rt.times=sapply(0:(rt.ntimes-1),function(i) mint + (i/(rt.ntimes-1))*(maxt-mint))
- }else if(is.null(rt.times) & !(is.null(rt.ntimes))){
-   rt.times=sapply(0:(rt.ntimes-1),function(i) mint + (i/(rt.ntimes-1))*(maxt-mint))
- }else if(!(is.null(rt.times)) & is.null(rt.ntimes)){
-   rt.ntimes=length(rt.times)
+   #pte.ntimes = 10
+   pte.ntimes=10
+   pte.times=sapply(0:(pte.ntimes-1),function(i) mint + (i/(pte.ntimes-1))*(maxt-mint))
+ }else if(is.null(pte.times) & !(is.null(pte.ntimes))){
+   pte.times=sapply(0:(pte.ntimes-1),function(i) mint + (i/(pte.ntimes-1))*(maxt-mint))
+ }else if(!(is.null(pte.times)) & is.null(pte.ntimes)){
+   pte.ntimes=length(pte.times)
  }else{
-   if(length(rt.times) != rt.ntimes){
-	stop("The length of the specified time-points should be equal to rt.ntimes")
+   if(length(pte.times) != pte.ntimes){
+	stop("The length of the specified time-points should be equal to pte.ntimes")
    }
-   if((min(rt.times)<min(death$timeT))| (max(rt.times)>max(death$timeT))){
-     stop("Please provide time-points for the computation of R(t) that are in the range of the observed follow-up times")
+   if((min(pte.times)<min(death$timeT))| (max(pte.times)>max(death$timeT))){
+     stop("Please provide time-points for the computation of PTE(t) that are in the range of the observed follow-up times")
    }else{
-     rt.ntimes=length(rt.times)
+     pte.ntimes=length(pte.times)
    }
  }
 
   if(mediation){
-    param.res.rt =as.integer(c(1*mediation,g.nknots,splines.ord,rt.ntimes,
-                               rt.nmc,rt.boot,rt.nboot,rt.boot.nmc,rt.integ.type))
-    res.rt = array(as.double(rep(0.0,(1+rt.nboot)*(rt.ntimes)*4)),dim=c(rt.ntimes,4,1+rt.nboot))
-    res.rt[,1,1]=rt.times
+    param.res.pte =as.integer(c(1*mediation,g.nknots,splines.ord,pte.ntimes,
+                               pte.nmc,pte.boot,pte.nboot,pte.boot.nmc,pte.integ.type))
+    res.pte = array(as.double(rep(0.0,(1+pte.nboot)*(pte.ntimes)*4)),dim=c(pte.ntimes,4,1+pte.nboot))
+    res.pte[,1,1]=pte.times
   }else{
     #todo
-    res.rt=array(as.double(rep(0.0,(1+rt.nboot)*(rt.ntimes)*4)),dim=c(rt.ntimes,4,1+rt.nboot))
-    param.res.rt =as.integer(rep(0,9))
+    res.pte=array(as.double(rep(0.0,(1+pte.nboot)*(pte.ntimes)*4)),dim=c(pte.ntimes,4,1+pte.nboot))
+    param.res.pte =as.integer(rep(0,9))
   }
 
 
@@ -1323,8 +1323,8 @@ jointSurroPenal = function(data,maxit = 50, indicator.zeta = 1, indicator.alpha 
                   datab = matrix(0, nrow = 1, ncol = np),
                   as.double(vbetast),
                   as.double(vbetastinit),
-                  param.res.rt=as.integer(param.res.rt),
-                  res.rt=as.double(res.rt),
+                  param.res.pte=as.integer(param.res.pte),
+                  res.pte=as.double(res.pte),
                   knotsurro=as.double(rep(0,2+g.nknots)),
                   PACKAGE="frailtypack"
   )
@@ -1423,60 +1423,60 @@ jointSurroPenal = function(data,maxit = 50, indicator.zeta = 1, indicator.alpha 
     })
     data.g<-data.frame("s"=g.x,"g"=g.y,"upper"=g.upper,
                             "lower"=g.lower)
-    res.rt<-array(NA,dim=c(rt.ntimes,4,rt.nboot+1))
-    for(i in 1:(rt.nboot+1)){
-      pos<-(1+(i-1)*(4*rt.ntimes)):((4*rt.ntimes)*i)
-      vect<-ans$res.rt[pos]
-      res.rt[,,i]<-matrix(vect,ncol=4,nrow=rt.ntimes)
+    res.pte<-array(NA,dim=c(pte.ntimes,4,pte.nboot+1))
+    for(i in 1:(pte.nboot+1)){
+      pos<-(1+(i-1)*(4*pte.ntimes)):((4*pte.ntimes)*i)
+      vect<-ans$res.pte[pos]
+      res.pte[,,i]<-matrix(vect,ncol=4,nrow=pte.ntimes)
     }
-    dat.rt<-as.data.frame(res.rt[,,1])
-    names(dat.rt)<-c("Time","S11","S01","S00")
-    dat.rt$Rt<-(dat.rt$S11-dat.rt$S01)/(dat.rt$S11-dat.rt$S00)
-    dat.rt$NDE<-dat.rt$S01 - dat.rt$S00
-    dat.rt$NIE<-dat.rt$S11 - dat.rt$S01
-    dat.rt$TE<-dat.rt$S11-dat.rt$S00
-    if(rt.boot){
-      Rtconf<-as.data.frame(do.call(rbind,lapply(1:rt.ntimes,function(i){
-        return(as.numeric(quantile(sapply(1:(rt.nboot+1),function(k){
-          (res.rt[i,2,k]-res.rt[i,3,k])/(res.rt[i,2,k]-res.rt[i,4,k])
+    dat.pte<-as.data.frame(res.pte[,,1])
+    names(dat.pte)<-c("Time","S11","S01","S00")
+    dat.pte$PTE<-(dat.pte$S11-dat.pte$S01)/(dat.pte$S11-dat.pte$S00)
+    dat.pte$NDE<-dat.pte$S01 - dat.pte$S00
+    dat.pte$NIE<-dat.pte$S11 - dat.pte$S01
+    dat.pte$TE<-dat.pte$S11-dat.pte$S00
+    if(pte.boot){
+      PTEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
+        return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
+          (res.pte[i,2,k]-res.pte[i,3,k])/(res.pte[i,2,k]-res.pte[i,4,k])
         }),probs=c(.025,.975),na.rm=T)))
       })))
-      names(Rtconf)<-c("lower","upper")
-      NDEconf<-as.data.frame(do.call(rbind,lapply(1:rt.ntimes,function(i){
-        return(as.numeric(quantile(sapply(1:(rt.nboot+1),function(k){
-          res.rt[i,3,k]-res.rt[i,4,k]
+      names(PTEconf)<-c("lower","upper")
+      NDEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
+        return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
+          res.pte[i,3,k]-res.pte[i,4,k]
         }),probs=c(.025,.975),na.rm=T)))
       })))
       names(NDEconf)<-c("lower","upper")
-      NIEconf<-as.data.frame(do.call(rbind,lapply(1:rt.ntimes,function(i){
-        return(as.numeric(quantile(sapply(1:(rt.nboot+1),function(k){
-          res.rt[i,2,k]-res.rt[i,3,k]
+      NIEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
+        return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
+          res.pte[i,2,k]-res.pte[i,3,k]
         }),probs=c(.025,.975),na.rm=T)))
       })))
       names(NIEconf)<-c("lower","upper")
-      TEconf<-as.data.frame(do.call(rbind,lapply(1:rt.ntimes,function(i){
-        return(as.numeric(quantile(sapply(1:(rt.nboot+1),function(k){
-          res.rt[i,2,k]-res.rt[i,4,k]
+      TEconf<-as.data.frame(do.call(rbind,lapply(1:pte.ntimes,function(i){
+        return(as.numeric(quantile(sapply(1:(pte.nboot+1),function(k){
+          res.pte[i,2,k]-res.pte[i,4,k]
         }),probs=c(.025,.975),na.rm=T)))
       })))
       names(TEconf)<-c("lower","upper")
     }
-    dat.rt$S00<-NULL
-    dat.rt$S11<-NULL
-    dat.rt$S01<-NULL
-    if(rt.boot){
-      result.mediation<-list(data.rt=dat.rt,Rt.ci=Rtconf,NIE.ci=NIEconf,
+    dat.pte$S00<-NULL
+    dat.pte$S11<-NULL
+    dat.pte$S01<-NULL
+    if(pte.boot){
+      result.mediation<-list(data.pte=dat.pte,PTE.ci=PTEconf,NIE.ci=NIEconf,
                              NDE.ci=NDEconf,TE.ci=TEconf,g.knots=sort(knotsurro),
                              g.order=splines.ord,g.coefficients=bgamma,
                              data.g=data.g)
     }else{
-      result.mediation<-list(data.rt=dat.rt,g.knots=sort(knotsurro),
+      result.mediation<-list(data.pte=dat.pte,g.knots=sort(knotsurro),
                              g.order=splines.ord,g.coefficients=bgamma,
                              data.g=data.g)
     }
   }
  #}else{
-  #  res.rt<-NULL
+  #  res.pte<-NULL
   #}
   # resultats a retourner:
   result <- NULL
