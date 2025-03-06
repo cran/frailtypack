@@ -1,8 +1,17 @@
-Changes in Version 3.6.5 December 2024 
-o Change in the name of some arguments in the functions jointSurroPenal, plot.jointSurroMed and summary.jointSurroMed to be more consistent with the literature. 
+Changes in Version 3.7.0 March 2025
+o New functions to compute power and sample size for four types of frailty-model-based designs:
+  - `SFM.power()` and `SFM.ssize()` for shared frailty models.
+  - `NFM.power()` and `NFM.ssize()` for nested frailty models,
+  - `JFM.power()` and `JFM.ssize()` for joint frailty models,
+  - `GJFM.power()` and `GJFM.ssize()` for general joint frailty models,
+o New S3 method print.frailtyDesign for the previous functions.
+o New S3 method summary.frailtyDesign for the previous functions.
+
+Changes in Version 3.6.5 December 2024
+o Change in the name of some arguments in the functions jointSurroPenal, plot.jointSurroMed and summary.jointSurroMed to be more consistent with the literature.
 
 
-Changes in Version 3.6.4 November 2024 
+Changes in Version 3.6.4 November 2024
 o Bug fixes in the function plot.longiPenal
 
 Changes in Version 3.6.3 October 2024
@@ -14,7 +23,7 @@ o Correction of warnings during compilation stage of the package.
 Changes in Version 3.6.1 June 2024
 o Corrections for the compilation of the package, regarding OMP specification in joint_longi.f90 and pointer variable declaration in fortran_random.c and frailtypack.h
 o Corrections of compilation warnings
-o Some examples with a long runtime have been placed within the \dontrun function. 
+o Some examples with a long runtime have been placed within the \dontrun function.
 
 Changes in Version 3.6.0 March 2024
 o New function (jointRecCompet) to fit a frailty model with one recurrent event and two terminal events.
@@ -26,12 +35,12 @@ o Minor syntax updates in man files.
 o Minor bugs in demo scripts fixed: problems with capital letters.
 o Replacement of fortran random numbers and random seeds by random number and random seed functions generators in C.
 o Update of the CITATIONS file, replacing citentry by bibentry.
-o Modifications in Integrale_mult_scl.f90, Integrant_scl.f90, joint_longi.f90 to avoid OMP reduction issue with flang-new when submitting on CRAN. 
-o Replacement of kind(4) or kind(8) by kind(1.0) for integers and kind(1.0d0) for double precision. 
-o Add \value in num.id.Rd and SurvIC.Rd to explain function results. 
-o Update of DESCRIPTION file, replacing Author by Authors@R. Also add copyrights authors with 'cph' role. 
-o Add a commentary on frailtypenal.rd for demo file. 
-o Change of every 'dontrun' of folder in 'donttest'. 
+o Modifications in Integrale_mult_scl.f90, Integrant_scl.f90, joint_longi.f90 to avoid OMP reduction issue with flang-new when submitting on CRAN.
+o Replacement of kind(4) or kind(8) by kind(1.0) for integers and kind(1.0d0) for double precision.
+o Add \value in num.id.Rd and SurvIC.Rd to explain function results.
+o Update of DESCRIPTION file, replacing Author by Authors@R. Also add copyrights authors with 'cph' role.
+o Add a commentary on frailtypenal.rd for demo file.
+o Change of every 'dontrun' of folder in 'donttest'.
 
 Changes in Version 3.5.0 december 2021
 o New model based on a mediation analysis approach added in the jointSurroPenal() function.
@@ -108,7 +117,7 @@ o Add of the function to use to predict the treatment effect on the true endpoin
 
 o Add of the function to use to compute the surrogate threshold effect (STE)
 
-o Upadate of the values of the function jointSurroPenal() and jointSurroPenalSimul(). Several other values are returned to these function.
+o Update of the values of the function jointSurroPenal() and jointSurroPenalSimul(). Several other values are returned to these function.
 
 o Update of the subroutine Fortran jointsurrogate(). Computation of the variance-covariance matrix for the estimates of the variance-covariance parameters of the random effect treatment-by-trial interaction using the delta-method. we also return in this function the dataframes for the estimates and their variance-covariance matrices.
 

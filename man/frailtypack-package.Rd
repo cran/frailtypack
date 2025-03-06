@@ -44,6 +44,13 @@ with the possibility to use a mediation analysis model.
 
 14) Competing Joint Frailty Model: A single type of recurrent event and two terminal events. 
 
+15) Functions to compute power and sample size for four Gamma-frailty-based designs: 
+ Shared Frailty Models, Nested Frailty Models, Joint Frailty Models, and 
+ General Joint Frailty Models. Each design includes two primary functions: a 
+ power function, which computes power given a specified sample size; 
+ and a sample size function, which computes the required sample size to achieve 
+ a specified power.
+
 The package includes concordance measures for Cox proportional hazards models and for shared frailty models.
 Now, you can also consider time-varying covariates effects in Cox, shared and joint frailty models (1-5).
 Some of the Fortran routines in the package can speed-up computation time by making use
@@ -51,7 +58,7 @@ of parallelization through OpenMP.
 Moreover, the package can be used with its shiny application, in a local mode or by following the link below. 
 
 \tabular{ll}{ Package: \tab frailtypack\cr Type: \tab Package\cr Version:
-\tab 3.6.5 \cr Date: \tab 2024-12-09\cr License: \tab GPL (>= 2.0)\cr
+\tab 3.7.0 \cr Date: \tab 2025-03-06\cr License: \tab GPL (>= 2.0)\cr
 LazyLoad: \tab no\cr }
 }
 \examples{
@@ -179,6 +186,11 @@ joint.surro.sim.MCGH <- jointSurroPenal(data = data.sim, int.method = 2,
 }
 }
 \references{
+Derek Dinart, Carine Bellera & Virginie Rondeau (09 Feb 2024).
+Sample size estimation for recurrent event data using multifrailty
+and multilevel survival models. \emph{Journal of Biopharmaceutical Statistics},
+DOI: 10.1080/10543406.2024.2310306.
+      
 V. Rondeau, Y. Mazroui and J. R. Gonzalez (2012). Frailtypack:
 An R package for the analysis of correlated survival data with frailty
 models using penalized likelihood estimation or parametric estimation.
@@ -218,6 +230,7 @@ penalized likelihood estimation. \emph{Statistics in Medecine}, \bold{25},
 \author{
 Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen, 
 Amadou Diakite, Alexandre Laurent, Myriam Lopez, Agnieszka Krol, 
-Casimir L. Sofeu, Denis Rustand, Quentin Le Coent, Lacey Etzkorn and Romain Pierlot
+Casimir L. Sofeu, Denis Rustand, Quentin Le Coent, Lacey Etzkorn, Romain Pierlot,
+Derek Dinart and Adrien Orué
 }
 \keyword{package}

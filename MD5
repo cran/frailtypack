@@ -1,6 +1,6 @@
-3a82bd0a4006796f1de6d1bf95190a21 *DESCRIPTION
-13ddbd0e49508f951d7b8c4989bfe90c *NAMESPACE
-206c5888d9506544ae9175981916b436 *NEWS
+7b2eb337787b5a87e895510eb32a89d4 *DESCRIPTION
+3c25f11088a3d5c00f5de69a58d1a039 *NAMESPACE
+9a70e8cccf3e09bd7a97b9f3da6844b6 *NEWS
 04a96eb3506e02ceebe313047b72cff6 *R/Cmeasures.R
 06a41d0e1395de2dd02648cea53d0f66 *R/Diffepoce.R
 8ac5f81fd69c8d23ed12c4545f3b5754 *R/GenfrailtyPenal.R
@@ -17,8 +17,9 @@ ef08f0c6afaaed3def6d2743fb420d76 *R/autresFonctions.R
 3280c93ad879b238634e48a6b4e26d12 *R/evalOpenMPFortran.R
 11f4dcaf9487fcf912026afde1bbf548 *R/event2.R
 eee9f7375e47c491fc37bc6257c0a5ca *R/factor.names.R
+2896606dede09e38f20b947258208e0c *R/frailtyDesign.R
 d1f14fd3f52c6e7197eab26b53b46f3d *R/frailtyPenal.R
-659c8d71fa803cecda310f7001da40e0 *R/frailtypack-package.R
+2f0951775471cb34820434bb07f3b78e *R/frailtypack-package.R
 08791a674614d2372b6bfff9285c67fc *R/hazard.R
 0d8b846edf7f416ff99744ed5a0aff9e *R/integrant.R
 f7628d900f7be000606a7a302f40218b *R/jointRecCompet.R
@@ -64,6 +65,7 @@ a0682bf61b23e0e9fceac3b6edb2408f *R/plot.trivPenal.R
 642de0d5d7c5cf0155373a93fd8ca511 *R/print.Diffepoce.R
 f115498a5d12efc35fcca0c5f537718a *R/print.additivePenal.R
 0e40d17a3d39b7eb8a6985a1c04cd4dd *R/print.epoce.R
+853c9bace8ef3645ddec84c1019ff803 *R/print.frailtyDesign.R
 5d5c21e951b890bf887ddefe6d8d45e8 *R/print.frailtyPenal.R
 430e02108f9422aeaac3afb340da543b *R/print.jointNestedPenal.R
 a4bb7097477f77a50d12d4c5c7766f75 *R/print.jointPenal.R
@@ -87,6 +89,7 @@ f6cacde0f4e2a7a804882d76cc347ea5 *R/statFP.R
 c49138b336e2c6434d2432ebd588537b *R/ste.R
 43e3ce40ad0472ef56ad0532e4b33337 *R/subcluster.R
 1d8b2f9e1746c6e61dd9a4313765ec6e *R/summary.additivePenal.R
+b5fdc99d5312aa2f20d4bc3efa8bb458 *R/summary.frailtyDesign.R
 bfdfb82dae75ebf4ec8b1396982f7a7f *R/summary.frailtyPenal.R
 bc881561fd582a7c3b3f6ad87e14ec5c *R/summary.jointNestedPenal.R
 514680d037462063a22f5e19ce75dce3 *R/summary.jointPenal.R
@@ -112,7 +115,7 @@ aed8b9b6fcbd5dee50955e3fb6db6511 *R/trivPenalNL.R
 c4c6c8f56f0fb125a9f0ad5f36a78a9d *R/waldtest.R
 a71112d82c50e5ebb93969d293107e37 *R/wts.R
 f91b833a47c5f27a322ef5bb3b334461 *THANKS
-80298e861c9e2d069355f813047bbd1f *build/vignette.rds
+2bb965f1352cfa1c111546188bc568ab *build/vignette.rds
 f9b9c4d9d73247b5e38d320cd587b621 *data/bcos.rda
 52d2b2b6fa8d5b2ef44badfdf80b509c *data/colorectal.rda
 01559782d363c615311c70ccda768add *data/colorectalLongi.rda
@@ -136,8 +139,8 @@ e3d6c560201632a0138c51117a62b699 *demo/frailtypack_jointSurroPenalSimul.R
 dc2fad1ed12f361136108038f6b88eeb *demo/frailtypack_multivPenal.R
 ff5bcb421316a8fb4e02f18802c304b1 *demo/frailtypack_nestedPenal.R
 85a4573047ecc5572559d00c3fcba03b *inst/CITATION
-ddc9d86d6e56ef2dbe814ede7252d475 *inst/doc/Package_summary.Rmd
-5fb4c60ccdae8772e18164cf3877f739 *inst/doc/Package_summary.html
+bca515243a066f052ba11132ec2a4e63 *inst/doc/Package_summary.Rmd
+10e3b03261fec28fdab147047e4790d0 *inst/doc/Package_summary.html
 0c835405d74fbeb4b31de0c086991f4f *inst/shiny_frailtypack/app.R
 8124c0a8b870cd4a9f3886a043b0e305 *inst/shiny_frailtypack/rsconnect/shinyapps.io/frailtypack-pkg/shiny_frailtypack.dcf
 f38ab18d2048f9e35e689085bad70a70 *man/Cmeasures.Rd
@@ -228,8 +231,9 @@ f30759092cc0998a62de1e21ebed6341 *man/figures/trivNLmodel3.png
 bdc23b145745b68e692c40392267bd24 *man/figures/trivmodel1.png
 ad8967aab85865ae279660a95193a5f6 *man/figures/trivmodel2.png
 ffea639d37fc50be8d910d8e53a621f7 *man/figures/vartheta.png
+9dfd188288a4e611f275cafa8c2cd698 *man/frailtyDesign.Rd
 1dd52407508710089d56563a352328ed *man/frailtyPenal.Rd
-1c24f8506ea6e1d0dd1754078f859d50 *man/frailtypack-package.Rd
+0a13fcb8f0fe16166a1a181ad5834ff2 *man/frailtypack-package.Rd
 65827b2efa3fb4f4813cb7d8b3045d59 *man/gastadj.Rd
 3f8f6b7e4b77099bae79a002d6771e5a *man/hazard.Rd
 75f0386c4e6a38491fa9f127bbfe6923 *man/jointRecCompet.Rd
@@ -267,6 +271,7 @@ eeff57cf6587c78381ea4757bb686b6b *man/plotTreatPredJointSurro.Rd
 70976ff503286438898a884cf821e8bc *man/prediction.Rd
 f997567961e7d1ecf5ce2739db048d90 *man/print.Cmeasures.Rd
 ed3214114e8bcff9d90d079ad9a124b9 *man/print.additivePenal.Rd
+548ee1cd1c4b1c4591004d4e1c073d42 *man/print.frailtyDesign.Rd
 0632ed16db8754daa37dc160775b98bf *man/print.frailtyPenal.Rd
 219cca4c355fec7bd7b0eb4693490552 *man/print.jointNestedPenal.Rd
 f087e352c0077388bdcd1e22ba7b6024 *man/print.jointPenal.Rd
@@ -275,7 +280,7 @@ b14b13b8864c8a3e4e0417f09b9e2905 *man/print.jointRecCompet.Rd
 6b5dbde4aaa1284d293ac51536d07102 *man/print.longiPenal.Rd
 590938c97628b5f29d875b4ef45d05ed *man/print.multivPenal.Rd
 05d825e178785750a00ec796b75f5cb4 *man/print.nestedPenal.Rd
-833cc5c0ff015b42b03ba1b9ac047872 *man/print.prediction.Rd
+f66b75219f9eb4780e4e2f907f565b4b *man/print.prediction.Rd
 3f19495f5b47b4bc0a2c2aa71bebad96 *man/print.trivPenal.Rd
 a73188c98a6452150473bd0c9db70f6c *man/print.trivPenalNL.Rd
 9ac441dd3e64932ef8126f3f5520df70 *man/readmission.Rd
@@ -286,6 +291,7 @@ ba2a6e84f8b8e7487b783d7ead4cbca1 *man/slope.Rd
 f2efea8e7ee82308e11984f78b7d24fc *man/ste.Rd
 9686e0ab9721d3d79c33d17bea7943cc *man/subcluster.Rd
 05bfae7042e44721e673d74feb22b86a *man/summary.additivePenal.Rd
+0e84daf27e063fb16545ce5b0c2acf75 *man/summary.frailtyDesign.Rd
 c0c220283c5d915797224fc63e2eb171 *man/summary.frailtyPenal.Rd
 bbb7fecf37802eb951b7aefc40f5860b *man/summary.jointNestedPenal.Rd
 e4feae66127af66c2d3be300c4e2b305 *man/summary.jointPenal.Rd
@@ -425,6 +431,6 @@ bd8bfac9a3be600b98d24cdfc70cfa8c *src/somme.f90
 250a36dba29d09d293444432531c25a3 *src/surrosim.f90
 c5781e4c2d506e3e16152ae3bcb28964 *src/survival.f90
 fb488d9a73269b24baad4ac39aae0b5c *src/test.f90
-ddc9d86d6e56ef2dbe814ede7252d475 *vignettes/Package_summary.Rmd
+bca515243a066f052ba11132ec2a4e63 *vignettes/Package_summary.Rmd
 0deda243021ac0cccf8a4ebe9079ff53 *vignettes/blue_x.png
 2b146366e81a7e0f6f9bd3be37ba6b30 *vignettes/orange_x.png
