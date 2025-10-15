@@ -186,7 +186,7 @@ joint.surro.sim.MCGH <- jointSurroPenal(data = data.sim, int.method = 2,
 }
 }
 \references{
-Derek Dinart, Carine Bellera & Virginie Rondeau (09 Feb 2024).
+Derek Dinart, Carine Bellera & Virginie Rondeau (2024).
 Sample size estimation for recurrent event data using multifrailty
 and multilevel survival models. \emph{Journal of Biopharmaceutical Statistics},
 DOI: 10.1080/10543406.2024.2310306.

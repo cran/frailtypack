@@ -1057,7 +1057,7 @@ subroutine joint_longi(VectNsujet,ngnzag,k0,tt00,tt10,ic0,groupe0&
 
     !b(np-nva-nb_re-nparammed) = 1.0d0
     if (typeof == 2) then
-      if(typeJoint.eq.2)    b(1:2)=0.8d0
+      !if(typeJoint.eq.2)    b(1:2)=0.8d0 !**
       if(typeJoint.eq.3)     b(1:4)=0.8d0
     end if
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1159,7 +1159,7 @@ subroutine joint_longi(VectNsujet,ngnzag,k0,tt00,tt10,ic0,groupe0&
           else 
             call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajlongisplines)
           end if 
-        else 
+       else
           call marq98J(k0,b,np,ni,v,res,ier,istop,effet,ca,cb,dd,funcpajlongisplines)
         end if 
         !                         endif

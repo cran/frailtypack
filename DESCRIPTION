@@ -1,7 +1,7 @@
 Package: frailtypack
 Title: Shared, Joint (Generalized) Frailty Models; Surrogate Endpoints
-Version: 3.7.0
-Date: 2025-03-06
+Version: 3.7.1
+Date: 2025-10-06
 Authors@R: c(
     person("Virginie", "Rondeau", , "virginie.rondeau@u-bordeaux.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7109-4831")),
@@ -21,12 +21,14 @@ Authors@R: c(
     person("Lacey", "Etzkorn", role = "aut"),
     person("Derek", "Dinart", role = "aut"),
     person("Adrien", "Orué", role = "aut"),
+    person("Viviane", "Philipps", role = "aut"),
     person("David", "Hill", role = "cph"),
     person("John", "Burkardt", role = "cph"),
     person("Alan", "Genz", role = "cph"),
     person("Ashwith J.", "Rego", role = "cph")
   )
-Author: Virginie Rondeau [aut, cre] (<https://orcid.org/0000-0001-7109-4831>),
+Author: Virginie Rondeau [aut, cre] (ORCID:
+    <https://orcid.org/0000-0001-7109-4831>),
   Juan R. Gonzalez [aut],
   Yassin Mazroui [aut],
   Audrey Mauguen [aut],
@@ -43,6 +45,7 @@ Author: Virginie Rondeau [aut, cre] (<https://orcid.org/0000-0001-7109-4831>),
   Lacey Etzkorn [aut],
   Derek Dinart [aut],
   Adrien Orué [aut],
+  Viviane Philipps [aut],
   David Hill [cph],
   John Burkardt [cph],
   Alan Genz [cph],
@@ -107,10 +110,10 @@ Imports: graphics, matrixcalc, nlme, rootSolve, shiny, splines,
         statmod, stats, utils
 Suggests: knitr, timereg, rmarkdown
 VignetteBuilder: knitr
-Date/Publication: 2025-03-06 16:20:10 UTC
+Date/Publication: 2025-10-15 09:40:02 UTC
 Encoding: UTF-8
 LazyLoad: no
 NeedsCompilation: yes
-Packaged: 2025-03-06 14:39:41 UTC; AD
+Packaged: 2025-10-06 10:47:37 UTC; vp3
 Repository: CRAN
 RoxygenNote: 7.3.2

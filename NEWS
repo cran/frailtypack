@@ -1,3 +1,6 @@
+Changes in Version 3.7.1 September 2025
+o The longiPenal function has now init.long and init.surv arguments to specify initial values for the longitudinal and survival submodels.
+
 Changes in Version 3.7.0 March 2025
 o New functions to compute power and sample size for four types of frailty-model-based designs:
   - `SFM.power()` and `SFM.ssize()` for shared frailty models.

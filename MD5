@@ -1,6 +1,6 @@
-7b2eb337787b5a87e895510eb32a89d4 *DESCRIPTION
+f40b7798922ee746f7d99e04c9e00da6 *DESCRIPTION
 3c25f11088a3d5c00f5de69a58d1a039 *NAMESPACE
-9a70e8cccf3e09bd7a97b9f3da6844b6 *NEWS
+4e59d5638033c83bbe97d7ed4b605eee *NEWS
 04a96eb3506e02ceebe313047b72cff6 *R/Cmeasures.R
 06a41d0e1395de2dd02648cea53d0f66 *R/Diffepoce.R
 8ac5f81fd69c8d23ed12c4545f3b5754 *R/GenfrailtyPenal.R
@@ -33,7 +33,7 @@ db447b9b0efeaa129fcecdec477c8056 *R/jointSurroCopPenal.R
 9c9c264198175b20a0d8f11237f411dc *R/kappa_val_croisee.r
 cc13f3ede0b9f3eee6e6ca7335116f74 *R/kendall_bootstrap.r
 736204d2917572e63c39c441f8aa749e *R/lines.frailtyPenal.R
-68251583964ecc88e28a98e2d89b0db6 *R/longiPenal.R
+8d32e3687d26f59c2d9db34cfd5ec4d7 *R/longiPenal.R
 973c521e64f913755fee6ec56b204da1 *R/loocv.R
 c3f91ef3b638773274287c9e67204fa5 *R/loocv.summary.R
 5691a9009fe2863dec4c3c2c64c9d846 *R/mergeJointSurroSimul.R
@@ -115,7 +115,7 @@ aed8b9b6fcbd5dee50955e3fb6db6511 *R/trivPenalNL.R
 c4c6c8f56f0fb125a9f0ad5f36a78a9d *R/waldtest.R
 a71112d82c50e5ebb93969d293107e37 *R/wts.R
 f91b833a47c5f27a322ef5bb3b334461 *THANKS
-2bb965f1352cfa1c111546188bc568ab *build/vignette.rds
+e7a7cfa0ea2a01a999ce8ff054470561 *build/vignette.rds
 f9b9c4d9d73247b5e38d320cd587b621 *data/bcos.rda
 52d2b2b6fa8d5b2ef44badfdf80b509c *data/colorectal.rda
 01559782d363c615311c70ccda768add *data/colorectalLongi.rda
@@ -140,7 +140,7 @@ dc2fad1ed12f361136108038f6b88eeb *demo/frailtypack_multivPenal.R
 ff5bcb421316a8fb4e02f18802c304b1 *demo/frailtypack_nestedPenal.R
 85a4573047ecc5572559d00c3fcba03b *inst/CITATION
 bca515243a066f052ba11132ec2a4e63 *inst/doc/Package_summary.Rmd
-10e3b03261fec28fdab147047e4790d0 *inst/doc/Package_summary.html
+cbddc2199a1256394afa39d5e8ddbf47 *inst/doc/Package_summary.html
 0c835405d74fbeb4b31de0c086991f4f *inst/shiny_frailtypack/app.R
 8124c0a8b870cd4a9f3886a043b0e305 *inst/shiny_frailtypack/rsconnect/shinyapps.io/frailtypack-pkg/shiny_frailtypack.dcf
 f38ab18d2048f9e35e689085bad70a70 *man/Cmeasures.Rd
@@ -233,7 +233,7 @@ ad8967aab85865ae279660a95193a5f6 *man/figures/trivmodel2.png
 ffea639d37fc50be8d910d8e53a621f7 *man/figures/vartheta.png
 9dfd188288a4e611f275cafa8c2cd698 *man/frailtyDesign.Rd
 1dd52407508710089d56563a352328ed *man/frailtyPenal.Rd
-0a13fcb8f0fe16166a1a181ad5834ff2 *man/frailtypack-package.Rd
+10b78b4579ba55b2ee3c82fac0f58a3b *man/frailtypack-package.Rd
 65827b2efa3fb4f4813cb7d8b3045d59 *man/gastadj.Rd
 3f8f6b7e4b77099bae79a002d6771e5a *man/hazard.Rd
 75f0386c4e6a38491fa9f127bbfe6923 *man/jointRecCompet.Rd
@@ -244,7 +244,7 @@ b620b186a49f61a780635784d79dbe40 *man/jointSurroCopPenal.Rd
 5117d58c0c0d4e33d8bd9f7da8cb95f8 *man/jointSurroPenalSimul.Rd
 b5755a818d521a1e04862ac8f19f4513 *man/jointSurroTKendall.Rd
 3b9ed72e53c7fd3577a85a4ad783f867 *man/longDat.Rd
-5e65067ee2f4ab6c4cd8b9b1057c777f *man/longiPenal.Rd
+c9d7379b967e20a34ca4654bfb40b79f *man/longiPenal.Rd
 0a67f1932152f94f1c86dde4fea83f75 *man/loocv.Rd
 5eb0757760ee3f1886c8769081fe8315 *man/multivPenal.Rd
 a6eb4b13cda1899d8fc903b62ff4a959 *man/num.id.Rd
@@ -367,7 +367,7 @@ dd68f6e0e522a90dbee3fb5c9d4fcf67 *src/funcpaj_tps.f90
 8f69fc5e53b990513041fc038fe5a80e *src/funcpajgen_tps.f90
 ce08bcf730210e004d96b74e92c90fa3 *src/funcpajgeneral.f90
 799157b67fbe71775ed1aa9a70f690fe *src/funcpajgenparam.f90
-ceff7e3f4d4959f19f061e275b0bd55d *src/funcpajlongisplines.f90
+7f72c3709417822b7738477f1f656988 *src/funcpajlongisplines.f90
 7ddcb89df0056487ca9c877968a1d2bf *src/funcpajlongisplines2.f90
 035c6178ae523bb95c6f1fb100126bcc *src/funcpajlongisplines_nl.f90
 b6012a106c55361e7c878d770fca7c76 *src/funcpajlongiweib.f90
@@ -410,7 +410,7 @@ c1a351721e97dc89c9e823cd34f985f9 *src/init.c
 08be4240018b0d4b6ac0103fe2ebb2fd *src/joint.f90
 bb95782af7eca51e8144bb32bb217634 *src/jointSurrogate.f90
 53b69b585f7e2cc0b6cb66a814ccc730 *src/joint_competing.f90
-3fe5322db3b7e874364c36f0e548a11d *src/joint_longi.f90
+9f6cf1d938812ad1bca6b8664a5e156d *src/joint_longi.f90
 a184f267fd14e6fb4c52c969700e5f87 *src/joint_longi_nl.f90
 c34e3079d3f418b3b2a4c512c334e0b1 *src/joint_surrogate.f90
 d18cc6232ab4f906dfc32fa299a6c494 *src/jointgen.f90

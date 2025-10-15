@@ -4,14 +4,17 @@
 \alias{longiPenal}
 \title{Fit a Joint Model for Longitudinal Data and a Terminal Event}
 \usage{
-longiPenal(formula, formula.LongitudinalData, data,  data.Longi,
-          formula.Binary=FALSE, random,random.Binary=FALSE, fixed.Binary=FALSE, 
-          GLMlog=FALSE, MTP=FALSE, id, intercept = TRUE,link="Random-effects",
-          timevar=FALSE,left.censoring=FALSE,n.knots, kappa,maxit=350,
-          hazard="Splines",mediation=FALSE,med.center=NULL,med.trt=NULL,init.B,
-          init.Random, init.Eta, method.GH = "Standard",seed.MC=1, n.nodes,
-          LIMparam=1e-3,LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE,med.nmc=500,
-          pte.times=NULL,pte.ntimes=NULL,pte.nmc=500,pte.boot=FALSE,pte.nboot=2000)
+longiPenal(formula, formula.LongitudinalData, data, data.Longi,
+ formula.Binary = FALSE, random, random.Binary = FALSE,
+ fixed.Binary = FALSE, GLMlog = FALSE, MTP = FALSE, id,
+ intercept = TRUE, link = "Random-effects", timevar = FALSE,
+ left.censoring = FALSE, n.knots, kappa, maxit = 350, hazard = "Splines",
+ mediation = FALSE, med.center = NULL, med.trt = NULL,
+ init.longi = NULL, init.surv = NULL, init.Eta,
+ method.GH = "Standard",seed.MC = 1, n.nodes, LIMparam = 1e-3,
+ LIMlogl = 1e-3, LIMderiv = 1e-3, print.times = TRUE, med.nmc = 500,
+ pte.times = NULL, pte.ntimes = NULL, pte.nmc = 500,
+ pte.boot = FALSE, pte.nboot = 2000)
 }
 \arguments{
 \item{formula}{a formula object, with the response on the left of a
@@ -19,8 +22,8 @@ longiPenal(formula, formula.LongitudinalData, data,  data.Longi,
 survival object as returned by the 'Surv' function like in survival
 package. Interactions are possible using * or :.}
 
-\item{formula.LongitudinalData}{a formula object, only requires terms on the
-right to indicate which variables are modelling the longitudinal outcome.
+\item{formula.LongitudinalData}{a formula object, with the longitudinal outcome
+on the left and terms indicating the modelling variables on the right.
 It must follow the standard form used for linear mixed-effects models.
 Interactions are possible using * or :.}
 
@@ -29,7 +32,7 @@ Interactions are possible using * or :.}
 \item{data.Longi}{a 'data.frame' with the variables used in
 \code{formula.LongitudinalData}.}
 
-\item{formula.Binary}{a formula object, only requires terms on the
+\item{formula.Binary}{a formula object, with terms on the
 right to indicate which variables are modelling the binary part of the
 two-part model fitting the longitudinal semicontinuous outcome.
 It must follow the standard form used for linear mixed-effects models.
@@ -109,14 +112,25 @@ If no center then this argument should be \code{NULL}. Default is \code{NULL}.}
 
 \item{med.trt}{For mediation analysis, a vector containing the treatment indicator for each subject.}
 
-\item{init.B}{Vector of initial values for regression coefficients. This
-vector should be of the same size as the whole vector of covariates with
-the first elements for the covariates related to the terminal event and
-then for the covariates related to the biomarker (interactions in the end
-of each component). Default is 0.5 for each.}
+\item{init.longi}{A model estimated with the \code{lme} function from the \code{nlme} package
+used to set initial values for the regression coefficients, the random effects
+and the measurement error in the longitudinal outcome submodel. The \code{lme} model
+should have the same number of parameters as the longitudinal submodel from 
+\code{longiPenal} model to be estimated.
+Alternatively, \code{init.longi} can be a list with elements \code{"fixed"}, \code{"random"} and \code{"sigma"}
+representing respectively the regression coefficients, the random effects
+variance matrix and the standard deviation of the measurement error. Default is 0.5 for each.}
 
-\item{init.Random}{Initial value for variance of the elements of the matrix
-of the distribution of the random effects. Default is 0.5 for each element.}
+\item{init.surv}{A model estimated with the \code{frailtyPenal} function
+ used to set initial values for the baseline risk function and the regression
+ coefficients in the survival outcome submodel. The \code{frailtyPenal} model should
+ have the same number of parameters (baseline risk and regression coeffcients)
+ than the survival submodel of the \code{longiPenal} model.
+ Alternatively, \code{init.surv} can be a list with elements \code{"hazard"} and \code{"fixed"}
+ representing the baseline risk function parameters (with splines baseline
+hazard, it corresponds to the coefficients of the splins functions, with
+Weibull hazard, it corresponds to two parameters) and the regression coeffcients.
+ Default is 0.5 for each element.}
 
 \item{init.Eta}{Initial values for regression coefficients for the link
 function. Default is 0.5 for each.}
@@ -320,7 +334,7 @@ b\out{<sub>i</sub>}(t)=\bold{\eqn{X}\out{<sub>Li</sub>}}(t\out{<sub>ik</sub>})\o
 
 We consider that the longitudinal outcome can be a subject to a
 quantification limit, i.e. some observations, below a level of detection
-s cannot be quantified (left-censoring).
+cannot be quantified (left-censoring).
 
 Alternatively, a two-part model is proposed to fit a semicontinuous biomarker.
 The two-part model decomposes the biomarker's distribution into a binary
@@ -416,23 +430,49 @@ data(colorectalLongi)
 # Survival data preparation - only terminal events
 colorectalSurv <- subset(colorectal, new.lesions == 0)
 
+# We recommend fitting first a mixed model on the longitudinal data and
+# a survival model on the terminal event and use these estimations as
+# initial values for the joint model.
+# Mixed model with lme:
+mlongi <- nlme::lme(tumor.size ~ year * treatment + age + who.PS, 
+                    data = colorectalLongi, random = ~1 + year | id)
+# Survival model with frailtyPenal:
+msurv <- frailtyPenal(Surv(time1, state) ~ age + treatment + who.PS + prev.resection,
+                      data = colorectalSurv, n.knots = 7, kappa = 2)
+msurv.weib <- frailtyPenal(Surv(time1, state) ~ age + treatment + who.PS + prev.resection,
+                           data = colorectalSurv, hazard = "Weibull")
+
+
+# Joint model with
 # Baseline hazard function approximated with splines
 # Random effects as the link function
-
 model.spli.RE <- longiPenal(Surv(time1, state) ~ age + treatment + who.PS
 + prev.resection, tumor.size ~  year * treatment + age + who.PS ,
 data=colorectalSurv,	data.Longi = colorectalLongi, random = c("1", "year"),
 id = "id", link = "Random-effects", left.censoring = -3.33,
-n.knots = 7, kappa = 2)
+n.knots = 7, kappa = 2, init.longi = mlongi, init.surv = msurv, init.Eta = c(0, 0))
 
+# Joint model with
 # Weibull baseline hazard function
 # Current level of the biomarker as the link function
-
 model.weib.CL <- longiPenal(Surv(time1, state) ~ age + treatment + who.PS
 + prev.resection, tumor.size ~  year * treatment + age + who.PS , timevar="year",
 data=colorectalSurv, data.Longi = colorectalLongi, random = c("1", "year"),
-id = "id", link = "Current-level", left.censoring = -3.33, hazard = "Weibull")
+id = "id", link = "Current-level", left.censoring = -3.33, hazard = "Weibull",
+init.longi = mlongi, init.surv = msurv.weib, init.Eta = 0)
 
+# Joint model with user specified initial values
+initL <- list(fixed = c(3, -0.3, -0.1, 0.2, -0.4, 0.2, 1, -0.6),
+              random = matrix(c(2, -0.4, -0.4, 0.8), 2, 2),
+              sigma = 1)
+initS <- list(hazard = c(1.2, 1.5),
+              fixed = c(-0.2, 0, 0.1, -0.2, 0.5, -0.3))
+
+model.weib.CL.2 <- longiPenal(Surv(time1, state) ~ age + treatment + who.PS
++ prev.resection, tumor.size ~  year * treatment + age + who.PS , timevar="year",
+data=colorectalSurv, data.Longi = colorectalLongi, random = c("1", "year"),
+id = "id", link = "Current-level", left.censoring = -3.33, hazard = "Weibull",
+init.longi = initL, init.surv = initS, init.Eta = 0.3)
 
 ###--- Two-part Joint model for semicontinuous
 #      longitudinal data and a terminal event ---###
@@ -459,7 +499,8 @@ print(CTPJM_re)
 # Simulated dataset (github.com/DenisRustand/TPJM_sim)
 data(longDat)
 data(survDat)
-tte <- frailtyPenal(Surv(deathTimes, d)~trt,n.knots=5,kappa=0, data=survDat,cross.validation = T)
+tte <- frailtyPenal(Surv(deathTimes, d)~trt,n.knots=5,kappa=0, data=survDat,
+cross.validation = T)
 kap <- round(tte$kappa,2);kap # smoothing parameter
   CTPJM_cl <- longiPenal(Surv(deathTimes, d)~trt, Y~timej*trtY,
   data=survDat, data.Longi = longDat,
@@ -504,13 +545,21 @@ colorectalSurv <- subset(colorectal, new.lesions == 0)
 colorectalSurv$treatment<-sapply(colorectalSurv$treatment,function(t) ifelse(t=="S",1,0))
 colorectalLongi$treatment<-sapply(colorectalLongi$treatment,function(t) ifelse(t=="S",1,0))
 
-mod.col=longiPenal(Surv(time1, state) ~ age+treatment, 
-  	       tumor.size ~ age+year*treatment,
-           data=colorectalSurv,	data.Longi = colorectalLongi, random = c("1", "year"),
-           id = "id", link = "Current-level",timevar="year",method.GH = "Pseudo-adaptive",
-           mediation = TRUE,med.trt = colorectalSurv$treatment,
-           med.center = NULL,med.nmc = 50,n.knots = 7, kappa = 2,
-  	        pte.ntimes = 30,pte.boot = T,pte.nmc = 1000,pte.nboot = 1000)
+longi.col <- nlme::lme(tumor.size ~ age+year*treatment,
+                       random = ~1 + year | id,
+                       data = colorectalLongi)
+surv.col <- frailtyPenal(Surv(time1, state) ~ age + treatment ,
+                         n.knots = 7, kappa = 2,
+                         data = colorectalSurv)
+
+mod.col <- longiPenal(Surv(time1, state) ~ age+treatment,
+            tumor.size ~ age+year*treatment,
+            data=colorectalSurv, data.Longi = colorectalLongi, random = c("1", "year"),
+            id = "id", link = "Current-level",timevar="year",method.GH = "Pseudo-adaptive",
+            mediation = TRUE,med.trt = colorectalSurv$treatment,
+            med.center = NULL,med.nmc = 50,n.knots = 7, kappa = 2,
+            pte.ntimes = 30,pte.boot = T,pte.nmc = 1000,pte.nboot = 1000,
+            init.longi = longi.col, init.surv = surv.col)
 
 print(mod.col)
 plot(mod.col,plot.mediation='All')

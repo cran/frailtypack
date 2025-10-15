@@ -36,7 +36,7 @@
 #'
 #' We consider that the longitudinal outcome can be a subject to a
 #' quantification limit, i.e. some observations, below a level of detection
-#' s cannot be quantified (left-censoring).
+#' cannot be quantified (left-censoring).
 #'
 #' Alternatively, a two-part model is proposed to fit a semicontinuous biomarker.
 #' The two-part model decomposes the biomarker's distribution into a binary
@@ -118,23 +118,26 @@
 #' and types of corresponding covariates must be the same, as well as the number
 #' and identification of individuals. }
 #'
-#' @usage longiPenal(formula, formula.LongitudinalData, data,  data.Longi,
-#'           formula.Binary=FALSE, random,random.Binary=FALSE, fixed.Binary=FALSE, 
-#'           GLMlog=FALSE, MTP=FALSE, id, intercept = TRUE,link="Random-effects",
-#'           timevar=FALSE,left.censoring=FALSE,n.knots, kappa,maxit=350,
-#'           hazard="Splines",mediation=FALSE,med.center=NULL,med.trt=NULL,init.B,
-#'           init.Random, init.Eta, method.GH = "Standard",seed.MC=1, n.nodes,
-#'           LIMparam=1e-3,LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE,med.nmc=500,
-#'           pte.times=NULL,pte.ntimes=NULL,pte.nmc=500,pte.boot=FALSE,pte.nboot=2000)
+#' @usage longiPenal(formula, formula.LongitudinalData, data, data.Longi,
+#'  formula.Binary = FALSE, random, random.Binary = FALSE,
+#'  fixed.Binary = FALSE, GLMlog = FALSE, MTP = FALSE, id,
+#'  intercept = TRUE, link = "Random-effects", timevar = FALSE,
+#'  left.censoring = FALSE, n.knots, kappa, maxit = 350, hazard = "Splines",
+#'  mediation = FALSE, med.center = NULL, med.trt = NULL,
+#'  init.longi = NULL, init.surv = NULL, init.Eta,
+#'  method.GH = "Standard",seed.MC = 1, n.nodes, LIMparam = 1e-3,
+#'  LIMlogl = 1e-3, LIMderiv = 1e-3, print.times = TRUE, med.nmc = 500,
+#'  pte.times = NULL, pte.ntimes = NULL, pte.nmc = 500,
+#'  pte.boot = FALSE, pte.nboot = 2000)
 #' @param formula a formula object, with the response on the left of a
 #'   \eqn{\sim} operator, and the terms on the right. The response must be a
 #'   survival object as returned by the 'Surv' function like in survival
 #'   package. Interactions are possible using * or :.
-#' @param formula.LongitudinalData a formula object, only requires terms on the
-#'   right to indicate which variables are modelling the longitudinal outcome.
+#' @param formula.LongitudinalData a formula object, with the longitudinal outcome
+#'   on the left and terms indicating the modelling variables on the right.
 #'   It must follow the standard form used for linear mixed-effects models.
 #'   Interactions are possible using * or :.
-#' @param formula.Binary a formula object, only requires terms on the
+#' @param formula.Binary a formula object, with terms on the
 #'   right to indicate which variables are modelling the binary part of the
 #'   two-part model fitting the longitudinal semicontinuous outcome.
 #'   It must follow the standard form used for linear mixed-effects models.
@@ -194,13 +197,24 @@
 #'   hazard functions using equidistant intervals or \code{"Splines-per"} using
 #'   percentile with the penalized likelihood estimation, \code{"Weibull"} for
 #'   the parametric Weibull functions. The default is \code{"Splines"}.
-#' @param init.B Vector of initial values for regression coefficients. This
-#'   vector should be of the same size as the whole vector of covariates with
-#'   the first elements for the covariates related to the terminal event and
-#'   then for the covariates related to the biomarker (interactions in the end
-#'   of each component). Default is 0.5 for each.
-#' @param init.Random Initial value for variance of the elements of the matrix
-#'   of the distribution of the random effects. Default is 0.5 for each element.
+#' @param init.longi A model estimated with the \code{lme} function from the \code{nlme} package
+#'   used to set initial values for the regression coefficients, the random effects
+#'   and the measurement error in the longitudinal outcome submodel. The \code{lme} model
+#'   should have the same number of parameters as the longitudinal submodel from 
+#'   \code{longiPenal} model to be estimated.
+#'   Alternatively, \code{init.longi} can be a list with elements \code{"fixed"}, \code{"random"} and \code{"sigma"}
+#'   representing respectively the regression coefficients, the random effects
+#'   variance matrix and the standard deviation of the measurement error. Default is 0.5 for each.
+#' @param init.surv A model estimated with the \code{frailtyPenal} function
+#'   used to set initial values for the baseline risk function and the regression
+#'   coefficients in the survival outcome submodel. The \code{frailtyPenal} model should
+#'   have the same number of parameters (baseline risk and regression coeffcients)
+#'   than the survival submodel of the \code{longiPenal} model.
+#'   Alternatively, \code{init.surv} can be a list with elements \code{"hazard"} and \code{"fixed"}
+#'   representing the baseline risk function parameters (with splines baseline
+#'  hazard, it corresponds to the coefficients of the splins functions, with
+#'  Weibull hazard, it corresponds to two parameters) and the regression coeffcients.
+#'   Default is 0.5 for each element.
 #' @param init.Eta Initial values for regression coefficients for the link
 #'   function. Default is 0.5 for each.
 #' @param method.GH Method for the Gauss-Hermite quadrature: \code{"Standard"}
@@ -402,23 +416,49 @@
 #' # Survival data preparation - only terminal events
 #' colorectalSurv <- subset(colorectal, new.lesions == 0)
 #'
+#' # We recommend fitting first a mixed model on the longitudinal data and
+#' # a survival model on the terminal event and use these estimations as
+#' # initial values for the joint model.
+#' # Mixed model with lme:
+#' mlongi <- nlme::lme(tumor.size ~ year * treatment + age + who.PS, 
+#'                     data = colorectalLongi, random = ~1 + year | id)
+#' # Survival model with frailtyPenal:
+#' msurv <- frailtyPenal(Surv(time1, state) ~ age + treatment + who.PS + prev.resection,
+#'                       data = colorectalSurv, n.knots = 7, kappa = 2)
+#' msurv.weib <- frailtyPenal(Surv(time1, state) ~ age + treatment + who.PS + prev.resection,
+#'                            data = colorectalSurv, hazard = "Weibull")
+#' 
+#'
+#' # Joint model with
 #' # Baseline hazard function approximated with splines
 #' # Random effects as the link function
-#'
 #' model.spli.RE <- longiPenal(Surv(time1, state) ~ age + treatment + who.PS
 #' + prev.resection, tumor.size ~  year * treatment + age + who.PS ,
 #' data=colorectalSurv,	data.Longi = colorectalLongi, random = c("1", "year"),
 #' id = "id", link = "Random-effects", left.censoring = -3.33,
-#' n.knots = 7, kappa = 2)
+#' n.knots = 7, kappa = 2, init.longi = mlongi, init.surv = msurv, init.Eta = c(0, 0))
 #'
+#' # Joint model with
 #' # Weibull baseline hazard function
 #' # Current level of the biomarker as the link function
-#'
 #' model.weib.CL <- longiPenal(Surv(time1, state) ~ age + treatment + who.PS
 #' + prev.resection, tumor.size ~  year * treatment + age + who.PS , timevar="year",
 #' data=colorectalSurv, data.Longi = colorectalLongi, random = c("1", "year"),
-#' id = "id", link = "Current-level", left.censoring = -3.33, hazard = "Weibull")
+#' id = "id", link = "Current-level", left.censoring = -3.33, hazard = "Weibull",
+#' init.longi = mlongi, init.surv = msurv.weib, init.Eta = 0)
 #'
+#' # Joint model with user specified initial values
+#' initL <- list(fixed = c(3, -0.3, -0.1, 0.2, -0.4, 0.2, 1, -0.6),
+#'               random = matrix(c(2, -0.4, -0.4, 0.8), 2, 2),
+#'               sigma = 1)
+#' initS <- list(hazard = c(1.2, 1.5),
+#'               fixed = c(-0.2, 0, 0.1, -0.2, 0.5, -0.3))
+#' 
+#' model.weib.CL.2 <- longiPenal(Surv(time1, state) ~ age + treatment + who.PS
+#' + prev.resection, tumor.size ~  year * treatment + age + who.PS , timevar="year",
+#' data=colorectalSurv, data.Longi = colorectalLongi, random = c("1", "year"),
+#' id = "id", link = "Current-level", left.censoring = -3.33, hazard = "Weibull",
+#' init.longi = initL, init.surv = initS, init.Eta = 0.3)
 #'
 #' ###--- Two-part Joint model for semicontinuous
 #' #      longitudinal data and a terminal event ---###
@@ -445,7 +485,8 @@
 #' # Simulated dataset (github.com/DenisRustand/TPJM_sim)
 #' data(longDat)
 #' data(survDat)
-#' tte <- frailtyPenal(Surv(deathTimes, d)~trt,n.knots=5,kappa=0, data=survDat,cross.validation = T)
+#' tte <- frailtyPenal(Surv(deathTimes, d)~trt,n.knots=5,kappa=0, data=survDat,
+#' cross.validation = T)
 #' kap <- round(tte$kappa,2);kap # smoothing parameter
 #'   CTPJM_cl <- longiPenal(Surv(deathTimes, d)~trt, Y~timej*trtY,
 #'   data=survDat, data.Longi = longDat,
@@ -490,25 +531,33 @@
 #' colorectalSurv$treatment<-sapply(colorectalSurv$treatment,function(t) ifelse(t=="S",1,0))
 #' colorectalLongi$treatment<-sapply(colorectalLongi$treatment,function(t) ifelse(t=="S",1,0))
 #' 
-#' mod.col=longiPenal(Surv(time1, state) ~ age+treatment, 
-#'   	       tumor.size ~ age+year*treatment,
-#'            data=colorectalSurv,	data.Longi = colorectalLongi, random = c("1", "year"),
-#'            id = "id", link = "Current-level",timevar="year",method.GH = "Pseudo-adaptive",
-#'            mediation = TRUE,med.trt = colorectalSurv$treatment,
-#'            med.center = NULL,med.nmc = 50,n.knots = 7, kappa = 2,
-#'   	        pte.ntimes = 30,pte.boot = T,pte.nmc = 1000,pte.nboot = 1000)
+#' longi.col <- nlme::lme(tumor.size ~ age+year*treatment,
+#'                        random = ~1 + year | id,
+#'                        data = colorectalLongi)
+#' surv.col <- frailtyPenal(Surv(time1, state) ~ age + treatment ,
+#'                          n.knots = 7, kappa = 2,
+#'                          data = colorectalSurv)
+#' 
+#' mod.col <- longiPenal(Surv(time1, state) ~ age+treatment,
+#'             tumor.size ~ age+year*treatment,
+#'             data=colorectalSurv, data.Longi = colorectalLongi, random = c("1", "year"),
+#'             id = "id", link = "Current-level",timevar="year",method.GH = "Pseudo-adaptive",
+#'             mediation = TRUE,med.trt = colorectalSurv$treatment,
+#'             med.center = NULL,med.nmc = 50,n.knots = 7, kappa = 2,
+#'             pte.ntimes = 30,pte.boot = T,pte.nmc = 1000,pte.nboot = 1000,
+#'             init.longi = longi.col, init.surv = surv.col)
 #' 
 #' print(mod.col)
 #' plot(mod.col,plot.mediation='All')
 #' }
 "longiPenal" <-
-  function (formula, formula.LongitudinalData, data,  data.Longi, formula.Binary=FALSE, random,
-            random.Binary=FALSE, fixed.Binary=FALSE, GLMlog=FALSE, MTP=FALSE, id, intercept = TRUE,
-            link="Random-effects",timevar=FALSE,left.censoring=FALSE,n.knots, kappa,
-            maxit=350, hazard="Splines",mediation=FALSE,med.center=NULL,med.trt=NULL,init.B,
-            init.Random, init.Eta, method.GH = "Standard",seed.MC=1, n.nodes, LIMparam=1e-3,
-            LIMlogl=1e-3, LIMderiv=1e-3, print.times=TRUE,med.nmc=500,
-            pte.times=NULL,pte.ntimes=NULL,pte.nmc=500,pte.boot=FALSE,pte.nboot=2000)
+  function (formula, formula.LongitudinalData, data, data.Longi, formula.Binary = FALSE, random,
+            random.Binary = FALSE, fixed.Binary = FALSE, GLMlog = FALSE, MTP = FALSE, id, intercept = TRUE,
+            link = "Random-effects", timevar = FALSE, left.censoring = FALSE, n.knots, kappa,
+            maxit = 350, hazard = "Splines", mediation = FALSE, med.center = NULL, med.trt = NULL,
+            init.longi = NULL, init.surv = NULL, init.Eta, method.GH = "Standard",seed.MC = 1, n.nodes, LIMparam = 1e-3,
+            LIMlogl = 1e-3, LIMderiv = 1e-3, print.times = TRUE, med.nmc = 500,
+            pte.times = NULL, pte.ntimes = NULL, pte.nmc = 500, pte.boot = FALSE, pte.nboot = 2000)
   {
     # Ajout de la fonction minmin issue de print.survfit, permettant de calculer la mediane
     minmin <- function(y, x) {
@@ -527,7 +576,7 @@
     OrderLong <- data.Longi[,id]
     OrderDat <- data[,id]
     m2 <- match.call()
-    m2$formula <-  m2$data <- m2$random <- m2$random.Binary <- m2$fixed.Binary<- m2$id <- m2$link <-m2$timevar <- m2$n.knots <- m2$kappa <- m2$maxit <- m2$hazard  <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$left.censoring <- m2$GLMlog <- m2$MTP <- m2$init.Random <- m2$init.Eta <- m2$method.GH <- m2$seed.MC<- m2$intercept <- m2$n.nodes <- m2$mediation <- m2$med.center <- m2$med.trt <-m2$med.nmc <- m2$pte.times <- m2$pte.ntimes <- m2$pte.nmc <- m2$pte.boot <- m2$pte.nboot <- m2$... <- NULL
+    m2$formula <-  m2$data <- m2$random <- m2$random.Binary <- m2$fixed.Binary<- m2$id <- m2$link <-m2$timevar <- m2$n.knots <- m2$kappa <- m2$maxit <- m2$hazard  <- m2$init.B <- m2$LIMparam <- m2$LIMlogl <- m2$LIMderiv <- m2$print.times <- m2$left.censoring <- m2$GLMlog <- m2$MTP <- m2$init.Random <- m2$init.longi <- m2$init.surv <- m2$init.Eta <- m2$method.GH <- m2$seed.MC<- m2$intercept <- m2$n.nodes <- m2$mediation <- m2$med.center <- m2$med.trt <-m2$med.nmc <- m2$pte.times <- m2$pte.ntimes <- m2$pte.nmc <- m2$pte.boot <- m2$pte.nboot <- m2$... <- NULL
     Names.data.Longi <- m2$data.Longi
     # TWO-PART indicator
     TwoPart <- ifelse(formula.Binary==FALSE, FALSE, TRUE) # true if two-part activated
@@ -755,7 +804,7 @@
     m <- match.call(expand.dots = FALSE) # recupere l'instruction de l'utilisateur
 
 
-    m$formula.LongitudinalData <- m$formula.Binary <- m$data.Longi <- m$n.knots <- m$random <- m$random.Binary <- m$fixed.Binary <- m$link <- m$timevar <- m$id <- m$kappa <- m$maxit <- m$hazard  <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$left.censoring <- m$GLMlog <- m$MTP <- m$print.times <- m$init.Random <- m$init.Eta <- m$method.GH <- m$seed.MC <- m$intercept <- m$n.nodes <- m$mediation <- m$med.center <- m$med.trt <-m$med.nmc <- m$pte.times <- m$pte.ntimes <- m$pte.nmc <- m$pte.boot <- m$pte.nboot  <- NULL
+    m$formula.LongitudinalData <- m$formula.Binary <- m$data.Longi <- m$n.knots <- m$random <- m$random.Binary <- m$fixed.Binary <- m$link <- m$timevar <- m$id <- m$kappa <- m$maxit <- m$hazard  <- m$init.B <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$left.censoring <- m$GLMlog <- m$MTP <- m$print.times <- m$init.Random <- m$init.longi <- m$init.surv <- m$init.Eta <- m$method.GH <- m$seed.MC <- m$intercept <- m$n.nodes <- m$mediation <- m$med.center <- m$med.trt <-m$med.nmc <- m$pte.times <- m$pte.ntimes <- m$pte.nmc <- m$pte.boot <- m$pte.nboot  <- NULL
 
 
     special <- c("strata", "cluster", "subcluster", "terminal","num.id","timedep")
@@ -1644,7 +1693,9 @@ if(TwoPart) max_repB <- max(table(clusterB))
       nREB <- length(random.Binary)
       nRE <- nREY+nREB
     }else{
-      nRE <- length(random)
+        nRE <- length(random)
+        nREY <- nRE
+        nREB <- 0
     }
     ne_re <- nRE*(nRE+1)/2
 
@@ -2065,21 +2116,77 @@ if(TwoPart) max_repB <- max(table(clusterB))
     }
     # traitement de l'initialisation du Beta rentre par l'utilisateur
 
-    Beta <- rep(0.5,np)
-    if (!missing(init.B)) {
-      if (length(init.B) != nvar) stop("Wrong number of regression coefficients in init.B")
-      #  if (timedep) stop("You can hardly know initial regression coefficient while time-varying effect")
-      Beta <- c(rep(0.5,np-nvar-nparammed),init.B)
-    }
+      Beta <- rep(0.5,np)
+      
+      if (!missing(init.Eta)) {
+          if (length(init.Eta) != netadc) stop(paste("init.Eta must be of length", netadc))
+          Beta[(np -nvar-1-ne_re-netadc-nparammed+1):(np-nvar-1-ne_re-nparammed)] <- init.Eta
+      }
 
-    if (!missing(init.Random)) {
-      if (length(init.Random)!=ne_re) stop("init.Random must be of length that corresponds to the number of elements to estimate of the B1 matrix")
-      Beta[(np-nvar-ne_re-nparammed+1):(np-nvar-nparammed)] <- init.Random
-    }
-    if (!missing(init.Eta)) {
-      if (length(init.Eta)!=netadc) stop("init.Eta must be of length that corresponds to the dimension of the link function")
-      Beta[(np -nvar-1-ne_re-netadc-nparammed+1):(np-nvar-1-ne_re-nparammed)] <- init.Eta
-    }
+      ## initial values from a mixed model
+      if(!is.null(init.longi)){
+          if(inherits(init.longi, "lme")){
+              fix.longi <- nlme::fixef(init.longi)
+              rand.longi <- nlme::getVarCov(init.longi)
+              sig.longi <- init.longi$sigma
+              
+              init.longi <- list(fixed = fix.longi,
+                                 random = rand.longi,
+                                 sigma = sig.longi)
+          } else {
+              if(!all(c("fixed", "random", "sigma") %in% names(init.longi)))
+                  stop("init.longi should either be a lme model or a list with elements fixed, random, and sigma")
+          }
+
+          ## fixed effects
+          if(!all(is.na(init.longi$fixed))){
+              if(length(init.longi$fixed) != nvarY) stop(paste(nvarY, "fixed effects are required in init.longi"))
+              Beta[np - nparammed - nvar + nvarT + 1:nvarY] <- init.longi$fixed
+          }
+
+          ## cholesky of the random effect variance matrix
+          if(!all(is.na(init.longi$random))){
+              if((ncol(init.longi$random) != nREY) | (nrow(init.longi$random) != nREY)){
+                  stop(paste(nREY, "random effects are required in init.longi"))
+              }
+              chol.longi <- chol(init.longi$random)[upper.tri(init.longi$random, diag = TRUE)]
+              Beta[np - nparammed - nvar - ne_re + 1:((nREY * (nREY + 1)) / 2)] <- chol.longi
+          }
+
+          ## measurement error
+          if(!is.na(init.longi$sigma)){
+              if(length(init.longi$sigma) != 1) stop("one measurement error is required in init.longi")
+              Beta[np - nparammed - nvar - ne_re] <- init.longi$sigma
+          }
+      }
+
+      ## initial values from a survival model
+      if(!is.null(init.surv)){
+          nhaz <- n.knots + 2 # number of baseline risk parameters in the current joint model
+          if(inherits(init.surv, "frailtyPenal")){
+              nhaz.surv <- ifelse(init.surv$typeof == 0, init.surv$n.knots + 2, 2) # number of baseline risk parameters in the initial model
+              haz.surv <- init.surv$b[1:nhaz.surv] 
+              fix.surv <- init.surv$b[(nhaz.surv + 1):length(init.surv$b)]
+
+              init.surv <- list(hazard = haz.surv,
+                                fixed = fix.surv)
+          } else {
+              if(!all(c("hazard", "fixed") %in% names(init.surv)))
+                  stop("init.surv should either be a frailtyPenal model or a list with elements hazard and fixed")
+          }
+
+          ## baseline risk
+          if(!all(is.na(init.surv$hazard))){
+              if(length(init.surv$hazard) != nhaz) stop(paste(nhaz, "baseline risk parameters are required in init.surv"))
+              Beta[1:nhaz] <- init.surv$hazard
+          }
+
+          ## regression coefficient
+          if(!all(is.na(init.surv$fixed))){
+              if(length(init.surv$fixed) != nvarT) stop(paste(nvarT, "fixed effects are required in init.surv"))
+              Beta[np - nparammed - nvar + 1:nvarT] <- init.surv$fixed
+          }
+      }
 
     xSuT <- matrix(0,nrow=100,ncol=1)
     if (typeof==0){
