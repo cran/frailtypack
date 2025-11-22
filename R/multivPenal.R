@@ -16,7 +16,7 @@
 #' The multivariate frailty model for two types of recurrent events with a
 #' terminal event is (in the calendar or time-to-event timescale):
 #' 
-#' {\figure{multivmodel1.png}{options: width="100\%"}}
+#' {\figure{multivmodel1.png}{options: width="731"}}
 #' 
 #' where \eqn{r}\out{<sub>0</sub>}\out{<sup>l</sup>}(t), (l\out{&isin;}\{1,3\}) and \eqn{r}\out{<sub>0</sub>}(t) are
 #' respectively the recurrent and terminal event baseline hazard functions, and
@@ -32,7 +32,7 @@
 #' two Gaussian and correlated random effects \eqn{u}\out{<sub>i</sub>},\eqn{v}\out{<sub>i</sub>}: %
 #' (\eqn{u}\out{<sub>i</sub>},\eqn{v}\out{<sub>i</sub>})\out{<sup>T</sup>} \out{<span>&#126;</span>} \bold{\eqn{N}}(0,\eqn{\Sigma}\out{<sub>uv</sub>}), with
 #' 
-#' {\figure{multivmodel2.png}{options: width="100\%"}}
+#' {\figure{multivmodel2.png}{options: width="731"}}
 #' 
 #' Dependencies between these three types of event are taken into account by
 #' two correlated random effects and parameters \eqn{\theta}\out{<sub>1</sub>},\eqn{\theta}\out{<sub>2</sub>} the

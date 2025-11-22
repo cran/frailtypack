@@ -262,6 +262,158 @@ NULL
 #' @keywords datasets
 NULL
 
+
+
+
+
+#' Transformed Readmission Data for Illness-Death Modeling
+#'
+#' A dataset derived from the \code{readmission} data (originally from the
+#' \code{frailtypack} package, related to rehospitalization times after surgery
+#' in colorectal cancer patients). This transformed version reshapes the data
+#' to fit a standard illness-death model framework, focusing on the first
+#' event (rehospitalization) and the terminal event (death). Recurrent
+#' rehospitalization events beyond the first one are excluded. Time is scaled to years.
+#'
+#' @name readmission2
+#' @docType data
+#' @usage data(readmission2)
+#' @format A data frame with one row per subject, containing columns suitable
+#'   for use with the \code{IllnessDeath} function:
+#'   \describe{
+#'     \item{id}{Unique subject identification number.}
+#'     \item{observed_disease_time}{Time (in years since surgery) to either the first rehospitalization (illness), death, or administrative censoring, whichever occurred first.}
+#'     \item{observed_death_time}{Time (in years since surgery) to either death or administrative censoring.}
+#'     \item{disease_status}{Indicator for the non-terminal event (first rehospitalization). 1 if the subject experienced a first rehospitalization before death/censoring, 0 otherwise.}
+#'     \item{death_status}{Indicator for the terminal event (death). 1 if the subject died, 0 if censored.}
+#'     \item{dukes}{Dukes' tumoral stage at baseline (Factor or numeric: 1:A-B; 2:C; 3:D).}
+#'     \item{sex}{Gender (Factor or numeric: 1:Male; 2:Female).}
+#'     \item{charlson}{Comorbidity Charlson's index at baseline (Factor or numeric: 0: Index 0; 1: Index 1-2; 3: Index >=3). Note: Original data had this as time-dependent, this version likely uses the baseline value.}
+#'     \item{chemo}{Indicator whether patient received chemotherapy (Factor or numeric: 1:No; 2:Yes).}
+#'     \item{group}{An example grouping variable (numeric, derived from id mod 10 + 1), useful for fitting grouped frailty models.}
+#' }
+#' @details
+#' The transformation process involved:
+#' \enumerate{
+#'   \item Starting with the original \code{readmission} data.
+#'   \item Excluding recurrent rehospitalization events, keeping only the interval from surgery (t.start=0) to the first event (event=1) or censoring (event=0).
+#'   \item Reshaping the data so each row represents one subject.
+#'   \item Defining \code{observed_disease_time} and \code{disease_status} based on the first event interval (t.stop when t.start=0).
+#'   \item Defining \code{observed_death_time} and \code{death_status} based on the overall follow-up time and final death status for the subject. If a subject had a first event and then further follow-up, the death time comes from the second interval if available.
+#'   \item Scaling time variables (\code{t.stop}) from days (assumed) to years by dividing by 365.
+#'   \item Copying baseline covariates (dukes, sex, charlson, chemo) from the subject's first record.
+#' }
+#' This dataset is intended primarily for demonstrating the \code{IllnessDeath} function.
+#'
+#' @source Derived from the \code{readmission} dataset, originally described in:
+#' Gonzalez, JR., Fernandez, E., Moreno, V., Ribes, J., Peris, M., Navarro, M.,
+#' Cambray, M. and Borras, JM (2005). Sex differences in hospital readmission
+#' among colorectal cancer patients. \emph{Journal of Epidemiology and
+#' Community Health}, \bold{59}, 6, 506-511.
+#' @keywords datasets
+NULL
+
+
+
+
+#' Filtered Paquid Sample Data Set for Illness-Death Modeling
+#'
+#' A dataset derived from \code{Paq1000} (originally a sample from the Paquid
+#' study available via the \code{SmoothHazard} package). This version excludes
+#' subjects where the age of dementia diagnosis or censoring ('r') was exactly 
+#' equal to the age at study entry ('e'), ensuring valid observation intervals
+#' when using left truncation.
+#'
+#' @name Paq810
+#' @docType data
+#' @usage data(Paq810) 
+#'
+#' @format A data frame with approximately 810 rows (original 1000 minus exclusions)
+#'   and the following 8 columns:
+#'   \describe{
+#'     \item{dementia}{Dementia status indicator: 0 = non-demented, 1 = demented.}
+#'     \item{death}{Death status indicator: 0 = alive, 1 = dead.}
+#'     \item{e}{Age at entry into the study (left-truncation time).}
+#'     \item{l}{For demented subjects: age at the visit *before* the diagnostic visit. For non-demented subjects: age at the last visit.}
+#'     \item{r}{Age at dementia diagnosis or censoring for dementia (event/censoring time for 0->1 transition). Guaranteed to be > `e`.}
+#'     \item{t}{Overall exit age. For dead subjects: age at death. For alive subjects: age at the latest news (censoring time for death).}
+#'     \item{certif}{Primary school certificate indicator: 0 = without certificate, 1 = with certificate.}
+#'     \item{gender}{Gender indicator: 0 = female, 1 = male.}
+#' }
+#'
+#' @details
+#' This dataset was created by filtering the \code{Paq1000} data:
+#' \code{Paq810 <- Paq1000[Paq1000$r > Paq1000$e, ]}.
+#' This step is necessary to prevent issues with \code{survival::Surv(e, r, dementia)}
+#' which requires the stop time ('r') to be strictly greater than the start/entry
+#' time ('e').
+#'
+#' The time variables `e`, `l`, `r`, and `t` are all ages in years.
+#' This dataset is suitable for fitting illness-death models with left truncation
+#' using functions like \code{IllnessDeath}.
+#'
+#' @source Derived from the \code{Paq1000} dataset, which originates from the
+#'   Paquid study and is included in the \code{SmoothHazard} package.
+#' @seealso \code{Paq1000}, The \code{SmoothHazard} package.
+#' @keywords datasets
+NULL
+
+
+
+
+#' Transformed Bone Marrow Transplant Data for Competing Risks
+#'
+#' A dataset derived from the \code{bmtcrr} data (originally from the
+#' \code{casebase} package). This version adds unique subject IDs, an example
+#' grouping variable, and calculates an `observed_time` based on age at transplant
+#' plus follow-up time in years, setting age 0 as the origin. It's prepared
+#' for competing risks analyses, potentially with frailties or left truncation.
+#'
+#' @name CPRSKbmtcrr
+#' @docType data
+#' @usage data(CPRSKbmtcrr) 
+#'
+#' @format A data frame with 177 observations and the following columns:
+#'   \describe{
+#'     \item{id}{Unique subject identification number.}
+#'     \item{Sex}{Gender of the individual (Factor: Male, Female).}
+#'     \item{D}{Disease type: ALL or AML (Factor: ALL, AML).}
+#'     \item{Phase}{Phase at transplant (Factor: Relapse, CR1, CR2, CR3).}
+#'     \item{Age}{Age in years at transplant (start of follow-up).}
+#'     \item{Status}{Status indicator: 0 = censored, 1 = relapse, 2 = competing event.}
+#'     \item{Source}{Source of stem cells (Factor: BM+PB, PB).}
+#'     \item{ftime}{Original failure time in months since transplant.}
+#'     \item{group}{Example grouping variable (numeric, derived from id mod 10 + 1).}
+#'     \item{observed_time}{Time in years since birth (Age + ftime/12) representing the
+#'      time of event or censoring relative to birth as origin.}
+#' }
+#'
+#' @details
+#' This dataset was created by taking the original \code{bmtcrr} data from the
+#' \code{casebase} package and applying the following transformations:
+#' \enumerate{
+#'   \item Added a unique subject identifier \code{id}.
+#'   \item Added an example grouping variable \code{group} based on \code{id}.
+#'   \item Calculated \code{observed_time = Age + ftime/12} to represent the
+#'       subject's age at event or censoring, potentially for use with left
+#'       truncation at \code{Age}.
+#' }
+#' The primary event is typically relapse (Status=1), with death without relapse
+#' (Status=2) as a competing event. Censoring is Status=0. Note that the time
+#' scale for \code{observed_time} is years since birth.
+#' 
+#'
+#' @source Derived from the \code{bmtcrr} dataset available in the \code{casebase} package.
+#' @references Scrucca L, Santucci A, Aversa F. Competing risk analysis using R:
+#'   an easy guide for clinicians. \emph{Bone Marrow Transplant}. 2007 Aug;40(4):381-7.
+#'   doi:10.1038/sj.bmt.1705727.
+#' @seealso \code{bmtcrr}. The \code{casebase} package.
+#' @keywords datasets
+NULL
+
+
+
+
 ##' Advanced Ovarian Cancer dataset
 ##' 
 ##' This dataset combines the data  that were collected in four double-blind randomized

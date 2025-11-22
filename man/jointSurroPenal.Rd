@@ -253,7 +253,7 @@ This function return an object of class jointSurroPenal or jointSurroMed in the 
    \item{LCV}{the approximated likelihood cross-validation criterion in the semiparametric case (with \code{H}
     minus the converged Hessian matrix, and \code{l(.)} the full log-likelihood).
    \if{html}{
-    {\figure{lcv.png}{options: width="50\%"}}}
+    {\figure{lcv.png}{options: width="365"}}}
     \if{latex}{\deqn{LCV = \frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))};}}
    \item{xS}{vector of times for surrogate endpoint where both survipte.nmc.bootval and hazard function are estimated.
    By default seq(0,max(time),length=99), where time is the vector of survival times;}
@@ -317,7 +317,7 @@ on the final endpoint \eqn{T} is allowed through a function \eqn{g(S)}.
 For the j\out{<sup>th</sup>} subject (j=1,...,n\out{<sub>i</sub>}) of the i\out{<sup>th</sup>}
 trial (i=1,...,G), the joint surrogate model is defined as follows:
 
-{\figure{surromodel1.png}{options: width="100\%"}}
+{\figure{surromodel1.png}{options: width="731"}}
 
 where,
 \eqn{\omega}\out{<sub>ij</sub>} \out{&#126;} \eqn{N}(0,\eqn{\theta}), u\out{<sub>i</sub>} \out{&#126;} \eqn{N}(0,\eqn{\gamma}), \eqn{\omega}\out{<sub>i</sub>} \out{&#8869;} u\out{<sub>i</sub>},
@@ -328,7 +328,7 @@ and
 
 with
 
-{\figure{surromodel2.png}{options: width="100\%"}}
+{\figure{surromodel2.png}{options: width="731"}}
 
 In this model, \eqn{\lambda}\out{<sub>0s</sub>}(t) is the baseline hazard function associated with the
 surrogate endpoint and \eqn{\beta}\out{<sub>S</sub>} the fixed treatment effect (or log-hazard ratio);
@@ -344,7 +344,7 @@ v\out{<sub>S<sub>i</sub></sub>} and v\out{<sub>T<sub>i</sub></sub>} are two corr
 In the mediation analysis setting, the hazard function for the true endpoint
 becomes:
 
-{\figure{jointsurromed.png}{options: width="100\%"}}
+{\figure{jointsurromed.png}{options: width="731"}}
 
 where the term I(S\out{<sub>ij</sub>}\out{&le;} t)g(S\out{<sub>ij</sub>}) allows
 for a direct effect of the surrogate time \eqn{S} on the risk
@@ -363,7 +363,7 @@ To measure the strength of association between \eqn{S}\out{<sub>ij</sub>} and \e
 adjusting the marginal distributions for the trial and the treatment effects, as show in
 Sofeu \emph{et al.}(2018), we use the Kendall's \eqn{\tau} define by :
 
-{\figure{surromodel3.png}{options: width="100\%"}}
+{\figure{surromodel3.png}{options: width="731"}}
 
 
  where \eqn{\theta}, \eqn{\zeta}, \eqn{\alpha} and \eqn{\gamma} are estimated using the joint surrogate model
@@ -383,7 +383,7 @@ Sofeu \emph{et al.}(2018), we use the Kendall's \eqn{\tau} define by :
  treatment-by-trial interaction can be used to evaluate underlined prediction, and
  therefore as surrogacy evaluation measurement at trial-level. It is defined by:
 
- {\figure{surromodel4.png}{options: width="100\%"}}
+ {\figure{surromodel4.png}{options: width="731"}}
 
  The SEs of \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} is calculated using the Delta-method. We also propose
  \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} and 95\% CI computed using the parametric bootstrap. The use of delta-method
@@ -398,7 +398,7 @@ In the mediation analysis setting, the surrogacy measure is the proportion of tr
 on the final endpoint \eqn{T} that goes through its effect on the surrogate \eqn{S}.
 This measure is a time-dependent function \eqn{PTE(t)} defined as:
 
-{\figure{pte.png}{options: width="50\%"}}
+{\figure{pte.png}{options: width="365"}}
 
 where \eqn{NIE} and \eqn{TE} stand for "natual indirect effect" and "total effect"
 respectively. The numerator is the difference of the survival function of \eqn{T}

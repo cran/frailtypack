@@ -298,7 +298,7 @@ sum of the longest diameters (SLD) of target lesions. The dynamics of the
 biomarker are described by an ordinary differential equation (ODE) that
 includes the effect of the natural net growth and the treatment effect:
 
-{\figure{trivNLmodel1.png}{options: width="100\%"}}
+{\figure{trivNLmodel1.png}{options: width="731"}}
 
 The model includes the following parameters (using the interpretation of
 tumor dynamics): exp(\eqn{K}\out{<sub>G,0</sub>}) the constant tumor growth rate,
@@ -322,7 +322,7 @@ hazard risk models. The joint model is constructed assuming that the
 processes are linked via a latent structure and includes the non-linear
 mixed effects model for the longitudinal data:
 
-{\figure{trivNLmodel2.png}{options: width="100\%"}}
+{\figure{trivNLmodel2.png}{options: width="731"}}
 
 where \bold{\eqn{X}}\out{<sub>G,i</sub>}(t), \bold{\eqn{X}}\out{<sub>D,i</sub>}(t),
 \bold{\eqn{X}}\out{<sub>R,ij</sub>}(t) and \bold{\eqn{X}}\out{<sub>T,i</sub>}(t) are vectors of possible
@@ -338,7 +338,7 @@ is available: the random effects \bold{b}\out{<sub>i</sub>}. The frailty term
 v\out{<sub>i</sub>} is gaussian with mean 0 and variance \eqn{\sigma}\out{<sub>v</sub>}. Together with
 \bold{b}\out{<sub>i</sub>} constitutes the random effects of the model: 
 
-{\figure{trivNLmodel3.png}{options: width="100\%"}}
+{\figure{trivNLmodel3.png}{options: width="731"}}
 
 Any combination of the random effects \bold{b}\out{<sub>i</sub>}, e.g.
 \bold{b}\out{<sub>i</sub>}=b\out{<sub>y0,i</sub>} or \bold{b}\out{<sub>i</sub>} =

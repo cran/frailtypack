@@ -1,7 +1,7 @@
 Package: frailtypack
 Title: Shared, Joint (Generalized) Frailty Models; Surrogate Endpoints
-Version: 3.7.1
-Date: 2025-10-06
+Version: 3.8.0
+Date: 2025-11-20
 Authors@R: c(
     person("Virginie", "Rondeau", , "virginie.rondeau@u-bordeaux.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7109-4831")),
@@ -21,6 +21,7 @@ Authors@R: c(
     person("Lacey", "Etzkorn", role = "aut"),
     person("Derek", "Dinart", role = "aut"),
     person("Adrien", "Orué", role = "aut"),
+    person("Ayoub", "Bifenzi", role = "aut"),
     person("Viviane", "Philipps", role = "aut"),
     person("David", "Hill", role = "cph"),
     person("John", "Burkardt", role = "cph"),
@@ -45,6 +46,7 @@ Author: Virginie Rondeau [aut, cre] (ORCID:
   Lacey Etzkorn [aut],
   Derek Dinart [aut],
   Adrien Orué [aut],
+  Ayoub Bifenzi [aut],
   Viviane Philipps [aut],
   David Hill [cph],
   John Burkardt [cph],
@@ -99,7 +101,10 @@ Description: The following several classes of frailty models using a
     General Joint Frailty Models. Each design includes two primary functions: a 
     power function, which computes power given a specified sample size; 
     and a sample size function, which computes the required sample size to achieve 
-    a specified power. Moreover, the package can be used with its shiny
+    a specified power. 16) Weibull Illness-Death model with or without shared frailty
+    between transitions. Left-truncated and right-censored data are allowed. 
+    17) Weibull Competing risks model with or without shared frailty between the 
+    transitions. Left-truncated and right-censored data are allowed. Moreover, the package can be used with its shiny
     application, in a local mode or by following the link below.
 License: GPL (>= 2.0)
 URL:
@@ -107,13 +112,13 @@ URL:
         https://frailtypack-pkg.shinyapps.io/shiny_frailtypack/
 Depends: boot, doBy, MASS, R (>= 3.5.0), survC1, survival
 Imports: graphics, matrixcalc, nlme, rootSolve, shiny, splines,
-        statmod, stats, utils
+        statmod, stats, utils, dplyr, marqLevAlg, tidyr,
 Suggests: knitr, timereg, rmarkdown
 VignetteBuilder: knitr
-Date/Publication: 2025-10-15 09:40:02 UTC
+Date/Publication: 2025-11-22 23:30:02 UTC
 Encoding: UTF-8
 LazyLoad: no
 NeedsCompilation: yes
-Packaged: 2025-10-06 10:47:37 UTC; vp3
+Packaged: 2025-11-20 13:30:36 UTC; ab25
 Repository: CRAN
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3

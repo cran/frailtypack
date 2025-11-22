@@ -8,7 +8,7 @@ estimation or a parametric estimation}
 additivePenal(formula, data, correlation = FALSE, recurrentAG =
 FALSE, cross.validation = FALSE, n.knots, kappa, maxit = 350, hazard =
 "Splines", nb.int, LIMparam = 1e-4, LIMlogl = 1e-4, LIMderiv = 1e-3,
-print.times = TRUE)
+print.times = TRUE,init.hazard.weib)
 }
 \arguments{
 \item{formula}{a formula object, with the response on the left of a
@@ -69,6 +69,9 @@ gradient (see Details), \eqn{10^{-3}} by default.}
 
 \item{print.times}{a logical parameter to print iteration process. Default
 is TRUE.}
+
+\item{init.hazard.weib}{If a weibull model is used, initialization values 
+for hazard parameters.}
 }
 \value{
 An additive model or more generally an object of class
@@ -160,7 +163,7 @@ approach is different from the shared frailty models.
 subject in the i\out{<sup>th</sup>} trial with random trial effect u\out{<sub>i</sub>} as
 well as the random treatment-by-trial interaction v\out{<sub>i</sub>} is:
 
-{\figure{additivemodel.png}{options: width="60\%"}}
+{\figure{additivemodel.png}{options: width="439"}}
 
 where \eqn{\lambda}\out{<sub>0</sub>(0)} is the baseline hazard function, \eqn{\beta}\out{<sub>k</sub>} the
 fixed effect associated to the covariate X\out{<sub>ijk</sub>} (k=1,..,p),

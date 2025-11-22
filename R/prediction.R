@@ -10,7 +10,7 @@
 #' A predictive probability of event between t and horizon time t+w, with w the
 #' window of prediction. 
 #' 
-#' {\figure{prediction1.png}{options: width="100\%"}}
+#' {\figure{prediction1.png}{options: width="731"}}
 #' 
 #' \bold{For Gamma Shared Frailty model for clustered (not recurrent) events}
 #' 
@@ -19,12 +19,12 @@
 #' - a conditional predictive probability of event between t and horizon time
 #' t+w, i.e. given a specific group
 #' 
-#' {\figure{prediction2.png}{options: width="100\%"}}
+#' {\figure{prediction2.png}{options: width="731"}}
 #' 
 #' - a marginal predictive probability of event between t and horizon time t+w,
 #' i.e. averaged over the population
 #' 
-#' {\figure{prediction3.png}{options: width="100\%"}}
+#' {\figure{prediction3.png}{options: width="731"}}
 #' 
 #' \bold{For Gaussian Shared Frailty model for clustered (not recurrent)
 #' events}
@@ -35,12 +35,12 @@
 #' t+w, i.e. given a specific group and given a specific Gaussian random effect
 #' \eqn{\eta}
 #' 
-#' {\figure{prediction4.png}{options: width="100\%"}}
+#' {\figure{prediction4.png}{options: width="731"}}
 #' 
 #' - a marginal predictive probability of event between t and horizon time t+w,
 #' i.e. averaged over the population
 #' 
-#' {\figure{prediction5.png}{options: width="100\%"}}
+#' {\figure{prediction5.png}{options: width="731"}}
 #' 
 #' \bold{For Gamma Shared Frailty model for recurrent events}
 #' 
@@ -49,7 +49,7 @@
 #' - A marginal predictive probability of event between t and horizon time t+w,
 #' i.e. averaged over the population.
 #' 
-#' {\figure{prediction6.png}{options: width="100\%"}}
+#' {\figure{prediction6.png}{options: width="731"}}
 #' 
 #' - a conditional predictive probability of event between t and horizon time
 #' t+w, i.e. given a specific individual.
@@ -64,7 +64,7 @@
 #' - A marginal predictive probability of event between t and horizon time t+w,
 #' i.e. averaged over the population.
 #' 
-#' {\figure{prediction7.png}{options: width="100\%"}}
+#' {\figure{prediction7.png}{options: width="731"}}
 #' 
 #' - a conditional predictive probability of event between t and horizon time
 #' t+w, i.e. given a specific individual.
@@ -95,18 +95,18 @@
 #' - a prediction of death between t and t+w given that the patient had exactly
 #' J recurrences (H\out{<sub>i</sub>}\out{<sup>J,1</sup>}) before t
 #' 
-#' {\figure{prediction8.png}{options: width="100\%"}}
+#' {\figure{prediction8.png}{options: width="731"}}
 #' 
 #' - a prediction of death between t and t+w given that the patient had at
 #' least J recurrences (H\out{<sub>i</sub>}\out{<sup>J,2</sup>}) before t
 #' 
-#' {\figure{prediction9.png}{options: width="100\%"}}
+#' {\figure{prediction9.png}{options: width="731"}}
 #' 
 #' - a prediction of death between t and t+w considering the recurrence history
 #' only in the parameters estimation. It corresponds to the average probability
 #' of death between t and t+w for a patient with these given characteristics.
 #' 
-#' {\figure{prediction10.png}{options: width="100\%"}}
+#' {\figure{prediction10.png}{options: width="731"}}
 #' 
 #' \bold{ - Prediction of risk of a new recurrent event knowing patients'
 #' characteristics : }
@@ -118,8 +118,8 @@
 #' probability computed is a prediction of a new recurrent event between t and
 #' t+w given that the patient had exactly J recurrences (\eqn{H}\out{<sub>i</sub>}\out{<sup>J</sup>}) before t:
 #' 
-#' {\figure{prediction11.1.png}{options: width="100\%"}}
-#' {\figure{prediction11.2.png}{options: width="100\%"}}
+#' {\figure{prediction11.1.png}{options: width="731"}}
+#' {\figure{prediction11.2.png}{options: width="731"}}
 #' 
 #' It is possible to compute all these predictions in two ways : - either you
 #' want a cumulative probability of developing the event between t and t+w
@@ -144,7 +144,7 @@
 #' the observed time to an event before t ; \eqn{\delta}\out{<sub>fi</sub>}\out{<sup>D</sup>}(t) the disease
 #' indicator by time t and X\out{<sub>fi</sub>}\out{<sup>D</sup>}(t) the covariate information
 #' observed up to time t. We define the family history of subject i in
-#' family f by {\figure{prediction12.png}{options: width="100\%"}}
+#' family f by {\figure{prediction12.png}{options: width="731"}}
 #' 
 #' which includes the visiting and disease history of all subjects except for
 #' subject i in family f as well as their covariate information by
@@ -152,8 +152,8 @@
 #' 
 #' The prediction probability can be written as :
 #' 
-#' {\figure{prediction13.1.png}{options: width="100\%"}}
-#' {\figure{prediction13.2.png}{options: width="100\%"}}
+#' {\figure{prediction13.1.png}{options: width="731"}}
+#' {\figure{prediction13.2.png}{options: width="731"}}
 #' 
 #' \bold{For Joint models for longitudinal data and a terminal event}
 #' 
@@ -163,7 +163,7 @@
 #' covariates before time t and that the subject was at risk at t.  The
 #' marginal predicted probability of the terminal event is
 #' 
-#' {\figure{prediction14.png}{options: width="100\%"}}
+#' {\figure{prediction14.png}{options: width="731"}}
 #' 
 #' These probabilities can be calculated in several time points with fixed time
 #' of prediction t and varying window w or with fixed window w and varying time
@@ -180,7 +180,7 @@
 #' conditional also on covariates before time t and that the subject was at
 #' risk at t.  The marginal predicted probability of the terminal event is
 #' 
-#' {\figure{prediction15.png}{options: width="100\%"}}
+#' {\figure{prediction15.png}{options: width="731"}}
 #' 
 #' The biomarker history can be represented using a linear (\code{trivPenal})
 #' or non-linear mixed-effects model (\code{trivPenalNL}).

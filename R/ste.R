@@ -28,9 +28,9 @@
 ##' \eqn{u(\alpha_0) \equiv 
 ##' E(\beta + b_0|\alpha_0, \vartheta) + Z_{1-(\gamma/2)} \sqrt(Var(\beta + b_0|\alpha_0, \vartheta))}
 ##' }
-##' \if{html}{\figure{ste.png}{options: width="60\%"}}
+##' \if{html}{\figure{ste.png}{options: width="439"}}
 ##' 
-##' where \if{latex}{\eqn{\vartheta}}\if{html}{\figure{vartheta.png}{options: width="3\%"}}
+##' where \if{latex}{\eqn{\vartheta}}\if{html}{\figure{vartheta.png}{options: width="22"}}
 ##' represents the set of estimates for the fixed-effects and the 
 ##' variance-covariance parameters of the random effects obtained from the joint surrogate 
 ##' \code{\link[=jointSurroPenal]{model}} 

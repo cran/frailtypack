@@ -287,7 +287,7 @@ model and the risks of the recurrent and terminal events are represented by
 proportional hazard risk models. The joint model is constructed assuming
 that the processes are linked via a latent structure (Krol et al. 2015):
 
-{\figure{trivmodel1.png}{options: width="100\%"}}
+{\figure{trivmodel1.png}{options: width="731"}}
 
 where \bold{\eqn{X}}\out{<sub>Li</sub>}(t), \bold{\eqn{X}}\out{<sub>Rij</sub>}(t) and
 \bold{\eqn{X}}\out{<sub>Ti</sub>}(t) are vectors of fixed effects covariates and
@@ -308,7 +308,7 @@ the current biomarker level \eqn{m}\out{<sub>i</sub>}(t)=\bold{\eqn{X}}\out{<sub
 v\out{<sub>i</sub>} is gaussian with mean 0 and variance \eqn{\sigma}\out{<sub>v</sub>}. Together with
 \eqn{b}\out{<sub>i</sub>} constitutes the random effects of the model: 
 
-{\figure{trivmodel2.png}{options: width="100\%"}}
+{\figure{trivmodel2.png}{options: width="731"}}
 
 We consider that the longitudinal outcome can be a subject to a
 quantification limit, i.e. some observations, below a level of detection

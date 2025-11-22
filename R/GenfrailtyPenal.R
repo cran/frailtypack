@@ -17,7 +17,7 @@
 #' \eqn{j}\out{<sup>th</sup>} subject in the \eqn{i}\out{<sup>th</sup>} group 
 #' is then expressed by
 #' 
-#' {\figure{gsm1.png}{options: width="70\%"}}
+#' {\figure{gsm1.png}{options: width="512"}}
 #'
 #' where \bold{\eqn{x}}\out{<sub>ij</sub>} 
 #' is a collection of baseline covariates, 
@@ -27,7 +27,7 @@
 #' is the hazard function for an average value of the frailty.
 #' The associated conditional survival function writes
 #' 
-#' {\figure{gsm2.png}{options: width="70\%"}}
+#' {\figure{gsm2.png}{options: width="512"}}
 #' 
 #' where 
 #' \eqn{S}\out{<sub>ij</sub>}
@@ -54,7 +54,7 @@
 #'
 #' The conditional survival function is finally modeled by
 #' 
-#' {\figure{gsm3.png}{options: width="70\%"}}
+#' {\figure{gsm3.png}{options: width="512"}}
 #' 
 #' The table below summarizes the most commonly used (inverse) link functions and 
 #' their associated conditional survival, hazard and cumulative hazard functions.
@@ -62,14 +62,14 @@
 #' POM for "Proportional Odds Model, 
 #' PROM for "Probit Model" and AHM for "Additive Hazards Model".
 #' 
-#' {\figure{gsm4.png}{options: width="100\%"}}
+#' {\figure{gsm4.png}{options: width="731"}}
 #' 
 #' 
 #' \bold{I.(a) Fully parametric case}
 #' 
 #' In the fully parametric case, linear predictors considered are of the form
 #' 
-#' {\figure{gsm5.png}{options: width="70\%"}}
+#' {\figure{gsm5.png}{options: width="512"}}
 #' 
 #' where \eqn{\rho > 0} is a shape parameter, 
 #' \eqn{\gamma > 0} a scale parameter, 
@@ -96,7 +96,7 @@
 #' (\eqn{t} | \bold{\eqn{x}}\out{<sub>ij</sub>} ; \bold{\eqn{\xi}}), 
 #' but we have this time 
 #' 
-#' {\figure{gsm6.png}{options: width="70\%"}}
+#' {\figure{gsm6.png}{options: width="512"}}
 #' 
 #' The smoothness of baseline hazard function \eqn{\lambda}\out{<sub>0</sub>}() 
 #' is ensured by penalizing the log-likelihood by a term which has 
@@ -137,7 +137,7 @@
 #' \eqn{S}\out{<sub>Rij</sub>}(.) and death survival function 
 #' \eqn{S}\out{<sub>Di</sub>}(.) is
 #'
-#' {\figure{gsm7.png}{options: width="70\%"}}
+#' {\figure{gsm7.png}{options: width="512"}}
 #'
 #' - \eqn{\eta}\out{<sub>Rij</sub>} (resp. \eqn{\eta}\out{<sub>Di</sub>}) 
 #' is the linear predictor for the recurrent (resp. terminal) event process.
@@ -175,7 +175,7 @@
 #' (\eqn{t} | \bold{\eqn{x}}\out{<sub>Rij</sub>} ; 
 #' \bold{\eqn{\xi}}\out{<sub>R</sub>}), where 
 #' 
-#' {\figure{gsm8.png}{options: width="70\%"}}
+#' {\figure{gsm8.png}{options: width="512"}}
 #' 
 #' The submodel for terminal event is expressed as
 #' \eqn{\lambda}\out{<sub>Di</sub>}
@@ -186,7 +186,7 @@
 #' (\eqn{t} | \bold{\eqn{x}}\out{<sub>Di</sub>} ; 
 #' \bold{\eqn{\xi}}\out{<sub>D</sub>}), where 
 #'
-#' {\figure{gsm9.png}{options: width="70\%"}}
+#' {\figure{gsm9.png}{options: width="512"}}
 #' 
 #' Baseline hazard functions 
 #' \eqn{\lambda}\out{<sub>R0</sub>}(.) and \eqn{\lambda}\out{<sub>D0</sub>}(.)
@@ -216,7 +216,7 @@
 # death. The frailty term \eqn{v}\out{<sub>i</sub>} is specific to the recurrent event rate.
 # Thus, the general joint frailty model is:
 #
-# {\figure{frailtymodel9.png}{options: width="90\%"}}
+# {\figure{frailtymodel9.png}{options: width="658"}}
 #
 # where the \eqn{iid} random effects
 # \bold{\eqn{u}\out{<sub>i</sub>}} \out{&#126;} \bold{\eqn{\Gamma}(1/\eqn{\theta},1/\eqn{\theta})} and the
@@ -240,7 +240,7 @@
 # \eqn{w}\out{<sub>ij</sub>} for the k\out{<sup>th</sup>} individual of the j\out{<sup>th</sup>} subgroup of
 # the i\out{<sup>th</sup>} group is :
 #
-# {\figure{frailtymodel10.png}{options: width="80\%"}}
+# {\figure{frailtymodel10.png}{options: width="585"}}
 #
 # where \eqn{\lambda}\out{<sub>0</sub>}(t) is the baseline hazard function, \eqn{X}\out{<sub>ijk</sub>}
 # denotes the covariate vector and \eqn{\beta} the corresponding vector of
@@ -272,7 +272,7 @@
 # \eqn{r}\out{<sub>fij</sub>}(.) and for terminal event hazard function \eqn{\lambda}\out{<sub>fi</sub>}
 # is :
 #
-# {\figure{frailtymodel11.png}{options: width="90\%"}}
+# {\figure{frailtymodel11.png}{options: width="658"}}
 #
 # where \eqn{r}\out{<sub>0</sub>}(resp. \eqn{\lambda}\out{<sub>0</sub>}) is the recurrent (resp.
 # terminal) event baseline hazard function, \eqn{\beta} (resp. \eqn{\gamma})

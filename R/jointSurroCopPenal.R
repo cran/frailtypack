@@ -20,15 +20,15 @@
 #' be covariates associated with \out{S<sub>ij</sub>} and \out{T<sub>ij</sub>}.
 #' The joint frailty-copula model is defined as follows:
 #'
-#' {\figure{jointSurvCop1.png}{options: width="100\%"}}
+#' {\figure{jointSurvCop1.png}{options: width="731"}}
 #'
 #' where
 #'
-#' {\figure{jointSurvCop3.png}{options: width="100\%"}}
+#' {\figure{jointSurvCop3.png}{options: width="731"}}
 #'
 #' and the conditional survival functions are given by
 #'
-#' {\figure{jointSurvCop2.png}{options: width="100\%"}}
+#' {\figure{jointSurvCop2.png}{options: width="731"}}
 #'
 #' in which
 #'
@@ -38,7 +38,7 @@
 #'
 #' with
 #'
-#' {\figure{surromodel2.png}{options: width="100\%"}}
+#' {\figure{surromodel2.png}{options: width="731"}}
 #'
 #'
 #' In this model, \eqn{\lambda}\out{<sub>0s</sub>}(x) is the baseline hazard function associated with the
@@ -59,11 +59,11 @@
 #' For simplicity, we focus on the Clayton and Gumbel-Hougaard copula functions. In Clayton's
 #' model, the copula function has the form
 #'
-#' {\figure{jointSurvCop5.png}{options: width="100\%"}}
+#' {\figure{jointSurvCop5.png}{options: width="731"}}
 #'
 #' and in Gumbel's model, the copula function has the form
 #'
-#' {\figure{jointSurvCop6.png}{options: width="100\%"}}
+#' {\figure{jointSurvCop6.png}{options: width="731"}}
 #'
 #'
 #' \bold{Surrogacy evaluation}
@@ -77,7 +77,7 @@
 #' From the proposed model, according to the copula function, it can be shown that Kendall's \eqn{\tau}
 #' is defined as :
 #'
-#' {\figure{jointSurvCop4.png}{options: width="100\%"}}
+#' {\figure{jointSurvCop4.png}{options: width="731"}}
 #'
 #'
 #'  where \eqn{\theta} is the copula parameter. Kendall's \eqn{\tau} is the difference between the probability of
@@ -94,7 +94,7 @@
 #'  treatment-by-trial interaction can be used to evaluate underlined prediction, and
 #'  therefore as surrogacy evaluation measurement at trial-level. It is defined by:
 #'
-#'  {\figure{surromodel4.png}{options: width="100\%"}}
+#'  {\figure{surromodel4.png}{options: width="731"}}
 #'
 #'  The SEs of \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} and \eqn{\tau} are calculated using the Delta-method. We also propose
 #'  \eqn{R}\out{<sub>trial</sub>}\out{<sup>2</sup>} and 95\% CI computed using the parametric bootstrap. The use of delta-method
@@ -421,7 +421,7 @@
 #'    \item{LCV}{the approximated likelihood cross-validation criterion in the semiparametric case (with \code{H}
 #'     minus the converged Hessian matrix, and \code{l(.)} the full log-likelihood).
 #'     \if{html}{
-#'     {\figure{lcv.png}{options: width="50\%"}}}
+#'     {\figure{lcv.png}{options: width="365"}}}
 #'     \if{latex}{\deqn{LCV = \frac{1}{n}(trace(H^{-1}_{pl}H) - l(.))};}}
 #'    \item{xS}{vector of times for surrogate endpoint where both survival and hazard function are estimated.
 #'    By default seq(0,max(time),length=99), where time is the vector of survival times;}

@@ -1,3 +1,20 @@
+Changes in Version 3.8.0 October 2025
+o New argument init.hazard.weib added to frailtyPenal and additivePenal models to initialize Weibull baseline hazard parameters.
+o Modifications in the documentation of frailtyPenal and additivePenal, the equations that defines the models are written more clearly.
+o New functions (frailtyIllnessDeath, plot.frailtyIllnessDeath, summary.frailtyIllnessDeath, print.frailtyIllnessDeath) to estimate, plot the output, summarize and print a Weibull Illness Death model with/without shared Frailty between transitions, with/without right censoring and left truncation.
+o New functions (frailtyCmprsk, plot.frailtyCmprsk, summary.frailtyCmprsk, print.frailtyCmprsk) to estimate, plot the output, summarize and print a Weibull competing risks 
+  model with/without shared Frailty between transitions, with/without right censoring and left truncation.
+o Added the possibility to use 50 nodes for Gaussian-Hermite and Gaussian-Laguerre quadrature in frailtyPenal.
+o Fixed an issue in the function summary.jointPenal: the index used to extract standard deviations from the variance–covariance matrix (for display in the summary) has been corrected.
+o The dataset readmission was corrected: subjects 60, 109, and 280 contained inconsistencies where individuals were recorded as both readmitted and deceased at the same time. These anomalies were fixed by setting their death status to 0 for the corresponding observations.
+o The specification of HTML figure dimensions has been updated: dimensions are now defined in pixels instead of percentages.
+o When fitting a (general) joint frailty model with frailtyPenal(), alpha_p.value, theta_p.value and beta_p.value are now computed using the robust variance.
+o S3 method print.jointPenal has been updated to use the robust variance se(HIH), for both printing and p-values computing.
+o S3 method summary.jointPenal has been updated to use the robust variance se(HIH) for the confidence intervals computing. Also, an automatic interpretation of 
+  the frailty variance (and association parameter) is now provided in the summary output.
+
+
+
 Changes in Version 3.7.1 September 2025
 o The longiPenal function has now init.long and init.surv arguments to specify initial values for the longitudinal and survival submodels.
 

@@ -6,7 +6,7 @@
 \title{summary of parameter estimates of a joint frailty model}
 \usage{
 \method{summary}{jointPenal}(object, level = 0.95, len = 6, d = 2,
-lab="hr", ...)
+lab="HR", ...)
 }
 \arguments{
 \item{object}{output from a call to frailtyPenal for joint models}
@@ -30,29 +30,31 @@ Confidence level is allowed (level argument).
 This function returns hazard rations (HR) and its confidence intervals.
 }
 \examples{
-
-
 \dontrun{
 
 data(readmission)
 
 #-- gap-time
-modJoint.gap <- frailtyPenal(Surv(time,event)~cluster(id)+sex+dukes+
-charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=14,kappa=c(9.55e+9,1.41e+12))
+modJoint.gap <- frailtyPenal(
+  Surv(time, event) ~ cluster(id) + sex + dukes +
+    charlson + terminal(death),
+  formula.terminalEvent = ~ sex + dukes + charlson,
+  data = readmission, n.knots = 14, kappa = c(9.55e+9, 1.41e+12)
+)
 
 #-- calendar time
-modJoint.calendar <- frailtyPenal(Surv(t.start,t.stop,event)~cluster(id)+
-sex+dukes+charlson+terminal(death),formula.terminalEvent=~sex+dukes+charlson,
-data=readmission,n.knots=10,kappa=c(9.55e+9,1.41e+12),recurrentAG=TRUE)
+modJoint.calendar <- frailtyPenal(
+  Surv(t.start, t.stop, event) ~ cluster(id) +
+    sex + dukes + charlson + terminal(death),
+  formula.terminalEvent = ~ sex + dukes + charlson,
+  data = readmission, n.knots = 10, kappa = c(9.55e+9, 1.41e+12), recurrentAG = TRUE
+)
 
 #-- It takes around 1 minute to converge
 
 summary(modJoint.gap)
 summary(modJoint.calendar)
-
 }
-
 
 }
 \seealso{

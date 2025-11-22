@@ -17,7 +17,7 @@
 #' subject in the i\out{<sup>th</sup>} trial with random trial effect u\out{<sub>i</sub>} as
 #' well as the random treatment-by-trial interaction v\out{<sub>i</sub>} is:
 #' 
-#' {\figure{additivemodel.png}{options: width="60\%"}}
+#' {\figure{additivemodel.png}{options: width="439"}}
 #' 
 #' where \eqn{\lambda}\out{<sub>0</sub>(0)} is the baseline hazard function, \eqn{\beta}\out{<sub>k</sub>} the
 #' fixed effect associated to the covariate X\out{<sub>ijk</sub>} (k=1,..,p),
@@ -71,7 +71,7 @@
 #' @usage additivePenal(formula, data, correlation = FALSE, recurrentAG =
 #' FALSE, cross.validation = FALSE, n.knots, kappa, maxit = 350, hazard =
 #' "Splines", nb.int, LIMparam = 1e-4, LIMlogl = 1e-4, LIMderiv = 1e-3,
-#' print.times = TRUE)
+#' print.times = TRUE,init.hazard.weib)
 #' @param formula a formula object, with the response on the left of a
 #' \eqn{\sim} operator, and the terms on the right.  The response must be a
 #' survival object as returned by the 'Surv' function like in survival package.
@@ -117,6 +117,10 @@
 #' gradient (see Details), \eqn{10^{-3}} by default.
 #' @param print.times a logical parameter to print iteration process. Default
 #' is TRUE.
+#' @param init.hazard.weib If a weibull model is used, initialization values 
+#' for hazard parameters.
+
+#' 
 #' @return An additive model or more generally an object of class
 #' 'additivePenal'.  Methods defined for 'additivePenal' objects are provided
 #' for print, plot and summary.
@@ -229,7 +233,7 @@
 #' 
 "additivePenal" <-
   function (formula, data, correlation=FALSE, recurrentAG=FALSE, cross.validation=FALSE, n.knots, kappa,
-            maxit=350, hazard="Splines", nb.int, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-3, print.times=TRUE)
+            maxit=350, hazard="Splines", nb.int, LIMparam=1e-4, LIMlogl=1e-4, LIMderiv=1e-3, print.times=TRUE,init.hazard.weib)
   {
     
     # Ajout de la fonction minmin issue de print.survfit, permettant de calculer la mediane
@@ -325,7 +329,7 @@
     
     call <- match.call()
     m <- match.call(expand.dots = FALSE)
-    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$... <- NULL
+    m$correlation <- m$n.knots <- m$recurrentAG <- m$cross.validation <- m$kappa <- m$maxit <- m$hazard <- m$nb.int <- m$init.hazard.weib <- m$LIMparam <- m$LIMlogl <- m$LIMderiv <- m$print.times <- m$... <- NULL
     special <- c("strata", "cluster", "slope")
     Terms <- if (missing(data)) 
       terms(formula, special)
@@ -645,6 +649,28 @@
     }
     size2 <- mt1
     
+    
+    Beta <- as.double(rep(0,np))
+    
+    if(uni.strat>1){
+      if (!missing(init.hazard.weib)) {
+        if (typeof != 2) stop("init.hazard.weib is only available for Weibull hazard")
+        if (length(init.hazard.weib) != 2*as.integer(uni.strat) ) stop("init.hazard.weib must be a vector of length 2*n.strat for stratified Additive Frailty model")
+        if(!all(sapply(init.hazard.weib, function(x) is.numeric(x) && x >= 0))) stop("init.hazard.weib must be a vector of positive real numbers")
+        Beta[1:2*(as.integer(uni.strat))] <- c(sqrt(init.hazard.weib))
+      }
+    }
+    
+    
+    if(uni.strat==1){
+      if (!missing(init.hazard.weib)) {
+        if (typeof != 2) stop("init.hazard.weib is only available for Weibull hazard")
+        if (length(init.hazard.weib) != 2) stop("init.hazard.weib must be a vector of length 2 for Additive Frailty model")
+        if(!all(sapply(init.hazard.weib, function(x) is.numeric(x) && x >= 0))) stop("init.hazard.weib must be a vector of positive real numbers")
+        Beta[1:2] <- c(sqrt(init.hazard.weib))
+      }
+    }
+    
     if (print.times){
       ptm<-proc.time()
       cat("\n")
@@ -674,7 +700,7 @@
                     as.integer(correlation),
                     as.integer(np),
                     
-                    b=as.double(rep(0,np)),
+                    b=as.double(Beta),
                     coef=as.double(rep(0,nvar)),
                     varcoef=as.double(rep(0,nvar)),
                     varcoef2=as.double(rep(0,nvar)),

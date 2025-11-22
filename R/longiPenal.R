@@ -12,7 +12,7 @@
 #' that the processes are linked via a latent structure (Wulfsohn and Tsiatsis
 #' 1997):
 #'
-#' {\figure{longimodel.png}{options: width="100\%"}}
+#' {\figure{longimodel.png}{options: width="731"}}
 #'
 #' where \bold{\eqn{X}}\out{<sub>Li</sub>}(t) and
 #' \bold{\eqn{X}}\out{<sub>Ti</sub>} are vectors of fixed effects covariates and

@@ -2963,7 +2963,7 @@ end if
 
     use tailles
     use comon,only:typeJoint!auxig,typeof
-    use donnees,only:w,x,w1,x1        !The abscissas-weights.
+    use donnees,only:w,x,w1,x1,x50GL,w50GL        !The abscissas-weights.
 
     implicit none
 
@@ -2982,6 +2982,9 @@ end if
     else if (nnodes.eq.32) then
       xx(1:nnodes) = x1(1:nnodes)
       ww(1:nnodes) = w1(1:nnodes)
+    else if (nnodes.eq.50) then
+      xx(1:nnodes) = x50GL(1:nnodes)
+      ww(1:nnodes) = w50GL(1:nnodes)
     end if
     
     auxfunca = 0.d0
@@ -3025,7 +3028,7 @@ end if
 
     use tailles
     use comon,only:auxig,fam,nfam,ng!,auxif,typeJoint,typeof
-    use donnees,only:w,x, w1, x1     !The abscissas-weights.
+    use donnees,only:w,x, w1, x1,x50GL,w50GL     !The abscissas-weights.
 
     implicit none
 
@@ -3047,6 +3050,9 @@ end if
     else if (nnodes.eq.32) then
       xx(1:nnodes) = x1(1:nnodes)
       ww(1:nnodes) = w1(1:nnodes)
+    else if (nnodes.eq.50) then
+      xx(1:nnodes) = x50GL(1:nnodes)
+      ww(1:nnodes) = w50GL(1:nnodes)
     end if
      
     ss3=0.d0
@@ -3089,7 +3095,7 @@ end if
 
     use tailles
     !use comon,only:typeof!,auxig
-    use donnees,only:w,x,w1,x1
+    use donnees,only:w,x,w1,x1,x50GL,w50GL
 
     implicit none
 
@@ -3108,6 +3114,9 @@ end if
     else if (nnodes.eq.32) then
       xx(1:nnodes) = x1(1:nnodes)
       ww(1:nnodes) = w1(1:nnodes)
+    else if (nnodes.eq.50) then
+      xx(1:nnodes) = x50GL(1:nnodes)
+      ww(1:nnodes) = w50GL(1:nnodes)
     end if
     
     ss = 0.d0
@@ -3237,6 +3246,9 @@ end if
     else if (nnodes.eq.32) then
       xx(1:nnodes) = x3(1:nnodes)
       ww(1:nnodes) = w3(1:nnodes)
+    else if (nnodes.eq.50) then
+      xx(1:nnodes) = x50GH(1:nnodes)
+      ww(1:nnodes) = w50GH(1:nnodes)
     end if
     
     ss=0.d0
