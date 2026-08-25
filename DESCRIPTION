@@ -1,7 +1,7 @@
 Package: frailtypack
 Title: Shared, Joint (Generalized) Frailty Models; Surrogate Endpoints
-Version: 3.8.0
-Date: 2025-11-20
+Version: 3.8.1
+Date: 2026-08-24
 Authors@R: c(
     person("Virginie", "Rondeau", , "virginie.rondeau@u-bordeaux.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7109-4831")),
@@ -115,10 +115,10 @@ Imports: graphics, matrixcalc, nlme, rootSolve, shiny, splines,
         statmod, stats, utils, dplyr, marqLevAlg, tidyr,
 Suggests: knitr, timereg, rmarkdown
 VignetteBuilder: knitr
-Date/Publication: 2025-11-22 23:30:02 UTC
+Date/Publication: 2026-08-25 11:10:10 UTC
 Encoding: UTF-8
 LazyLoad: no
 NeedsCompilation: yes
-Packaged: 2025-11-20 13:30:36 UTC; ab25
+Packaged: 2026-08-24 17:05:48 UTC; virginie
 Repository: CRAN
-RoxygenNote: 7.3.3
+Config/roxygen2/version: 8.1.0

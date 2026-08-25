@@ -55,8 +55,6 @@
 #' LazyLoad: \tab no\cr }
 #' 
 #' @name frailtypack-package
-#' @aliases frailtypack-package frailtypack
-#' _PACKAGE
 #' @author Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen, 
 #' Amadou Diakite, Alexandre Laurent, Myriam Lopez, Agnieszka Krol, 
 #' Casimir L. Sofeu, Denis Rustand, Quentin Le Coent, Lacey Etzkorn, Romain Pierlot,
@@ -106,9 +104,9 @@
 ##' @import survival boot MASS survC1 nlme doBy
 ## @import shiny shinyjs shinyBS shinydashboard rhandsontable shinythemes jsonlite
 ##' @importFrom graphics abline legend lines matlines matplot par plot
-##' @importFrom stats .getXlevels aggregate as.formula complete.cases
-##' contrasts get_all_vars is.empty.model model.extract model.matrix 
-##' pchisq pnorm qnorm quantile rgamma terms update var model.frame na.pass
+#' @importFrom stats .getXlevels aggregate as.formula complete.cases
+#'   contrasts get_all_vars is.empty.model model.extract model.matrix
+#'   pchisq pnorm qnorm quantile rgamma terms update var model.frame na.pass
 ##' @importFrom utils flush.console
 ##' @importFrom statmod gauss.quad
 ##' @importFrom nlme lme

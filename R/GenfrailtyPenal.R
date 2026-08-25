@@ -1162,15 +1162,16 @@
 #' formula.terminalEvent=~sex+dukes+timedep(chemo), data=readmission, recurrentAG=TRUE, 
 #' hazard="Splines", family=c("PH","PH"), 
 #' n.knots=5, kappa=c(100,100), betaknots=1, betaorder=3)
+#'
+#' \dontrun{
 #' GenfrailtyPenal(
 #' formula=Surv(t.start,t.stop,event)~cluster(id)+terminal(death)+sex+dukes+timedep(chemo),
-#' formula.terminalEvent=~sex+dukes+timedep(chemo), data=readmission, recurrentAG=TRUE, 
-#' hazard="Splines", family=c("AH","AH"), 
+#' formula.terminalEvent=~sex+dukes+timedep(chemo), data=readmission, recurrentAG=TRUE,
+#' hazard="Splines", family=c("AH","AH"),
 #' n.knots=5, kappa=c(600,600), betaknots=1, betaorder=3)
-#'
 #' }
 #'
-#'
+#' }
 "GenfrailtyPenal" <-
   function (formula, formula.terminalEvent, data, recurrentAG=FALSE, 
             family, hazard="Splines", n.knots, kappa, betaknots=1,betaorder=3, 

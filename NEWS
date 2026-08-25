@@ -1,3 +1,5 @@
+Changes in Version 3.8.1 August 2026
+o Bugs modified in file Integrant_scl.f90
 Changes in Version 3.8.0 October 2025
 o New argument init.hazard.weib added to frailtyPenal and additivePenal models to initialize Weibull baseline hazard parameters.
 o Modifications in the documentation of frailtyPenal and additivePenal, the equations that defines the models are written more clearly.

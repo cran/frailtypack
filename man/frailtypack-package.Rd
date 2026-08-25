@@ -2,8 +2,6 @@
 % Please edit documentation in R/frailtypack-package.R
 \name{frailtypack-package}
 \alias{frailtypack-package}
-\alias{frailtypack}
-\alias{_PACKAGE}
 \title{General Frailty models: shared, joint and nested frailty models with
 prediction; Evaluation of Failure-Time Surrogate Endpoints 
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}}

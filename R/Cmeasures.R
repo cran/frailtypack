@@ -8,9 +8,7 @@
 #' c-index (Harrell et al. 1996) at these three levels. It is possible to
 #' exclude tied pairs from concordance estimation (otherwise, account for 1/2).
 #' 
-#' 
-#' @aliases Cmeasures CbootstrapFP cindexes.frailty cindexes.W cindexes.B
-#' cindexes statFP
+#' @aliases Cmeasures CbootstrapFP cindexes.frailty cindexes.W cindexes.B cindexes statFP
 #' @usage
 #' 
 #' Cmeasures(fitc, ties = 1, marginal = 0, cindex = 0, Nboot = 0, tau = 0,

@@ -105,8 +105,7 @@
 #' \eqn{\rho}).
 #' }
 #' }
-#' @aliases multivPenal transfo.table multivPenal for multivariate frailty
-#' model
+#' @aliases multivPenal transfo.table multivPenal for multivariate frailty model
 #' @usage
 #' 
 #' multivPenal(formula, formula.Event2, formula.terminalEvent, data, initialize

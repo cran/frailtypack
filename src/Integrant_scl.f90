@@ -693,10 +693,9 @@ contains
     auxfunca=0.d0
     ss=0.d0
     ss1=0.d0
-    !$OMP PARALLEL DO default(none) PRIVATE (ii,jj,xxl,wsij,wtij,m1,m3,m) firstprivate(ss1,auxfunca,vsi,vti,ui,uti)& 
-    !$OMP SHARED(npg,varcovinv,nnodes,xx1,ww1,invBi_chol_Essai_k,ndim,adaptative,posind_i,test,rho,varcov,&
-    !$OMP delta,j,deltastar,const_res4,ve,const_res5)&
-    !$OMPREDUCTION(+:ss) SCHEDULE(Dynamic,1)
+    !$OMP PARALLEL DO DEFAULT(NONE) PRIVATE(ii,jj,xxl,wsij,wtij,m1,m3,m) FIRSTPRIVATE(ss1,auxfunca,vsi,vti,ui,uti) &
+    !$OMP SHARED(npg,varcovinv,nnodes,xx1,ww1,invBi_chol_Essai_k,ndim,adaptative,posind_i,test,rho,varcov, &
+    !$OMP delta,j,deltastar,const_res4,ve,const_res5) REDUCTION(+:ss) SCHEDULE(DYNAMIC,1)
         do ii=1,npg
             ss1=0.d0
             do jj=1,npg

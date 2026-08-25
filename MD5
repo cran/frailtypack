@@ -1,9 +1,9 @@
-67ac75192deb7c5c923cb490ec6f32a8 *DESCRIPTION
-dae56ef4f5019154908ed6b72b31405b *NAMESPACE
-6f2726aa0f787f07de8025571f11da62 *NEWS
-04a96eb3506e02ceebe313047b72cff6 *R/Cmeasures.R
+d678248214779bddbc2e47cea4587a85 *DESCRIPTION
+efd3e7c01bf4470981c07bffdf40ad68 *NAMESPACE
+81c9f16b1035e4131c4c792fa7d19882 *NEWS
+86c171d93976002af3527b883a231c72 *R/Cmeasures.R
 06a41d0e1395de2dd02648cea53d0f66 *R/Diffepoce.R
-f3c30b025efe0f72ae416ea704eec9bb *R/GenfrailtyPenal.R
+1c86bf42097b17346fe7bfe591ecd202 *R/GenfrailtyPenal.R
 09036cf7d675adee6a2a673223e01f58 *R/SurvIC.R
 dbde094f3811c1103cb0c1e73e2b02df *R/additivePenal.R
 ef08f0c6afaaed3def6d2743fb420d76 *R/autresFonctions.R
@@ -21,7 +21,7 @@ a59c893677d74c8d6ef5696d7a11602f *R/frailtyCmprsk.R
 2896606dede09e38f20b947258208e0c *R/frailtyDesign.R
 dfe908af2b76075ba0b895adaaf1943b *R/frailtyIllnessDeath.R
 242708bb92822f1bdf029e01fc65695f *R/frailtyPenal.R
-2f0951775471cb34820434bb07f3b78e *R/frailtypack-package.R
+e2f589495069c99659762ca54730ef53 *R/frailtypack-package.R
 08791a674614d2372b6bfff9285c67fc *R/hazard.R
 0d8b846edf7f416ff99744ed5a0aff9e *R/integrant.R
 f7628d900f7be000606a7a302f40218b *R/jointRecCompet.R
@@ -39,7 +39,7 @@ cc13f3ede0b9f3eee6e6ca7335116f74 *R/kendall_bootstrap.r
 973c521e64f913755fee6ec56b204da1 *R/loocv.R
 c3f91ef3b638773274287c9e67204fa5 *R/loocv.summary.R
 5691a9009fe2863dec4c3c2c64c9d846 *R/mergeJointSurroSimul.R
-ba9c1215905a726844834a1ff8dc449a *R/multivPenal.R
+cf3c02be48bc002ed48060e4ac0b9b72 *R/multivPenal.R
 70198967833f37d98ce2cdde778756e3 *R/num.id.R
 41b264bcddf7c2f6313c155c399c98de *R/plot.Diffepoce.R
 49fe29255b5272eff4e979611fd13cdb *R/plot.additivePenal.R
@@ -123,7 +123,7 @@ ff56af1d1c89ed8e553588a30ff78f2c *R/trivPenalNL.R
 c4c6c8f56f0fb125a9f0ad5f36a78a9d *R/waldtest.R
 a71112d82c50e5ebb93969d293107e37 *R/wts.R
 f91b833a47c5f27a322ef5bb3b334461 *THANKS
-a30643e9e60455d2ce4bc5652b4b7b43 *build/vignette.rds
+e6cef916c1f8162f832f6981e080dbe8 *build/vignette.rds
 c741da6526ad82db9428758380b5fc7c *data/CPRSKbmtcrr.rda
 1faabe884a1f3c5a3dcaab55f6267ed6 *data/Paq810.rda
 f9b9c4d9d73247b5e38d320cd587b621 *data/bcos.rda
@@ -151,13 +151,13 @@ dc2fad1ed12f361136108038f6b88eeb *demo/frailtypack_multivPenal.R
 ff5bcb421316a8fb4e02f18802c304b1 *demo/frailtypack_nestedPenal.R
 85a4573047ecc5572559d00c3fcba03b *inst/CITATION
 35eb7c34e9bd9e4a0330bf6f09a3669a *inst/doc/Package_summary.Rmd
-2e7063051e7c534c90a813be89e7e474 *inst/doc/Package_summary.html
+6abfea12cf47043408b9f57c83344aef *inst/doc/Package_summary.html
 0c835405d74fbeb4b31de0c086991f4f *inst/shiny_frailtypack/app.R
 8124c0a8b870cd4a9f3886a043b0e305 *inst/shiny_frailtypack/rsconnect/shinyapps.io/frailtypack-pkg/shiny_frailtypack.dcf
 38c8647d4859db6a4dc5024411f9c90d *man/CPRSKbmtcrr.Rd
 cad71bd0140bc1f088c8a149ad770f20 *man/Cmeasures.Rd
 f99c7ada2e857486f83eeb7c73083247 *man/Diffepoce.Rd
-e62b6bce52e333e65950676f7145cc80 *man/GenfrailtyPenal.Rd
+479dcee5c3e5d14a3d3ead84b9fabf6d *man/GenfrailtyPenal.Rd
 eead56bf2d9154c931f05b709e9b7a67 *man/Paq810.Rd
 fd616d62bcba9b713d2119676045caa4 *man/SurvIC.Rd
 48163a73eafcc3a32b35fa561ecf6aa4 *man/additivePenal.Rd
@@ -250,7 +250,7 @@ ecd0b6a6119ade604fd7bf39d68d08ca *man/frailtyCmprsk.Rd
 9dfd188288a4e611f275cafa8c2cd698 *man/frailtyDesign.Rd
 9c446c3966b784d76cec54c84708cfe2 *man/frailtyIllnessDeath.Rd
 a33578ea4d2026b9e5c232c8955c3025 *man/frailtyPenal.Rd
-db6d53ea1207a6acb81641ca409e4571 *man/frailtypack-package.Rd
+5d16f0474399cc42ba965875b0c503b5 *man/frailtypack-package.Rd
 1209e4d76915ebcfd933639c90797339 *man/gastadj.Rd
 533309fe6085ceac8a2f9759204b1958 *man/hazard.Rd
 75f0386c4e6a38491fa9f127bbfe6923 *man/jointRecCompet.Rd
@@ -339,7 +339,7 @@ f6d116cf00b64d57ae72562edaf9086b *src/Adonnees.f90
 4888ae1dc357b391de40fee902a8129e *src/AparamMultive.f90
 b23c8ef818eaa1cda8a43f5c02991b14 *src/Aparameters.f90
 dd7be53f3e7a34ff8023eee95354012f *src/Integrale_mult_scl.f90
-2a5f26e170848654cd0c7da4f7d0387a *src/Integrant_scl.f90
+85be0be72d77a59d31aba5a47eeff179 *src/Integrant_scl.f90
 4996271943a81df060d2d9d81c1f706d *src/Makevars
 6db73c5d542a66ab336324992a5f3241 *src/Pour_Adaptative.f90
 ab7e582dbade391e78177abc40d3ad66 *src/aGhermite.f90
